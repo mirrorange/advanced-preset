@@ -30,7 +30,11 @@ const active = computed(() => {
 });
 // Content stages land in the message itself; only show them when they carry something else.
 const visible = computed(() => (view.value?.stages ?? []).filter((s) => s.kind !== 'content' || s.status === 'interrupted' || view.value?.running));
-const openId = computed(() => (manual.value ? picked.value : view.value?.running ? active.value : picked.value));
+const openId = computed(() => {
+  if (manual.value || !view.value?.running) return picked.value;
+  // A streaming content stage is already visible as the message text.
+  return visible.value.find((s) => s.id === active.value && s.kind !== 'content')?.id ?? null;
+});
 const openStage = computed(() => visible.value.find((s) => s.id === openId.value) ?? null);
 
 watch(() => view.value?.running, (running, was) => {

@@ -11,3 +11,4 @@ export * from './content';
 export * from './config';
 export * from './semver';
 export * from './assemble';
+export * from './clone';

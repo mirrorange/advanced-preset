@@ -4,6 +4,7 @@
  *   swiping messages rolls back naturally.
  * - Global memory: an append-only log per AP preset with a cursor (undo / redo), not tied to messages.
  */
+import { cloneData } from '@advanced-preset/protocol';
 import type { MemoryOp } from '@advanced-preset/protocol';
 import { st } from '@/st/host';
 import { getSidecar } from './sidecar';
@@ -71,7 +72,7 @@ export async function appendUserChatEvent(event: ChatEvent): Promise<void> {
   if (msg && sc) {
     sc.events.push(event);
     const info = msg.swipe_info?.[msg.swipe_id ?? 0];
-    if (info?.extra?.[META_KEY]) (info.extra[META_KEY] as { events: ChatEvent[] }).events = structuredClone(sc.events);
+    if (info?.extra?.[META_KEY]) (info.extra[META_KEY] as { events: ChatEvent[] }).events = cloneData(sc.events);
     await ctx.saveChat();
   } else {
     const meta = (ctx.chatMetadata[META_KEY] ??= {});

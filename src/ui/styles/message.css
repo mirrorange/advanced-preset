@@ -1,3 +1,6 @@
+/* Align with ST's message text so the swipe controls keep their gutter. */
+:host(ap-cards), :host(ap-stages) { padding-right: var(--mes-right-spacing, 30px); }
+
 /* Message mounts: stage panel, cards, dock. Quiet by default; colour comes from the actor. */
 .stages { --actor: var(--ap-primary); display: flex; flex-direction: column; gap: var(--ap-space-2); margin: 2px 0 var(--ap-space-2); }
 .stage-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -62,7 +65,8 @@
 
 .synopsis { padding: 4px var(--ap-space-3); border-radius: var(--ap-radius-sm); cursor: pointer; color: var(--ap-muted); }
 .synopsis:hover { background: var(--ap-surface); }
-.synopsis-line { display: flex; align-items: center; gap: var(--ap-space-3); min-width: 0; }
+.synopsis-line { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); min-width: 0; }
+.synopsis-line > .row { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .synopsis-event { color: var(--ap-text); }
 .synopsis-summary { margin-top: 4px; }
 .row.tight { gap: 4px; white-space: nowrap; }

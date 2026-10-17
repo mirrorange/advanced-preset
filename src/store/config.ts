@@ -5,7 +5,7 @@
  */
 import {
   applyMigrations, compareVersions, deepMerge, diffObjects, pruneDiff, recommended,
-  type APreset, type Configuration, type SparseDiff,
+  type APreset, type Configuration, type SparseDiff, cloneData,
 } from '@advanced-preset/protocol';
 import { settings, save, type ConfigRef, type PresetState, type SavedConfig } from './settings';
 
@@ -110,7 +110,7 @@ export function migratePresetState(preset: APreset): string[] {
   const removed: string[] = [];
   const shape = preset.configurationDefaults as unknown as Record<string, unknown>;
   const fix = (d: SparseDiff): SparseDiff => {
-    const out = (compareVersions(from, preset.version) < 0 ? applyMigrations(d, preset.migrations, from) : structuredClone(d)) as Record<string, unknown>;
+    const out = (compareVersions(from, preset.version) < 0 ? applyMigrations(d, preset.migrations, from) : cloneData(d)) as Record<string, unknown>;
     removed.push(...pruneDiff(out, shape));
     // module / param maps are keyed by id: drop ids that no longer exist
     const mods = out.modules as Record<string, unknown> | undefined;

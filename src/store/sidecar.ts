@@ -2,6 +2,7 @@
  * Sidecar data (§13, D2): per-swipe `extra.advanced_preset`. `mes` only ever holds story content;
  * stages, structures, events and diagnostics live here.
  */
+import { cloneData } from '@advanced-preset/protocol';
 import type { PatchResult, StageKind, Transport } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
 import type { ChatEvent } from './eventlog';
@@ -58,7 +59,7 @@ export function writeSidecar(mesId: number, sidecar: Sidecar): void {
   const info = msg.swipe_info?.[sw];
   if (info) {
     info.extra ??= {};
-    info.extra[SIDECAR_KEY] = structuredClone(sidecar);
+    info.extra[SIDECAR_KEY] = cloneData(sidecar);
   }
 }
 

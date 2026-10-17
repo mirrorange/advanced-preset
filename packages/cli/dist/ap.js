@@ -7756,16 +7756,25 @@ function renderContent(content, resolve2, post = (s) => s) {
   return out;
 }
 
+// ../protocol/src/clone.ts
+function cloneData(value) {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map((v) => cloneData(v));
+  const out = {};
+  for (const [k, v] of Object.entries(value)) if (v !== void 0) out[k] = cloneData(v);
+  return out;
+}
+
 // ../protocol/src/config.ts
 var isObj = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
 function deepMerge(base, ...layers) {
-  let out = structuredClone(base);
+  let out = cloneData(base);
   for (const layer of layers) out = mergeTwo(out, layer);
   return out;
 }
 function mergeTwo(a, b) {
   if (b === void 0) return a;
-  if (!isObj(a) || !isObj(b)) return structuredClone(b);
+  if (!isObj(a) || !isObj(b)) return cloneData(b);
   const out = { ...a };
   for (const [k, v] of Object.entries(b)) out[k] = mergeTwo(a[k], v);
   return out;
@@ -9042,7 +9051,7 @@ async function init(o) {
 }
 
 // src/cli.ts
-var VERSION = true ? "0.1.0" : "0.0.0-dev";
+var VERSION = true ? "1.0.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage

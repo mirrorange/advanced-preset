@@ -3,6 +3,7 @@
  * Selecting a Carrier activates its AP preset; manual edits stay in the Carrier until the AP preset
  * is reinstalled or updated. Sampling is synced both ways with the configuration layer (§7.4).
  */
+import { cloneData } from '@advanced-preset/protocol';
 import type { APreset, Configuration } from '@advanced-preset/protocol';
 import { st, toast, type PresetManager } from '@/st/host';
 import { presetState, activeConfiguration, updateConfiguration } from './config';
@@ -46,9 +47,9 @@ function stablePromptsHash(obj: { prompts?: unknown; prompt_order?: unknown }): 
 export function buildCarrier(preset: APreset, config: Configuration): Record<string, unknown> {
   const order = preset.carrier.prompt_order.map((o) => ({ ...o }));
   return {
-    ...structuredClone(config.sampling),
-    prompts: structuredClone(preset.carrier.prompts),
-    prompt_order: [100000, 100001].map((character_id) => ({ character_id, order: structuredClone(order) })),
+    ...cloneData(config.sampling),
+    prompts: cloneData(preset.carrier.prompts),
+    prompt_order: [100000, 100001].map((character_id) => ({ character_id, order: cloneData(order) })),
     extensions: { [CARRIER_EXT]: { presetId: preset.id, version: preset.version, hash: preset.hash } satisfies CarrierMeta },
   };
 }
@@ -70,7 +71,14 @@ async function writeCarrier(name: string, body: Record<string, unknown>, select:
   if (select) { await m.savePreset(name, body); return; }
   await m.savePreset(name, body, { skipUpdate: true });
   const { presets, preset_names } = m.getPresetList();
-  if (preset_names[name] !== undefined) presets[preset_names[name]!] = body;
+  if (preset_names[name] !== undefined) { presets[preset_names[name]!] = body; return; }
+  // New preset: register it in ST's list and dropdown without applying it.
+  presets.push(body);
+  const value = presets.length - 1;
+  preset_names[name] = value;
+  const sel = (m as { select?: string | ArrayLike<HTMLSelectElement> }).select ?? '#settings_preset_openai';
+  const dropdown = typeof sel === 'string' ? document.querySelector<HTMLSelectElement>(sel) : sel[0];
+  dropdown?.append(new Option(name, String(value)));
 }
 
 /**
@@ -113,7 +121,7 @@ export async function pushSampling(preset: APreset): Promise<void> {
   if (!current) return;
   const sampling = activeConfiguration(preset).sampling;
   if (Object.entries(sampling).every(([k, v]) => JSON.stringify(current[k]) === JSON.stringify(v))) return;
-  const body = { ...current, ...structuredClone(sampling) };
+  const body = { ...current, ...cloneData(sampling) };
   const selected = m.getSelectedPresetName() === name;
   syncing = true;
   try { await writeCarrier(name, body, selected); } finally { syncing = false; }
@@ -129,7 +137,7 @@ export function pullSampling(preset: APreset): boolean {
   const changed: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(config.sampling)) {
     const lv = live[settingKey(k)];
-    if (lv !== undefined && JSON.stringify(lv) !== JSON.stringify(v)) changed[k] = structuredClone(lv);
+    if (lv !== undefined && JSON.stringify(lv) !== JSON.stringify(v)) changed[k] = cloneData(lv);
   }
   if (!Object.keys(changed).length) return false;
   updateConfiguration(preset, (c) => Object.assign(c.sampling, changed));
