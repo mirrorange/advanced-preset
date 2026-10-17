@@ -14,7 +14,7 @@ export function renderContent(content: Content | undefined, resolve: Resolver, p
   if (!content) return [];
   const out: RenderedBlock[] = [];
   for (const block of content) {
-    const text = post(block.pieces.filter((p) => test(p.when, resolve)).map((p) => p.text).join('')).trim();
+    const text = post(block.pieces.filter((p) => test(p.when, resolve)).map((p) => p.text).join('')).replace(/\n{3,}/g, '\n\n').trim();
     if (!text) continue;
     out.push(block.role ? { role: block.role, text } : { text });
   }
