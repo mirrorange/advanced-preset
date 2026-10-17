@@ -10,6 +10,9 @@ export interface InitOptions {
   author: string;
 }
 
+declare const __AP_VERSION__: string;
+const CLI_VERSION = typeof __AP_VERSION__ === 'string' ? __AP_VERSION__ : '0.0.0-dev';
+
 const TEMPLATE = fileURLToPath(new URL('../template', import.meta.url));
 
 async function* files(dir: string): AsyncGenerator<string> {
@@ -28,7 +31,7 @@ export async function init(o: InitOptions): Promise<void> {
   for await (const f of files(o.dir)) {
     if (!/\.(ya?ml|md|json)$|gitignore$/.test(f)) continue;
     const src = await readFile(f, 'utf8');
-    const out = src.replaceAll('__PRESET_ID__', o.id).replaceAll('__PRESET_NAME__', o.name).replaceAll('__AUTHOR__', o.author);
+    const out = src.replaceAll('__PRESET_ID__', o.id).replaceAll('__PRESET_NAME__', o.name).replaceAll('__AUTHOR__', o.author).replaceAll('__CLI_VERSION__', CLI_VERSION);
     if (out !== src) await writeFile(f, out);
   }
   // npm strips .gitignore from published packages, so the template ships it as `gitignore`.
