@@ -1,0 +1,15 @@
+groups:
+  guidelines: { label: 写作指南 }
+  language: { label: 语言 }
+modules:
+  show-dont-tell: { name: 展示而非讲述, description: 用动作与细节传达情绪。 }
+  options: { name: 推荐回复 }
+params:
+  language: { label: 回复语言 }
+workflows:
+  linear: { name: 线性, description: 先规划，再写作。, stages: { plan: 规划, final: 写作 } }
+  task: { name: 任务, stages: { thinking: 思考, content: 输出 } }
+configurations:
+  default: { name: 默认 }
+  prefill: { name: 预填充模型 }
+  tools: { name: 工具调用 }

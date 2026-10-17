@@ -9,6 +9,10 @@ import type { Expr } from './expr';
 
 export const FORMAT_VERSION = 1 as const;
 
+/** Fixed tool names (the preset only supplies descriptions and the stage-tool prefix). */
+export const SUBMIT_TOOL = 'ap_submit_turn';
+export const STRUCTURES_TOOL = 'ap_structures';
+
 export type Transport = 'prefill' | 'plaintext' | 'structured' | 'tool-single' | 'tool-multi';
 export const TRANSPORTS: readonly Transport[] = ['prefill', 'plaintext', 'structured', 'tool-single', 'tool-multi'];
 export type Style = 'dialogue' | 'imperative';
@@ -271,8 +275,7 @@ export interface LocaleTable {
   groups?: Record<string, { label?: string; description?: string }>;
   modules?: Record<string, { name?: string; description?: string }>;
   params?: Record<string, { label?: string; description?: string; options?: Record<string, string> }>;
-  workflows?: Record<string, { name?: string; description?: string }>;
-  stages?: Record<string, string>;
+  workflows?: Record<string, { name?: string; description?: string; stages?: Record<string, string> }>;
   configurations?: Record<string, { name?: string; description?: string }>;
   structures?: Record<string, { title?: string }>;
   [key: string]: unknown;

@@ -1,0 +1,90 @@
+# __PRESET_NAME__ — an Advanced Preset. Run `npm run dev` and paste the URL into Advanced Preset → Debug.
+formatVersion: 1
+id: __PRESET_ID__
+name: __PRESET_NAME__
+version: 0.1.0
+author: __AUTHOR__
+description: A minimal Advanced Preset.
+minAdvancedPreset: 1.0.0
+
+actors:
+  narrator: { name: Narrator, prefix: "{{ap::name::narrator}}: " }
+  user: { name: "{{user}}", prefix: "{{ap::name::user}}: " }
+narrator: narrator
+user: user
+
+# Transport → prompt style. Dialogue = prefixed conversation, imperative = numbered instructions.
+styles: { prefill: dialogue, plaintext: dialogue, structured: imperative, tool-single: imperative, tool-multi: imperative }
+contentMarker: <START_OF_CONTENT>
+prefillGuide: <START_OF_STORY>
+
+regions:
+  - { id: top, role: system, merge: join }
+  - { id: guidelines, role: system, merge: { wrap: guidelines } }
+  - { id: settings, native: true }
+  - { id: history, role: system, anchor: historyStart }
+  - { id: task, role: system, anchor: historyEnd }
+  - { id: tail, role: system, anchor: tail }
+workflowRegion: task
+
+groups:
+  guidelines: { label: Guidelines, order: 10 }
+  language: { label: Language, order: 20, tab: writing }
+
+params:
+  - id: language
+    type: text
+    label: Reply language
+    group: language
+    unset: the language used in the story so far
+    options: [English, 简体中文, 日本語]
+
+structures:
+  reply:
+    kind: reply
+    tag: Reply
+    field: reply
+    formatPrompt:
+      tag: "<Reply>[your reply to the user, plain paragraphs as <p>…</p>]</Reply>"
+      field: Put your reply to the user in the `reply` field as `<p>` paragraphs.
+  options:
+    kind: options
+    tag: options
+    field: options
+    count: 3
+    formatPrompt:
+      tag: |-
+        <options>
+        <option title="...">...</option>
+        </options>
+      field: 'Fill `options` with 3 items `{ "label": "...", "content": "..." }`.'
+
+regex:
+  - { id: summary, pattern: "(summary|summarize|recap|总结)", flags: i, target: meta, requires: meta.pure }
+
+meta:
+  trigger: "@{{ap::name::narrator}}"
+  tasks: { summary: flags.summary }
+
+syntheticTurns:
+  - id: init
+    label: Workflow init
+    user: <!-- Workflow Start -->
+    tool: { name: ap_workflow_init, description: Start the writing workflow. }
+    response:
+      single: Call `{{submit}}` once, filling every field in order.
+      multi: Call the stage tools in order, starting with `{{first}}`.
+      parallel: Call the stage tools in order, starting with `{{first}}`. Several per reply are fine.
+
+carrier:
+  order: [top, guidelines, { main: false }, worldInfoBefore, personaDescription, charDescription, charPersonality, scenario, worldInfoAfter, dialogueExamples, history, chatHistory, { jailbreak: false }, task, tail]
+
+configurationDefaults:
+  sampling: { temperature: 1, openai_max_context: 1000000, openai_max_tokens: 16384, max_context_unlocked: true, stream_openai: true, function_calling: true, reasoning_effort: low, use_sysprompt: true }
+  connection: { transport: structured, workflow: linear }
+
+defaultConfiguration: default
+configurations:
+  - { id: default, name: Default, diff: {} }
+  - { id: prefill, name: Prefill models, diff: { connection: { transport: prefill } } }
+  - { id: tools, name: Tool calling, diff: { connection: { transport: tool-single } } }
