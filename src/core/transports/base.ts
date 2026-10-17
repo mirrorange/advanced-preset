@@ -3,7 +3,7 @@
  * turns accumulated response state into a TurnResult, and decides whether another segment is needed.
  */
 import {
-  actorName, emptyTurn, SUBMIT_TOOL, stageToolName, type JsonSchema, type Stage, type TurnResult,
+  actorName, emptyTurn, toGeminiSchema, toGeminiTools, SUBMIT_TOOL, stageToolName, type JsonSchema, type Stage, type TurnResult,
 } from '@advanced-preset/protocol';
 import type { ChatMessage } from '@/st/host';
 import type { GenerationContext } from '../context';
@@ -99,7 +99,15 @@ export function baseBody(input: DriverInput, extra: Record<string, unknown> = {}
   delete body.tool_choice;
   delete body.json_schema;
   if (input.caller.tools.length) { body.tools = input.caller.tools; body.tool_choice = input.caller.toolChoice ?? 'auto'; }
-  return Object.assign(body, extra);
+  Object.assign(body, extra);
+  if (input.family === 'gemini') forGemini(body);
+  return body;
+}
+
+/** Gemini only takes an OpenAPI subset of JSON Schema (no `type: [..]`, `additionalProperties`, …). */
+function forGemini(body: Record<string, any>): void {
+  if (Array.isArray(body.tools)) body.tools = toGeminiTools(body.tools);
+  if (body.json_schema?.value) body.json_schema = { ...body.json_schema, value: toGeminiSchema(body.json_schema.value) };
 }
 
 export function callerCalls(read: ReadState, caller: CallerInfo): ToolCallAcc[] {
