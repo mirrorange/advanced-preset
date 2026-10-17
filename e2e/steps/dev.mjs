@@ -11,7 +11,7 @@ export default async function (page, shots) {
   await page.waitForTimeout(3000);
   console.log('presets', JSON.stringify(await page.evaluate(() => window.AdvancedPreset.listPresets())));
   await page.screenshot({ path: `${shots}/dev-1.png` });
-  const f = `${process.env.AP_PETALS || '../../petals-preset'}/preset.yaml`;
+  const f = `${process.env.AP_PETALS || '../petals-preset'}/preset.yaml`;
   const src = fs.readFileSync(f, 'utf8');
   fs.writeFileSync(f, src.replace('name: Petals Preset', 'name: Petals Preset DEV'));
   await page.waitForTimeout(4000);
