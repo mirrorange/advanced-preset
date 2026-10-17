@@ -5,3 +5,6 @@ packages/protocol/dist/
 coverage/
 .vite/
 *.tgz
+e2e/shots/
+e2e/mock.json
+e2e/mock-requests.jsonl
