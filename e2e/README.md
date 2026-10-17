@@ -1,6 +1,6 @@
 # E2E
 
-Headless checks against a real SillyTavern with a mock OpenAI-compatible backend.
+Headless checks against a real SillyTavern with a mock OpenAI-compatible backend (needs `playwright` resolvable from the repo).
 
 ```sh
 node e2e/mock.mjs &                                  # :5055, reads e2e/mock.json {delay, mode}
