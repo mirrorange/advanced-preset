@@ -2,6 +2,7 @@
  * Configuration layers (D8/D9): `configurationDefaults ⊕ recommended[base] ⊕ user diff`.
  * User data only stores sparse diffs, so new defaults flow in automatically.
  */
+import { cloneData } from './clone';
 import type { APreset, Configuration, Migration, SparseDiff } from './types';
 import { satisfies } from './semver';
 
@@ -9,14 +10,14 @@ type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
 
 export function deepMerge<T>(base: T, ...layers: unknown[]): T {
-  let out: unknown = structuredClone(base);
+  let out: unknown = cloneData(base);
   for (const layer of layers) out = mergeTwo(out, layer);
   return out as T;
 }
 
 function mergeTwo(a: unknown, b: unknown): unknown {
   if (b === undefined) return a;
-  if (!isObj(a) || !isObj(b)) return structuredClone(b);
+  if (!isObj(a) || !isObj(b)) return cloneData(b);
   const out: Obj = { ...a };
   for (const [k, v] of Object.entries(b)) out[k] = mergeTwo(a[k], v);
   return out;
@@ -32,7 +33,7 @@ export function diffObjects(full: unknown, base: unknown): unknown {
     }
     return Object.keys(out).length ? out : undefined;
   }
-  return JSON.stringify(full) === JSON.stringify(base) ? undefined : structuredClone(full);
+  return JSON.stringify(full) === JSON.stringify(base) ? undefined : cloneData(full);
 }
 
 /** Drop keys of `diff` that do not exist in `shape` (the defaults). Returns removed paths. */
@@ -51,7 +52,7 @@ export function pruneDiff(diff: Obj, shape: Obj, path = '', removed: string[] = 
 const OPEN_MAPS = new Set(['sampling']);
 
 export function applyMigrations(diff: SparseDiff, migrations: Migration[], fromVersion: string): SparseDiff {
-  const out = structuredClone(diff) as Obj;
+  const out = cloneData(diff) as Obj;
   for (const mig of migrations) {
     if (!satisfies(fromVersion, mig.from)) continue;
     for (const section of ['modules', 'params'] as const) {

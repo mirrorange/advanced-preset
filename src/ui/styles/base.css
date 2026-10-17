@@ -65,10 +65,11 @@ input[type='range'] { width: 100%; accent-color: var(--ap-primary); }
 .switch input:focus-visible + .track { box-shadow: var(--ap-ring); }
 
 /* Segmented */
-.segmented { display: flex; flex-wrap: wrap; gap: 2px; padding: 2px; border-radius: var(--ap-radius-md); background: var(--ap-surface-2); }
+.segmented { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 2px; border-radius: var(--ap-radius-md); background: var(--ap-surface-2); }
 .segmented button {
-  flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 1.9em; padding: 0 0.7em;
-  border: 0; border-radius: calc(var(--ap-radius-md) - 2px); background: transparent; color: var(--ap-muted); cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; min-height: 1.9em; padding: 0 0.4em;
+  border: 0; border-radius: calc(var(--ap-radius-md) - 2px); background: transparent; color: var(--ap-muted); cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .segmented button:hover { color: var(--ap-text); }
 .segmented button.on { background: var(--ap-panel-bg); color: var(--ap-primary); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); font-weight: 600; }

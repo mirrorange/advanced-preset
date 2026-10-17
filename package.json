@@ -6,12 +6,12 @@
   "description": "Advanced Preset — a generic, data-driven preset engine for SillyTavern Chat Completion.",
   "packageManager": "pnpm@10.34.5",
   "scripts": {
-    "build": "pnpm -r --filter ./packages/** build && vite build && node scripts/write-build-id.mjs",
+    "build": "pnpm -r --filter './packages/**' build && vite build && node scripts/write-build-id.mjs",
     "build:ext": "vite build && node scripts/write-build-id.mjs",
     "dev": "vite build --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "vue-tsc --noEmit -p tsconfig.json && pnpm -r --filter ./packages/** typecheck",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json && vue-tsc --noEmit -p test/tsconfig.json && pnpm -r --filter './packages/**' typecheck",
     "sync-presets": "node scripts/sync-presets.mjs"
   },
   "devDependencies": {
