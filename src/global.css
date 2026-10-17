@@ -1,0 +1,2 @@
+/* The only global rule AP ships (§16.2): pure-meta turns hide ST’s message text behind the reply card. */
+.mes_text.ap-hidden { display: none !important; }

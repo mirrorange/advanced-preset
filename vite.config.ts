@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 // @ts-expect-error plain ESM helper shared with scripts/write-build-id.mjs
 import { computeBuildId } from './scripts/build-id.mjs';
+
+const manifest = JSON.parse(readFileSync(new URL('./manifest.json', import.meta.url), 'utf8')) as { version: string };
 
 export default defineConfig({
   plugins: [vue()],
@@ -14,7 +17,7 @@ export default defineConfig({
   },
   define: {
     __AP_BUILD_ID__: JSON.stringify(computeBuildId()),
-    __AP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '1.0.0'),
+    __AP_VERSION__: JSON.stringify(manifest.version),
     __VUE_OPTIONS_API__: 'false',
     __VUE_PROD_DEVTOOLS__: 'false',
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
@@ -33,6 +36,6 @@ export default defineConfig({
       fileName: () => 'index.js',
       cssFileName: 'style',
     },
-    rollupOptions: { output: { inlineDynamicImports: true } },
+    rollupOptions: { output: { codeSplitting: false } },
   },
 });

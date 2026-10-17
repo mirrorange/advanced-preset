@@ -1,0 +1,34 @@
+<script setup lang="ts">
+/** UI preferences (outside the configuration layer): theme colours and stage collapsing. */
+import { computed } from 'vue';
+import { Palette, RotateCcw } from 'lucide-vue-next';
+import { settings, save } from '@/store/settings';
+import { t } from '@/i18n';
+import Section from '../components/Section.vue';
+import Field from '../components/Field.vue';
+import Switch from '../components/Switch.vue';
+import IconButton from '../components/IconButton.vue';
+
+const ui = settings().ui;
+const color = (k: 'primary' | 'accent') => computed({
+  get: () => ui[k] ?? '',
+  set: (v: string) => { ui[k] = v || undefined; save(); },
+});
+const primary = color('primary');
+const accent = color('accent');
+const collapse = computed({ get: () => ui.collapseStages, set: (v: boolean) => { ui.collapseStages = v; save(); } });
+const reset = () => { ui.primary = undefined; ui.accent = undefined; save(); };
+</script>
+
+<template>
+  <Section :title="t('appearance.title')" :icon="Palette" collapsible :open="false">
+    <Field :label="t('appearance.colors')" :help="t('appearance.colors.hint')" inline>
+      <div class="swatches">
+        <label class="swatch" :style="{ background: primary || 'var(--ap-primary-500)' }" :title="t('appearance.primary')"><input v-model.lazy="primary" type="color" /></label>
+        <label class="swatch" :style="{ background: accent || 'var(--ap-accent-500)' }" :title="t('appearance.accent')"><input v-model.lazy="accent" type="color" /></label>
+        <IconButton :icon="RotateCcw" :label="t('common.reset')" small align="end" :disabled="!primary && !accent" @click="reset" />
+      </div>
+    </Field>
+    <Field :label="t('appearance.collapseStages')" inline><Switch v-model="collapse" /></Field>
+  </Section>
+</template>
