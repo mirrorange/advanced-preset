@@ -129,6 +129,8 @@ async function* sseEvents(body: ReadableStream<Uint8Array>, signal?: AbortSignal
   try {
     while (true) {
       const { done, value } = await reader.read();
+      // A cancelled reader just reports `done`; surface the abort so callers mark open stages.
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
       if (done) break;
       buf += decoder.decode(value, { stream: true }).replace(/\r\n?/g, '\n');
       let cut: number;

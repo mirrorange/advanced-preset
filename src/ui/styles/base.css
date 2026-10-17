@@ -71,6 +71,7 @@ input[type='range'] { width: 100%; accent-color: var(--ap-primary); }
   border: 0; border-radius: calc(var(--ap-radius-md) - 2px); background: transparent; color: var(--ap-muted); cursor: pointer;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.segmented.dense button { padding: 0 2px; font-size: var(--ap-font-size-sm); }
 .segmented button:hover { color: var(--ap-text); }
 .segmented button.on { background: var(--ap-panel-bg); color: var(--ap-primary); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); font-weight: 600; }
 

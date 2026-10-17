@@ -116,6 +116,8 @@ async function run(
   let requests = 0;
   let interrupted = false;
   let callerToolCalls: EncodedToolCall[] | undefined;
+  /** Partial turn at the moment of an abort (parsed as non-final so open stages stay open). */
+  let partial: TurnResult | undefined;
 
   for (let step = 0; step < maxSteps; step++) {
     g.step = step;
@@ -143,7 +145,7 @@ async function run(
       rec.usage = read.usage;
     } catch (e) {
       rec.error = messageOf(e);
-      if (isAbort(e) || signal?.aborted) { interrupted = true; driver.progress(read, true); break; }
+      if (isAbort(e) || signal?.aborted) { interrupted = true; partial = driver.progress(read, false); break; }
       throw e;
     }
     reasoning += read.reasoning;
@@ -157,8 +159,8 @@ async function run(
     if (verdict.done) break;
   }
 
-  const turn = driver.result();
-  if (interrupted) for (const s of Object.values(turn.stages)) if (s.status !== 'done') s.status = 'interrupted';
+  const turn = partial ?? driver.result();
+  if (interrupted) for (const s of Object.values(turn.stages)) if (s.status === 'streaming') s.status = 'interrupted';
   updateLive(g, turn, reasoning);
   const outcome = finish(ctx, turn, driver.rawText(), driver.callerResult?.(), reasoning, { usage, requests, durationMs: Date.now() - started, interrupted });
   outcome.toolCalls = callerToolCalls;
