@@ -4,3 +4,4 @@ packages/protocol/dist/
 .DS_Store
 coverage/
 .vite/
+*.tgz
