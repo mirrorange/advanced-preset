@@ -1,0 +1,9 @@
+{
+  "app.name": "Advanced Preset",
+  "carrier.reset": "Manual edits to “{name}” were reset by the preset update.",
+  "error.toolsUnsupported": "The current source or settings do not support tool calling. Switch the transport or pick another recommended configuration.",
+  "error.emptyTurn": "The model returned no story content.",
+  "update.reloading": "Advanced Preset was updated — reloading…",
+  "update.none": "Already up to date.",
+  "update.failed": "Update failed: {error}"
+}

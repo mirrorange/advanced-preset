@@ -1,0 +1,9 @@
+{
+  "app.name": "Advanced Preset",
+  "carrier.reset": "预设已更新，「{name}」中的手动修改已被重置。",
+  "error.toolsUnsupported": "当前 API 源或设置不支持工具调用。请切换传输模式或选择其他推荐配置。",
+  "error.emptyTurn": "模型没有返回正文。",
+  "update.reloading": "Advanced Preset 已更新，正在重新加载…",
+  "update.none": "已是最新版本。",
+  "update.failed": "更新失败：{error}"
+}
