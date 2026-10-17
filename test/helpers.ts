@@ -1,0 +1,25 @@
+import { readFileSync } from 'node:fs';
+import { assemble, defaultVars, resolveConfiguration, type APreset, type Transport } from '@advanced-preset/protocol';
+import type { GenerationContext } from '@/core/context';
+
+export const petals = JSON.parse(readFileSync(new URL('../dist/presets/petals.apreset.json', import.meta.url), 'utf8')) as APreset;
+
+export function ctxFor(transport: Transport, workflowId = 'linear', over: Partial<GenerationContext> = {}): GenerationContext {
+  const preset = petals;
+  const config = resolveConfiguration(preset, 'other', { connection: { transport, workflow: workflowId } });
+  const workflow = preset.workflows.find((w) => w.id === workflowId)!;
+  const vars = defaultVars(preset, config, { transport });
+  const assembly = assemble({ preset, config, vars, data: {} }, workflow);
+  return {
+    id: 'ap-test', preset, config, origin: 'story', stType: 'normal', interceptorRan: true, dryRun: false,
+    meta: { present: false, pure: false, mixed: false, segments: [], stripped: '', task: null },
+    flags: {}, transport, workflow, stages: assembly.stages, structures: assembly.structures, assembly,
+    inputIndex: 1, createdAt: 0, warnings: [], ...over,
+  };
+}
+
+export async function collect<T>(gen: AsyncGenerator<T>): Promise<T[]> {
+  const out: T[] = [];
+  for await (const x of gen) out.push(x);
+  return out;
+}
