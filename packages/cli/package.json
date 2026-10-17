@@ -1,0 +1,24 @@
+{
+  "name": "advanced-preset",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Advanced Preset CLI — build, check, preview and hot-reload Advanced Preset sources.",
+  "bin": {
+    "ap": "dist/ap.js"
+  },
+  "files": [
+    "dist",
+    "schema"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "chokidar": "^5.0.0",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@advanced-preset/protocol": "workspace:*"
+  }
+}
