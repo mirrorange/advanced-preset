@@ -7,7 +7,7 @@ defineProps<{ options: SegmentOption<T>[] }>();
 </script>
 
 <template>
-  <div class="segmented" role="radiogroup">
+  <div class="segmented" :class="{ dense: options.length > 4 }" role="radiogroup">
     <button
       v-for="o in options" :key="String(o.value)" type="button" role="radio" :aria-checked="model === o.value"
       :class="{ on: model === o.value }" :title="o.hint" @click="model = o.value"
