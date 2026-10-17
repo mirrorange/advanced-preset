@@ -1,6 +1,6 @@
 {
   "name": "@advanced-preset/protocol",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Shared protocol of Advanced Preset: artifact types, expressions, macros, structures and workflow artifacts.",

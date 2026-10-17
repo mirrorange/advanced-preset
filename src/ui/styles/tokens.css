@@ -1,0 +1,48 @@
+/* Design tokens (§16.4). Palette shades default to fuchsia / purple; theme.ts overrides them from
+   the preset theme or the user's colour, and switches the light / dark semantic mapping. */
+:host {
+  --ap-primary-50: #fdf4ff; --ap-primary-100: #fae8ff; --ap-primary-200: #f5d0fe; --ap-primary-300: #f0abfc;
+  --ap-primary-400: #e879f9; --ap-primary-500: #d946ef; --ap-primary-600: #c026d3; --ap-primary-700: #a21caf;
+  --ap-primary-800: #86198f; --ap-primary-900: #701a75;
+  --ap-accent-50: #faf5ff; --ap-accent-100: #f3e8ff; --ap-accent-200: #e9d5ff; --ap-accent-300: #d8b4fe;
+  --ap-accent-400: #c084fc; --ap-accent-500: #a855f7; --ap-accent-600: #9333ea; --ap-accent-700: #7e22ce;
+  --ap-accent-800: #6b21a8; --ap-accent-900: #581c87;
+
+  --ap-radius-sm: 6px; --ap-radius-md: 10px; --ap-radius-lg: 14px; --ap-radius-pill: 999px;
+  --ap-space-1: 4px; --ap-space-2: 8px; --ap-space-3: 12px; --ap-space-4: 16px; --ap-space-5: 24px;
+  --ap-font-size-xs: 0.75em; --ap-font-size-sm: 0.875em; --ap-font-size-md: 1em; --ap-font-size-lg: 1.125em;
+
+  /* Semantic (light). Text follows ST so AP blends into any theme. */
+  --ap-text: var(--SmartThemeBodyColor, #1f1724);
+  --ap-muted: color-mix(in srgb, var(--ap-text) 58%, transparent);
+  --ap-faint: color-mix(in srgb, var(--ap-text) 36%, transparent);
+  --ap-border: color-mix(in srgb, var(--ap-text) 14%, transparent);
+  --ap-surface: color-mix(in srgb, var(--ap-text) 4%, transparent);
+  --ap-surface-2: color-mix(in srgb, var(--ap-text) 8%, transparent);
+  --ap-primary: var(--ap-primary-600);
+  --ap-accent: var(--ap-accent-600);
+  --ap-on-primary: #fff;
+  --ap-tint: color-mix(in srgb, var(--ap-primary-500) 10%, transparent);
+  --ap-danger: #dc2626;
+  --ap-success: #16a34a;
+  --ap-warning: #d97706;
+  --ap-panel-bg: var(--SmartThemeBlurTintColor, rgba(250, 245, 252, 0.92));
+  --ap-shadow: 0 8px 28px rgba(15, 5, 20, 0.18);
+  --ap-ring: 0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);
+
+  color: var(--ap-text);
+  font: inherit;
+  line-height: 1.5;
+}
+:host([data-ap-theme='dark']) {
+  --ap-text: var(--SmartThemeBodyColor, #f3eaf6);
+  --ap-primary: var(--ap-primary-400);
+  --ap-accent: var(--ap-accent-400);
+  --ap-on-primary: #1a0b1f;
+  --ap-tint: color-mix(in srgb, var(--ap-primary-400) 14%, transparent);
+  --ap-danger: #f87171;
+  --ap-success: #4ade80;
+  --ap-warning: #fbbf24;
+  --ap-panel-bg: var(--SmartThemeBlurTintColor, rgba(28, 20, 32, 0.92));
+  --ap-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}

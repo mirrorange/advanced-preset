@@ -19,8 +19,12 @@ export function t(key: string, params: Record<string, string | number> = {}): st
 }
 
 /** Preset-provided label for the current locale, falling back to the source text. */
+export function presetLocale(preset: APreset): LocaleTable | undefined {
+  return preset.locales?.[locale()] ?? preset.locales?.[locale().split('-')[0]!];
+}
+
 export function pt(preset: APreset, section: keyof LocaleTable, id: string, field: string, fallback: string): string {
-  const table = preset.locales?.[locale()] ?? preset.locales?.[locale().split('-')[0]!];
+  const table = presetLocale(preset);
   const entry = (table?.[section] as Record<string, Record<string, unknown>> | undefined)?.[id];
   const v = entry?.[field];
   return typeof v === 'string' && v ? v : fallback;

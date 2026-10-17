@@ -111,7 +111,9 @@ export async function pushSampling(preset: APreset): Promise<void> {
   const m = pm();
   const current = m.getCompletionPresetByName(name);
   if (!current) return;
-  const body = { ...current, ...structuredClone(activeConfiguration(preset).sampling) };
+  const sampling = activeConfiguration(preset).sampling;
+  if (Object.entries(sampling).every(([k, v]) => JSON.stringify(current[k]) === JSON.stringify(v))) return;
+  const body = { ...current, ...structuredClone(sampling) };
   const selected = m.getSelectedPresetName() === name;
   syncing = true;
   try { await writeCarrier(name, body, selected); } finally { syncing = false; }

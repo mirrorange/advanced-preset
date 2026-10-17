@@ -1,0 +1,119 @@
+/* Shared primitives used by every AP surface. One look, one place. */
+*, *::before, *::after { box-sizing: border-box; }
+:host { display: block; }
+:host([hidden]) { display: none; }
+svg.lucide { flex: none; width: 1.1em; height: 1.1em; stroke-width: 2; }
+button, input, select, textarea { font: inherit; color: inherit; }
+p { margin: 0; }
+.muted { color: var(--ap-muted); }
+.faint { color: var(--ap-faint); }
+.row { display: flex; align-items: center; gap: var(--ap-space-2); }
+.col { display: flex; flex-direction: column; gap: var(--ap-space-2); }
+.grow { flex: 1 1 auto; min-width: 0; }
+.wrap { flex-wrap: wrap; }
+.ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mono { font-family: var(--monoFontFamily, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: var(--ap-font-size-xs); }
+.pre { white-space: pre-wrap; word-break: break-word; }
+.small { font-size: var(--ap-font-size-sm); }
+.xs { font-size: var(--ap-font-size-xs); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 2em; padding: 0 0.8em; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm);
+  background: var(--ap-surface); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn:hover:not(:disabled) { background: var(--ap-surface-2); border-color: color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border)); }
+.btn:focus-visible, .icon-btn:focus-visible, .input:focus-visible { outline: none; box-shadow: var(--ap-ring); }
+.btn:disabled, .icon-btn:disabled { opacity: 0.45; cursor: default; }
+.btn.primary { background: var(--ap-primary); border-color: transparent; color: var(--ap-on-primary); }
+.btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text)); }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.danger:hover:not(:disabled) { color: var(--ap-danger); border-color: color-mix(in srgb, var(--ap-danger) 50%, transparent); }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 2em; height: 2em; flex: none;
+  border: 0; border-radius: var(--ap-radius-sm); background: transparent; color: var(--ap-muted); cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.icon-btn:hover:not(:disabled) { background: var(--ap-surface-2); color: var(--ap-text); }
+.icon-btn.active { color: var(--ap-primary); }
+.icon-btn.danger:hover:not(:disabled) { color: var(--ap-danger); }
+.icon-btn.sm { width: 1.6em; height: 1.6em; }
+
+/* Inputs */
+.input {
+  width: 100%; min-height: 2em; padding: 0.3em 0.6em; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm);
+  background: var(--ap-surface); outline: none; transition: border-color 0.15s;
+}
+.input:hover { border-color: color-mix(in srgb, var(--ap-text) 24%, transparent); }
+.input:focus { border-color: var(--ap-primary); }
+textarea.input { resize: vertical; line-height: 1.45; min-height: 4.5em; }
+select.input { appearance: none; padding-right: 1.8em; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 13px) 55%, calc(100% - 8px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+select.input option { background: var(--ap-panel-bg); color: var(--ap-text); }
+input[type='number'].input { font-variant-numeric: tabular-nums; }
+input[type='range'] { width: 100%; accent-color: var(--ap-primary); }
+
+/* Switch */
+.switch { position: relative; display: inline-flex; flex: none; width: 2.2em; height: 1.25em; cursor: pointer; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch .track { width: 100%; height: 100%; border-radius: var(--ap-radius-pill); background: var(--ap-surface-2); border: 1px solid var(--ap-border); transition: background 0.15s; }
+.switch .thumb { position: absolute; top: 0.18em; left: 0.18em; width: 0.9em; height: 0.9em; border-radius: 50%; background: var(--ap-muted); transition: transform 0.18s, background 0.15s; }
+.switch input:checked + .track { background: var(--ap-primary); border-color: transparent; }
+.switch input:checked ~ .thumb { transform: translateX(0.95em); background: var(--ap-on-primary); }
+.switch input:focus-visible + .track { box-shadow: var(--ap-ring); }
+
+/* Segmented */
+.segmented { display: flex; flex-wrap: wrap; gap: 2px; padding: 2px; border-radius: var(--ap-radius-md); background: var(--ap-surface-2); }
+.segmented button {
+  flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 1.9em; padding: 0 0.7em;
+  border: 0; border-radius: calc(var(--ap-radius-md) - 2px); background: transparent; color: var(--ap-muted); cursor: pointer; white-space: nowrap;
+}
+.segmented button:hover { color: var(--ap-text); }
+.segmented button.on { background: var(--ap-panel-bg); color: var(--ap-primary); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); font-weight: 600; }
+
+/* Cards, chips */
+.card { border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md); background: var(--ap-surface); }
+.card-head { display: flex; align-items: center; gap: var(--ap-space-2); min-height: 2.25em; padding: 0 var(--ap-space-2) 0 var(--ap-space-3); }
+.card-head.clickable { cursor: pointer; user-select: none; }
+.card-title { flex: 1 1 auto; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-body { padding: 0 var(--ap-space-3) var(--ap-space-3); }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; max-width: 100%; min-height: 1.75em; padding: 0 0.65em;
+  border: 1px solid var(--ap-border); border-radius: var(--ap-radius-pill); background: var(--ap-surface);
+  font-size: var(--ap-font-size-sm); white-space: nowrap; cursor: default;
+}
+button.chip { cursor: pointer; }
+.chip:is(button):hover { background: var(--ap-surface-2); }
+.badge { display: inline-flex; align-items: center; padding: 0 0.5em; min-height: 1.45em; border-radius: var(--ap-radius-pill); font-size: var(--ap-font-size-xs); background: var(--ap-tint); color: var(--ap-primary); font-weight: 600; white-space: nowrap; }
+.badge.neutral { background: var(--ap-surface-2); color: var(--ap-muted); }
+.badge.warn { background: color-mix(in srgb, var(--ap-warning) 16%, transparent); color: var(--ap-warning); }
+.dot { width: 0.5em; height: 0.5em; border-radius: 50%; flex: none; background: currentColor; }
+.divider { height: 1px; background: var(--ap-border); margin: var(--ap-space-2) 0; }
+.empty { display: flex; flex-direction: column; align-items: center; gap: var(--ap-space-2); padding: var(--ap-space-5) var(--ap-space-3); color: var(--ap-faint); text-align: center; }
+.empty svg.lucide { width: 1.8em; height: 1.8em; }
+
+/* Tooltip (Help) */
+.tip { position: relative; display: inline-flex; }
+.tip-bubble {
+  position: absolute; z-index: 20; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  width: max-content; max-width: min(280px, 70vw); padding: 0.45em 0.7em; border-radius: var(--ap-radius-sm);
+  background: color-mix(in srgb, var(--ap-text) 92%, transparent); color: var(--ap-panel-bg-solid, #fff);
+  font-size: var(--ap-font-size-xs); font-weight: 400; line-height: 1.45; white-space: pre-line; text-align: left; pointer-events: none;
+  box-shadow: var(--ap-shadow);
+}
+:host([data-ap-theme='dark']) .tip-bubble { color: #160d1a; }
+.tip-bubble.below { bottom: auto; top: calc(100% + 6px); }
+.tip-bubble.start { left: 0; transform: none; }
+.tip-bubble.end { left: auto; right: 0; transform: none; }
+
+/* Motion */
+@keyframes ap-spin { to { transform: rotate(360deg); } }
+@keyframes ap-pulse { 50% { opacity: 0.45; } }
+.spin { animation: ap-spin 1s linear infinite; }
+.pulse { animation: ap-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .spin, .pulse { animation: none; } }
+
+/* Scrollbars */
+.scroll { overflow: auto; scrollbar-width: thin; scrollbar-color: var(--ap-border) transparent; }

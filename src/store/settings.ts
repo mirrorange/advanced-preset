@@ -33,6 +33,8 @@ export interface APSettings {
   presets: Record<string, PresetState>;
   /** User-installed artifacts (built-ins are shipped in dist/presets). */
   installed: Record<string, APreset>;
+  /** Where installed artifacts came from (URL), for one-click updates. */
+  sources: Record<string, string>;
   ui: { primary?: string; accent?: string; panelWidth: number; collapseStages: boolean };
   dev: { url: string; enabled: boolean };
   debug: { keepRequests: number };
@@ -43,6 +45,7 @@ const defaults = (): APSettings => ({
   enabled: true,
   presets: {},
   installed: {},
+  sources: {},
   ui: { panelWidth: 440, collapseStages: true },
   dev: { url: 'http://localhost:4747', enabled: false },
   debug: { keepRequests: 20 },

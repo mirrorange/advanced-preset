@@ -1,0 +1,80 @@
+<script setup lang="ts">
+/** Settings panel (§16.5): header with preset + enable switch, six tabs, resizable width. */
+import { computed, onBeforeUnmount, onMounted, ref, type Component } from 'vue';
+import { Blocks, Brain, Bug, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
+import { settings, save } from '@/store/settings';
+import { presetState } from '@/store/config';
+import { t, pt } from '@/i18n';
+import { activePreset, ui, type PanelTab } from '../state';
+import IconButton from '../components/IconButton.vue';
+import Switch from '../components/Switch.vue';
+import PresetsTab from './tabs/PresetsTab.vue';
+import ConfigTab from './tabs/ConfigTab.vue';
+import ModulesTab from './tabs/ModulesTab.vue';
+import WritingTab from './tabs/WritingTab.vue';
+import MemoryTab from './tabs/MemoryTab.vue';
+import DebugTab from './tabs/DebugTab.vue';
+
+const tabs: { id: PanelTab; icon: Component; view: Component }[] = [
+  { id: 'presets', icon: Package, view: PresetsTab },
+  { id: 'config', icon: SlidersHorizontal, view: ConfigTab },
+  { id: 'modules', icon: Blocks, view: ModulesTab },
+  { id: 'writing', icon: PenLine, view: WritingTab },
+  { id: 'memory', icon: Brain, view: MemoryTab },
+  { id: 'debug', icon: Bug, view: DebugTab },
+];
+const current = computed(() => tabs.find((x) => x.id === ui.tab) ?? tabs[0]!);
+
+const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => { settings().enabled = v; save(); } });
+const subtitle = computed(() => {
+  const p = activePreset.value;
+  if (!p) return t('panel.noPreset');
+  const ref = presetState(p).active.ref;
+  const name = ref.kind === 'saved'
+    ? presetState(p).saved.find((c) => c.id === ref.id)?.name ?? ''
+    : pt(p, 'configurations', ref.id, 'name', p.configurations.find((c) => c.id === ref.id)?.name ?? ref.id);
+  return `v${p.version} · ${name}`;
+});
+
+const width = computed(() => `${Math.max(340, Math.min(settings().ui.panelWidth, window.innerWidth))}px`);
+const dragging = ref(false);
+function startResize(e: PointerEvent) {
+  dragging.value = true;
+  const el = e.currentTarget as HTMLElement;
+  el.setPointerCapture(e.pointerId);
+  const move = (ev: PointerEvent) => { settings().ui.panelWidth = Math.round(Math.max(340, Math.min(window.innerWidth - 40, window.innerWidth - ev.clientX))); };
+  const up = () => { dragging.value = false; el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); save(); };
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', up);
+}
+
+const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && ui.panelOpen) ui.panelOpen = false; };
+onMounted(() => document.addEventListener('keydown', onKey));
+onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
+</script>
+
+<template>
+  <Transition name="panel">
+    <aside v-if="ui.panelOpen" class="panel" :style="{ '--ap-panel-width': width }" role="dialog" :aria-label="t('app.name')">
+      <div class="resize" :class="{ dragging }" @pointerdown="startResize" />
+      <header class="panel-head">
+        <div class="panel-logo"><Layers /></div>
+        <div class="grow">
+          <div class="panel-title ellipsis">{{ activePreset?.name ?? t('app.name') }}</div>
+          <div class="panel-sub ellipsis">{{ subtitle }}</div>
+        </div>
+        <Switch v-model="enabled" :label="t('panel.enabled')" />
+        <IconButton :icon="X" :label="t('common.close')" align="end" below @click="ui.panelOpen = false" />
+      </header>
+      <nav class="tabs" role="tablist">
+        <button v-for="x in tabs" :key="x.id" type="button" role="tab" class="tab" :class="{ on: x.id === ui.tab }" :aria-selected="x.id === ui.tab" @click="ui.tab = x.id">
+          <component :is="x.icon" />
+          <span>{{ t(`tab.${x.id}`) }}</span>
+        </button>
+      </nav>
+      <main class="panel-body scroll">
+        <KeepAlive><component :is="current.view" :key="current.id" /></KeepAlive>
+      </main>
+    </aside>
+  </Transition>
+</template>
