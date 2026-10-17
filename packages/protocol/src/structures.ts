@@ -125,7 +125,11 @@ export function normalizeStructure(kind: StructureKind, value: unknown, decl?: S
     }
     case 'custom': {
       if (decl?.shape === 'kv') {
-        if (!value || typeof value !== 'object') return undefined;
+        if (typeof value === 'string') {
+          // Gemini receives free-form maps as JSON-encoded strings (see gemini.ts)
+          try { value = JSON.parse(value); } catch { return undefined; }
+        }
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
         return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, asString(v)]));
       }
       const s = asString(value).trim();
