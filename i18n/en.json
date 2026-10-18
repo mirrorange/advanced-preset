@@ -22,6 +22,7 @@
   "common.undo": "Undo",
   "panel.enabled": "Enabled",
   "panel.open": "Open panel",
+  "panel.open.title": "Advanced Preset panel",
   "panel.noPreset": "No Advanced Preset selected",
   "panel.choosePreset": "Choose a preset",
   "tab.presets": "Presets",

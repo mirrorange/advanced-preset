@@ -1,15 +1,13 @@
-/* Side panel (§16.5): right-docked drawer on desktop, full screen on mobile. */
+/* Settings panel (§16.5): fills ST's AI Response Configuration drawer (`#left-nav-panel`), on top of
+   its content. The drawer is the containing block, so desktop / mobile sizing come from ST. */
+:host(ap-panel) { border-radius: inherit; }
 .panel {
-  position: fixed; z-index: 3005; top: var(--topBarBlockSize, 0px); right: 0; bottom: 0; width: var(--ap-panel-width, 440px); max-width: 100vw;
+  position: absolute; z-index: 100; inset: 0; overflow: hidden; border-radius: inherit;
   display: flex; flex-direction: column; background: var(--ap-panel-bg); color: var(--ap-text);
   backdrop-filter: blur(var(--SmartThemeBlurStrength, 10px)); -webkit-backdrop-filter: blur(var(--SmartThemeBlurStrength, 10px));
-  border-left: 1px solid var(--ap-border); box-shadow: var(--ap-shadow);
 }
-@media (max-width: 768px) { .panel { width: 100vw; border-left: 0; } .resize { display: none; } }
-.panel-enter-active, .panel-leave-active { transition: transform 0.22s ease, opacity 0.22s ease; }
-.panel-enter-from, .panel-leave-to { transform: translateX(24px); opacity: 0; }
-.resize { position: absolute; left: -3px; top: 0; bottom: 0; width: 6px; cursor: ew-resize; }
-.resize:hover, .resize.dragging { background: color-mix(in srgb, var(--ap-primary) 35%, transparent); }
+.panel-enter-active, .panel-leave-active { transition: transform 0.2s ease, opacity 0.2s ease; }
+.panel-enter-from, .panel-leave-to { transform: translateY(8px); opacity: 0; }
 
 .panel-head { flex: none; display: flex; align-items: center; gap: var(--ap-space-2); padding: var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4); }
 .panel-logo { display: grid; place-items: center; width: 2.1em; height: 2.1em; border-radius: var(--ap-radius-md); flex: none;
@@ -97,11 +95,7 @@
 .swatch { width: 1.6em; height: 1.6em; border-radius: 50%; border: 2px solid var(--ap-border); cursor: pointer; padding: 0; overflow: hidden; }
 .swatch input { opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
-/* Top-bar button and settings row (outside the panel). */
-.topbar-btn { display: grid; place-items: center; width: 100%; height: 100%; color: inherit; cursor: pointer; opacity: 0.85; }
-.topbar-btn:hover, .topbar-btn.on { opacity: 1; }
-.topbar-btn.on { color: var(--ap-primary); }
-.topbar-btn svg.lucide { width: var(--ap-topbar-icon, 1.35em); height: var(--ap-topbar-icon, 1.35em); }
+/* Settings row (outside the panel). */
 .settings-row { display: flex; align-items: center; gap: var(--ap-space-2); padding: var(--ap-space-1) 0; }
 .preset-info { gap: 2px; }
 .preset-head { gap: 6px; }

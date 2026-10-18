@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 export default async function (page, shots) {
-  await page.locator('ap-topbar .topbar-btn').click();
+  await page.evaluate(() => document.getElementById('ap-preset-button').click());
   await page.waitForTimeout(300);
   const head = page.locator('ap-panel .panel-head input[role=switch]');
   if (!(await head.isChecked())) await page.locator('ap-panel .panel-head .switch').click();

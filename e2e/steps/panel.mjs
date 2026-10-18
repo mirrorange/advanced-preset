@@ -9,7 +9,7 @@ export default async function (page, shots) {
   const chip = page.locator('ap-stages .chip, ap-stages button').first();
   if (await chip.count()) { await chip.click(); await page.waitForTimeout(400); }
   await page.screenshot({ path: `${shots}/msg-${theme || 'dark'}.png` });
-  await page.locator('ap-topbar .topbar-btn').click();
+  await page.evaluate(() => document.getElementById('ap-preset-button').click());
   await page.waitForTimeout(600);
   const tabs = page.locator('ap-panel .tab');
   const n = await tabs.count();

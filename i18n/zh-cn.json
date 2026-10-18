@@ -22,6 +22,7 @@
   "common.undo": "撤销",
   "panel.enabled": "启用",
   "panel.open": "打开面板",
+  "panel.open.title": "Advanced Preset 面板",
   "panel.noPreset": "未选择 Advanced Preset 预设",
   "panel.choosePreset": "选择预设",
   "tab.presets": "预设",
