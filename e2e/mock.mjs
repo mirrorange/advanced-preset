@@ -31,12 +31,14 @@ function respond(b) {
     const called = new Set((b.messages || []).flatMap((m) => (m.tool_calls || []).map((c) => c.function.name)));
     let name;
     if (b.tool_choice?.function?.name) name = b.tool_choice.function.name;
-    else name = (tools.find((t) => /submit/.test(t.function.name)) || tools.find((t) => /stage|ap_/.test(t.function.name) && !called.has(t.function.name)))?.function.name;
+    // Tool names come from the preset (ap_stage_* / ask_questions / write_story …): prefer a submit-style
+    // tool, otherwise the first tool not yet called (the synthetic init call already sits in history).
+    else name = (tools.find((t) => /submit/.test(t.function.name)) || tools.find((t) => !called.has(t.function.name)))?.function.name;
     const tool = tools.find((t) => t.function.name === name);
     if (tool) {
       if (b.tool_choice === 'required' && !b.tool_choice?.function) {
         // parallel: call all stage tools not yet called
-        const rest = tools.filter((t) => !called.has(t.function.name) && !/synthetic|history/.test(t.function.name));
+        const rest = tools.filter((t) => !called.has(t.function.name));
         return { calls: rest.map((t, i) => ({ id: `c${Date.now()}_${i}`, name: t.function.name, arguments: JSON.stringify(gen(t.function.parameters)) })) };
       }
       return { calls: [{ id: `c${Date.now()}`, name, arguments: JSON.stringify(gen(tool.function.parameters)) }] };
