@@ -121,10 +121,11 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
       unknown: text(str(results.unknown, D.results.unknown), at('results.unknown')),
       nudge: text(str(results.nudge ?? o.nudge, D.results.nudge), at('results.nudge')),
     },
+    callerSchemaHint: text(str(o.callerSchemaHint, D.callerSchemaHint), at('callerSchemaHint')),
   };
   const hint = o.jsonStringHint === undefined ? D.jsonStringHint : opt(o.jsonStringHint, 'jsonStringHint');
   if (hint) tools.jsonStringHint = hint;
-  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'jsonStringHint', ...legacy]);
+  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }

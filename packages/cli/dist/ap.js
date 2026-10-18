@@ -7686,7 +7686,8 @@ var DEFAULT_TOOLS = {
     unknown: "Unknown tool {{name}}.",
     nudge: "Continue the workflow: call `{{next}}` now."
   },
-  jsonStringHint: "(JSON object encoded as a string)"
+  jsonStringHint: "(JSON object encoded as a string)",
+  callerSchemaHint: "After your thinking, output the result as one JSON code block (```json \u2026 ```) that matches this JSON Schema:\n\n```json\n{{schema}}\n```"
 };
 var same = (s) => s;
 function fillTemplate(text, vars) {
@@ -8283,11 +8284,12 @@ function compileTools(src, diag, text, file = "preset.yaml") {
       done: text(str(results.done, D.results.done), at("results.done")),
       unknown: text(str(results.unknown, D.results.unknown), at("results.unknown")),
       nudge: text(str(results.nudge ?? o.nudge, D.results.nudge), at("results.nudge"))
-    }
+    },
+    callerSchemaHint: text(str(o.callerSchemaHint, D.callerSchemaHint), at("callerSchemaHint"))
   };
   const hint = o.jsonStringHint === void 0 ? D.jsonStringHint : opt(o.jsonStringHint, "jsonStringHint");
   if (hint) tools.jsonStringHint = hint;
-  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "jsonStringHint", ...legacy]);
+  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "jsonStringHint", "callerSchemaHint", ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }
