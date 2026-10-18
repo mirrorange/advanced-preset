@@ -96,19 +96,16 @@ button.chip { cursor: pointer; }
 .empty { display: flex; flex-direction: column; align-items: center; gap: var(--ap-space-2); padding: var(--ap-space-5) var(--ap-space-3); color: var(--ap-faint); text-align: center; }
 .empty svg.lucide { width: 1.8em; height: 1.8em; }
 
-/* Tooltip (Help) */
+/* Tooltip (Tip / Help): shown in the top layer and placed by bubble.ts against the viewport. */
 .tip { position: relative; display: inline-flex; }
 .tip-bubble {
-  position: absolute; z-index: 20; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  width: max-content; max-width: min(280px, 70vw); padding: 0.45em 0.7em; border-radius: var(--ap-radius-sm);
+  position: fixed; inset: auto; left: 0; top: 0; z-index: 2147483000; margin: 0; border: 0; overflow: visible;
+  width: max-content; max-width: min(280px, calc(100vw - 16px)); padding: 0.45em 0.7em; border-radius: var(--ap-radius-sm);
   background: color-mix(in srgb, var(--ap-text) 92%, transparent); color: var(--ap-panel-bg-solid, #fff);
-  font-size: var(--ap-font-size-xs); font-weight: 400; line-height: 1.45; white-space: pre-line; text-align: left; pointer-events: none;
+  font-size: var(--ap-font-size-xs); font-weight: 400; line-height: 1.45; white-space: pre-line; overflow-wrap: anywhere; text-align: left; pointer-events: none;
   box-shadow: var(--ap-shadow);
 }
 :host([data-ap-theme='dark']) .tip-bubble { color: #160d1a; }
-.tip-bubble.below { bottom: auto; top: calc(100% + 6px); }
-.tip-bubble.start { left: 0; transform: none; }
-.tip-bubble.end { left: auto; right: 0; transform: none; }
 
 /* Motion */
 @keyframes ap-spin { to { transform: rotate(360deg); } }
