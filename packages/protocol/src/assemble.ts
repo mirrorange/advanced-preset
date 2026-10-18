@@ -180,7 +180,7 @@ export function workflowContent(preset: APreset, workflow: Workflow, stages: Sta
     const body = s.stages[stage.id]?.[style];
     if (!body?.length) return;
     if (style === 'imperative' && preset.stageHeading) {
-      const target = transport === 'tool-multi' ? stageToolName(preset.tools.stagePrefix, stage) : stageFieldName(stages, stage);
+      const target = transport === 'tool-multi' ? stageToolName(stages, stage, preset.tools) : stageFieldName(stages, stage, preset.tools);
       const heading = preset.stageHeading
         .replaceAll('{{n}}', String(i + 1))
         .replaceAll('{{label}}', stage.label)

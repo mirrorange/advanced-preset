@@ -26,16 +26,33 @@ export interface StructureValues {
   custom: string | Record<string, string>;
 }
 
-const str = (description?: string): JsonSchema => (description ? { type: 'string', description } : { type: 'string' });
+/** Sub-fields of each kind, in schema order. Presets may describe them (`StructureDecl.properties`) but not rename them. */
+export const STRUCTURE_PROPERTIES: Record<StructureKind, readonly string[]> = {
+  reply: [],
+  impersonate: [],
+  recap: [],
+  memory: ['scope', 'operation', 'key', 'content'],
+  synopsis: ['time', 'location', 'event', 'summary'],
+  options: ['label', 'content'],
+  custom: [],
+};
 
-/** JSON Schema of a structure's field (used by structured output and tool parameters). */
-export function structureFieldSchema(decl: StructureDecl): JsonSchema {
-  const description = decl.description;
-  const withDesc = (s: JsonSchema): JsonSchema => (description ? { ...s, description } : s);
+/**
+ * JSON Schema of a structure's field (used by structured output and tool parameters). The shape is
+ * fixed by the kind; descriptions come from the preset and are passed through `expand`.
+ */
+export function structureFieldSchema(decl: StructureDecl, expand: (text: string) => string = (t) => t): JsonSchema {
+  const d = (t?: string) => (t ? expand(t).trim() || undefined : undefined);
+  const describe = (s: JsonSchema, text?: string): JsonSchema => {
+    const description = d(text);
+    return description ? { ...s, description } : s;
+  };
+  const sub = (key: string, s: JsonSchema = { type: 'string' }) => describe(s, decl.properties?.[key]);
+  const withDesc = (s: JsonSchema) => describe(s, decl.description);
   switch (decl.kind) {
     case 'reply':
     case 'impersonate':
-      return withDesc(str());
+      return withDesc({ type: 'string' });
     case 'recap':
       return withDesc({ type: ['string', 'null'] });
     case 'memory':
@@ -44,10 +61,10 @@ export function structureFieldSchema(decl: StructureDecl): JsonSchema {
         items: {
           type: 'object',
           properties: {
-            scope: { type: 'string', enum: ['memory', 'global_memory'] },
-            operation: { type: 'string', enum: ['replace', 'delete'] },
-            key: str(),
-            content: { type: ['string', 'null'] },
+            scope: sub('scope', { type: 'string', enum: ['memory', 'global_memory'] }),
+            operation: sub('operation', { type: 'string', enum: ['replace', 'delete'] }),
+            key: sub('key'),
+            content: sub('content', { type: ['string', 'null'] }),
           },
           required: ['scope', 'operation', 'key', 'content'],
           additionalProperties: false,
@@ -56,7 +73,7 @@ export function structureFieldSchema(decl: StructureDecl): JsonSchema {
     case 'synopsis':
       return withDesc({
         type: 'object',
-        properties: { time: str(), location: str(), event: str(), summary: str() },
+        properties: { time: sub('time'), location: sub('location'), event: sub('event'), summary: sub('summary') },
         required: ['time', 'location', 'event', 'summary'],
         additionalProperties: false,
       });
@@ -65,14 +82,14 @@ export function structureFieldSchema(decl: StructureDecl): JsonSchema {
         type: 'array',
         items: {
           type: 'object',
-          properties: { label: str(), content: str() },
+          properties: { label: sub('label'), content: sub('content') },
           required: ['label', 'content'],
           additionalProperties: false,
         },
         ...(decl.count ? { minItems: decl.count, maxItems: decl.count } : {}),
       });
     case 'custom':
-      return decl.shape === 'kv' ? withDesc({ type: 'object', additionalProperties: { type: 'string' } }) : withDesc(str());
+      return decl.shape === 'kv' ? withDesc({ type: 'object', additionalProperties: { type: 'string' } }) : withDesc({ type: 'string' });
   }
 }
 

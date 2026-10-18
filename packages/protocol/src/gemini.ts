@@ -18,15 +18,21 @@ const FORMATS: Record<string, string[]> = { string: ['enum', 'date-time'], numbe
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 
+export interface GeminiOptions {
+  /** Appended to the description of free-form maps that become JSON-encoded strings (preset text). */
+  jsonStringHint?: string;
+}
+
 /** Convert one JSON Schema node (recursively) into a Gemini-compatible schema. Never mutates the input. */
-export function toGeminiSchema(schema: unknown): JsonSchema {
+export function toGeminiSchema(schema: unknown, opts: GeminiOptions = {}): JsonSchema {
+  const recurse = (s: unknown) => toGeminiSchema(s, opts);
   if (!isObj(schema)) return { type: 'string' };
   const src: Record<string, unknown> = { ...schema };
 
   // oneOf / allOf → anyOf (allOf with one member is inlined)
   if (Array.isArray(src.allOf) && src.allOf.length === 1 && isObj(src.allOf[0])) {
     const { allOf: _drop, ...own } = src;
-    return toGeminiSchema({ ...(src.allOf[0] as Record<string, unknown>), ...own });
+    return recurse({ ...(src.allOf[0] as Record<string, unknown>), ...own });
   }
   if (Array.isArray(src.oneOf) && !src.anyOf) src.anyOf = src.oneOf;
   if (src.const !== undefined && src.enum === undefined) src.enum = [src.const];
@@ -42,16 +48,16 @@ export function toGeminiSchema(schema: unknown): JsonSchema {
     const nonNull = members.filter((m) => m.type !== 'null');
     if (nonNull.length < members.length) nullable = true;
     if (nonNull.length === 1 && !types.length) {
-      const inner = toGeminiSchema(nonNull[0]);
+      const inner = recurse(nonNull[0]);
       return finish({ ...inner, ...(src.description ? { description: src.description } : {}) }, nullable);
     }
-    if (nonNull.length) out.anyOf = nonNull.map((m) => toGeminiSchema(m));
+    if (nonNull.length) out.anyOf = nonNull.map((m) => recurse(m));
   }
 
   if (types.length > 1) {
     // a multi-type union becomes anyOf of single-type copies
     const rest = { ...src, type: undefined, anyOf: undefined, oneOf: undefined, nullable: undefined };
-    const members = types.map((t) => toGeminiSchema({ ...rest, type: t }));
+    const members = types.map((t) => recurse({ ...rest, type: t }));
     return finish({ anyOf: members, ...(typeof src.description === 'string' ? { description: src.description } : {}) }, nullable);
   }
   const type = types[0];
@@ -61,10 +67,10 @@ export function toGeminiSchema(schema: unknown): JsonSchema {
     if (v === undefined || !KEEP.has(k) || k === 'type' || k === 'anyOf' || k === 'nullable') continue;
     switch (k) {
       case 'properties':
-        if (isObj(v)) out.properties = Object.fromEntries(Object.entries(v).map(([n, s]) => [n, toGeminiSchema(s)]));
+        if (isObj(v)) out.properties = Object.fromEntries(Object.entries(v).map(([n, s]) => [n, recurse(s)]));
         break;
       case 'items':
-        out.items = toGeminiSchema(Array.isArray(v) ? v[0] : v);
+        out.items = recurse(Array.isArray(v) ? v[0] : v);
         break;
       case 'enum': {
         const values = Array.isArray(v) ? v.filter((x) => x !== null && x !== undefined).map(String) : [];
@@ -87,8 +93,8 @@ export function toGeminiSchema(schema: unknown): JsonSchema {
     const names = Object.keys(props);
     if (!names.length) {
       // Gemini rejects OBJECT without properties (e.g. free-form maps): ask for a JSON-encoded string instead.
-      const desc = typeof out.description === 'string' ? `${out.description} ` : '';
-      return finish({ type: 'string', description: `${desc}(JSON object encoded as a string)`.trim() }, nullable);
+      const description = [out.description, opts.jsonStringHint].filter((x) => typeof x === 'string' && x).join(' ');
+      return finish({ type: 'string', ...(description ? { description } : {}) }, nullable);
     }
     out.type = 'object';
     if (Array.isArray(out.required)) out.required = (out.required as string[]).filter((r) => names.includes(r));
@@ -105,13 +111,13 @@ function finish(s: JsonSchema, nullable: boolean): JsonSchema {
 }
 
 /** Apply {@link toGeminiSchema} to OpenAI-style tool definitions (`{ type: 'function', function: { parameters } }`). */
-export function toGeminiTools<T>(tools: T[]): T[] {
+export function toGeminiTools<T>(tools: T[], opts: GeminiOptions = {}): T[] {
   return tools.map((t: any) => {
     const params = t?.function?.parameters;
     if (!isObj(params)) return t;
     const props = isObj(params.properties) ? params.properties : {};
     // Parameterless tools: ST drops `parameters` when `properties` is empty, keep that shape.
     if (!Object.keys(props).length) return t;
-    return { ...t, function: { ...t.function, parameters: toGeminiSchema(params) } };
+    return { ...t, function: { ...t.function, parameters: toGeminiSchema(params, opts) } };
   });
 }

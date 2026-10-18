@@ -13,3 +13,4 @@ export * from './semver';
 export * from './assemble';
 export * from './clone';
 export * from './gemini';
+export * from './artifact';
