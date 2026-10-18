@@ -12,7 +12,7 @@ defineProps<{ options: SegmentOption<T>[] }>();
       v-for="o in options" :key="String(o.value)" type="button" role="radio" :aria-checked="model === o.value"
       :class="{ on: model === o.value }" :title="o.hint" @click="model = o.value"
     >
-      <component :is="o.icon" v-if="o.icon" />{{ o.label }}
+      <component :is="o.icon" v-if="o.icon" /><span class="ellipsis">{{ o.label }}</span>
     </button>
   </div>
 </template>

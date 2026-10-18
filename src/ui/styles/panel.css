@@ -2,7 +2,7 @@
    its content. The drawer is the containing block, so desktop / mobile sizing come from ST. */
 :host(ap-panel) { border-radius: inherit; }
 .panel {
-  position: absolute; z-index: 100; inset: 0; overflow: hidden; border-radius: inherit;
+  position: absolute; z-index: 100; inset: 0; overflow: hidden; border-radius: inherit; container: ap-panel / inline-size;
   display: flex; flex-direction: column; background: var(--ap-panel-bg); color: var(--ap-text);
   backdrop-filter: blur(var(--SmartThemeBlurStrength, 10px)); -webkit-backdrop-filter: blur(var(--SmartThemeBlurStrength, 10px));
 }
@@ -104,3 +104,15 @@
 .caret { transition: transform 0.15s; }
 .caret.open { transform: rotate(90deg); }
 .build { text-align: center; padding-top: var(--ap-space-2); }
+
+/* ST's drawer can be quite narrow (e.g. ~250px on a 1024px desktop): drop tab labels, let segmented
+   controls wrap onto rows and tighten the body padding instead of clipping. */
+@container ap-panel (max-width: 340px) {
+  .tab span { display: none; }
+  .tab { min-width: 2.4em; padding: var(--ap-space-2) 2px; }
+  .tab svg.lucide { width: 1.35em; height: 1.35em; }
+  .panel-head { padding-left: var(--ap-space-3); }
+  .panel-body { padding-left: var(--ap-space-3); padding-right: var(--ap-space-3); }
+  .segmented { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(4.6em, 1fr)); }
+  .segmented.dense button { padding: 0 0.4em; }
+}
