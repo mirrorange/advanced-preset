@@ -95,8 +95,6 @@
 .swatch { width: 1.6em; height: 1.6em; border-radius: 50%; border: 2px solid var(--ap-border); cursor: pointer; padding: 0; overflow: hidden; }
 .swatch input { opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
-/* Settings row (outside the panel). */
-.settings-row { display: flex; align-items: center; gap: var(--ap-space-2); padding: var(--ap-space-1) 0; }
 .preset-info { gap: 2px; }
 .preset-head { gap: 6px; }
 .preset-actions { gap: 0; }
