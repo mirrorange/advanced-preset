@@ -7,7 +7,7 @@ import {
   applyPatches, partialTagTail, replyToPlainText, stripComments, terminalContentIndex,
   type MemoryOp, type PatchResult, type TurnResult,
 } from '@advanced-preset/protocol';
-import { nativeFetch, st, toast } from '@/st/host';
+import { nativeFetch, st, streamContextOf, toast } from '@/st/host';
 import { presetState } from '@/store/config';
 import { applyMemoryOps, type ChatEvent } from '@/store/eventlog';
 import type { Sidecar, SidecarStage, TurnKind } from '@/store/sidecar';
@@ -41,7 +41,7 @@ function capabilityError(ctx: GenerationContext): string | null {
 
 export async function orchestrate(ctx: GenerationContext, base: Record<string, any>, signal?: AbortSignal | null): Promise<Response> {
   const source = String(base.chat_completion_source ?? '');
-  const family = familyOf(source);
+  const family = familyOf(source, base);
   const stream = Boolean(base.stream);
   const err = capabilityError(ctx);
   if (err) { toast('error', err, 'Advanced Preset'); return errorResponse(err, 400); }
@@ -104,7 +104,7 @@ async function run(
   onContent: (text: string) => void,
 ): Promise<Outcome> {
   const source = String(base.chat_completion_source ?? '');
-  const driver = createDriver({ ctx, base, messages: base.messages ?? [], caller, family: familyOf(source) });
+  const driver = createDriver({ ctx, base, messages: base.messages ?? [], caller, family: familyOf(source, base) });
   const terminal = terminalContentIndex(ctx.stages);
   const terminalId = terminal >= 0 ? ctx.stages[terminal]!.id : null;
   const hasPatch = ctx.stages.some((s) => s.kind === 'patch');
@@ -129,7 +129,7 @@ async function run(
     try {
       const resp = await nativeFetch(GENERATE_URL, { method: 'POST', headers: st().getRequestHeaders(), body: JSON.stringify(body), signal });
       let lastUi = 0;
-      for await (const r of readResponse(resp, source, Boolean(body.stream), signal)) {
+      for await (const r of readResponse(resp, streamContextOf(body), Boolean(body.stream), signal)) {
         read = r;
         const now = Date.now();
         if (now - lastUi < 50) continue;

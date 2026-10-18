@@ -3,16 +3,17 @@
  * `chat_completion_source` — SSE chunks when streaming, a JSON body otherwise. The response only
  * carries story content (plus native reasoning and, for task calls, the caller's tool calls).
  */
-export type Family = 'openai' | 'claude' | 'gemini' | 'cohere';
+import { responseFamily, streamContextOf, wireFamily, type WireFamily } from '@/st/host';
 
-export function familyOf(source: string | undefined): Family {
-  switch (source) {
-    case 'claude': return 'claude';
-    case 'makersuite':
-    case 'vertexai': return 'gemini';
-    case 'cohere': return 'cohere';
-    default: return 'openai';
-  }
+export type Family = WireFamily;
+
+/**
+ * Response family of a request body. `base` carries the connection details (custom / OpenCode API
+ * format, model) that decide the shape for sources such as `custom` + Claude Messages.
+ */
+export function familyOf(source: string | undefined, base?: Record<string, any>): Family {
+  const ctx = base ? streamContextOf({ ...base, chat_completion_source: source ?? base.chat_completion_source }) : { chatCompletionSource: String(source ?? '') };
+  return base ? responseFamily(ctx) : wireFamily(ctx);
 }
 
 export interface EncodedToolCall { id: string; name: string; arguments: string; signature?: string }

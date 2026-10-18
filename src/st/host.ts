@@ -64,7 +64,9 @@ export interface STContext {
 
 export const st = (): STContext => (globalThis as any).SillyTavern.getContext();
 
-type StreamingReply = (data: unknown, state: StreamState, options: { chatCompletionSource?: string; overrideShowThoughts?: boolean }) => string;
+/** Request context ST forks use to pick a stream shape (custom / OpenCode API formats, Vertex AI Claude). */
+export interface StreamContext { chatCompletionSource: string; model?: string | null; customApiFormat?: string | null; opencodeApiFormat?: string | null }
+type StreamingReply = (data: unknown, state: StreamState, options: Partial<StreamContext> & { overrideShowThoughts?: boolean }) => string;
 export interface StreamState { reasoning: string; images: string[]; signature: string; toolSignatures: Record<string, string> }
 
 let openaiModule: { getStreamingReply?: StreamingReply } = {};
@@ -91,18 +93,83 @@ export const extensionBaseUrl = () => hostUrl('../');
  * Extract text (and reasoning into `state`) from one parsed stream event, exactly as ST's frontend
  * would for `source`. Falls back to a local implementation of the common shapes.
  */
-export function streamingReply(data: any, state: StreamState, source: string): string {
-  if (openaiModule.getStreamingReply) return openaiModule.getStreamingReply(data, state, { chatCompletionSource: source, overrideShowThoughts: true });
-  if (source === 'claude') { state.reasoning += data?.delta?.thinking ?? ''; return data?.delta?.text ?? ''; }
-  if (source === 'makersuite' || source === 'vertexai') {
-    const parts: any[] = data?.candidates?.[0]?.content?.parts ?? [];
-    state.reasoning += parts.filter((p) => p.thought).map((p) => p.text).join('');
-    return parts.filter((p) => !p.thought).map((p) => p.text ?? '').join('');
+export function streamContextOf(base: Record<string, any>): StreamContext {
+  return {
+    chatCompletionSource: String(base.chat_completion_source ?? ''),
+    model: base.model ?? null,
+    customApiFormat: base.custom_api_format ?? null,
+    opencodeApiFormat: base.opencode_api_format ?? null,
+  };
+}
+
+export function streamingReply(data: any, state: StreamState, source: string | StreamContext): string {
+  const ctx: StreamContext = typeof source === 'string' ? { chatCompletionSource: source } : source;
+  if (openaiModule.getStreamingReply) return openaiModule.getStreamingReply(data, state, { ...ctx, overrideShowThoughts: true });
+  // Local fallback: shape follows the response family of the connection.
+  switch (wireFamily(ctx)) {
+    case 'claude': state.reasoning += data?.delta?.thinking ?? ''; return data?.delta?.text ?? '';
+    case 'gemini': {
+      const parts: any[] = data?.candidates?.[0]?.content?.parts ?? [];
+      state.reasoning += parts.filter((p) => p.thought).map((p) => p.text).join('');
+      return parts.filter((p) => !p.thought).map((p) => p.text ?? '').join('');
+    }
+    case 'cohere': return data?.delta?.message?.content?.text ?? '';
+    default: {
+      const d = data?.choices?.[0]?.delta;
+      state.reasoning += d?.reasoning_content ?? d?.reasoning ?? '';
+      return d?.content ?? data?.choices?.[0]?.message?.content ?? '';
+    }
   }
-  if (source === 'cohere') return data?.delta?.message?.content?.text ?? '';
-  const d = data?.choices?.[0]?.delta;
-  state.reasoning += d?.reasoning_content ?? d?.reasoning ?? '';
-  return d?.content ?? data?.choices?.[0]?.message?.content ?? '';
+}
+
+export type WireFamily = 'openai' | 'claude' | 'gemini' | 'cohere';
+
+/**
+ * Stream shape ST's frontend parses for a connection. Mirrors ST / TauriTavern `getStreamingReply`:
+ * a `custom` or `opencode` source with a native API format, or a Claude model on Vertex AI, is read
+ * in that native shape rather than the OpenAI one.
+ */
+export function wireFamily(ctx: StreamContext): WireFamily {
+  const { chatCompletionSource: source, customApiFormat: custom, opencodeApiFormat: opencode } = ctx;
+  switch (source) {
+    case 'claude':
+    case 'aws_bedrock': return 'claude';
+    case 'makersuite': return 'gemini';
+    case 'vertexai': return String(ctx.model ?? '').trim().toLowerCase().startsWith('claude-') ? 'claude' : 'gemini';
+    case 'cohere': return 'cohere';
+    case 'custom':
+      if (custom === 'claude_messages') return 'claude';
+      if (custom === 'gemini_generate_content') return 'gemini';
+      return 'openai';
+    case 'opencode':
+      if (opencode === 'claude_messages') return 'claude';
+      if (opencode === 'gemini') return 'gemini';
+      return 'openai';
+    default: return 'openai';
+  }
+}
+
+/** Probe samples: the text `"\u0001"` in each family's stream shape. */
+const PROBES: [WireFamily, unknown][] = [
+  ['claude', { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: '\u0001' } }],
+  ['gemini', { candidates: [{ index: 0, content: { role: 'model', parts: [{ text: '\u0001' }] } }] }],
+  ['cohere', { type: 'content-delta', index: 0, delta: { message: { content: { text: '\u0001' } } } }],
+  ['openai', { choices: [{ index: 0, delta: { content: '\u0001' } }] }],
+];
+
+/**
+ * Family whose stream ST's frontend actually reads for this connection. Asks the host parser when it
+ * is available (so unknown forks / formats still match) and falls back to {@link wireFamily}.
+ */
+export function responseFamily(ctx: StreamContext): WireFamily {
+  const guess = wireFamily(ctx);
+  const parse = openaiModule.getStreamingReply;
+  if (!parse) return guess;
+  const reads = (sample: unknown) => {
+    try { return parse(sample, { reasoning: '', images: [], signature: '', toolSignatures: {} }, { ...ctx, overrideShowThoughts: false }) === '\u0001'; } catch { return false; }
+  };
+  const ordered = [guess, ...PROBES.map(([f]) => f).filter((f) => f !== guess)];
+  return ordered.find((f) => reads(PROBES.find(([x]) => x === f)![1])) ?? guess;
 }
 
 export function toast(kind: 'info' | 'success' | 'warning' | 'error', message: string, title?: string) {

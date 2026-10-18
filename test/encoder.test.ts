@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { encodeJson, streamEncoder, type Family } from '@/core/encoder';
+import { encodeJson, familyOf, streamEncoder, type Family } from '@/core/encoder';
+import { streamContextOf } from '@/st/host';
 import { readResponse } from '@/core/reader';
 import { collect } from './helpers';
 
@@ -42,4 +43,32 @@ describe('encoder ↔ reader round trip', () => {
       expect(JSON.parse(calls[0]!.arguments)).toEqual({ q: 'rain' });
     });
   }
+});
+
+describe('connection-aware response family', () => {
+  const cases: [Record<string, unknown>, Family][] = [
+    [{ chat_completion_source: 'custom', custom_api_format: 'claude_messages' }, 'claude'],
+    [{ chat_completion_source: 'custom', custom_api_format: 'gemini_generate_content' }, 'gemini'],
+    [{ chat_completion_source: 'custom', custom_api_format: 'openai_responses' }, 'openai'],
+    [{ chat_completion_source: 'custom' }, 'openai'],
+    [{ chat_completion_source: 'opencode', opencode_api_format: 'claude_messages' }, 'claude'],
+    [{ chat_completion_source: 'opencode', opencode_api_format: 'gemini' }, 'gemini'],
+    [{ chat_completion_source: 'vertexai', model: 'claude-opus-4-5' }, 'claude'],
+    [{ chat_completion_source: 'vertexai', model: 'gemini-3-pro' }, 'gemini'],
+    [{ chat_completion_source: 'aws_bedrock' }, 'claude'],
+    [{ chat_completion_source: 'openrouter' }, 'openai'],
+  ];
+  for (const [base, family] of cases) {
+    it(`${JSON.stringify(base)} → ${family}`, () => {
+      expect(familyOf(String(base.chat_completion_source), base)).toBe(family);
+    });
+  }
+
+  it('streams story text that a custom Claude Messages connection can read', async () => {
+    const base = { chat_completion_source: 'custom', custom_api_format: 'claude_messages' };
+    const enc = streamEncoder(familyOf('custom', base));
+    const body = enc.text('外套落下来的时候，') + enc.text('墨笙的肩膀缩了一下。') + enc.reasoning('thinking') + enc.end();
+    const states = await collect(readResponse(sseResponse(body), streamContextOf(base), true));
+    expect(states.at(-1)!.text).toBe('外套落下来的时候，墨笙的肩膀缩了一下。');
+  });
 });

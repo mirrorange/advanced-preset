@@ -2,7 +2,7 @@
  * Reads a backend response (`/api/backends/chat-completions/generate`) for any source: SSE or JSON,
  * accumulating text, native reasoning and tool calls (with partial argument strings for streaming UI).
  */
-import { streamingReply, type StreamState } from '@/st/host';
+import { streamingReply, type StreamContext, type StreamState } from '@/st/host';
 
 export interface ToolCallAcc { id: string; name: string; arguments: string; signature?: string }
 
@@ -152,7 +152,7 @@ async function* sseEvents(body: ReadableStream<Uint8Array>, signal?: AbortSignal
  * Yields the accumulated state after every chunk (once for non-streaming responses).
  * Throws {@link BackendError} for HTTP errors and error payloads.
  */
-export async function* readResponse(resp: Response, source: string, stream: boolean, signal?: AbortSignal): AsyncGenerator<ReadState> {
+export async function* readResponse(resp: Response, source: string | StreamContext, stream: boolean, signal?: AbortSignal): AsyncGenerator<ReadState> {
   if (!resp.ok) {
     const text = await resp.text().catch(() => '');
     let msg = `HTTP ${resp.status}`;
