@@ -1,6 +1,6 @@
 <script setup lang="ts">
-/** Settings panel (§16.5): header with preset + enable switch, six tabs, resizable width. */
-import { computed, onBeforeUnmount, onMounted, ref, type Component } from 'vue';
+/** Settings panel (§16.5): header with preset + enable switch and six tabs, overlaid on ST's AI Response Configuration drawer. */
+import { computed, onBeforeUnmount, onMounted, type Component } from 'vue';
 import { Blocks, Brain, Bug, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
 import { presetState } from '@/store/config';
@@ -36,18 +36,6 @@ const subtitle = computed(() => {
   return `v${p.version} · ${name}`;
 });
 
-const width = computed(() => `${Math.max(340, Math.min(settings().ui.panelWidth, window.innerWidth))}px`);
-const dragging = ref(false);
-function startResize(e: PointerEvent) {
-  dragging.value = true;
-  const el = e.currentTarget as HTMLElement;
-  el.setPointerCapture(e.pointerId);
-  const move = (ev: PointerEvent) => { settings().ui.panelWidth = Math.round(Math.max(340, Math.min(window.innerWidth - 40, window.innerWidth - ev.clientX))); };
-  const up = () => { dragging.value = false; el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); save(); };
-  el.addEventListener('pointermove', move);
-  el.addEventListener('pointerup', up);
-}
-
 const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && ui.panelOpen) ui.panelOpen = false; };
 onMounted(() => document.addEventListener('keydown', onKey));
 onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
@@ -55,8 +43,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
 
 <template>
   <Transition name="panel">
-    <aside v-if="ui.panelOpen" class="panel" :style="{ '--ap-panel-width': width }" role="dialog" :aria-label="t('app.name')">
-      <div class="resize" :class="{ dragging }" @pointerdown="startResize" />
+    <aside v-if="ui.panelOpen" class="panel" role="dialog" :aria-label="t('app.name')">
       <header class="panel-head">
         <div class="panel-logo"><Layers /></div>
         <div class="grow">

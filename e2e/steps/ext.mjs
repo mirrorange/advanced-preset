@@ -9,7 +9,7 @@ export default async function (page, shots) {
   if (await row.count()) await row.first().screenshot({ path: `${shots}/ext-row.png` });
   await page.locator('#extensions-settings-button .drawer-toggle').click();
   await page.waitForTimeout(400);
-  await page.locator('ap-topbar .topbar-btn').click();
+  await page.evaluate(() => document.getElementById('ap-preset-button').click());
   await page.waitForTimeout(300);
   await page.locator('ap-panel .tab').nth(5).click();
   await page.waitForTimeout(300);

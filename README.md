@@ -12,7 +12,7 @@ SillyTavern → 扩展 → 安装扩展，填入：
 https://github.com/mirrorange/advanced-preset
 ```
 
-安装后在 Chat Completion 预设下拉中选择 `AP · <预设名>` 即可启用对应预设；顶栏的图层图标打开面板。
+安装后在 Chat Completion 预设下拉中选择 `AP · <预设名>` 即可启用对应预设；点击预设下拉旁的图层按钮（或扩展设置中的「打开面板」）打开面板，面板覆盖在 AI 响应配置面板之上。
 
 ## 功能一览
 
