@@ -984,13 +984,13 @@ var require_Collection = __commonJS({
 var require_stringifyComment = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/stringify/stringifyComment.js"(exports) {
     "use strict";
-    var stringifyComment = (str3) => str3.replace(/^(?!$)(?: $)?/gm, "#");
+    var stringifyComment = (str2) => str2.replace(/^(?!$)(?: $)?/gm, "#");
     function indentComment(comment, indent) {
       if (/^\n+$/.test(comment))
         return comment.substring(1);
       return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;
     }
-    var lineComment = (str3, indent, comment) => str3.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str3.endsWith(" ") ? "" : " ") + comment;
+    var lineComment = (str2, indent, comment) => str2.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str2.endsWith(" ") ? "" : " ") + comment;
     exports.indentComment = indentComment;
     exports.lineComment = lineComment;
     exports.stringifyComment = stringifyComment;
@@ -1144,16 +1144,16 @@ var require_stringifyString = __commonJS({
       lineWidth: ctx.options.lineWidth,
       minContentWidth: ctx.options.minContentWidth
     });
-    var containsDocumentMarker = (str3) => /^(%|---|\.\.\.)/m.test(str3);
-    function lineLengthOverLimit(str3, lineWidth, indentLength) {
+    var containsDocumentMarker = (str2) => /^(%|---|\.\.\.)/m.test(str2);
+    function lineLengthOverLimit(str2, lineWidth, indentLength) {
       if (!lineWidth || lineWidth < 0)
         return false;
       const limit = lineWidth - indentLength;
-      const strLen = str3.length;
+      const strLen = str2.length;
       if (strLen <= limit)
         return false;
       for (let i = 0, start = 0; i < strLen; ++i) {
-        if (str3[i] === "\n") {
+        if (str2[i] === "\n") {
           if (i - start > limit)
             return true;
           start = i + 1;
@@ -1170,11 +1170,11 @@ var require_stringifyString = __commonJS({
       const { implicitKey } = ctx;
       const minMultiLineLength = ctx.options.doubleQuotedMinMultiLineLength;
       const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
-      let str3 = "";
+      let str2 = "";
       let start = 0;
       for (let i = 0, ch = json[i]; ch; ch = json[++i]) {
         if (ch === " " && json[i + 1] === "\\" && json[i + 2] === "n") {
-          str3 += json.slice(start, i) + "\\ ";
+          str2 += json.slice(start, i) + "\\ ";
           i += 1;
           start = i;
           ch = "\\";
@@ -1183,38 +1183,38 @@ var require_stringifyString = __commonJS({
           switch (json[i + 1]) {
             case "u":
               {
-                str3 += json.slice(start, i);
+                str2 += json.slice(start, i);
                 const code = json.substr(i + 2, 4);
                 switch (code) {
                   case "0000":
-                    str3 += "\\0";
+                    str2 += "\\0";
                     break;
                   case "0007":
-                    str3 += "\\a";
+                    str2 += "\\a";
                     break;
                   case "000b":
-                    str3 += "\\v";
+                    str2 += "\\v";
                     break;
                   case "001b":
-                    str3 += "\\e";
+                    str2 += "\\e";
                     break;
                   case "0085":
-                    str3 += "\\N";
+                    str2 += "\\N";
                     break;
                   case "00a0":
-                    str3 += "\\_";
+                    str2 += "\\_";
                     break;
                   case "2028":
-                    str3 += "\\L";
+                    str2 += "\\L";
                     break;
                   case "2029":
-                    str3 += "\\P";
+                    str2 += "\\P";
                     break;
                   default:
                     if (code.substr(0, 2) === "00")
-                      str3 += "\\x" + code.substr(2);
+                      str2 += "\\x" + code.substr(2);
                     else
-                      str3 += json.substr(i, 6);
+                      str2 += json.substr(i, 6);
                 }
                 i += 5;
                 start = i + 1;
@@ -1224,14 +1224,14 @@ var require_stringifyString = __commonJS({
               if (implicitKey || json[i + 2] === '"' || json.length < minMultiLineLength) {
                 i += 1;
               } else {
-                str3 += json.slice(start, i) + "\n\n";
+                str2 += json.slice(start, i) + "\n\n";
                 while (json[i + 2] === "\\" && json[i + 3] === "n" && json[i + 4] !== '"') {
-                  str3 += "\n";
+                  str2 += "\n";
                   i += 2;
                 }
-                str3 += indent;
+                str2 += indent;
                 if (json[i + 2] === " ")
-                  str3 += "\\";
+                  str2 += "\\";
                 i += 1;
                 start = i + 1;
               }
@@ -1240,8 +1240,8 @@ var require_stringifyString = __commonJS({
               i += 1;
           }
       }
-      str3 = start ? str3 + json.slice(start) : json;
-      return implicitKey ? str3 : foldFlowLines.foldFlowLines(str3, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
+      str2 = start ? str2 + json.slice(start) : json;
+      return implicitKey ? str2 : foldFlowLines.foldFlowLines(str2, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
     }
     function singleQuotedString(value, ctx) {
       if (ctx.options.singleQuote === false || ctx.implicitKey && value.includes("\n") || /[ \t]\n|\n[ \t]/.test(value))
@@ -1369,15 +1369,15 @@ ${indent}${start}${value}${end}`;
           return quotedString(value, ctx);
         }
       }
-      const str3 = value.replace(/\n+/g, `$&
+      const str2 = value.replace(/\n+/g, `$&
 ${indent}`);
       if (actualString) {
-        const test2 = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str3);
+        const test2 = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str2);
         const { compat, tags } = ctx.doc.schema;
         if (tags.some(test2) || compat?.some(test2))
           return quotedString(value, ctx);
       }
-      return implicitKey ? str3 : foldFlowLines.foldFlowLines(str3, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
+      return implicitKey ? str2 : foldFlowLines.foldFlowLines(str2, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
     }
     function stringifyString(item, ctx, onComment, onChompKeep) {
       const { implicitKey, inFlow } = ctx;
@@ -1529,11 +1529,11 @@ var require_stringify = __commonJS({
       const props = stringifyProps(node, tagObj, ctx);
       if (props.length > 0)
         ctx.indentAtStart = (ctx.indentAtStart ?? 0) + props.length + 1;
-      const str3 = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
+      const str2 = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
       if (!props)
-        return str3;
-      return identity.isScalar(node) || str3[0] === "{" || str3[0] === "[" ? `${props} ${str3}` : `${props}
-${ctx.indent}${str3}`;
+        return str2;
+      return identity.isScalar(node) || str2[0] === "{" || str2[0] === "[" ? `${props} ${str2}` : `${props}
+${ctx.indent}${str2}`;
     }
     exports.createStringifyContext = createStringifyContext;
     exports.stringify = stringify;
@@ -1568,8 +1568,8 @@ var require_stringifyPair = __commonJS({
       });
       let keyCommentDone = false;
       let chompKeep = false;
-      let str3 = stringify.stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
-      if (!explicitKey && !ctx.inFlow && str3.length > 1024) {
+      let str2 = stringify.stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
+      if (!explicitKey && !ctx.inFlow && str2.length > 1024) {
         if (simpleKeys)
           throw new Error("With simple keys, single line scalar must not span more than 1024 characters");
         explicitKey = true;
@@ -1578,27 +1578,27 @@ var require_stringifyPair = __commonJS({
         if (allNullValues || value == null) {
           if (keyCommentDone && onComment)
             onComment();
-          return str3 === "" ? "?" : explicitKey ? `? ${str3}` : str3;
+          return str2 === "" ? "?" : explicitKey ? `? ${str2}` : str2;
         }
       } else if (allNullValues && !simpleKeys || value == null && explicitKey) {
-        str3 = `? ${str3}`;
+        str2 = `? ${str2}`;
         if (keyComment && !keyCommentDone) {
-          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
+          str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(keyComment));
         } else if (chompKeep && onChompKeep)
           onChompKeep();
-        return str3;
+        return str2;
       }
       if (keyCommentDone)
         keyComment = null;
       if (explicitKey) {
         if (keyComment)
-          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
-        str3 = `? ${str3}
+          str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(keyComment));
+        str2 = `? ${str2}
 ${indent}:`;
       } else {
-        str3 = `${str3}:`;
+        str2 = `${str2}:`;
         if (keyComment)
-          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
+          str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(keyComment));
       }
       let vsb, vcb, valueComment;
       if (identity.isNode(value)) {
@@ -1614,7 +1614,7 @@ ${indent}:`;
       }
       ctx.implicitKey = false;
       if (!explicitKey && !keyComment && identity.isScalar(value))
-        ctx.indentAtStart = str3.length + 1;
+        ctx.indentAtStart = str2.length + 1;
       chompKeep = false;
       if (!indentSeq && indentStep.length >= 2 && !ctx.inFlow && !explicitKey && identity.isSeq(value) && !value.flow && !value.tag && !value.anchor) {
         ctx.indent = ctx.indent.substring(2);
@@ -1658,16 +1658,16 @@ ${ctx.indent}`;
       } else if (valueStr === "" || valueStr[0] === "\n") {
         ws = "";
       }
-      str3 += ws + valueStr;
+      str2 += ws + valueStr;
       if (ctx.inFlow) {
         if (valueCommentDone && onComment)
           onComment();
       } else if (valueComment && !valueCommentDone) {
-        str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(valueComment));
+        str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(valueComment));
       } else if (chompKeep && onChompKeep) {
         onChompKeep();
       }
-      return str3;
+      return str2;
     }
     exports.stringifyPair = stringifyPair;
   }
@@ -1894,31 +1894,31 @@ var require_stringifyCollection = __commonJS({
           }
         }
         chompKeep = false;
-        let str4 = stringify.stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
+        let str3 = stringify.stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
         if (comment2)
-          str4 += stringifyComment.lineComment(str4, itemIndent, commentString(comment2));
+          str3 += stringifyComment.lineComment(str3, itemIndent, commentString(comment2));
         if (chompKeep && comment2)
           chompKeep = false;
-        lines.push(blockItemPrefix + str4);
+        lines.push(blockItemPrefix + str3);
       }
-      let str3;
+      let str2;
       if (lines.length === 0) {
-        str3 = flowChars.start + flowChars.end;
+        str2 = flowChars.start + flowChars.end;
       } else {
-        str3 = lines[0];
+        str2 = lines[0];
         for (let i = 1; i < lines.length; ++i) {
           const line = lines[i];
-          str3 += line ? `
+          str2 += line ? `
 ${indent}${line}` : "\n";
         }
       }
       if (comment) {
-        str3 += "\n" + stringifyComment.indentComment(commentString(comment), indent);
+        str2 += "\n" + stringifyComment.indentComment(commentString(comment), indent);
         if (onComment)
           onComment();
       } else if (chompKeep && onChompKeep)
         onChompKeep();
-      return str3;
+      return str2;
     }
     function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
       const { indent, indentStep, flowCollectionPadding: fcPadding, options: { commentString } } = ctx;
@@ -1961,21 +1961,21 @@ ${indent}${line}` : "\n";
         }
         if (comment)
           reqNewline = true;
-        let str3 = stringify.stringify(item, itemCtx, () => comment = null);
-        reqNewline || (reqNewline = lines.length > linesAtValue || str3.includes("\n"));
+        let str2 = stringify.stringify(item, itemCtx, () => comment = null);
+        reqNewline || (reqNewline = lines.length > linesAtValue || str2.includes("\n"));
         if (i < items.length - 1) {
-          str3 += ",";
+          str2 += ",";
         } else if (ctx.options.trailingComma) {
           if (ctx.options.lineWidth > 0) {
-            reqNewline || (reqNewline = lines.reduce((sum, line) => sum + line.length + 2, 2) + (str3.length + 2) > ctx.options.lineWidth);
+            reqNewline || (reqNewline = lines.reduce((sum, line) => sum + line.length + 2, 2) + (str2.length + 2) > ctx.options.lineWidth);
           }
           if (reqNewline) {
-            str3 += ",";
+            str2 += ",";
           }
         }
         if (comment)
-          str3 += stringifyComment.lineComment(str3, itemIndent, commentString(comment));
-        lines.push(str3);
+          str2 += stringifyComment.lineComment(str2, itemIndent, commentString(comment));
+        lines.push(str2);
         linesAtValue = lines.length;
       }
       const { start, end } = flowChars;
@@ -1987,11 +1987,11 @@ ${indent}${line}` : "\n";
           reqNewline = ctx.options.lineWidth > 0 && len > ctx.options.lineWidth;
         }
         if (reqNewline) {
-          let str3 = start;
+          let str2 = start;
           for (const line of lines)
-            str3 += line ? `
+            str2 += line ? `
 ${indentStep}${indent}${line}` : "\n";
-          return `${str3}
+          return `${str2}
 ${indent}${end}`;
         } else {
           return `${start}${fcPadding}${lines.join(" ")}${fcPadding}${end}`;
@@ -2323,7 +2323,7 @@ var require_string = __commonJS({
       identify: (value) => typeof value === "string",
       default: true,
       tag: "tag:yaml.org,2002:str",
-      resolve: (str3) => str3,
+      resolve: (str2) => str2,
       stringify(item, ctx, onComment, onChompKeep) {
         ctx = Object.assign({ actualString: true }, ctx);
         return stringifyString.stringifyString(item, ctx, onComment, onChompKeep);
@@ -2361,7 +2361,7 @@ var require_bool = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:bool",
       test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
-      resolve: (str3) => new Scalar.Scalar(str3[0] === "t" || str3[0] === "T"),
+      resolve: (str2) => new Scalar.Scalar(str2[0] === "t" || str2[0] === "T"),
       stringify({ source, value }, ctx) {
         if (source && boolTag.test.test(source)) {
           const sv = source[0] === "t" || source[0] === "T";
@@ -2413,7 +2413,7 @@ var require_float = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
-      resolve: (str3) => str3.slice(-3).toLowerCase() === "nan" ? NaN : str3[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      resolve: (str2) => str2.slice(-3).toLowerCase() === "nan" ? NaN : str2[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
       stringify: stringifyNumber.stringifyNumber
     };
     var floatExp = {
@@ -2422,7 +2422,7 @@ var require_float = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "EXP",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+(?:\.[0-9]*)?)[eE][-+]?[0-9]+$/,
-      resolve: (str3) => parseFloat(str3),
+      resolve: (str2) => parseFloat(str2),
       stringify(node) {
         const num = Number(node.value);
         return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
@@ -2433,11 +2433,11 @@ var require_float = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
-      resolve(str3) {
-        const node = new Scalar.Scalar(parseFloat(str3));
-        const dot = str3.indexOf(".");
-        if (dot !== -1 && str3[str3.length - 1] === "0")
-          node.minFractionDigits = str3.length - dot - 1;
+      resolve(str2) {
+        const node = new Scalar.Scalar(parseFloat(str2));
+        const dot = str2.indexOf(".");
+        if (dot !== -1 && str2[str2.length - 1] === "0")
+          node.minFractionDigits = str2.length - dot - 1;
         return node;
       },
       stringify: stringifyNumber.stringifyNumber
@@ -2454,7 +2454,7 @@ var require_int = __commonJS({
     "use strict";
     var stringifyNumber = require_stringifyNumber();
     var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
-    var intResolve = (str3, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str3) : parseInt(str3.substring(offset), radix);
+    var intResolve = (str2, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str2) : parseInt(str2.substring(offset), radix);
     function intStringify(node, radix, prefix) {
       const { value } = node;
       if (intIdentify(value) && value >= 0)
@@ -2467,7 +2467,7 @@ var require_int = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "OCT",
       test: /^0o[0-7]+$/,
-      resolve: (str3, _onError, opt) => intResolve(str3, 2, 8, opt),
+      resolve: (str2, _onError, opt) => intResolve(str2, 2, 8, opt),
       stringify: (node) => intStringify(node, 8, "0o")
     };
     var int = {
@@ -2475,7 +2475,7 @@ var require_int = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:int",
       test: /^[-+]?[0-9]+$/,
-      resolve: (str3, _onError, opt) => intResolve(str3, 0, 10, opt),
+      resolve: (str2, _onError, opt) => intResolve(str2, 0, 10, opt),
       stringify: stringifyNumber.stringifyNumber
     };
     var intHex = {
@@ -2484,7 +2484,7 @@ var require_int = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "HEX",
       test: /^0x[0-9a-fA-F]+$/,
-      resolve: (str3, _onError, opt) => intResolve(str3, 2, 16, opt),
+      resolve: (str2, _onError, opt) => intResolve(str2, 2, 16, opt),
       stringify: (node) => intStringify(node, 16, "0x")
     };
     exports.int = int;
@@ -2537,7 +2537,7 @@ var require_schema2 = __commonJS({
         identify: (value) => typeof value === "string",
         default: true,
         tag: "tag:yaml.org,2002:str",
-        resolve: (str3) => str3,
+        resolve: (str2) => str2,
         stringify: stringifyJSON
       },
       {
@@ -2554,7 +2554,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:bool",
         test: /^true$|^false$/,
-        resolve: (str3) => str3 === "true",
+        resolve: (str2) => str2 === "true",
         stringify: stringifyJSON
       },
       {
@@ -2562,7 +2562,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:int",
         test: /^-?(?:0|[1-9][0-9]*)$/,
-        resolve: (str3, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str3) : parseInt(str3, 10),
+        resolve: (str2, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str2) : parseInt(str2, 10),
         stringify: ({ value }) => intIdentify(value) ? value.toString() : JSON.stringify(value)
       },
       {
@@ -2570,7 +2570,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:float",
         test: /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,
-        resolve: (str3) => parseFloat(str3),
+        resolve: (str2) => parseFloat(str2),
         stringify: stringifyJSON
       }
     ];
@@ -2578,9 +2578,9 @@ var require_schema2 = __commonJS({
       default: true,
       tag: "",
       test: /^/,
-      resolve(str3, onError) {
-        onError(`Unresolved plain scalar ${JSON.stringify(str3)}`);
-        return str3;
+      resolve(str2, onError) {
+        onError(`Unresolved plain scalar ${JSON.stringify(str2)}`);
+        return str2;
       }
     };
     var schema = [map.map, seq.seq].concat(jsonScalars, jsonError);
@@ -2612,10 +2612,10 @@ var require_binary = __commonJS({
         if (typeof node_buffer.Buffer === "function") {
           return node_buffer.Buffer.from(src, "base64");
         } else if (typeof atob === "function") {
-          const str3 = atob(src.replace(/[\n\r]/g, ""));
-          const buffer = new Uint8Array(str3.length);
-          for (let i = 0; i < str3.length; ++i)
-            buffer[i] = str3.charCodeAt(i);
+          const str2 = atob(src.replace(/[\n\r]/g, ""));
+          const buffer = new Uint8Array(str2.length);
+          for (let i = 0; i < str2.length; ++i)
+            buffer[i] = str2.charCodeAt(i);
           return buffer;
         } else {
           onError("This environment does not support reading binary tags; either Buffer or atob is required");
@@ -2626,28 +2626,28 @@ var require_binary = __commonJS({
         if (!value)
           return "";
         const buf = value;
-        let str3;
+        let str2;
         if (typeof node_buffer.Buffer === "function") {
-          str3 = buf instanceof node_buffer.Buffer ? buf.toString("base64") : node_buffer.Buffer.from(buf.buffer).toString("base64");
+          str2 = buf instanceof node_buffer.Buffer ? buf.toString("base64") : node_buffer.Buffer.from(buf.buffer).toString("base64");
         } else if (typeof btoa === "function") {
           let s = "";
           for (let i = 0; i < buf.length; ++i)
             s += String.fromCharCode(buf[i]);
-          str3 = btoa(s);
+          str2 = btoa(s);
         } else {
           throw new Error("This environment does not support writing binary tags; either Buffer or btoa is required");
         }
         type ?? (type = Scalar.Scalar.BLOCK_LITERAL);
         if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
           const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
-          const n = Math.ceil(str3.length / lineWidth);
+          const n = Math.ceil(str2.length / lineWidth);
           const lines = new Array(n);
           for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
-            lines[i] = str3.substr(o, lineWidth);
+            lines[i] = str2.substr(o, lineWidth);
           }
-          str3 = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
+          str2 = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
         }
-        return stringifyString.stringifyString({ comment, type, value: str3 }, ctx, onComment, onChompKeep);
+        return stringifyString.stringifyString({ comment, type, value: str2 }, ctx, onComment, onChompKeep);
       }
     };
     exports.binary = binary;
@@ -2853,7 +2853,7 @@ var require_float2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
-      resolve: (str3) => str3.slice(-3).toLowerCase() === "nan" ? NaN : str3[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      resolve: (str2) => str2.slice(-3).toLowerCase() === "nan" ? NaN : str2[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
       stringify: stringifyNumber.stringifyNumber
     };
     var floatExp = {
@@ -2862,7 +2862,7 @@ var require_float2 = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "EXP",
       test: /^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,
-      resolve: (str3) => parseFloat(str3.replace(/_/g, "")),
+      resolve: (str2) => parseFloat(str2.replace(/_/g, "")),
       stringify(node) {
         const num = Number(node.value);
         return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
@@ -2873,11 +2873,11 @@ var require_float2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,
-      resolve(str3) {
-        const node = new Scalar.Scalar(parseFloat(str3.replace(/_/g, "")));
-        const dot = str3.indexOf(".");
+      resolve(str2) {
+        const node = new Scalar.Scalar(parseFloat(str2.replace(/_/g, "")));
+        const dot = str2.indexOf(".");
         if (dot !== -1) {
-          const f = str3.substring(dot + 1).replace(/_/g, "");
+          const f = str2.substring(dot + 1).replace(/_/g, "");
           if (f[f.length - 1] === "0")
             node.minFractionDigits = f.length;
         }
@@ -2897,34 +2897,34 @@ var require_int2 = __commonJS({
     "use strict";
     var stringifyNumber = require_stringifyNumber();
     var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
-    function intResolve(str3, offset, radix, { intAsBigInt }) {
-      const sign = str3[0];
+    function intResolve(str2, offset, radix, { intAsBigInt }) {
+      const sign = str2[0];
       if (sign === "-" || sign === "+")
         offset += 1;
-      str3 = str3.substring(offset).replace(/_/g, "");
+      str2 = str2.substring(offset).replace(/_/g, "");
       if (intAsBigInt) {
         switch (radix) {
           case 2:
-            str3 = `0b${str3}`;
+            str2 = `0b${str2}`;
             break;
           case 8:
-            str3 = `0o${str3}`;
+            str2 = `0o${str2}`;
             break;
           case 16:
-            str3 = `0x${str3}`;
+            str2 = `0x${str2}`;
             break;
         }
-        const n2 = BigInt(str3);
+        const n2 = BigInt(str2);
         return sign === "-" ? BigInt(-1) * n2 : n2;
       }
-      const n = parseInt(str3, radix);
+      const n = parseInt(str2, radix);
       return sign === "-" ? -1 * n : n;
     }
     function intStringify(node, radix, prefix) {
       const { value } = node;
       if (intIdentify(value)) {
-        const str3 = value.toString(radix);
-        return value < 0 ? "-" + prefix + str3.substr(1) : prefix + str3;
+        const str2 = value.toString(radix);
+        return value < 0 ? "-" + prefix + str2.substr(1) : prefix + str2;
       }
       return stringifyNumber.stringifyNumber(node);
     }
@@ -2934,7 +2934,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "BIN",
       test: /^[-+]?0b[0-1_]+$/,
-      resolve: (str3, _onError, opt) => intResolve(str3, 2, 2, opt),
+      resolve: (str2, _onError, opt) => intResolve(str2, 2, 2, opt),
       stringify: (node) => intStringify(node, 2, "0b")
     };
     var intOct = {
@@ -2943,7 +2943,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "OCT",
       test: /^[-+]?0[0-7_]+$/,
-      resolve: (str3, _onError, opt) => intResolve(str3, 1, 8, opt),
+      resolve: (str2, _onError, opt) => intResolve(str2, 1, 8, opt),
       stringify: (node) => intStringify(node, 8, "0")
     };
     var int = {
@@ -2951,7 +2951,7 @@ var require_int2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:int",
       test: /^[-+]?[0-9][0-9_]*$/,
-      resolve: (str3, _onError, opt) => intResolve(str3, 0, 10, opt),
+      resolve: (str2, _onError, opt) => intResolve(str2, 0, 10, opt),
       stringify: stringifyNumber.stringifyNumber
     };
     var intHex = {
@@ -2960,7 +2960,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "HEX",
       test: /^[-+]?0x[0-9a-fA-F_]+$/,
-      resolve: (str3, _onError, opt) => intResolve(str3, 2, 16, opt),
+      resolve: (str2, _onError, opt) => intResolve(str2, 2, 16, opt),
       stringify: (node) => intStringify(node, 16, "0x")
     };
     exports.int = int;
@@ -3064,9 +3064,9 @@ var require_timestamp = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/schema/yaml-1.1/timestamp.js"(exports) {
     "use strict";
     var stringifyNumber = require_stringifyNumber();
-    function parseSexagesimal(str3, asBigInt) {
-      const sign = str3[0];
-      const parts = sign === "-" || sign === "+" ? str3.substring(1) : str3;
+    function parseSexagesimal(str2, asBigInt) {
+      const sign = str2[0];
+      const parts = sign === "-" || sign === "+" ? str2.substring(1) : str2;
       const num = (n) => asBigInt ? BigInt(n) : Number(n);
       const res = parts.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
       return sign === "-" ? num(-1) * res : res;
@@ -3103,7 +3103,7 @@ var require_timestamp = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "TIME",
       test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+$/,
-      resolve: (str3, _onError, { intAsBigInt }) => parseSexagesimal(str3, intAsBigInt),
+      resolve: (str2, _onError, { intAsBigInt }) => parseSexagesimal(str2, intAsBigInt),
       stringify: stringifySexagesimal
     };
     var floatTime = {
@@ -3112,7 +3112,7 @@ var require_timestamp = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "TIME",
       test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*$/,
-      resolve: (str3) => parseSexagesimal(str3, false),
+      resolve: (str2) => parseSexagesimal(str2, false),
       stringify: stringifySexagesimal
     };
     var timestamp = {
@@ -3123,8 +3123,8 @@ var require_timestamp = __commonJS({
       // may be omitted altogether, resulting in a date format. In such a case, the time part is
       // assumed to be 00:00:00Z (start of day, UTC).
       test: RegExp("^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:(?:t|T|[ \\t]+)([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}(\\.[0-9]+)?)(?:[ \\t]*(Z|[-+][012]?[0-9](?::[0-9]{2})?))?)?$"),
-      resolve(str3) {
-        const match = str3.match(timestamp.test);
+      resolve(str2) {
+        const match = str2.match(timestamp.test);
         if (!match)
           throw new Error("!!timestamp expects a date, starting with yyyy-mm-dd");
         const [, year, month, day, hour, minute, second] = match.map(Number);
@@ -7381,8 +7381,7 @@ var import_yaml2 = __toESM(require_dist(), 1);
 import { createHash } from "node:crypto";
 
 // ../protocol/src/types.ts
-var FORMAT_VERSION = 1;
-var SUBMIT_TOOL = "ap_submit_turn";
+var FORMAT_VERSION = 2;
 var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-multi"];
 var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom"];
 
@@ -7610,14 +7609,27 @@ var MACRO_HEADS = {
 };
 
 // ../protocol/src/structures.ts
-var str = (description) => description ? { type: "string", description } : { type: "string" };
-function structureFieldSchema(decl) {
-  const description = decl.description;
-  const withDesc = (s) => description ? { ...s, description } : s;
+var STRUCTURE_PROPERTIES = {
+  reply: [],
+  impersonate: [],
+  recap: [],
+  memory: ["scope", "operation", "key", "content"],
+  synopsis: ["time", "location", "event", "summary"],
+  options: ["label", "content"],
+  custom: []
+};
+function structureFieldSchema(decl, expand = (t) => t) {
+  const d = (t) => t ? expand(t).trim() || void 0 : void 0;
+  const describe = (s, text) => {
+    const description = d(text);
+    return description ? { ...s, description } : s;
+  };
+  const sub = (key, s = { type: "string" }) => describe(s, decl.properties?.[key]);
+  const withDesc = (s) => describe(s, decl.description);
   switch (decl.kind) {
     case "reply":
     case "impersonate":
-      return withDesc(str());
+      return withDesc({ type: "string" });
     case "recap":
       return withDesc({ type: ["string", "null"] });
     case "memory":
@@ -7626,10 +7638,10 @@ function structureFieldSchema(decl) {
         items: {
           type: "object",
           properties: {
-            scope: { type: "string", enum: ["memory", "global_memory"] },
-            operation: { type: "string", enum: ["replace", "delete"] },
-            key: str(),
-            content: { type: ["string", "null"] }
+            scope: sub("scope", { type: "string", enum: ["memory", "global_memory"] }),
+            operation: sub("operation", { type: "string", enum: ["replace", "delete"] }),
+            key: sub("key"),
+            content: sub("content", { type: ["string", "null"] })
           },
           required: ["scope", "operation", "key", "content"],
           additionalProperties: false
@@ -7638,7 +7650,7 @@ function structureFieldSchema(decl) {
     case "synopsis":
       return withDesc({
         type: "object",
-        properties: { time: str(), location: str(), event: str(), summary: str() },
+        properties: { time: sub("time"), location: sub("location"), event: sub("event"), summary: sub("summary") },
         required: ["time", "location", "event", "summary"],
         additionalProperties: false
       });
@@ -7647,14 +7659,14 @@ function structureFieldSchema(decl) {
         type: "array",
         items: {
           type: "object",
-          properties: { label: str(), content: str() },
+          properties: { label: sub("label"), content: sub("content") },
           required: ["label", "content"],
           additionalProperties: false
         },
         ...decl.count ? { minItems: decl.count, maxItems: decl.count } : {}
       });
     case "custom":
-      return decl.shape === "kv" ? withDesc({ type: "object", additionalProperties: { type: "string" } }) : withDesc(str());
+      return decl.shape === "kv" ? withDesc({ type: "object", additionalProperties: { type: "string" } }) : withDesc({ type: "string" });
   }
 }
 function isStructureOptional(kind) {
@@ -7662,15 +7674,26 @@ function isStructureOptional(kind) {
 }
 
 // ../protocol/src/workflow.ts
-var PATCH_SCHEMA = {
-  type: "array",
-  items: {
-    type: "object",
-    properties: { old_string: { type: "string" }, new_string: { type: "string" } },
-    required: ["old_string", "new_string"],
-    additionalProperties: false
-  }
+var DEFAULT_TOOLS = {
+  turn: { name: "ap_turn", field: "step{{n}}_{{actor}}_{{stage}}", fieldDescription: "{{label}}" },
+  submit: { name: "ap_submit_turn", description: "Submit the complete workflow for this turn: every stage in order, then the final content and structures." },
+  stage: { name: "ap_stage_{{stage}}", description: "{{label}}", param: { name: "content" }, patchParam: { name: "edits" } },
+  patch: {},
+  envelope: { thinking: { name: "thinking" }, result: { name: "result" } },
+  results: {
+    next: "Recorded. Continue with `{{next}}`.",
+    done: "Recorded. The workflow is complete.",
+    unknown: "Unknown tool {{name}}.",
+    nudge: "Continue the workflow: call `{{next}}` now."
+  },
+  jsonStringHint: "(JSON object encoded as a string)"
 };
+var same = (s) => s;
+function fillTemplate(text, vars) {
+  let out = text;
+  for (const [k, v] of Object.entries(vars)) out = out.replaceAll(`{{${k}}}`, String(v));
+  return out;
+}
 function activeStages(workflow, resolve2) {
   return workflow.stages.filter((s) => test(s.when, resolve2));
 }
@@ -7686,58 +7709,103 @@ function structuresAnchorIndex(workflow, stages) {
   const t = terminalContentIndex(stages);
   return t >= 0 ? t : stages.length - 1;
 }
-function stageFieldName(stages, stage) {
-  return `step${stages.indexOf(stage) + 1}_${stage.actor}_${stage.id}`;
+function stageVars(stages, stage) {
+  return { n: stages.indexOf(stage) + 1, stage: stage.id, actor: stage.actor, label: stage.label };
 }
-function stageToolName(prefix, stage) {
-  return `${prefix}${stage.id}`;
+function stageFieldName(stages, stage, tools = DEFAULT_TOOLS) {
+  return fillTemplate(stage.field?.name ?? tools.turn.field, stageVars(stages, stage));
 }
-function stageSchema(stage, description) {
-  const base = stage.kind === "patch" ? { ...PATCH_SCHEMA } : { type: "string" };
-  return description ? { ...base, description } : base;
+function stageToolName(stages, stage, tools = DEFAULT_TOOLS) {
+  return fillTemplate(stage.tool?.name ?? tools.stage.name, stageVars(stages, stage));
 }
-function buildTurnSchema(workflow, stages, structures, opts = {}) {
-  const properties = {};
-  const required = [];
+function stageParam(stage, tools = DEFAULT_TOOLS) {
+  const base = stage.kind === "patch" ? tools.stage.patchParam : tools.stage.param;
+  const o = stage.tool?.param;
+  const description = o?.description ?? base.description;
+  return { name: o?.name ?? base.name, ...description ? { description } : {} };
+}
+var withDescription = (schema, description) => description ? { ...schema, description } : schema;
+function patchSchema(tools = DEFAULT_TOOLS, expand = same, description) {
+  const p = tools.patch;
+  const d = (t) => t ? expand(t) : void 0;
+  return withDescription({
+    type: "array",
+    items: {
+      type: "object",
+      properties: { old_string: withDescription({ type: "string" }, d(p.old)), new_string: withDescription({ type: "string" }, d(p.new)) },
+      required: ["old_string", "new_string"],
+      additionalProperties: false
+    }
+  }, description ?? d(p.description));
+}
+function stageSchema(stage, description, tools = DEFAULT_TOOLS, expand = same) {
+  return stage.kind === "patch" ? patchSchema(tools, expand, description) : withDescription({ type: "string" }, description);
+}
+function tool(name, description, parameters) {
+  return { type: "function", function: { name, ...description ? { description } : {}, parameters } };
+}
+function turnArtifacts(tools, workflow, stages, structures, expand = same) {
+  const desc = (template, stage) => {
+    if (!template) return void 0;
+    const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();
+    return t || void 0;
+  };
   const anchor = structuresAnchorIndex(workflow, stages);
-  const addStructures = () => {
+  const fieldOf = (s) => stageFieldName(stages, s, tools);
+  const toolOf = (s) => stageToolName(stages, s, tools);
+  const paramOf = (s) => stageParam(s, tools).name;
+  const structureProps = (properties, required) => {
     for (const s of structures) {
-      properties[s.field] = structureFieldSchema(s);
+      properties[s.field] = structureFieldSchema(s, expand);
       if (!isStructureOptional(s.kind)) required.push(s.field);
     }
   };
-  stages.forEach((stage, i) => {
-    const name = stageFieldName(stages, stage);
-    properties[name] = stageSchema(stage, opts.stageDescriptions?.[stage.id]);
-    if (!stage.optional) required.push(name);
-    if (i === anchor) addStructures();
-  });
-  if (anchor < 0) addStructures();
-  return { type: "object", properties, required, additionalProperties: false };
-}
-function tool(name, description, parameters) {
-  return { type: "function", function: { name, description, parameters } };
-}
-function buildStageTools(workflow, stages, structures, prefix, descriptions) {
-  const anchor = structuresAnchorIndex(workflow, stages);
-  return stages.map((stage, i) => {
+  const turnSchema = () => {
     const properties = {};
     const required = [];
-    if (stage.kind === "patch") {
-      properties.edits = PATCH_SCHEMA;
-      required.push("edits");
-    } else {
-      properties.content = { type: "string" };
-      required.push("content");
-    }
-    if (i === anchor) {
-      for (const s of structures) {
-        properties[s.field] = structureFieldSchema(s);
-        if (!isStructureOptional(s.kind)) required.push(s.field);
-      }
-    }
-    return tool(stageToolName(prefix, stage), descriptions[stage.id] ?? stage.label, { type: "object", properties, required, additionalProperties: false });
+    stages.forEach((stage, i) => {
+      const name = fieldOf(stage);
+      properties[name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
+      if (!stage.optional) required.push(name);
+      if (i === anchor) structureProps(properties, required);
+    });
+    if (anchor < 0) structureProps(properties, required);
+    return { type: "object", properties, required, additionalProperties: false };
+  };
+  const stageTools = () => stages.map((stage, i) => {
+    const properties = {};
+    const required = [];
+    const param = stageParam(stage, tools);
+    properties[param.name] = stageSchema(stage, desc(param.description, stage), tools, expand);
+    required.push(param.name);
+    if (i === anchor) structureProps(properties, required);
+    return tool(toolOf(stage), desc(stage.tool?.description ?? tools.stage.description, stage), { type: "object", properties, required, additionalProperties: false });
   });
+  const keys = { thinking: tools.envelope.thinking.name, result: tools.envelope.result.name };
+  return {
+    fieldOf,
+    toolOf,
+    paramOf,
+    stageOfTool: (name) => stages.find((s) => toolOf(s) === name),
+    schema: () => {
+      const description = desc(tools.turn.description);
+      return { name: tools.turn.name, ...description ? { description } : {}, value: turnSchema() };
+    },
+    turnSchema,
+    submitTool: (parameters) => tool(tools.submit.name, desc(tools.submit.description), parameters ?? turnSchema()),
+    stageTools,
+    envelope: (caller) => ({
+      type: "object",
+      properties: {
+        [keys.thinking]: withDescription({ type: "string" }, desc(tools.envelope.thinking.description)),
+        [keys.result]: withDescription(caller, desc(tools.envelope.result.description) ?? caller.description)
+      },
+      required: [keys.thinking, keys.result],
+      additionalProperties: false
+    }),
+    envelopeKeys: keys,
+    toolNames: () => [tools.submit.name, ...stages.map(toolOf)]
+  };
 }
 function workflowSummary(stages, actorName2, label = (s) => s.label) {
   const parts = stages.map((s) => `${label(s)} (${actorName2(s.actor)})${s.optional ? " [optional]" : ""}`);
@@ -7923,7 +7991,7 @@ function workflowContent(preset, workflow, stages, style, transport, config) {
     const body = s.stages[stage.id]?.[style];
     if (!body?.length) return;
     if (style === "imperative" && preset.stageHeading) {
-      const target = transport === "tool-multi" ? stageToolName(preset.tools.stagePrefix, stage) : stageFieldName(stages, stage);
+      const target = transport === "tool-multi" ? stageToolName(stages, stage, preset.tools) : stageFieldName(stages, stage, preset.tools);
       const heading = preset.stageHeading.replaceAll("{{n}}", String(i + 1)).replaceAll("{{label}}", stage.label).replaceAll("{{actor}}", actorName(preset, config, stage.actor)).replaceAll("{{target}}", target).replaceAll("{{optional}}", stage.optional ? " (optional)" : "");
       const [first, ...rest] = body;
       out.push({ ...first, pieces: [{ text: `${heading}
@@ -8148,8 +8216,9 @@ function compileContent(tokens, diag, where, onExpr) {
 }
 
 // src/compile.ts
+var SOURCE_FORMAT_VERSION = 1;
 var isObj2 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
-var str2 = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
+var str = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
 var ROLES2 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
 var STAGE_KINDS = ["text", "content", "patch"];
@@ -8170,13 +8239,58 @@ var NATIVE_PROMPTS = {
 };
 var anchorText = (region) => `\u27E6ap:region:${region}\u27E7`;
 var anchorIdentifier = (region) => `ap_${region}`;
-var DEFAULT_TOOLS = {
-  submit: "Submit the complete workflow for this turn: every stage in order, then the final content and structures.",
-  stagePrefix: "ap_stage_",
-  structures: "Structures of this turn.",
-  stageResult: "Recorded. Continue with `{{next}}`.",
-  nudge: "Continue the workflow: call `{{next}}` now."
-};
+function compileTools(src, diag, text, file = "preset.yaml") {
+  const o = isObj2(src) ? src : {};
+  const at = (path) => ({ file, path: `tools.${path}` });
+  const opt = (v, path) => v === void 0 || v === null ? void 0 : text(str(v), at(path));
+  const field = (v, path, fallback) => {
+    const f = typeof v === "string" ? { name: v } : isObj2(v) ? v : {};
+    const description = f.description !== void 0 ? opt(f.description, `${path}.description`) : fallback.description;
+    return { name: str(f.name, fallback.name), ...description ? { description } : {} };
+  };
+  const legacy = ["stagePrefix", "stageResult", "nudge", "structures"].filter((k) => k in o);
+  if (legacy.length || typeof o.submit === "string")
+    diag.warn(`legacy tools keys (${[...legacy, ...typeof o.submit === "string" ? ["submit: <text>"] : []].join(", ")}); see the README for the tools section`, { file, path: "tools" });
+  const D = DEFAULT_TOOLS;
+  const turn = isObj2(o.turn) ? o.turn : {};
+  const submit = isObj2(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
+  const stage = isObj2(o.stage) ? o.stage : {};
+  const patch = isObj2(o.patch) ? o.patch : {};
+  const env = isObj2(o.envelope) ? o.envelope : {};
+  const results = isObj2(o.results) ? o.results : {};
+  const pick = (v, fallback) => v === void 0 ? fallback : v;
+  const tools = {
+    turn: {
+      name: str(turn.name, D.turn.name),
+      field: str(turn.field, D.turn.field),
+      ...(() => {
+        const description = opt(turn.description, "turn.description");
+        const fieldDescription = pick(opt(turn.fieldDescription, "turn.fieldDescription"), D.turn.fieldDescription);
+        return { ...description ? { description } : {}, ...fieldDescription ? { fieldDescription } : {} };
+      })()
+    },
+    submit: { name: str(submit.name, D.submit.name), description: pick(opt(submit.description, "submit.description"), D.submit.description) },
+    stage: {
+      name: str(stage.name, typeof o.stagePrefix === "string" ? `${o.stagePrefix}{{stage}}` : D.stage.name),
+      description: pick(opt(stage.description, "stage.description"), D.stage.description),
+      param: field(stage.param, "stage.param", D.stage.param),
+      patchParam: field(stage.patchParam, "stage.patchParam", D.stage.patchParam)
+    },
+    patch: Object.fromEntries(["description", "old", "new"].flatMap((k) => patch[k] !== void 0 ? [[k, opt(patch[k], `patch.${k}`)]] : [])),
+    envelope: { thinking: field(env.thinking, "envelope.thinking", D.envelope.thinking), result: field(env.result, "envelope.result", D.envelope.result) },
+    results: {
+      next: text(str(results.next ?? o.stageResult, D.results.next), at("results.next")),
+      done: text(str(results.done, D.results.done), at("results.done")),
+      unknown: text(str(results.unknown, D.results.unknown), at("results.unknown")),
+      nudge: text(str(results.nudge ?? o.nudge, D.results.nudge), at("results.nudge"))
+    }
+  };
+  const hint = o.jsonStringHint === void 0 ? D.jsonStringHint : opt(o.jsonStringHint, "jsonStringHint");
+  if (hint) tools.jsonStringHint = hint;
+  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "jsonStringHint", ...legacy]);
+  for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
+  return tools;
+}
 function compile(tree) {
   const diag = new Diagnostics();
   const map = { exprs: [], texts: [], entries: /* @__PURE__ */ new Map(), modules: /* @__PURE__ */ new Map(), workflows: /* @__PURE__ */ new Map() };
@@ -8216,30 +8330,30 @@ function compile(tree) {
     for (const b of c) for (const p of b.pieces) map.texts.push({ text: p.text, where });
     return c;
   };
-  if (raw.formatVersion !== void 0 && raw.formatVersion !== FORMAT_VERSION)
-    diag.error(`unsupported formatVersion ${String(raw.formatVersion)} (expected ${FORMAT_VERSION})`, { file: M, path: "formatVersion" });
-  const id = str2(raw.id);
+  if (raw.formatVersion !== void 0 && raw.formatVersion !== SOURCE_FORMAT_VERSION)
+    diag.error(`unsupported formatVersion ${String(raw.formatVersion)} (expected ${SOURCE_FORMAT_VERSION})`, { file: M, path: "formatVersion" });
+  const id = str(raw.id);
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) diag.error("id must be lower-case kebab-case", { file: M, path: "id" });
-  const version = str2(raw.version, "0.0.0");
+  const version = str(raw.version, "0.0.0");
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error("version must be semver", { file: M, path: "version" });
   const actors = {};
   for (const [aid, a] of Object.entries(isObj2(raw.actors) ? raw.actors : {})) {
     const o = isObj2(a) ? a : {};
     actors[aid] = {
-      name: text(str2(o.name, aid), { file: M, path: `actors.${aid}.name` }),
-      prefix: text(str2(o.prefix, `{{ap::name::${aid}}}: `), { file: M, path: `actors.${aid}.prefix` }),
-      ...o.color ? { color: str2(o.color) } : {}
+      name: text(str(o.name, aid), { file: M, path: `actors.${aid}.name` }),
+      prefix: text(str(o.prefix, `{{ap::name::${aid}}}: `), { file: M, path: `actors.${aid}.prefix` }),
+      ...o.color ? { color: str(o.color) } : {}
     };
   }
   if (!Object.keys(actors).length) diag.error("at least one actor is required", { file: M, path: "actors" });
-  const narrator = str2(raw.narrator, Object.keys(actors)[0] ?? "narrator");
-  const user = str2(raw.user, "user");
+  const narrator = str(raw.narrator, Object.keys(actors)[0] ?? "narrator");
+  const user = str(raw.user, "user");
   for (const [k, v] of [["narrator", narrator], ["user", user]])
     if (!actors[v]) diag.error(`${k} actor \`${v}\` is not declared`, { file: M, path: k });
   const styleSrc = isObj2(raw.styles) ? raw.styles : {};
   const styles = Object.fromEntries(
     TRANSPORTS.map((t) => {
-      const s = str2(styleSrc[t], t === "prefill" || t === "plaintext" ? "dialogue" : "imperative");
+      const s = str(styleSrc[t], t === "prefill" || t === "plaintext" ? "dialogue" : "imperative");
       if (!STYLES2.includes(s)) diag.error(`style must be dialogue | imperative`, { file: M, path: `styles.${t}` });
       return [t, s];
     })
@@ -8250,40 +8364,40 @@ function compile(tree) {
   (Array.isArray(raw.regions) ? raw.regions : []).forEach((r, i) => {
     const o = isObj2(r) ? r : {};
     const where = { file: M, path: `regions[${i}]` };
-    const rid = str2(o.id);
+    const rid = str(o.id);
     if (!rid) return diag.error("region id is required", where);
     if (regions.some((x) => x.id === rid)) diag.error(`duplicate region \`${rid}\``, where);
-    const role = str2(o.role, "system");
+    const role = str(o.role, "system");
     if (!ROLES2.includes(role)) diag.error(`role must be ${ROLES2.join(" | ")}`, where);
     let merge = "none";
     if (o.merge === "join" || o.merge === "none") merge = o.merge;
     else if (isObj2(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
     else if (o.merge !== void 0) diag.error("merge must be none | join | { wrap: <tag> }", where);
-    regions.push({ id: rid, role, merge, separator: str2(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
+    regions.push({ id: rid, role, merge, separator: str(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
     if (o.anchor !== void 0) {
-      const a = str2(o.anchor);
+      const a = str(o.anchor);
       if (!ANCHORS.includes(a)) diag.error(`anchor must be ${ANCHORS.join(" | ")}`, where);
       else anchors[a] = rid;
     }
   });
   for (const [a, rid] of Object.entries(isObj2(raw.anchors) ? raw.anchors : {})) {
     if (!ANCHORS.includes(a)) diag.error(`unknown semantic anchor \`${a}\``, { file: M, path: `anchors.${a}` });
-    else anchors[a] = str2(rid);
+    else anchors[a] = str(rid);
   }
   for (const a of ANCHORS) if (!anchors[a]) diag.error(`semantic anchor \`${a}\` is not mapped to a region`, { file: M, path: "anchors" });
   const params = (Array.isArray(raw.params) ? raw.params : []).map((p, i) => {
     const o = isObj2(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
-    const type = str2(o.type, "text");
+    const type = str(o.type, "text");
     if (!["text", "number", "select"].includes(type)) diag.error("param type must be text | number | select", where);
-    const options = Array.isArray(o.options) ? o.options.map((x) => isObj2(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
+    const options = Array.isArray(o.options) ? o.options.map((x) => isObj2(x) ? { value: x.value, ...x.label !== void 0 ? { label: str(x.label) } : {}, ...x.text !== void 0 ? { text: text(str(x.text), where) } : {} } : { value: x }) : void 0;
     const param = {
-      id: str2(o.id),
+      id: str(o.id),
       type,
-      label: str2(o.label, str2(o.id)),
+      label: str(o.label, str(o.id)),
       default: o.default ?? (type === "number" ? 0 : "")
     };
-    for (const k of ["description", "group", "unset", "fallback", "unit"]) if (o[k] !== void 0) param[k] = str2(o[k]);
+    for (const k of ["description", "group", "unset", "fallback", "unit"]) if (o[k] !== void 0) param[k] = str(o[k]);
     for (const k of ["min", "max"]) if (typeof o[k] === "number") param[k] = o[k];
     if (param.unset) text(param.unset, where);
     if (options) param.options = options;
@@ -8296,34 +8410,46 @@ function compile(tree) {
     const o = isObj2(g) ? g : {};
     groupOrder += 10;
     groups[gid] = {
-      label: str2(o.label, gid),
+      label: str(o.label, gid),
       order: typeof o.order === "number" ? o.order : groupOrder,
-      ...o.description ? { description: str2(o.description) } : {},
+      ...o.description ? { description: str(o.description) } : {},
       ...o.allowNone ? { allowNone: true } : {},
-      ...o.tab ? { tab: str2(o.tab) } : {}
+      ...o.tab ? { tab: str(o.tab) } : {}
     };
   }
   const structures = {};
   for (const [sid, s] of Object.entries(isObj2(raw.structures) ? raw.structures : {})) {
     const o = isObj2(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
-    const kind = str2(o.kind, sid);
+    const kind = str(o.kind, sid);
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(", ")}`, where);
     const fp = isObj2(o.formatPrompt) ? o.formatPrompt : {};
     const decl = {
       id: sid,
       kind,
-      tag: str2(o.tag, sid),
-      field: str2(o.field, sid),
-      formatPrompt: { tag: text(str2(fp.tag), where), field: text(str2(fp.field), where) }
+      tag: str(o.tag, sid),
+      field: str(o.field, sid),
+      formatPrompt: { tag: text(str(fp.tag), where), field: text(str(fp.field), where) }
     };
-    if (o.description !== void 0) decl.description = str2(o.description);
+    if (o.description !== void 0) decl.description = text(str(o.description), where);
+    if (isObj2(o.properties)) {
+      const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
+      const props = {};
+      for (const [k, v] of Object.entries(o.properties)) {
+        if (!allowed.includes(k)) {
+          diag.error(`${kind} has no sub-field \`${k}\`${allowed.length ? ` (expected ${allowed.join(" | ")})` : ""}`, { ...where, path: `${where.path}.properties.${k}` });
+          continue;
+        }
+        props[k] = text(str(v), where);
+      }
+      if (Object.keys(props).length) decl.properties = props;
+    }
     if (typeof o.count === "number") decl.count = o.count;
     if (kind === "custom") {
       decl.shape = o.shape === "kv" ? "kv" : "text";
       decl.display = o.display === "hidden" ? "hidden" : "card";
     }
-    if (o.title !== void 0) decl.title = text(str2(o.title), where);
+    if (o.title !== void 0) decl.title = text(str(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);
     structures[sid] = decl;
@@ -8331,7 +8457,7 @@ function compile(tree) {
   const regex = (Array.isArray(raw.regex) ? raw.regex : []).map((r, i) => {
     const o = isObj2(r) ? r : {};
     const where = { file: M, path: `regex[${i}]` };
-    const decl = { id: str2(o.id), pattern: str2(o.pattern), flags: str2(o.flags, "i"), target: str2(o.target, "meta") };
+    const decl = { id: str(o.id), pattern: str(o.pattern), flags: str(o.flags, "i"), target: str(o.target, "meta") };
     try {
       new RegExp(decl.pattern, decl.flags);
     } catch (e) {
@@ -8345,11 +8471,11 @@ function compile(tree) {
   const metaSrc = isObj2(raw.meta) ? raw.meta : {};
   const tasksSrc = isObj2(metaSrc.tasks) ? metaSrc.tasks : {};
   const meta = {
-    trigger: text(str2(metaSrc.trigger, `@{{ap::name::${narrator}}}`), { file: M, path: "meta.trigger" }),
+    trigger: text(str(metaSrc.trigger, `@{{ap::name::${narrator}}}`), { file: M, path: "meta.trigger" }),
     wrap: metaSrc.wrap !== false,
     recentCount: typeof metaSrc.recentCount === "number" ? metaSrc.recentCount : 3,
     tasks: {},
-    impersonatePrompt: text(str2(metaSrc.impersonatePrompt, `${str2(metaSrc.trigger, `@{{ap::name::${narrator}}}`)} Write my next reply for me.`), { file: M, path: "meta.impersonatePrompt" })
+    impersonatePrompt: text(str(metaSrc.impersonatePrompt, `${str(metaSrc.trigger, `@{{ap::name::${narrator}}}`)} Write my next reply for me.`), { file: M, path: "meta.impersonatePrompt" })
   };
   for (const [task, cond] of Object.entries(tasksSrc)) {
     if (task !== "summary" && task !== "impersonate") {
@@ -8363,7 +8489,7 @@ function compile(tree) {
   const tokenSaving = {
     keepFullTurns: typeof tsSrc.keepFullTurns === "number" ? tsSrc.keepFullTurns : 6,
     truncateUserAfter: typeof tsSrc.truncateUserAfter === "number" ? tsSrc.truncateUserAfter : 2e3,
-    synopsisTemplate: str2(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
+    synopsisTemplate: str(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
   };
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
     const o = isObj2(s) ? s : {};
@@ -8371,18 +8497,17 @@ function compile(tree) {
     const toolSrc = isObj2(o.tool) ? o.tool : {};
     const resp = isObj2(o.response) ? o.response : {};
     const turn = {
-      id: str2(o.id),
-      label: str2(o.label, str2(o.id)),
-      user: text(str2(o.user), where),
-      tool: { name: str2(toolSrc.name, "ap_workflow_init"), description: text(str2(toolSrc.description), where) },
-      response: { single: text(str2(resp.single), where), multi: text(str2(resp.multi), where), parallel: text(str2(resp.parallel ?? resp.multi), where) }
+      id: str(o.id),
+      label: str(o.label, str(o.id)),
+      user: text(str(o.user), where),
+      tool: { name: str(toolSrc.name, "ap_workflow_init"), description: text(str(toolSrc.description), where) },
+      response: { single: text(str(resp.single), where), multi: text(str(resp.multi), where), parallel: text(str(resp.parallel ?? resp.multi), where) }
     };
-    if (o.thoughtSignature) turn.thoughtSignature = str2(o.thoughtSignature);
+    if (o.thoughtSignature) turn.thoughtSignature = str(o.thoughtSignature);
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error("invalid tool name", where);
     return turn;
   });
-  const tools = { ...DEFAULT_TOOLS, ...isObj2(raw.tools) ? raw.tools : {} };
-  for (const [k, v] of Object.entries(tools)) text(str2(v), { file: M, path: `tools.${k}` });
+  const tools = compileTools(raw.tools, diag, text, M);
   const theme = isObj2(raw.theme) ? raw.theme : {};
   const modules = [];
   const entries = [];
@@ -8391,27 +8516,27 @@ function compile(tree) {
     const parsed = parseMarkdown(tree.get(file), ["entry"], diag, { file });
     const fm = parsed.data;
     const where = { file, line: 1 };
-    const mid = str2(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
+    const mid = str(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
     if (modules.some((m) => m.id === mid)) diag.error(`duplicate module id \`${mid}\``, where);
     const toggle = fm.toggle === "always" || fm.system === true ? "always" : "user";
     const questions = { mandatory: questionList(fm, "mandatory", mid, diag, where, text), optional: questionList(fm, "optional", mid, diag, where, text) };
     const mod = {
       id: mid,
-      name: str2(fm.name, mid),
+      name: str(fm.name, mid),
       toggle,
       default: toggle === "always" ? true : fm.default === true,
-      structures: Array.isArray(fm.structures) ? fm.structures.map((s) => str2(s)) : [],
+      structures: Array.isArray(fm.structures) ? fm.structures.map((s) => str(s)) : [],
       questions,
       source: file
     };
-    if (fm.description !== void 0) mod.description = str2(fm.description).trim();
-    if (fm.group !== void 0) mod.group = str2(fm.group);
-    if (fm.exclusive !== void 0) mod.exclusive = str2(fm.exclusive);
+    if (fm.description !== void 0) mod.description = str(fm.description).trim();
+    if (fm.group !== void 0) mod.group = str(fm.group);
+    if (fm.exclusive !== void 0) mod.exclusive = str(fm.exclusive);
     const mw = expr(fm.when, { ...where, path: "when" });
     if (mw) mod.when = mw;
     modules.push(mod);
     map.modules.set(mid, where);
-    const defRegion = fm.region === void 0 ? void 0 : str2(fm.region);
+    const defRegion = fm.region === void 0 ? void 0 : str(fm.region);
     const defOrder = typeof fm.order === "number" ? fm.order : 1e3;
     parsed.chunks.forEach((chunk, ci) => {
       const hasText = chunk.tokens.some((t) => t.kind === "text" && t.text.trim());
@@ -8432,7 +8557,7 @@ function compile(tree) {
       map.entries.set(eid, at);
     });
   }
-  const moduleOrder = Array.isArray(raw.moduleOrder) ? raw.moduleOrder.map((x) => str2(x)) : ["*"];
+  const moduleOrder = Array.isArray(raw.moduleOrder) ? raw.moduleOrder.map((x) => str(x)) : ["*"];
   if (!moduleOrder.includes("*")) moduleOrder.push("*");
   const rank = (mid) => {
     const i = moduleOrder.indexOf(mid);
@@ -8445,17 +8570,17 @@ function compile(tree) {
   const workflows = [];
   const workflowFiles = [...tree.keys()].filter((p) => /^workflows\/[^/]+\.md$/.test(p)).sort();
   for (const file of workflowFiles) {
-    const wf = compileWorkflow(file, tree.get(file), diag, expr, content);
+    const wf = compileWorkflow(file, tree.get(file), diag, expr, content, text);
     if (!wf) continue;
     if (workflows.some((w) => w.id === wf.id)) diag.error(`duplicate workflow id \`${wf.id}\``, { file });
     workflows.push(wf);
     map.workflows.set(wf.id, { file });
   }
   if (Array.isArray(raw.workflowOrder)) {
-    const order = raw.workflowOrder.map((x) => str2(x));
+    const order = raw.workflowOrder.map((x) => str(x));
     workflows.sort((a, b) => (order.indexOf(a.id) + 1 || 1e6) - (order.indexOf(b.id) + 1 || 1e6));
   }
-  const carrier = compileCarrier(isObj2(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
+  const carrier = compileCarrier(isObj2(raw.carrier) ? raw.carrier : {}, regions, str(raw.name, id), diag);
   const cd = isObj2(raw.configurationDefaults) ? raw.configurationDefaults : {};
   const sect = (k) => isObj2(cd[k]) ? cd[k] : {};
   const storyWorkflow = workflows.find((w) => w.kind === "story")?.id ?? "";
@@ -8494,16 +8619,16 @@ function compile(tree) {
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
     const o = isObj2(c) ? c : {};
-    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj2(o.diff) ? o.diff : {} };
-    if (o.description !== void 0) rc.description = str2(o.description);
+    const rc = { id: str(o.id), name: str(o.name, str(o.id)), diff: isObj2(o.diff) ? o.diff : {} };
+    if (o.description !== void 0) rc.description = str(o.description);
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
-  const defaultConfiguration = str2(raw.defaultConfiguration, configurations[0].id);
+  const defaultConfiguration = str(raw.defaultConfiguration, configurations[0].id);
   const migrations = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m) => {
     const o = isObj2(m) ? m : {};
-    return { from: str2(o.from), rename: isObj2(o.rename) ? o.rename : {} };
+    return { from: str(o.from), rename: isObj2(o.rename) ? o.rename : {} };
   });
   const locales = {};
   for (const [file, src] of tree) {
@@ -8520,26 +8645,26 @@ function compile(tree) {
   const preset = {
     formatVersion: FORMAT_VERSION,
     id,
-    name: str2(raw.name, id),
+    name: str(raw.name, id),
     version,
-    ...raw.author !== void 0 ? { author: str2(raw.author) } : {},
-    ...raw.description !== void 0 ? { description: str2(raw.description).trim() } : {},
-    ...raw.minAdvancedPreset !== void 0 ? { minAdvancedPreset: str2(raw.minAdvancedPreset) } : {},
+    ...raw.author !== void 0 ? { author: str(raw.author) } : {},
+    ...raw.description !== void 0 ? { description: str(raw.description).trim() } : {},
+    ...raw.minAdvancedPreset !== void 0 ? { minAdvancedPreset: str(raw.minAdvancedPreset) } : {},
     hash: "",
     actors,
     narrator,
     user,
     styles,
     plaintextFormat: raw.plaintextFormat === "tag" ? "tag" : "prefix",
-    contentMarker: str2(raw.contentMarker, "<START_OF_CONTENT>"),
-    prefillGuide: text(str2(raw.prefillGuide), { file: M, path: "prefillGuide" }),
-    historyItemTemplate: str2(raw.historyItemTemplate, "{{prefix}}{{content}}"),
-    stageHeading: text(str2(raw.stageHeading, "### Step {{n}}: {{label}} ({{actor}})"), { file: M, path: "stageHeading" }),
-    stop: Array.isArray(raw.stop) ? raw.stop.map((s) => str2(s)) : [],
+    contentMarker: str(raw.contentMarker, "<START_OF_CONTENT>"),
+    prefillGuide: text(str(raw.prefillGuide), { file: M, path: "prefillGuide" }),
+    historyItemTemplate: str(raw.historyItemTemplate, "{{prefix}}{{content}}"),
+    stageHeading: text(str(raw.stageHeading, "### Step {{n}}: {{label}} ({{actor}})"), { file: M, path: "stageHeading" }),
+    stop: Array.isArray(raw.stop) ? raw.stop.map((s) => str(s)) : [],
     regions,
     anchors,
-    workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
-    ...raw.questionsRegion !== void 0 ? { questionsRegion: str2(raw.questionsRegion) } : {},
+    workflowRegion: str(raw.workflowRegion, anchors.tail ?? ""),
+    ...raw.questionsRegion !== void 0 ? { questionsRegion: str(raw.questionsRegion) } : {},
     params,
     groups,
     modules,
@@ -8572,19 +8697,19 @@ function questionList(fm, kind, mid, diag, where, text) {
   }
   return q.map((x, i) => {
     const o = isObj2(x) ? x : { text: x };
-    return { id: str2(o.id, `${mid}-${kind[0]}${i + 1}`), text: text(str2(o.text).trim(), { ...where, path: `questions.${kind}[${i}]` }) };
+    return { id: str(o.id, `${mid}-${kind[0]}${i + 1}`), text: text(str(o.text).trim(), { ...where, path: `questions.${kind}[${i}]` }) };
   });
 }
-function compileWorkflow(file, src, diag, expr, content) {
+function compileWorkflow(file, src, diag, expr, content, text) {
   const parsed = parseMarkdown(src, ["section"], diag, { file });
   const fm = parsed.data;
-  const id = str2(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
+  const id = str(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
   const kind = fm.kind === "task" ? "task" : "story";
   const stages = [];
   (Array.isArray(fm.stages) ? fm.stages : []).forEach((s, i) => {
     const o = isObj2(s) ? s : {};
     const where = { file, path: `stages[${i}]` };
-    const stage = { id: str2(o.id), actor: str2(o.actor), kind: str2(o.kind, "text"), label: str2(o.label, str2(o.id)) };
+    const stage = { id: str(o.id), actor: str(o.actor), kind: str(o.kind, "text"), label: str(o.label, str(o.id)) };
     if (!/^[a-z][\w-]*$/i.test(stage.id)) diag.error("stage id is required (letters, digits, _ and -)", where);
     if (stages.some((x) => x.id === stage.id)) diag.error(`duplicate stage \`${stage.id}\``, where);
     if (!STAGE_KINDS.includes(stage.kind)) diag.error(`stage kind must be ${STAGE_KINDS.join(" | ")}`, where);
@@ -8593,7 +8718,27 @@ function compileWorkflow(file, src, diag, expr, content) {
       if (o.questions !== "ask" && o.questions !== "answer") diag.error("questions must be ask | answer", where);
       else stage.questions = o.questions;
     }
-    if (o.tag !== void 0) stage.tag = str2(o.tag);
+    if (o.tag !== void 0) stage.tag = str(o.tag);
+    if (o.field !== void 0) {
+      const f = isObj2(o.field) ? o.field : { description: o.field };
+      const out = {};
+      if (f.name !== void 0) out.name = str(f.name);
+      if (f.description !== void 0) out.description = text(str(f.description), where);
+      stage.field = out;
+    }
+    if (o.tool !== void 0) {
+      const t = isObj2(o.tool) ? o.tool : { description: o.tool };
+      const out = {};
+      if (t.name !== void 0) out.name = str(t.name);
+      if (t.description !== void 0) out.description = text(str(t.description), where);
+      if (t.param !== void 0) {
+        const p = isObj2(t.param) ? t.param : { name: t.param };
+        out.param = {};
+        if (p.name !== void 0) out.param.name = str(p.name);
+        if (p.description !== void 0) out.param.description = text(str(p.description), where);
+      }
+      stage.tool = out;
+    }
     if (o.executor !== void 0 && o.executor !== "default") diag.error("only `executor: default` is supported in v1", where);
     const w = expr(o.when, where);
     if (w) stage.when = w;
@@ -8644,19 +8789,19 @@ function compileWorkflow(file, src, diag, expr, content) {
       slot[st] = body;
     }
   }
-  const wf = { id, name: str2(fm.name, id), kind, stages, sections };
-  if (fm.description !== void 0) wf.description = str2(fm.description).trim();
-  if (fm.hint !== void 0) wf.hint = str2(fm.hint).trim();
+  const wf = { id, name: str(fm.name, id), kind, stages, sections };
+  if (fm.description !== void 0) wf.description = str(fm.description).trim();
+  if (fm.hint !== void 0) wf.hint = str(fm.hint).trim();
   const after = isObj2(fm.structures) ? fm.structures.after : void 0;
   if (after !== void 0) {
-    wf.structuresAfter = str2(after);
+    wf.structuresAfter = str(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
   }
   return wf;
 }
 function compileCarrier(src, regions, presetName, diag) {
   const M = "preset.yaml";
-  const label = str2(src.label, presetName);
+  const label = str(src.label, presetName);
   const overrides = isObj2(src.prompts) ? src.prompts : {};
   const prompts = [];
   const prompt_order = [];
@@ -8842,7 +8987,40 @@ function validate(p, map, diag) {
   for (const s of Object.values(p.structures)) {
     if (fields.has(s.field)) diag.error(`structures ${fields.get(s.field)} and ${s.id} share field \`${s.field}\``, { file: M, path: "structures" });
     fields.set(s.field, s.id);
-    if (/^step\d+_/.test(s.field)) diag.error(`field \`${s.field}\` collides with stage field names`, { file: M, path: `structures.${s.id}` });
+  }
+  const TOOL_NAME = /^[A-Za-z0-9_-]{1,64}$/;
+  const FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_]{0,63}$/;
+  const T = { file: M, path: "tools" };
+  if (!TOOL_NAME.test(p.tools.turn.name)) diag.error(`tools.turn.name \`${p.tools.turn.name}\` must match ${TOOL_NAME}`, T);
+  if (!TOOL_NAME.test(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` must match ${TOOL_NAME}`, T);
+  const env = p.tools.envelope;
+  for (const f of [env.thinking, env.result]) if (!FIELD_NAME.test(f.name)) diag.error(`envelope field \`${f.name}\` must match ${FIELD_NAME}`, T);
+  if (env.thinking.name === env.result.name) diag.error("envelope thinking and result fields must differ", T);
+  const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
+  if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
+  const structureFields = new Set(Object.values(p.structures).map((s) => s.field));
+  function checkNames(w, where) {
+    const structs = Object.values(p.structures);
+    const a = turnArtifacts(p.tools, w, w.stages, structs);
+    const seenFields = /* @__PURE__ */ new Map();
+    const seenTools = /* @__PURE__ */ new Map();
+    const anchor = structuresAnchorIndex(w, w.stages);
+    w.stages.forEach((s, i) => {
+      const field = a.fieldOf(s);
+      const tool2 = a.toolOf(s);
+      const param = a.paramOf(s);
+      const at = `workflow ${w.id}: stage ${s.id}`;
+      if (!FIELD_NAME.test(field)) diag.error(`${at}: field name \`${field}\` must match ${FIELD_NAME}`, where);
+      if (structureFields.has(field)) diag.error(`${at}: field \`${field}\` collides with a structure field`, where);
+      if (seenFields.has(field)) diag.error(`${at}: field \`${field}\` is also used by stage ${seenFields.get(field)}`, where);
+      seenFields.set(field, s.id);
+      if (!TOOL_NAME.test(tool2)) diag.error(`${at}: tool name \`${tool2}\` must match ${TOOL_NAME}`, where);
+      if (seenTools.has(tool2)) diag.error(`${at}: tool \`${tool2}\` is also used by stage ${seenTools.get(tool2)}`, where);
+      if (tool2 === p.tools.submit.name || synthetic.has(tool2)) diag.error(`${at}: tool \`${tool2}\` collides with the submit / synthetic turn tool`, where);
+      seenTools.set(tool2, s.id);
+      if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
+      if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
+    });
   }
   const usedStyles = new Set(Object.values(p.styles));
   for (const w of p.workflows) {
@@ -8852,6 +9030,7 @@ function validate(p, map, diag) {
       for (const st of usedStyles) if (!w.sections.stages[s.id]?.[st]) diag.warn(`workflow ${w.id}: stage ${s.id} has no ${st} section`, where);
     }
     if (w.kind === "task" && w.stages.some((s) => s.questions)) diag.warn(`workflow ${w.id}: task workflows do not receive questions`, where);
+    checkNames(w, where);
   }
   if (!p.workflows.some((w) => w.kind === "task")) diag.warn("no task workflow: meta replies and script calls fall back to the main workflow", { file: M });
   const c = p.configurationDefaults.connection;
@@ -8951,9 +9130,12 @@ function preview(preset, o) {
   const wf = a.workflow;
   const artifacts = {};
   if (wf) {
-    if (transport === "structured") artifacts.schema = buildTurnSchema(wf, a.stages, a.structures);
-    if (transport === "tool-single") artifacts.tools = [tool(SUBMIT_TOOL, a.expand(preset.tools.submit), buildTurnSchema(wf, a.stages, a.structures))];
-    if (transport === "tool-multi") artifacts.tools = buildStageTools(wf, a.stages, a.structures, preset.tools.stagePrefix, {});
+    const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
+    const synthetic = preset.syntheticTurns.find((s) => s.id === config.connection.syntheticTurn);
+    const init2 = synthetic && transport.startsWith("tool-") ? [{ type: "function", function: { name: synthetic.tool.name, description: a.expand(synthetic.tool.description), parameters: { type: "object", properties: {} } } }] : [];
+    if (transport === "structured") artifacts.schema = t.schema();
+    if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
+    if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
   }
   if (o.json) return JSON.stringify({ vars: a.vars, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
   const lines = [];

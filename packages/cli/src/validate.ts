@@ -1,6 +1,6 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
-  MACRO_HEADS, TRANSPORTS, listMacros, pruneDiff, deepMerge, variables,
+  MACRO_HEADS, TRANSPORTS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -152,7 +152,42 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   for (const s of Object.values(p.structures)) {
     if (fields.has(s.field)) diag.error(`structures ${fields.get(s.field)} and ${s.id} share field \`${s.field}\``, { file: M, path: 'structures' });
     fields.set(s.field, s.id);
-    if (/^step\d+_/.test(s.field)) diag.error(`field \`${s.field}\` collides with stage field names`, { file: M, path: `structures.${s.id}` });
+  }
+
+  // ── tool / field names (checked with every stage active) ──────────────────
+  const TOOL_NAME = /^[A-Za-z0-9_-]{1,64}$/;
+  const FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_]{0,63}$/;
+  const T = { file: M, path: 'tools' };
+  if (!TOOL_NAME.test(p.tools.turn.name)) diag.error(`tools.turn.name \`${p.tools.turn.name}\` must match ${TOOL_NAME}`, T);
+  if (!TOOL_NAME.test(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` must match ${TOOL_NAME}`, T);
+  const env = p.tools.envelope;
+  for (const f of [env.thinking, env.result]) if (!FIELD_NAME.test(f.name)) diag.error(`envelope field \`${f.name}\` must match ${FIELD_NAME}`, T);
+  if (env.thinking.name === env.result.name) diag.error('envelope thinking and result fields must differ', T);
+  const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
+  if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
+  const structureFields = new Set(Object.values(p.structures).map((s) => s.field));
+  function checkNames(w: APreset['workflows'][number], where: Where) {
+    const structs = Object.values(p.structures);
+    const a = turnArtifacts(p.tools, w, w.stages, structs);
+    const seenFields = new Map<string, string>();
+    const seenTools = new Map<string, string>();
+    const anchor = structuresAnchorIndex(w, w.stages);
+    w.stages.forEach((s, i) => {
+      const field = a.fieldOf(s);
+      const tool = a.toolOf(s);
+      const param = a.paramOf(s);
+      const at = `workflow ${w.id}: stage ${s.id}`;
+      if (!FIELD_NAME.test(field)) diag.error(`${at}: field name \`${field}\` must match ${FIELD_NAME}`, where);
+      if (structureFields.has(field)) diag.error(`${at}: field \`${field}\` collides with a structure field`, where);
+      if (seenFields.has(field)) diag.error(`${at}: field \`${field}\` is also used by stage ${seenFields.get(field)}`, where);
+      seenFields.set(field, s.id);
+      if (!TOOL_NAME.test(tool)) diag.error(`${at}: tool name \`${tool}\` must match ${TOOL_NAME}`, where);
+      if (seenTools.has(tool)) diag.error(`${at}: tool \`${tool}\` is also used by stage ${seenTools.get(tool)}`, where);
+      if (tool === p.tools.submit.name || synthetic.has(tool)) diag.error(`${at}: tool \`${tool}\` collides with the submit / synthetic turn tool`, where);
+      seenTools.set(tool, s.id);
+      if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
+      if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
+    });
   }
 
   // ── workflows ───────────────────────────────────────────────────────────────
@@ -164,6 +199,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       for (const st of usedStyles) if (!w.sections.stages[s.id]?.[st]) diag.warn(`workflow ${w.id}: stage ${s.id} has no ${st} section`, where);
     }
     if (w.kind === 'task' && w.stages.some((s) => s.questions)) diag.warn(`workflow ${w.id}: task workflows do not receive questions`, where);
+    checkNames(w, where);
   }
   if (!p.workflows.some((w) => w.kind === 'task')) diag.warn('no task workflow: meta replies and script calls fall back to the main workflow', { file: M });
 

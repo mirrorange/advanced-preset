@@ -12,16 +12,22 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
-  FORMAT_VERSION, STRUCTURE_KINDS, TRANSPORTS, parseExpr,
+  DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   type Group, type Migration, type Module, type Param, type ParamOption, type Question, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
-  type SyntheticTurn, type Transport, type Workflow, type WorkflowSections,
+  type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
 
 export type SourceTree = Map<string, string>;
+
+/**
+ * Version of the *source* format (`preset.yaml#formatVersion`). Independent of the artifact
+ * `FORMAT_VERSION`: source changes so far are backward compatible (legacy keys still compile).
+ */
+export const SOURCE_FORMAT_VERSION = 1;
 
 /** Where each compiled thing came from, for diagnostics produced after compilation. */
 export interface SourceMap {
@@ -65,13 +71,63 @@ export const NATIVE_PROMPTS: Record<string, { name: string; marker: boolean }> =
 export const anchorText = (region: string) => `⟦ap:region:${region}⟧`;
 export const anchorIdentifier = (region: string) => `ap_${region}`;
 
-const DEFAULT_TOOLS: APreset['tools'] = {
-  submit: 'Submit the complete workflow for this turn: every stage in order, then the final content and structures.',
-  stagePrefix: 'ap_stage_',
-  structures: 'Structures of this turn.',
-  stageResult: 'Recorded. Continue with `{{next}}`.',
-  nudge: 'Continue the workflow: call `{{next}}` now.',
-};
+/**
+ * `tools` source → ToolsDecl. Every model-visible text of the transport layer lives here; unset
+ * parts fall back to {@link DEFAULT_TOOLS}. Legacy (format 1) keys are still accepted:
+ * `submit: <description>`, `stagePrefix`, `stageResult`, `nudge`.
+ */
+export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, where: Where) => string, file = 'preset.yaml'): ToolsDecl {
+  const o = isObj(src) ? src : {};
+  const at = (path: string): Where => ({ file, path: `tools.${path}` });
+  const opt = (v: unknown, path: string): string | undefined => (v === undefined || v === null ? undefined : text(str(v), at(path)));
+  const field = (v: unknown, path: string, fallback: FieldText): FieldText => {
+    const f = typeof v === 'string' ? { name: v } : isObj(v) ? v : {};
+    const description = f.description !== undefined ? opt(f.description, `${path}.description`) : fallback.description;
+    return { name: str(f.name, fallback.name), ...(description ? { description } : {}) };
+  };
+  const legacy = ['stagePrefix', 'stageResult', 'nudge', 'structures'].filter((k) => k in o);
+  if (legacy.length || typeof o.submit === 'string')
+    diag.warn(`legacy tools keys (${[...legacy, ...(typeof o.submit === 'string' ? ['submit: <text>'] : [])].join(', ')}); see the README for the tools section`, { file, path: 'tools' });
+  const D = DEFAULT_TOOLS;
+  const turn = isObj(o.turn) ? o.turn : {};
+  const submit = isObj(o.submit) ? o.submit : typeof o.submit === 'string' ? { description: o.submit } : {};
+  const stage = isObj(o.stage) ? o.stage : {};
+  const patch = isObj(o.patch) ? o.patch : {};
+  const env = isObj(o.envelope) ? o.envelope : {};
+  const results = isObj(o.results) ? o.results : {};
+  const pick = <T>(v: T | undefined, fallback: T) => (v === undefined ? fallback : v);
+  const tools: ToolsDecl = {
+    turn: {
+      name: str(turn.name, D.turn.name),
+      field: str(turn.field, D.turn.field),
+      ...((): Partial<ToolsDecl['turn']> => {
+        const description = opt(turn.description, 'turn.description');
+        const fieldDescription = pick(opt(turn.fieldDescription, 'turn.fieldDescription'), D.turn.fieldDescription);
+        return { ...(description ? { description } : {}), ...(fieldDescription ? { fieldDescription } : {}) };
+      })(),
+    },
+    submit: { name: str(submit.name, D.submit.name), description: pick(opt(submit.description, 'submit.description'), D.submit.description) },
+    stage: {
+      name: str(stage.name, typeof o.stagePrefix === 'string' ? `${o.stagePrefix}{{stage}}` : D.stage.name),
+      description: pick(opt(stage.description, 'stage.description'), D.stage.description),
+      param: field(stage.param, 'stage.param', D.stage.param),
+      patchParam: field(stage.patchParam, 'stage.patchParam', D.stage.patchParam),
+    },
+    patch: Object.fromEntries((['description', 'old', 'new'] as const).flatMap((k) => (patch[k] !== undefined ? [[k, opt(patch[k], `patch.${k}`)!]] : []))),
+    envelope: { thinking: field(env.thinking, 'envelope.thinking', D.envelope.thinking), result: field(env.result, 'envelope.result', D.envelope.result) },
+    results: {
+      next: text(str(results.next ?? o.stageResult, D.results.next), at('results.next')),
+      done: text(str(results.done, D.results.done), at('results.done')),
+      unknown: text(str(results.unknown, D.results.unknown), at('results.unknown')),
+      nudge: text(str(results.nudge ?? o.nudge, D.results.nudge), at('results.nudge')),
+    },
+  };
+  const hint = o.jsonStringHint === undefined ? D.jsonStringHint : opt(o.jsonStringHint, 'jsonStringHint');
+  if (hint) tools.jsonStringHint = hint;
+  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'jsonStringHint', ...legacy]);
+  for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
+  return tools;
+}
 
 export function compile(tree: SourceTree): CompileResult {
   const diag = new Diagnostics();
@@ -115,8 +171,8 @@ export function compile(tree: SourceTree): CompileResult {
   };
 
   // ── metadata ────────────────────────────────────────────────────────────────
-  if (raw.formatVersion !== undefined && raw.formatVersion !== FORMAT_VERSION)
-    diag.error(`unsupported formatVersion ${String(raw.formatVersion)} (expected ${FORMAT_VERSION})`, { file: M, path: 'formatVersion' });
+  if (raw.formatVersion !== undefined && raw.formatVersion !== SOURCE_FORMAT_VERSION)
+    diag.error(`unsupported formatVersion ${String(raw.formatVersion)} (expected ${SOURCE_FORMAT_VERSION})`, { file: M, path: 'formatVersion' });
   const id = str(raw.id);
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) diag.error('id must be lower-case kebab-case', { file: M, path: 'id' });
   const version = str(raw.version, '0.0.0');
@@ -228,7 +284,16 @@ export function compile(tree: SourceTree): CompileResult {
       field: str(o.field, sid),
       formatPrompt: { tag: text(str(fp.tag), where), field: text(str(fp.field), where) },
     };
-    if (o.description !== undefined) decl.description = str(o.description);
+    if (o.description !== undefined) decl.description = text(str(o.description), where);
+    if (isObj(o.properties)) {
+      const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
+      const props: Record<string, string> = {};
+      for (const [k, v] of Object.entries(o.properties)) {
+        if (!allowed.includes(k)) { diag.error(`${kind} has no sub-field \`${k}\`${allowed.length ? ` (expected ${allowed.join(' | ')})` : ''}`, { ...where, path: `${where.path}.properties.${k}` }); continue; }
+        props[k] = text(str(v), where);
+      }
+      if (Object.keys(props).length) decl.properties = props;
+    }
     if (typeof o.count === 'number') decl.count = o.count;
     if (kind === 'custom') {
       decl.shape = o.shape === 'kv' ? 'kv' : 'text';
@@ -293,8 +358,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error('invalid tool name', where);
     return turn;
   });
-  const tools = { ...DEFAULT_TOOLS, ...(isObj(raw.tools) ? (raw.tools as Partial<APreset['tools']>) : {}) };
-  for (const [k, v] of Object.entries(tools)) text(str(v), { file: M, path: `tools.${k}` });
+  const tools = compileTools(raw.tools, diag, text, M);
   const theme = isObj(raw.theme) ? (raw.theme as APreset['theme']) : {};
 
   // ── modules ─────────────────────────────────────────────────────────────────
@@ -364,7 +428,7 @@ export function compile(tree: SourceTree): CompileResult {
   const workflows: Workflow[] = [];
   const workflowFiles = [...tree.keys()].filter((p) => /^workflows\/[^/]+\.md$/.test(p)).sort();
   for (const file of workflowFiles) {
-    const wf = compileWorkflow(file, tree.get(file)!, diag, expr, content);
+    const wf = compileWorkflow(file, tree.get(file)!, diag, expr, content, text);
     if (!wf) continue;
     if (workflows.some((w) => w.id === wf.id)) diag.error(`duplicate workflow id \`${wf.id}\``, { file });
     workflows.push(wf);
@@ -511,6 +575,7 @@ function compileWorkflow(
   diag: Diagnostics,
   expr: (s: unknown, w: Where) => Expr | undefined,
   content: (tokens: Chunk['tokens'], w: Where) => Content,
+  text: (s: string, w: Where) => string,
 ): Workflow | undefined {
   const parsed = parseMarkdown(src, ['section'], diag, { file });
   const fm = parsed.data;
@@ -530,6 +595,26 @@ function compileWorkflow(
       else stage.questions = o.questions;
     }
     if (o.tag !== undefined) stage.tag = str(o.tag);
+    if (o.field !== undefined) {
+      const f = isObj(o.field) ? o.field : { description: o.field };
+      const out: Stage['field'] = {};
+      if (f.name !== undefined) out.name = str(f.name);
+      if (f.description !== undefined) out.description = text(str(f.description), where);
+      stage.field = out;
+    }
+    if (o.tool !== undefined) {
+      const t = isObj(o.tool) ? o.tool : { description: o.tool };
+      const out: NonNullable<Stage['tool']> = {};
+      if (t.name !== undefined) out.name = str(t.name);
+      if (t.description !== undefined) out.description = text(str(t.description), where);
+      if (t.param !== undefined) {
+        const p = isObj(t.param) ? t.param : { name: t.param };
+        out.param = {};
+        if (p.name !== undefined) out.param.name = str(p.name);
+        if (p.description !== undefined) out.param.description = text(str(p.description), where);
+      }
+      stage.tool = out;
+    }
     if (o.executor !== undefined && o.executor !== 'default') diag.error('only `executor: default` is supported in v1', where);
     const w = expr(o.when, where);
     if (w) stage.when = w;

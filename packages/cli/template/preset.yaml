@@ -70,11 +70,32 @@ syntheticTurns:
   - id: init
     label: Workflow init
     user: <!-- Workflow Start -->
-    tool: { name: ap_workflow_init, description: Start the writing workflow. }
+    tool: { name: workflow_init, description: Start the writing workflow. }
     response:
       single: Call `{{submit}}` once, filling every field in order.
       multi: Call the stage tools in order, starting with `{{first}}`.
       parallel: Call the stage tools in order, starting with `{{first}}`. Several per reply are fine.
+
+# Every name and description the model sees in tool / structured-output mode. The extension only
+# defines the shapes; all text comes from here. Templates: {{n}} {{stage}} {{actor}} {{label}}.
+tools:
+  turn:
+    name: writing_turn
+    field: "step{{n}}_{{stage}}"
+    fieldDescription: "{{label}} ({{ap::name::narrator}})"
+  submit:
+    name: submit_turn
+    description: Submit the whole turn at once, every field in order.
+  stage:
+    name: "{{stage}}"
+    description: "Step {{n}}: {{label}}"
+    param: { name: content, description: Text of this step. }
+    patchParam: { name: edits, description: Exact replacements applied to the content. }
+  results:
+    next: Recorded. Next, call `{{next}}`.
+    done: Recorded. The turn is complete.
+    unknown: Unknown tool {{name}}.
+    nudge: The turn is not finished. Call `{{next}}` now.
 
 carrier:
   order: [top, guidelines, { main: false }, worldInfoBefore, personaDescription, charDescription, charPersonality, scenario, worldInfoAfter, dialogueExamples, history, chatHistory, { jailbreak: false }, task, tail]
