@@ -74,7 +74,8 @@ export async function orchestrate(ctx: GenerationContext, base: Record<string, a
       });
       // Whatever was not streamed (patched content, held-back tails, task replies) goes out now.
       if (outcome.content.startsWith(streamed)) await write(enc.text(outcome.content.slice(streamed.length)));
-      if (outcome.reasoning) await write(enc.reasoning(outcome.reasoning));
+      // A Claude thinking block without a signature cannot be replayed with tool calls; keep it out of those.
+      if (outcome.reasoning && !(family === 'claude' && outcome.toolCalls?.length)) await write(enc.reasoning(outcome.reasoning));
       if (outcome.toolCalls?.length) await write(enc.toolCalls(outcome.toolCalls));
       await write(enc.end());
     } catch (e) {

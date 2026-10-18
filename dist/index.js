@@ -6490,67 +6490,112 @@ function Gd(e, t) {
 	}) : { chatCompletionSource: String(e ?? "") };
 	return t ? u(n) : c(n);
 }
-var Kd = (e) => `data: ${typeof e == "string" ? e : JSON.stringify(e)}\n\n`;
-function qd(e) {
+var X = (e) => `data: ${typeof e == "string" ? e : JSON.stringify(e)}\n\n`;
+function Kd(e) {
 	switch (e) {
 		case "claude": {
-			let e = 1;
+			let e = !1, t = -1, n = null, r = !1, i = () => e ? "" : (e = !0, X({
+				type: "message_start",
+				message: {
+					id: `msg_ap_${Date.now().toString(36)}`,
+					type: "message",
+					role: "assistant",
+					content: [],
+					model: "",
+					stop_reason: null,
+					stop_sequence: null,
+					usage: {
+						input_tokens: 0,
+						output_tokens: 0
+					}
+				}
+			})), a = () => n === null ? "" : (n = null, X({
+				type: "content_block_stop",
+				index: t
+			})), o = (e) => {
+				if (n === e) return i();
+				let r = i() + a();
+				return t++, n = e, r + X({
+					type: "content_block_start",
+					index: t,
+					content_block: e === "text" ? {
+						type: "text",
+						text: ""
+					} : {
+						type: "thinking",
+						thinking: "",
+						signature: ""
+					}
+				});
+			};
 			return {
-				text: (e) => e ? Kd({
+				text: (e) => e ? o("text") + X({
 					type: "content_block_delta",
-					index: 0,
+					index: t,
 					delta: {
 						type: "text_delta",
 						text: e
 					}
 				}) : "",
-				reasoning: (e) => e ? Kd({
+				reasoning: (e) => e ? o("thinking") + X({
 					type: "content_block_delta",
-					index: 0,
+					index: t,
 					delta: {
 						type: "thinking_delta",
 						thinking: e
 					}
 				}) : "",
-				toolCalls: (t) => t.map((t) => {
-					let n = e++;
-					return Kd({
+				toolCalls: (e) => {
+					if (!e.length) return "";
+					let n = i() + a();
+					for (let i of e) t++, r = !0, n += X({
 						type: "content_block_start",
-						index: n,
+						index: t,
 						content_block: {
 							type: "tool_use",
-							id: t.id,
-							name: t.name,
+							id: i.id,
+							name: i.name,
 							input: {}
 						}
-					}) + Kd({
+					}) + X({
 						type: "content_block_delta",
-						index: n,
+						index: t,
 						delta: {
 							type: "input_json_delta",
-							partial_json: t.arguments || "{}"
+							partial_json: i.arguments || "{}"
 						}
-					}) + Kd({
+					}) + X({
 						type: "content_block_stop",
-						index: n
+						index: t
 					});
-				}).join(""),
-				error: (e) => Kd({
+					return n;
+				},
+				error: (e) => X({
 					type: "error",
-					error: { message: e }
+					error: {
+						type: "api_error",
+						message: e
+					}
 				}),
-				end: () => Kd({ type: "message_stop" })
+				end: () => i() + a() + X({
+					type: "message_delta",
+					delta: {
+						stop_reason: r ? "tool_use" : "end_turn",
+						stop_sequence: null
+					},
+					usage: { output_tokens: 0 }
+				}) + X({ type: "message_stop" })
 			};
 		}
 		case "gemini": return {
-			text: (e) => e ? Kd({ candidates: [{
+			text: (e) => e ? X({ candidates: [{
 				index: 0,
 				content: {
 					role: "model",
 					parts: [{ text: e }]
 				}
 			}] }) : "",
-			reasoning: (e) => e ? Kd({ candidates: [{
+			reasoning: (e) => e ? X({ candidates: [{
 				index: 0,
 				content: {
 					role: "model",
@@ -6560,30 +6605,30 @@ function qd(e) {
 					}]
 				}
 			}] }) : "",
-			toolCalls: (e) => e.length ? Kd({ candidates: [{
+			toolCalls: (e) => e.length ? X({ candidates: [{
 				index: 0,
 				content: {
 					role: "model",
 					parts: e.map((e) => ({
 						functionCall: {
 							name: e.name,
-							args: Jd(e.arguments)
+							args: qd(e.arguments)
 						},
 						...e.signature ? { thoughtSignature: e.signature } : {}
 					}))
 				}
 			}] }) : "",
-			error: (e) => Kd({ error: { message: e } }),
+			error: (e) => X({ error: { message: e } }),
 			end: () => ""
 		};
 		case "cohere": return {
-			text: (e) => e ? Kd({
+			text: (e) => e ? X({
 				type: "content-delta",
 				index: 0,
 				delta: { message: { content: { text: e } } }
 			}) : "",
 			reasoning: () => "",
-			toolCalls: (e) => e.map((e, t) => Kd({
+			toolCalls: (e) => e.map((e, t) => X({
 				type: "tool-call-start",
 				index: t,
 				delta: { message: { tool_calls: {
@@ -6595,22 +6640,22 @@ function qd(e) {
 					}
 				} } }
 			})).join(""),
-			error: (e) => Kd({ error: { message: e } }),
-			end: () => Kd({ type: "message-end" })
+			error: (e) => X({ error: { message: e } }),
+			end: () => X({ type: "message-end" })
 		};
 		default: return {
-			text: (e) => e ? Kd({ choices: [{
+			text: (e) => e ? X({ choices: [{
 				index: 0,
 				delta: { content: e }
 			}] }) : "",
-			reasoning: (e) => e ? Kd({ choices: [{
+			reasoning: (e) => e ? X({ choices: [{
 				index: 0,
 				delta: {
 					reasoning_content: e,
 					reasoning: e
 				}
 			}] }) : "",
-			toolCalls: (e) => e.length ? Kd({ choices: [{
+			toolCalls: (e) => e.length ? X({ choices: [{
 				index: 0,
 				delta: { tool_calls: e.map((e, t) => ({
 					index: t,
@@ -6622,19 +6667,19 @@ function qd(e) {
 					}
 				})) }
 			}] }) : "",
-			error: (e) => Kd({ error: { message: e } }),
-			end: () => Kd("[DONE]")
+			error: (e) => X({ error: { message: e } }),
+			end: () => X("[DONE]")
 		};
 	}
 }
-function Jd(e) {
+function qd(e) {
 	try {
 		return JSON.parse(e || "{}");
 	} catch {
 		return {};
 	}
 }
-function Yd(e, t) {
+function Jd(e, t) {
 	let n = t.toolCalls?.length ? t.toolCalls.map((e) => ({
 		id: e.id,
 		type: "function",
@@ -6669,7 +6714,7 @@ function Yd(e, t) {
 			type: "tool_use",
 			id: e.id,
 			name: e.name,
-			input: Jd(e.arguments)
+			input: qd(e.arguments)
 		}))
 	] : e === "gemini" && (r.responseContent = {
 		role: "model",
@@ -6682,14 +6727,14 @@ function Yd(e, t) {
 			...(t.toolCalls ?? []).map((e) => ({
 				functionCall: {
 					name: e.name,
-					args: Jd(e.arguments)
+					args: qd(e.arguments)
 				},
 				...e.signature ? { thoughtSignature: e.signature } : {}
 			}))
 		]
 	}), r;
 }
-function Xd(e, t = 502) {
+function Yd(e, t = 502) {
 	return new Response(JSON.stringify({ error: { message: e } }), {
 		status: t,
 		statusText: e.slice(0, 100),
@@ -6698,18 +6743,18 @@ function Xd(e, t = 502) {
 }
 //#endregion
 //#region src/core/reader.ts
-var Zd = class extends Error {
+var Xd = class extends Error {
 	status;
 	body;
 	constructor(e, t = 502, n) {
 		super(e), this.status = t, this.body = n;
 	}
 };
-function Qd(e) {
+function Zd(e) {
 	let t = e?.error ?? e?.detail?.error;
 	return t ? typeof t == "string" ? t : String(t.message || t.code || t.type || "Unknown error") : null;
 }
-var $d = class {
+var Qd = class {
 	calls = [];
 	claudeIndex = /* @__PURE__ */ new Map();
 	get list() {
@@ -6773,16 +6818,16 @@ var $d = class {
 		}
 	}
 };
-function ef(e) {
+function $d(e) {
 	if (typeof e == "string") return e;
 	let t = (Array.isArray(e?.content) ? e.content.filter((e) => e?.type === "text").map((e) => e.text).join("\n\n") : void 0) || e?.choices?.[0]?.message?.content || e?.choices?.[0]?.text || e?.text || e?.message?.content?.[0]?.text || "";
 	return Array.isArray(t) ? t.map((e) => e?.text ?? "").join("") : String(t ?? "");
 }
-function tf(e) {
+function ef(e) {
 	let t = e?.choices?.[0]?.message;
 	return t?.reasoning_content || t?.reasoning ? String(t.reasoning_content ?? t.reasoning) : Array.isArray(e?.responseContent?.parts) ? e.responseContent.parts.filter((e) => e.thought).map((e) => e.text).join("\n\n") : Array.isArray(e?.content) ? e.content.filter((e) => e.type === "thinking").map((e) => e.thinking).join("\n\n") : "";
 }
-async function* nf(e, t) {
+async function* tf(e, t) {
 	let n = e.getReader(), r = new TextDecoder(), i = "", a = () => n.cancel().catch(() => void 0);
 	t?.addEventListener("abort", a, { once: !0 });
 	try {
@@ -6805,25 +6850,25 @@ async function* nf(e, t) {
 		t?.removeEventListener("abort", a);
 	}
 }
-async function* rf(e, t, n, r) {
+async function* nf(e, t, n, r) {
 	if (!e.ok) {
 		let t = await e.text().catch(() => ""), n = `HTTP ${e.status}`;
 		try {
-			n = Qd(JSON.parse(t)) ?? n;
+			n = Zd(JSON.parse(t)) ?? n;
 		} catch {
 			t && (n = t.slice(0, 500));
 		}
-		throw new Zd(n, e.status, t);
+		throw new Xd(n, e.status, t);
 	}
 	let i = {
 		text: "",
 		reasoning: "",
 		toolCalls: []
-	}, a = new $d();
+	}, a = new Qd();
 	if (!(n && e.body && !(e.headers.get("content-type") ?? "").includes("application/json")) || !e.body) {
-		let t = await e.json(), n = Qd(t);
-		if (n) throw new Zd(n);
-		i.text = ef(t), i.reasoning = tf(t), a.fromBody(t), i.toolCalls = a.list, i.finishReason = t?.choices?.[0]?.finish_reason ?? t?.stop_reason, i.usage = t?.usage ?? t?.usageMetadata, yield i;
+		let t = await e.json(), n = Zd(t);
+		if (n) throw new Xd(n);
+		i.text = $d(t), i.reasoning = ef(t), a.fromBody(t), i.toolCalls = a.list, i.finishReason = t?.choices?.[0]?.finish_reason ?? t?.stop_reason, i.usage = t?.usage ?? t?.usageMetadata, yield i;
 		return;
 	}
 	let o = {
@@ -6832,7 +6877,7 @@ async function* rf(e, t, n, r) {
 		signature: "",
 		toolSignatures: {}
 	};
-	for await (let n of nf(e.body, r)) {
+	for await (let n of tf(e.body, r)) {
 		if (n === "[DONE]") break;
 		let e;
 		try {
@@ -6840,8 +6885,8 @@ async function* rf(e, t, n, r) {
 		} catch {
 			continue;
 		}
-		let r = Qd(e);
-		if (r) throw new Zd(r);
+		let r = Zd(e);
+		if (r) throw new Xd(r);
 		i.text += s(e, o, t), i.reasoning = o.reasoning, a.push(e), i.toolCalls = a.list, o.signature && (i.signature = o.signature);
 		let c = e?.choices?.[0]?.finish_reason ?? e?.delta?.stop_reason ?? e?.candidates?.[0]?.finishReason;
 		c && (i.finishReason = c), (e?.usage || e?.usageMetadata) && (i.usage = e.usage ?? e.usageMetadata), yield i;
@@ -6849,9 +6894,9 @@ async function* rf(e, t, n, r) {
 }
 //#endregion
 //#region src/core/live.ts
-var af = /* @__PURE__ */ $t({ current: null });
-function of(e, t) {
-	return af.current = {
+var rf = /* @__PURE__ */ $t({ current: null });
+function af(e, t) {
+	return rf.current = {
 		genId: e.id,
 		presetId: e.preset.id,
 		transport: e.transport,
@@ -6872,9 +6917,9 @@ function of(e, t) {
 		step: 0,
 		startedAt: Date.now(),
 		mesId: null
-	}, af.current;
+	}, rf.current;
 }
-function sf(e, t, n) {
+function of(e, t, n) {
 	for (let n of e.stages) {
 		let e = t.stages[n.id];
 		e && (n.text = e.text ?? "", e.patches && (n.patches = e.patches), n.status = e.status);
@@ -6883,46 +6928,46 @@ function sf(e, t, n) {
 }
 //#endregion
 //#region src/core/orchestrator.ts
-var cf = "/api/backends/chat-completions/generate", lf = { pending: null }, uf = (e) => e?.name === "AbortError";
-function df(t) {
+var sf = "/api/backends/chat-completions/generate", cf = { pending: null }, lf = (e) => e?.name === "AbortError";
+function uf(t) {
 	return (t.transport === "tool-single" || t.transport === "tool-multi") && !e().isToolCallingSupported() ? Y("error.toolsUnsupported") : null;
 }
-async function ff(e, t, n) {
-	let r = Gd(String(t.chat_completion_source ?? ""), t), i = !!t.stream, a = df(e);
-	if (a) return d("error", a, "Advanced Preset"), Xd(a, 400);
+async function df(e, t, n) {
+	let r = Gd(String(t.chat_completion_source ?? ""), t), i = !!t.stream, a = uf(e);
+	if (a) return d("error", a, "Advanced Preset"), Yd(a, 400);
 	let o = e.origin === "task" ? Nu(e.preset) : /* @__PURE__ */ new Set(), s = e.origin === "task" ? {
 		tools: (t.tools ?? []).filter((e) => !o.has(e?.function?.name ?? "")),
 		toolChoice: t.tool_choice,
 		schema: t.json_schema ?? void 0
-	} : { tools: [] }, c = of(e, i);
+	} : { tools: [] }, c = af(e, i);
 	if (!i) try {
-		let i = await hf(e, t, s, c, n ?? void 0, () => void 0);
-		return new Response(JSON.stringify(Yd(r, i)), { headers: { "Content-Type": "application/json" } });
+		let i = await mf(e, t, s, c, n ?? void 0, () => void 0);
+		return new Response(JSON.stringify(Jd(r, i)), { headers: { "Content-Type": "application/json" } });
 	} catch (e) {
-		return mf(c, e);
+		return pf(c, e);
 	}
-	let l = qd(r), u = new TextEncoder(), f = new TransformStream(), p = f.writable.getWriter(), m = (e) => e ? p.write(u.encode(e)).catch(() => void 0) : Promise.resolve(), h = "";
+	let l = Kd(r), u = new TextEncoder(), f = new TransformStream(), p = f.writable.getWriter(), m = (e) => e ? p.write(u.encode(e)).catch(() => void 0) : Promise.resolve(), h = "";
 	return (async () => {
 		try {
-			let r = await hf(e, t, s, c, n ?? void 0, (e) => {
+			let i = await mf(e, t, s, c, n ?? void 0, (e) => {
 				e.startsWith(h) && e.length > h.length && (m(l.text(e.slice(h.length))), h = e);
 			});
-			r.content.startsWith(h) && await m(l.text(r.content.slice(h.length))), r.reasoning && await m(l.reasoning(r.reasoning)), r.toolCalls?.length && await m(l.toolCalls(r.toolCalls)), await m(l.end());
+			i.content.startsWith(h) && await m(l.text(i.content.slice(h.length))), i.reasoning && !(r === "claude" && i.toolCalls?.length) && await m(l.reasoning(i.reasoning)), i.toolCalls?.length && await m(l.toolCalls(i.toolCalls)), await m(l.end());
 		} catch (e) {
-			uf(e) || (await m(l.error(pf(e))), mf(c, e));
+			lf(e) || (await m(l.error(ff(e))), pf(c, e));
 		} finally {
 			await p.close().catch(() => void 0);
 		}
 	})(), new Response(f.readable, { headers: { "Content-Type": "text/event-stream; charset=utf-8" } });
 }
-var pf = (e) => e instanceof Error ? e.message : String(e);
-function mf(e, t) {
-	return e.status = uf(t) ? "aborted" : "error", e.error = pf(t), t instanceof Zd ? new Response(t.body || JSON.stringify({ error: { message: t.message } }), {
+var ff = (e) => e instanceof Error ? e.message : String(e);
+function pf(e, t) {
+	return e.status = lf(t) ? "aborted" : "error", e.error = ff(t), t instanceof Xd ? new Response(t.body || JSON.stringify({ error: { message: t.message } }), {
 		status: t.status,
 		headers: { "Content-Type": "application/json" }
-	}) : Xd(pf(t));
+	}) : Yd(ff(t));
 }
-async function hf(t, n, r, i, a, s) {
+async function mf(t, n, r, i, a, s) {
 	let c = String(n.chat_completion_source ?? ""), l = Wd({
 		ctx: t,
 		base: n,
@@ -6945,26 +6990,26 @@ async function hf(t, n, r, i, a, s) {
 			toolCalls: []
 		};
 		try {
-			let t = await f(cf, {
+			let t = await f(sf, {
 				method: "POST",
 				headers: e().getRequestHeaders(),
 				body: JSON.stringify(r),
 				signal: a
 			}), n = 0;
-			for await (let e of rf(t, o(r), !!r.stream, a)) {
+			for await (let e of nf(t, o(r), !!r.stream, a)) {
 				u = e;
 				let t = Date.now();
 				if (t - n < 50) continue;
 				n = t;
 				let r = l.progress(e, !1);
-				if (sf(i, r, _ + e.reasoning), m && d) {
+				if (of(i, r, _ + e.reasoning), m && d) {
 					let e = r.stages[d]?.text ?? "";
 					e && s(e.slice(0, e.length - Es(e)).trimEnd());
 				}
 			}
 			c.response = u.text || JSON.stringify(u.toolCalls), c.durationMs = Date.now() - c.at, c.usage = u.usage;
 		} catch (e) {
-			if (c.error = pf(e), uf(e) || a?.aborted) {
+			if (c.error = ff(e), lf(e) || a?.aborted) {
 				b = !0, S = l.progress(u, !1);
 				break;
 			}
@@ -6985,8 +7030,8 @@ async function hf(t, n, r, i, a, s) {
 	}
 	let C = S ?? l.result();
 	if (b) for (let e of Object.values(C.stages)) e.status === "streaming" && (e.status = "interrupted");
-	sf(i, C, _);
-	let w = gf(t, C, l.rawText(), l.callerResult?.(), _, {
+	of(i, C, _);
+	let w = hf(t, C, l.rawText(), l.callerResult?.(), _, {
 		usage: v,
 		requests: y,
 		durationMs: Date.now() - g,
@@ -6994,7 +7039,7 @@ async function hf(t, n, r, i, a, s) {
 	});
 	return w.toolCalls = x, x && (w.content = ""), i.status = b ? "aborted" : "done", w;
 }
-function gf(t, n, r, i, a, o) {
+function hf(t, n, r, i, a, o) {
 	let { preset: s, config: c } = t, l = [...t.warnings, ...n.warnings], u = n.content, d, f, p, m = t.stages.find((e) => e.kind === "patch"), h = m ? n.stages[m.id]?.patches : void 0;
 	if (m && h?.length && u && !o.interrupted) {
 		let e = oc(u, h);
@@ -7059,43 +7104,43 @@ function gf(t, n, r, i, a, o) {
 		reasoning: a,
 		sidecar: E
 	};
-	return T ? lf.pending = {
+	return T ? cf.pending = {
 		ctx: t,
 		outcome: te,
 		at: Date.now()
 	} : e().eventSource.emit("advanced_preset_generation_completed", {
 		genId: t.id,
 		sidecar: E
-	}), af.current?.genId === t.id && (af.current.structures = n.structures), te;
+	}), rf.current?.genId === t.id && (rf.current.structures = n.structures), te;
 }
 //#endregion
 //#region src/core/fetch-gate.ts
-var _f = "__ap_gen_id";
-function vf(e) {
+var gf = "__ap_gen_id";
+function _f(e) {
 	return typeof e == "string" ? e : e instanceof URL ? e.href : e.url;
 }
-function yf() {
+function vf() {
 	let e = globalThis.fetch;
 	if (e.__apGate) return;
 	p(e.bind(globalThis));
 	let t = async function(t, n) {
-		if (n?.method === "POST" && typeof n.body == "string" && n.body.includes("__ap_gen_id") && new URL(vf(t), location.href).pathname === "/api/backends/chat-completions/generate") {
+		if (n?.method === "POST" && typeof n.body == "string" && n.body.includes("__ap_gen_id") && new URL(_f(t), location.href).pathname === "/api/backends/chat-completions/generate") {
 			let e = null;
 			try {
 				e = JSON.parse(n.body);
 			} catch {
 				e = null;
 			}
-			let t = e?.[_f], r = typeof t == "string" ? cu.get(t) : void 0;
+			let t = e?.[gf], r = typeof t == "string" ? cu.get(t) : void 0;
 			if (e && r && !r.claimed) {
-				delete e[_f], r.claimed = !0;
+				delete e[gf], r.claimed = !0;
 				try {
-					return await ff(r, e, n.signal);
+					return await df(r, e, n.signal);
 				} finally {
 					cu.release(t);
 				}
 			}
-			e && (delete e[_f], n = {
+			e && (delete e[gf], n = {
 				...n,
 				body: JSON.stringify(e)
 			});
@@ -7104,26 +7149,26 @@ function yf() {
 	};
 	t.__apGate = !0, globalThis.fetch = t;
 }
-function bf(e) {
+function yf(e) {
 	let t = cu.takeArmed();
-	t && (e[_f] = t.id);
+	t && (e[gf] = t.id);
 }
 //#endregion
 //#region src/app/receive.ts
-var xf = 6e5, Sf = /* @__PURE__ */ new Set(["impersonate", "quiet"]);
-async function Cf(t, n) {
-	let r = lf.pending;
-	if (!r || Date.now() - r.at > xf || Sf.has(n ?? "")) return;
+var bf = 6e5, xf = /* @__PURE__ */ new Set(["impersonate", "quiet"]);
+async function Sf(t, n) {
+	let r = cf.pending;
+	if (!r || Date.now() - r.at > bf || xf.has(n ?? "")) return;
 	let i = e().chat[t];
 	if (!i || i.is_user) return;
-	lf.pending = null;
+	cf.pending = null;
 	let { outcome: a } = r;
-	a.content && i.mes !== a.content && (i.mes = a.content, Array.isArray(i.swipes) && (i.swipes[i.swipe_id ?? 0] = a.content)), Il(t, a.sidecar), af.current?.genId === r.ctx.id && (af.current.mesId = t), e().updateMessageBlock(t, i), await e().saveChat(), await e().eventSource.emit("advanced_preset_message_updated", t);
+	a.content && i.mes !== a.content && (i.mes = a.content, Array.isArray(i.swipes) && (i.swipes[i.swipe_id ?? 0] = a.content)), Il(t, a.sidecar), rf.current?.genId === r.ctx.id && (rf.current.mesId = t), e().updateMessageBlock(t, i), await e().saveChat(), await e().eventSource.emit("advanced_preset_message_updated", t);
 }
 //#endregion
 //#region src/app/updater.ts
-var wf = "advancedPreset.reloadedFor";
-async function Tf() {
+var Cf = "advancedPreset.reloadedFor";
+async function wf() {
 	try {
 		let e = await f(`${a()}dist/build.json?t=${Date.now()}`, { cache: "no-store" });
 		return e.ok ? (await e.json()).id ?? null : null;
@@ -7131,30 +7176,30 @@ async function Tf() {
 		return null;
 	}
 }
-function Ef(e) {
-	sessionStorage.setItem(wf, e), d("info", Y("update.reloading")), setTimeout(() => location.reload(), 3e3);
+function Tf(e) {
+	sessionStorage.setItem(Cf, e), d("info", Y("update.reloading")), setTimeout(() => location.reload(), 3e3);
+}
+async function Ef() {
+	let e = await wf();
+	e && e !== "f7040f6cbf707ed5" && sessionStorage.getItem(Cf) !== e && Tf(e);
 }
 async function Df() {
-	let e = await Tf();
-	e && e !== "5edccd6084ba1161" && sessionStorage.getItem(wf) !== e && Ef(e);
+	await Ef();
 }
 async function Of() {
-	await Df();
+	let e = i().replace(/^third-party\//, ""), t = await kf(e, !1);
+	if (t.status === 404 && (t = await kf(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
+	let n = await t.json(), r = await wf();
+	return r && r !== "f7040f6cbf707ed5" ? (Tf(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
-async function kf() {
-	let e = i().replace(/^third-party\//, ""), t = await Af(e, !1);
-	if (t.status === 404 && (t = await Af(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
-	let n = await t.json(), r = await Tf();
-	return r && r !== "5edccd6084ba1161" ? (Ef(r), "updated") : n.isUpToDate ? "current" : "updated";
-}
-var Af = (t, n) => f("/api/extensions/update", {
+var kf = (t, n) => f("/api/extensions/update", {
 	method: "POST",
 	headers: e().getRequestHeaders(),
 	body: JSON.stringify({
 		extensionName: t,
 		global: n
 	})
-}), X = /* @__PURE__ */ $t({
+}), Af = /* @__PURE__ */ $t({
 	status: "off",
 	presetId: "",
 	hash: "",
@@ -7167,21 +7212,21 @@ async function Nf() {
 	let n = e.replace(/\/+$/, "");
 	try {
 		let e = await (await f(`${n}/`, { cache: "no-store" })).json();
-		if (X.status = "online", X.error = e.ok === !1 ? "build failed" : "", X.at = Date.now(), !e.hash || e.hash === X.hash) return;
+		if (Af.status = "online", Af.error = e.ok === !1 ? "build failed" : "", Af.at = Date.now(), !e.hash || e.hash === Af.hash) return;
 		let t = Wc(await (await f(`${n}/preset`, { cache: "no-store" })).json());
 		if (!t) throw Error("not an Advanced Preset artifact");
-		X.presetId && X.presetId !== t.id && Qc(null, X.presetId), Qc(t), X.presetId = t.id, X.hash = t.hash, pl(t), await kl(t), bu("dev", {
+		Af.presetId && Af.presetId !== t.id && Qc(null, Af.presetId), Qc(t), Af.presetId = t.id, Af.hash = t.hash, pl(t), await kl(t), bu("dev", {
 			id: t.id,
 			version: t.version,
 			hash: t.hash
 		});
 	} catch (e) {
-		X.status = "error", X.error = e instanceof Error ? e.message : String(e);
+		Af.status = "error", Af.error = e instanceof Error ? e.message : String(e);
 	}
 }
 function Pf() {
 	if (Mf && clearTimeout(Mf), Mf = null, !q().dev.enabled) {
-		X.presetId && Qc(null, X.presetId), Object.assign(X, {
+		Af.presetId && Qc(null, Af.presetId), Object.assign(Af, {
 			status: "off",
 			presetId: "",
 			hash: "",
@@ -7189,7 +7234,7 @@ function Pf() {
 		});
 		return;
 	}
-	X.status === "off" && (X.status = "connecting");
+	Af.status === "off" && (Af.status = "connecting");
 	let e = async () => {
 		await Nf(), q().dev.enabled && (Mf = setTimeout(e, jf));
 	};
@@ -7197,7 +7242,7 @@ function Pf() {
 }
 function Ff() {
 	ir(() => [q().dev.enabled, q().dev.url], () => {
-		X.hash = "", Pf();
+		Af.hash = "", Pf();
 	}, { immediate: !0 });
 }
 //#endregion
@@ -7384,7 +7429,7 @@ function hp(e, t) {
 function gp(t) {
 	let n = Number(t.getAttribute("mesid")), r = t.querySelector(":scope > .mes_block"), i = r?.querySelector(":scope > .mes_text");
 	if (!r || !i || Number.isNaN(n)) return;
-	let a = e().chat[n], o = Fl(a), s = af.current?.mesId === n, c = !(!a || a.is_user || !o && !s), l = r.querySelector(":scope > ap-stages"), u = r.querySelector(":scope > ap-cards");
+	let a = e().chat[n], o = Fl(a), s = rf.current?.mesId === n, c = !(!a || a.is_user || !o && !s), l = r.querySelector(":scope > ap-stages"), u = r.querySelector(":scope > ap-cards");
 	c ? ((!l || l.nextElementSibling !== i) && (l?.remove(), l = hp("ap-stages", n), i.before(l)), (!u || u.previousElementSibling !== i) && (u?.remove(), u = hp("ap-cards", n), i.after(u)), l.getAttribute("mesid") !== String(n) && l.setAttribute("mesid", String(n)), u.getAttribute("mesid") !== String(n) && u.setAttribute("mesid", String(n)), i.classList.toggle(pp, !!(!s && o && mp.includes(o.turn)))) : (l?.remove(), u?.remove(), i.classList.remove(pp));
 }
 function _p(e = document) {
@@ -7438,13 +7483,13 @@ function wp() {
 	};
 	r();
 	let i;
-	ir(() => af.current && af.current.status === "running" && af.current.streaming && af.current.mesId === null, (t) => {
+	ir(() => rf.current && rf.current.status === "running" && rf.current.streaming && rf.current.mesId === null, (t) => {
 		clearInterval(i), t && (i = setInterval(() => {
-			let t = af.current, n = e().streamingProcessor?.messageId;
+			let t = rf.current, n = e().streamingProcessor?.messageId;
 			if (!t || t.status !== "running") return clearInterval(i);
 			typeof n == "number" && n >= 0 && (t.mesId = n, clearInterval(i), Cp());
 		}, 100));
-	}), ir(() => af.current?.status, () => Sp());
+	}), ir(() => rf.current?.status, () => Sp());
 }
 //#endregion
 //#region src/ui/entry.ts
@@ -8504,7 +8549,7 @@ function Qm(e, t) {
 }
 function $m(e) {
 	return K(() => {
-		let t = e(), n = Zf(t), r = af.current;
+		let t = e(), n = Zf(t), r = rf.current;
 		if (r && r.mesId === t && (r.status === "running" || !n || n.genId !== r.genId)) {
 			let e = Yc(r.presetId);
 			return {
@@ -9030,7 +9075,7 @@ var gh = { class: "reply-name xs" }, _h = ["innerHTML"], vh = /* @__PURE__ */ L(
 }, rg = /* @__PURE__ */ L({
 	__name: "Dock",
 	setup(e) {
-		let t = K(() => af.current && !af.current.streaming && af.current.status === "running" ? af.current : null), n = K(() => {
+		let t = K(() => rf.current && !rf.current.streaming && rf.current.status === "running" ? rf.current : null), n = K(() => {
 			let e = t.value;
 			if (!e) return [];
 			let n = Yc(e.presetId);
@@ -9250,7 +9295,7 @@ var fg = { class: "field-label" }, pg = { class: "ellipsis" }, mg = {
 		}, Y("presets.installed")), l = (e) => {
 			let t = e.target.files?.[0];
 			t && o("file", () => ug(t), Y("presets.installed")), e.target.value = "";
-		}, u = (e) => o(`update:${e.preset.id}`, () => lg(q().sources[e.preset.id]), Y("presets.updated")), f = (e) => o(`remove:${e.preset.id}`, () => dg(e.preset.id)), p = () => o("ext", async () => d("info", await kf() === "current" ? Y("update.none") : Y("update.reloading")));
+		}, u = (e) => o(`update:${e.preset.id}`, () => lg(q().sources[e.preset.id]), Y("presets.updated")), f = (e) => o(`remove:${e.preset.id}`, () => dg(e.preset.id)), p = () => o("ext", async () => d("info", await Of() === "current" ? Y("update.none") : Y("update.reloading")));
 		return (e, o) => (B(), V(z, null, [
 			U("div", xg, [
 				U("button", {
@@ -10407,7 +10452,7 @@ var Lg = { class: "empty" }, Rg = /* @__PURE__ */ L({
 				icon: F(Dm),
 				help: F(Y)("debug.dev.hint")
 			}, {
-				actions: I(() => [U("span", Z_, [U("span", { class: A(["dot status-dot", F(X).status]) }, null, 2), sa(j(F(Y)(`debug.dev.${F(X).status}`)), 1)])]),
+				actions: I(() => [U("span", Z_, [U("span", { class: A(["dot status-dot", F(Af).status]) }, null, 2), sa(j(F(Y)(`debug.dev.${F(Af).status}`)), 1)])]),
 				default: I(() => [W(gg, { label: F(Y)("debug.dev.url") }, {
 					default: I(() => [U("div", Q_, [Zn(U("input", {
 						"onUpdate:modelValue": t[0] ||= (e) => p.value = e,
@@ -10425,7 +10470,7 @@ var Lg = { class: "empty" }, Rg = /* @__PURE__ */ L({
 						label: F(Y)("debug.dev")
 					}, null, 8, ["modelValue", "label"])])]),
 					_: 1
-				}, 8, ["label"]), F(X).error ? (B(), V("span", $_, j(F(X).error), 1)) : G("", !0)]),
+				}, 8, ["label"]), F(Af).error ? (B(), V("span", $_, j(F(Af).error), 1)) : G("", !0)]),
 				_: 1
 			}, 8, [
 				"title",
@@ -10531,7 +10576,7 @@ var Lg = { class: "empty" }, Rg = /* @__PURE__ */ L({
 				]), U("pre", kv, j(s(e.data)), 1)]))), 128)), m.value.length ? G("", !0) : (B(), V("div", Av, j(F(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			U("div", jv, "Advanced Preset " + j(F("1.1.0")) + " · " + j(F("5edccd6084ba1161")), 1)
+			U("div", jv, "Advanced Preset " + j(F("1.1.0")) + " · " + j(F("f7040f6cbf707ed5")), 1)
 		], 64));
 	}
 }), Nv = ["aria-label"], Pv = { class: "panel-head" }, Fv = { class: "panel-logo" }, Iv = { class: "grow" }, Lv = { class: "panel-title ellipsis" }, Rv = { class: "panel-sub ellipsis" }, zv = {
@@ -10679,7 +10724,7 @@ function $v() {
 //#region src/index.ts
 var ey = {
 	version: "1.1.0",
-	buildId: "5edccd6084ba1161",
+	buildId: "f7040f6cbf707ed5",
 	nextGeneration: (e) => Ql(e),
 	listPresets: () => Gc().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -10688,7 +10733,7 @@ var ey = {
 		source: t
 	})),
 	activePresetId: () => wl(),
-	update: kf
+	update: Of
 };
 globalThis.advancedPresetInterceptor = _u, window.AdvancedPreset = ey;
 function ty(e, t) {
@@ -10706,7 +10751,7 @@ async function ny() {
 }
 async function ry() {
 	let { eventSource: t, eventTypes: n } = e();
-	q(), yf(), Vf(), await r(), await Uc();
+	q(), vf(), Vf(), await r(), await Uc();
 	for (let { preset: e } of Gc()) {
 		let t = pl(e);
 		t.length && bu("migrate", {
@@ -10714,7 +10759,7 @@ async function ry() {
 			notes: t
 		});
 	}
-	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => Mu(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => bf(e)), t.on(n.MESSAGE_RECEIVED, (e, t) => Cf(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
+	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => Mu(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => yf(e)), t.on(n.MESSAGE_RECEIVED, (e, t) => Sf(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		cu.setPending(null), cu.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => cu.sweep());
 	let i = ty(() => {
@@ -10723,15 +10768,15 @@ async function ry() {
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, i), t.on(n.OAI_PRESET_CHANGED_AFTER, i);
 	let a = async () => {
-		await ny(), Ff(), Df();
+		await ny(), Ff(), Ef();
 	};
 	t.on(n.APP_READY, () => void a()), $v(), bu("init", {
 		version: "1.1.0",
-		build: "5edccd6084ba1161",
+		build: "f7040f6cbf707ed5",
 		enabled: q().enabled
 	});
 }
-var iy = Of;
+var iy = Df;
 ry().catch((e) => console.error("[AP] init failed", e));
 //#endregion
 export { iy as advancedPresetOnUpdate };

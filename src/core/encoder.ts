@@ -31,18 +31,48 @@ export interface StreamEncoder {
 export function streamEncoder(family: Family): StreamEncoder {
   switch (family) {
     case 'claude': {
-      let next = 1;
+      // A well-formed Messages stream: hosts such as TauriTavern validate block order strictly
+      // (start → deltas → stop per index, message_stop with no open block).
+      let started = false;
+      let index = -1;
+      let open: 'text' | 'thinking' | null = null;
+      let toolUse = false;
+      const head = () => {
+        if (started) return '';
+        started = true;
+        return sse({ type: 'message_start', message: { id: `msg_ap_${Date.now().toString(36)}`, type: 'message', role: 'assistant', content: [], model: '', stop_reason: null, stop_sequence: null, usage: { input_tokens: 0, output_tokens: 0 } } });
+      };
+      const close = () => {
+        if (open === null) return '';
+        open = null;
+        return sse({ type: 'content_block_stop', index });
+      };
+      const block = (kind: 'text' | 'thinking') => {
+        if (open === kind) return head();
+        const out = head() + close();
+        index++;
+        open = kind;
+        return out + sse({ type: 'content_block_start', index, content_block: kind === 'text' ? { type: 'text', text: '' } : { type: 'thinking', thinking: '', signature: '' } });
+      };
       return {
-        text: (t) => (t ? sse({ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: t } }) : ''),
-        reasoning: (t) => (t ? sse({ type: 'content_block_delta', index: 0, delta: { type: 'thinking_delta', thinking: t } }) : ''),
-        toolCalls: (calls) => calls.map((c) => {
-          const index = next++;
-          return sse({ type: 'content_block_start', index, content_block: { type: 'tool_use', id: c.id, name: c.name, input: {} } })
-            + sse({ type: 'content_block_delta', index, delta: { type: 'input_json_delta', partial_json: c.arguments || '{}' } })
-            + sse({ type: 'content_block_stop', index });
-        }).join(''),
-        error: (message) => sse({ type: 'error', error: { message } }),
-        end: () => sse({ type: 'message_stop' }),
+        text: (t) => (t ? block('text') + sse({ type: 'content_block_delta', index, delta: { type: 'text_delta', text: t } }) : ''),
+        reasoning: (t) => (t ? block('thinking') + sse({ type: 'content_block_delta', index, delta: { type: 'thinking_delta', thinking: t } }) : ''),
+        toolCalls: (calls) => {
+          if (!calls.length) return '';
+          let out = head() + close();
+          for (const c of calls) {
+            index++;
+            toolUse = true;
+            out += sse({ type: 'content_block_start', index, content_block: { type: 'tool_use', id: c.id, name: c.name, input: {} } })
+              + sse({ type: 'content_block_delta', index, delta: { type: 'input_json_delta', partial_json: c.arguments || '{}' } })
+              + sse({ type: 'content_block_stop', index });
+          }
+          return out;
+        },
+        error: (message) => sse({ type: 'error', error: { type: 'api_error', message } }),
+        end: () => head() + close()
+          + sse({ type: 'message_delta', delta: { stop_reason: toolUse ? 'tool_use' : 'end_turn', stop_sequence: null }, usage: { output_tokens: 0 } })
+          + sse({ type: 'message_stop' }),
       };
     }
     case 'gemini':

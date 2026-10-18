@@ -72,3 +72,37 @@ describe('connection-aware response family', () => {
     expect(states.at(-1)!.text).toBe('外套落下来的时候，墨笙的肩膀缩了一下。');
   });
 });
+
+describe('Claude stream is well-formed for strict hosts (TauriTavern)', () => {
+  const events = (body: string) => body.split('\n\n').filter(Boolean).map((b) => JSON.parse(b.replace(/^data: /, '')));
+  const consumeAll = async (body: string) => {
+    // @ts-expect-error plain JS fixture copied from TauriTavern
+    const { ClaudeNativeStreamAccumulator } = await import('./fixtures/claude-native-stream.js');
+    const acc = new ClaudeNativeStreamAccumulator();
+    for (const e of events(body)) acc.consume(e);
+    return acc.finish();
+  };
+
+  it('story text, then reasoning', async () => {
+    const enc = streamEncoder('claude');
+    const body = enc.text('外套') + enc.text('落下来') + enc.reasoning('想法') + enc.end();
+    const native = await consumeAll(body);
+    expect(native.claude.content.map((b: any) => b.type)).toEqual(['text', 'thinking']);
+    expect(native.claude.content[0].text).toBe('外套落下来');
+    expect(native.claude.stop_reason).toBe('end_turn');
+  });
+
+  it('caller tool calls after text', async () => {
+    const enc = streamEncoder('claude');
+    const body = enc.text('ok') + enc.toolCalls([{ id: 't1', name: 'a', arguments: '{"x":1}' }, { id: 't2', name: 'b', arguments: '' }]) + enc.end();
+    const native = await consumeAll(body);
+    expect(native.claude.content.map((b: any) => b.type)).toEqual(['text', 'tool_use', 'tool_use']);
+    expect(native.claude.content[1].input).toEqual({ x: 1 });
+    expect(native.claude.stop_reason).toBe('tool_use');
+  });
+
+  it('empty turn still closes the message', async () => {
+    const enc = streamEncoder('claude');
+    await expect(consumeAll(enc.end())).resolves.toBeTruthy();
+  });
+});
