@@ -224,12 +224,15 @@ export interface ObjectOptions {
   final: boolean;
   /** Keys still being streamed (the last key of a partial object). */
   openKey?: string;
+  /** Field name of a stage (defaults to the default template). */
+  fieldOf?: (stage: Stage) => string;
 }
 
 /** Parse a turn object (structured output / single tool arguments). */
 export function parseTurnObject(obj: Record<string, unknown> | null | undefined, o: ObjectOptions): TurnResult {
   const r = emptyTurn(o.stages);
   const src = obj ?? {};
+  const fieldOf = o.fieldOf ?? ((s: Stage) => stageFieldName(o.stages, s));
   const findKey = (name: string, stage?: Stage) => {
     if (name in src) return src[name];
     if (stage) {
@@ -241,7 +244,7 @@ export function parseTurnObject(obj: Record<string, unknown> | null | undefined,
   };
   let lastPresent: string | null = null;
   for (const s of o.stages) {
-    const v = findKey(stageFieldName(o.stages, s), s);
+    const v = findKey(fieldOf(s), s);
     if (v === undefined) continue;
     lastPresent = s.id;
     if (s.kind === 'patch') r.stages[s.id]!.patches = normalizePatches(v);
@@ -255,7 +258,7 @@ export function parseTurnObject(obj: Record<string, unknown> | null | undefined,
   }
   const terminal = terminalContentIndex(o.stages);
   if (!o.final) {
-    const openStage = o.stages.find((s) => stageFieldName(o.stages, s) === o.openKey || s.id === o.openKey);
+    const openStage = o.stages.find((s) => fieldOf(s) === o.openKey || s.id === o.openKey);
     r.current = openStage?.id ?? (o.openKey ? null : lastPresent);
   }
   if (terminal >= 0 && r.stages[o.stages[terminal]!.id]!.text !== undefined) r.contentStarted = true;

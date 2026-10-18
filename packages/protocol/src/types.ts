@@ -7,11 +7,12 @@
  */
 import type { Expr } from './expr';
 
-export const FORMAT_VERSION = 1 as const;
-
-/** Fixed tool names (the preset only supplies descriptions and the stage-tool prefix). */
-export const SUBMIT_TOOL = 'ap_submit_turn';
-export const STRUCTURES_TOOL = 'ap_structures';
+/**
+ * 2: every model-visible text of the transport layer (tool names / descriptions, parameter names,
+ * schema descriptions, tool results) comes from the preset (`tools`, `Stage.field`, `Stage.tool`,
+ * `StructureDecl.properties`). Version 1 artifacts are upgraded on load (`upgradeArtifact`).
+ */
+export const FORMAT_VERSION = 2 as const;
 
 export type Transport = 'prefill' | 'plaintext' | 'structured' | 'tool-single' | 'tool-multi';
 export const TRANSPORTS: readonly Transport[] = ['prefill', 'plaintext', 'structured', 'tool-single', 'tool-multi'];
@@ -135,6 +136,10 @@ export interface Stage {
   tag?: string;
   /** Reserved request-segment hook (D10). v1 only accepts `default`. */
   executor?: 'default';
+  /** Structured output / single tool: this stage's field. `name` overrides `tools.turn.field`. */
+  field?: Partial<FieldText>;
+  /** Multi-step tools: this stage's tool. Unset parts fall back to `tools.stage`. */
+  tool?: { name?: string; description?: string; param?: Partial<FieldText> };
 }
 
 export interface WorkflowSections {
@@ -166,6 +171,8 @@ export interface StructureDecl {
   tag: string;
   field: string;
   description?: string;
+  /** Descriptions of the kind's sub-fields (e.g. memory `key`, synopsis `time`), keyed by the fixed sub-field name. */
+  properties?: Record<string, string>;
   /** options: number of options requested */
   count?: number;
   /** custom only */
@@ -208,6 +215,41 @@ export interface SyntheticTurn {
   thoughtSignature?: string;
   /** Tool results by tool mode. `{{first}}` = first stage tool. */
   response: { single: string; multi: string; parallel: string };
+}
+
+/** Model-visible name and description of a field / parameter. */
+export interface FieldText {
+  name: string;
+  description?: string;
+}
+
+/**
+ * Model-visible texts of the transport layer. The extension only defines the semantics (which
+ * tools exist, their parameter shapes, the loop); every name and description comes from here.
+ *
+ * Name / description templates may use `{{n}}` (1-based position among the active stages),
+ * `{{stage}}` (stage id), `{{actor}}` (actor id) and `{{label}}` (stage label). Descriptions and
+ * result texts are macro-expanded (`{{ap::…}}`, then ST macros) at request time.
+ */
+export interface ToolsDecl {
+  /** Structured output (`json_schema`): schema name / description, stage field-name and field-description templates. */
+  turn: { name: string; description?: string; field: string; fieldDescription?: string };
+  /** Single-step tool carrying the whole turn. */
+  submit: { name: string; description?: string };
+  /** Multi-step stage tools (defaults; each stage may override via `Stage.tool`). */
+  stage: { name: string; description?: string; param: FieldText; patchParam: FieldText };
+  /** Descriptions inside patch edits (`old_string` / `new_string` are fixed keys). */
+  patch: { description?: string; old?: string; new?: string };
+  /** Task turns with a caller JSON schema: `{ <thinking>, <result> }`. */
+  envelope: { thinking: FieldText; result: FieldText };
+  /**
+   * Multi-step loop texts. `next`: tool result after a stage (`{{next}}` = next tool); `done`: tool
+   * result after the last stage; `unknown`: result of an unknown tool (`{{name}}`); `nudge`: user
+   * message when the model stops early (`{{next}}`). `{{submit}}` / `{{first}}` are also available.
+   */
+  results: { next: string; done: string; unknown: string; nudge: string };
+  /** Appended to the description of free-form maps sent as JSON-encoded strings (Gemini). */
+  jsonStringHint?: string;
 }
 
 export interface CarrierPrompt {
@@ -328,7 +370,7 @@ export interface APreset {
   meta: MetaDecl;
   tokenSaving: TokenSavingDecl;
   syntheticTurns: SyntheticTurn[];
-  tools: { submit: string; stagePrefix: string; structures: string; stageResult: string; nudge: string };
+  tools: ToolsDecl;
   theme: ThemeDecl;
   carrier: CarrierDecl;
   configurationDefaults: Configuration;
