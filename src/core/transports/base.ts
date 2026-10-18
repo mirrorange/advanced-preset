@@ -3,9 +3,10 @@
  * turns accumulated response state into a TurnResult, and decides whether another segment is needed.
  */
 import {
-  actorName, emptyTurn, toGeminiSchema, toGeminiTools, SUBMIT_TOOL, stageToolName, type JsonSchema, type Stage, type TurnResult,
+  actorName, emptyTurn, fillTemplate, toGeminiSchema, toGeminiTools, turnArtifacts,
+  type APreset, type JsonSchema, type TurnArtifacts, type TurnResult,
 } from '@advanced-preset/protocol';
-import type { ChatMessage } from '@/st/host';
+import { st, type ChatMessage } from '@/st/host';
 import type { GenerationContext } from '../context';
 import type { ReadState, ToolCallAcc } from '../reader';
 
@@ -45,7 +46,31 @@ export interface DriverInput {
   family: 'openai' | 'claude' | 'gemini' | 'cohere';
 }
 
-export const isApTool = (name: string) => name.startsWith('ap_');
+/**
+ * Every tool name the preset can expose (submit, stage tools of every workflow, synthetic turns).
+ * Used to drop our own tools from a caller's tool list.
+ */
+export function presetToolNames(preset: APreset): Set<string> {
+  const names = new Set<string>([preset.tools.submit.name, ...preset.syntheticTurns.map((t) => t.tool.name)]);
+  for (const w of preset.workflows) {
+    const variants = [w.stages, w.stages.filter((s) => !s.when)];
+    for (const stages of variants) for (const n of turnArtifacts(preset.tools, w, stages, []).toolNames()) names.add(n);
+  }
+  return names;
+}
+
+/** Description text: `{{ap::…}}` macros, then ST macros (`{{user}}`, …) when SillyTavern is present. */
+export function textExpander(ctx: GenerationContext): (text: string) => string {
+  return (text) => {
+    const ap = ctx.assembly ? ctx.assembly.expand(text) : text;
+    try { return st().substituteParams(ap); } catch { return ap; }
+  };
+}
+
+/** Schema / tool names and descriptions of this turn, all from the preset. */
+export function artifactsOf(ctx: GenerationContext): TurnArtifacts {
+  return turnArtifacts(ctx.preset.tools, ctx.workflow!, ctx.stages, ctx.structures, textExpander(ctx));
+}
 
 export function prefixesOf(ctx: GenerationContext): Record<string, string> {
   const { preset, config, assembly } = ctx;
@@ -57,12 +82,11 @@ export function prefixesOf(ctx: GenerationContext): Record<string, string> {
   return out;
 }
 
-/** `{{next}}` / `{{first}}` / `{{submit}}` placeholders of tool texts. */
-export function fillToolText(text: string, vars: { next?: string; first?: string }): string {
-  return text.replaceAll('{{submit}}', SUBMIT_TOOL).replaceAll('{{next}}', vars.next ?? '').replaceAll('{{first}}', vars.first ?? '');
+/** `{{next}}` / `{{first}}` / `{{submit}}` / `{{name}}` placeholders of tool texts, then macros. */
+export function fillToolText(ctx: GenerationContext, text: string, vars: { next?: string; first?: string; name?: string }): string {
+  const filled = fillTemplate(text, { submit: ctx.preset.tools.submit.name, next: vars.next ?? '', first: vars.first ?? '', name: vars.name ?? '' });
+  return textExpander(ctx)(filled);
 }
-
-export const stageTool = (ctx: GenerationContext, s: Stage) => stageToolName(ctx.preset.tools.stagePrefix, s);
 
 /** Synthetic workflow-init turn (§10.5) placed after the assembled prompt. */
 export function syntheticTurn(input: DriverInput, mode: 'single' | 'multi' | 'parallel', first: string): { messages: ChatMessage[]; tool: any } | null {
@@ -72,24 +96,15 @@ export function syntheticTurn(input: DriverInput, mode: 'single' | 'multi' | 'pa
   if (!turn) return null;
   const callId = `call_${turn.id}_init`;
   const signature = ctx.config.connection.sendThoughtSignature && family === 'gemini' ? turn.thoughtSignature : undefined;
-  const expand = (s: string) => (ctx.assembly ? ctx.assembly.expand(s) : s);
+  const expand = textExpander(ctx);
+  const description = expand(turn.tool.description);
   return {
-    tool: { type: 'function', function: { name: turn.tool.name, description: turn.tool.description, parameters: { type: 'object', properties: {} } } },
+    tool: { type: 'function', function: { name: turn.tool.name, ...(description ? { description } : {}), parameters: { type: 'object', properties: {} } } },
     messages: [
       { role: 'user', content: expand(turn.user) },
       { role: 'assistant', content: '', tool_calls: [{ id: callId, type: 'function', function: { name: turn.tool.name, arguments: '{}' }, ...(signature ? { signature } : {}) }] },
-      { role: 'tool', tool_call_id: callId, content: fillToolText(expand(turn.response[mode]), { first }) },
+      { role: 'tool', tool_call_id: callId, content: fillToolText(ctx, turn.response[mode], { first }) },
     ],
-  };
-}
-
-/** Wrap a caller schema for task calls (D18): `{ thinking, result }`. */
-export function callerEnvelope(schema: JsonSchema): JsonSchema {
-  return {
-    type: 'object',
-    properties: { thinking: { type: 'string' }, result: schema },
-    required: ['thinking', 'result'],
-    additionalProperties: false,
   };
 }
 
@@ -100,14 +115,15 @@ export function baseBody(input: DriverInput, extra: Record<string, unknown> = {}
   delete body.json_schema;
   if (input.caller.tools.length) { body.tools = input.caller.tools; body.tool_choice = input.caller.toolChoice ?? 'auto'; }
   Object.assign(body, extra);
-  if (input.family === 'gemini') forGemini(body);
+  if (input.family === 'gemini') forGemini(body, input.ctx.preset.tools.jsonStringHint);
   return body;
 }
 
 /** Gemini only takes an OpenAPI subset of JSON Schema (no `type: [..]`, `additionalProperties`, …). */
-function forGemini(body: Record<string, any>): void {
-  if (Array.isArray(body.tools)) body.tools = toGeminiTools(body.tools);
-  if (body.json_schema?.value) body.json_schema = { ...body.json_schema, value: toGeminiSchema(body.json_schema.value) };
+function forGemini(body: Record<string, any>, jsonStringHint?: string): void {
+  const opts = { jsonStringHint };
+  if (Array.isArray(body.tools)) body.tools = toGeminiTools(body.tools, opts);
+  if (body.json_schema?.value) body.json_schema = { ...body.json_schema, value: toGeminiSchema(body.json_schema.value, opts) };
 }
 
 export function callerCalls(read: ReadState, caller: CallerInfo): ToolCallAcc[] {

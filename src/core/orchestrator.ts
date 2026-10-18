@@ -14,7 +14,7 @@ import type { Sidecar, SidecarStage, TurnKind } from '@/store/sidecar';
 import { t } from '@/i18n';
 import type { GenerationContext } from './context';
 import { createDriver, type CallerInfo } from './transports';
-import { isApTool } from './transports/base';
+import { presetToolNames } from './transports/base';
 import { encodeJson, errorResponse, familyOf, streamEncoder, type EncodedToolCall } from './encoder';
 import { BackendError, readResponse, type ReadState } from './reader';
 import { live, startLive, updateLive, type LiveGeneration } from './live';
@@ -46,8 +46,9 @@ export async function orchestrate(ctx: GenerationContext, base: Record<string, a
   const err = capabilityError(ctx);
   if (err) { toast('error', err, 'Advanced Preset'); return errorResponse(err, 400); }
 
+  const ours = ctx.origin === 'task' ? presetToolNames(ctx.preset) : new Set<string>();
   const caller: CallerInfo = ctx.origin === 'task'
-    ? { tools: (base.tools ?? []).filter((x: any) => !isApTool(x?.function?.name ?? '')), toolChoice: base.tool_choice, schema: base.json_schema ?? undefined }
+    ? { tools: (base.tools ?? []).filter((x: any) => !ours.has(x?.function?.name ?? '')), toolChoice: base.tool_choice, schema: base.json_schema ?? undefined }
     : { tools: [] };
   const g = startLive(ctx, stream);
 
