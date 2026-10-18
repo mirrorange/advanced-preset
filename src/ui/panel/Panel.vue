@@ -3,9 +3,8 @@
 import { computed, onBeforeUnmount, onMounted, type Component } from 'vue';
 import { Blocks, Brain, Bug, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
-import { presetState } from '@/store/config';
-import { t, pt } from '@/i18n';
-import { activePreset, ui, type PanelTab } from '../state';
+import { t } from '@/i18n';
+import { activePreset, presetSummary, ui, type PanelTab } from '../state';
 import IconButton from '../components/IconButton.vue';
 import Switch from '../components/Switch.vue';
 import PresetsTab from './tabs/PresetsTab.vue';
@@ -28,12 +27,7 @@ const current = computed(() => tabs.find((x) => x.id === ui.tab) ?? tabs[0]!);
 const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => { settings().enabled = v; save(); } });
 const subtitle = computed(() => {
   const p = activePreset.value;
-  if (!p) return t('panel.noPreset');
-  const ref = presetState(p).active.ref;
-  const name = ref.kind === 'saved'
-    ? presetState(p).saved.find((c) => c.id === ref.id)?.name ?? ''
-    : pt(p, 'configurations', ref.id, 'name', p.configurations.find((c) => c.id === ref.id)?.name ?? ref.id);
-  return `v${p.version} · ${name}`;
+  return p ? `v${p.version} · ${presetSummary.value.config}` : t('panel.noPreset');
 });
 
 const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && ui.panelOpen) ui.panelOpen = false; };

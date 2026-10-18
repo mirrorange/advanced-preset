@@ -4,13 +4,16 @@ export default async function (page, shots) {
   // open extensions drawer
   await page.locator('#extensions-settings-button .drawer-toggle').click();
   await page.waitForTimeout(800);
-  const row = page.locator('ap-settings');
-  console.log('settings row', await row.count());
-  if (await row.count()) await row.first().screenshot({ path: `${shots}/ext-row.png` });
-  await page.locator('#extensions-settings-button .drawer-toggle').click();
-  await page.waitForTimeout(400);
-  await page.evaluate(() => document.getElementById('ap-preset-button').click());
-  await page.waitForTimeout(300);
+  const block = page.locator('#advanced_preset_settings');
+  console.log('settings block', await block.count());
+  await block.screenshot({ path: `${shots}/ext-collapsed.png` });
+  await block.locator('.inline-drawer-toggle').click();
+  await page.waitForTimeout(500);
+  await page.locator('#extensions_settings2').screenshot({ path: `${shots}/ext-expanded.png` });
+  // "Open panel" closes the extensions drawer and opens the AI Response Configuration drawer with AP on top.
+  await block.locator('.menu_button').click();
+  await page.waitForTimeout(800);
+  console.log('drawer open', await page.evaluate(() => document.getElementById('left-nav-panel').classList.contains('openDrawer')), 'panel', await page.locator('ap-panel .panel').count());
   await page.locator('ap-panel .tab').nth(5).click();
   await page.waitForTimeout(300);
   for (const name of ['Last assembly', 'Requests']) {
