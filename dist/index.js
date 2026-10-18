@@ -6922,13 +6922,13 @@ function gf(e) {
 }
 async function _f() {
 	let e = await hf();
-	e && e !== "d13f57de90d5d32a" && sessionStorage.getItem(mf) !== e && gf(e);
+	e && e !== "aa9fda6ebb067010" && sessionStorage.getItem(mf) !== e && gf(e);
 }
 async function vf() {
 	let e = i().replace(/^third-party\//, ""), t = await yf(e, !1);
 	if (t.status === 404 && (t = await yf(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await hf();
-	return r && r !== "d13f57de90d5d32a" ? (gf(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "aa9fda6ebb067010" ? (gf(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var yf = (t, n) => c("/api/extensions/update", {
 	method: "POST",
@@ -7014,7 +7014,7 @@ function Af() {
 }
 //#endregion
 //#region src/ui/styles/tokens.css?inline
-var jf = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-shadow:0 8px 28px #00000073}", Mf = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", Nf = ":host(ap-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.row.tight{white-space:nowrap;gap:4px}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}", Pf = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;background:var(--ap-panel-bg);color:var(--ap-text);-webkit-backdrop-filter:blur(var(--SmartThemeBlurStrength,10px));flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}", Z = /* @__PURE__ */ Zt({
+var jf = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-shadow:0 8px 28px #00000073}", Mf = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", Nf = ":host(ap-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.row.tight{white-space:nowrap;gap:4px}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}", Pf = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;background:var(--ap-panel-bg);color:var(--ap-text);-webkit-backdrop-filter:blur(var(--SmartThemeBlurStrength,10px));flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden;container:ap-panel/inline-size}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}@container ap-panel (width<=340px){.tab span{display:none}.tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tab svg.lucide{width:1.35em;height:1.35em}.panel-head{padding-left:var(--ap-space-3)}.panel-body{padding-left:var(--ap-space-3);padding-right:var(--ap-space-3)}.segmented{grid-template-columns:repeat(auto-fill,minmax(4.6em,1fr));grid-auto-flow:row}.segmented.dense button{padding:0 .4em}}", Z = /* @__PURE__ */ Zt({
 	chatRev: 0,
 	presetId: null,
 	panelOpen: !1,
@@ -9172,7 +9172,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 	"aria-checked",
 	"title",
 	"onClick"
-], kg = /* @__PURE__ */ I({
+], kg = { class: "ellipsis" }, Ag = /* @__PURE__ */ I({
 	__name: "Segmented",
 	props: /*@__PURE__*/ Jr({ options: {} }, {
 		modelValue: {},
@@ -9192,24 +9192,24 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			class: O({ on: t.value === e.value }),
 			title: e.hint,
 			onClick: (n) => t.value = e.value
-		}, [e.icon ? (z(), V(Rr(e.icon), { key: 0 })) : W("", !0), ia(k(e.label), 1)], 10, Og))), 128))], 2));
+		}, [e.icon ? (z(), V(Rr(e.icon), { key: 0 })) : W("", !0), H("span", kg, k(e.label), 1)], 10, Og))), 128))], 2));
 	}
-}), Ag = { class: "col" }, jg = { class: "row" }, Mg = ["aria-label"], Ng = ["label"], Pg = ["value"], Fg = ["label"], Ig = ["value"], Lg = ["placeholder"], Rg = {
+}), jg = { class: "col" }, Mg = { class: "row" }, Ng = ["aria-label"], Pg = ["label"], Fg = ["value"], Ig = ["label"], Lg = ["value"], Rg = ["placeholder"], zg = {
 	key: 1,
 	class: "xs muted row tight"
-}, zg = { value: "" }, Bg = ["value"], Vg = ["value"], Hg = { class: "slider" }, Ug = [
+}, Bg = { value: "" }, Vg = ["value"], Hg = ["value"], Ug = { class: "slider" }, Wg = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onInput"
-], Wg = [
+], Gg = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onChange"
-], Gg = { class: "field-grid" }, Kg = ["value", "onChange"], qg = ["value"], Jg = ["value"], Yg = /* @__PURE__ */ I({
+], Kg = { class: "field-grid" }, qg = ["value", "onChange"], Jg = ["value"], Yg = ["value"], Xg = /* @__PURE__ */ I({
 	__name: "ConfigTab",
 	setup(e) {
 		let { preset: t, config: n, update: r } = Tg(), i = G(() => t.value ? J(t.value) : null), a = G({
@@ -9333,8 +9333,8 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			n.sampling[e] = t;
 		}, { sampling: !0 }), ce = (e) => Number(e.target.value);
 		return (e, r) => !P(t) || !P(n) || !i.value ? (z(), V(Dg, { key: 0 })) : (z(), B(R, { key: 1 }, [
-			H("div", Ag, [
-				H("div", jg, [
+			H("div", jg, [
+				H("div", Mg, [
 					Jn(H("select", {
 						"onUpdate:modelValue": r[0] ||= (e) => a.value = e,
 						class: "input grow",
@@ -9342,13 +9342,13 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					}, [H("optgroup", { label: P(Y)("config.recommended") }, [(z(!0), B(R, null, L(P(t).configurations, (e) => (z(), B("option", {
 						key: e.id,
 						value: `recommended:${e.id}`
-					}, k(P(ol)(P(t), "configurations", e.id, "name", e.name)), 9, Pg))), 128))], 8, Ng), i.value.saved.length ? (z(), B("optgroup", {
+					}, k(P(ol)(P(t), "configurations", e.id, "name", e.name)), 9, Fg))), 128))], 8, Pg), i.value.saved.length ? (z(), B("optgroup", {
 						key: 0,
 						label: P(Y)("config.saved")
 					}, [(z(!0), B(R, null, L(i.value.saved, (e) => (z(), B("option", {
 						key: e.id,
 						value: `saved:${e.id}`
-					}, k(e.name), 9, Ig))), 128))], 8, Fg)) : W("", !0)], 8, Mg), [[qo, a.value]]),
+					}, k(e.name), 9, Lg))), 128))], 8, Ig)) : W("", !0)], 8, Ng), [[qo, a.value]]),
 					s.value && o.value ? (z(), V($, {
 						key: 0,
 						icon: P(mm),
@@ -9399,7 +9399,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						class: "input grow",
 						placeholder: P(Y)("config.name"),
 						autofocus: ""
-					}, null, 8, Lg), [[Wo, l.value]]),
+					}, null, 8, Rg), [[Wo, l.value]]),
 					U($, {
 						icon: P(Dm),
 						label: P(Y)("common.cancel"),
@@ -9414,7 +9414,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						onClick: d
 					}, null, 8, ["icon", "label"])
 				], 32)) : W("", !0),
-				o.value ? (z(), B("span", Rg, [r[14] ||= H("span", { class: "dot modified" }, null, -1), ia(k(P(Y)("config.modified")), 1)])) : W("", !0)
+				o.value ? (z(), B("span", zg, [r[14] ||= H("span", { class: "dot modified" }, null, -1), ia(k(P(Y)("config.modified")), 1)])) : W("", !0)
 			]),
 			U(Eh, {
 				title: P(Y)("config.connection"),
@@ -9425,7 +9425,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						label: P(Y)("config.transport"),
 						help: P(Y)(`transport.${g.value}.hint`)
 					}, {
-						default: F(() => [U(kg, {
+						default: F(() => [U(Ag, {
 							modelValue: g.value,
 							"onUpdate:modelValue": r[5] ||= (e) => g.value = e,
 							options: h.value
@@ -9463,10 +9463,10 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 							default: F(() => [Jn(H("select", {
 								"onUpdate:modelValue": r[8] ||= (e) => E.value = e,
 								class: "input"
-							}, [H("option", zg, k(P(Y)("common.none")), 1), (z(!0), B(R, null, L(P(t).syntheticTurns, (e) => (z(), B("option", {
+							}, [H("option", Bg, k(P(Y)("common.none")), 1), (z(!0), B(R, null, L(P(t).syntheticTurns, (e) => (z(), B("option", {
 								key: e.id,
 								value: e.id
-							}, k(e.label), 9, Bg))), 128))], 512), [[qo, E.value]])]),
+							}, k(e.label), 9, Vg))), 128))], 512), [[qo, E.value]])]),
 							_: 1
 						}, 8, ["label", "help"]),
 						U(ag, {
@@ -9492,7 +9492,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 								max: "20",
 								value: P(T),
 								onChange: r[10] ||= (e) => T.value = ce(e)
-							}, null, 40, Vg)]),
+							}, null, 40, Hg)]),
 							_: 1
 						}, 8, ["label"])) : W("", !0)
 					], 64)) : W("", !0),
@@ -9516,7 +9516,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				icon: P(Em),
 				help: x.value
 			}, {
-				default: F(() => [U(kg, {
+				default: F(() => [U(Ag, {
 					modelValue: b.value,
 					"onUpdate:modelValue": r[12] ||= (e) => b.value = e,
 					options: y.value
@@ -9538,14 +9538,14 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						key: 0,
 						label: P(Y)(`sampling.${e.key}`)
 					}, {
-						default: F(() => [H("div", Hg, [H("input", {
+						default: F(() => [H("div", Ug, [H("input", {
 							type: "range",
 							min: e.min,
 							max: e.max,
 							step: e.step,
 							value: ae.value[e.key],
 							onInput: (t) => se(e.key, ce(t))
-						}, null, 40, Ug), H("input", {
+						}, null, 40, Wg), H("input", {
 							class: "input",
 							type: "number",
 							min: e.min,
@@ -9553,10 +9553,10 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 							step: e.step,
 							value: ae.value[e.key],
 							onChange: (t) => se(e.key, ce(t))
-						}, null, 40, Wg)])]),
+						}, null, 40, Gg)])]),
 						_: 2
 					}, 1032, ["label"])) : W("", !0)], 64))), 64)),
-					H("div", Gg, [(z(), B(R, null, L(ne, (e) => (z(), B(R, { key: e }, [oe(e) ? (z(), V(ag, {
+					H("div", Kg, [(z(), B(R, null, L(ne, (e) => (z(), B(R, { key: e }, [oe(e) ? (z(), V(ag, {
 						key: 0,
 						label: P(Y)(`sampling.${e}`)
 					}, {
@@ -9565,7 +9565,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 							type: "number",
 							value: ae.value[e],
 							onChange: (t) => se(e, ce(t))
-						}, null, 40, Kg)]),
+						}, null, 40, qg)]),
 						_: 2
 					}, 1032, ["label"])) : W("", !0)], 64))), 64)), oe("reasoning_effort") ? (z(), V(ag, {
 						key: 0,
@@ -9578,7 +9578,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						}, [(z(), B(R, null, L(ie, (e) => H("option", {
 							key: e,
 							value: e
-						}, k(P(Y)(`effort.${e}`)), 9, Jg)), 64))], 40, qg)]),
+						}, k(P(Y)(`effort.${e}`)), 9, Yg)), 64))], 40, Jg)]),
 						_: 1
 					}, 8, ["label"])) : W("", !0)]),
 					(z(), B(R, null, L(re, (e) => (z(), B(R, { key: e }, [oe(e) ? (z(), V(ag, {
@@ -9597,10 +9597,10 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			}, 8, ["title", "icon"])
 		], 64));
 	}
-}), Xg = ["aria-checked", "onClick"], Zg = { class: "grow" }, Qg = ["aria-checked", "onClick"], $g = { class: "grow muted" }, e_ = { class: "grow" }, t_ = { class: "ellipsis" }, n_ = {
+}), Zg = ["aria-checked", "onClick"], Qg = { class: "grow" }, $g = ["aria-checked", "onClick"], e_ = { class: "grow muted" }, t_ = { class: "grow" }, n_ = { class: "ellipsis" }, r_ = {
 	key: 0,
 	class: "empty"
-}, r_ = /* @__PURE__ */ I({
+}, i_ = /* @__PURE__ */ I({
 	__name: "ModulesTab",
 	setup(e) {
 		let { preset: t, config: n, update: r } = Tg(), i = G(() => t.value && n.value ? _c(t.value, n.value) : {}), a = G(() => {
@@ -9651,22 +9651,22 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				onClick: (n) => l(t, e.id)
 			}, [
 				r[0] ||= H("span", { class: "radio" }, null, -1),
-				H("span", Zg, k(o(e)), 1),
+				H("span", Qg, k(o(e)), 1),
 				U(Ch, {
 					text: s(e),
 					align: "end"
 				}, null, 8, ["text"])
-			], 10, Xg))), 128)), e.allowNone ? (z(), B("button", {
+			], 10, Zg))), 128)), e.allowNone ? (z(), B("button", {
 				key: 0,
 				type: "button",
 				role: "radio",
 				class: O(["choice", { on: c(t) === null }]),
 				"aria-checked": c(t) === null,
 				onClick: (e) => l(t, null)
-			}, [r[1] ||= H("span", { class: "radio" }, null, -1), H("span", $g, k(P(Y)("common.none")), 1)], 10, Qg)) : W("", !0)]))), 128)), (z(!0), B(R, null, L(e.toggles, (e) => (z(), B("div", {
+			}, [r[1] ||= H("span", { class: "radio" }, null, -1), H("span", e_, k(P(Y)("common.none")), 1)], 10, $g)) : W("", !0)]))), 128)), (z(!0), B(R, null, L(e.toggles, (e) => (z(), B("div", {
 				key: e.id,
 				class: "module-row"
-			}, [H("span", e_, [H("span", t_, k(o(e)), 1), U(Ch, {
+			}, [H("span", t_, [H("span", n_, k(o(e)), 1), U(Ch, {
 				text: s(e),
 				align: "start"
 			}, null, 8, ["text"])]), U(Yh, {
@@ -9679,37 +9679,37 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				"onUpdate:modelValue"
 			])]))), 128))]),
 			_: 2
-		}, 1032, ["title", "help"]))), 128)), a.value.length ? W("", !0) : (z(), B("div", n_, k(P(Y)("modules.none")), 1))], 64));
+		}, 1032, ["title", "help"]))), 128)), a.value.length ? W("", !0) : (z(), B("div", r_, k(P(Y)("modules.none")), 1))], 64));
 	}
-}), i_ = ["value", "onChange"], a_ = ["value"], o_ = {
+}), a_ = ["value", "onChange"], o_ = ["value"], s_ = {
 	key: 1,
 	class: "unit"
-}, s_ = [
+}, c_ = [
 	"min",
 	"max",
 	"value",
 	"placeholder",
 	"onChange"
-], c_ = {
+], l_ = {
 	key: 0,
 	class: "small muted"
-}, l_ = [
+}, u_ = [
 	"list",
 	"value",
 	"placeholder",
 	"onChange"
-], u_ = ["id"], d_ = ["value"], f_ = [
+], d_ = ["id"], f_ = ["value"], p_ = [
 	"value",
 	"placeholder",
 	"onChange"
-], p_ = [
+], m_ = [
 	"value",
 	"placeholder",
 	"onChange"
-], m_ = {
+], h_ = {
 	key: 0,
 	class: "field-grid"
-}, h_ = ["value"], g_ = ["value"], __ = ["value"], v_ = /* @__PURE__ */ I({
+}, g_ = ["value"], __ = ["value"], v_ = ["value"], y_ = /* @__PURE__ */ I({
 	__name: "WritingTab",
 	setup(e) {
 		let { preset: t, config: n, update: r } = Tg(), i = G(() => {
@@ -9755,7 +9755,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					}, [(z(!0), B(R, null, L(e.options, (t) => (z(), B("option", {
 						key: String(t.value),
 						value: t.value
-					}, k(s(e, t.value, t.label)), 9, a_))), 128))], 40, i_)) : e.type === "number" ? (z(), B("div", o_, [H("input", {
+					}, k(s(e, t.value, t.label)), 9, o_))), 128))], 40, a_)) : e.type === "number" ? (z(), B("div", s_, [H("input", {
 						class: "input",
 						type: "number",
 						min: e.min,
@@ -9763,19 +9763,19 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						value: c(e),
 						placeholder: e.unset,
 						onChange: (t) => l(e, t.target.value)
-					}, null, 40, s_), e.unit ? (z(), B("span", c_, k(e.unit), 1)) : W("", !0)])) : (z(), B(R, { key: 2 }, [H("input", {
+					}, null, 40, c_), e.unit ? (z(), B("span", l_, k(e.unit), 1)) : W("", !0)])) : (z(), B(R, { key: 2 }, [H("input", {
 						class: "input",
 						list: e.options?.length ? h(e) : void 0,
 						value: c(e),
 						placeholder: e.unset,
 						onChange: (t) => l(e, t.target.value)
-					}, null, 40, l_), e.options?.length ? (z(), B("datalist", {
+					}, null, 40, u_), e.options?.length ? (z(), B("datalist", {
 						key: 0,
 						id: h(e)
 					}, [(z(!0), B(R, null, L(e.options, (t) => (z(), B("option", {
 						key: String(t.value),
 						value: t.value
-					}, k(s(e, t.value, t.label)), 9, d_))), 128))], 8, u_)) : W("", !0)], 64))]),
+					}, k(s(e, t.value, t.label)), 9, f_))), 128))], 8, d_)) : W("", !0)], 64))]),
 					_: 2
 				}, 1032, ["label", "help"]))), 128))]),
 				_: 2
@@ -9799,7 +9799,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						value: P(n).identity.names[e] ?? "",
 						placeholder: t.name,
 						onChange: (t) => d("names", e, t.target.value)
-					}, null, 40, f_)]),
+					}, null, 40, p_)]),
 					_: 2
 				}, 1032, ["label"]), U(ag, { label: P(Y)("writing.actorPrefix") }, {
 					default: F(() => [H("input", {
@@ -9807,7 +9807,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						value: P(n).identity.prefixes[e] ?? "",
 						placeholder: t.prefix,
 						onChange: (t) => d("prefixes", e, t.target.value)
-					}, null, 40, p_)]),
+					}, null, 40, m_)]),
 					_: 2
 				}, 1032, ["label"])]))), 128))]),
 				_: 1
@@ -9822,7 +9822,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					"onUpdate:modelValue": r[0] ||= (e) => f.value = e,
 					label: P(Y)("writing.tokenSaving")
 				}, null, 8, ["modelValue", "label"])]),
-				default: F(() => [f.value ? (z(), B("div", m_, [U(ag, {
+				default: F(() => [f.value ? (z(), B("div", h_, [U(ag, {
 					label: P(Y)("writing.keepFullTurns"),
 					help: P(Y)("writing.keepFullTurns.hint")
 				}, {
@@ -9832,7 +9832,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						min: "0",
 						value: P(n).tokenSaving.keepFullTurns,
 						onChange: r[1] ||= (e) => p("keepFullTurns", e.target.value)
-					}, null, 40, h_)]),
+					}, null, 40, g_)]),
 					_: 1
 				}, 8, ["label", "help"]), U(ag, {
 					label: P(Y)("writing.truncateUserAfter"),
@@ -9844,7 +9844,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						min: "0",
 						value: P(n).tokenSaving.truncateUserAfter,
 						onChange: r[2] ||= (e) => p("truncateUserAfter", e.target.value)
-					}, null, 40, g_)]),
+					}, null, 40, __)]),
 					_: 1
 				}, 8, ["label", "help"])])) : W("", !0)]),
 				_: 1
@@ -9869,29 +9869,29 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						max: "20",
 						value: P(n).meta.recentCount,
 						onChange: r[3] ||= (e) => m(e.target.value)
-					}, null, 40, __)]),
+					}, null, 40, v_)]),
 					_: 1
 				}, 8, ["label", "help"])]),
 				_: 1
 			}, 8, ["title", "icon"])
 		], 64));
 	}
-}), y_ = { class: "kv" }, b_ = {
+}), b_ = { class: "kv" }, x_ = {
 	key: 0,
 	class: "kv-row"
-}, x_ = { class: "kv-key ellipsis" }, S_ = { class: "kv-value pre small" }, C_ = {
+}, S_ = { class: "kv-key ellipsis" }, C_ = { class: "kv-value pre small" }, w_ = {
 	key: 0,
 	class: "kv-actions"
-}, w_ = {
+}, T_ = {
 	key: 1,
 	class: "kv-edit col"
-}, T_ = ["placeholder"], E_ = ["placeholder"], D_ = { class: "row end" }, O_ = {
+}, E_ = ["placeholder"], D_ = ["placeholder"], O_ = { class: "row end" }, k_ = {
 	key: 0,
 	class: "kv-edit col"
-}, k_ = ["placeholder"], A_ = ["placeholder"], j_ = { class: "row end" }, M_ = {
+}, A_ = ["placeholder"], j_ = ["placeholder"], M_ = { class: "row end" }, N_ = {
 	key: 1,
 	class: "faint small kv-empty"
-}, N_ = /* @__PURE__ */ I({
+}, P_ = /* @__PURE__ */ I({
 	__name: "KvEditor",
 	props: {
 		entries: {},
@@ -9907,20 +9907,20 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			let e = a.value.trim();
 			e && (i.value && i.value !== e && r("remove", i.value), r("set", e, o.value), i.value = null);
 		}
-		return (t, n) => (z(), B("div", y_, [
-			(z(!0), B(R, null, L(e.entries, (t, l) => (z(), B(R, { key: l }, [i.value === l ? (z(), B("div", w_, [
+		return (t, n) => (z(), B("div", b_, [
+			(z(!0), B(R, null, L(e.entries, (t, l) => (z(), B(R, { key: l }, [i.value === l ? (z(), B("div", T_, [
 				Jn(H("input", {
 					"onUpdate:modelValue": n[0] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: P(Y)("memory.key")
-				}, null, 8, T_), [[Wo, a.value]]),
+				}, null, 8, E_), [[Wo, a.value]]),
 				Jn(H("textarea", {
 					"onUpdate:modelValue": n[1] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: P(Y)("memory.content")
-				}, null, 8, E_), [[Wo, o.value]]),
-				H("div", D_, [U($, {
+				}, null, 8, D_), [[Wo, o.value]]),
+				H("div", O_, [U($, {
 					icon: P(Dm),
 					label: P(Y)("common.cancel"),
 					onClick: n[2] ||= (e) => i.value = null
@@ -9930,10 +9930,10 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					active: "",
 					onClick: c
 				}, null, 8, ["icon", "label"])])
-			])) : (z(), B("div", b_, [
-				H("div", x_, k(l), 1),
-				H("div", S_, k(t), 1),
-				e.readonly ? W("", !0) : (z(), B("div", C_, [U($, {
+			])) : (z(), B("div", x_, [
+				H("div", S_, k(l), 1),
+				H("div", C_, k(t), 1),
+				e.readonly ? W("", !0) : (z(), B("div", w_, [U($, {
 					icon: P(lm),
 					label: P(Y)("common.edit"),
 					small: "",
@@ -9956,19 +9956,19 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					"onClick"
 				])]))
 			]))], 64))), 128)),
-			i.value === "" ? (z(), B("div", O_, [
+			i.value === "" ? (z(), B("div", k_, [
 				Jn(H("input", {
 					"onUpdate:modelValue": n[3] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: P(Y)("memory.key")
-				}, null, 8, k_), [[Wo, a.value]]),
+				}, null, 8, A_), [[Wo, a.value]]),
 				Jn(H("textarea", {
 					"onUpdate:modelValue": n[4] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: P(Y)("memory.content")
-				}, null, 8, A_), [[Wo, o.value]]),
-				H("div", j_, [U($, {
+				}, null, 8, j_), [[Wo, o.value]]),
+				H("div", M_, [U($, {
 					icon: P(Dm),
 					label: P(Y)("common.cancel"),
 					onClick: n[5] ||= (e) => i.value = null
@@ -9979,7 +9979,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					onClick: c
 				}, null, 8, ["icon", "label"])])
 			])) : W("", !0),
-			!Object.keys(e.entries).length && i.value === null ? (z(), B("div", M_, k(P(Y)("memory.empty")), 1)) : W("", !0),
+			!Object.keys(e.entries).length && i.value === null ? (z(), B("div", N_, k(P(Y)("memory.empty")), 1)) : W("", !0),
 			!e.readonly && i.value === null ? (z(), B("button", {
 				key: 2,
 				type: "button",
@@ -9988,16 +9988,16 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			}, [U(P(um)), ia(k(P(Y)("common.add")), 1)])) : W("", !0)
 		]));
 	}
-}), P_ = {
+}), F_ = {
 	key: 1,
 	class: "faint small"
-}, F_ = {
+}, I_ = {
 	key: 0,
 	class: "badge neutral"
-}, I_ = ["placeholder"], L_ = {
+}, L_ = ["placeholder"], R_ = {
 	key: 1,
 	class: "faint small"
-}, R_ = /* @__PURE__ */ I({
+}, z_ = /* @__PURE__ */ I({
 	__name: "MemoryTab",
 	setup(t) {
 		let { preset: n } = Tg(), r = G(() => n.value ? J(n.value) : null), i = G(() => (Z.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = G(() => (Z.chatRev, i.value ? Ol() : {})), o = G(() => r.value ? jl(r.value) : {}), s = G(() => (Z.chatRev, i.value ? kl() : null));
@@ -10035,12 +10035,12 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				icon: P(rm),
 				help: P(Y)("memory.chat.hint")
 			}, {
-				default: F(() => [i.value ? (z(), V(N_, {
+				default: F(() => [i.value ? (z(), V(P_, {
 					key: 0,
 					entries: a.value,
 					onSet: c,
 					onRemove: l
-				}, null, 8, ["entries"])) : (z(), B("div", P_, k(P(Y)("memory.noChat")), 1))]),
+				}, null, 8, ["entries"])) : (z(), B("div", F_, k(P(Y)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
@@ -10075,7 +10075,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					"label",
 					"disabled"
 				])]),
-				default: F(() => [U(N_, {
+				default: F(() => [U(P_, {
 					entries: o.value,
 					onSet: u,
 					onRemove: d
@@ -10091,7 +10091,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				icon: P(hm),
 				help: P(Y)("memory.recap.hint")
 			}, {
-				actions: F(() => [s.value ? (z(), B("span", F_, "#0–" + k(s.value.coversUpTo), 1)) : W("", !0), i.value ? (z(), V($, {
+				actions: F(() => [s.value ? (z(), B("span", I_, "#0–" + k(s.value.coversUpTo), 1)) : W("", !0), i.value ? (z(), V($, {
 					key: 1,
 					icon: P(Fp),
 					label: P(Y)("common.save"),
@@ -10111,7 +10111,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					class: "input",
 					rows: "6",
 					placeholder: P(Y)("memory.recap.empty")
-				}, null, 8, I_)), [[Wo, f.value]]) : (z(), B("div", L_, k(P(Y)("memory.noChat")), 1))]),
+				}, null, 8, L_)), [[Wo, f.value]]) : (z(), B("div", R_, k(P(Y)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
@@ -10120,34 +10120,34 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			])
 		], 64));
 	}
-}), z_ = { class: "row tight xs muted" }, B_ = { class: "row" }, V_ = {
+}), B_ = { class: "row tight xs muted" }, V_ = { class: "row" }, H_ = {
 	key: 0,
 	class: "xs text-danger"
-}, H_ = { class: "row wrap xs muted" }, U_ = { class: "badge neutral" }, W_ = {
+}, U_ = { class: "row wrap xs muted" }, W_ = { class: "badge neutral" }, G_ = {
 	key: 0,
 	class: "badge neutral"
-}, G_ = { class: "badge neutral" }, K_ = {
+}, K_ = { class: "badge neutral" }, q_ = {
 	key: 1,
 	class: "badge warn"
-}, q_ = ["onClick"], J_ = { class: "grow mono" }, Y_ = { class: "xs muted" }, X_ = { class: "row xs muted" }, Z_ = { class: "badge neutral" }, Q_ = { class: "pre mono scroll" }, $_ = {
+}, J_ = ["onClick"], Y_ = { class: "grow mono" }, X_ = { class: "xs muted" }, Z_ = { class: "row xs muted" }, Q_ = { class: "badge neutral" }, $_ = { class: "pre mono scroll" }, ev = {
 	key: 0,
 	class: "xs faint region-msg"
-}, ev = {
+}, tv = {
 	key: 0,
 	class: "xs text-warning"
-}, tv = {
+}, nv = {
 	key: 1,
 	class: "faint small"
-}, nv = ["onClick"], rv = { class: "mono grow ellipsis" }, iv = {
+}, rv = ["onClick"], iv = { class: "mono grow ellipsis" }, av = {
 	key: 0,
 	class: "badge warn"
-}, av = { class: "xs muted" }, ov = { class: "xs muted" }, sv = { class: "row xs muted" }, cv = { class: "grow" }, lv = { class: "mono scroll" }, uv = { class: "row xs muted" }, dv = { class: "grow" }, fv = { class: "mono scroll" }, pv = {
+}, ov = { class: "xs muted" }, sv = { class: "xs muted" }, cv = { class: "row xs muted" }, lv = { class: "grow" }, uv = { class: "mono scroll" }, dv = { class: "row xs muted" }, fv = { class: "grow" }, pv = { class: "mono scroll" }, mv = {
 	key: 0,
 	class: "faint small"
-}, mv = { class: "row xs" }, hv = { class: "badge neutral" }, gv = { class: "muted" }, _v = { class: "mono scroll" }, vv = {
+}, hv = { class: "row xs" }, gv = { class: "badge neutral" }, _v = { class: "muted" }, vv = { class: "mono scroll" }, yv = {
 	key: 0,
 	class: "faint small"
-}, yv = { class: "xs faint mono build" }, bv = /* @__PURE__ */ I({
+}, bv = { class: "xs faint mono build" }, xv = /* @__PURE__ */ I({
 	__name: "DebugTab",
 	setup(t) {
 		let n = G(() => ou.log.find((e) => e.kind === "assembly")?.data), r = /* @__PURE__ */ Zt(/* @__PURE__ */ new Set()), i = (e) => r.has(e) ? r.delete(e) : r.add(e), a = /* @__PURE__ */ Zt({});
@@ -10189,9 +10189,9 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				icon: P(gm),
 				help: P(Y)("debug.dev.hint")
 			}, {
-				actions: F(() => [H("span", z_, [H("span", { class: O(["dot status-dot", P(X).status]) }, null, 2), ia(k(P(Y)(`debug.dev.${P(X).status}`)), 1)])]),
+				actions: F(() => [H("span", B_, [H("span", { class: O(["dot status-dot", P(X).status]) }, null, 2), ia(k(P(Y)(`debug.dev.${P(X).status}`)), 1)])]),
 				default: F(() => [U(ag, { label: P(Y)("debug.dev.url") }, {
-					default: F(() => [H("div", B_, [Jn(H("input", {
+					default: F(() => [H("div", V_, [Jn(H("input", {
 						"onUpdate:modelValue": t[0] ||= (e) => p.value = e,
 						class: "input grow",
 						type: "url",
@@ -10207,7 +10207,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						label: P(Y)("debug.dev")
 					}, null, 8, ["modelValue", "label"])])]),
 					_: 1
-				}, 8, ["label"]), P(X).error ? (z(), B("span", V_, k(P(X).error), 1)) : W("", !0)]),
+				}, 8, ["label"]), P(X).error ? (z(), B("span", H_, k(P(X).error), 1)) : W("", !0)]),
 				_: 1
 			}, 8, [
 				"title",
@@ -10220,11 +10220,11 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				collapsible: ""
 			}, {
 				default: F(() => [n.value ? (z(), B(R, { key: 0 }, [
-					H("div", H_, [
-						H("span", U_, k(P(Y)(`transport.${n.value.transport}`)), 1),
-						n.value.workflow ? (z(), B("span", W_, k(n.value.workflow), 1)) : W("", !0),
-						H("span", G_, k(n.value.origin), 1),
-						n.value.dryRun ? (z(), B("span", K_, "dry run")) : W("", !0),
+					H("div", U_, [
+						H("span", W_, k(P(Y)(`transport.${n.value.transport}`)), 1),
+						n.value.workflow ? (z(), B("span", G_, k(n.value.workflow), 1)) : W("", !0),
+						H("span", K_, k(n.value.origin), 1),
+						n.value.dryRun ? (z(), B("span", q_, "dry run")) : W("", !0),
 						t[3] ||= H("span", { class: "grow" }, null, -1),
 						ia(k(l(n.value.at)), 1)
 					]),
@@ -10236,14 +10236,14 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						onClick: (t) => i(e.id)
 					}, [
 						U(P(Lp), { class: O(["faint caret", { open: r.has(e.id) }]) }, null, 8, ["class"]),
-						H("span", J_, k(e.id), 1),
-						H("span", Y_, k(e.messages.length) + " · " + k(a[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + k(a[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
-					], 8, q_), r.has(e.id) ? (z(), B(R, { key: 0 }, [(z(!0), B(R, null, L(e.messages, (e, t) => (z(), B("div", {
+						H("span", Y_, k(e.id), 1),
+						H("span", X_, k(e.messages.length) + " · " + k(a[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + k(a[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
+					], 8, J_), r.has(e.id) ? (z(), B(R, { key: 0 }, [(z(!0), B(R, null, L(e.messages, (e, t) => (z(), B("div", {
 						key: t,
 						class: "region-msg"
-					}, [H("div", X_, [H("span", Z_, k(e.role), 1), ia(k(e.chars) + " ch", 1)]), H("div", Q_, k(e.content), 1)]))), 128)), e.messages.length ? W("", !0) : (z(), B("div", $_, k(P(Y)("debug.emptyRegion")), 1))], 64)) : W("", !0)]))), 128))]),
-					n.value.warnings.length ? (z(), B("div", ev, k(n.value.warnings.join(" · ")), 1)) : W("", !0)
-				], 64)) : (z(), B("div", tv, k(P(Y)("debug.noAssembly")), 1))]),
+					}, [H("div", Z_, [H("span", Q_, k(e.role), 1), ia(k(e.chars) + " ch", 1)]), H("div", $_, k(e.content), 1)]))), 128)), e.messages.length ? W("", !0) : (z(), B("div", ev, k(P(Y)("debug.emptyRegion")), 1))], 64)) : W("", !0)]))), 128))]),
+					n.value.warnings.length ? (z(), B("div", tv, k(n.value.warnings.join(" · ")), 1)) : W("", !0)
+				], 64)) : (z(), B("div", nv, k(P(Y)("debug.noAssembly")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			U(Eh, {
@@ -10258,12 +10258,12 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 					class: "row small clickable",
 					onClick: (e) => o.value = o.value === t ? null : t
 				}, [
-					H("span", rv, k(e.genId) + " · #" + k(e.step), 1),
-					e.error ? (z(), B("span", iv, k(P(Y)("debug.error")), 1)) : W("", !0),
-					H("span", av, k(d(e.usage)), 1),
-					H("span", ov, k(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
-				], 8, nv), o.value === t ? (z(), B(R, { key: 0 }, [
-					H("div", sv, [H("span", cv, k(P(Y)("debug.request")), 1), U($, {
+					H("span", iv, k(e.genId) + " · #" + k(e.step), 1),
+					e.error ? (z(), B("span", av, k(P(Y)("debug.error")), 1)) : W("", !0),
+					H("span", ov, k(d(e.usage)), 1),
+					H("span", sv, k(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
+				], 8, rv), o.value === t ? (z(), B(R, { key: 0 }, [
+					H("div", cv, [H("span", lv, k(P(Y)("debug.request")), 1), U($, {
 						icon: P(Wp),
 						label: P(Y)("common.copy"),
 						small: "",
@@ -10274,8 +10274,8 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						"label",
 						"onClick"
 					])]),
-					H("pre", lv, k(s(e.request)), 1),
-					H("div", uv, [H("span", dv, k(P(Y)("debug.response")), 1), U($, {
+					H("pre", uv, k(s(e.request)), 1),
+					H("div", dv, [H("span", fv, k(P(Y)("debug.response")), 1), U($, {
 						icon: P(Wp),
 						label: P(Y)("common.copy"),
 						small: "",
@@ -10286,8 +10286,8 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						"label",
 						"onClick"
 					])]),
-					H("pre", fv, k(e.error ?? s(e.response ?? "")), 1)
-				], 64)) : W("", !0)]))), 128)), P(ou).requests.length ? W("", !0) : (z(), B("div", pv, k(P(Y)("debug.noRequests")), 1))]),
+					H("pre", pv, k(e.error ?? s(e.response ?? "")), 1)
+				], 64)) : W("", !0)]))), 128)), P(ou).requests.length ? W("", !0) : (z(), B("div", mv, k(P(Y)("debug.noRequests")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			U(Eh, {
@@ -10306,20 +10306,24 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				default: F(() => [(z(!0), B(R, null, L(m.value, (e, n) => (z(), B("div", {
 					key: n,
 					class: "req"
-				}, [H("div", mv, [
-					H("span", hv, k(e.kind), 1),
+				}, [H("div", hv, [
+					H("span", gv, k(e.kind), 1),
 					t[4] ||= H("span", { class: "grow" }, null, -1),
-					H("span", gv, k(l(e.at)), 1)
-				]), H("pre", _v, k(s(e.data)), 1)]))), 128)), m.value.length ? W("", !0) : (z(), B("div", vv, k(P(Y)("debug.noLog")), 1))]),
+					H("span", _v, k(l(e.at)), 1)
+				]), H("pre", vv, k(s(e.data)), 1)]))), 128)), m.value.length ? W("", !0) : (z(), B("div", yv, k(P(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H("div", yv, "Advanced Preset " + k(P("1.0.1")) + " · " + k(P("d13f57de90d5d32a")), 1)
+			H("div", bv, "Advanced Preset " + k(P("1.0.1")) + " · " + k(P("aa9fda6ebb067010")), 1)
 		], 64));
 	}
-}), xv = ["aria-label"], Sv = { class: "panel-head" }, Cv = { class: "panel-logo" }, wv = { class: "grow" }, Tv = { class: "panel-title ellipsis" }, Ev = { class: "panel-sub ellipsis" }, Dv = {
+}), Sv = ["aria-label"], Cv = { class: "panel-head" }, wv = { class: "panel-logo" }, Tv = { class: "grow" }, Ev = { class: "panel-title ellipsis" }, Dv = { class: "panel-sub ellipsis" }, Ov = {
 	class: "tabs",
 	role: "tablist"
-}, Ov = ["aria-selected", "onClick"], kv = { class: "panel-body scroll" }, Av = /* @__PURE__ */ I({
+}, kv = [
+	"title",
+	"aria-selected",
+	"onClick"
+], Av = { class: "panel-body scroll" }, jv = /* @__PURE__ */ I({
 	__name: "Panel",
 	setup(e) {
 		let t = [
@@ -10331,27 +10335,27 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			{
 				id: "config",
 				icon: vm,
-				view: Yg
+				view: Xg
 			},
 			{
 				id: "modules",
 				icon: jp,
-				view: r_
+				view: i_
 			},
 			{
 				id: "writing",
 				icon: cm,
-				view: v_
+				view: y_
 			},
 			{
 				id: "memory",
 				icon: Mp,
-				view: R_
+				view: z_
 			},
 			{
 				id: "debug",
 				icon: Np,
-				view: bv
+				view: xv
 			}
 		], n = G(() => t.find((e) => e.id === Z.tab) ?? t[0]), r = G({
 			get: () => K().enabled,
@@ -10371,9 +10375,9 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				role: "dialog",
 				"aria-label": P(Y)("app.name")
 			}, [
-				H("header", Sv, [
-					H("div", Cv, [U(P($p))]),
-					H("div", wv, [H("div", Tv, k(P(Lf)?.name ?? P(Y)("app.name")), 1), H("div", Ev, k(i.value), 1)]),
+				H("header", Cv, [
+					H("div", wv, [U(P($p))]),
+					H("div", Tv, [H("div", Ev, k(P(Lf)?.name ?? P(Y)("app.name")), 1), H("div", Dv, k(i.value), 1)]),
 					U(Yh, {
 						modelValue: r.value,
 						"onUpdate:modelValue": a[0] ||= (e) => r.value = e,
@@ -10387,29 +10391,30 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 						onClick: a[1] ||= (e) => P(Z).panelOpen = !1
 					}, null, 8, ["icon", "label"])
 				]),
-				H("nav", Dv, [(z(), B(R, null, L(t, (e) => H("button", {
+				H("nav", Ov, [(z(), B(R, null, L(t, (e) => H("button", {
 					key: e.id,
 					type: "button",
 					role: "tab",
 					class: O(["tab", { on: e.id === P(Z).tab }]),
+					title: P(Y)(`tab.${e.id}`),
 					"aria-selected": e.id === P(Z).tab,
 					onClick: (t) => P(Z).tab = e.id
-				}, [(z(), V(Rr(e.icon))), H("span", null, k(P(Y)(`tab.${e.id}`)), 1)], 10, Ov)), 64))]),
-				H("main", kv, [(z(), V(Dr, null, [(z(), V(Rr(n.value.view), { key: n.value.id }))], 1024))])
-			], 8, xv)) : W("", !0)]),
+				}, [(z(), V(Rr(e.icon))), H("span", null, k(P(Y)(`tab.${e.id}`)), 1)], 10, kv)), 64))]),
+				H("main", Av, [(z(), V(Dr, null, [(z(), V(Rr(n.value.view), { key: n.value.id }))], 1024))])
+			], 8, Sv)) : W("", !0)]),
 			_: 1
 		}));
 	}
-}), jv = { class: "inline-drawer" }, Mv = { class: "inline-drawer-toggle inline-drawer-header" }, Nv = { class: "inline-drawer-content" }, Pv = { class: "flex-container flexFlowColumn flexNoGap" }, Fv = { key: 0 }, Iv = {
+}), Mv = { class: "inline-drawer" }, Nv = { class: "inline-drawer-toggle inline-drawer-header" }, Pv = { class: "inline-drawer-content" }, Fv = { class: "flex-container flexFlowColumn flexNoGap" }, Iv = { key: 0 }, Lv = {
 	key: 1,
 	class: "opacity50p"
-}, Lv = {
+}, Rv = {
 	key: 2,
 	class: "opacity50p"
-}, Rv = { class: "flex-container alignItemsCenter justifySpaceBetween marginTop5" }, zv = {
+}, zv = { class: "flex-container alignItemsCenter justifySpaceBetween marginTop5" }, Bv = {
 	class: "checkbox_label",
 	for: "ap_settings_enabled"
-}, Bv = { class: "opacity50p" }, Vv = /* @__PURE__ */ I({
+}, Vv = { class: "opacity50p" }, Hv = /* @__PURE__ */ I({
 	__name: "SettingsDrawer",
 	setup(e) {
 		let t = G({
@@ -10418,12 +10423,12 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				K().enabled = e, q();
 			}
 		});
-		return (e, n) => (z(), B("div", jv, [H("div", Mv, [H("b", null, k(P(Y)("app.name")), 1), n[3] ||= H("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), H("div", Nv, [
-			H("div", Pv, [P(Lf) ? (z(), B("small", Fv, k(P(Y)("settings.active", {
+		return (e, n) => (z(), B("div", Mv, [H("div", Nv, [H("b", null, k(P(Y)("app.name")), 1), n[3] ||= H("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), H("div", Pv, [
+			H("div", Fv, [P(Lf) ? (z(), B("small", Iv, k(P(Y)("settings.active", {
 				name: P(Lf).name,
 				version: P(Lf).version
-			})), 1)) : W("", !0), P(Lf) ? (z(), B("small", Iv, k(P(Y)("settings.config", { name: P(Rf).config })), 1)) : (z(), B("small", Lv, k(P(Y)("settings.inactive")), 1))]),
-			H("div", Rv, [H("label", zv, [Jn(H("input", {
+			})), 1)) : W("", !0), P(Lf) ? (z(), B("small", Lv, k(P(Y)("settings.config", { name: P(Rf).config })), 1)) : (z(), B("small", Rv, k(P(Y)("settings.inactive")), 1))]),
+			H("div", zv, [H("label", Bv, [Jn(H("input", {
 				id: "ap_settings_enabled",
 				"onUpdate:modelValue": n[0] ||= (e) => t.value = e,
 				type: "checkbox"
@@ -10434,20 +10439,20 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				onClick: n[1] ||= (e) => P(Vf)(),
 				onKeydown: n[2] ||= ns((e) => P(Vf)(), ["enter"])
 			}, [n[4] ||= H("i", { class: "fa-solid fa-layer-group" }, null, -1), H("small", null, k(P(Y)("panel.open")), 1)], 32)]),
-			H("small", Bv, "v" + k(P("1.0.1")), 1)
+			H("small", Vv, "v" + k(P("1.0.1")), 1)
 		])]));
 	}
 });
 //#endregion
 //#region src/ui/index.ts
-function Hv() {
+function Uv() {
 	let e = document.getElementById("extensions_settings2") ?? document.getElementById("extensions_settings");
 	if (!e || e.querySelector("#advanced_preset_settings")) return;
 	let t = document.createElement("div");
-	t.id = "advanced_preset_settings", e.append(t), os(Vv).mount(t);
+	t.id = "advanced_preset_settings", e.append(t), os(Hv).mount(t);
 }
-function Uv() {
-	tp("ap-stages", Zm, ["mesid"]), tp("ap-cards", Vh, ["mesid"]), tp("ap-dock", Kh), tp("ap-panel", Av), $f(), If();
+function Wv() {
+	tp("ap-stages", Zm, ["mesid"]), tp("ap-cards", Vh, ["mesid"]), tp("ap-dock", Kh), tp("ap-panel", jv), $f(), If();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.OAI_PRESET_CHANGED_AFTER,
@@ -10455,13 +10460,13 @@ function Uv() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, If);
-	bp(), Hv(), pp();
+	bp(), Uv(), pp();
 }
 //#endregion
 //#region src/index.ts
-var Wv = {
+var Gv = {
 	version: "1.0.1",
-	buildId: "d13f57de90d5d32a",
+	buildId: "aa9fda6ebb067010",
 	nextGeneration: (e) => Bl(e),
 	listPresets: () => Ic().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -10472,21 +10477,21 @@ var Wv = {
 	activePresetId: () => fl(),
 	update: vf
 };
-globalThis.advancedPresetInterceptor = au, window.AdvancedPreset = Wv;
-function Gv(e, t) {
+globalThis.advancedPresetInterceptor = au, window.AdvancedPreset = Gv;
+function Kv(e, t) {
 	let n;
 	return (...r) => {
 		clearTimeout(n), n = setTimeout(() => e(...r), t);
 	};
 }
-async function Kv() {
+async function qv() {
 	for (let { preset: e } of Ic()) try {
 		await _l(e);
 	} catch (t) {
 		console.error("[AP] carrier sync failed", e.id, t);
 	}
 }
-async function qv() {
+async function Jv() {
 	let { eventSource: t, eventTypes: n } = e();
 	K(), lf(), Af(), await r(), await Pc();
 	for (let { preset: e } of Ic()) {
@@ -10499,19 +10504,19 @@ async function qv() {
 	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => bu(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => uf(e)), t.on(n.MESSAGE_RECEIVED, (e, t) => pf(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		Xl.setPending(null), Xl.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => Xl.sweep());
-	let i = Gv(() => {
+	let i = Kv(() => {
 		let e = fl(), t = e ? Rc(e) : void 0;
 		t && xl(t);
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, i), t.on(n.OAI_PRESET_CHANGED_AFTER, i);
 	let a = async () => {
-		await Kv(), wf(), _f();
+		await qv(), wf(), _f();
 	};
-	t.on(n.APP_READY, () => void a()), Uv(), cu("init", {
+	t.on(n.APP_READY, () => void a()), Wv(), cu("init", {
 		version: "1.0.1",
-		build: "d13f57de90d5d32a",
+		build: "aa9fda6ebb067010",
 		enabled: K().enabled
 	});
 }
-qv().catch((e) => console.error("[AP] init failed", e));
+Jv().catch((e) => console.error("[AP] init failed", e));
 //#endregion

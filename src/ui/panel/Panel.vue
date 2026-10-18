@@ -48,7 +48,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
         <IconButton :icon="X" :label="t('common.close')" align="end" below @click="ui.panelOpen = false" />
       </header>
       <nav class="tabs" role="tablist">
-        <button v-for="x in tabs" :key="x.id" type="button" role="tab" class="tab" :class="{ on: x.id === ui.tab }" :aria-selected="x.id === ui.tab" @click="ui.tab = x.id">
+        <button v-for="x in tabs" :key="x.id" type="button" role="tab" class="tab" :class="{ on: x.id === ui.tab }" :title="t(`tab.${x.id}`)" :aria-selected="x.id === ui.tab" @click="ui.tab = x.id">
           <component :is="x.icon" />
           <span>{{ t(`tab.${x.id}`) }}</span>
         </button>
