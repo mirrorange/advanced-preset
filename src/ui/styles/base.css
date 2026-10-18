@@ -81,6 +81,8 @@ input[type='range'] { width: 100%; accent-color: var(--ap-primary); }
 .card-head.clickable { cursor: pointer; user-select: none; }
 .card-title { flex: 1 1 auto; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-body { padding: 0 var(--ap-space-3) var(--ap-space-3); }
+/* A section whose content is conditionally hidden (e.g. Token saving switched off) is just its header. */
+.card > .card-body:empty { display: none; }
 .chip {
   display: inline-flex; align-items: center; gap: 5px; max-width: 100%; min-height: 1.75em; padding: 0 0.65em;
   border: 1px solid var(--ap-border); border-radius: var(--ap-radius-pill); background: var(--ap-surface);
