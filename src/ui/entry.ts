@@ -29,7 +29,7 @@ function mountButton(): void {
   if (!group || group.querySelector(`#${BUTTON}`)) return;
   const btn = document.createElement('div');
   btn.id = BUTTON;
-  btn.className = 'margin0 menu_button menu_button_icon';
+  btn.className = 'menu_button menu_button_icon';
   btn.setAttribute('role', 'button');
   btn.tabIndex = 0;
   btn.title = t('panel.open.title');
