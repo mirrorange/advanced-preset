@@ -6922,13 +6922,13 @@ function gf(e) {
 }
 async function _f() {
 	let e = await hf();
-	e && e !== "b05e83c555fd76b6" && sessionStorage.getItem(mf) !== e && gf(e);
+	e && e !== "65105e4512f69327" && sessionStorage.getItem(mf) !== e && gf(e);
 }
 async function vf() {
 	let e = i().replace(/^third-party\//, ""), t = await yf(e, !1);
 	if (t.status === 404 && (t = await yf(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await hf();
-	return r && r !== "b05e83c555fd76b6" ? (gf(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "65105e4512f69327" ? (gf(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var yf = (t, n) => c("/api/extensions/update", {
 	method: "POST",
@@ -10313,7 +10313,7 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 				]), H("pre", vv, k(s(e.data)), 1)]))), 128)), m.value.length ? W("", !0) : (z(), B("div", yv, k(P(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H("div", bv, "Advanced Preset " + k(P("1.0.1")) + " · " + k(P("b05e83c555fd76b6")), 1)
+			H("div", bv, "Advanced Preset " + k(P("1.0.1")) + " · " + k(P("65105e4512f69327")), 1)
 		], 64));
 	}
 }), Sv = ["aria-label"], Cv = { class: "panel-head" }, wv = { class: "panel-logo" }, Tv = { class: "grow" }, Ev = { class: "panel-title ellipsis" }, Dv = { class: "panel-sub ellipsis" }, Ov = {
@@ -10405,13 +10405,13 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			_: 1
 		}));
 	}
-}), Mv = { class: "inline-drawer" }, Nv = { class: "inline-drawer-toggle inline-drawer-header" }, Pv = { class: "inline-drawer-content" }, Fv = {
-	class: "checkbox_label",
+}), Mv = { class: "inline-drawer" }, Nv = { class: "inline-drawer-toggle inline-drawer-header" }, Pv = { class: "inline-drawer-content" }, Fv = { class: "flex-container alignItemsCenter spaceBetween" }, Iv = {
+	class: "checkbox_label flex1",
 	for: "ap_settings_enabled"
-}, Iv = { key: 0 }, Lv = { class: "text_muted" }, Rv = {
+}, Lv = { key: 0 }, Rv = { class: "text_muted" }, zv = {
 	key: 1,
 	class: "text_muted"
-}, zv = /* @__PURE__ */ I({
+}, Bv = /* @__PURE__ */ I({
 	__name: "SettingsDrawer",
 	setup(e) {
 		let t = G({
@@ -10421,33 +10421,32 @@ var Eg = { class: "empty" }, Dg = /* @__PURE__ */ I({
 			}
 		});
 		return (e, n) => (z(), B("div", Mv, [H("div", Nv, [H("b", null, k(P(Y)("app.name")), 1), n[3] ||= H("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), H("div", Pv, [
-			H("label", Fv, [Jn(H("input", {
+			H("div", Fv, [H("label", Iv, [Jn(H("input", {
 				id: "ap_settings_enabled",
 				"onUpdate:modelValue": n[0] ||= (e) => t.value = e,
 				type: "checkbox"
-			}, null, 512), [[Go, t.value]]), H("span", null, k(P(Y)("settings.enable")), 1)]),
-			n[5] ||= H("hr", null, null, -1),
-			H("h4", null, k(P(Y)("settings.preset")), 1),
-			P(Lf) ? (z(), B("div", Iv, [ia(k(P(Lf).name) + " ", 1), H("span", Lv, "v" + k(P(Lf).version) + " · " + k(P(Rf).config), 1)])) : (z(), B("i", Rv, k(P(Y)("settings.inactive")), 1)),
-			H("div", {
+			}, null, 512), [[Go, t.value]]), H("span", null, k(P(Y)("settings.enable")), 1)]), H("div", {
 				class: "menu_button menu_button_icon",
 				role: "button",
 				tabindex: "0",
 				onClick: n[1] ||= (e) => P(Vf)(),
 				onKeydown: n[2] ||= ns((e) => P(Vf)(), ["enter"])
-			}, [n[4] ||= H("i", { class: "fa-solid fa-layer-group" }, null, -1), H("span", null, k(P(Y)("panel.open")), 1)], 32)
+			}, [n[4] ||= H("i", { class: "fa-solid fa-layer-group" }, null, -1), H("span", null, k(P(Y)("panel.open")), 1)], 32)]),
+			n[5] ||= H("hr", null, null, -1),
+			H("h4", null, k(P(Y)("settings.preset")), 1),
+			P(Lf) ? (z(), B("div", Lv, [ia(k(P(Lf).name) + " ", 1), H("span", Rv, "v" + k(P(Lf).version) + " · " + k(P(Rf).config), 1)])) : (z(), B("i", zv, k(P(Y)("settings.inactive")), 1))
 		])]));
 	}
 });
 //#endregion
 //#region src/ui/index.ts
-function Bv() {
+function Vv() {
 	let e = document.getElementById("extensions_settings2") ?? document.getElementById("extensions_settings");
 	if (!e || e.querySelector("#advanced_preset_settings")) return;
 	let t = document.createElement("div");
-	t.id = "advanced_preset_settings", e.append(t), os(zv).mount(t);
+	t.id = "advanced_preset_settings", e.append(t), os(Bv).mount(t);
 }
-function Vv() {
+function Hv() {
 	tp("ap-stages", Zm, ["mesid"]), tp("ap-cards", Vh, ["mesid"]), tp("ap-dock", Kh), tp("ap-panel", jv), $f(), If();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
@@ -10456,13 +10455,13 @@ function Vv() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, If);
-	bp(), Bv(), pp();
+	bp(), Vv(), pp();
 }
 //#endregion
 //#region src/index.ts
-var Hv = {
+var Uv = {
 	version: "1.0.1",
-	buildId: "b05e83c555fd76b6",
+	buildId: "65105e4512f69327",
 	nextGeneration: (e) => Bl(e),
 	listPresets: () => Ic().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -10473,21 +10472,21 @@ var Hv = {
 	activePresetId: () => fl(),
 	update: vf
 };
-globalThis.advancedPresetInterceptor = au, window.AdvancedPreset = Hv;
-function Uv(e, t) {
+globalThis.advancedPresetInterceptor = au, window.AdvancedPreset = Uv;
+function Wv(e, t) {
 	let n;
 	return (...r) => {
 		clearTimeout(n), n = setTimeout(() => e(...r), t);
 	};
 }
-async function Wv() {
+async function Gv() {
 	for (let { preset: e } of Ic()) try {
 		await _l(e);
 	} catch (t) {
 		console.error("[AP] carrier sync failed", e.id, t);
 	}
 }
-async function Gv() {
+async function Kv() {
 	let { eventSource: t, eventTypes: n } = e();
 	K(), lf(), Af(), await r(), await Pc();
 	for (let { preset: e } of Ic()) {
@@ -10500,19 +10499,19 @@ async function Gv() {
 	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => bu(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => uf(e)), t.on(n.MESSAGE_RECEIVED, (e, t) => pf(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		Xl.setPending(null), Xl.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => Xl.sweep());
-	let i = Uv(() => {
+	let i = Wv(() => {
 		let e = fl(), t = e ? Rc(e) : void 0;
 		t && xl(t);
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, i), t.on(n.OAI_PRESET_CHANGED_AFTER, i);
 	let a = async () => {
-		await Wv(), wf(), _f();
+		await Gv(), wf(), _f();
 	};
-	t.on(n.APP_READY, () => void a()), Vv(), cu("init", {
+	t.on(n.APP_READY, () => void a()), Hv(), cu("init", {
 		version: "1.0.1",
-		build: "b05e83c555fd76b6",
+		build: "65105e4512f69327",
 		enabled: K().enabled
 	});
 }
-Gv().catch((e) => console.error("[AP] init failed", e));
+Kv().catch((e) => console.error("[AP] init failed", e));
 //#endregion

@@ -19,10 +19,16 @@ const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => {
       <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down" />
     </div>
     <div class="inline-drawer-content">
-      <label class="checkbox_label" for="ap_settings_enabled">
-        <input id="ap_settings_enabled" v-model="enabled" type="checkbox" />
-        <span>{{ t('settings.enable') }}</span>
-      </label>
+      <div class="flex-container alignItemsCenter spaceBetween">
+        <label class="checkbox_label flex1" for="ap_settings_enabled">
+          <input id="ap_settings_enabled" v-model="enabled" type="checkbox" />
+          <span>{{ t('settings.enable') }}</span>
+        </label>
+        <div class="menu_button menu_button_icon" role="button" tabindex="0" @click="openPanel()" @keydown.enter="openPanel()">
+          <i class="fa-solid fa-layer-group" />
+          <span>{{ t('panel.open') }}</span>
+        </div>
+      </div>
       <hr />
       <h4>{{ t('settings.preset') }}</h4>
       <div v-if="activePreset">
@@ -30,10 +36,6 @@ const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => {
         <span class="text_muted">v{{ activePreset.version }} · {{ presetSummary.config }}</span>
       </div>
       <i v-else class="text_muted">{{ t('settings.inactive') }}</i>
-      <div class="menu_button menu_button_icon" role="button" tabindex="0" @click="openPanel()" @keydown.enter="openPanel()">
-        <i class="fa-solid fa-layer-group" />
-        <span>{{ t('panel.open') }}</span>
-      </div>
     </div>
   </div>
 </template>
