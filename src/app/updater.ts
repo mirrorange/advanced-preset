@@ -1,7 +1,8 @@
 /**
- * Auto-apply updates (§17, I-16): the running bundle carries a content-derived build id; when the
- * `dist/build.json` on disk differs (ST updated the extension at startup or the user did manually),
- * reload once so the page never runs stale code.
+ * Auto-apply updates (§17, I-16, I-35): the running bundle carries a content-derived build id; when the
+ * `dist/build.json` on disk differs, reload once so the page never runs stale code. Checked at
+ * APP_READY (stale browser cache) and from ST's manifest `update` hook, which ST calls after updating
+ * the extension from its Extensions panel (that path only toasts "Reload the page to apply updates").
  */
 import { extensionBaseUrl, extensionId, nativeFetch, st, toast } from '@/st/host';
 import { t } from '@/i18n';
@@ -28,6 +29,14 @@ export async function checkStaleBundle(): Promise<void> {
   const id = await diskBuildId();
   if (!id || id === __AP_BUILD_ID__ || sessionStorage.getItem(GUARD) === id) return;
   reload(id);
+}
+
+/**
+ * ST manifest hook (`hooks.update`): ST imports `dist/index.js` — the already-running module — and
+ * calls this after a successful git pull. Must settle within ST's 5 s hook timeout.
+ */
+export async function onExtensionUpdated(): Promise<void> {
+  await checkStaleBundle();
 }
 
 /** Panel "check for updates": git pull through ST, then reload if the bundle changed. */

@@ -15,7 +15,7 @@ import { setNextGeneration } from '@/core/classify';
 import { registry } from '@/core/context';
 import { debugLog } from '@/core/debug';
 import { onMessageReceived } from '@/app/receive';
-import { checkStaleBundle, updateExtension } from '@/app/updater';
+import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
 import { mountUi } from '@/ui';
@@ -90,5 +90,8 @@ async function init(): Promise<void> {
   mountUi();
   debugLog('init', { version: __AP_VERSION__, build: __AP_BUILD_ID__, enabled: settings().enabled });
 }
+
+/** ST manifest hook `update` (see manifest.json `hooks`). */
+export const advancedPresetOnUpdate = onExtensionUpdated;
 
 void init().catch((e) => console.error('[AP] init failed', e));
