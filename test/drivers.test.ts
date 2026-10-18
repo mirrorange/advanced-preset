@@ -11,6 +11,8 @@ const read = (over: Partial<ReadState>): ReadState => ({ text: '', reasoning: ''
 /** Preset with custom tool texts, to prove nothing is hard-coded in the extension. */
 const custom: APreset = {
   ...petals,
+  // template-driven names only (no per-stage overrides)
+  workflows: petals.workflows.map((w) => ({ ...w, stages: w.stages.map(({ field: _f, tool: _t, ...s }) => s) })),
   tools: {
     ...DEFAULT_TOOLS,
     turn: { name: 'demo_turn', description: 'Turn of {{ap::name::narrator}}', field: '{{stage}}_{{n}}', fieldDescription: '{{label}}!' },
@@ -106,6 +108,20 @@ describe('transport drivers', () => {
 });
 
 describe('preset-defined tool texts', () => {
+  it('petals: stage overrides name fields, tools and parameters', () => {
+    const multi = driverFor('tool-multi', 'edit');
+    const names = (multi.driver.body(0) as any).tools.map((t: any) => t.function.name);
+    expect(names).toEqual(['start_workflow', 'ask_questions', 'give_creative_input', 'write_story', 'review_story', 'edit_story']);
+    expect(names.some((n: string) => n.startsWith('ap_'))).toBe(false);
+    const write = (multi.driver.body(0) as any).tools.find((t: any) => t.function.name === 'write_story').function;
+    expect(Object.keys(write.parameters.properties)).toEqual(['story', 'synopsis', 'options']);
+    expect(write.description).toContain('Freesia');
+    const st = driverFor('structured', 'linear');
+    const js = (st.driver.body(0) as any).json_schema;
+    expect(js.name).toBe('petals_workflow');
+    expect(Object.keys(js.value.properties).slice(0, 3)).toEqual(['step1_questions', 'step2_creative_input', 'step3_story']);
+  });
+
   it('structured: schema name, description and field names come from the preset', () => {
     const { ctx, driver } = driverFor('structured', 'linear', custom);
     const js = (driver.body(0) as any).json_schema;
