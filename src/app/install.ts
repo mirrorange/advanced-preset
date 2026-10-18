@@ -2,7 +2,7 @@
 import { compareVersions, type APreset } from '@advanced-preset/protocol';
 import { nativeFetch, st } from '@/st/host';
 import { settings, save } from '@/store/settings';
-import { getPreset, installPreset, isArtifact, isBuiltin, removeInstalled } from '@/store/presets';
+import { getPreset, installPreset, isBuiltin, removeInstalled, toArtifact } from '@/store/presets';
 import { migratePresetState } from '@/store/config';
 import { ensureCarrier, findCarrier } from '@/store/carrier';
 import { t } from '@/i18n';
@@ -13,8 +13,9 @@ export function rawUrl(url: string): string {
   return m ? `https://raw.githubusercontent.com/${m[1]}/${m[2]}/${m[3]}` : url.trim();
 }
 
-export async function installArtifact(data: unknown, source?: string): Promise<APreset> {
-  if (!isArtifact(data)) throw new Error(t('presets.invalid'));
+export async function installArtifact(raw: unknown, source?: string): Promise<APreset> {
+  const data = toArtifact(raw);
+  if (!data) throw new Error(t('presets.invalid'));
   if (data.minAdvancedPreset && compareVersions(__AP_VERSION__, data.minAdvancedPreset) < 0) {
     throw new Error(t('presets.tooNew', { version: data.minAdvancedPreset }));
   }

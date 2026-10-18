@@ -3,7 +3,7 @@
  * live `ap dev` source. Lookup order: dev override → installed → built-in.
  */
 import { reactive } from 'vue';
-import { FORMAT_VERSION, compareVersions, type APreset } from '@advanced-preset/protocol';
+import { compareVersions, upgradeArtifact, type APreset } from '@advanced-preset/protocol';
 import { extensionBaseUrl, nativeFetch } from '@/st/host';
 import { settings, save } from './settings';
 
@@ -18,18 +18,16 @@ export async function loadBuiltins(): Promise<void> {
     const base = `${extensionBaseUrl()}dist/presets/`;
     const index: { file: string }[] = await (await nativeFetch(`${base}index.json`, { cache: 'no-cache' })).json();
     for (const { file } of index) {
-      const a = (await (await nativeFetch(base + file, { cache: 'no-cache' })).json()) as APreset;
-      if (isArtifact(a)) builtins.set(a.id, a);
+      const a = upgradeArtifact(await (await nativeFetch(base + file, { cache: 'no-cache' })).json());
+      if (a) builtins.set(a.id, a);
     }
   } catch (e) {
     console.error('[AP] failed to load built-in presets', e);
   }
 }
 
-export function isArtifact(a: unknown): a is APreset {
-  const x = a as APreset;
-  return Boolean(x) && typeof x === 'object' && x.formatVersion === FORMAT_VERSION && typeof x.id === 'string' && Array.isArray(x.entries);
-}
+/** Parse an artifact of any supported format into the current one (`null` if it is not an artifact). */
+export const toArtifact = (a: unknown): APreset | null => upgradeArtifact(a);
 
 export function listPresets(): PresetEntry[] {
   const ids = new Set([...builtins.keys(), ...Object.keys(settings().installed), ...devPresets.keys()]);
@@ -39,12 +37,21 @@ export function listPresets(): PresetEntry[] {
 export function getPresetEntry(id: string): PresetEntry | undefined {
   const dev = devPresets.get(id);
   if (dev) return { preset: dev, source: 'dev' };
-  const inst = settings().installed[id];
+  const inst = installedArtifact(id);
   const bi = builtins.get(id);
   // An installed copy older than the shipped built-in is superseded by the built-in.
   if (inst && (!bi || compareVersions(inst.version, bi.version) >= 0)) return { preset: inst, source: 'installed' };
   if (bi) return { preset: bi, source: 'builtin' };
   return undefined;
+}
+
+/** Installed copies may predate the current artifact format: upgrade them (memoised per stored object). */
+const upgraded = new WeakMap<object, APreset | null>();
+function installedArtifact(id: string): APreset | undefined {
+  const raw = settings().installed[id];
+  if (!raw) return undefined;
+  if (!upgraded.has(raw)) upgraded.set(raw, upgradeArtifact(raw));
+  return upgraded.get(raw) ?? undefined;
 }
 
 export const getPreset = (id: string) => getPresetEntry(id)?.preset;

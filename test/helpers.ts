@@ -1,11 +1,10 @@
 import { readFileSync } from 'node:fs';
-import { assemble, defaultVars, resolveConfiguration, type APreset, type Transport } from '@advanced-preset/protocol';
+import { assemble, defaultVars, resolveConfiguration, upgradeArtifact, type APreset, type Transport } from '@advanced-preset/protocol';
 import type { GenerationContext } from '@/core/context';
 
-export const petals = JSON.parse(readFileSync(new URL('../dist/presets/petals.apreset.json', import.meta.url), 'utf8')) as APreset;
+export const petals = upgradeArtifact(JSON.parse(readFileSync(new URL('../dist/presets/petals.apreset.json', import.meta.url), 'utf8')))!;
 
-export function ctxFor(transport: Transport, workflowId = 'linear', over: Partial<GenerationContext> = {}): GenerationContext {
-  const preset = petals;
+export function ctxFor(transport: Transport, workflowId = 'linear', over: Partial<GenerationContext> = {}, preset: APreset = petals): GenerationContext {
   const config = resolveConfiguration(preset, 'other', { connection: { transport, workflow: workflowId } });
   const workflow = preset.workflows.find((w) => w.id === workflowId)!;
   const vars = defaultVars(preset, config, { transport });

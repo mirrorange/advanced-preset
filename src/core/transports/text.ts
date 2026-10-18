@@ -1,10 +1,7 @@
 /** Prefill and plaintext transports (§10.2–10.3): dialogue-style output parsed by prefixes / tags. */
-import { parseDialogue, type TurnResult } from '@advanced-preset/protocol';
+import { fillTemplate, parseDialogue, type TurnResult } from '@advanced-preset/protocol';
 import type { ReadState } from '../reader';
 import { baseBody, callerCalls, prefixesOf, type Driver, type DriverInput } from './base';
-
-const CALLER_SCHEMA_HINT = (schema: unknown) =>
-  `After your thinking, output the result as one JSON code block (\`\`\`json … \`\`\`) that matches this JSON Schema:\n\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``;
 
 export function textDriver(input: DriverInput): Driver {
   const { ctx } = input;
@@ -23,7 +20,8 @@ export function textDriver(input: DriverInput): Driver {
   });
   const messages = [...input.messages];
   if (input.caller.schema) {
-    const hint = { role: 'system' as const, content: CALLER_SCHEMA_HINT(input.caller.schema.value) };
+    const content = fillTemplate(ctx.preset.tools.callerSchemaHint, { schema: JSON.stringify(input.caller.schema.value, null, 2) });
+    const hint = { role: 'system' as const, content };
     // Keep a trailing assistant prefill last.
     if (messages[messages.length - 1]?.role === 'assistant') messages.splice(messages.length - 1, 0, hint);
     else messages.push(hint);
