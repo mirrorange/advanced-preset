@@ -1,6 +1,6 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  SUBMIT_TOOL, TRANSPORTS, assemble, buildStageTools, buildTurnSchema, defaultVars, resolveConfiguration, tool, workflowSummary, actorName,
+  TRANSPORTS, assemble, defaultVars, resolveConfiguration, turnArtifacts, workflowSummary, actorName,
   type APreset, type Transport,
 } from '@advanced-preset/protocol';
 
@@ -32,9 +32,13 @@ export function preview(preset: APreset, o: PreviewOptions): string {
 
   const artifacts: Record<string, unknown> = {};
   if (wf) {
-    if (transport === 'structured') artifacts.schema = buildTurnSchema(wf, a.stages, a.structures);
-    if (transport === 'tool-single') artifacts.tools = [tool(SUBMIT_TOOL, a.expand(preset.tools.submit), buildTurnSchema(wf, a.stages, a.structures))];
-    if (transport === 'tool-multi') artifacts.tools = buildStageTools(wf, a.stages, a.structures, preset.tools.stagePrefix, {});
+    // Same builder as the extension; ST macros ({{user}}, …) stay unexpanded here.
+    const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
+    const synthetic = preset.syntheticTurns.find((s) => s.id === config.connection.syntheticTurn);
+    const init = synthetic && transport.startsWith('tool-') ? [{ type: 'function', function: { name: synthetic.tool.name, description: a.expand(synthetic.tool.description), parameters: { type: 'object', properties: {} } } }] : [];
+    if (transport === 'structured') artifacts.schema = t.schema();
+    if (transport === 'tool-single') artifacts.tools = [...init, t.submitTool()];
+    if (transport === 'tool-multi') artifacts.tools = [...init, ...t.stageTools()];
   }
   if (o.json) return JSON.stringify({ vars: a.vars, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
 

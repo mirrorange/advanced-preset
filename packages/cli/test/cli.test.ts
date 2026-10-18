@@ -188,6 +188,81 @@ structures: [ghost]
   });
 });
 
+describe('tools section', () => {
+  const withTools = (tools: string, stages?: string) => {
+    const t = tree();
+    t.set('preset.yaml', `${MANIFEST}${tools}`);
+    if (stages) t.set('workflows/linear.md', t.get('workflows/linear.md')!.replace(/stages:\n(  - .*\n)+/, `stages:\n${stages}`));
+    return build(t);
+  };
+
+  it('defaults to the format-1 names when omitted', () => {
+    const { preset } = build(tree());
+    expect(preset!.formatVersion).toBe(2);
+    expect(preset!.tools.submit.name).toBe('ap_submit_turn');
+    expect(preset!.tools.stage.name).toBe('ap_stage_{{stage}}');
+  });
+
+  it('compiles names, params, descriptions and stage overrides', () => {
+    const { preset, diag } = withTools(`
+tools:
+  turn: { name: demo_turn, field: "{{stage}}_{{n}}", description: "Turn of {{ap::name::narrator}}" }
+  submit: { name: submit_turn, description: Submit everything }
+  stage: { name: "{{stage}}", description: "{{label}}", param: { name: text, description: Stage text } }
+  patch: { old: Old text }
+  envelope: { thinking: { name: reasoning } }
+  results: { done: All done }
+`, `  - { id: plan, actor: narrator, kind: text, label: Plan, tool: { name: make_plan, param: plan }, field: { description: The plan } }
+  - { id: final, actor: narrator, kind: content, label: Write }
+`);
+    expect(diag.errors).toEqual([]);
+    const p = preset!;
+    expect(p.tools.turn).toEqual({ name: 'demo_turn', field: '{{stage}}_{{n}}', description: 'Turn of {{ap::name::narrator}}', fieldDescription: '{{label}}' });
+    expect(p.tools.stage.param).toEqual({ name: 'text', description: 'Stage text' });
+    expect(p.tools.envelope.thinking.name).toBe('reasoning');
+    expect(p.tools.envelope.result.name).toBe('result');
+    expect(p.tools.results.done).toBe('All done');
+    expect(p.workflows[0]!.stages[0]!.tool).toEqual({ name: 'make_plan', param: { name: 'plan' } });
+    expect(p.workflows[0]!.stages[0]!.field).toEqual({ description: 'The plan' });
+  });
+
+  it('accepts legacy keys with a warning', () => {
+    const { preset, diag } = withTools(`
+tools:
+  submit: Submit it.
+  stagePrefix: x_
+  stageResult: Next {{next}}
+`);
+    expect(diag.errors).toEqual([]);
+    expect(preset!.tools.submit).toEqual({ name: 'ap_submit_turn', description: 'Submit it.' });
+    expect(preset!.tools.stage.name).toBe('x_{{stage}}');
+    expect(preset!.tools.results.next).toBe('Next {{next}}');
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/legacy tools keys/);
+  });
+
+  it('flags invalid and colliding names', () => {
+    const { diag } = withTools(`
+tools:
+  submit: { name: "bad name" }
+  stage: { name: same, param: reply }
+  turn: { field: reply }
+`);
+    const msgs = diag.errors.map((e) => e.message).join('\n');
+    expect(msgs).toMatch(/tools.submit.name `bad name`/);
+    expect(msgs).toMatch(/tool `same` is also used by stage plan/);
+    expect(msgs).toMatch(/field `reply` collides with a structure field/);
+    expect(msgs).toMatch(/tool parameter `reply` collides with a structure field/);
+  });
+
+  it('checks structure sub-field descriptions', () => {
+    const t = tree();
+    t.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  synopsis: { kind: synopsis, properties: { time: When, mood: x }, formatPrompt: { tag: a, field: b } }\n'));
+    const { preset, diag } = build(t);
+    expect(diag.errors.map((e) => e.message).join('\n')).toMatch(/synopsis has no sub-field `mood`/);
+    expect(preset!.structures.synopsis!.properties).toEqual({ time: 'When' });
+  });
+});
+
 describe('assemble', () => {
   it('renders regions per style with exclusive winners and macros', () => {
     const { preset } = build(tree());
