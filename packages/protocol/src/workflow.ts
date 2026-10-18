@@ -31,6 +31,7 @@ export const DEFAULT_TOOLS: ToolsDecl = {
     nudge: 'Continue the workflow: call `{{next}}` now.',
   },
   jsonStringHint: '(JSON object encoded as a string)',
+  callerSchemaHint: 'After your thinking, output the result as one JSON code block (```json … ```) that matches this JSON Schema:\n\n```json\n{{schema}}\n```',
 };
 
 export type Expand = (text: string) => string;

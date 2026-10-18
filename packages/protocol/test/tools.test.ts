@@ -22,6 +22,7 @@ const tools: ToolsDecl = {
   envelope: { thinking: { name: 'reasoning', description: 'Think first' }, result: { name: 'answer' } },
   results: { next: 'ok {{next}}', done: 'done', unknown: '? {{name}}', nudge: 'go {{next}}' },
   jsonStringHint: '(JSON string)',
+  callerSchemaHint: 'JSON please: {{schema}}',
 };
 const expand = (s: string) => s.replaceAll('{{ap::name::editor}}', 'Petals').replaceAll('{{ap::name::narrator}}', 'Freesia');
 

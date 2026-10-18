@@ -250,6 +250,8 @@ export interface ToolsDecl {
   results: { next: string; done: string; unknown: string; nudge: string };
   /** Appended to the description of free-form maps sent as JSON-encoded strings (Gemini). */
   jsonStringHint?: string;
+  /** Prefill / plaintext task turns with a caller JSON schema: system hint asking for a JSON block (`{{schema}}`). */
+  callerSchemaHint: string;
 }
 
 export interface CarrierPrompt {

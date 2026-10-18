@@ -31,6 +31,7 @@ workflow; every name and description in them comes from `preset.yaml#tools`:
 | `envelope.thinking` / `envelope.result` | task turns with a caller JSON schema |
 | `results.next` / `done` / `unknown` / `nudge` | tool results and the nudge in the multi-step loop |
 | `jsonStringHint` | appended for free-form maps sent to Gemini as JSON strings |
+| `callerSchemaHint` | prefill / plaintext task turns with a caller JSON schema (`{{schema}}`) |
 
 Names and descriptions may use `{{n}}` (position among the active stages), `{{stage}}`, `{{actor}}`
 and `{{label}}`; descriptions also expand `{{ap::…}}` and SillyTavern macros. A stage can override
