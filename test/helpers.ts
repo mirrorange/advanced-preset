@@ -22,3 +22,12 @@ export async function collect<T>(gen: AsyncGenerator<T>): Promise<T[]> {
   for await (const x of gen) out.push(x);
   return out;
 }
+
+/** SSE response split into odd-sized chunks, so readers have to re-assemble events. */
+export function sseResponse(body: string): Response {
+  const bytes = new TextEncoder().encode(body);
+  const stream = new ReadableStream<Uint8Array>({
+    start(c) { for (let i = 0; i < bytes.length; i += 7) c.enqueue(bytes.slice(i, i + 7)); c.close(); },
+  });
+  return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
+}
