@@ -57,6 +57,44 @@ Removed points are flagged in the panel and their content is skipped. `ap check`
 targets the current version doesn't declare. Preview with users' modules:
 `ap preview --user-modules my.ap-modules.json`.
 
+## Build variables
+
+`vars` in `preset.yaml` declares variables that active modules build up during assembly; prompts
+read them with a macro. Ids are a contract with user modules — keep them stable.
+
+```yaml
+vars:
+  considerations: { type: dict, label: Planning considerations, description: Shown as help in the panel. }
+  tone: { type: string, separator: "\n" }   # separator between appended pieces (default: none)
+  props: list                                # shorthand: id: type
+```
+
+A module updates variables in its frontmatter; the update applies only while the module is active
+(enabled and its `when` holds), in module order:
+
+```yaml
+vars:
+  considerations: { show: Which concrete actions will carry the emotion? }   # dict: set keys (null removes)
+  tone: Keep it light.                                                       # string: append
+  props: [lantern, map]                                                      # list: append (a scalar appends one item)
+```
+
+| Macro | Result |
+| --- | --- |
+| `{{ap::var::considerations}}` | whole value as readable YAML (string as is) |
+| `{{ap::var::considerations::keys}}` / `::values` | YAML list of the dict's keys / values |
+| `{{ap::var::considerations::show}}` | one dict entry |
+| `{{ap::var::props::0}}` / `::-1` | one list item by index |
+
+Lists and dicts keep insertion order; setting an existing key keeps its position. `ap check` warns
+when modules that can be active together set the same key, about unknown variables or selectors,
+and about variables nobody reads. Users' modules (**My modules**) may update the same variables and
+are applied after the preset's, so their keys override built-in ones; an empty value removes one.
+Renamed variables go in `migrations[].rename.vars`.
+
+`stages.<id>` is true while the current workflow runs the stage this turn — handy for modules that
+only feed one stage: `when: stages.plan`.
+
 ## Tool and schema texts
 
 In structured-output and tool-calling modes the extension builds the JSON schema and tools from the
