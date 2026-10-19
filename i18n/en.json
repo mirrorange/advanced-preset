@@ -227,7 +227,7 @@
   "um.keyword": "Keywords",
   "um.expr": "Expression",
   "um.kw.input": "This input",
-  "um.kw.recent": "Recent messages",
+  "um.kw.recent": "Recent",
   "um.kw.recentN": "Last {n} messages",
   "um.kw.messages": "messages",
   "um.kw.any": "contains any",
