@@ -35,10 +35,16 @@ function withConnectionDefaults(p: APreset): APreset {
   return { ...p, configurationDefaults: { ...p.configurationDefaults, connection: { ...CONNECTION_DEFAULTS, ...conn } } };
 }
 
+/** Fields added without a format bump get their empty defaults. */
+function withOptionalDefaults(p: APreset): APreset {
+  const out = withConnectionDefaults(p);
+  return Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
+}
+
 /** Upgrade a parsed artifact to the current format. Returns `null` for anything that is not a known artifact. */
 export function upgradeArtifact(raw: unknown): APreset | null {
   if (!isObj(raw) || typeof raw.id !== 'string' || !Array.isArray(raw.entries)) return null;
-  if (raw.formatVersion === FORMAT_VERSION) return withConnectionDefaults(raw as APreset);
-  if (raw.formatVersion === 1) return withConnectionDefaults({ ...raw, formatVersion: FORMAT_VERSION, tools: v1Tools(raw.tools) } as APreset);
+  if (raw.formatVersion === FORMAT_VERSION) return withOptionalDefaults(raw as APreset);
+  if (raw.formatVersion === 1) return withOptionalDefaults({ ...raw, formatVersion: FORMAT_VERSION, tools: v1Tools(raw.tools) } as APreset);
   return null;
 }
