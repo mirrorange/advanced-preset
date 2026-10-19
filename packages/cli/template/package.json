@@ -7,7 +7,8 @@
     "build": "ap build",
     "check": "ap check",
     "dev": "ap dev",
-    "preview": "ap preview"
+    "preview": "ap preview",
+    "skills": "ap skills install"
   },
   "devDependencies": {
     "advanced-preset": "https://github.com/mirrorange/advanced-preset/releases/download/v__CLI_VERSION__/advanced-preset-__CLI_VERSION__.tgz"
