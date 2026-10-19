@@ -8,11 +8,14 @@
 import type { Expr } from './expr';
 
 /**
+ * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
+ * carry `questions`. Older artifacts are not loaded.
+ *
  * 2: every model-visible text of the transport layer (tool names / descriptions, parameter names,
  * schema descriptions, tool results) comes from the preset (`tools`, `Stage.field`, `Stage.tool`,
- * `StructureDecl.properties`). Version 1 artifacts are upgraded on load (`upgradeArtifact`).
+ * `StructureDecl.properties`).
  */
-export const FORMAT_VERSION = 2 as const;
+export const FORMAT_VERSION = 3 as const;
 
 export type Transport = 'prefill' | 'plaintext' | 'structured' | 'tool-single' | 'tool-multi';
 export const TRANSPORTS: readonly Transport[] = ['prefill', 'plaintext', 'structured', 'tool-single', 'tool-multi'];
@@ -98,14 +101,30 @@ export interface Group {
   tab?: 'modules' | 'writing';
 }
 
-export interface Question {
+export type BuildVarType = 'string' | 'list' | 'dict';
+export const BUILD_VAR_TYPES: readonly BuildVarType[] = ['string', 'list', 'dict'];
+
+/** A build variable declared by the preset (`preset.yaml#vars`). Ids are a contract with user modules. */
+export interface BuildVarDecl {
   id: string;
-  text: string;
+  type: BuildVarType;
+  label?: string;
+  description?: string;
+  /** Strings: text placed between appended parts (default none). */
+  separator?: string;
 }
-export interface ModuleQuestions {
-  mandatory: Question[];
-  optional: Question[];
+
+export interface DictItem {
+  key: string;
+  /** `null` removes the key. */
+  value: string | null;
 }
+
+/** What an active module does to a build variable. `type` mirrors the declaration. */
+export type BuildVarUpdate =
+  | { var: string; type: 'string'; text: string }
+  | { var: string; type: 'list'; items: string[] }
+  | { var: string; type: 'dict'; items: DictItem[] };
 
 export interface Module {
   id: string;
@@ -119,7 +138,8 @@ export interface Module {
   /** Module-level condition: when false, the module contributes nothing this turn. */
   when?: Expr;
   structures: string[];
-  questions: ModuleQuestions;
+  /** Build variable updates applied while the module is active, in order. */
+  vars: BuildVarUpdate[];
   /** Source path, for diagnostics. */
   source?: string;
 }
@@ -156,7 +176,6 @@ export interface Stage {
   kind: StageKind;
   label: string;
   optional?: boolean;
-  questions?: 'ask' | 'answer';
   when?: Expr;
   /** Dialogue style: the stage is written as `<tag>…</tag>` instead of a prefixed segment. */
   tag?: string;
@@ -333,7 +352,7 @@ export interface RecommendedConfiguration {
 export interface Migration {
   /** Semver range of the *previous* preset version, e.g. `<7.0.0`. */
   from: string;
-  rename: { modules?: Record<string, string>; params?: Record<string, string>; insertionPoints?: Record<string, string> };
+  rename: { modules?: Record<string, string>; params?: Record<string, string>; insertionPoints?: Record<string, string>; vars?: Record<string, string> };
 }
 
 export interface ThemeDecl {
@@ -350,12 +369,8 @@ export interface LocaleTable {
   configurations?: Record<string, { name?: string; description?: string }>;
   structures?: Record<string, { title?: string }>;
   insertionPoints?: Record<string, { label?: string; description?: string }>;
+  vars?: Record<string, { label?: string; description?: string }>;
   [key: string]: unknown;
-}
-
-export interface QuestionsDecl {
-  /** Template for the Questions region. `{{ap::questions::mandatory}}` / `optional` lists are available. */
-  region: string;
 }
 
 export interface APreset {
@@ -387,8 +402,6 @@ export interface APreset {
   anchors: Record<SemanticAnchor, string>;
   /** Region that receives the workflow (CoT / task) prompt. */
   workflowRegion: string;
-  /** Region that receives the generated Questions block. */
-  questionsRegion?: string;
 
   params: Param[];
   groups: Record<string, Group>;
@@ -396,6 +409,8 @@ export interface APreset {
   entries: Entry[];
   /** Places where user modules may insert content (absent in older artifacts → `[]`). */
   insertionPoints: InsertionPoint[];
+  /** Build variables, in declaration order. */
+  vars: BuildVarDecl[];
   workflows: Workflow[];
   structures: Record<string, StructureDecl>;
   regex: RegexDecl[];

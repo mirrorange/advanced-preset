@@ -11,7 +11,7 @@ const preset = {
     { id: 'settings', role: 'system', merge: 'none', separator: '', native: true },
     { id: 'task', role: 'user', merge: 'join', separator: '\n\n' },
   ],
-  modules: [{ id: 'core', name: 'Core', toggle: 'always', default: true, structures: [], questions: { mandatory: [], optional: [] } }],
+  modules: [{ id: 'core', name: 'Core', toggle: 'always', default: true, structures: [], vars: [] }],
   entries: [entry('core/a', 'top', 100), entry('core/b', 'top', 200), entry('core/t', 'task', 100), entry('core/c', 'top', 300)],
   insertionPoints: [
     { id: 'after-a', label: 'After A', region: 'top', order: 100 },
@@ -22,7 +22,7 @@ const preset = {
 } as unknown as APreset;
 
 const mod = (id: string, points: string[], over: Partial<UserModule> = {}): UserModule => ({
-  id, name: id, enabled: true, entries: points.map((point, i) => ({ id: `e${i}`, point, text: `${id}@${point}` })), trigger: { match: 'all', rules: [] }, ...over,
+  id, name: id, enabled: true, entries: points.map((point, i) => ({ id: `e${i}`, point, text: `${id}@${point}` })), vars: [], trigger: { match: 'all', rules: [] }, ...over,
 });
 
 describe('user modules', () => {
@@ -86,7 +86,7 @@ describe('user modules', () => {
     const file = JSON.parse(JSON.stringify(userModuleFile([mod('x', ['early'])], { id: 'p', version: '1.0.0' })));
     expect(parseUserModuleFile(file)).toEqual({ preset: { id: 'p', version: '1.0.0' }, modules: [mod('x', ['early'])] });
     const loose = parseUserModuleFile({ name: 'n', entries: [{ point: 'p', role: 'bogus', text: 1 }], trigger: { match: 'any', rules: [{ kind: 'nope' }, { kind: 'var', path: 'x', op: '==', value: { a: 1 } }] } });
-    expect(loose.modules[0]).toEqual({ id: '', name: 'n', enabled: true, entries: [{ id: 'e1', point: 'p', text: '' }], trigger: { match: 'any', rules: [{ kind: 'var', path: 'x', op: '==' }] } });
+    expect(loose.modules[0]).toEqual({ id: '', name: 'n', enabled: true, entries: [{ id: 'e1', point: 'p', text: '' }], vars: [], trigger: { match: 'any', rules: [{ kind: 'var', path: 'x', op: '==' }] } });
     expect(() => parseUserModuleFile({ format: 'advanced-preset.user-modules', version: 2 })).toThrow();
     expect(() => parseUserModuleFile([1])).toThrow();
   });

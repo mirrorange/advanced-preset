@@ -80,17 +80,10 @@ describe('preset-defined tool texts', () => {
 });
 
 describe('artifact upgrade', () => {
-  it('keeps format-1 tool names and texts', () => {
-    const v1 = { formatVersion: 1, id: 'x', entries: [], tools: { submit: 'S', stagePrefix: 'ap_stage_', structures: 'x', stageResult: 'R {{next}}', nudge: 'N' } };
-    const up = upgradeArtifact(v1)!;
-    expect(up.formatVersion).toBe(FORMAT_VERSION);
-    expect(up.tools.submit).toEqual({ name: 'ap_submit_turn', description: 'S' });
-    expect(up.tools.results.next).toBe('R {{next}}');
-    const a = turnArtifacts(up.tools, wf, stages.map(({ tool: _t, field: _f, ...s }) => s), []);
-    expect(a.stageTools().map((t) => t.function.name)).toEqual(['ap_stage_questions', 'ap_stage_final', 'ap_stage_edit']);
-    expect(Object.keys(a.turnSchema().properties as object)).toEqual(['step1_narrator_questions', 'step2_narrator_final', 'step3_narrator_edit']);
-    expect(a.schema().name).toBe('ap_turn');
+  it('only loads the current format', () => {
+    expect(upgradeArtifact({ formatVersion: 2, id: 'x', entries: [] })).toBeNull();
     expect(upgradeArtifact({ formatVersion: 9, id: 'x', entries: [] })).toBeNull();
+    expect(upgradeArtifact({ formatVersion: FORMAT_VERSION, id: 'x', entries: [] })).not.toBeNull();
     expect(DEFAULT_TOOLS.stage.param.name).toBe('content');
   });
 
