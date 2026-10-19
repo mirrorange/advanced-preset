@@ -1,8 +1,8 @@
 <script setup lang="ts">
-/** Drill-in editor of one user module: name, switch, insertion entries, trigger and file actions. */
+/** Drill-in editor of one user module: name, switch, insertion entries, variable updates, trigger and file actions. */
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { ArrowLeft, CopyPlus, Download, MapPin, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
-import { compileText, findPoint, type APreset, type Role, type UserEntry, type UserModule } from '@advanced-preset/protocol';
+import { compileText, findPoint, type APreset, type BuildVarUpdate, type Role, type UserEntry, type UserModule } from '@advanced-preset/protocol';
 import { t, pt } from '@/i18n';
 import { save } from '@/store/settings';
 import { duplicateUserModule, exportUserModules, newEntry, removeUserModule } from '@/store/user-modules';
@@ -12,6 +12,7 @@ import Section from '../../components/Section.vue';
 import Switch from '../../components/Switch.vue';
 import Help from '../../components/Help.vue';
 import TriggerEditor from './TriggerEditor.vue';
+import VarUpdateEditor from './VarUpdateEditor.vue';
 
 const props = defineProps<{ preset: APreset; module: UserModule }>();
 const emit = defineEmits<{ close: []; open: [id: string] }>();
@@ -47,6 +48,19 @@ function addEntry() {
 }
 const removeEntry = (i: number) => props.module.entries.splice(i, 1);
 
+const vars = computed(() => props.preset.vars.map((v) => ({ id: v.id, label: pt(props.preset, 'vars', v.id, 'label', v.label ?? v.id) })));
+const unusedVars = computed(() => vars.value.filter((v) => !props.module.vars.some((u) => u.var === v.id)));
+const varPicker = ref<HTMLSelectElement | null>(null);
+function addVar(id: string) {
+  const decl = props.preset.vars.find((v) => v.id === id);
+  if (varPicker.value) varPicker.value.value = '';
+  if (!decl) return;
+  const u: BuildVarUpdate = decl.type === 'string' ? { var: id, type: 'string', text: '' }
+    : decl.type === 'list' ? { var: id, type: 'list', items: [''] }
+    : { var: id, type: 'dict', items: [{ key: '', value: '' }] };
+  props.module.vars.push(u);
+}
+
 const confirmDelete = ref(false);
 function remove() {
   if (!confirmDelete.value) { confirmDelete.value = true; setTimeout(() => (confirmDelete.value = false), 3000); return; }
@@ -80,13 +94,24 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
           <select class="input bare um-role" :value="e.role ?? ''" :aria-label="t('um.role')" @change="setRole(e, ($event.target as HTMLSelectElement).value)">
             <option v-for="r in ROLES" :key="r" :value="r">{{ t(`um.role.${r || 'merge'}`) }}</option>
           </select>
-          <IconButton v-if="module.entries.length > 1" :icon="X" :label="t('um.removeEntry')" small align="end" @click="removeEntry(i)" />
+          <IconButton v-if="module.entries.length > 1 || module.vars.length" :icon="X" :label="t('um.removeEntry')" small align="end" @click="removeEntry(i)" />
         </div>
         <div v-if="missing(e)" class="um-warn xs"><TriangleAlert />{{ t('um.pointLost') }}</div>
         <textarea v-model="e.text" class="input um-text" rows="4" spellcheck="false" :placeholder="t('um.text.placeholder')" />
         <div v-if="errors(e).length" class="rule-error xs pre">{{ errorText(e) }}</div>
       </div>
       <button v-if="points.length" type="button" class="btn ghost add" @click="addEntry"><Plus />{{ t('um.addEntry') }}</button>
+    </Section>
+
+    <Section v-if="vars.length || module.vars.length" :title="t('um.bv')" :help="t('um.bv.help')">
+      <VarUpdateEditor v-for="(u, i) in module.vars" :key="u.var" :preset="preset" :update="u" @remove="module.vars.splice(i, 1)" />
+      <label v-if="unusedVars.length" class="btn ghost add picker">
+        <Plus />{{ t('um.bv.add') }}
+        <select ref="varPicker" :aria-label="t('um.bv.add')" @change="addVar(($event.target as HTMLSelectElement).value)">
+          <option value="" disabled selected hidden />
+          <option v-for="v in unusedVars" :key="v.id" :value="v.id">{{ v.label }}</option>
+        </select>
+      </label>
     </Section>
 
     <Section :title="t('um.trigger')" :help="t('um.trigger.help')">

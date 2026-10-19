@@ -86,6 +86,19 @@ const logEntries = computed(() => debugState.log.filter((e) => e.kind !== 'assem
           </template>
         </div>
       </div>
+      <div v-if="snapshot.vars?.length">
+        <div v-for="v in snapshot.vars" :key="v.id" class="region">
+          <div class="region-head" @click="toggleRegion(`var:${v.id}`)">
+            <ChevronRight class="faint caret" :class="{ open: openRegions.has(`var:${v.id}`) }" />
+            <span class="grow mono">{{ v.id }}</span>
+            <span class="xs muted">{{ v.text.length }} ch</span>
+          </div>
+          <div v-if="openRegions.has(`var:${v.id}`)" class="region-msg">
+            <div class="pre mono scroll">{{ v.text }}</div>
+            <div v-if="!v.text" class="xs faint">{{ t('debug.emptyRegion') }}</div>
+          </div>
+        </div>
+      </div>
       <div v-if="snapshot.warnings.length" class="xs text-warning">{{ snapshot.warnings.join(' · ') }}</div>
     </template>
     <div v-else class="faint small">{{ t('debug.noAssembly') }}</div>

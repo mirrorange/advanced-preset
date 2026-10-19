@@ -3,7 +3,7 @@
  * their keyword rules scan. Merging into the preset happens in the assembler (`withUserModules`).
  */
 import {
-  cloneData, compareVersions, emptyTrigger, migrateUserModules, missingPoints, parseUserModuleFile, userModuleFile,
+  cloneData, compareVersions, emptyTrigger, migrateUserModules, lostRefs, parseUserModuleFile, userModuleFile,
   type APreset, type KeywordTexts, type UserEntry, type UserModule, type UserModuleFile,
 } from '@advanced-preset/protocol';
 import { presetState } from './config';
@@ -33,8 +33,8 @@ export function newEntry(preset: APreset, module?: UserModule): UserEntry {
 
 export function createUserModule(preset: APreset, name: string): UserModule {
   const list = userModules(preset);
-  const m: UserModule = { id: uniqueId(list.map((x) => x.id)), name, enabled: true, entries: [], trigger: emptyTrigger() };
-  m.entries.push(newEntry(preset, m));
+  const m: UserModule = { id: uniqueId(list.map((x) => x.id)), name, enabled: true, entries: [], vars: [], trigger: emptyTrigger() };
+  if (preset.insertionPoints.length) m.entries.push(newEntry(preset, m));
   list.push(m);
   save();
   return list[list.length - 1]!;
@@ -87,7 +87,7 @@ export function importUserModules(preset: APreset, raw: unknown): { added: UserM
     return copy;
   });
   save();
-  return { added, missing: added.filter((m) => missingPoints(preset, m).length).length };
+  return { added, missing: added.filter((m) => lostRefs(preset, m).length).length };
 }
 
 /** Keyword rule input: the current user message, then earlier non-system messages, newest first. */
