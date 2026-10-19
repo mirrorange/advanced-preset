@@ -8224,7 +8224,7 @@ function Up(e) {
 }
 async function Wp() {
 	let e = await Hp();
-	e && e !== "3ee5ebc04fa2a272" && sessionStorage.getItem(Vp) !== e && Up(e);
+	e && e !== "065483f6e07fa245" && sessionStorage.getItem(Vp) !== e && Up(e);
 }
 async function Gp() {
 	await Wp();
@@ -8233,7 +8233,7 @@ async function Kp() {
 	let e = a().replace(/^third-party\//, ""), t = await qp(e, !1);
 	if (t.status === 404 && (t = await qp(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Hp();
-	return r && r !== "3ee5ebc04fa2a272" ? (Up(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "065483f6e07fa245" ? (Up(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var qp = (t, n) => p("/api/extensions/update", {
 	method: "POST",
@@ -12744,7 +12744,7 @@ var Yv = ["data-id"], Xv = ["aria-label", "onPointerdown"], Zv = ["onClick"], Qv
 				]), U("pre", Nx, j(s(e.data)), 1)]))), 128)), m.value.length ? G("", !0) : (B(), V("div", Px, j(F(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			U("div", Fx, "Advanced Preset " + j(F("1.3.1")) + " · " + j(F("3ee5ebc04fa2a272")), 1)
+			U("div", Fx, "Advanced Preset " + j(F("1.3.1")) + " · " + j(F("065483f6e07fa245")), 1)
 		], 64));
 	}
 }), Lx = ["aria-label"], Rx = { class: "panel-head" }, zx = { class: "panel-logo" }, Bx = { class: "grow" }, Vx = { class: "panel-title ellipsis" }, Hx = { class: "panel-sub ellipsis" }, Ux = {
@@ -12892,7 +12892,7 @@ function rS() {
 //#region src/index.ts
 var iS = {
 	version: "1.3.1",
-	buildId: "3ee5ebc04fa2a272",
+	buildId: "065483f6e07fa245",
 	nextGeneration: (e) => qu(e),
 	listPresets: () => Bl().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -12940,7 +12940,7 @@ async function sS() {
 	};
 	t.on(n.APP_READY, () => void a()), rS(), Dd("init", {
 		version: "1.3.1",
-		build: "3ee5ebc04fa2a272",
+		build: "065483f6e07fa245",
 		enabled: q().enabled
 	});
 }
