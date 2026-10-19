@@ -32,12 +32,14 @@ export default async function (page, shots) {
   await guide.screenshot({ path: `${shots}/modules-guidelines-b-${tag}.png` });
 
   const style = page.locator('ap-panel .section').filter({ has: page.locator('.card-title', { hasText: /^(Writing Style|文风)$/ }) });
-  console.log('style radios', await radios(style), 'header switch', await style.locator('.card-head .switch').count());
+  // Main style is its own switch row; the header has no switch, so it never seems to control Eros.
+  const mainRow = style.locator('.module-row').first();
+  console.log('style row', await mainRow.innerText(), 'radios', await radios(style), 'header switch', await style.locator('.card-head .switch').count());
   await style.screenshot({ path: `${shots}/modules-style-on-${tag}.png` });
-  await style.locator('.card-head .switch').click(); await page.waitForTimeout(300);
-  console.log('style off radios', await radios(style));
+  const wasOn = await radios(style);
+  await mainRow.locator('.switch').click(); await page.waitForTimeout(300);
+  console.log('style toggled radios', await radios(style));
   await style.screenshot({ path: `${shots}/modules-style-off-${tag}.png` });
-  const active = await page.evaluate(() => JSON.stringify(Object.entries(window.AdvancedPreset?.debug?.modules?.() ?? {}).length));
-  console.log('debug', active);
-  await style.locator('.card-head .switch').click(); await page.waitForTimeout(300);
+  await mainRow.locator('.switch').click(); await page.waitForTimeout(300);
+  console.log('style restored radios', await radios(style), 'was', wasOn);
 }
