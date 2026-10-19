@@ -4,7 +4,7 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
-  actorName, assemble, defaultVars, replyToPlainText, withUserModules, type APreset, type MacroData, type Vars, type Workflow,
+  actorName, assemble, defaultVars, formatVar, replyToPlainText, withUserModules, type APreset, type MacroData, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, type ChatMessage } from '@/st/host';
 import { getPreset } from '@/store/presets';
@@ -186,6 +186,8 @@ export interface AssemblySnapshot {
   transport: string;
   workflow: string;
   modules: string[];
+  /** Build variables as the prompts read them in full (before macro expansion). */
+  vars: { id: string; text: string }[];
   regions: { id: string; messages: { role: string; chars: number; content: string }[] }[];
   warnings: string[];
 }
@@ -227,6 +229,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   const snapshot: AssemblySnapshot = {
     genId: ctx.id, at: Date.now(), dryRun, origin: ctx.origin, transport: ctx.transport, workflow: workflow?.id ?? '',
     modules: assembly.modules.map((m) => m.id), regions: [], warnings: ctx.warnings,
+    vars: Object.entries(assembly.buildVars).map(([id, v]) => ({ id, text: formatVar(v) })),
   };
   for (const m of list) {
     if (!m.__anchor) { final.push(m); continue; }

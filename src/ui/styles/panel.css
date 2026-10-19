@@ -145,6 +145,13 @@
 .um-text { field-sizing: content; min-height: 5.5em; max-height: 24em; font-family: var(--monoFontFamily, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: var(--ap-font-size-sm); }
 .um-warn { display: flex; align-items: center; gap: 6px; color: var(--ap-warning); }
 .um-warn svg.lucide { width: 1.1em; height: 1.1em; }
+.um-var-label { flex: 1 1 8em; min-width: 0; padding: 0 0.35em; font-weight: 600; }
+.um-entry.lost .um-var-label { color: var(--ap-warning); }
+.um-var-row { display: grid; grid-template-columns: minmax(5em, 32%) 1fr auto; gap: 4px; align-items: start; }
+.um-var-row.list { grid-template-columns: 1fr auto; }
+.um-var-key { min-width: 0; font-weight: 600; }
+.um-var-value { min-width: 0; field-sizing: content; min-height: 2.1em; max-height: 12em; resize: none; }
+.um-var-add { align-self: flex-start; }
 .um-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0 -0.5em; }
 .um-foot .btn { color: var(--ap-muted); }
 .um-foot .btn:hover:not(:disabled) { color: var(--ap-text); background: var(--ap-surface-2); }
