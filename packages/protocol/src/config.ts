@@ -3,11 +3,22 @@
  * User data only stores sparse diffs, so new defaults flow in automatically.
  */
 import { cloneData } from './clone';
-import type { APreset, Configuration, Migration, SparseDiff } from './types';
+import type { APreset, Configuration, ConnectionConfig, Migration, SparseDiff } from './types';
 import { satisfies } from './semver';
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
+
+/** Connection defaults that do not depend on the preset (workflow / synthetic turn do). */
+export const CONNECTION_DEFAULTS: Omit<ConnectionConfig, 'workflow' | 'syntheticTurn'> = {
+  transport: 'structured',
+  forceTool: true,
+  parallelTools: false,
+  sendThoughtSignature: false,
+  streamToolArguments: 'auto',
+  maxSteps: 6,
+  finalFallback: true,
+};
 
 export function deepMerge<T>(base: T, ...layers: unknown[]): T {
   let out: unknown = cloneData(base);

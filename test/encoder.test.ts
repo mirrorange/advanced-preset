@@ -2,18 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { encodeJson, familyOf, streamEncoder, type Family } from '@/core/encoder';
 import { streamContextOf } from '@/st/host';
 import { readResponse } from '@/core/reader';
-import { collect } from './helpers';
+import { collect, sseResponse } from './helpers';
 
 const sources: Record<Family, string> = { openai: 'openai', claude: 'claude', gemini: 'makersuite', cohere: 'cohere' };
-
-function sseResponse(body: string): Response {
-  const bytes = new TextEncoder().encode(body);
-  // Split into odd-sized chunks so the reader has to re-assemble events.
-  const stream = new ReadableStream<Uint8Array>({
-    start(c) { for (let i = 0; i < bytes.length; i += 7) c.enqueue(bytes.slice(i, i + 7)); c.close(); },
-  });
-  return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
-}
 
 describe('encoder ↔ reader round trip', () => {
   for (const [family, source] of Object.entries(sources) as [Family, string][]) {

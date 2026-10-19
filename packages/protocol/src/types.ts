@@ -16,6 +16,15 @@ export const FORMAT_VERSION = 2 as const;
 
 export type Transport = 'prefill' | 'plaintext' | 'structured' | 'tool-single' | 'tool-multi';
 export const TRANSPORTS: readonly Transport[] = ['prefill', 'plaintext', 'structured', 'tool-single', 'tool-multi'];
+
+/**
+ * Incremental tool-call arguments in tool transports. Only Gemini's generateContent API needs asking
+ * (`streamFunctionCallArguments`, accepted by Vertex AI only); the other wire formats carry argument
+ * deltas natively, though a backend may still deliver a call whole.
+ * `auto` asks where the backend is known to support it, `on` asks on every Gemini-format connection.
+ */
+export type ToolArgStreaming = 'auto' | 'on' | 'off';
+export const TOOL_ARG_STREAMING: readonly ToolArgStreaming[] = ['auto', 'on', 'off'];
 export type Style = 'dialogue' | 'imperative';
 export type Role = 'system' | 'user' | 'assistant';
 export type ActorId = string;
@@ -278,6 +287,7 @@ export interface ConnectionConfig {
   parallelTools: boolean;
   syntheticTurn: string | null;
   sendThoughtSignature: boolean;
+  streamToolArguments: ToolArgStreaming;
   maxSteps: number;
   finalFallback: boolean;
 }

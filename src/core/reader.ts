@@ -3,6 +3,7 @@
  * accumulating text, native reasoning and tool calls (with partial argument strings for streaming UI).
  */
 import { streamingReply, type StreamContext, type StreamState } from '@/st/host';
+import { PartialArgs } from './partial-args';
 
 export interface ToolCallAcc { id: string; name: string; arguments: string; signature?: string }
 
@@ -29,6 +30,8 @@ function errorMessage(data: any): string | null {
 export class ToolCallCollector {
   private calls: ToolCallAcc[] = [];
   private claudeIndex = new Map<number, number>();
+  /** Gemini call whose arguments are still streaming (`willContinue`). */
+  private geminiOpen: { call: ToolCallAcc; args: PartialArgs } | null = null;
 
   get list(): ToolCallAcc[] { return this.calls; }
 
@@ -64,15 +67,8 @@ export class ToolCallCollector {
       const i = this.claudeIndex.get(p.index ?? 0);
       if (i !== undefined) this.at(i).arguments += p.delta.partial_json ?? '';
     }
-    // Gemini (whole function calls per chunk)
-    for (const part of p?.candidates?.[0]?.content?.parts ?? []) {
-      if (!part?.functionCall) continue;
-      const c = this.at(this.calls.length);
-      c.id = `call_${Math.random().toString(36).slice(2, 10)}`;
-      c.name = part.functionCall.name ?? '';
-      c.arguments = JSON.stringify(part.functionCall.args ?? {});
-      if (part.thoughtSignature) c.signature = part.thoughtSignature;
-    }
+    // Gemini: whole calls, or streamed ones (`partialArgs`) when `streamFunctionCallArguments` is on
+    for (const part of p?.candidates?.[0]?.content?.parts ?? []) if (part?.functionCall) this.pushGemini(part);
     // Cohere
     if (['tool-call-start', 'tool-call-delta'].includes(p?.type)) {
       const tc = p?.delta?.message?.tool_calls;
@@ -81,6 +77,29 @@ export class ToolCallCollector {
       if (tc?.function?.name && !c.name) c.name = tc.function.name;
       if (typeof tc?.function?.arguments === 'string') c.arguments += tc.function.arguments;
     }
+  }
+
+  /**
+   * A part carrying a `name` starts a call (complete when it has `args` and no `willContinue`);
+   * later parts of a streamed call only carry `partialArgs`, and one without `willContinue` ends it.
+   */
+  private pushGemini(part: any): void {
+    const fc = part.functionCall;
+    if (fc.name) {
+      const call = this.at(this.calls.length);
+      call.id = fc.id || `call_${Math.random().toString(36).slice(2, 10)}`;
+      call.name = fc.name;
+      call.arguments = JSON.stringify(fc.args ?? {});
+      this.geminiOpen = { call, args: new PartialArgs() };
+    }
+    const open = this.geminiOpen;
+    if (!open) return;
+    if (part.thoughtSignature) open.call.signature = part.thoughtSignature;
+    if (Array.isArray(fc.partialArgs) && fc.partialArgs.length) {
+      open.args.apply(fc.partialArgs);
+      open.call.arguments = JSON.stringify(open.args.value);
+    }
+    if (!fc.willContinue) this.geminiOpen = null;
   }
 
   /** Non-streaming bodies (ST normalises most sources to OpenAI shape, with mirrors). */
