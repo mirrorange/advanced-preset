@@ -50,22 +50,32 @@ export interface MacroData {
   customLast?: Record<string, string>;
 }
 
+/** Whether an exclusive set may be left with no module selected (`groups[set].allowNone`). */
+export function exclusiveAllowsNone(preset: APreset, set: string): boolean {
+  return Boolean(preset.groups[set]?.allowNone);
+}
+
 /**
- * Module activation: always-on modules + enabled user modules, one winner per exclusive group
- * (first in module order), then the module-level `when`.
+ * Module activation: always-on modules + enabled user modules, one winner per exclusive set
+ * (first enabled in module order). A set that does not allow none falls back to its default
+ * module (else its first module) when nothing in it is enabled. Then the module-level `when`.
  */
 export function activeModules(preset: APreset, config: Configuration, resolve?: Resolver): Module[] {
-  const taken = new Set<string>();
-  const out: Module[] = [];
+  const winner = new Map<string, string>();
   for (const m of preset.modules) {
-    const on = m.toggle === 'always' || config.modules[m.id] === true;
-    if (!on) continue;
-    if (m.exclusive) {
-      if (taken.has(m.exclusive)) continue;
-      taken.add(m.exclusive);
-    }
-    out.push(m);
+    if (m.exclusive && m.toggle === 'user' && config.modules[m.id] === true && !winner.has(m.exclusive)) winner.set(m.exclusive, m.id);
   }
+  for (const m of preset.modules) {
+    const set = m.exclusive;
+    if (!set || winner.has(set) || exclusiveAllowsNone(preset, set)) continue;
+    const members = preset.modules.filter((x) => x.exclusive === set && x.toggle === 'user');
+    const pick = members.find((x) => x.default) ?? members[0];
+    if (pick) winner.set(set, pick.id);
+  }
+  const out = preset.modules.filter((m) => {
+    if (m.toggle === 'always') return true;
+    return m.exclusive ? winner.get(m.exclusive) === m.id : config.modules[m.id] === true;
+  });
   return resolve ? out.filter((m) => test(m.when, resolve)) : out;
 }
 

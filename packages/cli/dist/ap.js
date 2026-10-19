@@ -7885,18 +7885,25 @@ function resolverOf(vars) {
     return cur;
   };
 }
+function exclusiveAllowsNone(preset, set) {
+  return Boolean(preset.groups[set]?.allowNone);
+}
 function activeModules(preset, config, resolve2) {
-  const taken = /* @__PURE__ */ new Set();
-  const out = [];
+  const winner = /* @__PURE__ */ new Map();
   for (const m of preset.modules) {
-    const on = m.toggle === "always" || config.modules[m.id] === true;
-    if (!on) continue;
-    if (m.exclusive) {
-      if (taken.has(m.exclusive)) continue;
-      taken.add(m.exclusive);
-    }
-    out.push(m);
+    if (m.exclusive && m.toggle === "user" && config.modules[m.id] === true && !winner.has(m.exclusive)) winner.set(m.exclusive, m.id);
   }
+  for (const m of preset.modules) {
+    const set = m.exclusive;
+    if (!set || winner.has(set) || exclusiveAllowsNone(preset, set)) continue;
+    const members = preset.modules.filter((x) => x.exclusive === set && x.toggle === "user");
+    const pick = members.find((x) => x.default) ?? members[0];
+    if (pick) winner.set(set, pick.id);
+  }
+  const out = preset.modules.filter((m) => {
+    if (m.toggle === "always") return true;
+    return m.exclusive ? winner.get(m.exclusive) === m.id : config.modules[m.id] === true;
+  });
   return resolve2 ? out.filter((m) => test(m.when, resolve2)) : out;
 }
 function moduleSwitches(preset, config) {
@@ -9210,7 +9217,10 @@ function validate(p, map, diag) {
   for (const [g, ids] of exclusive) {
     const on = ids.filter((id) => defaults[id]);
     if (on.length > 1) diag.warn(`exclusive group \`${g}\`: several modules enabled by default (${on.join(", ")}); the first in moduleOrder wins`, { file: M, path: "configurationDefaults.modules" });
-    if (!on.length && !p.groups[g]?.allowNone) diag.warn(`exclusive group \`${g}\` has no default and does not allow none`, { file: M, path: "groups" });
+    if (!on.length && !p.groups[g]?.allowNone) diag.warn(`exclusive group \`${g}\` has no default and does not allow none; its first module is used`, { file: M, path: "groups" });
+  }
+  for (const [g, decl] of Object.entries(p.groups)) {
+    if (decl.allowNone && !exclusive.has(g)) diag.warn(`group \`${g}\`: allowNone only applies to an exclusive set (modules with \`exclusive: ${g}\`)`, { file: M, path: `groups.${g}` });
   }
   for (const id of p.moduleOrder) if (id !== "*" && !moduleIds.has(id)) diag.warn(`moduleOrder: unknown module \`${id}\``, { file: M, path: "moduleOrder" });
   for (const x of p.params) {
@@ -9452,7 +9462,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.2.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.3.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -9477,7 +9487,7 @@ async function init(o) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.2.0" : "0.0.0-dev";
+var VERSION = true ? "1.3.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage

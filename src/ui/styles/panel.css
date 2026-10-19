@@ -59,6 +59,7 @@
 .module-row .grow { display: flex; align-items: center; gap: 4px; }
 .module-row .icon-btn.sm { width: 1.4em; height: 1.4em; color: var(--ap-faint); }
 .choice-list { display: flex; flex-direction: column; gap: 4px; }
+.choice-list.nested { margin-left: 0.5em; padding-left: var(--ap-space-2); border-left: 1px solid var(--ap-border); }
 .choice {
   display: flex; align-items: center; gap: var(--ap-space-2); padding: 6px var(--ap-space-2); border: 1px solid transparent; border-radius: var(--ap-radius-sm);
   background: transparent; text-align: left; cursor: pointer; width: 100%;

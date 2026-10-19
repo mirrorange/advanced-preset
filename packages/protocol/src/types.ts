@@ -89,7 +89,10 @@ export interface Group {
   label: string;
   description?: string;
   order: number;
-  /** Exclusive groups rendered as a segmented choice may offer "none". */
+  /**
+   * As an exclusive set (`exclusive: <group id>`): whether nothing may be selected. The panel then shows
+   * a switch for the set and its choices only while it is on; otherwise one module is always active.
+   */
   allowNone?: boolean;
   /** Panel tab: modules (default) or writing (for parameter groups). */
   tab?: 'modules' | 'writing';
