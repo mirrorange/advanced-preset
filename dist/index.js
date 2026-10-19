@@ -6391,8 +6391,9 @@ function Td(e, t, n = .9) {
 //#region src/store/user-modules.ts
 var Ed = 50;
 function Dd(e) {
-	let t = mu(e);
-	return t.userModules ??= [];
+	let t = mu(e), n = t.userModules ??= [];
+	for (let e of n) e.vars ??= [];
+	return n;
 }
 var Od = () => Math.random().toString(36).slice(2, 8);
 function kd(e) {
@@ -8350,7 +8351,7 @@ function rm(e) {
 }
 async function im() {
 	let e = await nm();
-	e && e !== "e12f0e22cdeecbed" && sessionStorage.getItem(tm) !== e && rm(e);
+	e && e !== "3525709c537fbfed" && sessionStorage.getItem(tm) !== e && rm(e);
 }
 async function am() {
 	await im();
@@ -8359,7 +8360,7 @@ async function om() {
 	let e = a().replace(/^third-party\//, ""), t = await sm(e, !1);
 	if (t.status === 404 && (t = await sm(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await nm();
-	return r && r !== "e12f0e22cdeecbed" ? (rm(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "3525709c537fbfed" ? (rm(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var sm = (t, n) => p("/api/extensions/update", {
 	method: "POST",
@@ -13081,7 +13082,7 @@ var uy = ["data-id"], dy = ["aria-label", "onPointerdown"], fy = ["onClick"], py
 				]), H("pre", mS, A(s(e.data)), 1)]))), 128)), m.value.length ? W("", !0) : (z(), B("div", hS, A(P(J)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H("div", gS, "Advanced Preset " + A(P("1.4.0")) + " · " + A(P("e12f0e22cdeecbed")), 1)
+			H("div", gS, "Advanced Preset " + A(P("1.4.0")) + " · " + A(P("3525709c537fbfed")), 1)
 		], 64));
 	}
 }), vS = ["aria-label"], yS = { class: "panel-head" }, bS = { class: "panel-logo" }, xS = { class: "grow" }, SS = { class: "panel-title ellipsis" }, CS = { class: "panel-sub ellipsis" }, wS = {
@@ -13229,7 +13230,7 @@ function RS() {
 //#region src/index.ts
 var zS = {
 	version: "1.4.0",
-	buildId: "e12f0e22cdeecbed",
+	buildId: "3525709c537fbfed",
 	nextGeneration: (e) => sd(e),
 	listPresets: () => tu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -13277,7 +13278,7 @@ async function HS() {
 	};
 	t.on(n.APP_READY, () => void a()), RS(), Vd("init", {
 		version: "1.4.0",
-		build: "e12f0e22cdeecbed",
+		build: "3525709c537fbfed",
 		enabled: K().enabled
 	});
 }
