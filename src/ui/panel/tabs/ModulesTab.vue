@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Modules by group (§16.5): exclusive sets as a choice list, the rest as switches; `always` modules are hidden. */
-import { computed } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import type { Module } from '@advanced-preset/protocol';
 import { moduleSwitches } from '@advanced-preset/protocol';
 import { t, pt } from '@/i18n';
@@ -9,6 +9,9 @@ import NoPreset from '../NoPreset.vue';
 import Section from '../../components/Section.vue';
 import Switch from '../../components/Switch.vue';
 import Help from '../../components/Help.vue';
+import UserModulesSection from '../user-modules/UserModulesSection.vue';
+import UserModuleEditor from '../user-modules/UserModuleEditor.vue';
+import { userModules } from '@/store/user-modules';
 
 const { preset, config, update } = usePreset();
 const on = computed(() => (preset.value && config.value ? moduleSwitches(preset.value, config.value) : {}));
@@ -50,11 +53,31 @@ function choose(c: Choice, id: string | null) {
 function toggle(m: Module, v: boolean) {
   update((cfg) => { cfg.modules[m.id] = v; });
 }
+
+// User module editor: drill-in view that replaces the list; the list scroll position is restored on return.
+const editing = ref<string | null>(null);
+const root = ref<HTMLElement | null>(null);
+const editingModule = computed(() => (preset.value && editing.value ? userModules(preset.value).find((m) => m.id === editing.value) : undefined));
+let listScroll = 0;
+const scroller = () => root.value?.closest('.panel-body') as HTMLElement | null;
+function openEditor(id: string) {
+  if (!editing.value) listScroll = scroller()?.scrollTop ?? 0;
+  editing.value = id;
+  void nextTick(() => scroller()?.scrollTo({ top: 0 }));
+}
+function closeEditor() {
+  editing.value = null;
+  void nextTick(() => scroller()?.scrollTo({ top: listScroll }));
+}
+watch(() => preset.value?.id, () => { editing.value = null; });
 </script>
 
 <template>
   <NoPreset v-if="!preset || !config" />
-  <template v-else>
+  <div v-else-if="editingModule" ref="root" class="col tab-col">
+    <UserModuleEditor :key="editingModule.id" :preset="preset" :module="editingModule" @close="closeEditor" @open="openEditor" />
+  </div>
+  <div v-else ref="root" class="col tab-col">
     <Section v-for="g in groups" :key="g.id" :title="g.label" :help="g.help">
       <div v-for="c in g.choices" :key="c.key" class="choice-list" role="radiogroup">
         <button
@@ -76,5 +99,6 @@ function toggle(m: Module, v: boolean) {
       </div>
     </Section>
     <div v-if="!groups.length" class="empty">{{ t('modules.none') }}</div>
-  </template>
+    <UserModulesSection :preset="preset" @open="openEditor" />
+  </div>
 </template>
