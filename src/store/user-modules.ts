@@ -14,7 +14,9 @@ const SCAN_LIMIT = 50;
 
 export function userModules(preset: APreset): UserModule[] {
   const s = presetState(preset);
-  return (s.userModules ??= []);
+  const list = (s.userModules ??= []);
+  for (const m of list) m.vars ??= []; // saved before build variables existed
+  return list;
 }
 
 const shortId = () => Math.random().toString(36).slice(2, 8);
