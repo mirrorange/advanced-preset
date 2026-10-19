@@ -121,6 +121,20 @@ export interface Module {
   source?: string;
 }
 
+/**
+ * A named place where user modules may insert content. Points are the preset's public contract
+ * for user extensions: their ids should stay stable across versions (or be renamed by migrations).
+ */
+export interface InsertionPoint {
+  id: string;
+  label: string;
+  description?: string;
+  /** Non-native region the content goes into. */
+  region: string;
+  /** Position inside the region; user content follows preset entries of the same order. */
+  order: number;
+}
+
 export interface Entry {
   /** `<module>/<entry>` */
   id: string;
@@ -316,7 +330,7 @@ export interface RecommendedConfiguration {
 export interface Migration {
   /** Semver range of the *previous* preset version, e.g. `<7.0.0`. */
   from: string;
-  rename: { modules?: Record<string, string>; params?: Record<string, string> };
+  rename: { modules?: Record<string, string>; params?: Record<string, string>; insertionPoints?: Record<string, string> };
 }
 
 export interface ThemeDecl {
@@ -332,6 +346,7 @@ export interface LocaleTable {
   workflows?: Record<string, { name?: string; description?: string; stages?: Record<string, string> }>;
   configurations?: Record<string, { name?: string; description?: string }>;
   structures?: Record<string, { title?: string }>;
+  insertionPoints?: Record<string, { label?: string; description?: string }>;
   [key: string]: unknown;
 }
 
@@ -376,6 +391,8 @@ export interface APreset {
   groups: Record<string, Group>;
   modules: Module[];
   entries: Entry[];
+  /** Places where user modules may insert content (absent in older artifacts → `[]`). */
+  insertionPoints: InsertionPoint[];
   workflows: Workflow[];
   structures: Record<string, StructureDecl>;
   regex: RegexDecl[];

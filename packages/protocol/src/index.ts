@@ -15,3 +15,4 @@ export * from './clone';
 export * from './gemini';
 export * from './artifact';
 export * from './directives';
+export * from './user-modules';
