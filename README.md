@@ -33,6 +33,7 @@ https://github.com/mirrorange/advanced-preset
 - 内容支持 `{{ap::…}}`、SillyTavern 宏与 `<!-- @if … -->` 等指令；可按条目选择消息角色。
 - 触发条件全部或任一满足时生效：传输方式、工作流、参数、模组开关、关键词（本轮输入或最近 N 条消息，可用正则）或任意表达式；不设条件即始终生效。
 - 可导出为 `*.ap-modules.json` 分享或备份；导入较旧版本预设的导出文件时会按迁移表更新，找不到的插入位置会被标出。
+- 也可更新预设声明的构建变量（如「规划要点」）：字符串追加、列表添加项、字典设置键；与内置同键时以用户为准，值留空即移除该内置项。
 - 预设更新后模组原样保留；若预设改名了插入位置，会按其迁移表自动跟随；若插入位置被移除，模组会标出警告，该段内容暂不插入。
 
 ## 编写预设
@@ -45,6 +46,8 @@ node ../packages/cli/dist/ap.js build      # 产物 dist/<id>.apreset.json
 ```
 
 单选模组：同一 `exclusive` 集合中只生效一个；集合在 `groups` 中声明 `allowNone: true` 时可全部关闭，面板为它显示一个开关，打开后才列出选项；否则始终有一个生效（未选择时用默认模组）。
+
+构建变量：`preset.yaml#vars` 声明字符串 / 列表 / 字典变量，模组 frontmatter 的 `vars:` 在模组生效时更新它们（字符串拼接、列表追加、字典设置），提示词用 `{{ap::var::<id>}}` 读出可读 YAML，`::keys` / `::values` 取字典键或值列表，`::<key>` / `::<index>` 取单项。`ap check` 会提示可能同时生效的模组设置了同一键。详见模板 README。
 
 模板仓库：[advanced-preset-template](https://github.com/mirrorange/advanced-preset-template)。CLI 命令：`build` / `check` / `dev` / `preview` / `init`（`ap --help`）。
 

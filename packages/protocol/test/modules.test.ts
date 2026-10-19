@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { exclusiveAllowsNone, moduleSwitches, type APreset, type Configuration, type Module } from '../src';
 
 const mod = (id: string, over: Partial<Module> = {}): Module => ({
-  id, name: id, toggle: 'user', default: false, structures: [], questions: { mandatory: [], optional: [] }, ...over,
+  id, name: id, toggle: 'user', default: false, structures: [], vars: [], ...over,
 });
 const preset = {
   groups: { mode: { label: 'Mode', order: 1 }, style: { label: 'Style', order: 2, allowNone: true } },

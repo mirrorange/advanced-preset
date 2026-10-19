@@ -6,7 +6,7 @@
 import { compileText, type DirectiveError } from './directives';
 import { parseExpr, type Expr, type Literal } from './expr';
 import { satisfies } from './semver';
-import type { APreset, Entry, InsertionPoint, Migration, Module, Role } from './types';
+import type { APreset, BuildVarDecl, BuildVarUpdate, Entry, InsertionPoint, Migration, Module, Role } from './types';
 
 export type VarOp = 'on' | 'off' | '==' | '!=' | 'in' | 'notIn' | '>' | '>=' | '<' | '<=';
 
@@ -61,6 +61,11 @@ export interface UserModule {
   name: string;
   enabled: boolean;
   entries: UserEntry[];
+  /**
+   * Updates of the preset's build variables, applied after the preset's own modules. In dicts an
+   * empty value removes the key (so a user can drop a built-in item).
+   */
+  vars: BuildVarUpdate[];
   trigger: Trigger;
 }
 
@@ -188,6 +193,35 @@ export function missingPoints(preset: APreset, module: UserModule): UserEntry[] 
   return module.entries.filter((e) => !findPoint(preset, e.point));
 }
 
+export function findVar(preset: APreset, id: string): BuildVarDecl | undefined {
+  return (preset.vars ?? []).find((v) => v.id === id);
+}
+
+/** Variable updates the preset no longer supports (variable removed or its type changed). */
+export function missingVars(preset: APreset, module: UserModule): BuildVarUpdate[] {
+  return (module.vars ?? []).filter((u) => findVar(preset, u.var)?.type !== u.type);
+}
+
+/** Ids of everything a module refers to that the preset no longer has (insertion points and variables). */
+export function lostRefs(preset: APreset, module: UserModule): string[] {
+  return [...new Set([...missingPoints(preset, module).map((e) => e.point), ...missingVars(preset, module).map((u) => u.var)])];
+}
+
+/** A user update as applied: blank items are dropped and blank dict values remove the key. */
+export function effectiveUpdate(u: BuildVarUpdate): BuildVarUpdate | null {
+  switch (u.type) {
+    case 'string': return u.text.trim() ? u : null;
+    case 'list': {
+      const items = u.items.filter((x) => x.trim());
+      return items.length ? { ...u, items } : null;
+    }
+    case 'dict': {
+      const items = u.items.filter((x) => x.key.trim()).map((x) => ({ key: x.key.trim(), value: x.value?.trim() ? x.value : null }));
+      return items.length ? { ...u, items } : null;
+    }
+  }
+}
+
 function insertEntry(entries: Entry[], entry: Entry): void {
   let at = -1;
   for (let i = 0; i < entries.length; i++) {
@@ -205,7 +239,7 @@ function insertEntry(entries: Entry[], entry: Entry): void {
  * preset entries of the same region and order; user modules keep their list order.
  */
 export function withUserModules(preset: APreset, modules: UserModule[], texts?: KeywordTexts): { preset: APreset; skipped: SkippedEntry[] } {
-  const enabled = modules.filter((m) => m.enabled && m.entries.length);
+  const enabled = modules.filter((m) => m.enabled && (m.entries.length || m.vars?.length));
   if (!enabled.length) return { preset, skipped: [] };
   const skipped: SkippedEntry[] = [];
   const extraModules: Module[] = [];
@@ -220,7 +254,7 @@ export function withUserModules(preset: APreset, modules: UserModule[], texts?: 
       default: true,
       when: compileTrigger(m.trigger, texts),
       structures: [],
-      questions: { mandatory: [], optional: [] },
+      vars: (m.vars ?? []).filter((u) => findVar(preset, u.var)?.type === u.type).map(effectiveUpdate).filter((u): u is BuildVarUpdate => Boolean(u)),
     });
     for (const e of m.entries) {
       const point = findPoint(preset, e.point);
@@ -256,10 +290,13 @@ export function migrateUserModules(modules: UserModule[], migrations: Migration[
   if (!applicable.length) return modules;
   return modules.map((m) => {
     let entries = m.entries;
+    let vars = m.vars ?? [];
     let rules = m.trigger.rules;
     for (const { rename } of applicable) {
       const points = rename.insertionPoints;
       if (points) entries = entries.map((e) => (points[e.point] ? { ...e, point: points[e.point]! } : e));
+      const renamedVars = rename.vars;
+      if (renamedVars) vars = vars.map((u) => (renamedVars[u.var] ? { ...u, var: renamedVars[u.var]! } : u));
       if (rename.modules || rename.params) {
         rules = rules.map((r) => {
           if (r.kind === 'var') return { ...r, path: renamePath(r.path, rename) };
@@ -268,7 +305,7 @@ export function migrateUserModules(modules: UserModule[], migrations: Migration[
         });
       }
     }
-    return { ...m, entries, trigger: { ...m.trigger, rules } };
+    return { ...m, entries, vars, trigger: { ...m.trigger, rules } };
   });
 }
 
@@ -312,6 +349,18 @@ function normalizeRule(raw: unknown): TriggerRule | null {
   return null;
 }
 
+function normalizeVarUpdate(raw: unknown): BuildVarUpdate[] {
+  if (!isObj(raw) || typeof raw.var !== 'string') return [];
+  const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
+  if (raw.type === 'string') return [{ var: raw.var, type: 'string', text: str(raw.text) }];
+  if (raw.type === 'list') return [{ var: raw.var, type: 'list', items: strings(raw.items) }];
+  if (raw.type === 'dict' && Array.isArray(raw.items)) {
+    const items = raw.items.filter(isObj).map((x) => ({ key: str(x.key), value: typeof x.value === 'string' ? x.value : null }));
+    return [{ var: raw.var, type: 'dict', items }];
+  }
+  return [];
+}
+
 /** Coerce untrusted data (imported file, old settings) into a valid user module, or `null`. */
 export function normalizeUserModule(raw: unknown): UserModule | null {
   if (!isObj(raw) || !Array.isArray(raw.entries)) return null;
@@ -327,6 +376,7 @@ export function normalizeUserModule(raw: unknown): UserModule | null {
     name: str(raw.name),
     enabled: raw.enabled !== false,
     entries,
+    vars: Array.isArray(raw.vars) ? raw.vars.flatMap(normalizeVarUpdate) : [],
     trigger: {
       match: trigger.match === 'any' ? 'any' : 'all',
       rules: Array.isArray(trigger.rules) ? trigger.rules.map(normalizeRule).filter((r): r is TriggerRule => Boolean(r)) : [],

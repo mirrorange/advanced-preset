@@ -13,12 +13,12 @@ stages:
 <!-- @section stage:plan style=dialogue -->
 {{ap::prefix::narrator}}First I will outline the next scene in a few bullet points, considering:
 
-{{ap::questions::mandatory}}
+{{ap::var::considerations::values}}
 
 <!-- @section stage:plan style=imperative -->
 Outline the next scene in a few bullet points, considering:
 
-{{ap::questions::mandatory}}
+{{ap::var::considerations::values}}
 
 <!-- @section stage:final style=dialogue -->
 {{ap::prefix::narrator}}Then I will output <START_OF_CONTENT> and write the story.

@@ -5,7 +5,7 @@ name: __PRESET_NAME__
 version: 0.1.0
 author: __AUTHOR__
 description: A minimal Advanced Preset.
-minAdvancedPreset: 1.2.0
+minAdvancedPreset: 1.4.0
 
 actors:
   narrator: { name: Narrator, prefix: "{{ap::name::narrator}}: " }
@@ -26,6 +26,14 @@ regions:
   - { id: task, role: system, anchor: historyEnd }
   - { id: tail, role: system, anchor: tail }
 workflowRegion: task
+
+# Build variables: modules append to them while active; prompts read them with {{ap::var::<id>}}.
+# Types: string (concatenated), list (items appended), dict (keys set; later modules override).
+vars:
+  considerations:
+    type: dict
+    label: Planning considerations
+    description: Points the narrator weighs while planning the next scene.
 
 # Where users may add their own modules from the panel. Keep ids stable across versions;
 # when one must change, map it in `migrations[].rename.insertionPoints`.

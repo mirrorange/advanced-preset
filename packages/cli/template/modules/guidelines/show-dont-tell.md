@@ -6,9 +6,9 @@ group: guidelines
 default: true
 region: guidelines
 when: "!meta.pure"
-questions:
-  mandatory:
-    - { id: show, text: Which concrete actions or details will carry the emotion of this scene? }
+vars:
+  considerations:
+    show: Which concrete actions or details will carry the emotion of this scene?
 ---
 ## Show, don't tell
 
