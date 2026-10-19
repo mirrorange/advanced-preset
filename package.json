@@ -1,7 +1,7 @@
 {
   "name": "advanced-preset-workspace",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.5.0",
   "type": "module",
   "description": "Advanced Preset — a generic, data-driven preset engine for SillyTavern Chat Completion.",
   "packageManager": "pnpm@10.34.5",
@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json && vue-tsc --noEmit -p test/tsconfig.json && pnpm -r --filter './packages/**' typecheck",
-    "sync-presets": "node scripts/sync-presets.mjs"
+    "sync-presets": "node scripts/sync-presets.mjs",
+    "sync-skills": "node scripts/sync-skills.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
