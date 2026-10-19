@@ -18,7 +18,7 @@ https://github.com/mirrorange/advanced-preset
 
 | | |
 | --- | --- |
-| 传输 | 预填充 · 纯文本 · 结构化输出（`json_schema`）· 单步工具 · 多步工具；工具参数流式输出（含 Vertex AI Gemini 3+ 的 `streamFunctionCallArguments`） |
+| 传输 | 预填充 · 纯文本 · 结构化输出（`json_schema`）· 单步工具 · 多步工具；工具参数流式输出（含 Vertex AI Gemini 3+ 的 `streamFunctionCallArguments`；SillyTavern 尚未支持时可用 [服务端插件](contrib/sillytavern-gemini-tool-args/)） |
 | 工作流 | 由预设声明的阶段序列（如 linear / iterative / edit / task），流式展示每个阶段 |
 | 结构 | 回复、代写、选项、记忆、回顾、事件摘要、自定义结构，以卡片显示在消息下方 |
 | 元指令 | `@叙述者 …` 触发任务回合；代写按钮直接走元指令 |
