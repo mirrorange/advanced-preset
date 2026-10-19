@@ -4,9 +4,11 @@
  * configuration or a saved user configuration. Only sparse diffs are stored (D9).
  */
 import {
-  applyMigrations, compareVersions, deepMerge, diffObjects, pruneDiff, recommended,
+  applyMigrations, compareVersions, deepMerge, diffObjects, migrateUserModules, missingPoints, pruneDiff, recommended,
   type APreset, type Configuration, type SparseDiff, cloneData,
 } from '@advanced-preset/protocol';
+import { toast } from '@/st/host';
+import { t } from '@/i18n';
 import { settings, save, type ConfigRef, type PresetState, type SavedConfig } from './settings';
 
 export function presetState(preset: APreset): PresetState {
@@ -102,15 +104,18 @@ export function deleteSaved(preset: APreset, id: string): void {
 /**
  * §7.3: after a preset update, rename keys by `migrations`, then drop keys the new schema no longer
  * has. Returns removed paths (logged as warnings). Idempotent per (version, hash).
+ * User modules get the same renames; a version update that leaves some of them pointing at
+ * insertion points the preset no longer declares raises a warning (their content is skipped).
  */
 export function migratePresetState(preset: APreset): string[] {
   const s = presetState(preset);
   if (s.version === preset.version && s.hash === preset.hash) return [];
   const from = s.version ?? '0.0.0';
+  const upgraded = compareVersions(from, preset.version) < 0;
   const removed: string[] = [];
   const shape = preset.configurationDefaults as unknown as Record<string, unknown>;
   const fix = (d: SparseDiff): SparseDiff => {
-    const out = (compareVersions(from, preset.version) < 0 ? applyMigrations(d, preset.migrations, from) : cloneData(d)) as Record<string, unknown>;
+    const out = (upgraded ? applyMigrations(d, preset.migrations, from) : cloneData(d)) as Record<string, unknown>;
     removed.push(...pruneDiff(out, shape));
     // module / param maps are keyed by id: drop ids that no longer exist
     const mods = out.modules as Record<string, unknown> | undefined;
@@ -122,9 +127,13 @@ export function migratePresetState(preset: APreset): string[] {
   s.active.diff = fix(s.active.diff ?? {});
   for (const c of s.saved) c.diff = fix(c.diff);
   if (s.active.ref.kind === 'recommended' && !preset.configurations.some((c) => c.id === s.active.ref.id)) s.active.ref = { kind: 'recommended', id: preset.defaultConfiguration };
+  if (s.userModules?.length && upgraded) s.userModules = migrateUserModules(s.userModules, preset.migrations, from);
+  const lost = (s.userModules ?? []).filter((m) => m.enabled && missingPoints(preset, m).length).map((m) => m.name);
+  const known = s.version !== undefined;
   s.version = preset.version;
   s.hash = preset.hash;
   save();
   if (removed.length) console.warn(`[AP] ${preset.id}: dropped obsolete configuration keys`, removed);
+  if (lost.length && known && s.version !== from) toast('warning', t('userModules.lostAfterUpdate', { names: lost.join(', ') }), preset.name);
   return removed;
 }

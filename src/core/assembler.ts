@@ -4,7 +4,7 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
-  actorName, assemble, defaultVars, replyToPlainText, type APreset, type MacroData, type Vars, type Workflow,
+  actorName, assemble, defaultVars, replyToPlainText, withUserModules, type APreset, type MacroData, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, type ChatMessage } from '@/st/host';
 import { getPreset } from '@/store/presets';
@@ -13,6 +13,7 @@ import { activeCarrierPresetId } from '@/store/carrier';
 import { chatMemory, currentRecap, globalMemory } from '@/store/eventlog';
 import { getSidecar } from '@/store/sidecar';
 import { settings } from '@/store/settings';
+import { keywordTexts, userModules } from '@/store/user-modules';
 import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { alignHistory, rewriteHistory, type HistoryItem } from './history';
@@ -144,11 +145,14 @@ function contextFor(preset: APreset, dryRun: boolean): GenerationContext {
   if (pending && pending.preset.id === preset.id) return pending;
   const config = activeConfiguration(preset);
   // No interceptor: script / extension call (TH generate, …) ⇒ task (D17). dryRun previews a story turn.
-  const lastUser = [...st().chat].reverse().find((m) => m.is_user && !m.is_system);
+  const chat = st().chat;
+  const lastUserIndex = chat.findLastIndex((m) => m.is_user && !m.is_system);
+  const lastUser = chat[lastUserIndex];
   const { meta, flags, origin } = classify(preset, config, dryRun ? lastUser?.mes ?? '' : '', dryRun ? 'normal' : 'script', dryRun, [], !dryRun);
   return {
     id: newGenId(), preset, config, origin, stType: dryRun ? 'normal' : 'script', interceptorRan: false, dryRun,
     meta, flags, transport: config.connection.transport, stages: [], structures: [], inputIndex: -1, createdAt: Date.now(), warnings: [],
+    keywords: keywordTexts(chat, dryRun ? lastUserIndex : -1),
   };
 }
 
@@ -209,7 +213,9 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   const passthrough = ctx.stType === 'continue' || ctx.stType === 'impersonate';
   const workflow = passthrough ? undefined : pickWorkflow(preset, ctx.config, ctx.origin);
   const { vars, data } = buildVarsAndData(ctx, workflow);
-  const assembly = assemble({ preset, config: ctx.config, vars, data }, workflow);
+  const merged = withUserModules(preset, userModules(preset), ctx.keywords);
+  for (const x of merged.skipped) ctx.warnings.push(`user module ${x.module}: insertion point \`${x.point}\` is missing, entry ${x.entry} skipped`);
+  const assembly = assemble({ preset: merged.preset, config: ctx.config, vars, data }, workflow);
   ctx.workflow = workflow;
   ctx.assembly = assembly;
   ctx.stages = assembly.stages;
