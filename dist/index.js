@@ -8351,7 +8351,7 @@ function rm(e) {
 }
 async function im() {
 	let e = await nm();
-	e && e !== "3525709c537fbfed" && sessionStorage.getItem(tm) !== e && rm(e);
+	e && e !== "199840c47d042a7d" && sessionStorage.getItem(tm) !== e && rm(e);
 }
 async function am() {
 	await im();
@@ -8360,7 +8360,7 @@ async function om() {
 	let e = a().replace(/^third-party\//, ""), t = await sm(e, !1);
 	if (t.status === 404 && (t = await sm(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await nm();
-	return r && r !== "3525709c537fbfed" ? (rm(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "199840c47d042a7d" ? (rm(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var sm = (t, n) => p("/api/extensions/update", {
 	method: "POST",
@@ -10405,7 +10405,7 @@ function G_(e) {
 async function K_(e, t) {
 	let n = eu(e);
 	if (!n) throw Error(J("presets.invalid"));
-	if (n.minAdvancedPreset && xc("1.4.0", n.minAdvancedPreset) < 0) throw Error(J("presets.tooNew", { version: n.minAdvancedPreset }));
+	if (n.minAdvancedPreset && xc("1.5.0", n.minAdvancedPreset) < 0) throw Error(J("presets.tooNew", { version: n.minAdvancedPreset }));
 	ou(n), t && (K().sources[n.id] = t), q();
 	let r = au(n.id) ?? n;
 	return Du(r), await Ru(r), r;
@@ -13082,7 +13082,7 @@ var uy = ["data-id"], dy = ["aria-label", "onPointerdown"], fy = ["onClick"], py
 				]), H("pre", mS, A(s(e.data)), 1)]))), 128)), m.value.length ? W("", !0) : (z(), B("div", hS, A(P(J)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H("div", gS, "Advanced Preset " + A(P("1.4.0")) + " · " + A(P("3525709c537fbfed")), 1)
+			H("div", gS, "Advanced Preset " + A(P("1.5.0")) + " · " + A(P("199840c47d042a7d")), 1)
 		], 64));
 	}
 }), vS = ["aria-label"], yS = { class: "panel-head" }, bS = { class: "panel-logo" }, xS = { class: "grow" }, SS = { class: "panel-title ellipsis" }, CS = { class: "panel-sub ellipsis" }, wS = {
@@ -13229,8 +13229,8 @@ function RS() {
 //#endregion
 //#region src/index.ts
 var zS = {
-	version: "1.4.0",
-	buildId: "3525709c537fbfed",
+	version: "1.5.0",
+	buildId: "199840c47d042a7d",
 	nextGeneration: (e) => sd(e),
 	listPresets: () => tu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -13277,8 +13277,8 @@ async function HS() {
 		await VS(), pm(), im();
 	};
 	t.on(n.APP_READY, () => void a()), RS(), Vd("init", {
-		version: "1.4.0",
-		build: "3525709c537fbfed",
+		version: "1.5.0",
+		build: "199840c47d042a7d",
 		enabled: K().enabled
 	});
 }

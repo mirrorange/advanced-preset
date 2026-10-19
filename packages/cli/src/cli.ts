@@ -8,6 +8,7 @@ import { report } from './diagnostics';
 import { preview } from './preview';
 import { dev } from './dev';
 import { init } from './init';
+import { DEFAULT_TARGET, installSkills, listSkills } from './skills';
 
 declare const __AP_VERSION__: string;
 const VERSION = typeof __AP_VERSION__ === 'string' ? __AP_VERSION__ : '0.0.0-dev';
@@ -22,6 +23,10 @@ Usage
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
+                                             scaffold a new preset repository
+  ap skills  list                            list the bundled Agent Skills
+  ap skills  install [dir] [--target .agents/skills]
+                                             install / update the Agent Skills in a preset repo
 
 --strict treats warnings as errors.`;
 
@@ -46,6 +51,7 @@ async function main(argv: string[]): Promise<number> {
       id: { type: 'string' },
       name: { type: 'string' },
       author: { type: 'string' },
+      target: { type: 'string' },
     },
   });
   const dir = resolve(positionals[0] ?? '.');
@@ -85,8 +91,26 @@ async function main(argv: string[]): Promise<number> {
       if (!positionals[0]) { console.error('usage: ap init <dir>'); return 1; }
       const id = values.id ?? basename(dir).toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
       await init({ dir, id, name: values.name ?? id, author: values.author ?? '' });
-      console.log(`✓ created ${dir}\n  cd ${positionals[0]} && npm install && npm run dev`);
+      console.log(`✓ created ${dir}\n  cd ${positionals[0]} && npm install && npm run dev\n  Agent Skills: .agents/skills (see AGENTS.md)`);
       return 0;
+    }
+    case 'skills': {
+      const sub = positionals[0];
+      if (sub === 'list') {
+        for (const s of await listSkills()) console.log(`${s.name}\n  ${s.description}\n`);
+        return 0;
+      }
+      if (sub === 'install') {
+        const root = resolve(positionals[1] ?? '.');
+        const target = resolve(root, values.target ?? DEFAULT_TARGET);
+        const results = await installSkills(target);
+        const width = Math.max(...results.map((r) => r.name.length));
+        for (const r of results) console.log(`  ${r.name.padEnd(width)}  ${r.status}`);
+        console.log(`✓ ${results.length} skills in ${target}`);
+        return 0;
+      }
+      console.error('usage: ap skills list | ap skills install [dir] [--target .agents/skills]');
+      return 1;
     }
     case '--version':
     case '-v':

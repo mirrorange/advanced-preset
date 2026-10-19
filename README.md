@@ -4,6 +4,8 @@
 
 内置 [花瓣预设 v7](https://github.com/mirrorange/petals-preset)。
 
+📖 文档：[预设开发指南](docs/guide/README.md) · [参考文档](docs/reference/README.md) · [Agent Skills](packages/cli/template/.agents/skills)
+
 ## 安装
 
 SillyTavern → 扩展 → 安装扩展，填入：
@@ -38,18 +40,28 @@ https://github.com/mirrorange/advanced-preset
 
 ## 编写预设
 
-```sh
-node packages/cli/dist/ap.js init my-preset --id my-preset --name "My Preset"
-cd my-preset
-node ../packages/cli/dist/ap.js dev        # 面板「调试」页填入 http://localhost:4747
-node ../packages/cli/dist/ap.js build      # 产物 dist/<id>.apreset.json
-```
+AP 预设是一个普通的代码仓库：`preset.yaml` 加上一个个 Markdown 模组和工作流，用 `ap` 命令行编译成 `dist/<id>.apreset.json`，通过链接或文件安装到 AP。
 
-单选模组：同一 `exclusive` 集合中只生效一个；集合在 `groups` 中声明 `allowNone: true` 时可全部关闭，面板为它显示一个开关，打开后才列出选项；否则始终有一个生效（未选择时用默认模组）。
+推荐的做法是**让 AI Agent 帮你写**：你描述想要的效果，Agent 按 AP 的 Agent Skills 设计、编写、测试预设。
 
-构建变量：`preset.yaml#vars` 声明字符串 / 列表 / 字典变量，模组 frontmatter 的 `vars:` 在模组生效时更新它们（字符串拼接、列表追加、字典设置），提示词用 `{{ap::var::<id>}}` 读出可读 YAML，`::keys` / `::values` 取字典键或值列表，`::<key>` / `::<index>` 取单项。`ap check` 会提示可能同时生效的模组设置了同一键。详见模板 README。
+1. 在 [advanced-preset-template](https://github.com/mirrorange/advanced-preset-template) 页面点击 **Use this template** 创建仓库，或者用命令创建：
 
-模板仓库：[advanced-preset-template](https://github.com/mirrorange/advanced-preset-template)。CLI 命令：`build` / `check` / `dev` / `preview` / `init`（`ap --help`）。
+   ```sh
+   npx --yes https://github.com/mirrorange/advanced-preset/releases/download/v1.5.0/advanced-preset-1.5.0.tgz init my-preset --name "我的预设"
+   cd my-preset && npm install
+   ```
+
+2. 用 Agent（Codex、Claude Code、Cursor、Gemini CLI……）打开仓库，说：“请使用 ap-preset-design 技能，先和我讨论设计。”
+3. `npm run dev`，在 AP 面板 → **调试** → **开发源** 中填入 `http://localhost:4747`，边改边看。
+
+| 文档 | 内容 |
+| --- | --- |
+| [预设开发指南](docs/guide/README.md) | 面向新手：概念、设计方法、用 Agent 开发、测试与发布，以花瓣预设为例 |
+| [参考文档](docs/reference/README.md) | 面向高级开发者与 Agent：源码格式、编译规则、运行期行为的完整说明 |
+| [Agent Skills](packages/cli/template/.agents/skills) | `ap-preset-design` / `ap-preset-authoring` / `ap-preset-testing`，模板自带，也可用 `npx ap skills install` 安装到任何预设仓库 |
+| [`ap` 命令行](docs/reference/cli.md) | `build` / `check` / `dev` / `preview` / `init` / `skills` |
+
+完整目录见 [docs/](docs/README.md)。
 
 ## 仓库结构
 
@@ -60,7 +72,8 @@ node ../packages/cli/dist/ap.js build      # 产物 dist/<id>.apreset.json
 | `src/store/` | 设置、预设、配置层、Carrier、Sidecar、事件日志 |
 | `src/ui/` | 阶段面板、卡片、设置面板与主题 |
 | `packages/protocol/` | 预设协议：表达式、宏、结构、工作流、解析器、补丁、配置层（扩展与 CLI 共用） |
-| `packages/cli/` | `ap` 工具链（打包后提交在 `dist/ap.js`，无需安装依赖即可运行） |
+| `packages/cli/` | `ap` 工具链（打包后提交在 `dist/ap.js`，无需安装依赖即可运行）；`template/` 是 `ap init` 的模板，含 Agent Skills |
+| `docs/` | 预设开发指南与参考文档 |
 | `dist/` | 构建产物（SillyTavern 直接加载，需随源码一起提交） |
 
 ## 开发
@@ -72,4 +85,7 @@ pnpm test         # vitest
 pnpm typecheck    # vue-tsc
 ```
 
-修改内置预设后运行 `pnpm sync-presets` 将 `../petals-preset/dist` 同步到 `dist/presets/`。
+
+- 修改内置预设后运行 `pnpm sync-presets`，将 `../petals-preset/dist` 同步到 `dist/presets/`；
+- 修改 `docs/reference/` 或 `docs/guide/13-petals-case-study.md` 后运行 `pnpm sync-skills`，更新 Agent Skills 中的文档副本（`pnpm test` 会检查是否同步）；
+- 发布时附上 `npm pack packages/cli` 生成的 `advanced-preset-<版本>.tgz`，预设仓库通过这个地址安装 `ap`。

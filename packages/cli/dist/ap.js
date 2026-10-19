@@ -7370,7 +7370,7 @@ var require_dist = __commonJS({
 // src/cli.ts
 import { parseArgs } from "node:util";
 import { basename, resolve } from "node:path";
-import { readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
+import { readFile as readFile4, writeFile as writeFile3 } from "node:fs/promises";
 
 // ../protocol/src/types.ts
 var FORMAT_VERSION = 3;
@@ -9663,7 +9663,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.4.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.5.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -9687,8 +9687,79 @@ async function init(o) {
   if (await stat(gi).then(() => true, () => false)) await rename(gi, join2(o.dir, ".gitignore"));
 }
 
+// src/skills.ts
+var import_yaml3 = __toESM(require_dist(), 1);
+import { cp as cp2, mkdir as mkdir3, readdir as readdir3, readFile as readFile3, rm, stat as stat2 } from "node:fs/promises";
+import { join as join3, relative as relative3 } from "node:path";
+import { fileURLToPath as fileURLToPath2 } from "node:url";
+var SKILLS_SOURCE = fileURLToPath2(new URL("../template/.agents/skills", import.meta.url));
+var DEFAULT_TARGET = ".agents/skills";
+var isDir = (p) => stat2(p).then((s) => s.isDirectory(), () => false);
+function parseSkillFrontmatter(text) {
+  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
+  if (!m) return {};
+  const data = (0, import_yaml3.parse)(m[1]);
+  return {
+    name: typeof data?.name === "string" ? data.name : void 0,
+    description: typeof data?.description === "string" ? data.description : void 0
+  };
+}
+async function listSkills(source = SKILLS_SOURCE) {
+  const out = [];
+  for (const ent of (await readdir3(source, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+    if (!ent.isDirectory()) continue;
+    const dir = join3(source, ent.name);
+    const text = await readFile3(join3(dir, "SKILL.md"), "utf8").catch(() => null);
+    if (text === null) continue;
+    const fm = parseSkillFrontmatter(text);
+    out.push({ name: fm.name ?? ent.name, description: fm.description ?? "", dir });
+  }
+  return out;
+}
+async function snapshot(dir) {
+  const out = /* @__PURE__ */ new Map();
+  async function walk2(d) {
+    for (const ent of await readdir3(d, { withFileTypes: true })) {
+      const p = join3(d, ent.name);
+      if (ent.isDirectory()) await walk2(p);
+      else out.set(relative3(dir, p).split("\\").join("/"), await readFile3(p));
+    }
+  }
+  await walk2(dir);
+  return out;
+}
+async function sameTree(a, b) {
+  const [x, y] = await Promise.all([snapshot(a), snapshot(b)]);
+  if (x.size !== y.size) return false;
+  for (const [k, v] of x) {
+    const w = y.get(k);
+    if (!w || !v.equals(w)) return false;
+  }
+  return true;
+}
+async function installSkills(target, source = SKILLS_SOURCE) {
+  await mkdir3(target, { recursive: true });
+  const results = [];
+  for (const skill of await listSkills(source)) {
+    const name = skill.dir.split(/[\\/]/).pop();
+    const dest = join3(target, name);
+    let status = "installed";
+    if (await isDir(dest)) {
+      if (await sameTree(skill.dir, dest)) {
+        results.push({ name, status: "up to date" });
+        continue;
+      }
+      status = "updated";
+      await rm(dest, { recursive: true, force: true });
+    }
+    await cp2(skill.dir, dest, { recursive: true });
+    results.push({ name, status });
+  }
+  return results;
+}
+
 // src/cli.ts
-var VERSION = true ? "1.4.0" : "0.0.0-dev";
+var VERSION = true ? "1.5.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage
@@ -9699,6 +9770,10 @@ Usage
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
+                                             scaffold a new preset repository
+  ap skills  list                            list the bundled Agent Skills
+  ap skills  install [dir] [--target .agents/skills]
+                                             install / update the Agent Skills in a preset repo
 
 --strict treats warnings as errors.`;
 async function main(argv) {
@@ -9721,7 +9796,8 @@ async function main(argv) {
       "user-modules": { type: "string" },
       id: { type: "string" },
       name: { type: "string" },
-      author: { type: "string" }
+      author: { type: "string" },
+      target: { type: "string" }
     }
   });
   const dir = resolve(positionals[0] ?? ".");
@@ -9754,7 +9830,7 @@ async function main(argv) {
       for (const id of values.enable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = false;
       const meta = values.meta === "pure" || values.meta === "mixed" ? values.meta : void 0;
-      const userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile3(values["user-modules"], "utf8"))).modules : void 0;
+      const userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules : void 0;
       const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
@@ -9768,8 +9844,29 @@ async function main(argv) {
       const id = values.id ?? basename(dir).toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
       await init({ dir, id, name: values.name ?? id, author: values.author ?? "" });
       console.log(`\u2713 created ${dir}
-  cd ${positionals[0]} && npm install && npm run dev`);
+  cd ${positionals[0]} && npm install && npm run dev
+  Agent Skills: .agents/skills (see AGENTS.md)`);
       return 0;
+    }
+    case "skills": {
+      const sub = positionals[0];
+      if (sub === "list") {
+        for (const s of await listSkills()) console.log(`${s.name}
+  ${s.description}
+`);
+        return 0;
+      }
+      if (sub === "install") {
+        const root = resolve(positionals[1] ?? ".");
+        const target = resolve(root, values.target ?? DEFAULT_TARGET);
+        const results = await installSkills(target);
+        const width = Math.max(...results.map((r) => r.name.length));
+        for (const r of results) console.log(`  ${r.name.padEnd(width)}  ${r.status}`);
+        console.log(`\u2713 ${results.length} skills in ${target}`);
+        return 0;
+      }
+      console.error("usage: ap skills list | ap skills install [dir] [--target .agents/skills]");
+      return 1;
     }
     case "--version":
     case "-v":
