@@ -9452,7 +9452,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.1.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.2.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -9477,7 +9477,7 @@ async function init(o) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.1.0" : "0.0.0-dev";
+var VERSION = true ? "1.2.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage
