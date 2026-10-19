@@ -1,6 +1,6 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
-  MACRO_HEADS, TRANSPORTS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
+  MACRO_HEADS, TOOL_ARG_STREAMING, TRANSPORTS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -207,6 +207,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   const c = p.configurationDefaults.connection;
   const checkConnection = (conn: Partial<typeof c>, path: string) => {
     if (conn.transport !== undefined && !TRANSPORTS.includes(conn.transport)) diag.error(`unknown transport \`${conn.transport}\``, { file: M, path });
+    if (conn.streamToolArguments !== undefined && !TOOL_ARG_STREAMING.includes(conn.streamToolArguments)) diag.error(`unknown streamToolArguments \`${conn.streamToolArguments}\` (expected ${TOOL_ARG_STREAMING.join(' / ')})`, { file: M, path });
     if (conn.workflow !== undefined) {
       const wf = p.workflows.find((w) => w.id === conn.workflow);
       if (!wf) diag.error(`unknown workflow \`${conn.workflow}\``, { file: M, path });
