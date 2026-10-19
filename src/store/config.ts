@@ -134,6 +134,6 @@ export function migratePresetState(preset: APreset): string[] {
   s.hash = preset.hash;
   save();
   if (removed.length) console.warn(`[AP] ${preset.id}: dropped obsolete configuration keys`, removed);
-  if (lost.length && known && s.version !== from) toast('warning', t('userModules.lostAfterUpdate', { names: lost.join(', ') }), preset.name);
+  if (lost.length && known && s.version !== from) toast('warning', t('um.lostAfterUpdate', { names: lost.join(', ') }), preset.name);
   return removed;
 }
