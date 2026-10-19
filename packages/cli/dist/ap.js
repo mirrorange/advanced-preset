@@ -52,7 +52,7 @@ var require_identity = __commonJS({
     var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
     var isMap = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
     var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
-    var isScalar = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
+    var isScalar2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
     var isSeq = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
     function isCollection(node) {
       if (node && typeof node === "object")
@@ -74,7 +74,7 @@ var require_identity = __commonJS({
         }
       return false;
     }
-    var hasAnchor = (node) => (isScalar(node) || isCollection(node)) && !!node.anchor;
+    var hasAnchor = (node) => (isScalar2(node) || isCollection(node)) && !!node.anchor;
     exports.ALIAS = ALIAS;
     exports.DOC = DOC;
     exports.MAP = MAP;
@@ -89,7 +89,7 @@ var require_identity = __commonJS({
     exports.isMap = isMap;
     exports.isNode = isNode;
     exports.isPair = isPair;
-    exports.isScalar = isScalar;
+    exports.isScalar = isScalar2;
     exports.isSeq = isSeq;
   }
 });
@@ -4447,13 +4447,13 @@ var require_resolve_block_scalar = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/compose/resolve-block-scalar.js"(exports) {
     "use strict";
     var Scalar = require_Scalar();
-    function resolveBlockScalar(ctx, scalar, onError) {
-      const start = scalar.offset;
-      const header = parseBlockScalarHeader(scalar, ctx.options.strict, onError);
+    function resolveBlockScalar(ctx, scalar2, onError) {
+      const start = scalar2.offset;
+      const header = parseBlockScalarHeader(scalar2, ctx.options.strict, onError);
       if (!header)
         return { value: "", type: null, comment: "", range: [start, start, start] };
       const type = header.mode === ">" ? Scalar.Scalar.BLOCK_FOLDED : Scalar.Scalar.BLOCK_LITERAL;
-      const lines = scalar.source ? splitLines(scalar.source) : [];
+      const lines = scalar2.source ? splitLines(scalar2.source) : [];
       let chompStart = lines.length;
       for (let i = lines.length - 1; i >= 0; --i) {
         const content = lines[i][1];
@@ -4465,12 +4465,12 @@ var require_resolve_block_scalar = __commonJS({
       if (chompStart === 0) {
         const value2 = header.chomp === "+" && lines.length > 0 ? "\n".repeat(Math.max(1, lines.length - 1)) : "";
         let end2 = start + header.length;
-        if (scalar.source)
-          end2 += scalar.source.length;
+        if (scalar2.source)
+          end2 += scalar2.source.length;
         return { value: value2, type, comment: header.comment, range: [start, end2, end2] };
       }
-      let trimIndent = scalar.indent + header.indent;
-      let offset = scalar.offset + header.length;
+      let trimIndent = scalar2.indent + header.indent;
+      let offset = scalar2.offset + header.length;
       let contentStart = 0;
       for (let i = 0; i < chompStart; ++i) {
         const [indent, content] = lines[i];
@@ -4548,7 +4548,7 @@ var require_resolve_block_scalar = __commonJS({
         default:
           value += "\n";
       }
-      const end = start + header.length + scalar.source.length;
+      const end = start + header.length + scalar2.source.length;
       return { value, type, comment: header.comment, range: [start, end, end] };
     }
     function parseBlockScalarHeader({ offset, props }, strict, onError) {
@@ -4631,8 +4631,8 @@ var require_resolve_flow_scalar = __commonJS({
     "use strict";
     var Scalar = require_Scalar();
     var resolveEnd = require_resolve_end();
-    function resolveFlowScalar(scalar, strict, onError) {
-      const { offset, type, source, end } = scalar;
+    function resolveFlowScalar(scalar2, strict, onError) {
+      const { offset, type, source, end } = scalar2;
       let _type;
       let value;
       const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
@@ -4651,7 +4651,7 @@ var require_resolve_flow_scalar = __commonJS({
           break;
         /* istanbul ignore next should not happen */
         default:
-          onError(scalar, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
+          onError(scalar2, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
           return {
             value: "",
             type: null,
@@ -4866,26 +4866,26 @@ var require_compose_scalar = __commonJS({
         tag = findScalarTagByTest(ctx, value, token, onError);
       else
         tag = ctx.schema[identity.SCALAR];
-      let scalar;
+      let scalar2;
       try {
         const res = tag.resolve(value, (msg) => onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg), ctx.options);
-        scalar = identity.isScalar(res) ? res : new Scalar.Scalar(res);
+        scalar2 = identity.isScalar(res) ? res : new Scalar.Scalar(res);
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
         onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg);
-        scalar = new Scalar.Scalar(value);
+        scalar2 = new Scalar.Scalar(value);
       }
-      scalar.range = range;
-      scalar.source = value;
+      scalar2.range = range;
+      scalar2.source = value;
       if (type)
-        scalar.type = type;
+        scalar2.type = type;
       if (tagName)
-        scalar.tag = tagName;
+        scalar2.tag = tagName;
       if (tag.format)
-        scalar.format = tag.format;
+        scalar2.format = tag.format;
       if (comment)
-        scalar.comment = comment;
-      return scalar;
+        scalar2.comment = comment;
+      return scalar2;
     }
     function findScalarTagByName(schema, value, tagName, tagToken, onError) {
       if (tagName === "!")
@@ -5634,7 +5634,7 @@ var require_cst = __commonJS({
     var FLOW_END = "";
     var SCALAR = "";
     var isCollection = (token) => !!token && "items" in token;
-    var isScalar = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
+    var isScalar2 = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
     function prettyToken(token) {
       switch (token) {
         case BOM:
@@ -5718,7 +5718,7 @@ var require_cst = __commonJS({
     exports.FLOW_END = FLOW_END;
     exports.SCALAR = SCALAR;
     exports.isCollection = isCollection;
-    exports.isScalar = isScalar;
+    exports.isScalar = isScalar2;
     exports.prettyToken = prettyToken;
     exports.tokenType = tokenType;
   }
@@ -6713,37 +6713,37 @@ var require_parser = __commonJS({
           };
         }
       }
-      *scalar(scalar) {
+      *scalar(scalar2) {
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
           let sep2;
-          if (scalar.end) {
-            sep2 = scalar.end;
+          if (scalar2.end) {
+            sep2 = scalar2.end;
             sep2.push(this.sourceToken);
-            delete scalar.end;
+            delete scalar2.end;
           } else
             sep2 = [this.sourceToken];
           const map = {
             type: "block-map",
-            offset: scalar.offset,
-            indent: scalar.indent,
-            items: [{ start, key: scalar, sep: sep2 }]
+            offset: scalar2.offset,
+            indent: scalar2.indent,
+            items: [{ start, key: scalar2, sep: sep2 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
         } else
-          yield* this.lineEnd(scalar);
+          yield* this.lineEnd(scalar2);
       }
-      *blockScalar(scalar) {
+      *blockScalar(scalar2) {
         switch (this.type) {
           case "space":
           case "comment":
           case "newline":
-            scalar.props.push(this.sourceToken);
+            scalar2.props.push(this.sourceToken);
             return;
           case "scalar":
-            scalar.source = this.source;
+            scalar2.source = this.source;
             this.atNewLine = true;
             this.indent = 0;
             if (this.onNewLine) {
@@ -7373,9 +7373,10 @@ import { basename, resolve } from "node:path";
 import { readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
 
 // ../protocol/src/types.ts
-var FORMAT_VERSION = 2;
+var FORMAT_VERSION = 3;
 var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-multi"];
 var TOOL_ARG_STREAMING = ["auto", "on", "off"];
+var BUILD_VAR_TYPES = ["string", "list", "dict"];
 var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom"];
 
 // ../protocol/src/expr.ts
@@ -7598,7 +7599,7 @@ var MACRO_HEADS = {
   memory: { min: 1, max: 1 },
   recap: { min: 0, max: 0 },
   recent_meta: { min: 0, max: 0 },
-  questions: { min: 1, max: 1 }
+  var: { min: 1, max: 2 }
 };
 
 // ../protocol/src/structures.ts
@@ -7874,6 +7875,83 @@ function resolveConfiguration(preset, base, diff) {
   return deepMerge(preset.configurationDefaults, recommended(preset, base)?.diff, diff);
 }
 
+// ../protocol/src/build-vars.ts
+var VAR_SELECTORS = ["keys", "values"];
+function emptyVarValue(decl) {
+  return decl.type === "string" ? "" : decl.type === "list" ? [] : /* @__PURE__ */ new Map();
+}
+function applyVarUpdate(value, update, decl) {
+  if (update.type !== decl.type) return value;
+  switch (update.type) {
+    case "string": {
+      const cur = value;
+      if (!update.text) return cur;
+      return cur ? cur + (decl.separator ?? "") + update.text : update.text;
+    }
+    case "list":
+      return [...value, ...update.items];
+    case "dict": {
+      const map = new Map(value);
+      for (const { key, value: v } of update.items) {
+        if (v === null) map.delete(key);
+        else map.set(key, v);
+      }
+      return map;
+    }
+  }
+}
+function computeBuildVars(decls, modules) {
+  const byId = new Map(decls.map((d) => [d.id, d]));
+  const out = Object.fromEntries(decls.map((d) => [d.id, emptyVarValue(d)]));
+  for (const m of modules) {
+    for (const u of m.vars ?? []) {
+      const decl = byId.get(u.var);
+      if (decl) out[u.var] = applyVarUpdate(out[u.var], u, decl);
+    }
+  }
+  return out;
+}
+var RESERVED = /^(?:true|false|yes|no|on|off|null|~|[-+]?(?:\d[\d_]*(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?|\.inf|\.nan)$/i;
+function plainSafe(s) {
+  if (!s || s !== s.trim()) return false;
+  if (/^[?:,[\]{}#&*!|>'"%@`]/.test(s) || /^-(?:\s|$)/.test(s)) return false;
+  if (/:(?:\s|$)|\s#|\t/.test(s)) return false;
+  return !RESERVED.test(s);
+}
+function scalar(s, indent) {
+  if (s.includes("\n")) {
+    const body = s.replace(/\s+$/, "");
+    if (/^\s/.test(body)) return JSON.stringify(s);
+    return `|
+${body.split("\n").map((l) => l ? indent + l : "").join("\n")}`;
+  }
+  return plainSafe(s) ? s : JSON.stringify(s);
+}
+var keyText = (k) => !k.includes("\n") && plainSafe(k) ? k : JSON.stringify(k);
+function yamlList(items) {
+  return items.map((v) => `- ${scalar(v, "  ")}`).join("\n");
+}
+function yamlMap(map) {
+  return [...map].map(([k, v]) => `${keyText(k)}: ${scalar(v, "  ")}`).join("\n");
+}
+function formatVar(value, selector) {
+  if (value === void 0) return "";
+  if (typeof value === "string") return selector === void 0 ? value : "";
+  if (Array.isArray(value)) {
+    if (selector === void 0) return yamlList(value);
+    if (!/^-?\d+$/.test(selector)) return "";
+    const i = Number(selector);
+    return value[i < 0 ? value.length + i : i] ?? "";
+  }
+  if (selector === void 0) return yamlMap(value);
+  if (selector === "keys") return yamlList([...value.keys()]);
+  if (selector === "values") return yamlList([...value.values()]);
+  return value.get(selector) ?? "";
+}
+function plainBuildVars(vars) {
+  return Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, v instanceof Map ? Object.fromEntries(v) : v]));
+}
+
 // ../protocol/src/assemble.ts
 function resolverOf(vars) {
   return (path) => {
@@ -7917,7 +7995,7 @@ function activeStructures(preset, modules) {
 function actorName(preset, config, actor) {
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
 }
-function createMacroExpander(input, stages, workflow, modules) {
+function createMacroExpander(input, stages, workflow, buildVars) {
   const { preset, config, vars, data = {} } = input;
   const paramText = (id, depth = 0) => {
     const p = preset.params.find((x) => x.id === id);
@@ -7934,7 +8012,19 @@ function createMacroExpander(input, stages, workflow, modules) {
     const opt = p.options?.find((o) => String(o.value) === String(v));
     return opt?.text ?? String(v);
   };
-  const questions = (kind) => modules.flatMap((m) => m.questions[kind]).map((q) => `- ${q.text}`).join("\n");
+  let varDepth = 0;
+  const expandValue = (s) => varDepth > 4 ? s : expandMacros(s, resolve2);
+  const readVar = (id, selector) => {
+    const v = buildVars[id];
+    if (v === void 0) return "";
+    varDepth++;
+    try {
+      const expanded = typeof v === "string" ? expandValue(v) : Array.isArray(v) ? v.map(expandValue) : new Map([...v].map(([k, x]) => [k, expandValue(x)]));
+      return formatVar(expanded, selector);
+    } finally {
+      varDepth--;
+    }
+  };
   const style = vars.style;
   const resolve2 = (args) => {
     const [head, a, b] = args;
@@ -7964,8 +8054,8 @@ function createMacroExpander(input, stages, workflow, modules) {
         return data.recap ?? "";
       case "recent_meta":
         return data.recentMeta ?? "";
-      case "questions":
-        return questions(a === "optional" ? "optional" : "mandatory");
+      case "var":
+        return readVar(a, b);
       default:
         return void 0;
     }
@@ -8018,11 +8108,12 @@ function assemble(input, workflowOverride) {
   const workflow = workflowOverride ?? preset.workflows.find((w) => w.id === vars.workflow);
   const preResolve = resolverOf(vars);
   const stages = workflow ? activeStages(workflow, preResolve) : [];
-  vars.features = { ...vars.features, questions: stages.some((s) => s.questions === "ask") };
+  vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
   const resolve2 = resolverOf(vars);
   const modules = activeModules(preset, config, resolve2);
   const structures = activeStructures(preset, modules);
-  const expand = createMacroExpander({ ...input, vars }, stages, workflow, modules);
+  const buildVars = computeBuildVars(preset.vars, modules);
+  const expand = createMacroExpander({ ...input, vars }, stages, workflow, buildVars);
   const activeIds = new Set(modules.map((m) => m.id));
   const blocksByRegion = /* @__PURE__ */ new Map();
   for (const e of preset.entries) {
@@ -8044,7 +8135,7 @@ ${b.text}`;
   }
   const regions = {};
   for (const r of preset.regions) if (!r.native) regions[r.id] = regionMessages(r, blocksByRegion.get(r.id) ?? []);
-  return { vars, resolve: resolve2, modules, structures, workflow, stages, regions, expand };
+  return { vars, resolve: resolve2, modules, structures, buildVars, workflow, stages, regions, expand };
 }
 function defaultVars(preset, config, over = {}) {
   const transport = over.transport ?? config.connection.transport;
@@ -8057,7 +8148,8 @@ function defaultVars(preset, config, over = {}) {
     modules: moduleSwitches(preset, config),
     params: { ...config.params },
     flags: Object.fromEntries(preset.regex.map((r) => [r.id, false])),
-    features: { tokenSaving: config.tokenSaving.enabled, questions: false },
+    features: { tokenSaving: config.tokenSaving.enabled },
+    stages: {},
     chat: { group: false },
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },
@@ -8260,6 +8352,23 @@ function compileTrigger(trigger, texts = { input: "", recent: [] }) {
 function findPoint(preset, id) {
   return (preset.insertionPoints ?? []).find((p) => p.id === id);
 }
+function findVar(preset, id) {
+  return (preset.vars ?? []).find((v) => v.id === id);
+}
+function effectiveUpdate(u) {
+  switch (u.type) {
+    case "string":
+      return u.text.trim() ? u : null;
+    case "list": {
+      const items = u.items.filter((x) => x.trim());
+      return items.length ? { ...u, items } : null;
+    }
+    case "dict": {
+      const items = u.items.filter((x) => x.key.trim()).map((x) => ({ key: x.key.trim(), value: x.value?.trim() ? x.value : null }));
+      return items.length ? { ...u, items } : null;
+    }
+  }
+}
 function insertEntry(entries, entry) {
   let at = -1;
   for (let i = 0; i < entries.length; i++) {
@@ -8272,7 +8381,7 @@ function insertEntry(entries, entry) {
   else entries.splice(at, 0, entry);
 }
 function withUserModules(preset, modules, texts) {
-  const enabled = modules.filter((m) => m.enabled && m.entries.length);
+  const enabled = modules.filter((m) => m.enabled && (m.entries.length || m.vars?.length));
   if (!enabled.length) return { preset, skipped: [] };
   const skipped = [];
   const extraModules = [];
@@ -8287,7 +8396,7 @@ function withUserModules(preset, modules, texts) {
       default: true,
       when: compileTrigger(m.trigger, texts),
       structures: [],
-      questions: { mandatory: [], optional: [] }
+      vars: (m.vars ?? []).filter((u) => findVar(preset, u.var)?.type === u.type).map(effectiveUpdate).filter((u) => Boolean(u))
     });
     for (const e of m.entries) {
       const point = findPoint(preset, e.point);
@@ -8329,6 +8438,17 @@ function normalizeRule(raw) {
   }
   return null;
 }
+function normalizeVarUpdate(raw) {
+  if (!isObj2(raw) || typeof raw.var !== "string") return [];
+  const strings = (v) => Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+  if (raw.type === "string") return [{ var: raw.var, type: "string", text: str(raw.text) }];
+  if (raw.type === "list") return [{ var: raw.var, type: "list", items: strings(raw.items) }];
+  if (raw.type === "dict" && Array.isArray(raw.items)) {
+    const items = raw.items.filter(isObj2).map((x) => ({ key: str(x.key), value: typeof x.value === "string" ? x.value : null }));
+    return [{ var: raw.var, type: "dict", items }];
+  }
+  return [];
+}
 function normalizeUserModule(raw) {
   if (!isObj2(raw) || !Array.isArray(raw.entries)) return null;
   const trigger = isObj2(raw.trigger) ? raw.trigger : {};
@@ -8343,6 +8463,7 @@ function normalizeUserModule(raw) {
     name: str(raw.name),
     enabled: raw.enabled !== false,
     entries,
+    vars: Array.isArray(raw.vars) ? raw.vars.flatMap(normalizeVarUpdate) : [],
     trigger: {
       match: trigger.match === "any" ? "any" : "all",
       rules: Array.isArray(trigger.rules) ? trigger.rules.map(normalizeRule).filter((r) => Boolean(r)) : []
@@ -8620,6 +8741,28 @@ function compile(tree) {
     if (o.description !== void 0) point.description = str2(o.description).trim();
     insertionPoints.push(point);
   });
+  const vars = [];
+  if (raw.vars !== void 0 && !isObj3(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
+  for (const [vid, v] of Object.entries(isObj3(raw.vars) ? raw.vars : {})) {
+    const where = { file: M, path: `vars.${vid}` };
+    const o = isObj3(v) ? v : { type: v };
+    if (!/^[A-Za-z][\w-]*$/.test(vid)) {
+      diag.error("variable id must start with a letter (letters, digits, _ and -)", where);
+      continue;
+    }
+    if (!BUILD_VAR_TYPES.includes(o.type)) {
+      diag.error(`variable type must be ${BUILD_VAR_TYPES.join(" | ")}`, where);
+      continue;
+    }
+    const decl = { id: vid, type: o.type };
+    if (o.label !== void 0) decl.label = str2(o.label);
+    if (o.description !== void 0) decl.description = str2(o.description).trim();
+    if (o.separator !== void 0) {
+      if (decl.type === "string") decl.separator = str2(o.separator);
+      else diag.warn("separator only applies to string variables", where);
+    }
+    vars.push(decl);
+  }
   const params = (Array.isArray(raw.params) ? raw.params : []).map((p, i) => {
     const o = isObj3(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
@@ -8754,14 +8897,14 @@ function compile(tree) {
     const mid = str2(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
     if (modules.some((m) => m.id === mid)) diag.error(`duplicate module id \`${mid}\``, where);
     const toggle = fm.toggle === "always" || fm.system === true ? "always" : "user";
-    const questions = { mandatory: questionList(fm, "mandatory", mid, diag, where, text), optional: questionList(fm, "optional", mid, diag, where, text) };
+    if (fm.questions !== void 0) diag.error("`questions` was replaced by build variables: declare them in preset.yaml#vars and update them with `vars`", where);
     const mod = {
       id: mid,
       name: str2(fm.name, mid),
       toggle,
       default: toggle === "always" ? true : fm.default === true,
       structures: Array.isArray(fm.structures) ? fm.structures.map((s) => str2(s)) : [],
-      questions,
+      vars: varUpdates(fm.vars, vars, diag, { ...where, path: "vars" }, text),
       source: file
     };
     if (fm.description !== void 0) mod.description = str2(fm.description).trim();
@@ -8862,7 +9005,8 @@ function compile(tree) {
     const known = {
       modules: new Set(modules.map((x) => x.id)),
       params: new Set(params.map((x) => x.id)),
-      insertionPoints: new Set(insertionPoints.map((x) => x.id))
+      insertionPoints: new Set(insertionPoints.map((x) => x.id)),
+      vars: new Set(vars.map((x) => x.id))
     };
     for (const section of Object.keys(rename2)) {
       const where = { file: M, path: `migrations[${i}].rename.${section}` };
@@ -8909,12 +9053,12 @@ function compile(tree) {
     regions,
     anchors,
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
-    ...raw.questionsRegion !== void 0 ? { questionsRegion: str2(raw.questionsRegion) } : {},
     params,
     groups,
     modules,
     entries,
     insertionPoints,
+    vars,
     workflows,
     structures,
     regex,
@@ -8934,17 +9078,52 @@ function compile(tree) {
   preset.hash = hashPreset(preset);
   return { preset, diag, map };
 }
-function questionList(fm, kind, mid, diag, where, text) {
-  const q = isObj3(fm.questions) ? fm.questions[kind] : void 0;
-  if (q === void 0) return [];
-  if (!Array.isArray(q)) {
-    diag.error(`questions.${kind} must be a list`, where);
+var isScalar = (v) => ["string", "number", "boolean"].includes(typeof v);
+function varUpdates(src, decls, diag, where, text) {
+  if (src === void 0) return [];
+  if (!isObj3(src)) {
+    diag.error("vars must be a mapping of variable id \u2192 value", where);
     return [];
   }
-  return q.map((x, i) => {
-    const o = isObj3(x) ? x : { text: x };
-    return { id: str2(o.id, `${mid}-${kind[0]}${i + 1}`), text: text(str2(o.text).trim(), { ...where, path: `questions.${kind}[${i}]` }) };
-  });
+  const out = [];
+  for (const [id, v] of Object.entries(src)) {
+    const at = { ...where, path: `vars.${id}` };
+    const decl = decls.find((d) => d.id === id);
+    if (!decl) {
+      diag.error(`unknown variable \`${id}\` (declare it in preset.yaml#vars)`, at);
+      continue;
+    }
+    const scalarText = (x, w) => text(String(x), w);
+    switch (decl.type) {
+      case "string":
+        if (!isScalar(v)) diag.error(`\`${id}\` is a string variable: expected text`, at);
+        else out.push({ var: id, type: "string", text: scalarText(v, at) });
+        break;
+      case "list": {
+        const items = Array.isArray(v) ? v : [v];
+        if (!items.every(isScalar)) {
+          diag.error(`\`${id}\` is a list variable: expected an item or a list of plain items`, at);
+          break;
+        }
+        out.push({ var: id, type: "list", items: items.map((x, i) => scalarText(x, { ...at, path: `vars.${id}[${i}]` })) });
+        break;
+      }
+      case "dict": {
+        if (!isObj3(v)) {
+          diag.error(`\`${id}\` is a dict variable: expected a mapping`, at);
+          break;
+        }
+        const bad = Object.entries(v).filter(([, x]) => x !== null && !isScalar(x)).map(([k]) => k);
+        if (bad.length) {
+          diag.error(`\`${id}\` is a dict variable: values must be plain (${bad.join(", ")})`, at);
+          break;
+        }
+        out.push({ var: id, type: "dict", items: Object.entries(v).map(([key, x]) => ({ key, value: x === null ? null : scalarText(x, { ...at, path: `vars.${id}.${key}` }) })) });
+        break;
+      }
+    }
+  }
+  return out;
 }
 function compileWorkflow(file, src, diag, expr, content, text) {
   const parsed = parseMarkdown(src, ["section"], diag, { file });
@@ -8960,10 +9139,6 @@ function compileWorkflow(file, src, diag, expr, content, text) {
     if (stages.some((x) => x.id === stage.id)) diag.error(`duplicate stage \`${stage.id}\``, where);
     if (!STAGE_KINDS.includes(stage.kind)) diag.error(`stage kind must be ${STAGE_KINDS.join(" | ")}`, where);
     if (o.optional) stage.optional = true;
-    if (o.questions !== void 0) {
-      if (o.questions !== "ask" && o.questions !== "answer") diag.error("questions must be ask | answer", where);
-      else stage.questions = o.questions;
-    }
     if (o.tag !== void 0) stage.tag = str2(o.tag);
     if (o.field !== void 0) {
       const f = isObj3(o.field) ? o.field : { description: o.field };
@@ -9110,8 +9285,7 @@ var FIXED_VARS = {
   "chat.group": null,
   "memory.hasChat": null,
   "memory.hasGlobal": null,
-  "recap.present": null,
-  "features.questions": null
+  "recap.present": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -9120,11 +9294,13 @@ function validate(p, map, diag) {
   const flagIds = new Set(p.regex.map((r) => r.id));
   const regionIds = new Set(p.regions.map((r) => r.id));
   const workflowIds = new Set(p.workflows.map((w) => w.id));
+  const stageIds = new Set(p.workflows.flatMap((w) => w.stages.map((s) => s.id)));
+  const varDecls = new Map(p.vars.map((v) => [v.id, v]));
   const checkVar = (path, where) => {
     if (path in FIXED_VARS) return;
     const [root, ...rest] = path.split(".");
     const key = rest.join(".");
-    const known = root === "modules" ? moduleIds : root === "params" ? paramIds : root === "flags" ? flagIds : void 0;
+    const known = root === "modules" ? moduleIds : root === "params" ? paramIds : root === "flags" ? flagIds : root === "stages" ? stageIds : void 0;
     if (!known) return diag.error(`unknown variable \`${path}\``, where);
     if (!known.has(key)) diag.error(`unknown ${root.slice(0, -1)} \`${key}\` in condition`, where);
   };
@@ -9145,6 +9321,21 @@ function validate(p, map, diag) {
     for (const v of variables(expr)) checkVar(v, where);
     checkLiterals(expr, where);
   }
+  const dictKeys = (id) => new Set(p.modules.flatMap((m) => m.vars.flatMap((u) => u.var === id && u.type === "dict" ? u.items.map((x) => x.key) : [])));
+  for (const decl of p.vars) {
+    if (decl.type !== "dict") continue;
+    const setters = /* @__PURE__ */ new Map();
+    for (const m of p.modules) for (const u of m.vars) if (u.var === decl.id && u.type === "dict") {
+      for (const x of u.items) if (x.value !== null) setters.set(x.key, [...setters.get(x.key) ?? [], m.id]);
+    }
+    const exclusiveOf = (id) => p.modules.find((m) => m.id === id)?.exclusive;
+    for (const [key, ids] of setters) {
+      const clash = ids.some((x, i) => ids.slice(i + 1).some((y) => !exclusiveOf(x) || exclusiveOf(x) !== exclusiveOf(y)));
+      if (clash) diag.warn(`variable ${decl.id}: key \`${key}\` is set by ${ids.join(", ")} (the later module wins)`, map.modules.get(ids[ids.length - 1]) ?? {});
+    }
+    for (const reserved of VAR_SELECTORS) if (setters.has(reserved)) diag.warn(`variable ${decl.id}: key \`${reserved}\` cannot be read alone ({{ap::var::${decl.id}::${reserved}}} lists all ${reserved})`, { file: M, path: `vars.${decl.id}` });
+  }
+  const usedVars = /* @__PURE__ */ new Set();
   const structureIds = new Set(Object.keys(p.structures));
   for (const { text, where } of map.texts) {
     for (const args of listMacros(text)) {
@@ -9182,15 +9373,23 @@ function validate(p, map, diag) {
         case "memory":
           if (a !== "chat" && a !== "global") bad("expected chat | global");
           break;
-        case "questions":
-          if (a !== "mandatory" && a !== "optional") bad("expected mandatory | optional");
+        case "var": {
+          const decl = varDecls.get(a);
+          const sel = rest[1];
+          usedVars.add(a);
+          if (!decl) bad(`unknown variable \`${a}\``);
+          else if (sel === void 0) break;
+          else if (decl.type === "string") bad("string variables take no selector");
+          else if (decl.type === "list" && !/^-?\d+$/.test(sel)) bad("list variables take an index");
+          else if (decl.type === "dict" && !VAR_SELECTORS.includes(sel) && !dictKeys(a).has(sel)) diag.warn(`${shown}: no module sets key \`${sel}\``, where);
           break;
+        }
       }
     }
   }
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
-  for (const [k, rid] of [["workflowRegion", p.workflowRegion], ["questionsRegion", p.questionsRegion]])
-    if (rid !== void 0 && !regionIds.has(rid)) diag.error(`unknown region \`${rid}\``, { file: M, path: k });
+  if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: "workflowRegion" });
+  for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
   for (const e of p.entries) {
     const where = map.entries.get(e.id) ?? {};
     const region = p.regions.find((r) => r.id === e.region);
@@ -9278,7 +9477,6 @@ function validate(p, map, diag) {
       if (!p.actors[s.actor]) diag.error(`workflow ${w.id}: stage ${s.id} has unknown actor \`${s.actor}\``, where);
       for (const st of usedStyles) if (!w.sections.stages[s.id]?.[st]) diag.warn(`workflow ${w.id}: stage ${s.id} has no ${st} section`, where);
     }
-    if (w.kind === "task" && w.stages.some((s) => s.questions)) diag.warn(`workflow ${w.id}: task workflows do not receive questions`, where);
     checkNames(w, where);
   }
   if (!p.workflows.some((w) => w.kind === "task")) diag.warn("no task workflow: meta replies and script calls fall back to the main workflow", { file: M });
@@ -9314,7 +9512,8 @@ function validate(p, map, diag) {
       workflows: workflowIds,
       configurations: new Set(p.configurations.map((x) => x.id)),
       structures: structureIds,
-      insertionPoints: new Set(p.insertionPoints.map((x) => x.id))
+      insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
+      vars: new Set(varDecls.keys())
     };
     for (const [section, ids] of Object.entries(known)) {
       const t = table[section];
@@ -9389,12 +9588,14 @@ function preview(source, o) {
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, ...skipped.length ? { skipped } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
   const lines = [];
   const rule = (title) => lines.push("", `\u2501\u2501 ${title} ${"\u2501".repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} \xB7 ${transport} (${vars.style}) \xB7 workflow ${wf?.id ?? "\u2014"} \xB7 config ${o.config ?? preset.defaultConfiguration}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(", ")}`);
   for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
+  const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
+  if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   for (const r of preset.regions) {
