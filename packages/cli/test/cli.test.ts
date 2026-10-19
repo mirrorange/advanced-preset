@@ -146,6 +146,14 @@ describe('markdown directives', () => {
 });
 
 describe('compile + validate', () => {
+  it('warns when allowNone is declared on a group that is not an exclusive set', () => {
+    const t = tree();
+    t.set('preset.yaml', MANIFEST.replace('style: { label: Style, allowNone: true }', 'style: { label: Style, allowNone: true }\n  misc: { label: Misc, allowNone: true }'));
+    const warns = build(t).diag.warnings.map((w) => w.message).join('\n');
+    expect(warns).toMatch(/group `misc`: allowNone only applies to an exclusive set/);
+    expect(warns).not.toMatch(/group `style`: allowNone/);
+  });
+
   it('builds a clean artifact', () => {
     const { preset, diag } = build(tree());
     expect(diag.errors).toEqual([]);
