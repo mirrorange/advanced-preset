@@ -132,7 +132,10 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   for (const [g, ids] of exclusive) {
     const on = ids.filter((id) => defaults[id]);
     if (on.length > 1) diag.warn(`exclusive group \`${g}\`: several modules enabled by default (${on.join(', ')}); the first in moduleOrder wins`, { file: M, path: 'configurationDefaults.modules' });
-    if (!on.length && !p.groups[g]?.allowNone) diag.warn(`exclusive group \`${g}\` has no default and does not allow none`, { file: M, path: 'groups' });
+    if (!on.length && !p.groups[g]?.allowNone) diag.warn(`exclusive group \`${g}\` has no default and does not allow none; its first module is used`, { file: M, path: 'groups' });
+  }
+  for (const [g, decl] of Object.entries(p.groups)) {
+    if (decl.allowNone && !exclusive.has(g)) diag.warn(`group \`${g}\`: allowNone only applies to an exclusive set (modules with \`exclusive: ${g}\`)`, { file: M, path: `groups.${g}` });
   }
   for (const id of p.moduleOrder) if (id !== '*' && !moduleIds.has(id)) diag.warn(`moduleOrder: unknown module \`${id}\``, { file: M, path: 'moduleOrder' });
 
