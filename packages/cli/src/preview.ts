@@ -1,7 +1,7 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, defaultVars, resolveConfiguration, turnArtifacts, workflowSummary, actorName,
-  type APreset, type Transport,
+  TRANSPORTS, assemble, defaultVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  type APreset, type Transport, type UserModule,
 } from '@advanced-preset/protocol';
 
 export interface PreviewOptions {
@@ -10,10 +10,13 @@ export interface PreviewOptions {
   config?: string;
   meta?: 'pure' | 'mixed';
   modules?: Record<string, boolean>;
+  /** User modules merged in (keyword rules see empty chat text). */
+  userModules?: UserModule[];
   json?: boolean;
 }
 
-export function preview(preset: APreset, o: PreviewOptions): string {
+export function preview(source: APreset, o: PreviewOptions): string {
+  const { preset, skipped } = o.userModules ? withUserModules(source, o.userModules) : { preset: source, skipped: [] };
   const config = resolveConfiguration(preset, o.config ?? preset.defaultConfiguration, {
     connection: { ...(o.transport ? { transport: o.transport as Transport } : {}), ...(o.workflow ? { workflow: o.workflow } : {}) },
     modules: o.modules,
@@ -40,12 +43,13 @@ export function preview(preset: APreset, o: PreviewOptions): string {
     if (transport === 'tool-single') artifacts.tools = [...init, t.submitTool()];
     if (transport === 'tool-multi') artifacts.tools = [...init, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ vars: a.vars, ...(skipped.length ? { skipped } : {}), modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
 
   const lines: string[] = [];
   const rule = (title: string) => lines.push('', `━━ ${title} ${'━'.repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} · ${transport} (${vars.style}) · workflow ${wf?.id ?? '—'} · config ${o.config ?? preset.defaultConfiguration}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(', ')}`);
+  for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   for (const r of preset.regions) {

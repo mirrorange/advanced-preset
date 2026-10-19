@@ -1,7 +1,8 @@
 /** `ap` — Advanced Preset command line. */
 import { parseArgs } from 'node:util';
 import { basename, resolve } from 'node:path';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { parseUserModuleFile } from '@advanced-preset/protocol';
 import { buildDir, writeArtifact } from './io';
 import { report } from './diagnostics';
 import { preview } from './preview';
@@ -19,7 +20,7 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--json] [--out file]
+                   [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
 
 --strict treats warnings as errors.`;
@@ -41,6 +42,7 @@ async function main(argv: string[]): Promise<number> {
       enable: { type: 'string' },
       disable: { type: 'string' },
       json: { type: 'boolean' },
+      'user-modules': { type: 'string' },
       id: { type: 'string' },
       name: { type: 'string' },
       author: { type: 'string' },
@@ -73,7 +75,8 @@ async function main(argv: string[]): Promise<number> {
       for (const id of values.enable?.split(',').filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(',').filter(Boolean) ?? []) toggles[id.trim()] = false;
       const meta = values.meta === 'pure' || values.meta === 'mixed' ? values.meta : undefined;
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, json: values.json });
+      const userModules = values['user-modules'] ? parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8'))).modules : undefined;
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);
       return 0;
