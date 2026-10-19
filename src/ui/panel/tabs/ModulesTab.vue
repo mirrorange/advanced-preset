@@ -19,7 +19,7 @@ import { userModules } from '@/store/user-modules';
 const { preset, config, update } = usePreset();
 const on = computed(() => (preset.value && config.value ? moduleSwitches(preset.value, config.value) : {}));
 
-/** An exclusive set. `label` is set when the set is nested in another group; `optional` sets have an on/off switch. */
+/** An exclusive set. `label` is set when it is shown as its own row (nested, or beside other modules); `optional` sets have an on/off switch. */
 interface ChoiceSet { key: string; label?: string; help?: string; optional: boolean; modules: Module[] }
 interface GroupView { id: string; label: string; help?: string; header?: ChoiceSet; sets: ChoiceSet[]; toggles: Module[] }
 
@@ -33,13 +33,19 @@ const groups = computed<GroupView[]>(() => {
     .map((g): GroupView & { order: number } => {
       const decl = p.groups[g];
       const mods = user.filter((m) => (m.group ?? '') === g);
-      const sets = [...new Set(mods.filter((m) => m.exclusive).map((m) => m.exclusive!))].map((key): ChoiceSet => {
-        const own = key === g;
+      const keys = [...new Set(mods.filter((m) => m.exclusive).map((m) => m.exclusive!))];
+      const toggles = mods.filter((m) => !m.exclusive);
+      // An optional set that is the group's only content is switched from the section header; with other
+      // modules beside it, a header switch would read as controlling them too, so it gets its own row.
+      const sole = keys.length === 1 && !toggles.length;
+      const sets = keys.map((key): ChoiceSet => {
+        const optional = exclusiveAllowsNone(p, key);
+        const bare = key === g && (!optional || sole);
         return {
           key,
-          label: own ? undefined : pt(p, 'groups', key, 'label', p.groups[key]?.label ?? key),
-          help: own ? undefined : pt(p, 'groups', key, 'description', p.groups[key]?.description ?? '') || undefined,
-          optional: exclusiveAllowsNone(p, key),
+          label: bare ? undefined : pt(p, 'groups', key, 'label', p.groups[key]?.label ?? key),
+          help: bare || key === g ? undefined : pt(p, 'groups', key, 'description', p.groups[key]?.description ?? '') || undefined,
+          optional,
           modules: mods.filter((m) => m.exclusive === key),
         };
       });
@@ -48,10 +54,9 @@ const groups = computed<GroupView[]>(() => {
         order: decl?.order ?? 999,
         label: g ? pt(p, 'groups', g, 'label', decl?.label ?? g) : t('modules.other'),
         help: g ? pt(p, 'groups', g, 'description', decl?.description ?? '') || undefined : undefined,
-        // The group's own optional set is switched from the section header.
         header: sets.find((c) => !c.label && c.optional),
         sets,
-        toggles: mods.filter((m) => !m.exclusive),
+        toggles,
       };
     });
   return views.sort((a, b) => a.order - b.order);
