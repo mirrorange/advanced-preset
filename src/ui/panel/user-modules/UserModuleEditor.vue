@@ -94,10 +94,10 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
     </Section>
 
     <footer class="um-foot">
-      <button type="button" class="btn ghost" @click="exportOne"><Download />{{ t('um.export') }}</button>
-      <button type="button" class="btn ghost" @click="duplicate"><CopyPlus />{{ t('um.duplicate') }}</button>
+      <button type="button" class="btn ghost" :title="t('um.export')" @click="exportOne"><Download /><span>{{ t('um.export') }}</span></button>
+      <button type="button" class="btn ghost" :title="t('um.duplicate')" @click="duplicate"><CopyPlus /><span>{{ t('um.duplicate') }}</span></button>
       <span class="grow" />
-      <button type="button" class="btn ghost danger" :class="{ armed: confirmDelete }" @click="remove"><Trash2 />{{ confirmDelete ? t('um.confirmDelete') : t('common.delete') }}</button>
+      <button type="button" class="btn ghost danger" :class="{ armed: confirmDelete }" :title="t('common.delete')" @click="remove"><Trash2 /><span>{{ confirmDelete ? t('um.confirmDelete') : t('common.delete') }}</span></button>
     </footer>
   </div>
 </template>
