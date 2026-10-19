@@ -8224,7 +8224,7 @@ function Up(e) {
 }
 async function Wp() {
 	let e = await Hp();
-	e && e !== "f885258f416245e7" && sessionStorage.getItem(Vp) !== e && Up(e);
+	e && e !== "3ee5ebc04fa2a272" && sessionStorage.getItem(Vp) !== e && Up(e);
 }
 async function Gp() {
 	await Wp();
@@ -8233,7 +8233,7 @@ async function Kp() {
 	let e = a().replace(/^third-party\//, ""), t = await qp(e, !1);
 	if (t.status === 404 && (t = await qp(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Hp();
-	return r && r !== "f885258f416245e7" ? (Up(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "3ee5ebc04fa2a272" ? (Up(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var qp = (t, n) => p("/api/extensions/update", {
 	method: "POST",
@@ -10272,7 +10272,7 @@ function A_(e) {
 async function j_(e, t) {
 	let n = zl(e);
 	if (!n) throw Error(Y("presets.invalid"));
-	if (n.minAdvancedPreset && bc("1.3.0", n.minAdvancedPreset) < 0) throw Error(Y("presets.tooNew", { version: n.minAdvancedPreset }));
+	if (n.minAdvancedPreset && bc("1.3.1", n.minAdvancedPreset) < 0) throw Error(Y("presets.tooNew", { version: n.minAdvancedPreset }));
 	Gl(n), t && (q().sources[n.id] = t), J();
 	let r = Wl(n.id) ?? n;
 	return pu(r), await wu(r), r;
@@ -11970,13 +11970,13 @@ var Yv = ["data-id"], Xv = ["aria-label", "onPointerdown"], Zv = ["onClick"], Qv
 			if (!e) return [];
 			let n = e.modules.filter((e) => e.toggle === "user");
 			return [...new Set(n.map((e) => e.group ?? ""))].filter((t) => (e.groups[t]?.tab ?? "modules") === "modules").map((t) => {
-				let r = e.groups[t], i = n.filter((e) => (e.group ?? "") === t), a = [...new Set(i.filter((e) => e.exclusive).map((e) => e.exclusive))].map((n) => {
-					let r = n === t;
+				let r = e.groups[t], i = n.filter((e) => (e.group ?? "") === t), a = [...new Set(i.filter((e) => e.exclusive).map((e) => e.exclusive))], o = i.filter((e) => !e.exclusive), s = a.length === 1 && !o.length, c = a.map((n) => {
+					let r = Mc(e, n), a = n === t && (!r || s);
 					return {
 						key: n,
-						label: r ? void 0 : $l(e, "groups", n, "label", e.groups[n]?.label ?? n),
-						help: r ? void 0 : $l(e, "groups", n, "description", e.groups[n]?.description ?? "") || void 0,
-						optional: Mc(e, n),
+						label: a ? void 0 : $l(e, "groups", n, "label", e.groups[n]?.label ?? n),
+						help: a || n === t ? void 0 : $l(e, "groups", n, "description", e.groups[n]?.description ?? "") || void 0,
+						optional: r,
 						modules: i.filter((e) => e.exclusive === n)
 					};
 				});
@@ -11985,9 +11985,9 @@ var Yv = ["data-id"], Xv = ["aria-label", "onPointerdown"], Zv = ["onClick"], Qv
 					order: r?.order ?? 999,
 					label: t ? $l(e, "groups", t, "label", r?.label ?? t) : Y("modules.other"),
 					help: t && $l(e, "groups", t, "description", r?.description ?? "") || void 0,
-					header: a.find((e) => !e.label && e.optional),
-					sets: a,
-					toggles: i.filter((e) => !e.exclusive)
+					header: c.find((e) => !e.label && e.optional),
+					sets: c,
+					toggles: o
 				};
 			}).sort((e, t) => e.order - t.order);
 		}), o = (e) => $l(t.value, "modules", e.id, "name", e.name), s = (e) => $l(t.value, "modules", e.id, "description", e.description ?? "") || void 0, c = (e) => e.modules.find((e) => i.value[e.id])?.id ?? null;
@@ -12744,7 +12744,7 @@ var Yv = ["data-id"], Xv = ["aria-label", "onPointerdown"], Zv = ["onClick"], Qv
 				]), U("pre", Nx, j(s(e.data)), 1)]))), 128)), m.value.length ? G("", !0) : (B(), V("div", Px, j(F(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			U("div", Fx, "Advanced Preset " + j(F("1.3.0")) + " · " + j(F("f885258f416245e7")), 1)
+			U("div", Fx, "Advanced Preset " + j(F("1.3.1")) + " · " + j(F("3ee5ebc04fa2a272")), 1)
 		], 64));
 	}
 }), Lx = ["aria-label"], Rx = { class: "panel-head" }, zx = { class: "panel-logo" }, Bx = { class: "grow" }, Vx = { class: "panel-title ellipsis" }, Hx = { class: "panel-sub ellipsis" }, Ux = {
@@ -12891,8 +12891,8 @@ function rS() {
 //#endregion
 //#region src/index.ts
 var iS = {
-	version: "1.3.0",
-	buildId: "f885258f416245e7",
+	version: "1.3.1",
+	buildId: "3ee5ebc04fa2a272",
 	nextGeneration: (e) => qu(e),
 	listPresets: () => Bl().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -12939,8 +12939,8 @@ async function sS() {
 		await oS(), $p(), Wp();
 	};
 	t.on(n.APP_READY, () => void a()), rS(), Dd("init", {
-		version: "1.3.0",
-		build: "f885258f416245e7",
+		version: "1.3.1",
+		build: "3ee5ebc04fa2a272",
 		enabled: q().enabled
 	});
 }
