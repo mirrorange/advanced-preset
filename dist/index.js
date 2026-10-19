@@ -4754,7 +4754,7 @@ var vl = {
 	"config.thoughtSignature": "Thought signature",
 	"config.thoughtSignature.hint": "Attach a thought signature to the synthetic turn (Gemini).",
 	"config.streamToolArguments": "Stream tool arguments",
-	"config.streamToolArguments.hint": "Gemini returns tool calls whole unless asked to stream their arguments. Auto asks on Vertex AI (Gemini 3+), where Google supports it; On also asks on other Gemini-format connections, e.g. a custom endpoint backed by Vertex AI.",
+	"config.streamToolArguments.hint": "Gemini's generateContent API returns tool calls whole unless asked to stream their arguments, and only Vertex AI (Gemini 3+) accepts that request. Auto asks on Vertex AI; On also asks on other Gemini-format connections, e.g. a custom endpoint backed by Vertex AI.",
 	"config.streamToolArguments.auto": "Auto",
 	"config.streamToolArguments.on": "On",
 	"config.streamToolArguments.off": "Off",
@@ -4929,7 +4929,7 @@ var vl = {
 		"config.thoughtSignature": "思维签名",
 		"config.thoughtSignature.hint": "为示范轮次附加思维签名（Gemini）。",
 		"config.streamToolArguments": "流式工具参数",
-		"config.streamToolArguments.hint": "Gemini 默认一次性返回完整的工具调用，需要显式请求才会流式输出参数。自动：仅在 Google 支持的 Vertex AI（Gemini 3+）上请求；开启：在其他 Gemini 格式的连接上也请求，例如以 Vertex AI 为后端的自定义端点。",
+		"config.streamToolArguments.hint": "Gemini 的 generateContent 接口默认一次性返回完整的工具调用，需要显式请求才会流式输出参数，且只有 Vertex AI（Gemini 3+）接受该请求。自动：仅在 Vertex AI 上请求；开启：在其他 Gemini 格式的连接上也请求，例如以 Vertex AI 为后端的自定义端点。",
 		"config.streamToolArguments.auto": "自动",
 		"config.streamToolArguments.on": "开启",
 		"config.streamToolArguments.off": "关闭",
@@ -7315,7 +7315,7 @@ function Bf(e) {
 }
 async function Vf() {
 	let e = await zf();
-	e && e !== "c6cc7089d414e0c4" && sessionStorage.getItem(Rf) !== e && Bf(e);
+	e && e !== "f77547eb825425b6" && sessionStorage.getItem(Rf) !== e && Bf(e);
 }
 async function Hf() {
 	await Vf();
@@ -7324,7 +7324,7 @@ async function Uf() {
 	let e = a().replace(/^third-party\//, ""), t = await Wf(e, !1);
 	if (t.status === 404 && (t = await Wf(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await zf();
-	return r && r !== "c6cc7089d414e0c4" ? (Bf(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "f77547eb825425b6" ? (Bf(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Wf = (t, n) => p("/api/extensions/update", {
 	method: "POST",
@@ -10724,7 +10724,7 @@ var Qg = { class: "empty" }, $g = /* @__PURE__ */ L({
 				]), U("pre", Gv, j(s(e.data)), 1)]))), 128)), m.value.length ? G("", !0) : (B(), V("div", Kv, j(F(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			U("div", qv, "Advanced Preset " + j(F("1.1.0")) + " · " + j(F("c6cc7089d414e0c4")), 1)
+			U("div", qv, "Advanced Preset " + j(F("1.1.0")) + " · " + j(F("f77547eb825425b6")), 1)
 		], 64));
 	}
 }), Yv = ["aria-label"], Xv = { class: "panel-head" }, Zv = { class: "panel-logo" }, Qv = { class: "grow" }, $v = { class: "panel-title ellipsis" }, ey = { class: "panel-sub ellipsis" }, ty = {
@@ -10872,7 +10872,7 @@ function hy() {
 //#region src/index.ts
 var gy = {
 	version: "1.1.0",
-	buildId: "c6cc7089d414e0c4",
+	buildId: "f77547eb825425b6",
 	nextGeneration: (e) => nu(e),
 	listPresets: () => Yc().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -10920,7 +10920,7 @@ async function yy() {
 	};
 	t.on(n.APP_READY, () => void a()), hy(), wu("init", {
 		version: "1.1.0",
-		build: "c6cc7089d414e0c4",
+		build: "f77547eb825425b6",
 		enabled: q().enabled
 	});
 }

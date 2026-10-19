@@ -73,7 +73,7 @@
   "config.thoughtSignature": "Thought signature",
   "config.thoughtSignature.hint": "Attach a thought signature to the synthetic turn (Gemini).",
   "config.streamToolArguments": "Stream tool arguments",
-  "config.streamToolArguments.hint": "Gemini returns tool calls whole unless asked to stream their arguments. Auto asks on Vertex AI (Gemini 3+), where Google supports it; On also asks on other Gemini-format connections, e.g. a custom endpoint backed by Vertex AI.",
+  "config.streamToolArguments.hint": "Gemini's generateContent API returns tool calls whole unless asked to stream their arguments, and only Vertex AI (Gemini 3+) accepts that request. Auto asks on Vertex AI; On also asks on other Gemini-format connections, e.g. a custom endpoint backed by Vertex AI.",
   "config.streamToolArguments.auto": "Auto",
   "config.streamToolArguments.on": "On",
   "config.streamToolArguments.off": "Off",

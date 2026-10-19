@@ -1,8 +1,9 @@
 /**
- * Streaming of tool-call arguments on Gemini. Other families stream arguments by default; Gemini
- * returns every function call whole unless `toolConfig.functionCallingConfig.streamFunctionCallArguments`
- * is set (Vertex AI, Gemini 3+; the Gemini API does not support it). The reader rebuilds the
- * resulting `partialArgs` fragments (see `partial-args.ts`).
+ * Streaming of tool-call arguments on Gemini's generateContent API. Other wire formats carry argument
+ * deltas by default; generateContent returns every function call whole unless
+ * `toolConfig.functionCallingConfig.streamFunctionCallArguments` is set, which only Vertex AI accepts
+ * (Gemini 3+). The Gemini API offers argument streaming through its Interactions API instead, which
+ * SillyTavern does not use. The reader rebuilds the resulting `partialArgs` fragments (see `partial-args.ts`).
  *
  * The backend builds the Gemini request, so the flag has to travel through it:
  * - `stream_function_call_arguments: true` — the request field SillyTavern / TauriTavern read once

@@ -18,8 +18,9 @@ export type Transport = 'prefill' | 'plaintext' | 'structured' | 'tool-single' |
 export const TRANSPORTS: readonly Transport[] = ['prefill', 'plaintext', 'structured', 'tool-single', 'tool-multi'];
 
 /**
- * Incremental tool-call arguments in tool transports. Only Gemini needs asking
- * (`streamFunctionCallArguments`, Vertex AI); other families always stream arguments.
+ * Incremental tool-call arguments in tool transports. Only Gemini's generateContent API needs asking
+ * (`streamFunctionCallArguments`, accepted by Vertex AI only); the other wire formats carry argument
+ * deltas natively, though a backend may still deliver a call whole.
  * `auto` asks where the backend is known to support it, `on` asks on every Gemini-format connection.
  */
 export type ToolArgStreaming = 'auto' | 'on' | 'off';
