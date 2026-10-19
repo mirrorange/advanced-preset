@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assemble, defaultVars, resolveConfiguration } from '@advanced-preset/protocol';
+import { assemble, defaultVars, resolveConfiguration, withUserModules, type UserModule } from '@advanced-preset/protocol';
 import { compile, type SourceTree } from '../src/compile';
 import { validate } from '../src/validate';
 import { Diagnostics } from '../src/diagnostics';
@@ -281,5 +281,56 @@ describe('assemble', () => {
     expect(b.regions.top![0]!.content).toBe('You are Nia.\nFill the fields.\nWrite in English.');
     expect(b.regions.task!.map((m) => m.content).join('\n')).toContain('Reply only. Use the reply field.');
     expect(b.regions.task!.map((m) => m.content).join('\n')).toContain('### Step 1: Plan (Nia)');
+  });
+});
+
+describe('insertion points & user modules', () => {
+  const POINTS = `
+insertionPoints:
+  - { id: intro-end, label: After intro, region: top, order: 1000 }
+  - { id: guide, label: Guidelines, description: Inside the block., region: guide, order: 5 }
+migrations:
+  - { from: "<1.0.0", rename: { insertionPoints: { old: intro-end, older: gone }, modules: { s: style-a } } }
+`;
+
+  it('compiles points and checks migration targets', () => {
+    const { preset, diag } = build(tree({ 'preset.yaml': MANIFEST + POINTS, 'locales/zh-cn.yaml': 'insertionPoints: { guide: { label: 指南 }, nope: { label: x } }\n' }));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.insertionPoints).toEqual([
+      { id: 'intro-end', label: 'After intro', region: 'top', order: 1000 },
+      { id: 'guide', label: 'Guidelines', description: 'Inside the block.', region: 'guide', order: 5 },
+    ]);
+    const warns = diag.warnings.map((w) => w.message).join('\n');
+    expect(warns).toMatch(/`older` is renamed to `gone`/);
+    expect(warns).not.toMatch(/`old` is renamed/);
+    expect(warns).toMatch(/insertionPoints\.nope does not exist/);
+
+    const bad = build(tree({ 'preset.yaml': `${MANIFEST}insertionPoints:\n  - { id: a, region: settings }\n  - { id: a, region: top }\n  - { id: B, region: top }\n  - { id: c, region: nowhere }\n` }));
+    const msgs = bad.diag.errors.map((e) => e.message).join('\n');
+    expect(msgs).toMatch(/region `settings` is native/);
+    expect(msgs).toMatch(/duplicate insertion point `a`/);
+    expect(msgs).toMatch(/kebab-case/);
+    expect(msgs).toMatch(/unknown region `nowhere`/);
+  });
+
+  it('assembles user modules at their points', () => {
+    const p = build(tree({ 'preset.yaml': MANIFEST + POINTS })).preset!;
+    const config = resolveConfiguration(p, 'fast', undefined);
+    const modules: UserModule[] = [
+      { id: 'u1', name: 'Mine', enabled: true, trigger: { match: 'all', rules: [] }, entries: [
+        { id: 'a', point: 'intro-end', text: 'Also {{ap::name::narrator}}.' },
+        { id: 'b', point: 'guide', text: 'Mine first.' },
+        { id: 'c', point: 'intro-end', role: 'user', text: 'As user.' },
+      ] },
+      { id: 'u2', name: 'Off', enabled: true, trigger: { match: 'all', rules: [{ kind: 'var', path: 'transport', op: '==', value: 'structured' }] }, entries: [{ id: 'a', point: 'intro-end', text: 'never' }] },
+    ];
+    const { preset } = withUserModules(p, modules);
+    const a = assemble({ preset, config, vars: defaultVars(preset, config) });
+    expect(a.regions.top!.map((m) => [m.role, m.content])).toEqual([
+      ['system', 'You are Nia.\nSpeak with prefixes.\nWrite in the story language.'],
+      ['system', 'Also Nia.'],
+      ['user', 'As user.'],
+    ]);
+    expect(a.regions.guide).toEqual([{ role: 'system', content: '<guidelines>\nMine first.\n\nStyle A.\n</guidelines>' }]);
   });
 });

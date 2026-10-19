@@ -13,3 +13,7 @@ configurations:
   default: { name: 默认 }
   prefill: { name: 预填充模型 }
   tools: { name: 工具调用 }
+insertionPoints:
+  system-end: { label: 系统提示末尾 }
+  guidelines: { label: 写作指南, description: 位于指南块内，预设自带指南之后。 }
+  before-task: { label: 任务之前, description: 紧挨在工作流指令之前，适合放每轮提醒。 }

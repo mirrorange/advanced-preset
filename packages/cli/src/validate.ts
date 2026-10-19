@@ -238,6 +238,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       workflows: workflowIds,
       configurations: new Set(p.configurations.map((x) => x.id)),
       structures: structureIds,
+      insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
     };
     for (const [section, ids] of Object.entries(known)) {
       const t = table[section];

@@ -14,7 +14,7 @@ import { parse as parseYaml } from 'yaml';
 import {
   CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
-  type Group, type Migration, type Module, type Param, type ParamOption, type Question, type RecommendedConfiguration,
+  type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type Question, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
 } from '@advanced-preset/protocol';
@@ -233,6 +233,25 @@ export function compile(tree: SourceTree): CompileResult {
     else anchors[a as SemanticAnchor] = str(rid);
   }
   for (const a of ANCHORS) if (!anchors[a]) diag.error(`semantic anchor \`${a}\` is not mapped to a region`, { file: M, path: 'anchors' });
+
+  // ── insertion points (user modules) ───────────────────────────────────────
+  const insertionPoints: InsertionPoint[] = [];
+  (Array.isArray(raw.insertionPoints) ? raw.insertionPoints : []).forEach((r: unknown, i: number) => {
+    const o = isObj(r) ? r : {};
+    const where = { file: M, path: `insertionPoints[${i}]` };
+    const pid = str(o.id);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(pid)) return diag.error('insertion point id must be lower-case kebab-case', where);
+    if (insertionPoints.some((x) => x.id === pid)) return diag.error(`duplicate insertion point \`${pid}\``, where);
+    const rid = str(o.region);
+    const region = regions.find((x) => x.id === rid);
+    if (!region) diag.error(`unknown region \`${rid}\``, where);
+    else if (region.native) diag.error(`region \`${rid}\` is native; user modules cannot insert there`, where);
+    const order = o.order === undefined ? 1000 : Number(o.order);
+    if (!Number.isFinite(order)) diag.error('order must be a number', where);
+    const point: InsertionPoint = { id: pid, label: str(o.label, pid), region: rid, order };
+    if (o.description !== undefined) point.description = str(o.description).trim();
+    insertionPoints.push(point);
+  });
 
   // ── params & groups ─────────────────────────────────────────────────────────
   const params: Param[] = (Array.isArray(raw.params) ? raw.params : []).map((p: unknown, i: number) => {
@@ -486,9 +505,21 @@ export function compile(tree: SourceTree): CompileResult {
   if (!configurations.length) configurations.push({ id: 'default', name: 'Default', diff: {} });
   const defaultConfiguration = str(raw.defaultConfiguration, configurations[0]!.id);
 
-  const migrations: Migration[] = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m: unknown) => {
+  const migrations: Migration[] = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m: unknown, i: number) => {
     const o = isObj(m) ? m : {};
-    return { from: str(o.from), rename: (isObj(o.rename) ? o.rename : {}) as Migration['rename'] };
+    const rename = (isObj(o.rename) ? o.rename : {}) as Migration['rename'];
+    const known = {
+      modules: new Set(modules.map((x) => x.id)),
+      params: new Set(params.map((x) => x.id)),
+      insertionPoints: new Set(insertionPoints.map((x) => x.id)),
+    };
+    for (const section of Object.keys(rename) as (keyof Migration['rename'])[]) {
+      const where = { file: M, path: `migrations[${i}].rename.${section}` };
+      if (!(section in known)) { diag.warn(`unknown rename section \`${section}\``, where); continue; }
+      for (const [from, to] of Object.entries(isObj(rename[section]) ? rename[section]! : {}))
+        if (!known[section].has(String(to))) diag.warn(`\`${from}\` is renamed to \`${String(to)}\`, which this version does not declare`, where);
+    }
+    return { from: str(o.from), rename };
   });
 
   // ── locales ─────────────────────────────────────────────────────────────────
@@ -532,6 +563,7 @@ export function compile(tree: SourceTree): CompileResult {
     groups,
     modules,
     entries,
+    insertionPoints,
     workflows,
     structures,
     regex,

@@ -984,13 +984,13 @@ var require_Collection = __commonJS({
 var require_stringifyComment = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/stringify/stringifyComment.js"(exports) {
     "use strict";
-    var stringifyComment = (str2) => str2.replace(/^(?!$)(?: $)?/gm, "#");
+    var stringifyComment = (str3) => str3.replace(/^(?!$)(?: $)?/gm, "#");
     function indentComment(comment, indent) {
       if (/^\n+$/.test(comment))
         return comment.substring(1);
       return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;
     }
-    var lineComment = (str2, indent, comment) => str2.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str2.endsWith(" ") ? "" : " ") + comment;
+    var lineComment = (str3, indent, comment) => str3.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str3.endsWith(" ") ? "" : " ") + comment;
     exports.indentComment = indentComment;
     exports.lineComment = lineComment;
     exports.stringifyComment = stringifyComment;
@@ -1144,16 +1144,16 @@ var require_stringifyString = __commonJS({
       lineWidth: ctx.options.lineWidth,
       minContentWidth: ctx.options.minContentWidth
     });
-    var containsDocumentMarker = (str2) => /^(%|---|\.\.\.)/m.test(str2);
-    function lineLengthOverLimit(str2, lineWidth, indentLength) {
+    var containsDocumentMarker = (str3) => /^(%|---|\.\.\.)/m.test(str3);
+    function lineLengthOverLimit(str3, lineWidth, indentLength) {
       if (!lineWidth || lineWidth < 0)
         return false;
       const limit = lineWidth - indentLength;
-      const strLen = str2.length;
+      const strLen = str3.length;
       if (strLen <= limit)
         return false;
       for (let i = 0, start = 0; i < strLen; ++i) {
-        if (str2[i] === "\n") {
+        if (str3[i] === "\n") {
           if (i - start > limit)
             return true;
           start = i + 1;
@@ -1170,11 +1170,11 @@ var require_stringifyString = __commonJS({
       const { implicitKey } = ctx;
       const minMultiLineLength = ctx.options.doubleQuotedMinMultiLineLength;
       const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
-      let str2 = "";
+      let str3 = "";
       let start = 0;
       for (let i = 0, ch = json[i]; ch; ch = json[++i]) {
         if (ch === " " && json[i + 1] === "\\" && json[i + 2] === "n") {
-          str2 += json.slice(start, i) + "\\ ";
+          str3 += json.slice(start, i) + "\\ ";
           i += 1;
           start = i;
           ch = "\\";
@@ -1183,38 +1183,38 @@ var require_stringifyString = __commonJS({
           switch (json[i + 1]) {
             case "u":
               {
-                str2 += json.slice(start, i);
+                str3 += json.slice(start, i);
                 const code = json.substr(i + 2, 4);
                 switch (code) {
                   case "0000":
-                    str2 += "\\0";
+                    str3 += "\\0";
                     break;
                   case "0007":
-                    str2 += "\\a";
+                    str3 += "\\a";
                     break;
                   case "000b":
-                    str2 += "\\v";
+                    str3 += "\\v";
                     break;
                   case "001b":
-                    str2 += "\\e";
+                    str3 += "\\e";
                     break;
                   case "0085":
-                    str2 += "\\N";
+                    str3 += "\\N";
                     break;
                   case "00a0":
-                    str2 += "\\_";
+                    str3 += "\\_";
                     break;
                   case "2028":
-                    str2 += "\\L";
+                    str3 += "\\L";
                     break;
                   case "2029":
-                    str2 += "\\P";
+                    str3 += "\\P";
                     break;
                   default:
                     if (code.substr(0, 2) === "00")
-                      str2 += "\\x" + code.substr(2);
+                      str3 += "\\x" + code.substr(2);
                     else
-                      str2 += json.substr(i, 6);
+                      str3 += json.substr(i, 6);
                 }
                 i += 5;
                 start = i + 1;
@@ -1224,14 +1224,14 @@ var require_stringifyString = __commonJS({
               if (implicitKey || json[i + 2] === '"' || json.length < minMultiLineLength) {
                 i += 1;
               } else {
-                str2 += json.slice(start, i) + "\n\n";
+                str3 += json.slice(start, i) + "\n\n";
                 while (json[i + 2] === "\\" && json[i + 3] === "n" && json[i + 4] !== '"') {
-                  str2 += "\n";
+                  str3 += "\n";
                   i += 2;
                 }
-                str2 += indent;
+                str3 += indent;
                 if (json[i + 2] === " ")
-                  str2 += "\\";
+                  str3 += "\\";
                 i += 1;
                 start = i + 1;
               }
@@ -1240,8 +1240,8 @@ var require_stringifyString = __commonJS({
               i += 1;
           }
       }
-      str2 = start ? str2 + json.slice(start) : json;
-      return implicitKey ? str2 : foldFlowLines.foldFlowLines(str2, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
+      str3 = start ? str3 + json.slice(start) : json;
+      return implicitKey ? str3 : foldFlowLines.foldFlowLines(str3, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
     }
     function singleQuotedString(value, ctx) {
       if (ctx.options.singleQuote === false || ctx.implicitKey && value.includes("\n") || /[ \t]\n|\n[ \t]/.test(value))
@@ -1369,15 +1369,15 @@ ${indent}${start}${value}${end}`;
           return quotedString(value, ctx);
         }
       }
-      const str2 = value.replace(/\n+/g, `$&
+      const str3 = value.replace(/\n+/g, `$&
 ${indent}`);
       if (actualString) {
-        const test2 = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str2);
+        const test2 = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str3);
         const { compat, tags } = ctx.doc.schema;
         if (tags.some(test2) || compat?.some(test2))
           return quotedString(value, ctx);
       }
-      return implicitKey ? str2 : foldFlowLines.foldFlowLines(str2, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
+      return implicitKey ? str3 : foldFlowLines.foldFlowLines(str3, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
     }
     function stringifyString(item, ctx, onComment, onChompKeep) {
       const { implicitKey, inFlow } = ctx;
@@ -1529,11 +1529,11 @@ var require_stringify = __commonJS({
       const props = stringifyProps(node, tagObj, ctx);
       if (props.length > 0)
         ctx.indentAtStart = (ctx.indentAtStart ?? 0) + props.length + 1;
-      const str2 = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
+      const str3 = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
       if (!props)
-        return str2;
-      return identity.isScalar(node) || str2[0] === "{" || str2[0] === "[" ? `${props} ${str2}` : `${props}
-${ctx.indent}${str2}`;
+        return str3;
+      return identity.isScalar(node) || str3[0] === "{" || str3[0] === "[" ? `${props} ${str3}` : `${props}
+${ctx.indent}${str3}`;
     }
     exports.createStringifyContext = createStringifyContext;
     exports.stringify = stringify;
@@ -1568,8 +1568,8 @@ var require_stringifyPair = __commonJS({
       });
       let keyCommentDone = false;
       let chompKeep = false;
-      let str2 = stringify.stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
-      if (!explicitKey && !ctx.inFlow && str2.length > 1024) {
+      let str3 = stringify.stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
+      if (!explicitKey && !ctx.inFlow && str3.length > 1024) {
         if (simpleKeys)
           throw new Error("With simple keys, single line scalar must not span more than 1024 characters");
         explicitKey = true;
@@ -1578,27 +1578,27 @@ var require_stringifyPair = __commonJS({
         if (allNullValues || value == null) {
           if (keyCommentDone && onComment)
             onComment();
-          return str2 === "" ? "?" : explicitKey ? `? ${str2}` : str2;
+          return str3 === "" ? "?" : explicitKey ? `? ${str3}` : str3;
         }
       } else if (allNullValues && !simpleKeys || value == null && explicitKey) {
-        str2 = `? ${str2}`;
+        str3 = `? ${str3}`;
         if (keyComment && !keyCommentDone) {
-          str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(keyComment));
+          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
         } else if (chompKeep && onChompKeep)
           onChompKeep();
-        return str2;
+        return str3;
       }
       if (keyCommentDone)
         keyComment = null;
       if (explicitKey) {
         if (keyComment)
-          str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(keyComment));
-        str2 = `? ${str2}
+          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
+        str3 = `? ${str3}
 ${indent}:`;
       } else {
-        str2 = `${str2}:`;
+        str3 = `${str3}:`;
         if (keyComment)
-          str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(keyComment));
+          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
       }
       let vsb, vcb, valueComment;
       if (identity.isNode(value)) {
@@ -1614,7 +1614,7 @@ ${indent}:`;
       }
       ctx.implicitKey = false;
       if (!explicitKey && !keyComment && identity.isScalar(value))
-        ctx.indentAtStart = str2.length + 1;
+        ctx.indentAtStart = str3.length + 1;
       chompKeep = false;
       if (!indentSeq && indentStep.length >= 2 && !ctx.inFlow && !explicitKey && identity.isSeq(value) && !value.flow && !value.tag && !value.anchor) {
         ctx.indent = ctx.indent.substring(2);
@@ -1658,16 +1658,16 @@ ${ctx.indent}`;
       } else if (valueStr === "" || valueStr[0] === "\n") {
         ws = "";
       }
-      str2 += ws + valueStr;
+      str3 += ws + valueStr;
       if (ctx.inFlow) {
         if (valueCommentDone && onComment)
           onComment();
       } else if (valueComment && !valueCommentDone) {
-        str2 += stringifyComment.lineComment(str2, ctx.indent, commentString(valueComment));
+        str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(valueComment));
       } else if (chompKeep && onChompKeep) {
         onChompKeep();
       }
-      return str2;
+      return str3;
     }
     exports.stringifyPair = stringifyPair;
   }
@@ -1894,31 +1894,31 @@ var require_stringifyCollection = __commonJS({
           }
         }
         chompKeep = false;
-        let str3 = stringify.stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
+        let str4 = stringify.stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
         if (comment2)
-          str3 += stringifyComment.lineComment(str3, itemIndent, commentString(comment2));
+          str4 += stringifyComment.lineComment(str4, itemIndent, commentString(comment2));
         if (chompKeep && comment2)
           chompKeep = false;
-        lines.push(blockItemPrefix + str3);
+        lines.push(blockItemPrefix + str4);
       }
-      let str2;
+      let str3;
       if (lines.length === 0) {
-        str2 = flowChars.start + flowChars.end;
+        str3 = flowChars.start + flowChars.end;
       } else {
-        str2 = lines[0];
+        str3 = lines[0];
         for (let i = 1; i < lines.length; ++i) {
           const line = lines[i];
-          str2 += line ? `
+          str3 += line ? `
 ${indent}${line}` : "\n";
         }
       }
       if (comment) {
-        str2 += "\n" + stringifyComment.indentComment(commentString(comment), indent);
+        str3 += "\n" + stringifyComment.indentComment(commentString(comment), indent);
         if (onComment)
           onComment();
       } else if (chompKeep && onChompKeep)
         onChompKeep();
-      return str2;
+      return str3;
     }
     function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
       const { indent, indentStep, flowCollectionPadding: fcPadding, options: { commentString } } = ctx;
@@ -1961,21 +1961,21 @@ ${indent}${line}` : "\n";
         }
         if (comment)
           reqNewline = true;
-        let str2 = stringify.stringify(item, itemCtx, () => comment = null);
-        reqNewline || (reqNewline = lines.length > linesAtValue || str2.includes("\n"));
+        let str3 = stringify.stringify(item, itemCtx, () => comment = null);
+        reqNewline || (reqNewline = lines.length > linesAtValue || str3.includes("\n"));
         if (i < items.length - 1) {
-          str2 += ",";
+          str3 += ",";
         } else if (ctx.options.trailingComma) {
           if (ctx.options.lineWidth > 0) {
-            reqNewline || (reqNewline = lines.reduce((sum, line) => sum + line.length + 2, 2) + (str2.length + 2) > ctx.options.lineWidth);
+            reqNewline || (reqNewline = lines.reduce((sum, line) => sum + line.length + 2, 2) + (str3.length + 2) > ctx.options.lineWidth);
           }
           if (reqNewline) {
-            str2 += ",";
+            str3 += ",";
           }
         }
         if (comment)
-          str2 += stringifyComment.lineComment(str2, itemIndent, commentString(comment));
-        lines.push(str2);
+          str3 += stringifyComment.lineComment(str3, itemIndent, commentString(comment));
+        lines.push(str3);
         linesAtValue = lines.length;
       }
       const { start, end } = flowChars;
@@ -1987,11 +1987,11 @@ ${indent}${line}` : "\n";
           reqNewline = ctx.options.lineWidth > 0 && len > ctx.options.lineWidth;
         }
         if (reqNewline) {
-          let str2 = start;
+          let str3 = start;
           for (const line of lines)
-            str2 += line ? `
+            str3 += line ? `
 ${indentStep}${indent}${line}` : "\n";
-          return `${str2}
+          return `${str3}
 ${indent}${end}`;
         } else {
           return `${start}${fcPadding}${lines.join(" ")}${fcPadding}${end}`;
@@ -2323,7 +2323,7 @@ var require_string = __commonJS({
       identify: (value) => typeof value === "string",
       default: true,
       tag: "tag:yaml.org,2002:str",
-      resolve: (str2) => str2,
+      resolve: (str3) => str3,
       stringify(item, ctx, onComment, onChompKeep) {
         ctx = Object.assign({ actualString: true }, ctx);
         return stringifyString.stringifyString(item, ctx, onComment, onChompKeep);
@@ -2361,7 +2361,7 @@ var require_bool = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:bool",
       test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
-      resolve: (str2) => new Scalar.Scalar(str2[0] === "t" || str2[0] === "T"),
+      resolve: (str3) => new Scalar.Scalar(str3[0] === "t" || str3[0] === "T"),
       stringify({ source, value }, ctx) {
         if (source && boolTag.test.test(source)) {
           const sv = source[0] === "t" || source[0] === "T";
@@ -2413,7 +2413,7 @@ var require_float = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
-      resolve: (str2) => str2.slice(-3).toLowerCase() === "nan" ? NaN : str2[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      resolve: (str3) => str3.slice(-3).toLowerCase() === "nan" ? NaN : str3[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
       stringify: stringifyNumber.stringifyNumber
     };
     var floatExp = {
@@ -2422,7 +2422,7 @@ var require_float = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "EXP",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+(?:\.[0-9]*)?)[eE][-+]?[0-9]+$/,
-      resolve: (str2) => parseFloat(str2),
+      resolve: (str3) => parseFloat(str3),
       stringify(node) {
         const num = Number(node.value);
         return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
@@ -2433,11 +2433,11 @@ var require_float = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
-      resolve(str2) {
-        const node = new Scalar.Scalar(parseFloat(str2));
-        const dot = str2.indexOf(".");
-        if (dot !== -1 && str2[str2.length - 1] === "0")
-          node.minFractionDigits = str2.length - dot - 1;
+      resolve(str3) {
+        const node = new Scalar.Scalar(parseFloat(str3));
+        const dot = str3.indexOf(".");
+        if (dot !== -1 && str3[str3.length - 1] === "0")
+          node.minFractionDigits = str3.length - dot - 1;
         return node;
       },
       stringify: stringifyNumber.stringifyNumber
@@ -2454,7 +2454,7 @@ var require_int = __commonJS({
     "use strict";
     var stringifyNumber = require_stringifyNumber();
     var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
-    var intResolve = (str2, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str2) : parseInt(str2.substring(offset), radix);
+    var intResolve = (str3, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str3) : parseInt(str3.substring(offset), radix);
     function intStringify(node, radix, prefix) {
       const { value } = node;
       if (intIdentify(value) && value >= 0)
@@ -2467,7 +2467,7 @@ var require_int = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "OCT",
       test: /^0o[0-7]+$/,
-      resolve: (str2, _onError, opt) => intResolve(str2, 2, 8, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 8, opt),
       stringify: (node) => intStringify(node, 8, "0o")
     };
     var int = {
@@ -2475,7 +2475,7 @@ var require_int = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:int",
       test: /^[-+]?[0-9]+$/,
-      resolve: (str2, _onError, opt) => intResolve(str2, 0, 10, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 0, 10, opt),
       stringify: stringifyNumber.stringifyNumber
     };
     var intHex = {
@@ -2484,7 +2484,7 @@ var require_int = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "HEX",
       test: /^0x[0-9a-fA-F]+$/,
-      resolve: (str2, _onError, opt) => intResolve(str2, 2, 16, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 16, opt),
       stringify: (node) => intStringify(node, 16, "0x")
     };
     exports.int = int;
@@ -2537,7 +2537,7 @@ var require_schema2 = __commonJS({
         identify: (value) => typeof value === "string",
         default: true,
         tag: "tag:yaml.org,2002:str",
-        resolve: (str2) => str2,
+        resolve: (str3) => str3,
         stringify: stringifyJSON
       },
       {
@@ -2554,7 +2554,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:bool",
         test: /^true$|^false$/,
-        resolve: (str2) => str2 === "true",
+        resolve: (str3) => str3 === "true",
         stringify: stringifyJSON
       },
       {
@@ -2562,7 +2562,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:int",
         test: /^-?(?:0|[1-9][0-9]*)$/,
-        resolve: (str2, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str2) : parseInt(str2, 10),
+        resolve: (str3, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str3) : parseInt(str3, 10),
         stringify: ({ value }) => intIdentify(value) ? value.toString() : JSON.stringify(value)
       },
       {
@@ -2570,7 +2570,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:float",
         test: /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,
-        resolve: (str2) => parseFloat(str2),
+        resolve: (str3) => parseFloat(str3),
         stringify: stringifyJSON
       }
     ];
@@ -2578,9 +2578,9 @@ var require_schema2 = __commonJS({
       default: true,
       tag: "",
       test: /^/,
-      resolve(str2, onError) {
-        onError(`Unresolved plain scalar ${JSON.stringify(str2)}`);
-        return str2;
+      resolve(str3, onError) {
+        onError(`Unresolved plain scalar ${JSON.stringify(str3)}`);
+        return str3;
       }
     };
     var schema = [map.map, seq.seq].concat(jsonScalars, jsonError);
@@ -2612,10 +2612,10 @@ var require_binary = __commonJS({
         if (typeof node_buffer.Buffer === "function") {
           return node_buffer.Buffer.from(src, "base64");
         } else if (typeof atob === "function") {
-          const str2 = atob(src.replace(/[\n\r]/g, ""));
-          const buffer = new Uint8Array(str2.length);
-          for (let i = 0; i < str2.length; ++i)
-            buffer[i] = str2.charCodeAt(i);
+          const str3 = atob(src.replace(/[\n\r]/g, ""));
+          const buffer = new Uint8Array(str3.length);
+          for (let i = 0; i < str3.length; ++i)
+            buffer[i] = str3.charCodeAt(i);
           return buffer;
         } else {
           onError("This environment does not support reading binary tags; either Buffer or atob is required");
@@ -2626,28 +2626,28 @@ var require_binary = __commonJS({
         if (!value)
           return "";
         const buf = value;
-        let str2;
+        let str3;
         if (typeof node_buffer.Buffer === "function") {
-          str2 = buf instanceof node_buffer.Buffer ? buf.toString("base64") : node_buffer.Buffer.from(buf.buffer).toString("base64");
+          str3 = buf instanceof node_buffer.Buffer ? buf.toString("base64") : node_buffer.Buffer.from(buf.buffer).toString("base64");
         } else if (typeof btoa === "function") {
           let s = "";
           for (let i = 0; i < buf.length; ++i)
             s += String.fromCharCode(buf[i]);
-          str2 = btoa(s);
+          str3 = btoa(s);
         } else {
           throw new Error("This environment does not support writing binary tags; either Buffer or btoa is required");
         }
         type ?? (type = Scalar.Scalar.BLOCK_LITERAL);
         if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
           const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
-          const n = Math.ceil(str2.length / lineWidth);
+          const n = Math.ceil(str3.length / lineWidth);
           const lines = new Array(n);
           for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
-            lines[i] = str2.substr(o, lineWidth);
+            lines[i] = str3.substr(o, lineWidth);
           }
-          str2 = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
+          str3 = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
         }
-        return stringifyString.stringifyString({ comment, type, value: str2 }, ctx, onComment, onChompKeep);
+        return stringifyString.stringifyString({ comment, type, value: str3 }, ctx, onComment, onChompKeep);
       }
     };
     exports.binary = binary;
@@ -2853,7 +2853,7 @@ var require_float2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
-      resolve: (str2) => str2.slice(-3).toLowerCase() === "nan" ? NaN : str2[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      resolve: (str3) => str3.slice(-3).toLowerCase() === "nan" ? NaN : str3[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
       stringify: stringifyNumber.stringifyNumber
     };
     var floatExp = {
@@ -2862,7 +2862,7 @@ var require_float2 = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "EXP",
       test: /^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,
-      resolve: (str2) => parseFloat(str2.replace(/_/g, "")),
+      resolve: (str3) => parseFloat(str3.replace(/_/g, "")),
       stringify(node) {
         const num = Number(node.value);
         return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
@@ -2873,11 +2873,11 @@ var require_float2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,
-      resolve(str2) {
-        const node = new Scalar.Scalar(parseFloat(str2.replace(/_/g, "")));
-        const dot = str2.indexOf(".");
+      resolve(str3) {
+        const node = new Scalar.Scalar(parseFloat(str3.replace(/_/g, "")));
+        const dot = str3.indexOf(".");
         if (dot !== -1) {
-          const f = str2.substring(dot + 1).replace(/_/g, "");
+          const f = str3.substring(dot + 1).replace(/_/g, "");
           if (f[f.length - 1] === "0")
             node.minFractionDigits = f.length;
         }
@@ -2897,34 +2897,34 @@ var require_int2 = __commonJS({
     "use strict";
     var stringifyNumber = require_stringifyNumber();
     var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
-    function intResolve(str2, offset, radix, { intAsBigInt }) {
-      const sign = str2[0];
+    function intResolve(str3, offset, radix, { intAsBigInt }) {
+      const sign = str3[0];
       if (sign === "-" || sign === "+")
         offset += 1;
-      str2 = str2.substring(offset).replace(/_/g, "");
+      str3 = str3.substring(offset).replace(/_/g, "");
       if (intAsBigInt) {
         switch (radix) {
           case 2:
-            str2 = `0b${str2}`;
+            str3 = `0b${str3}`;
             break;
           case 8:
-            str2 = `0o${str2}`;
+            str3 = `0o${str3}`;
             break;
           case 16:
-            str2 = `0x${str2}`;
+            str3 = `0x${str3}`;
             break;
         }
-        const n2 = BigInt(str2);
+        const n2 = BigInt(str3);
         return sign === "-" ? BigInt(-1) * n2 : n2;
       }
-      const n = parseInt(str2, radix);
+      const n = parseInt(str3, radix);
       return sign === "-" ? -1 * n : n;
     }
     function intStringify(node, radix, prefix) {
       const { value } = node;
       if (intIdentify(value)) {
-        const str2 = value.toString(radix);
-        return value < 0 ? "-" + prefix + str2.substr(1) : prefix + str2;
+        const str3 = value.toString(radix);
+        return value < 0 ? "-" + prefix + str3.substr(1) : prefix + str3;
       }
       return stringifyNumber.stringifyNumber(node);
     }
@@ -2934,7 +2934,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "BIN",
       test: /^[-+]?0b[0-1_]+$/,
-      resolve: (str2, _onError, opt) => intResolve(str2, 2, 2, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 2, opt),
       stringify: (node) => intStringify(node, 2, "0b")
     };
     var intOct = {
@@ -2943,7 +2943,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "OCT",
       test: /^[-+]?0[0-7_]+$/,
-      resolve: (str2, _onError, opt) => intResolve(str2, 1, 8, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 1, 8, opt),
       stringify: (node) => intStringify(node, 8, "0")
     };
     var int = {
@@ -2951,7 +2951,7 @@ var require_int2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:int",
       test: /^[-+]?[0-9][0-9_]*$/,
-      resolve: (str2, _onError, opt) => intResolve(str2, 0, 10, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 0, 10, opt),
       stringify: stringifyNumber.stringifyNumber
     };
     var intHex = {
@@ -2960,7 +2960,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "HEX",
       test: /^[-+]?0x[0-9a-fA-F_]+$/,
-      resolve: (str2, _onError, opt) => intResolve(str2, 2, 16, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 16, opt),
       stringify: (node) => intStringify(node, 16, "0x")
     };
     exports.int = int;
@@ -3064,9 +3064,9 @@ var require_timestamp = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/schema/yaml-1.1/timestamp.js"(exports) {
     "use strict";
     var stringifyNumber = require_stringifyNumber();
-    function parseSexagesimal(str2, asBigInt) {
-      const sign = str2[0];
-      const parts = sign === "-" || sign === "+" ? str2.substring(1) : str2;
+    function parseSexagesimal(str3, asBigInt) {
+      const sign = str3[0];
+      const parts = sign === "-" || sign === "+" ? str3.substring(1) : str3;
       const num = (n) => asBigInt ? BigInt(n) : Number(n);
       const res = parts.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
       return sign === "-" ? num(-1) * res : res;
@@ -3103,7 +3103,7 @@ var require_timestamp = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "TIME",
       test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+$/,
-      resolve: (str2, _onError, { intAsBigInt }) => parseSexagesimal(str2, intAsBigInt),
+      resolve: (str3, _onError, { intAsBigInt }) => parseSexagesimal(str3, intAsBigInt),
       stringify: stringifySexagesimal
     };
     var floatTime = {
@@ -3112,7 +3112,7 @@ var require_timestamp = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "TIME",
       test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*$/,
-      resolve: (str2) => parseSexagesimal(str2, false),
+      resolve: (str3) => parseSexagesimal(str3, false),
       stringify: stringifySexagesimal
     };
     var timestamp = {
@@ -3123,8 +3123,8 @@ var require_timestamp = __commonJS({
       // may be omitted altogether, resulting in a date format. In such a case, the time part is
       // assumed to be 00:00:00Z (start of day, UTC).
       test: RegExp("^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:(?:t|T|[ \\t]+)([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}(\\.[0-9]+)?)(?:[ \\t]*(Z|[-+][012]?[0-9](?::[0-9]{2})?))?)?$"),
-      resolve(str2) {
-        const match = str2.match(timestamp.test);
+      resolve(str3) {
+        const match = str3.match(timestamp.test);
         if (!match)
           throw new Error("!!timestamp expects a date, starting with yyyy-mm-dd");
         const [, year, month, day, hour, minute, second] = match.map(Number);
@@ -7370,15 +7370,7 @@ var require_dist = __commonJS({
 // src/cli.ts
 import { parseArgs } from "node:util";
 import { basename, resolve } from "node:path";
-import { writeFile as writeFile3 } from "node:fs/promises";
-
-// src/io.ts
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { join, relative, sep } from "node:path";
-
-// src/compile.ts
-var import_yaml2 = __toESM(require_dist(), 1);
-import { createHash } from "node:crypto";
+import { readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
 
 // ../protocol/src/types.ts
 var FORMAT_VERSION = 2;
@@ -8066,6 +8058,310 @@ function defaultVars(preset, config, over = {}) {
   };
 }
 
+// ../protocol/src/directives.ts
+var DIRECTIVE_RE = /<!--\s*@([a-z][\w-]*)\b([\s\S]*?)-->/g;
+var FENCE_RE = /^\s*(```|~~~)/;
+function parseAttributes(src) {
+  const args = [];
+  const attrs = {};
+  const re = /([\w:.-]+)(?:\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"']+)))?/g;
+  for (const m of src.matchAll(re)) {
+    const value = m[2] ?? m[3] ?? m[4];
+    if (value === void 0) args.push(m[1]);
+    else attrs[m[1]] = value.replace(/\\(["'\\])/g, "$1");
+  }
+  return { args, attrs };
+}
+function tokenizeDirectives(body, split = [], firstLine = 1) {
+  const chunks = [{ tokens: [], line: firstLine }];
+  const push = (t) => {
+    const tokens = chunks[chunks.length - 1].tokens;
+    const last = tokens[tokens.length - 1];
+    if (t.kind === "text" && last?.kind === "text") last.text += t.text;
+    else tokens.push(t);
+  };
+  const lines = body.replace(/\r\n?/g, "\n").split("\n");
+  let fenced = false;
+  lines.forEach((line, i) => {
+    const nl = i < lines.length - 1 ? "\n" : "";
+    const lineNo = firstLine + i;
+    if (FENCE_RE.test(line)) fenced = !fenced;
+    if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
+    const matches = [...line.matchAll(DIRECTIVE_RE)];
+    if (!matches.length) return push({ kind: "text", text: line + nl });
+    const alone = line.replace(DIRECTIVE_RE, "").trim() === "";
+    let pos = 0;
+    for (const m of matches) {
+      if (m.index > pos) push({ kind: "text", text: line.slice(pos, m.index) });
+      const raw = m[2].trim();
+      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo };
+      if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
+      else push({ kind: "directive", directive });
+      pos = m.index + m[0].length;
+    }
+    if (!alone) push({ kind: "text", text: line.slice(pos) + nl });
+  });
+  return chunks;
+}
+var ROLES = ["system", "user", "assistant"];
+var STYLES = ["dialogue", "imperative"];
+function compileTokens(tokens, error, onExpr) {
+  const blocks = [{ pieces: [] }];
+  const stack = [];
+  const current = () => and(...stack.map((f) => f.negated ? { t: "not", e: f.cond } : f.cond));
+  for (const token of tokens) {
+    if (token.kind === "text") {
+      const when = current();
+      blocks[blocks.length - 1].pieces.push(when ? { text: token.text, when } : { text: token.text });
+      continue;
+    }
+    const d = token.directive;
+    switch (d.name) {
+      case "as": {
+        const role = d.args[0];
+        if (!ROLES.includes(role)) error(`@as expects one of ${ROLES.join(" | ")}`, d.line);
+        if (stack.length) error("@as cannot be used inside @if / @style", d.line);
+        blocks.push({ role: ROLES.includes(role) ? role : void 0, pieces: [] });
+        break;
+      }
+      case "style": {
+        const style = d.args[0];
+        if (style === "end") {
+          stack.pop();
+          break;
+        }
+        if (!style || !STYLES.includes(style)) {
+          error(`@style expects dialogue | imperative`, d.line);
+          break;
+        }
+        if (stack.length && stack[stack.length - 1].style) stack.pop();
+        stack.push({ cond: parseExpr(`style == "${style}"`), style: true, line: d.line });
+        break;
+      }
+      case "if": {
+        try {
+          const cond = parseExpr(d.raw);
+          onExpr?.(cond, d.line);
+          stack.push({ cond, line: d.line });
+        } catch (e) {
+          error(e.message, d.line);
+          stack.push({ cond: { t: "lit", v: false }, line: d.line });
+        }
+        break;
+      }
+      case "else": {
+        const top = stack[stack.length - 1];
+        if (!top || top.negated) error("@else without matching @if", d.line);
+        else top.negated = true;
+        break;
+      }
+      case "end":
+        if (!stack.length) error("@end without matching @if / @style", d.line);
+        stack.pop();
+        break;
+      default:
+        error(`unknown directive @${d.name}`, d.line);
+    }
+  }
+  if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1].line})`);
+  return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
+}
+function compileText(text, role) {
+  const errors = [];
+  const [chunk] = tokenizeDirectives(text);
+  const content = compileTokens(chunk.tokens, (message, line) => errors.push({ message, line }));
+  if (role && content[0] && !content[0].role) content[0] = { ...content[0], role };
+  return { content, errors };
+}
+
+// ../protocol/src/user-modules.ts
+var USER_MODULE_PREFIX = "user-";
+var DEFAULT_KEYWORD_DEPTH = 3;
+var USER_MODULES_FORMAT = "advanced-preset.user-modules";
+var userModuleId = (id) => `${USER_MODULE_PREFIX}${id}`;
+var VALUELESS = ["on", "off"];
+function ruleComplete(rule) {
+  switch (rule.kind) {
+    case "keyword":
+      return rule.words.some((w) => w.trim());
+    case "expr":
+      return Boolean(rule.source.trim());
+    case "var":
+      if (!rule.path) return false;
+      if (VALUELESS.includes(rule.op)) return true;
+      if (rule.op === "in" || rule.op === "notIn") return Array.isArray(rule.value) && rule.value.length > 0;
+      return rule.value !== void 0 && rule.value !== "";
+  }
+}
+function wordMatcher(rule) {
+  const words = rule.words.map((w) => w.trim()).filter(Boolean);
+  if (rule.regex) {
+    const res = words.flatMap((w) => {
+      try {
+        return [new RegExp(w, "iu")];
+      } catch {
+        return [];
+      }
+    });
+    return res.length ? (text) => res.some((re) => re.test(text)) : null;
+  }
+  const lower = words.map((w) => w.toLocaleLowerCase());
+  return lower.length ? (text) => {
+    const t = text.toLocaleLowerCase();
+    return lower.some((w) => t.includes(w));
+  } : null;
+}
+function keywordHit(rule, texts) {
+  const match = wordMatcher(rule);
+  if (!match) return rule.op === "none";
+  const scanned = rule.target === "input" ? [texts.input] : texts.recent.slice(0, Math.max(1, rule.depth ?? DEFAULT_KEYWORD_DEPTH));
+  const found = scanned.some((t) => t && match(t));
+  return rule.op === "any" ? found : !found;
+}
+var lit = (v) => ({ t: "lit", v });
+function varExpr(rule) {
+  const v = { t: "var", path: rule.path };
+  switch (rule.op) {
+    case "on":
+      return v;
+    case "off":
+      return { t: "not", e: v };
+    case "in":
+    case "notIn": {
+      const items = (Array.isArray(rule.value) ? rule.value : [rule.value ?? null]).map(lit);
+      const e = { t: "bin", op: "in", l: v, r: { t: "arr", items } };
+      return rule.op === "in" ? e : { t: "not", e };
+    }
+    default:
+      return { t: "bin", op: rule.op, l: v, r: lit(Array.isArray(rule.value) ? rule.value[0] ?? null : rule.value ?? null) };
+  }
+}
+function compileTrigger(trigger, texts = { input: "", recent: [] }) {
+  const parts = trigger.rules.filter(ruleComplete).map((rule) => {
+    if (rule.kind === "keyword") return lit(keywordHit(rule, texts));
+    if (rule.kind === "var") return varExpr(rule);
+    try {
+      return parseExpr(rule.source);
+    } catch {
+      return lit(false);
+    }
+  });
+  if (!parts.length) return void 0;
+  const op = trigger.match === "any" ? "||" : "&&";
+  return parts.reduce((l, r) => ({ t: "bin", op, l, r }));
+}
+function findPoint(preset, id) {
+  return (preset.insertionPoints ?? []).find((p) => p.id === id);
+}
+function insertEntry(entries, entry) {
+  let at = -1;
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    if (e.region !== entry.region) continue;
+    if (e.order <= entry.order) at = i + 1;
+    else if (at < 0) at = i;
+  }
+  if (at < 0) entries.push(entry);
+  else entries.splice(at, 0, entry);
+}
+function withUserModules(preset, modules, texts) {
+  const enabled = modules.filter((m) => m.enabled && m.entries.length);
+  if (!enabled.length) return { preset, skipped: [] };
+  const skipped = [];
+  const extraModules = [];
+  const entries = [...preset.entries];
+  const regions = new Map(preset.regions.map((r) => [r.id, r]));
+  for (const m of enabled) {
+    const id = userModuleId(m.id);
+    extraModules.push({
+      id,
+      name: m.name,
+      toggle: "always",
+      default: true,
+      when: compileTrigger(m.trigger, texts),
+      structures: [],
+      questions: { mandatory: [], optional: [] }
+    });
+    for (const e of m.entries) {
+      const point = findPoint(preset, e.point);
+      const region = point && regions.get(point.region);
+      if (!point || !region || region.native) {
+        skipped.push({ module: m.id, entry: e.id, point: e.point });
+        continue;
+      }
+      if (!e.text.trim()) continue;
+      insertEntry(entries, { id: `${id}/${e.id}`, module: id, region: point.region, order: point.order, content: compileText(e.text, e.role).content });
+    }
+  }
+  return { preset: { ...preset, modules: [...preset.modules, ...extraModules], entries }, skipped };
+}
+var isObj2 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var str = (v, fallback = "") => typeof v === "string" ? v : fallback;
+var isLiteral = (v) => v === null || ["string", "number", "boolean"].includes(typeof v);
+var ROLES2 = ["system", "user", "assistant"];
+var VAR_OPS = ["on", "off", "==", "!=", "in", "notIn", ">", ">=", "<", "<="];
+function normalizeRule(raw) {
+  if (!isObj2(raw)) return null;
+  if (raw.kind === "expr") return { kind: "expr", source: str(raw.source) };
+  if (raw.kind === "keyword") {
+    const rule = {
+      kind: "keyword",
+      target: raw.target === "recent" ? "recent" : "input",
+      words: Array.isArray(raw.words) ? raw.words.filter((w) => typeof w === "string") : [],
+      op: raw.op === "none" ? "none" : "any"
+    };
+    if (raw.regex === true) rule.regex = true;
+    if (rule.target === "recent" && typeof raw.depth === "number" && raw.depth >= 1) rule.depth = Math.floor(raw.depth);
+    return rule;
+  }
+  if (raw.kind === "var" && typeof raw.path === "string" && VAR_OPS.includes(raw.op)) {
+    const rule = { kind: "var", path: raw.path, op: raw.op };
+    if (Array.isArray(raw.value)) rule.value = raw.value.filter(isLiteral);
+    else if (isLiteral(raw.value)) rule.value = raw.value;
+    return rule;
+  }
+  return null;
+}
+function normalizeUserModule(raw) {
+  if (!isObj2(raw) || !Array.isArray(raw.entries)) return null;
+  const trigger = isObj2(raw.trigger) ? raw.trigger : {};
+  const entries = raw.entries.flatMap((e, i) => {
+    if (!isObj2(e)) return [];
+    const entry = { id: str(e.id) || `e${i + 1}`, point: str(e.point), text: str(e.text) };
+    if (ROLES2.includes(e.role)) entry.role = e.role;
+    return [entry];
+  });
+  return {
+    id: str(raw.id),
+    name: str(raw.name),
+    enabled: raw.enabled !== false,
+    entries,
+    trigger: {
+      match: trigger.match === "any" ? "any" : "all",
+      rules: Array.isArray(trigger.rules) ? trigger.rules.map(normalizeRule).filter((r) => Boolean(r)) : []
+    }
+  };
+}
+function parseUserModuleFile(raw) {
+  if (isObj2(raw) && raw.format === USER_MODULES_FORMAT) {
+    if (raw.version !== 1) throw new Error(`unsupported user module file version ${String(raw.version)}`);
+    const modules = (Array.isArray(raw.modules) ? raw.modules : []).map(normalizeUserModule).filter((m) => Boolean(m));
+    const preset = isObj2(raw.preset) && typeof raw.preset.id === "string" ? { id: raw.preset.id, version: str(raw.preset.version) } : void 0;
+    return { preset, modules };
+  }
+  const single = normalizeUserModule(raw);
+  if (single) return { modules: [single] };
+  throw new Error("not a user module file");
+}
+
+// src/io.ts
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { join, relative, sep } from "node:path";
+
+// src/compile.ts
+var import_yaml2 = __toESM(require_dist(), 1);
+import { createHash } from "node:crypto";
+
 // src/diagnostics.ts
 var Diagnostics = class {
   items = [];
@@ -8100,19 +8396,6 @@ function report(diag, log = console.error) {
 
 // src/markdown.ts
 var import_yaml = __toESM(require_dist(), 1);
-var DIRECTIVE_RE = /<!--\s*@([a-z][\w-]*)\b([\s\S]*?)-->/g;
-var FENCE_RE = /^\s*(```|~~~)/;
-function parseAttributes(src) {
-  const args = [];
-  const attrs = {};
-  const re = /([\w:.-]+)(?:\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"']+)))?/g;
-  for (const m of src.matchAll(re)) {
-    const value = m[2] ?? m[3] ?? m[4];
-    if (value === void 0) args.push(m[1]);
-    else attrs[m[1]] = value.replace(/\\(["'\\])/g, "$1");
-  }
-  return { args, attrs };
-}
 function splitFrontmatter(src) {
   const text = src.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
   const m = /^---\n([\s\S]*?)\n---[ \t]*(?:\n|$)/.exec(text);
@@ -8131,106 +8414,22 @@ function parseMarkdown(src, split, diag, where) {
       diag.error(`invalid frontmatter: ${e.message}`, where);
     }
   }
-  const chunks = [{ tokens: [], line: bodyLine }];
-  const push = (t) => {
-    const tokens = chunks[chunks.length - 1].tokens;
-    const last = tokens[tokens.length - 1];
-    if (t.kind === "text" && last?.kind === "text") last.text += t.text;
-    else tokens.push(t);
-  };
-  const lines = body.split("\n");
-  let fenced = false;
-  lines.forEach((line, i) => {
-    const nl = i < lines.length - 1 ? "\n" : "";
-    const lineNo = bodyLine + i;
-    if (FENCE_RE.test(line)) fenced = !fenced;
-    if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
-    const matches = [...line.matchAll(DIRECTIVE_RE)];
-    if (!matches.length) return push({ kind: "text", text: line + nl });
-    const alone = line.replace(DIRECTIVE_RE, "").trim() === "";
-    let pos = 0;
-    for (const m of matches) {
-      if (m.index > pos) push({ kind: "text", text: line.slice(pos, m.index) });
-      const raw = m[2].trim();
-      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo };
-      if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
-      else push({ kind: "directive", directive });
-      pos = m.index + m[0].length;
-    }
-    if (!alone) push({ kind: "text", text: line.slice(pos) + nl });
-  });
+  const chunks = tokenizeDirectives(body, split, bodyLine);
   return { data, chunks };
 }
-var ROLES = ["system", "user", "assistant"];
-var STYLES = ["dialogue", "imperative"];
 function compileContent(tokens, diag, where, onExpr) {
-  const blocks = [{ pieces: [] }];
-  const stack = [];
-  const current = () => and(...stack.map((f) => f.negated ? { t: "not", e: f.cond } : f.cond));
-  for (const token of tokens) {
-    if (token.kind === "text") {
-      const when = current();
-      blocks[blocks.length - 1].pieces.push(when ? { text: token.text, when } : { text: token.text });
-      continue;
-    }
-    const d = token.directive;
-    const at = { ...where, line: d.line };
-    switch (d.name) {
-      case "as": {
-        const role = d.args[0];
-        if (!ROLES.includes(role)) diag.error(`@as expects one of ${ROLES.join(" | ")}`, at);
-        if (stack.length) diag.error("@as cannot be used inside @if / @style", at);
-        blocks.push({ role: ROLES.includes(role) ? role : void 0, pieces: [] });
-        break;
-      }
-      case "style": {
-        const style = d.args[0];
-        if (style === "end") {
-          stack.pop();
-          break;
-        }
-        if (!style || !STYLES.includes(style)) {
-          diag.error(`@style expects dialogue | imperative`, at);
-          break;
-        }
-        if (stack.length && stack[stack.length - 1].style) stack.pop();
-        stack.push(Object.assign({ cond: parseExpr(`style == "${style}"`), line: d.line }, { style: true }));
-        break;
-      }
-      case "if": {
-        try {
-          const cond = parseExpr(d.raw);
-          onExpr?.(cond, at);
-          stack.push({ cond, line: d.line });
-        } catch (e) {
-          diag.error(e.message, at);
-          stack.push({ cond: { t: "lit", v: false }, line: d.line });
-        }
-        break;
-      }
-      case "else": {
-        const top = stack[stack.length - 1];
-        if (!top || top.negated) diag.error("@else without matching @if", at);
-        else top.negated = true;
-        break;
-      }
-      case "end":
-        if (!stack.length) diag.error("@end without matching @if / @style", at);
-        stack.pop();
-        break;
-      default:
-        diag.error(`unknown directive @${d.name}`, at);
-    }
-  }
-  if (stack.length) diag.error(`unclosed @if / @style (opened at line ${stack[stack.length - 1].line})`, where);
-  return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
+  return compileTokens(
+    tokens,
+    (message, line) => diag.error(message, line === void 0 ? where : { ...where, line }),
+    onExpr && ((e, line) => onExpr(e, { ...where, line }))
+  );
 }
 
 // src/compile.ts
 var SOURCE_FORMAT_VERSION = 1;
-var isObj2 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
-var str = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
-var ROLES2 = ["system", "user", "assistant"];
+var isObj3 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var str2 = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
+var ROLES3 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
 var STAGE_KINDS = ["text", "content", "patch"];
 var STYLES2 = ["dialogue", "imperative"];
@@ -8251,38 +8450,38 @@ var NATIVE_PROMPTS = {
 var anchorText = (region) => `\u27E6ap:region:${region}\u27E7`;
 var anchorIdentifier = (region) => `ap_${region}`;
 function compileTools(src, diag, text, file = "preset.yaml") {
-  const o = isObj2(src) ? src : {};
+  const o = isObj3(src) ? src : {};
   const at = (path) => ({ file, path: `tools.${path}` });
-  const opt = (v, path) => v === void 0 || v === null ? void 0 : text(str(v), at(path));
+  const opt = (v, path) => v === void 0 || v === null ? void 0 : text(str2(v), at(path));
   const field = (v, path, fallback) => {
-    const f = typeof v === "string" ? { name: v } : isObj2(v) ? v : {};
+    const f = typeof v === "string" ? { name: v } : isObj3(v) ? v : {};
     const description = f.description !== void 0 ? opt(f.description, `${path}.description`) : fallback.description;
-    return { name: str(f.name, fallback.name), ...description ? { description } : {} };
+    return { name: str2(f.name, fallback.name), ...description ? { description } : {} };
   };
   const legacy = ["stagePrefix", "stageResult", "nudge", "structures"].filter((k) => k in o);
   if (legacy.length || typeof o.submit === "string")
     diag.warn(`legacy tools keys (${[...legacy, ...typeof o.submit === "string" ? ["submit: <text>"] : []].join(", ")}); see the README for the tools section`, { file, path: "tools" });
   const D = DEFAULT_TOOLS;
-  const turn = isObj2(o.turn) ? o.turn : {};
-  const submit = isObj2(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
-  const stage = isObj2(o.stage) ? o.stage : {};
-  const patch = isObj2(o.patch) ? o.patch : {};
-  const env = isObj2(o.envelope) ? o.envelope : {};
-  const results = isObj2(o.results) ? o.results : {};
+  const turn = isObj3(o.turn) ? o.turn : {};
+  const submit = isObj3(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
+  const stage = isObj3(o.stage) ? o.stage : {};
+  const patch = isObj3(o.patch) ? o.patch : {};
+  const env = isObj3(o.envelope) ? o.envelope : {};
+  const results = isObj3(o.results) ? o.results : {};
   const pick = (v, fallback) => v === void 0 ? fallback : v;
   const tools = {
     turn: {
-      name: str(turn.name, D.turn.name),
-      field: str(turn.field, D.turn.field),
+      name: str2(turn.name, D.turn.name),
+      field: str2(turn.field, D.turn.field),
       ...(() => {
         const description = opt(turn.description, "turn.description");
         const fieldDescription = pick(opt(turn.fieldDescription, "turn.fieldDescription"), D.turn.fieldDescription);
         return { ...description ? { description } : {}, ...fieldDescription ? { fieldDescription } : {} };
       })()
     },
-    submit: { name: str(submit.name, D.submit.name), description: pick(opt(submit.description, "submit.description"), D.submit.description) },
+    submit: { name: str2(submit.name, D.submit.name), description: pick(opt(submit.description, "submit.description"), D.submit.description) },
     stage: {
-      name: str(stage.name, typeof o.stagePrefix === "string" ? `${o.stagePrefix}{{stage}}` : D.stage.name),
+      name: str2(stage.name, typeof o.stagePrefix === "string" ? `${o.stagePrefix}{{stage}}` : D.stage.name),
       description: pick(opt(stage.description, "stage.description"), D.stage.description),
       param: field(stage.param, "stage.param", D.stage.param),
       patchParam: field(stage.patchParam, "stage.patchParam", D.stage.patchParam)
@@ -8290,12 +8489,12 @@ function compileTools(src, diag, text, file = "preset.yaml") {
     patch: Object.fromEntries(["description", "old", "new"].flatMap((k) => patch[k] !== void 0 ? [[k, opt(patch[k], `patch.${k}`)]] : [])),
     envelope: { thinking: field(env.thinking, "envelope.thinking", D.envelope.thinking), result: field(env.result, "envelope.result", D.envelope.result) },
     results: {
-      next: text(str(results.next ?? o.stageResult, D.results.next), at("results.next")),
-      done: text(str(results.done, D.results.done), at("results.done")),
-      unknown: text(str(results.unknown, D.results.unknown), at("results.unknown")),
-      nudge: text(str(results.nudge ?? o.nudge, D.results.nudge), at("results.nudge"))
+      next: text(str2(results.next ?? o.stageResult, D.results.next), at("results.next")),
+      done: text(str2(results.done, D.results.done), at("results.done")),
+      unknown: text(str2(results.unknown, D.results.unknown), at("results.unknown")),
+      nudge: text(str2(results.nudge ?? o.nudge, D.results.nudge), at("results.nudge"))
     },
-    callerSchemaHint: text(str(o.callerSchemaHint, D.callerSchemaHint), at("callerSchemaHint"))
+    callerSchemaHint: text(str2(o.callerSchemaHint, D.callerSchemaHint), at("callerSchemaHint"))
   };
   const hint = o.jsonStringHint === void 0 ? D.jsonStringHint : opt(o.jsonStringHint, "jsonStringHint");
   if (hint) tools.jsonStringHint = hint;
@@ -8315,7 +8514,7 @@ function compile(tree) {
   let raw;
   try {
     const parsed = (0, import_yaml2.parse)(manifestSrc);
-    if (!isObj2(parsed)) throw new Error("top level must be a mapping");
+    if (!isObj3(parsed)) throw new Error("top level must be a mapping");
     raw = parsed;
   } catch (e) {
     diag.error(`invalid YAML: ${e.message}`, { file: M });
@@ -8344,28 +8543,28 @@ function compile(tree) {
   };
   if (raw.formatVersion !== void 0 && raw.formatVersion !== SOURCE_FORMAT_VERSION)
     diag.error(`unsupported formatVersion ${String(raw.formatVersion)} (expected ${SOURCE_FORMAT_VERSION})`, { file: M, path: "formatVersion" });
-  const id = str(raw.id);
+  const id = str2(raw.id);
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) diag.error("id must be lower-case kebab-case", { file: M, path: "id" });
-  const version = str(raw.version, "0.0.0");
+  const version = str2(raw.version, "0.0.0");
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error("version must be semver", { file: M, path: "version" });
   const actors = {};
-  for (const [aid, a] of Object.entries(isObj2(raw.actors) ? raw.actors : {})) {
-    const o = isObj2(a) ? a : {};
+  for (const [aid, a] of Object.entries(isObj3(raw.actors) ? raw.actors : {})) {
+    const o = isObj3(a) ? a : {};
     actors[aid] = {
-      name: text(str(o.name, aid), { file: M, path: `actors.${aid}.name` }),
-      prefix: text(str(o.prefix, `{{ap::name::${aid}}}: `), { file: M, path: `actors.${aid}.prefix` }),
-      ...o.color ? { color: str(o.color) } : {}
+      name: text(str2(o.name, aid), { file: M, path: `actors.${aid}.name` }),
+      prefix: text(str2(o.prefix, `{{ap::name::${aid}}}: `), { file: M, path: `actors.${aid}.prefix` }),
+      ...o.color ? { color: str2(o.color) } : {}
     };
   }
   if (!Object.keys(actors).length) diag.error("at least one actor is required", { file: M, path: "actors" });
-  const narrator = str(raw.narrator, Object.keys(actors)[0] ?? "narrator");
-  const user = str(raw.user, "user");
+  const narrator = str2(raw.narrator, Object.keys(actors)[0] ?? "narrator");
+  const user = str2(raw.user, "user");
   for (const [k, v] of [["narrator", narrator], ["user", user]])
     if (!actors[v]) diag.error(`${k} actor \`${v}\` is not declared`, { file: M, path: k });
-  const styleSrc = isObj2(raw.styles) ? raw.styles : {};
+  const styleSrc = isObj3(raw.styles) ? raw.styles : {};
   const styles = Object.fromEntries(
     TRANSPORTS.map((t) => {
-      const s = str(styleSrc[t], t === "prefill" || t === "plaintext" ? "dialogue" : "imperative");
+      const s = str2(styleSrc[t], t === "prefill" || t === "plaintext" ? "dialogue" : "imperative");
       if (!STYLES2.includes(s)) diag.error(`style must be dialogue | imperative`, { file: M, path: `styles.${t}` });
       return [t, s];
     })
@@ -8374,42 +8573,59 @@ function compile(tree) {
   const regions = [];
   const anchors = {};
   (Array.isArray(raw.regions) ? raw.regions : []).forEach((r, i) => {
-    const o = isObj2(r) ? r : {};
+    const o = isObj3(r) ? r : {};
     const where = { file: M, path: `regions[${i}]` };
-    const rid = str(o.id);
+    const rid = str2(o.id);
     if (!rid) return diag.error("region id is required", where);
     if (regions.some((x) => x.id === rid)) diag.error(`duplicate region \`${rid}\``, where);
-    const role = str(o.role, "system");
-    if (!ROLES2.includes(role)) diag.error(`role must be ${ROLES2.join(" | ")}`, where);
+    const role = str2(o.role, "system");
+    if (!ROLES3.includes(role)) diag.error(`role must be ${ROLES3.join(" | ")}`, where);
     let merge = "none";
     if (o.merge === "join" || o.merge === "none") merge = o.merge;
-    else if (isObj2(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
+    else if (isObj3(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
     else if (o.merge !== void 0) diag.error("merge must be none | join | { wrap: <tag> }", where);
-    regions.push({ id: rid, role, merge, separator: str(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
+    regions.push({ id: rid, role, merge, separator: str2(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
     if (o.anchor !== void 0) {
-      const a = str(o.anchor);
+      const a = str2(o.anchor);
       if (!ANCHORS.includes(a)) diag.error(`anchor must be ${ANCHORS.join(" | ")}`, where);
       else anchors[a] = rid;
     }
   });
-  for (const [a, rid] of Object.entries(isObj2(raw.anchors) ? raw.anchors : {})) {
+  for (const [a, rid] of Object.entries(isObj3(raw.anchors) ? raw.anchors : {})) {
     if (!ANCHORS.includes(a)) diag.error(`unknown semantic anchor \`${a}\``, { file: M, path: `anchors.${a}` });
-    else anchors[a] = str(rid);
+    else anchors[a] = str2(rid);
   }
   for (const a of ANCHORS) if (!anchors[a]) diag.error(`semantic anchor \`${a}\` is not mapped to a region`, { file: M, path: "anchors" });
+  const insertionPoints = [];
+  (Array.isArray(raw.insertionPoints) ? raw.insertionPoints : []).forEach((r, i) => {
+    const o = isObj3(r) ? r : {};
+    const where = { file: M, path: `insertionPoints[${i}]` };
+    const pid = str2(o.id);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(pid)) return diag.error("insertion point id must be lower-case kebab-case", where);
+    if (insertionPoints.some((x) => x.id === pid)) return diag.error(`duplicate insertion point \`${pid}\``, where);
+    const rid = str2(o.region);
+    const region = regions.find((x) => x.id === rid);
+    if (!region) diag.error(`unknown region \`${rid}\``, where);
+    else if (region.native) diag.error(`region \`${rid}\` is native; user modules cannot insert there`, where);
+    const order = o.order === void 0 ? 1e3 : Number(o.order);
+    if (!Number.isFinite(order)) diag.error("order must be a number", where);
+    const point = { id: pid, label: str2(o.label, pid), region: rid, order };
+    if (o.description !== void 0) point.description = str2(o.description).trim();
+    insertionPoints.push(point);
+  });
   const params = (Array.isArray(raw.params) ? raw.params : []).map((p, i) => {
-    const o = isObj2(p) ? p : {};
+    const o = isObj3(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
-    const type = str(o.type, "text");
+    const type = str2(o.type, "text");
     if (!["text", "number", "select"].includes(type)) diag.error("param type must be text | number | select", where);
-    const options = Array.isArray(o.options) ? o.options.map((x) => isObj2(x) ? { value: x.value, ...x.label !== void 0 ? { label: str(x.label) } : {}, ...x.text !== void 0 ? { text: text(str(x.text), where) } : {} } : { value: x }) : void 0;
+    const options = Array.isArray(o.options) ? o.options.map((x) => isObj3(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
     const param = {
-      id: str(o.id),
+      id: str2(o.id),
       type,
-      label: str(o.label, str(o.id)),
+      label: str2(o.label, str2(o.id)),
       default: o.default ?? (type === "number" ? 0 : "")
     };
-    for (const k of ["description", "group", "unset", "fallback", "unit"]) if (o[k] !== void 0) param[k] = str(o[k]);
+    for (const k of ["description", "group", "unset", "fallback", "unit"]) if (o[k] !== void 0) param[k] = str2(o[k]);
     for (const k of ["min", "max"]) if (typeof o[k] === "number") param[k] = o[k];
     if (param.unset) text(param.unset, where);
     if (options) param.options = options;
@@ -8418,33 +8634,33 @@ function compile(tree) {
   });
   const groups = {};
   let groupOrder = 0;
-  for (const [gid, g] of Object.entries(isObj2(raw.groups) ? raw.groups : {})) {
-    const o = isObj2(g) ? g : {};
+  for (const [gid, g] of Object.entries(isObj3(raw.groups) ? raw.groups : {})) {
+    const o = isObj3(g) ? g : {};
     groupOrder += 10;
     groups[gid] = {
-      label: str(o.label, gid),
+      label: str2(o.label, gid),
       order: typeof o.order === "number" ? o.order : groupOrder,
-      ...o.description ? { description: str(o.description) } : {},
+      ...o.description ? { description: str2(o.description) } : {},
       ...o.allowNone ? { allowNone: true } : {},
-      ...o.tab ? { tab: str(o.tab) } : {}
+      ...o.tab ? { tab: str2(o.tab) } : {}
     };
   }
   const structures = {};
-  for (const [sid, s] of Object.entries(isObj2(raw.structures) ? raw.structures : {})) {
-    const o = isObj2(s) ? s : {};
+  for (const [sid, s] of Object.entries(isObj3(raw.structures) ? raw.structures : {})) {
+    const o = isObj3(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
-    const kind = str(o.kind, sid);
+    const kind = str2(o.kind, sid);
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(", ")}`, where);
-    const fp = isObj2(o.formatPrompt) ? o.formatPrompt : {};
+    const fp = isObj3(o.formatPrompt) ? o.formatPrompt : {};
     const decl = {
       id: sid,
       kind,
-      tag: str(o.tag, sid),
-      field: str(o.field, sid),
-      formatPrompt: { tag: text(str(fp.tag), where), field: text(str(fp.field), where) }
+      tag: str2(o.tag, sid),
+      field: str2(o.field, sid),
+      formatPrompt: { tag: text(str2(fp.tag), where), field: text(str2(fp.field), where) }
     };
-    if (o.description !== void 0) decl.description = text(str(o.description), where);
-    if (isObj2(o.properties)) {
+    if (o.description !== void 0) decl.description = text(str2(o.description), where);
+    if (isObj3(o.properties)) {
       const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
       const props = {};
       for (const [k, v] of Object.entries(o.properties)) {
@@ -8452,7 +8668,7 @@ function compile(tree) {
           diag.error(`${kind} has no sub-field \`${k}\`${allowed.length ? ` (expected ${allowed.join(" | ")})` : ""}`, { ...where, path: `${where.path}.properties.${k}` });
           continue;
         }
-        props[k] = text(str(v), where);
+        props[k] = text(str2(v), where);
       }
       if (Object.keys(props).length) decl.properties = props;
     }
@@ -8461,15 +8677,15 @@ function compile(tree) {
       decl.shape = o.shape === "kv" ? "kv" : "text";
       decl.display = o.display === "hidden" ? "hidden" : "card";
     }
-    if (o.title !== void 0) decl.title = text(str(o.title), where);
+    if (o.title !== void 0) decl.title = text(str2(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);
     structures[sid] = decl;
   }
   const regex = (Array.isArray(raw.regex) ? raw.regex : []).map((r, i) => {
-    const o = isObj2(r) ? r : {};
+    const o = isObj3(r) ? r : {};
     const where = { file: M, path: `regex[${i}]` };
-    const decl = { id: str(o.id), pattern: str(o.pattern), flags: str(o.flags, "i"), target: str(o.target, "meta") };
+    const decl = { id: str2(o.id), pattern: str2(o.pattern), flags: str2(o.flags, "i"), target: str2(o.target, "meta") };
     try {
       new RegExp(decl.pattern, decl.flags);
     } catch (e) {
@@ -8480,14 +8696,14 @@ function compile(tree) {
     if (req) decl.requires = req;
     return decl;
   });
-  const metaSrc = isObj2(raw.meta) ? raw.meta : {};
-  const tasksSrc = isObj2(metaSrc.tasks) ? metaSrc.tasks : {};
+  const metaSrc = isObj3(raw.meta) ? raw.meta : {};
+  const tasksSrc = isObj3(metaSrc.tasks) ? metaSrc.tasks : {};
   const meta = {
-    trigger: text(str(metaSrc.trigger, `@{{ap::name::${narrator}}}`), { file: M, path: "meta.trigger" }),
+    trigger: text(str2(metaSrc.trigger, `@{{ap::name::${narrator}}}`), { file: M, path: "meta.trigger" }),
     wrap: metaSrc.wrap !== false,
     recentCount: typeof metaSrc.recentCount === "number" ? metaSrc.recentCount : 3,
     tasks: {},
-    impersonatePrompt: text(str(metaSrc.impersonatePrompt, `${str(metaSrc.trigger, `@{{ap::name::${narrator}}}`)} Write my next reply for me.`), { file: M, path: "meta.impersonatePrompt" })
+    impersonatePrompt: text(str2(metaSrc.impersonatePrompt, `${str2(metaSrc.trigger, `@{{ap::name::${narrator}}}`)} Write my next reply for me.`), { file: M, path: "meta.impersonatePrompt" })
   };
   for (const [task, cond] of Object.entries(tasksSrc)) {
     if (task !== "summary" && task !== "impersonate") {
@@ -8497,30 +8713,30 @@ function compile(tree) {
     const e = expr(cond, { file: M, path: `meta.tasks.${task}` });
     if (e) meta.tasks[task] = e;
   }
-  const tsSrc = isObj2(raw.tokenSaving) ? raw.tokenSaving : {};
+  const tsSrc = isObj3(raw.tokenSaving) ? raw.tokenSaving : {};
   const tokenSaving = {
     keepFullTurns: typeof tsSrc.keepFullTurns === "number" ? tsSrc.keepFullTurns : 6,
     truncateUserAfter: typeof tsSrc.truncateUserAfter === "number" ? tsSrc.truncateUserAfter : 2e3,
-    synopsisTemplate: str(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
+    synopsisTemplate: str2(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
   };
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
-    const o = isObj2(s) ? s : {};
+    const o = isObj3(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
-    const toolSrc = isObj2(o.tool) ? o.tool : {};
-    const resp = isObj2(o.response) ? o.response : {};
+    const toolSrc = isObj3(o.tool) ? o.tool : {};
+    const resp = isObj3(o.response) ? o.response : {};
     const turn = {
-      id: str(o.id),
-      label: str(o.label, str(o.id)),
-      user: text(str(o.user), where),
-      tool: { name: str(toolSrc.name, "ap_workflow_init"), description: text(str(toolSrc.description), where) },
-      response: { single: text(str(resp.single), where), multi: text(str(resp.multi), where), parallel: text(str(resp.parallel ?? resp.multi), where) }
+      id: str2(o.id),
+      label: str2(o.label, str2(o.id)),
+      user: text(str2(o.user), where),
+      tool: { name: str2(toolSrc.name, "ap_workflow_init"), description: text(str2(toolSrc.description), where) },
+      response: { single: text(str2(resp.single), where), multi: text(str2(resp.multi), where), parallel: text(str2(resp.parallel ?? resp.multi), where) }
     };
-    if (o.thoughtSignature) turn.thoughtSignature = str(o.thoughtSignature);
+    if (o.thoughtSignature) turn.thoughtSignature = str2(o.thoughtSignature);
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error("invalid tool name", where);
     return turn;
   });
   const tools = compileTools(raw.tools, diag, text, M);
-  const theme = isObj2(raw.theme) ? raw.theme : {};
+  const theme = isObj3(raw.theme) ? raw.theme : {};
   const modules = [];
   const entries = [];
   const moduleFiles = [...tree.keys()].filter((p) => p.startsWith("modules/") && p.endsWith(".md")).sort();
@@ -8528,27 +8744,27 @@ function compile(tree) {
     const parsed = parseMarkdown(tree.get(file), ["entry"], diag, { file });
     const fm = parsed.data;
     const where = { file, line: 1 };
-    const mid = str(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
+    const mid = str2(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
     if (modules.some((m) => m.id === mid)) diag.error(`duplicate module id \`${mid}\``, where);
     const toggle = fm.toggle === "always" || fm.system === true ? "always" : "user";
     const questions = { mandatory: questionList(fm, "mandatory", mid, diag, where, text), optional: questionList(fm, "optional", mid, diag, where, text) };
     const mod = {
       id: mid,
-      name: str(fm.name, mid),
+      name: str2(fm.name, mid),
       toggle,
       default: toggle === "always" ? true : fm.default === true,
-      structures: Array.isArray(fm.structures) ? fm.structures.map((s) => str(s)) : [],
+      structures: Array.isArray(fm.structures) ? fm.structures.map((s) => str2(s)) : [],
       questions,
       source: file
     };
-    if (fm.description !== void 0) mod.description = str(fm.description).trim();
-    if (fm.group !== void 0) mod.group = str(fm.group);
-    if (fm.exclusive !== void 0) mod.exclusive = str(fm.exclusive);
+    if (fm.description !== void 0) mod.description = str2(fm.description).trim();
+    if (fm.group !== void 0) mod.group = str2(fm.group);
+    if (fm.exclusive !== void 0) mod.exclusive = str2(fm.exclusive);
     const mw = expr(fm.when, { ...where, path: "when" });
     if (mw) mod.when = mw;
     modules.push(mod);
     map.modules.set(mid, where);
-    const defRegion = fm.region === void 0 ? void 0 : str(fm.region);
+    const defRegion = fm.region === void 0 ? void 0 : str2(fm.region);
     const defOrder = typeof fm.order === "number" ? fm.order : 1e3;
     parsed.chunks.forEach((chunk, ci) => {
       const hasText = chunk.tokens.some((t) => t.kind === "text" && t.text.trim());
@@ -8569,7 +8785,7 @@ function compile(tree) {
       map.entries.set(eid, at);
     });
   }
-  const moduleOrder = Array.isArray(raw.moduleOrder) ? raw.moduleOrder.map((x) => str(x)) : ["*"];
+  const moduleOrder = Array.isArray(raw.moduleOrder) ? raw.moduleOrder.map((x) => str2(x)) : ["*"];
   if (!moduleOrder.includes("*")) moduleOrder.push("*");
   const rank = (mid) => {
     const i = moduleOrder.indexOf(mid);
@@ -8589,12 +8805,12 @@ function compile(tree) {
     map.workflows.set(wf.id, { file });
   }
   if (Array.isArray(raw.workflowOrder)) {
-    const order = raw.workflowOrder.map((x) => str(x));
+    const order = raw.workflowOrder.map((x) => str2(x));
     workflows.sort((a, b) => (order.indexOf(a.id) + 1 || 1e6) - (order.indexOf(b.id) + 1 || 1e6));
   }
-  const carrier = compileCarrier(isObj2(raw.carrier) ? raw.carrier : {}, regions, str(raw.name, id), diag);
-  const cd = isObj2(raw.configurationDefaults) ? raw.configurationDefaults : {};
-  const sect = (k) => isObj2(cd[k]) ? cd[k] : {};
+  const carrier = compileCarrier(isObj3(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
+  const cd = isObj3(raw.configurationDefaults) ? raw.configurationDefaults : {};
+  const sect = (k) => isObj3(cd[k]) ? cd[k] : {};
   const storyWorkflow = workflows.find((w) => w.kind === "story")?.id ?? "";
   const identitySrc = sect("identity");
   const configurationDefaults = {
@@ -8614,7 +8830,7 @@ function compile(tree) {
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, ...sect("tokenSaving") },
     meta: { recentCount: meta.recentCount, ...sect("meta") }
   };
-  for (const k of ["names", "prefixes"]) if (isObj2(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
+  for (const k of ["names", "prefixes"]) if (isObj3(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
     if (!(k in configurationDefaults.modules)) diag.error(`configurationDefaults.modules: unknown user module \`${k}\``, { file: M, path: `configurationDefaults.modules.${k}` });
     else configurationDefaults.modules[k] = Boolean(v);
@@ -8625,17 +8841,32 @@ function compile(tree) {
   }
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
-    const o = isObj2(c) ? c : {};
-    const rc = { id: str(o.id), name: str(o.name, str(o.id)), diff: isObj2(o.diff) ? o.diff : {} };
-    if (o.description !== void 0) rc.description = str(o.description);
+    const o = isObj3(c) ? c : {};
+    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj3(o.diff) ? o.diff : {} };
+    if (o.description !== void 0) rc.description = str2(o.description);
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
-  const defaultConfiguration = str(raw.defaultConfiguration, configurations[0].id);
-  const migrations = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m) => {
-    const o = isObj2(m) ? m : {};
-    return { from: str(o.from), rename: isObj2(o.rename) ? o.rename : {} };
+  const defaultConfiguration = str2(raw.defaultConfiguration, configurations[0].id);
+  const migrations = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m, i) => {
+    const o = isObj3(m) ? m : {};
+    const rename2 = isObj3(o.rename) ? o.rename : {};
+    const known = {
+      modules: new Set(modules.map((x) => x.id)),
+      params: new Set(params.map((x) => x.id)),
+      insertionPoints: new Set(insertionPoints.map((x) => x.id))
+    };
+    for (const section of Object.keys(rename2)) {
+      const where = { file: M, path: `migrations[${i}].rename.${section}` };
+      if (!(section in known)) {
+        diag.warn(`unknown rename section \`${section}\``, where);
+        continue;
+      }
+      for (const [from, to] of Object.entries(isObj3(rename2[section]) ? rename2[section] : {}))
+        if (!known[section].has(String(to))) diag.warn(`\`${from}\` is renamed to \`${String(to)}\`, which this version does not declare`, where);
+    }
+    return { from: str2(o.from), rename: rename2 };
   });
   const locales = {};
   for (const [file, src] of tree) {
@@ -8643,7 +8874,7 @@ function compile(tree) {
     if (!m) continue;
     try {
       const parsed = (0, import_yaml2.parse)(src);
-      if (isObj2(parsed)) locales[m[1].toLowerCase()] = parsed;
+      if (isObj3(parsed)) locales[m[1].toLowerCase()] = parsed;
       else diag.error("locale file must be a mapping", { file });
     } catch (e) {
       diag.error(`invalid YAML: ${e.message}`, { file });
@@ -8652,30 +8883,31 @@ function compile(tree) {
   const preset = {
     formatVersion: FORMAT_VERSION,
     id,
-    name: str(raw.name, id),
+    name: str2(raw.name, id),
     version,
-    ...raw.author !== void 0 ? { author: str(raw.author) } : {},
-    ...raw.description !== void 0 ? { description: str(raw.description).trim() } : {},
-    ...raw.minAdvancedPreset !== void 0 ? { minAdvancedPreset: str(raw.minAdvancedPreset) } : {},
+    ...raw.author !== void 0 ? { author: str2(raw.author) } : {},
+    ...raw.description !== void 0 ? { description: str2(raw.description).trim() } : {},
+    ...raw.minAdvancedPreset !== void 0 ? { minAdvancedPreset: str2(raw.minAdvancedPreset) } : {},
     hash: "",
     actors,
     narrator,
     user,
     styles,
     plaintextFormat: raw.plaintextFormat === "tag" ? "tag" : "prefix",
-    contentMarker: str(raw.contentMarker, "<START_OF_CONTENT>"),
-    prefillGuide: text(str(raw.prefillGuide), { file: M, path: "prefillGuide" }),
-    historyItemTemplate: str(raw.historyItemTemplate, "{{prefix}}{{content}}"),
-    stageHeading: text(str(raw.stageHeading, "### Step {{n}}: {{label}} ({{actor}})"), { file: M, path: "stageHeading" }),
-    stop: Array.isArray(raw.stop) ? raw.stop.map((s) => str(s)) : [],
+    contentMarker: str2(raw.contentMarker, "<START_OF_CONTENT>"),
+    prefillGuide: text(str2(raw.prefillGuide), { file: M, path: "prefillGuide" }),
+    historyItemTemplate: str2(raw.historyItemTemplate, "{{prefix}}{{content}}"),
+    stageHeading: text(str2(raw.stageHeading, "### Step {{n}}: {{label}} ({{actor}})"), { file: M, path: "stageHeading" }),
+    stop: Array.isArray(raw.stop) ? raw.stop.map((s) => str2(s)) : [],
     regions,
     anchors,
-    workflowRegion: str(raw.workflowRegion, anchors.tail ?? ""),
-    ...raw.questionsRegion !== void 0 ? { questionsRegion: str(raw.questionsRegion) } : {},
+    workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
+    ...raw.questionsRegion !== void 0 ? { questionsRegion: str2(raw.questionsRegion) } : {},
     params,
     groups,
     modules,
     entries,
+    insertionPoints,
     workflows,
     structures,
     regex,
@@ -8696,27 +8928,27 @@ function compile(tree) {
   return { preset, diag, map };
 }
 function questionList(fm, kind, mid, diag, where, text) {
-  const q = isObj2(fm.questions) ? fm.questions[kind] : void 0;
+  const q = isObj3(fm.questions) ? fm.questions[kind] : void 0;
   if (q === void 0) return [];
   if (!Array.isArray(q)) {
     diag.error(`questions.${kind} must be a list`, where);
     return [];
   }
   return q.map((x, i) => {
-    const o = isObj2(x) ? x : { text: x };
-    return { id: str(o.id, `${mid}-${kind[0]}${i + 1}`), text: text(str(o.text).trim(), { ...where, path: `questions.${kind}[${i}]` }) };
+    const o = isObj3(x) ? x : { text: x };
+    return { id: str2(o.id, `${mid}-${kind[0]}${i + 1}`), text: text(str2(o.text).trim(), { ...where, path: `questions.${kind}[${i}]` }) };
   });
 }
 function compileWorkflow(file, src, diag, expr, content, text) {
   const parsed = parseMarkdown(src, ["section"], diag, { file });
   const fm = parsed.data;
-  const id = str(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
+  const id = str2(fm.id, file.replace(/^.*\//, "").replace(/\.md$/, ""));
   const kind = fm.kind === "task" ? "task" : "story";
   const stages = [];
   (Array.isArray(fm.stages) ? fm.stages : []).forEach((s, i) => {
-    const o = isObj2(s) ? s : {};
+    const o = isObj3(s) ? s : {};
     const where = { file, path: `stages[${i}]` };
-    const stage = { id: str(o.id), actor: str(o.actor), kind: str(o.kind, "text"), label: str(o.label, str(o.id)) };
+    const stage = { id: str2(o.id), actor: str2(o.actor), kind: str2(o.kind, "text"), label: str2(o.label, str2(o.id)) };
     if (!/^[a-z][\w-]*$/i.test(stage.id)) diag.error("stage id is required (letters, digits, _ and -)", where);
     if (stages.some((x) => x.id === stage.id)) diag.error(`duplicate stage \`${stage.id}\``, where);
     if (!STAGE_KINDS.includes(stage.kind)) diag.error(`stage kind must be ${STAGE_KINDS.join(" | ")}`, where);
@@ -8725,24 +8957,24 @@ function compileWorkflow(file, src, diag, expr, content, text) {
       if (o.questions !== "ask" && o.questions !== "answer") diag.error("questions must be ask | answer", where);
       else stage.questions = o.questions;
     }
-    if (o.tag !== void 0) stage.tag = str(o.tag);
+    if (o.tag !== void 0) stage.tag = str2(o.tag);
     if (o.field !== void 0) {
-      const f = isObj2(o.field) ? o.field : { description: o.field };
+      const f = isObj3(o.field) ? o.field : { description: o.field };
       const out = {};
-      if (f.name !== void 0) out.name = str(f.name);
-      if (f.description !== void 0) out.description = text(str(f.description), where);
+      if (f.name !== void 0) out.name = str2(f.name);
+      if (f.description !== void 0) out.description = text(str2(f.description), where);
       stage.field = out;
     }
     if (o.tool !== void 0) {
-      const t = isObj2(o.tool) ? o.tool : { description: o.tool };
+      const t = isObj3(o.tool) ? o.tool : { description: o.tool };
       const out = {};
-      if (t.name !== void 0) out.name = str(t.name);
-      if (t.description !== void 0) out.description = text(str(t.description), where);
+      if (t.name !== void 0) out.name = str2(t.name);
+      if (t.description !== void 0) out.description = text(str2(t.description), where);
       if (t.param !== void 0) {
-        const p = isObj2(t.param) ? t.param : { name: t.param };
+        const p = isObj3(t.param) ? t.param : { name: t.param };
         out.param = {};
-        if (p.name !== void 0) out.param.name = str(p.name);
-        if (p.description !== void 0) out.param.description = text(str(p.description), where);
+        if (p.name !== void 0) out.param.name = str2(p.name);
+        if (p.description !== void 0) out.param.description = text(str2(p.description), where);
       }
       stage.tool = out;
     }
@@ -8796,20 +9028,20 @@ function compileWorkflow(file, src, diag, expr, content, text) {
       slot[st] = body;
     }
   }
-  const wf = { id, name: str(fm.name, id), kind, stages, sections };
-  if (fm.description !== void 0) wf.description = str(fm.description).trim();
-  if (fm.hint !== void 0) wf.hint = str(fm.hint).trim();
-  const after = isObj2(fm.structures) ? fm.structures.after : void 0;
+  const wf = { id, name: str2(fm.name, id), kind, stages, sections };
+  if (fm.description !== void 0) wf.description = str2(fm.description).trim();
+  if (fm.hint !== void 0) wf.hint = str2(fm.hint).trim();
+  const after = isObj3(fm.structures) ? fm.structures.after : void 0;
   if (after !== void 0) {
-    wf.structuresAfter = str(after);
+    wf.structuresAfter = str2(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
   }
   return wf;
 }
 function compileCarrier(src, regions, presetName, diag) {
   const M = "preset.yaml";
-  const label = str(src.label, presetName);
-  const overrides = isObj2(src.prompts) ? src.prompts : {};
+  const label = str2(src.label, presetName);
+  const overrides = isObj3(src.prompts) ? src.prompts : {};
   const prompts = [];
   const prompt_order = [];
   const order = Array.isArray(src.order) ? src.order : [];
@@ -8821,12 +9053,12 @@ function compileCarrier(src, regions, presetName, diag) {
     } else if (NATIVE_PROMPTS[identifier]) {
       const n = NATIVE_PROMPTS[identifier];
       p = n.marker ? { identifier, name: n.name, system_prompt: true, marker: true } : { identifier, name: n.name, system_prompt: true, role: "system", content: "", marker: false };
-    } else if (isObj2(overrides[identifier])) {
+    } else if (isObj3(overrides[identifier])) {
       p = { identifier, name: identifier, role: "system", content: "", system_prompt: false, marker: false, injection_position: 0, injection_depth: 4 };
     } else {
       return diag.error(`carrier.order: \`${identifier}\` is neither a region, an ST prompt nor declared in carrier.prompts`, where);
     }
-    if (isObj2(overrides[identifier])) Object.assign(p, overrides[identifier]);
+    if (isObj3(overrides[identifier])) Object.assign(p, overrides[identifier]);
     if (prompts.some((x) => x.identifier === p.identifier)) return diag.error(`carrier.order: duplicate \`${identifier}\``, where);
     prompts.push(p);
     prompt_order.push({ identifier: p.identifier, enabled });
@@ -8834,7 +9066,7 @@ function compileCarrier(src, regions, presetName, diag) {
   order.forEach((item, i) => {
     const where = { file: M, path: `carrier.order[${i}]` };
     if (typeof item === "string") add(item, true, where);
-    else if (isObj2(item) && Object.keys(item).length === 1) {
+    else if (isObj3(item) && Object.keys(item).length === 1) {
       const [k, v] = Object.entries(item)[0];
       add(k, v !== false, where);
     } else diag.error("carrier.order items are `id` or `{ id: false }`", where);
@@ -9071,7 +9303,8 @@ function validate(p, map, diag) {
       groups: new Set(Object.keys(p.groups)),
       workflows: workflowIds,
       configurations: new Set(p.configurations.map((x) => x.id)),
-      structures: structureIds
+      structures: structureIds,
+      insertionPoints: new Set(p.insertionPoints.map((x) => x.id))
     };
     for (const [section, ids] of Object.entries(known)) {
       const t = table[section];
@@ -9120,7 +9353,8 @@ async function writeArtifact(preset, outDir) {
 }
 
 // src/preview.ts
-function preview(preset, o) {
+function preview(source, o) {
+  const { preset, skipped } = o.userModules ? withUserModules(source, o.userModules) : { preset: source, skipped: [] };
   const config = resolveConfiguration(preset, o.config ?? preset.defaultConfiguration, {
     connection: { ...o.transport ? { transport: o.transport } : {}, ...o.workflow ? { workflow: o.workflow } : {} },
     modules: o.modules
@@ -9145,11 +9379,12 @@ function preview(preset, o) {
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ vars: a.vars, ...skipped.length ? { skipped } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
   const lines = [];
   const rule = (title) => lines.push("", `\u2501\u2501 ${title} ${"\u2501".repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} \xB7 ${transport} (${vars.style}) \xB7 workflow ${wf?.id ?? "\u2014"} \xB7 config ${o.config ?? preset.defaultConfiguration}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(", ")}`);
+  for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   for (const r of preset.regions) {
@@ -9251,7 +9486,7 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--json] [--out file]
+                   [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
 
 --strict treats warnings as errors.`;
@@ -9272,6 +9507,7 @@ async function main(argv) {
       enable: { type: "string" },
       disable: { type: "string" },
       json: { type: "boolean" },
+      "user-modules": { type: "string" },
       id: { type: "string" },
       name: { type: "string" },
       author: { type: "string" }
@@ -9307,7 +9543,8 @@ async function main(argv) {
       for (const id of values.enable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = false;
       const meta = values.meta === "pure" || values.meta === "mixed" ? values.meta : void 0;
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, json: values.json });
+      const userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile3(values["user-modules"], "utf8"))).modules : void 0;
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

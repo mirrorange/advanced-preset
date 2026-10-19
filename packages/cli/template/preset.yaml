@@ -27,6 +27,21 @@ regions:
   - { id: tail, role: system, anchor: tail }
 workflowRegion: task
 
+# Where users may add their own modules from the panel. Keep ids stable across versions;
+# when one must change, map it in `migrations[].rename.insertionPoints`.
+insertionPoints:
+  - { id: system-end, label: End of system prompt, region: top, order: 1000 }
+  - id: guidelines
+    label: Writing guidelines
+    description: Inside the guidelines block, after the preset's own guidelines.
+    region: guidelines
+    order: 2000
+  - id: before-task
+    label: Before the task
+    description: Right before the workflow instructions; good for per-turn reminders.
+    region: task
+    order: 5
+
 groups:
   guidelines: { label: Guidelines, order: 10 }
   language: { label: Language, order: 20, tab: writing }
