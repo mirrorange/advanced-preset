@@ -27,7 +27,7 @@ groups:
 ```
 
 - Without `allowNone` exactly one module is active; when none is enabled, the module with `default: true` (else the first) is used.
-- With `allowNone` the panel shows a switch for the set and its choices only while it is on. The switch sits in the section header when the set id equals the module `group`, otherwise on its own row inside that group.
+- With `allowNone` the panel shows a switch for the set and its choices only while it is on. The switch sits in the section header when the set is the only content of its group (set id = module `group`); otherwise it is a row inside the group, labelled with the set's group label, so it never seems to control the other modules there.
 
 ## Insertion points
 
