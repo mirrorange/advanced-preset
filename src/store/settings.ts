@@ -3,7 +3,7 @@
  * so the panel updates live; writes go through to the plain object ST serialises).
  */
 import { reactive } from 'vue';
-import type { APreset, SparseDiff } from '@advanced-preset/protocol';
+import type { APreset, SparseDiff, UserModule } from '@advanced-preset/protocol';
 import { st } from '@/st/host';
 import type { MemoryEvent } from './eventlog';
 
@@ -25,6 +25,8 @@ export interface PresetState {
   hash?: string;
   /** Hash of the Carrier content AP generated last (detects manual edits). */
   carrierHash?: string;
+  /** The user's own modules for this preset, in insertion order. */
+  userModules?: UserModule[];
 }
 
 export interface APSettings {

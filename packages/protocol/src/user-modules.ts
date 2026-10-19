@@ -64,7 +64,7 @@ export interface UserModule {
   trigger: Trigger;
 }
 
-/** Texts scanned by keyword rules. `recent` is newest first and excludes `input`. */
+/** Texts scanned by keyword rules. `recent` is newest first and starts with the input when there is one. */
 export interface KeywordTexts {
   input: string;
   recent: string[];
