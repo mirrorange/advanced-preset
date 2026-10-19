@@ -13,8 +13,8 @@ const structures: StructureDecl[] = [
 ];
 
 const linear: Stage[] = [
-  { id: 'questions', actor: 'narrator', kind: 'text', label: 'Asking Questions', questions: 'ask' },
-  { id: 'planning', actor: 'editor', kind: 'text', label: 'Planning', questions: 'answer' },
+  { id: 'questions', actor: 'narrator', kind: 'text', label: 'Asking Questions' },
+  { id: 'planning', actor: 'editor', kind: 'text', label: 'Planning' },
   { id: 'final', actor: 'narrator', kind: 'content', label: 'Drafting' },
 ];
 const prefixes = { narrator: 'Freesia: ', editor: 'Petals: ', user: 'User: ' };
