@@ -11,6 +11,7 @@ import { st, type STMessage } from '@/st/host';
 import { classify, metaTrigger } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { rewriteHistory } from './history';
+import { keywordTexts } from '@/store/user-modules';
 
 export async function advancedPresetInterceptor(chat: STMessage[], _contextSize: number, _abort: (immediately: boolean) => void, type?: string): Promise<void> {
   registry.setPending(null);
@@ -25,6 +26,8 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
   const currentInput = stType !== 'continue' && chat[last]?.is_user ? last : -1;
   const input = currentInput >= 0 ? chat[currentInput]!.mes : '';
   const recentTexts = chat.slice(-6).map((m) => m.mes);
+  // Scanned before the history rewrite so keyword rules see what the user actually wrote.
+  const keywords = keywordTexts(chat, currentInput);
   const { meta, flags, origin } = classify(preset, config, input, stType, true, recentTexts);
 
   // Map copy indices back to real chat indices (coreChat is the non-system part of the chat).
@@ -60,6 +63,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     structures: [],
     inputIndex: currentInput >= 0 ? (realIndexOf[currentInput] ?? real.length - 1) : -1,
     continueFrom: stType === 'continue' ? chat[last]?.mes : undefined,
+    keywords,
     createdAt: Date.now(),
     warnings: [],
   };

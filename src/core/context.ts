@@ -3,7 +3,7 @@
  * (whichever comes first) and carried through FetchGate → Orchestrator → sidecar via `id`.
  */
 import type { APreset, Assembly, Configuration, Stage, StructureDecl, Transport, Workflow } from '@advanced-preset/protocol';
-import type { MetaParse } from '@advanced-preset/protocol';
+import type { KeywordTexts, MetaParse } from '@advanced-preset/protocol';
 
 export type Origin = 'story' | 'task';
 
@@ -27,6 +27,8 @@ export interface GenerationContext {
   inputIndex: number;
   /** Text of the existing message for `continue`. */
   continueFrom?: string;
+  /** Chat text scanned by user-module keyword rules. */
+  keywords?: KeywordTexts;
   createdAt: number;
   /** Set once FetchGate took over the request. */
   claimed?: boolean;

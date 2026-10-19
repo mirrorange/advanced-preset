@@ -16,6 +16,34 @@ In SillyTavern open **Advanced Preset → Debug**, paste `http://localhost:4747`
 | `workflows/*.md` | one workflow per file; `<!-- @section -->` per stage and style |
 | `locales/*.yaml` | panel strings |
 
+## Insertion points
+
+`insertionPoints` in `preset.yaml` opens places where users can add their own modules from the panel
+(**Modules → My modules**):
+
+```yaml
+insertionPoints:
+  - id: guidelines            # stable id, kebab-case; user modules refer to it
+    label: Writing guidelines
+    description: Inside the guidelines block, after the preset's own guidelines.
+    region: guidelines        # any non-native region
+    order: 2000               # user content follows preset entries with order <= this
+```
+
+User content takes the region's role and merge rules unless the user picks a role. Keep ids stable;
+when a point must move or be renamed, map it so existing user modules follow:
+
+```yaml
+migrations:
+  - from: "<2.0.0"
+    rename:
+      insertionPoints: { system-end: after-identity }
+```
+
+Removed points are flagged in the panel and their content is skipped. `ap check` warns about rename
+targets the current version doesn't declare. Preview with users' modules:
+`ap preview --user-modules my.ap-modules.json`.
+
 ## Tool and schema texts
 
 In structured-output and tool-calling modes the extension builds the JSON schema and tools from the

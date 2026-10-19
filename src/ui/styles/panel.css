@@ -105,6 +105,77 @@
 .caret.open { transform: rotate(90deg); }
 .build { text-align: center; padding-top: var(--ap-space-2); }
 
+/* User modules (list rows, drill-in editor, trigger rules) */
+.tab-col { gap: var(--ap-space-3); }
+.input.bare { width: auto; min-width: 0; border-color: transparent; background-color: transparent; padding-left: 0.35em; }
+.input.bare:hover { border-color: var(--ap-border); }
+.input.bare:focus { border-color: var(--ap-primary); }
+.chip.on { border-color: color-mix(in srgb, var(--ap-primary) 55%, transparent); background: var(--ap-tint); color: var(--ap-primary); }
+
+.um-list { display: flex; flex-direction: column; gap: 2px; margin: 0 calc(-1 * var(--ap-space-2)); }
+.um-row { display: flex; align-items: center; gap: 4px; min-height: 2.6em; padding: 0 var(--ap-space-2); border-radius: var(--ap-radius-sm); transition: background 0.15s, opacity 0.15s; }
+.um-row:hover { background: var(--ap-surface-2); }
+.um-row.dragging { background: var(--ap-tint); }
+.um-row.off .um-open { opacity: 0.55; }
+.um-grip { display: inline-flex; margin-left: -4px; color: var(--ap-faint); cursor: grab; touch-action: none; }
+.um-row.dragging .um-grip { cursor: grabbing; color: var(--ap-primary); }
+.um-open { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 4px 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.um-row-name { max-width: 100%; }
+.um-row-meta { max-width: 100%; line-height: 1.3; }
+.um-flag { width: 1em; height: 1em; margin: 0 2px; }
+.um-zap { color: var(--ap-primary); }
+.um-new {
+  display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 2.6em;
+  border: 1px dashed var(--ap-border); border-radius: var(--ap-radius-md); background: transparent; color: var(--ap-muted); cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.um-new:hover { color: var(--ap-primary); border-color: color-mix(in srgb, var(--ap-primary) 50%, transparent); background: var(--ap-tint); }
+
+.um-editor { display: flex; flex-direction: column; gap: var(--ap-space-3); }
+.um-head { display: flex; align-items: center; gap: var(--ap-space-2); margin-left: -6px; }
+.um-name { flex: 1 1 auto; font-size: var(--ap-font-size-lg); font-weight: 600; }
+.um-entry { display: flex; flex-direction: column; gap: 6px; }
+.um-entry + .um-entry { padding-top: var(--ap-space-3); border-top: 1px solid var(--ap-border); }
+.um-entry-head { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
+.um-entry-head > svg.lucide { width: 1em; height: 1em; }
+.um-entry-head select.grow { flex: 1 1 8em; min-width: 0; font-weight: 600; text-overflow: ellipsis; }
+.um-entry.lost .um-entry-head select.grow { color: var(--ap-warning); }
+.um-role { flex: 0 0 auto; min-width: 0; field-sizing: content; text-overflow: ellipsis; color: var(--ap-muted); font-size: var(--ap-font-size-sm); }
+.um-text { field-sizing: content; min-height: 5.5em; max-height: 24em; font-family: var(--monoFontFamily, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: var(--ap-font-size-sm); }
+.um-warn { display: flex; align-items: center; gap: 6px; color: var(--ap-warning); }
+.um-warn svg.lucide { width: 1.1em; height: 1.1em; }
+.um-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0 -0.5em; }
+.um-foot .btn { color: var(--ap-muted); }
+.um-foot .btn:hover:not(:disabled) { color: var(--ap-text); background: var(--ap-surface-2); }
+.um-foot .btn.danger:hover:not(:disabled), .um-foot .btn.armed { color: var(--ap-danger); }
+.um-foot .btn.armed { background: color-mix(in srgb, var(--ap-danger) 10%, transparent); }
+
+.trigger { display: flex; flex-direction: column; gap: var(--ap-space-2); }
+.always { padding: 2px 0; }
+.rule { display: flex; flex-direction: column; gap: 6px; padding: 6px var(--ap-space-2) var(--ap-space-2); border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface); }
+.rule-head { display: flex; align-items: center; gap: 2px; min-width: 0; margin-left: -0.35em; }
+.rule-subject { flex: 0 0 auto; min-width: 0; max-width: 60%; field-sizing: content; font-weight: 600; text-overflow: ellipsis; }
+.rule-target { flex: 1 1 auto; min-width: 0; text-overflow: ellipsis; }
+.rule-body { display: flex; flex-direction: column; gap: 6px; }
+.rule-op { align-self: flex-start; margin-left: -0.35em; color: var(--ap-muted); }
+.rule-cmp { flex: none; width: 4.2em; }
+.rule-scope { flex: 1 1 10em; }
+.rule-join { align-self: center; text-transform: uppercase; letter-spacing: 0.04em; margin: -4px 0; }
+.rule-error { color: var(--ap-danger); }
+.option-chips { gap: 4px; }
+.option-chips .chip { cursor: pointer; }
+.depth { width: 3.6em; padding-right: 0.2em; }
+.kw-words { align-items: flex-start; gap: 4px; }
+.chips-input { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 2.1em; padding: 3px 4px; cursor: text; }
+.chips-input .chip { gap: 2px; padding-right: 2px; background: var(--ap-tint); border-color: transparent; color: var(--ap-primary); }
+.chips-input .chip.mono { font-family: var(--monoFontFamily, ui-monospace, SFMono-Regular, Menlo, monospace); }
+.chip-x { display: inline-grid; place-items: center; width: 1.3em; height: 1.3em; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; opacity: 0.7; }
+.chip-x:hover { opacity: 1; background: color-mix(in srgb, var(--ap-primary) 16%, transparent); }
+.chip-x svg.lucide { width: 0.85em; height: 0.85em; }
+.chips-draft { flex: 1 1 5em; min-width: 5em; border: 0; outline: none; background: transparent; padding: 2px 4px; }
+.btn.add.picker { position: relative; overflow: hidden; }
+.btn.add.picker select { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+
 /* ST's drawer can be quite narrow (e.g. ~250px on a 1024px desktop): drop tab labels, let segmented
    controls wrap onto rows and tighten the body padding instead of clipping. */
 @container ap-panel (max-width: 340px) {
@@ -113,6 +184,8 @@
   .tab svg.lucide { width: 1.35em; height: 1.35em; }
   .panel-head { padding-left: var(--ap-space-3); }
   .panel-body { padding-left: var(--ap-space-3); padding-right: var(--ap-space-3); }
-  .segmented { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(4.6em, 1fr)); }
+  .segmented { grid-auto-flow: row; grid-template-columns: repeat(auto-fit, minmax(4.6em, 1fr)); }
   .segmented.dense button { padding: 0 0.4em; }
+  .um-foot .btn:not(.armed) > span { display: none; }
+  .um-role { order: 1; margin-left: 1.15em; }
 }
