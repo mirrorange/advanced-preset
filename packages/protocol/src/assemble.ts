@@ -8,6 +8,7 @@ import { test, type Resolver } from './expr';
 import { expandMacros } from './macros';
 import { renderContent } from './content';
 import { activeStages, stageFieldName, stageToolName, workflowSummary } from './workflow';
+import { computeBuildVars, formatVar, type BuildVars } from './build-vars';
 
 export interface Message {
   role: Role;
@@ -24,7 +25,9 @@ export interface Vars {
   modules: Record<string, boolean>;
   params: Record<string, string | number>;
   flags: Record<string, boolean>;
-  features: { tokenSaving: boolean; questions: boolean };
+  features: { tokenSaving: boolean };
+  /** `stages.<id>`: whether the current workflow runs that stage this turn. */
+  stages: Record<string, boolean>;
   chat: { group: boolean };
   memory: { hasChat: boolean; hasGlobal: boolean };
   recap: { present: boolean };
@@ -103,6 +106,8 @@ export interface Assembly {
   resolve: Resolver;
   modules: Module[];
   structures: StructureDecl[];
+  /** Build variables after the active modules' updates. */
+  buildVars: BuildVars;
   workflow?: Workflow;
   stages: Stage[];
   /** Rendered messages per region id (non-native regions only). */
@@ -115,7 +120,7 @@ export function actorName(preset: APreset, config: Configuration, actor: string)
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
 }
 
-export function createMacroExpander(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, modules: Module[]): (text: string) => string {
+export function createMacroExpander(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, buildVars: BuildVars): (text: string) => string {
   const { preset, config, vars, data = {} } = input;
   const paramText = (id: string, depth = 0): string => {
     const p = preset.params.find((x) => x.id === id);
@@ -132,8 +137,20 @@ export function createMacroExpander(input: AssemblyInput, stages: Stage[], workf
     const opt = p.options?.find((o) => String(o.value) === String(v));
     return opt?.text ?? String(v);
   };
-  const questions = (kind: 'mandatory' | 'optional') =>
-    modules.flatMap((m) => m.questions[kind]).map((q) => `- ${q.text}`).join('\n');
+  // Variable values may hold macros: expand them before formatting (bounded, values may refer to each other).
+  let varDepth = 0;
+  const expandValue = (s: string) => (varDepth > 4 ? s : expandMacros(s, resolve));
+  const readVar = (id: string, selector?: string): string => {
+    const v = buildVars[id];
+    if (v === undefined) return '';
+    varDepth++;
+    try {
+      const expanded = typeof v === 'string' ? expandValue(v) : Array.isArray(v) ? v.map(expandValue) : new Map([...v].map(([k, x]) => [k, expandValue(x)]));
+      return formatVar(expanded, selector);
+    } finally {
+      varDepth--;
+    }
+  };
   const style = vars.style;
   const resolve = (args: string[]): string | undefined => {
     const [head, a, b] = args;
@@ -155,7 +172,7 @@ export function createMacroExpander(input: AssemblyInput, stages: Stage[], workf
       case 'memory': return JSON.stringify((a === 'global' ? data.memory?.global : data.memory?.chat) ?? {}, null, 2);
       case 'recap': return data.recap ?? '';
       case 'recent_meta': return data.recentMeta ?? '';
-      case 'questions': return questions(a === 'optional' ? 'optional' : 'mandatory');
+      case 'var': return readVar(a!, b);
       default: return undefined;
     }
   };
@@ -212,11 +229,12 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   const workflow = workflowOverride ?? preset.workflows.find((w) => w.id === vars.workflow);
   const preResolve = resolverOf(vars);
   const stages = workflow ? activeStages(workflow, preResolve) : [];
-  vars.features = { ...vars.features, questions: stages.some((s) => s.questions === 'ask') };
+  vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
   const resolve = resolverOf(vars);
   const modules = activeModules(preset, config, resolve);
   const structures = activeStructures(preset, modules);
-  const expand = createMacroExpander({ ...input, vars }, stages, workflow, modules);
+  const buildVars = computeBuildVars(preset.vars, modules);
+  const expand = createMacroExpander({ ...input, vars }, stages, workflow, buildVars);
   const activeIds = new Set(modules.map((m) => m.id));
 
   const blocksByRegion = new Map<string, { role?: Role; text: string; workflow?: boolean }[]>();
@@ -238,7 +256,7 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   }
   const regions: Record<string, Message[]> = {};
   for (const r of preset.regions) if (!r.native) regions[r.id] = regionMessages(r, blocksByRegion.get(r.id) ?? []);
-  return { vars, resolve, modules, structures, workflow, stages, regions, expand };
+  return { vars, resolve, modules, structures, buildVars, workflow, stages, regions, expand };
 }
 
 /** Default variables for previews and tests. */
@@ -253,7 +271,8 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     modules: moduleSwitches(preset, config),
     params: { ...config.params },
     flags: Object.fromEntries(preset.regex.map((r) => [r.id, false])),
-    features: { tokenSaving: config.tokenSaving.enabled, questions: false },
+    features: { tokenSaving: config.tokenSaving.enabled },
+    stages: {},
     chat: { group: false },
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },

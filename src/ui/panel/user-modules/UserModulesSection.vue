@@ -2,7 +2,7 @@
 /** "My modules" list: open, toggle, reorder (drag the grip), import / export, create. */
 import { computed, ref } from 'vue';
 import { Download, GripVertical, Plus, Upload, TriangleAlert, Zap } from 'lucide-vue-next';
-import { missingPoints, ruleComplete, type APreset, type UserModule } from '@advanced-preset/protocol';
+import { lostRefs, ruleComplete, type APreset, type UserModule } from '@advanced-preset/protocol';
 import { t, pt } from '@/i18n';
 import { toast } from '@/st/host';
 import { save } from '@/store/settings';
@@ -18,15 +18,19 @@ const props = defineProps<{ preset: APreset }>();
 const emit = defineEmits<{ open: [id: string] }>();
 
 const list = computed(() => userModules(props.preset));
-const hasPoints = computed(() => props.preset.insertionPoints.length > 0);
+const hasPoints = computed(() => props.preset.insertionPoints.length > 0 || props.preset.vars.length > 0);
 
 const pointLabel = (id: string) => {
   const p = props.preset.insertionPoints.find((x) => x.id === id);
   return p ? pt(props.preset, 'insertionPoints', id, 'label', p.label) : id;
 };
-const pointsOf = (m: UserModule) => [...new Set(m.entries.map((e) => e.point))].map(pointLabel).join(' · ');
-const lost = (m: UserModule) => missingPoints(props.preset, m);
-const lostText = (m: UserModule) => t('um.lostHint', { points: [...new Set(lost(m).map((e) => e.point))].join(', ') });
+const varLabel = (id: string) => {
+  const v = props.preset.vars.find((x) => x.id === id);
+  return v ? pt(props.preset, 'vars', id, 'label', v.label ?? id) : id;
+};
+const pointsOf = (m: UserModule) => [...new Set(m.entries.map((e) => e.point))].map(pointLabel).concat(m.vars.map((u) => varLabel(u.var))).join(' · ');
+const lost = (m: UserModule) => lostRefs(props.preset, m);
+const lostText = (m: UserModule) => t('um.lostHint', { points: lost(m).join(', ') });
 const hasTrigger = (m: UserModule) => m.trigger.rules.some(ruleComplete);
 
 function setEnabled(m: UserModule, v: boolean) { m.enabled = v; save(); }

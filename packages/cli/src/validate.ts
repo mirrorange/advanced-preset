@@ -1,6 +1,6 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
-  MACRO_HEADS, TOOL_ARG_STREAMING, TRANSPORTS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
+  MACRO_HEADS, TOOL_ARG_STREAMING, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -25,7 +25,6 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'memory.hasChat': null,
   'memory.hasGlobal': null,
   'recap.present': null,
-  'features.questions': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
@@ -35,13 +34,15 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   const flagIds = new Set(p.regex.map((r) => r.id));
   const regionIds = new Set(p.regions.map((r) => r.id));
   const workflowIds = new Set(p.workflows.map((w) => w.id));
+  const stageIds = new Set(p.workflows.flatMap((w) => w.stages.map((s) => s.id)));
+  const varDecls = new Map(p.vars.map((v) => [v.id, v]));
 
   // ── condition variables ─────────────────────────────────────────────────────
   const checkVar = (path: string, where: Where) => {
     if (path in FIXED_VARS) return;
     const [root, ...rest] = path.split('.');
     const key = rest.join('.');
-    const known = root === 'modules' ? moduleIds : root === 'params' ? paramIds : root === 'flags' ? flagIds : undefined;
+    const known = root === 'modules' ? moduleIds : root === 'params' ? paramIds : root === 'flags' ? flagIds : root === 'stages' ? stageIds : undefined;
     if (!known) return diag.error(`unknown variable \`${path}\``, where);
     if (!known.has(key)) diag.error(`unknown ${root.slice(0, -1)} \`${key}\` in condition`, where);
   };
@@ -60,6 +61,22 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     for (const v of variables(expr)) checkVar(v, where);
     checkLiterals(expr, where);
   }
+
+  // ── build variables ─────────────────────────────────────────────────────────
+  const dictKeys = (id: string) => new Set(p.modules.flatMap((m) => m.vars.flatMap((u) => (u.var === id && u.type === 'dict' ? u.items.map((x) => x.key) : []))));
+  // Dict keys set by several modules that can be active together: the later module wins at runtime.
+  for (const decl of p.vars) {
+    if (decl.type !== 'dict') continue;
+    const setters = new Map<string, string[]>();
+    for (const m of p.modules) for (const u of m.vars) if (u.var === decl.id && u.type === 'dict') for (const x of u.items) if (x.value !== null) setters.set(x.key, [...(setters.get(x.key) ?? []), m.id]);
+    const exclusiveOf = (id: string) => p.modules.find((m) => m.id === id)?.exclusive;
+    for (const [key, ids] of setters) {
+      const clash = ids.some((x, i) => ids.slice(i + 1).some((y) => !exclusiveOf(x) || exclusiveOf(x) !== exclusiveOf(y)));
+      if (clash) diag.warn(`variable ${decl.id}: key \`${key}\` is set by ${ids.join(', ')} (the later module wins)`, map.modules.get(ids[ids.length - 1]!) ?? {});
+    }
+    for (const reserved of VAR_SELECTORS) if (setters.has(reserved)) diag.warn(`variable ${decl.id}: key \`${reserved}\` cannot be read alone ({{ap::var::${decl.id}::${reserved}}} lists all ${reserved})`, { file: M, path: `vars.${decl.id}` });
+  }
+  const usedVars = new Set<string>();
 
   // ── macros ──────────────────────────────────────────────────────────────────
   const structureIds = new Set(Object.keys(p.structures));
@@ -93,17 +110,25 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
         case 'memory':
           if (a !== 'chat' && a !== 'global') bad('expected chat | global');
           break;
-        case 'questions':
-          if (a !== 'mandatory' && a !== 'optional') bad('expected mandatory | optional');
+        case 'var': {
+          const decl = varDecls.get(a!);
+          const sel = rest[1];
+          usedVars.add(a!);
+          if (!decl) bad(`unknown variable \`${a}\``);
+          else if (sel === undefined) break;
+          else if (decl.type === 'string') bad('string variables take no selector');
+          else if (decl.type === 'list' && !/^-?\d+$/.test(sel)) bad('list variables take an index');
+          else if (decl.type === 'dict' && !VAR_SELECTORS.includes(sel as never) && !dictKeys(a!).has(sel)) diag.warn(`${shown}: no module sets key \`${sel}\``, where);
           break;
+        }
       }
     }
   }
 
   // ── regions / anchors ───────────────────────────────────────────────────────
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} → unknown region \`${rid}\``, { file: M, path: 'anchors' });
-  for (const [k, rid] of [['workflowRegion', p.workflowRegion], ['questionsRegion', p.questionsRegion]] as const)
-    if (rid !== undefined && !regionIds.has(rid)) diag.error(`unknown region \`${rid}\``, { file: M, path: k });
+  if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: 'workflowRegion' });
+  for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
   for (const e of p.entries) {
     const where = map.entries.get(e.id) ?? {};
     const region = p.regions.find((r) => r.id === e.region);
@@ -201,7 +226,6 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       if (!p.actors[s.actor]) diag.error(`workflow ${w.id}: stage ${s.id} has unknown actor \`${s.actor}\``, where);
       for (const st of usedStyles) if (!w.sections.stages[s.id]?.[st]) diag.warn(`workflow ${w.id}: stage ${s.id} has no ${st} section`, where);
     }
-    if (w.kind === 'task' && w.stages.some((s) => s.questions)) diag.warn(`workflow ${w.id}: task workflows do not receive questions`, where);
     checkNames(w, where);
   }
   if (!p.workflows.some((w) => w.kind === 'task')) diag.warn('no task workflow: meta replies and script calls fall back to the main workflow', { file: M });
@@ -242,6 +266,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       configurations: new Set(p.configurations.map((x) => x.id)),
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
+      vars: new Set(varDecls.keys()),
     };
     for (const [section, ids] of Object.entries(known)) {
       const t = table[section];

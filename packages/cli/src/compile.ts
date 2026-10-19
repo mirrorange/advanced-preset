@@ -14,7 +14,8 @@ import { parse as parseYaml } from 'yaml';
 import {
   CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
-  type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type Question, type RecommendedConfiguration,
+  BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
+  type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
 } from '@advanced-preset/protocol';
@@ -253,6 +254,25 @@ export function compile(tree: SourceTree): CompileResult {
     insertionPoints.push(point);
   });
 
+  // ── build variables ─────────────────────────────────────────────────────────
+  // `vars: { <id>: <type> }` or `{ <id>: { type, label?, description?, separator? } }`.
+  const vars: BuildVarDecl[] = [];
+  if (raw.vars !== undefined && !isObj(raw.vars)) diag.error('vars must be a mapping of id → type', { file: M, path: 'vars' });
+  for (const [vid, v] of Object.entries(isObj(raw.vars) ? raw.vars : {})) {
+    const where = { file: M, path: `vars.${vid}` };
+    const o: Obj = isObj(v) ? v : { type: v };
+    if (!/^[A-Za-z][\w-]*$/.test(vid)) { diag.error('variable id must start with a letter (letters, digits, _ and -)', where); continue; }
+    if (!BUILD_VAR_TYPES.includes(o.type as BuildVarType)) { diag.error(`variable type must be ${BUILD_VAR_TYPES.join(' | ')}`, where); continue; }
+    const decl: BuildVarDecl = { id: vid, type: o.type as BuildVarType };
+    if (o.label !== undefined) decl.label = str(o.label);
+    if (o.description !== undefined) decl.description = str(o.description).trim();
+    if (o.separator !== undefined) {
+      if (decl.type === 'string') decl.separator = str(o.separator);
+      else diag.warn('separator only applies to string variables', where);
+    }
+    vars.push(decl);
+  }
+
   // ── params & groups ─────────────────────────────────────────────────────────
   const params: Param[] = (Array.isArray(raw.params) ? raw.params : []).map((p: unknown, i: number) => {
     const o = isObj(p) ? p : {};
@@ -392,14 +412,14 @@ export function compile(tree: SourceTree): CompileResult {
     const mid = str(fm.id, file.replace(/^.*\//, '').replace(/\.md$/, ''));
     if (modules.some((m) => m.id === mid)) diag.error(`duplicate module id \`${mid}\``, where);
     const toggle: Module['toggle'] = fm.toggle === 'always' || fm.system === true ? 'always' : 'user';
-    const questions = { mandatory: questionList(fm, 'mandatory', mid, diag, where, text), optional: questionList(fm, 'optional', mid, diag, where, text) };
+    if (fm.questions !== undefined) diag.error('`questions` was replaced by build variables: declare them in preset.yaml#vars and update them with `vars`', where);
     const mod: Module = {
       id: mid,
       name: str(fm.name, mid),
       toggle,
       default: toggle === 'always' ? true : fm.default === true,
       structures: Array.isArray(fm.structures) ? fm.structures.map((s) => str(s)) : [],
-      questions,
+      vars: varUpdates(fm.vars, vars, diag, { ...where, path: 'vars' }, text),
       source: file,
     };
     if (fm.description !== undefined) mod.description = str(fm.description).trim();
@@ -512,6 +532,7 @@ export function compile(tree: SourceTree): CompileResult {
       modules: new Set(modules.map((x) => x.id)),
       params: new Set(params.map((x) => x.id)),
       insertionPoints: new Set(insertionPoints.map((x) => x.id)),
+      vars: new Set(vars.map((x) => x.id)),
     };
     for (const section of Object.keys(rename) as (keyof Migration['rename'])[]) {
       const where = { file: M, path: `migrations[${i}].rename.${section}` };
@@ -558,12 +579,12 @@ export function compile(tree: SourceTree): CompileResult {
     regions,
     anchors: anchors as APreset['anchors'],
     workflowRegion: str(raw.workflowRegion, anchors.tail ?? ''),
-    ...(raw.questionsRegion !== undefined ? { questionsRegion: str(raw.questionsRegion) } : {}),
     params,
     groups,
     modules,
     entries,
     insertionPoints,
+    vars,
     workflows,
     structures,
     regex,
@@ -584,17 +605,42 @@ export function compile(tree: SourceTree): CompileResult {
   return { preset, diag, map };
 }
 
-function questionList(fm: Obj, kind: 'mandatory' | 'optional', mid: string, diag: Diagnostics, where: Where, text: (s: string, w: Where) => string): Question[] {
-  const q = isObj(fm.questions) ? fm.questions[kind] : undefined;
-  if (q === undefined) return [];
-  if (!Array.isArray(q)) {
-    diag.error(`questions.${kind} must be a list`, where);
-    return [];
+const isScalar = (v: unknown): v is string | number | boolean => ['string', 'number', 'boolean'].includes(typeof v);
+
+/**
+ * A module's `vars`: `{ <id>: value }`. Strings take text, lists an item or a list of items,
+ * dicts a mapping (a `null` value removes the key). Values are scalars only (lists and dicts are shallow).
+ */
+function varUpdates(src: unknown, decls: BuildVarDecl[], diag: Diagnostics, where: Where, text: (s: string, w: Where) => string): BuildVarUpdate[] {
+  if (src === undefined) return [];
+  if (!isObj(src)) { diag.error('vars must be a mapping of variable id → value', where); return []; }
+  const out: BuildVarUpdate[] = [];
+  for (const [id, v] of Object.entries(src)) {
+    const at = { ...where, path: `vars.${id}` };
+    const decl = decls.find((d) => d.id === id);
+    if (!decl) { diag.error(`unknown variable \`${id}\` (declare it in preset.yaml#vars)`, at); continue; }
+    const scalarText = (x: unknown, w: Where) => text(String(x), w);
+    switch (decl.type) {
+      case 'string':
+        if (!isScalar(v)) diag.error(`\`${id}\` is a string variable: expected text`, at);
+        else out.push({ var: id, type: 'string', text: scalarText(v, at) });
+        break;
+      case 'list': {
+        const items = Array.isArray(v) ? v : [v];
+        if (!items.every(isScalar)) { diag.error(`\`${id}\` is a list variable: expected an item or a list of plain items`, at); break; }
+        out.push({ var: id, type: 'list', items: items.map((x, i) => scalarText(x, { ...at, path: `vars.${id}[${i}]` })) });
+        break;
+      }
+      case 'dict': {
+        if (!isObj(v)) { diag.error(`\`${id}\` is a dict variable: expected a mapping`, at); break; }
+        const bad = Object.entries(v).filter(([, x]) => x !== null && !isScalar(x)).map(([k]) => k);
+        if (bad.length) { diag.error(`\`${id}\` is a dict variable: values must be plain (${bad.join(', ')})`, at); break; }
+        out.push({ var: id, type: 'dict', items: Object.entries(v).map(([key, x]) => ({ key, value: x === null ? null : scalarText(x, { ...at, path: `vars.${id}.${key}` }) })) });
+        break;
+      }
+    }
   }
-  return q.map((x, i) => {
-    const o: Obj = isObj(x) ? x : { text: x };
-    return { id: str(o.id, `${mid}-${kind[0]}${i + 1}`), text: text(str(o.text).trim(), { ...where, path: `questions.${kind}[${i}]` }) };
-  });
+  return out;
 }
 
 function compileWorkflow(
@@ -618,10 +664,6 @@ function compileWorkflow(
     if (stages.some((x) => x.id === stage.id)) diag.error(`duplicate stage \`${stage.id}\``, where);
     if (!STAGE_KINDS.includes(stage.kind)) diag.error(`stage kind must be ${STAGE_KINDS.join(' | ')}`, where);
     if (o.optional) stage.optional = true;
-    if (o.questions !== undefined) {
-      if (o.questions !== 'ask' && o.questions !== 'answer') diag.error('questions must be ask | answer', where);
-      else stage.questions = o.questions;
-    }
     if (o.tag !== undefined) stage.tag = str(o.tag);
     if (o.field !== undefined) {
       const f = isObj(o.field) ? o.field : { description: o.field };

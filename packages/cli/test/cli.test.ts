@@ -206,7 +206,7 @@ describe('tools section', () => {
 
   it('defaults to the format-1 names when omitted', () => {
     const { preset } = build(tree());
-    expect(preset!.formatVersion).toBe(2);
+    expect(preset!.formatVersion).toBe(3);
     expect(preset!.tools.submit.name).toBe('ap_submit_turn');
     expect(preset!.tools.stage.name).toBe('ap_stage_{{stage}}');
   });
@@ -325,12 +325,12 @@ migrations:
     const p = build(tree({ 'preset.yaml': MANIFEST + POINTS })).preset!;
     const config = resolveConfiguration(p, 'fast', undefined);
     const modules: UserModule[] = [
-      { id: 'u1', name: 'Mine', enabled: true, trigger: { match: 'all', rules: [] }, entries: [
+      { id: 'u1', name: 'Mine', enabled: true, vars: [], trigger: { match: 'all', rules: [] }, entries: [
         { id: 'a', point: 'intro-end', text: 'Also {{ap::name::narrator}}.' },
         { id: 'b', point: 'guide', text: 'Mine first.' },
         { id: 'c', point: 'intro-end', role: 'user', text: 'As user.' },
       ] },
-      { id: 'u2', name: 'Off', enabled: true, trigger: { match: 'all', rules: [{ kind: 'var', path: 'transport', op: '==', value: 'structured' }] }, entries: [{ id: 'a', point: 'intro-end', text: 'never' }] },
+      { id: 'u2', name: 'Off', enabled: true, vars: [], trigger: { match: 'all', rules: [{ kind: 'var', path: 'transport', op: '==', value: 'structured' }] }, entries: [{ id: 'a', point: 'intro-end', text: 'never' }] },
     ];
     const { preset } = withUserModules(p, modules);
     const a = assemble({ preset, config, vars: defaultVars(preset, config) });
@@ -340,5 +340,114 @@ migrations:
       ['user', 'As user.'],
     ]);
     expect(a.regions.guide).toEqual([{ role: 'system', content: '<guidelines>\nMine first.\n\nStyle A.\n</guidelines>' }]);
+  });
+});
+
+describe('build variables', () => {
+  const VARS = `
+vars:
+  questions: { type: dict, label: Questions }
+  notes: { type: string, separator: "\\n" }
+  tags: list
+`;
+  const mods = {
+    'modules/q.md': `---
+id: q
+toggle: always
+region: task
+when: stages.plan
+vars:
+  questions: { outline: "Outline for {{ap::name::narrator}}?", tone: Tone? }
+  notes: First.
+  tags: one
+---
+{{ap::var::questions::values}}
+{{ap::var::questions::outline}} {{ap::var::tags::0}}
+{{ap::var::notes}} {{ap::var::tags}}
+`,
+    'modules/style/a.md': `---
+id: style-a
+group: style
+exclusive: style
+default: true
+region: guide
+vars:
+  questions: { style: A? }
+  tags: [a1, a2]
+---
+Style A.
+`,
+    'modules/style/b.md': `---
+id: style-b
+group: style
+exclusive: style
+region: guide
+vars:
+  questions: { style: B?, tone: null }
+---
+Style B.
+`,
+  };
+
+  it('compiles declarations and updates and assembles them', () => {
+    const { preset, diag } = build(tree({ 'preset.yaml': MANIFEST + VARS, ...mods }));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.vars).toEqual([
+      { id: 'questions', type: 'dict', label: 'Questions' },
+      { id: 'notes', type: 'string', separator: '\n' },
+      { id: 'tags', type: 'list' },
+    ]);
+    expect(preset!.modules.find((m) => m.id === 'style-b')!.vars).toEqual([{ var: 'questions', type: 'dict', items: [{ key: 'style', value: 'B?' }, { key: 'tone', value: null }] }]);
+    // Exclusive members setting the same key never clash.
+    expect(diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/key `style`/);
+    const config = resolveConfiguration(preset!, 'default', undefined);
+    const a = assemble({ preset: preset!, config, vars: defaultVars(preset!, config) });
+    expect(a.regions.task![0]!.content).toBe('- Outline for Nia?\n- Tone?\n- A?\nOutline for Nia? one\nFirst. - one\n- a1\n- a2');
+  });
+
+  it('flags bad declarations, updates and reads', () => {
+    const { diag } = build(tree({
+      'preset.yaml': `${MANIFEST + VARS}  bad: { type: tree }
+  unread: list
+`,
+      ...mods,
+      'modules/x.md': `---
+id: x
+toggle: always
+region: top
+when: stages.nope
+questions: { mandatory: [a] }
+vars:
+  questions: { outline: Mine?, deep: { a: 1 } }
+  notes: [a]
+  tags: [[nested]]
+  ghost: 1
+---
+{{ap::var::ghost}} {{ap::var::notes::0}} {{ap::var::tags::first}} {{ap::var::questions::nokey}}
+`,
+    }));
+    const errs = diag.errors.map((e) => e.message).join('\n');
+    expect(errs).toMatch(/variable type must be/);
+    expect(errs).toMatch(/replaced by build variables/);
+    expect(errs).toMatch(/values must be plain \(deep\)/);
+    expect(errs).toMatch(/`notes` is a string variable/);
+    expect(errs).toMatch(/`tags` is a list variable/);
+    expect(errs).toMatch(/unknown variable `ghost` \(declare/);
+    expect(errs).toMatch(/unknown stage `nope`/);
+    expect(errs).toMatch(/var::ghost\}\}: unknown variable/);
+    expect(errs).toMatch(/string variables take no selector/);
+    expect(errs).toMatch(/list variables take an index/);
+    const warns = diag.warnings.map((w) => w.message).join('\n');
+    expect(warns).toMatch(/no module sets key `nokey`/);
+    expect(warns).toMatch(/variable unread is never read/);
+  });
+
+  it('warns on dict keys set by modules active together', () => {
+    const { diag } = build(tree({
+      'preset.yaml': MANIFEST + VARS,
+      ...mods,
+      'modules/y.md': '---\nid: y\ntoggle: always\nregion: top\nvars:\n  questions: { outline: Again? }\n---\nY\n',
+    }));
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/key `outline` is set by q, y \(the later module wins\)/);
   });
 });

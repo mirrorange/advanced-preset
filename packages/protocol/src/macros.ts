@@ -37,5 +37,5 @@ export const MACRO_HEADS: Record<string, { min: number; max: number }> = {
   memory: { min: 1, max: 1 },
   recap: { min: 0, max: 0 },
   recent_meta: { min: 0, max: 0 },
-  questions: { min: 1, max: 1 },
+  var: { min: 1, max: 2 },
 };

@@ -16,3 +16,4 @@ export * from './gemini';
 export * from './artifact';
 export * from './directives';
 export * from './user-modules';
+export * from './build-vars';
