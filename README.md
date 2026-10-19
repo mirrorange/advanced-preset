@@ -28,7 +28,7 @@ https://github.com/mirrorange/advanced-preset
 
 ## 我的模组
 
-面板「模组」页底部的「我的模组」属于当前预设，内容插入到预设声明的插入位置（例如写作指南块内、任务之前）。
+面板「模组」页顶部的「我的模组」属于当前预设，内容插入到预设声明的插入位置（例如写作指南块内、任务之前）。
 
 - 内容支持 `{{ap::…}}`、SillyTavern 宏与 `<!-- @if … -->` 等指令；可按条目选择消息角色。
 - 触发条件全部或任一满足时生效：传输方式、工作流、参数、模组开关、关键词（本轮输入或最近 N 条消息，可用正则）或任意表达式；不设条件即始终生效。
@@ -43,6 +43,8 @@ cd my-preset
 node ../packages/cli/dist/ap.js dev        # 面板「调试」页填入 http://localhost:4747
 node ../packages/cli/dist/ap.js build      # 产物 dist/<id>.apreset.json
 ```
+
+单选模组：同一 `exclusive` 集合中只生效一个；集合在 `groups` 中声明 `allowNone: true` 时可全部关闭，面板为它显示一个开关，打开后才列出选项；否则始终有一个生效（未选择时用默认模组）。
 
 模板仓库：[advanced-preset-template](https://github.com/mirrorange/advanced-preset-template)。CLI 命令：`build` / `check` / `dev` / `preview` / `init`（`ap --help`）。
 

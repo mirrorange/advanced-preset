@@ -16,6 +16,19 @@ In SillyTavern open **Advanced Preset → Debug**, paste `http://localhost:4747`
 | `workflows/*.md` | one workflow per file; `<!-- @section -->` per stage and style |
 | `locales/*.yaml` | panel strings |
 
+## Single-choice modules
+
+Modules sharing `exclusive: <set>` form a single-choice set; the set is declared under `groups` with the same id.
+
+```yaml
+groups:
+  style: { label: Writing style, order: 30, allowNone: true }   # modules: group: style, exclusive: style
+  narrative: { label: Narrative agency, allowNone: true }       # nested: group: guidelines, exclusive: narrative
+```
+
+- Without `allowNone` exactly one module is active; when none is enabled, the module with `default: true` (else the first) is used.
+- With `allowNone` the panel shows a switch for the set and its choices only while it is on. The switch sits in the section header when the set id equals the module `group`, otherwise on its own row inside that group.
+
 ## Insertion points
 
 `insertionPoints` in `preset.yaml` opens places where users can add their own modules from the panel
