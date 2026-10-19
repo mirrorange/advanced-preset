@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { Cable, Check, Gauge, Pencil, Plus, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
-import { TRANSPORTS, type Transport } from '@advanced-preset/protocol';
+import { TOOL_ARG_STREAMING, TRANSPORTS, type Transport } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
 } from '@/store/config';
@@ -70,6 +70,7 @@ function conn<K extends keyof NonNullable<typeof config.value>['connection']>(ke
 const forceTool = conn('forceTool');
 const parallelTools = conn('parallelTools');
 const sendThoughtSignature = conn('sendThoughtSignature');
+const streamToolArguments = conn('streamToolArguments');
 const finalFallback = conn('finalFallback');
 const maxSteps = conn('maxSteps');
 const syntheticTurn = computed({
@@ -138,6 +139,11 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
           </select>
         </Field>
         <Field :label="t('config.thoughtSignature')" :help="t('config.thoughtSignature.hint')" inline><Switch v-model="sendThoughtSignature" /></Field>
+        <Field :label="t('config.streamToolArguments')" :help="t('config.streamToolArguments.hint')" inline>
+          <select v-model="streamToolArguments" class="input">
+            <option v-for="m in TOOL_ARG_STREAMING" :key="m" :value="m">{{ t(`config.streamToolArguments.${m}`) }}</option>
+          </select>
+        </Field>
         <Field v-if="transport === 'tool-multi'" :label="t('config.maxSteps')" inline>
           <input class="input" type="number" min="1" max="20" :value="maxSteps" @change="maxSteps = num($event)" />
         </Field>

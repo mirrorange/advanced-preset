@@ -64,6 +64,9 @@ export interface STContext {
 
 export const st = (): STContext => (globalThis as any).SillyTavern.getContext();
 
+/** Running inside TauriTavern (its stable host ABI object). */
+export const isTauriTavern = (): boolean => typeof (globalThis as any).__TAURITAVERN__ === 'object' && (globalThis as any).__TAURITAVERN__ !== null;
+
 /** Request context ST forks use to pick a stream shape (custom / OpenCode API formats, Vertex AI Claude). */
 export interface StreamContext { chatCompletionSource: string; model?: string | null; customApiFormat?: string | null; opencodeApiFormat?: string | null }
 type StreamingReply = (data: unknown, state: StreamState, options: Partial<StreamContext> & { overrideShowThoughts?: boolean }) => string;

@@ -2,6 +2,7 @@
  * Artifact format upgrades. Older artifacts (installed copies, dev servers running an older CLI)
  * are upgraded in memory when loaded, so the runtime only ever deals with the current format.
  */
+import { CONNECTION_DEFAULTS } from './config';
 import { FORMAT_VERSION, type APreset, type ToolsDecl } from './types';
 import { DEFAULT_TOOLS } from './workflow';
 
@@ -24,10 +25,20 @@ function v1Tools(old: unknown): ToolsDecl {
   };
 }
 
+/**
+ * Connection options added without a format bump (e.g. `streamToolArguments`) are missing from older
+ * artifacts. Fill them so they resolve to the default and user diffs touching them are not pruned.
+ */
+function withConnectionDefaults(p: APreset): APreset {
+  const conn = p.configurationDefaults?.connection;
+  if (!isObj(conn) || Object.keys(CONNECTION_DEFAULTS).every((k) => k in conn)) return p;
+  return { ...p, configurationDefaults: { ...p.configurationDefaults, connection: { ...CONNECTION_DEFAULTS, ...conn } } };
+}
+
 /** Upgrade a parsed artifact to the current format. Returns `null` for anything that is not a known artifact. */
 export function upgradeArtifact(raw: unknown): APreset | null {
   if (!isObj(raw) || typeof raw.id !== 'string' || !Array.isArray(raw.entries)) return null;
-  if (raw.formatVersion === FORMAT_VERSION) return raw as APreset;
-  if (raw.formatVersion === 1) return { ...raw, formatVersion: FORMAT_VERSION, tools: v1Tools(raw.tools) } as APreset;
+  if (raw.formatVersion === FORMAT_VERSION) return withConnectionDefaults(raw as APreset);
+  if (raw.formatVersion === 1) return withConnectionDefaults({ ...raw, formatVersion: FORMAT_VERSION, tools: v1Tools(raw.tools) } as APreset);
   return null;
 }

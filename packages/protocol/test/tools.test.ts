@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DEFAULT_TOOLS, FORMAT_VERSION, parseTurnObject, toGeminiSchema, turnArtifacts, upgradeArtifact,
-  type Stage, type StructureDecl, type ToolsDecl, type Workflow,
+  DEFAULT_TOOLS, FORMAT_VERSION, parseTurnObject, pruneDiff, resolveConfiguration, toGeminiSchema, turnArtifacts, upgradeArtifact,
+  type APreset, type Stage, type StructureDecl, type ToolsDecl, type Workflow,
 } from '../src';
 
 const stages: Stage[] = [
@@ -92,5 +92,17 @@ describe('artifact upgrade', () => {
     expect(a.schema().name).toBe('ap_turn');
     expect(upgradeArtifact({ formatVersion: 9, id: 'x', entries: [] })).toBeNull();
     expect(DEFAULT_TOOLS.stage.param.name).toBe('content');
+  });
+
+  it('fills connection options newer than the artifact, keeping user diffs on them', () => {
+    const old = {
+      formatVersion: FORMAT_VERSION, id: 'x', entries: [], configurations: [],
+      configurationDefaults: { connection: { transport: 'tool-single', workflow: 'w', syntheticTurn: null, forceTool: false, parallelTools: false, sendThoughtSignature: true, maxSteps: 3, finalFallback: true } },
+    };
+    const up = upgradeArtifact(old) as APreset;
+    expect(up.configurationDefaults.connection).toMatchObject({ transport: 'tool-single', forceTool: false, maxSteps: 3, streamToolArguments: 'auto' });
+    const diff = { connection: { streamToolArguments: 'off' } };
+    expect(pruneDiff(diff, up.configurationDefaults as never)).toEqual([]);
+    expect(resolveConfiguration(up, '', diff as never).connection.streamToolArguments).toBe('off');
   });
 });

@@ -12,7 +12,7 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
-  DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
+  CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   type Group, type Migration, type Module, type Param, type ParamOption, type Question, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
@@ -450,14 +450,9 @@ export function compile(tree: SourceTree): CompileResult {
   const identitySrc = sect('identity');
   const configurationDefaults: Configuration = {
     connection: {
-      transport: 'structured',
+      ...CONNECTION_DEFAULTS,
       workflow: storyWorkflow,
-      forceTool: true,
-      parallelTools: false,
       syntheticTurn: syntheticTurns[0]?.id ?? null,
-      sendThoughtSignature: false,
-      maxSteps: 6,
-      finalFallback: true,
       ...(sect('connection') as Partial<Configuration['connection']>),
     },
     sampling: { ...sect('sampling') },

@@ -7383,6 +7383,7 @@ import { createHash } from "node:crypto";
 // ../protocol/src/types.ts
 var FORMAT_VERSION = 2;
 var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-multi"];
+var TOOL_ARG_STREAMING = ["auto", "on", "off"];
 var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom"];
 
 // ../protocol/src/expr.ts
@@ -7836,6 +7837,15 @@ function cloneData(value) {
 
 // ../protocol/src/config.ts
 var isObj = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var CONNECTION_DEFAULTS = {
+  transport: "structured",
+  forceTool: true,
+  parallelTools: false,
+  sendThoughtSignature: false,
+  streamToolArguments: "auto",
+  maxSteps: 6,
+  finalFallback: true
+};
 function deepMerge(base, ...layers) {
   let out = cloneData(base);
   for (const layer of layers) out = mergeTwo(out, layer);
@@ -8589,14 +8599,9 @@ function compile(tree) {
   const identitySrc = sect("identity");
   const configurationDefaults = {
     connection: {
-      transport: "structured",
+      ...CONNECTION_DEFAULTS,
       workflow: storyWorkflow,
-      forceTool: true,
-      parallelTools: false,
       syntheticTurn: syntheticTurns[0]?.id ?? null,
-      sendThoughtSignature: false,
-      maxSteps: 6,
-      finalFallback: true,
       ...sect("connection")
     },
     sampling: { ...sect("sampling") },
@@ -9038,6 +9043,7 @@ function validate(p, map, diag) {
   const c = p.configurationDefaults.connection;
   const checkConnection = (conn, path) => {
     if (conn.transport !== void 0 && !TRANSPORTS.includes(conn.transport)) diag.error(`unknown transport \`${conn.transport}\``, { file: M, path });
+    if (conn.streamToolArguments !== void 0 && !TOOL_ARG_STREAMING.includes(conn.streamToolArguments)) diag.error(`unknown streamToolArguments \`${conn.streamToolArguments}\` (expected ${TOOL_ARG_STREAMING.join(" / ")})`, { file: M, path });
     if (conn.workflow !== void 0) {
       const wf = p.workflows.find((w) => w.id === conn.workflow);
       if (!wf) diag.error(`unknown workflow \`${conn.workflow}\``, { file: M, path });
