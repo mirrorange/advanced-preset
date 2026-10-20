@@ -202,7 +202,7 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
 /* Banner under ST's Chat Completion preset select (PresetBanner.vue). */
 .preset-banner {
   display: flex; align-items: center; flex-wrap: wrap; gap: 6px var(--ap-space-2);
-  margin-top: 6px; padding: 5px 5px 5px 10px; border-radius: var(--ap-radius-sm);
+  margin-top: 6px; margin-bottom: 4px; padding: 5px 5px 5px 10px; border-radius: var(--ap-radius-sm);
   background: var(--ap-tint); border: 1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);
   font-size: var(--ap-font-size-sm); line-height: 1.35;
 }
