@@ -3,7 +3,7 @@
 import { computed, onBeforeUnmount, onMounted, type Component } from 'vue';
 import { Blocks, Brain, Bug, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
-import { t } from '@/i18n';
+import { presetName, t } from '@/i18n';
 import { activePreset, presetSummary, ui, type PanelTab } from '../state';
 import IconButton from '../components/IconButton.vue';
 import Switch from '../components/Switch.vue';
@@ -41,7 +41,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
       <header class="panel-head">
         <div class="panel-logo"><Layers /></div>
         <div class="grow">
-          <div class="panel-title ellipsis">{{ activePreset?.name ?? t('app.name') }}</div>
+          <div class="panel-title ellipsis">{{ activePreset ? presetName(activePreset) : t('app.name') }}</div>
           <div class="panel-sub ellipsis">{{ subtitle }}</div>
         </div>
         <Switch v-model="enabled" :label="t('panel.enabled')" />

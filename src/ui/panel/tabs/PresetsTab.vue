@@ -5,7 +5,7 @@ import { listPresets, type PresetEntry } from '@/store/presets';
 import { activatePreset } from '@/store/carrier';
 import { settings } from '@/store/settings';
 import { toast } from '@/st/host';
-import { t } from '@/i18n';
+import { presetDescription, presetName, t } from '@/i18n';
 import { installFromFile, installFromUrl, removePreset } from '@/app/install';
 import { updateExtension } from '@/app/updater';
 import { activePreset, refreshActivePreset } from '../../state';
@@ -63,12 +63,12 @@ const checkUpdates = () => run('ext', async () => toast('info', (await updateExt
       <span class="preset-mark"><LoaderCircle v-if="busy === `select:${e.preset.id}`" class="spin" /><Check v-else-if="activePreset?.id === e.preset.id" /></span>
       <div class="grow col preset-info">
         <div class="row wrap preset-head">
-          <span class="preset-name">{{ e.preset.name }}</span>
+          <span class="preset-name">{{ presetName(e.preset) }}</span>
           <span class="badge neutral">v{{ e.preset.version }}</span>
           <span v-if="e.source !== 'builtin'" class="badge" :class="{ warn: e.source === 'dev' }">{{ t(`presets.source.${e.source}`) }}</span>
         </div>
         <span v-if="e.preset.author" class="xs muted">{{ e.preset.author }}</span>
-        <span v-if="e.preset.description" class="small muted preset-desc">{{ e.preset.description }}</span>
+        <span v-if="presetDescription(e.preset)" class="small muted preset-desc">{{ presetDescription(e.preset) }}</span>
       </div>
       <div class="row preset-actions" @click.stop>
         <IconButton v-if="e.source === 'installed' && settings().sources[e.preset.id]" :icon="RefreshCw" :label="t('presets.update')" align="end" small @click="updateFromSource(e)" />

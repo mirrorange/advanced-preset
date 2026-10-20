@@ -13,7 +13,7 @@ import { activatePreset, activeCarrierPresetId } from '@/store/carrier';
 import { installArtifact } from './install';
 import { downloadJson, fileSlug } from '@/ui/download';
 import { openPanel, refreshActivePreset } from '@/ui/state';
-import { t } from '@/i18n';
+import { presetName, t } from '@/i18n';
 
 const IMPORT_INPUT = 'openai_preset_import_file';
 const EXPORT_BUTTON = 'export_oai_preset';
@@ -39,7 +39,7 @@ async function onImport(input: HTMLInputElement, file: File): Promise<void> {
     const preset = await installArtifact(raw);
     await activatePreset(preset);
     refreshActivePreset();
-    toast('success', t('presets.installed'), preset.name);
+    toast('success', t('presets.installed'), presetName(preset));
     openPanel('presets');
   } catch (e) {
     toast('error', e instanceof Error ? e.message : String(e), t('app.name'));

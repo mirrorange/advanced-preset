@@ -292,6 +292,17 @@ describe('assemble', () => {
   });
 });
 
+describe('locales', () => {
+  it('translates the preset name and description', () => {
+    const { preset, diag } = build(tree({ 'preset.yaml': MANIFEST, 'locales/zh-cn.yaml': 'name: 测试预设\ndescription: 一段描述\n', 'locales/ja.yaml': 'name: [x]\n' }));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.locales['zh-cn']).toMatchObject({ name: '测试预设', description: '一段描述' });
+    const warns = diag.warnings.map((w) => w.message).join('\n');
+    expect(warns).toMatch(/name must be a string/);
+    expect(warns).not.toMatch(/description must be a string/);
+  });
+});
+
 describe('insertion points & user modules', () => {
   const POINTS = `
 insertionPoints:

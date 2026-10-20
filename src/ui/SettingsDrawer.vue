@@ -6,7 +6,7 @@
  */
 import { computed } from 'vue';
 import { settings, save } from '@/store/settings';
-import { t } from '@/i18n';
+import { presetName, t } from '@/i18n';
 import { activePreset, openPanel, presetSummary } from './state';
 
 const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => { settings().enabled = v; save(); } });
@@ -32,7 +32,7 @@ const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => {
       <hr />
       <h4>{{ t('settings.preset') }}</h4>
       <div v-if="activePreset">
-        {{ activePreset.name }}
+        {{ presetName(activePreset) }}
         <span class="text_muted">v{{ activePreset.version }} · {{ presetSummary.config }}</span>
       </div>
       <i v-else class="text_muted">{{ t('settings.inactive') }}</i>

@@ -258,6 +258,8 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   // ── locales ─────────────────────────────────────────────────────────────────
   for (const [lang, table] of Object.entries(p.locales)) {
     const file = `locales/${lang}.yaml`;
+    for (const k of ['name', 'description'] as const)
+      if (table[k] !== undefined && typeof table[k] !== 'string') diag.warn(`${k} must be a string`, { file, path: k });
     const known: Record<string, Set<string>> = {
       modules: moduleIds,
       params: paramIds,

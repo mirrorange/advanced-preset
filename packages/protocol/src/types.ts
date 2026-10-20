@@ -362,6 +362,10 @@ export interface ThemeDecl {
 
 /** Panel strings for one locale. Keys mirror ids in the artifact. */
 export interface LocaleTable {
+  /** Preset display name (`preset.yaml#name`). */
+  name?: string;
+  /** Preset description (`preset.yaml#description`). */
+  description?: string;
   groups?: Record<string, { label?: string; description?: string }>;
   modules?: Record<string, { name?: string; description?: string }>;
   params?: Record<string, { label?: string; description?: string; options?: Record<string, string> }>;

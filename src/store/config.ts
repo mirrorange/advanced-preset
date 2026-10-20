@@ -8,7 +8,7 @@ import {
   type APreset, type Configuration, type SparseDiff, cloneData,
 } from '@advanced-preset/protocol';
 import { toast } from '@/st/host';
-import { t } from '@/i18n';
+import { presetName, t } from '@/i18n';
 import { settings, save, type ConfigRef, type PresetState, type SavedConfig } from './settings';
 
 export function presetState(preset: APreset): PresetState {
@@ -134,6 +134,6 @@ export function migratePresetState(preset: APreset): string[] {
   s.hash = preset.hash;
   save();
   if (removed.length) console.warn(`[AP] ${preset.id}: dropped obsolete configuration keys`, removed);
-  if (lost.length && known && s.version !== from) toast('warning', t('um.lostAfterUpdate', { names: lost.join(', ') }), preset.name);
+  if (lost.length && known && s.version !== from) toast('warning', t('um.lostAfterUpdate', { names: lost.join(', ') }), presetName(preset));
   return removed;
 }
