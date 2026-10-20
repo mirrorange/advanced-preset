@@ -198,3 +198,15 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
   .um-foot .btn:not(.armed) > span { display: none; }
   .um-role { order: 1; margin-left: 1.15em; }
 }
+
+/* Banner under ST's Chat Completion preset select (PresetBanner.vue). */
+.preset-banner {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px var(--ap-space-2);
+  margin-top: 6px; padding: 5px 5px 5px 10px; border-radius: var(--ap-radius-sm);
+  background: var(--ap-tint); border: 1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);
+  font-size: var(--ap-font-size-sm); line-height: 1.35;
+}
+.preset-banner-icon { color: var(--ap-primary); }
+.preset-banner-text { flex: 1 1 11em; min-width: 0; }
+/* In a narrow drawer the button drops below the text instead of squeezing it. */
+.preset-banner .btn { margin-left: auto; min-height: 1.8em; padding: 0 0.7em; }

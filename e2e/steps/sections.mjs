@@ -1,7 +1,7 @@
 // Section spacing: header-only sections (Token saving off) have equal top / bottom padding.
 export default async function (page, shots) {
   const tag = process.env.AP_VIEWPORT || '1400x900';
-  await page.evaluate(() => document.getElementById('ap-preset-button').click());
+  await page.evaluate(() => window.AdvancedPreset.togglePanel());
   await page.waitForTimeout(800);
   await page.locator('ap-panel .tab').nth(3).click();
   await page.waitForTimeout(400);

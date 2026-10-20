@@ -6,7 +6,7 @@ export default async function (page, shots) {
   await page.locator('#ai-config-button > .drawer-toggle').click();
   await page.waitForTimeout(800);
   await page.screenshot({ path: `${shots}/ui-drawer-${tag}.png` });
-  await page.locator('#ap-preset-button').click();
+  await page.evaluate(() => window.AdvancedPreset.togglePanel());
   await page.waitForTimeout(600);
   const tabs = page.locator('ap-panel .tab');
   const n = await tabs.count();

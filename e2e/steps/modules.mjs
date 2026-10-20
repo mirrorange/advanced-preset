@@ -1,7 +1,7 @@
 // Modules tab: user modules on top; optional exclusive sets have a switch and show choices only while on.
 export default async function (page, shots) {
   const tag = process.env.AP_VIEWPORT || '1400x900';
-  await page.evaluate(() => document.getElementById('ap-preset-button').click());
+  await page.evaluate(() => window.AdvancedPreset.togglePanel());
   await page.waitForTimeout(800);
   const head = page.locator('ap-panel .panel-head input[role=switch]');
   if (!(await head.isChecked())) await page.locator('ap-panel .panel-head .switch').click();

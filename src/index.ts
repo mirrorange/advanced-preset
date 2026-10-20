@@ -20,6 +20,7 @@ import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
 import { installPresetIo } from '@/app/st-preset-io';
 import { mountUi } from '@/ui';
+import { ui } from '@/ui/state';
 import './global.css';
 
 declare global {
@@ -36,6 +37,8 @@ const api = {
   listPresets: () => listPresets().map(({ preset, source }) => ({ id: preset.id, name: preset.name, version: preset.version, source })),
   activePresetId: () => activeCarrierPresetId(),
   update: updateExtension,
+  /** Open / close the AP panel (toggles without an argument). */
+  togglePanel: (open?: boolean) => { ui.panelOpen = open ?? !ui.panelOpen; },
 };
 
 // Must exist synchronously: ST resolves the interceptor by name when generating.

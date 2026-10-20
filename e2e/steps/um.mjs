@@ -8,12 +8,12 @@ const shot = async (page, shots, name) => {
 
 async function openPanel(page) {
   if (!(await page.locator('ap-panel .panel-head').isVisible().catch(() => false))) {
-    await page.evaluate(() => document.getElementById('ap-preset-button').click());
+    await page.evaluate(() => window.AdvancedPreset.togglePanel());
     await page.waitForTimeout(400);
   }
 }
 async function closePanel(page) {
-  if (await page.locator('ap-panel .panel-head').isVisible().catch(() => false)) await page.evaluate(() => document.getElementById('ap-preset-button').click());
+  if (await page.locator('ap-panel .panel-head').isVisible().catch(() => false)) await page.evaluate(() => window.AdvancedPreset.togglePanel());
   await page.waitForTimeout(400);
   await page.evaluate(() => { if (document.querySelector('#left-nav-panel.openDrawer')) document.getElementById('leftNavDrawerIcon')?.click(); });
   await page.waitForTimeout(600);

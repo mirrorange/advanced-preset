@@ -5,7 +5,7 @@ export default async function (page, shots) {
     await page.evaluate(() => document.querySelector('.character_select')?.click());
     await page.waitForTimeout(1500);
   }
-  await page.evaluate(() => document.getElementById('ap-preset-button').click());
+  await page.evaluate(() => window.AdvancedPreset.togglePanel());
   await page.waitForTimeout(800);
   const n = await page.locator('ap-panel .tab').count();
   for (let i = 0; i < n; i++) {
