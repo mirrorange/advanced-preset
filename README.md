@@ -1,84 +1,92 @@
-# Advanced Preset
+<div align="center">
 
-为 SillyTavern 设计的高级预设扩展：用 Markdown + YAML 编写预设，扩展在生成时接管 Chat Completion 请求，提供分阶段工作流、五种传输方式、结构化产物（选项、记忆、回顾、摘要…）、补丁编辑与 Token 节省。
+# 🌸 Advanced Preset
 
-内置 [花瓣预设 v7](https://github.com/mirrorange/petals-preset)。
+**为 SillyTavern Chat Completion 设计的数据驱动预设引擎**
 
-📖 文档：[预设开发指南](docs/guide/README.md) · [参考文档](docs/reference/README.md) · [Agent Skills](packages/cli/template/.agents/skills)
+用 Markdown + YAML 编写预设；生成时由扩展接管请求，<br>
+带来分阶段工作流、五种传输方式、结构化卡片、补丁编辑与 Token 节省。
 
-## 安装
+[![npm](https://img.shields.io/npm/v/advanced-preset?label=ap%20cli&color=d6409f)](https://www.npmjs.com/package/advanced-preset)
+[![license](https://img.shields.io/badge/license-MIT-8b5cf6)](LICENSE)
+[![SillyTavern](https://img.shields.io/badge/SillyTavern-extension-2563eb)](https://github.com/SillyTavern/SillyTavern)
 
-SillyTavern → 扩展 → 安装扩展，填入：
+[安装](#-安装) · [功能](#-功能) · [编写预设](#-编写预设) · [文档](docs/README.md) · [开发](#-开发)
+
+</div>
+
+内置 [花瓣预设 v7](https://github.com/mirrorange/petals-preset)：与小苍兰一起写故事吧！Freesia 写故事，Petals 提建议。
+
+## 📦 安装
+
+在 SillyTavern 中打开 **扩展 → 安装扩展**，填入：
 
 ```
 https://github.com/mirrorange/advanced-preset
 ```
 
-安装后在 Chat Completion 预设下拉中选择 `AP · <预设名>` 即可启用对应预设；预设下拉下方会出现「当前预设使用 Advanced Preset」横幅，点击「打开面板」（或扩展设置中的「打开面板」）打开面板，面板覆盖在 AI 响应配置面板之上。
+然后：
 
-ST 的预设导入按钮可以直接导入 `.apreset.json`：安装为 AP 预设、自动选中并打开面板。选中 `AP · <预设名>` 时，导出按钮导出的是 AP 预设本身（可再次导入），重命名与另存为按钮隐藏。其他预设的导入导出与 ST 原生一致。
+1. 在对话补全预设下拉中选择 `AP · <预设名>`，启用对应的 AP 预设；
+2. 预设下拉下方出现「当前预设使用 Advanced Preset」横幅，点击 **打开面板**（扩展设置中也有入口）。面板覆盖在 AI 响应配置抽屉之上。
 
-## 功能一览
+> [!TIP]
+> ST 的预设 **导入** 按钮可以直接导入 `.apreset.json`：安装为 AP 预设、自动选中并打开面板。选中 `AP · <预设名>` 时，**导出** 按钮导出 AP 预设本身（可再次导入），重命名与另存为按钮会隐藏。其他预设的导入导出保持 ST 原生行为。
+
+扩展支持 ST 的自动更新；在扩展管理面板更新后会自动重新加载。
+
+## ✨ 功能
 
 | | |
 | --- | --- |
-| 传输 | 预填充 · 纯文本 · 结构化输出（`json_schema`）· 单步工具 · 多步工具；工具参数流式输出（含 Vertex AI Gemini 3+ 的 `streamFunctionCallArguments`） |
-| 工作流 | 由预设声明的阶段序列（如 linear / iterative / edit / task），流式展示每个阶段 |
-| 结构 | 回复、代写、选项、记忆、回顾、事件摘要、自定义结构，以卡片显示在消息下方 |
-| 元指令 | `@叙述者 …` 触发任务回合；代写按钮直接走元指令 |
-| 配置 | 推荐配置 ⊕ 用户差异（稀疏存储），采样参数与 Carrier 预设双向同步 |
-| 我的模组 | 在预设开放的插入位置加入自己的提示词；可视化触发条件（参数、模组、关键词、表达式）；可导入导出，随预设更新保留 |
-| 开发 | `ap dev` 本地热更新、组装预览、请求记录、事件日志 |
+| **传输** | 预填充 · 纯文本 · 结构化输出（`json_schema`）· 单步工具 · 多步工具；工具参数流式输出（含 Vertex AI Gemini 3+ 的 `streamFunctionCallArguments`） |
+| **工作流** | 由预设声明的阶段序列（如 linear / iterative / edit / task），流式展示每个阶段 |
+| **结构** | 回复、代写、选项、记忆、回顾、事件摘要、自定义结构，以卡片显示在消息下方 |
+| **元指令** | `@叙述者 …` 触发任务回合；代写按钮直接走元指令 |
+| **配置** | 推荐配置 ⊕ 用户差异（稀疏存储），采样参数与 Carrier 预设双向同步 |
+| **我的模组** | 在预设开放的插入位置加入自己的提示词，可视化触发条件，可导入导出，随预设更新保留 |
+| **多语言** | 面板中英双语；预设可翻译自己的名称、描述、模组、参数等面板文字 |
+| **开发** | `ap dev` 本地热更新、组装预览、请求记录、事件日志 |
 
-## 我的模组
+<details>
+<summary><b>我的模组</b>：在不修改预设的前提下加入自己的提示词</summary>
 
 面板「模组」页顶部的「我的模组」属于当前预设，内容插入到预设声明的插入位置（例如写作指南块内、任务之前）。
 
 - 内容支持 `{{ap::…}}`、SillyTavern 宏与 `<!-- @if … -->` 等指令；可按条目选择消息角色。
 - 触发条件全部或任一满足时生效：传输方式、工作流、参数、模组开关、关键词（本轮输入或最近 N 条消息，可用正则）或任意表达式；不设条件即始终生效。
-- 可导出为 `*.ap-modules.json` 分享或备份；导入较旧版本预设的导出文件时会按迁移表更新，找不到的插入位置会被标出。
-- 也可更新预设声明的构建变量（如「规划要点」）：字符串追加、列表添加项、字典设置键；与内置同键时以用户为准，值留空即移除该内置项。
-- 预设更新后模组原样保留；若预设改名了插入位置，会按其迁移表自动跟随；若插入位置被移除，模组会标出警告，该段内容暂不插入。
+- 可更新预设声明的构建变量（如「规划要点」）：字符串追加、列表添加项、字典设置键；与内置同键时以用户为准，值留空即移除该内置项。
+- 可导出为 `*.ap-modules.json` 分享或备份；导入较旧版本预设的导出文件时按迁移表更新。
+- 预设更新后模组原样保留：插入位置被改名时自动跟随，被移除时标出警告、该段内容暂不插入。
 
-## 编写预设
+</details>
 
-AP 预设是一个普通的代码仓库：`preset.yaml` 加上一个个 Markdown 模组和工作流，用 `ap` 命令行编译成 `dist/<id>.apreset.json`，通过链接或文件安装到 AP。
+## ✍️ 编写预设
 
-推荐的做法是**让 AI Agent 帮你写**：你描述想要的效果，Agent 按 AP 的 Agent Skills 设计、编写、测试预设。
+AP 预设就是一个普通的代码仓库：`preset.yaml` 加上若干 Markdown 模组与工作流，由 [`ap` 命令行](https://www.npmjs.com/package/advanced-preset)编译成 `dist/<id>.apreset.json`，用户通过链接或文件安装。
 
-1. 在 [advanced-preset-template](https://github.com/mirrorange/advanced-preset-template) 页面点击 **Use this template** 创建仓库，或者用命令创建：
+推荐的做法是 **让 AI Agent 帮你写**：你描述想要的效果，Agent 按 AP 自带的 Agent Skills 设计、编写、测试预设。
 
-   ```sh
-   npx --yes https://github.com/mirrorange/advanced-preset/releases/download/v1.5.0/advanced-preset-1.5.0.tgz init my-preset --name "我的预设"
-   cd my-preset && npm install
-   ```
+```sh
+npx advanced-preset@latest init my-preset --name "我的预设"
+cd my-preset && npm install
+```
 
-2. 用 Agent（Codex、Claude Code、Cursor、Gemini CLI……）打开仓库，说：“请使用 ap-preset-design 技能，先和我讨论设计。”
-3. `npm run dev`，在 AP 面板 → **调试** → **开发源** 中填入 `http://localhost:4747`，边改边看。
+> 也可以在 [advanced-preset-template](https://github.com/mirrorange/advanced-preset-template) 页面点击 **Use this template** 创建仓库。
+
+1. 用 Agent（Codex、Claude Code、Cursor、Gemini CLI……）打开仓库，说：“请使用 ap-preset-design 技能，先和我讨论设计。”
+2. 运行 `npm run dev`，在 AP 面板 → **调试** → **开发源** 中填入 `http://localhost:4747`，边改边看。
 
 | 文档 | 内容 |
 | --- | --- |
 | [预设开发指南](docs/guide/README.md) | 面向新手：概念、设计方法、用 Agent 开发、测试与发布，以花瓣预设为例 |
 | [参考文档](docs/reference/README.md) | 面向高级开发者与 Agent：源码格式、编译规则、运行期行为的完整说明 |
-| [Agent Skills](packages/cli/template/.agents/skills) | `ap-preset-design` / `ap-preset-authoring` / `ap-preset-testing`，模板自带，也可用 `npx ap skills install` 安装到任何预设仓库 |
+| [Agent Skills](packages/cli/template/.agents/skills) | `ap-preset-design` / `ap-preset-authoring` / `ap-preset-testing`，模板自带，也可用 `npx ap skills install` 安装 |
 | [`ap` 命令行](docs/reference/cli.md) | `build` / `check` / `dev` / `preview` / `init` / `skills` |
 
 完整目录见 [docs/](docs/README.md)。
 
-## 仓库结构
-
-| 路径 | 内容 |
-| --- | --- |
-| `src/` | 扩展本体（Vue 3 + TS，Shadow DOM UI） |
-| `src/core/` | 生成管线：分类、组装、拦截、Orchestrator、传输驱动、响应编码 |
-| `src/store/` | 设置、预设、配置层、Carrier、Sidecar、事件日志 |
-| `src/ui/` | 阶段面板、卡片、设置面板与主题 |
-| `packages/protocol/` | 预设协议：表达式、宏、结构、工作流、解析器、补丁、配置层（扩展与 CLI 共用） |
-| `packages/cli/` | `ap` 工具链（打包后提交在 `dist/ap.js`，无需安装依赖即可运行）；`template/` 是 `ap init` 的模板，含 Agent Skills |
-| `docs/` | 预设开发指南与参考文档 |
-| `dist/` | 构建产物（SillyTavern 直接加载，需随源码一起提交） |
-
-## 开发
+## 🛠️ 开发
 
 ```sh
 pnpm install
@@ -87,7 +95,31 @@ pnpm test         # vitest
 pnpm typecheck    # vue-tsc
 ```
 
-
-- 修改内置预设后运行 `pnpm sync-presets`，将 `../petals-preset/dist` 同步到 `dist/presets/`；
+- 修改内置预设后运行 `pnpm sync-presets`，把 `../petals-preset/dist` 同步到 `dist/presets/`；
 - 修改 `docs/reference/` 或 `docs/guide/13-petals-case-study.md` 后运行 `pnpm sync-skills`，更新 Agent Skills 中的文档副本（`pnpm test` 会检查是否同步）；
-- 发布时附上 `npm pack packages/cli` 生成的 `advanced-preset-<版本>.tgz`，预设仓库通过这个地址安装 `ap`。
+- `dist/` 与 `packages/cli/dist/ap.js` 需随源码一起提交：ST 直接从仓库加载扩展。
+
+<details>
+<summary><b>仓库结构</b></summary>
+
+| 路径 | 内容 |
+| --- | --- |
+| `src/` | 扩展本体（Vue 3 + TS，Shadow DOM UI） |
+| `src/core/` | 生成管线：分类、组装、拦截、Orchestrator、传输驱动、响应编码 |
+| `src/store/` | 设置、预设、配置层、Carrier、Sidecar、事件日志 |
+| `src/ui/` | 阶段面板、卡片、设置面板与主题 |
+| `packages/protocol/` | 预设协议：表达式、宏、结构、工作流、解析器、补丁、配置层（扩展与 CLI 共用，不单独发布） |
+| `packages/cli/` | npm 包 `advanced-preset`（`ap` 命令，打包为自包含的 `dist/ap.js`）；`template/` 是 `ap init` 的模板，含 Agent Skills |
+| `docs/` | 预设开发指南与参考文档 |
+| `dist/` | 扩展构建产物与内置预设 |
+
+</details>
+
+### 发布
+
+1. 同步修改 `package.json`、`manifest.json`、`packages/cli/package.json` 中的版本号，`pnpm build` 后提交；
+2. 推送 `v<版本>` 标签。GitHub Actions（[`release.yml`](.github/workflows/release.yml)）会检查标签与版本号一致、运行测试与类型检查、通过 npm Trusted Publishing 发布 `advanced-preset`，并创建 GitHub Release。
+
+## 📄 许可
+
+扩展、协议与 CLI 以 [MIT](LICENSE) 许可发布。`packages/cli/template/`（预设模板）与 `dist/presets/` 中内置的花瓣预设以 [CC0 1.0](packages/cli/template/LICENSE) 发布。

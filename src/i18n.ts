@@ -29,3 +29,14 @@ export function pt(preset: APreset, section: keyof LocaleTable, id: string, fiel
   const v = entry?.[field];
   return typeof v === 'string' && v ? v : fallback;
 }
+
+/** Preset display name / description for the current locale (`locales/<lang>.yaml#name|description`). */
+export function presetName(preset: APreset): string {
+  const v = presetLocale(preset)?.name;
+  return typeof v === 'string' && v ? v : preset.name;
+}
+
+export function presetDescription(preset: APreset): string | undefined {
+  const v = presetLocale(preset)?.description;
+  return typeof v === 'string' && v ? v : preset.description;
+}

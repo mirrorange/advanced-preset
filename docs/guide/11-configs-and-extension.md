@@ -64,9 +64,11 @@ configurations:
 
 ## 界面翻译
 
-预设里的名称和说明（模组名、分组名、参数说明、配置名……）通常用英文写。想让中文用户看到中文界面，在 `locales/zh-cn.yaml` 里写对应的翻译：
+预设里的名称和说明（预设本身的名称与描述、模组名、分组名、参数说明、配置名……）通常用英文写。想让中文用户看到中文界面，在 `locales/zh-cn.yaml` 里写对应的翻译：
 
 ```yaml
+name: 花瓣预设
+description: 与小苍兰一起写故事吧！Freesia 写故事，Petals 提建议，双角色驱动的工作流
 groups:
   style:
     label: 文风
