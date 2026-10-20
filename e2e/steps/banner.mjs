@@ -1,6 +1,12 @@
 // Banner under ST's Chat Completion preset select (I-71) and Carrier-only buttons (I-72).
 export default async function (page, shots) {
-  const tag = process.env.AP_VIEWPORT || '1400x900';
+  const tag = `${process.env.AP_VIEWPORT || '1400x900'}${process.env.AP_LANG ? `-${process.env.AP_LANG}` : ''}`;
+  if (process.env.AP_LANG) {
+    await page.evaluate((l) => localStorage.setItem('language', l), process.env.AP_LANG);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.AdvancedPreset, null, { timeout: 60000 });
+    await page.waitForTimeout(3000);
+  }
   await page.evaluate(() => document.querySelector('.character_select')?.click());
   await page.waitForTimeout(1000);
   await page.locator('#ai-config-button > .drawer-toggle').click();
