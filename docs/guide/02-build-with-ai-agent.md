@@ -32,10 +32,10 @@ Agent（能读写文件、运行命令的 AI 编程助手，例如 Codex、Claud
 
 **方式 B：用命令创建**
 
-在终端中运行（版本号换成 [Releases](https://github.com/mirrorange/advanced-preset/releases) 里的最新版本）：
+在终端中运行（需要 [Node.js](https://nodejs.org/) 20 或更新版本）：
 
 ```sh
-npx --yes https://github.com/mirrorange/advanced-preset/releases/download/v1.5.0/advanced-preset-1.5.0.tgz init my-preset --name "我的预设" --author 你的名字
+npx advanced-preset@latest init my-preset --name "我的预设" --author 你的名字
 cd my-preset
 npm install
 ```

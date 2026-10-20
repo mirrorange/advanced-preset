@@ -9505,6 +9505,8 @@ function validate(p, map, diag) {
   for (const m of p.migrations) if (!/^(<=?|>=?|=)?\s*\d+(\.\d+){0,2}/.test(m.from)) diag.error(`migration range \`${m.from}\` is not a semver range`, { file: M, path: "migrations" });
   for (const [lang, table] of Object.entries(p.locales)) {
     const file = `locales/${lang}.yaml`;
+    for (const k of ["name", "description"])
+      if (table[k] !== void 0 && typeof table[k] !== "string") diag.warn(`${k} must be a string`, { file, path: k });
     const known = {
       modules: moduleIds,
       params: paramIds,
@@ -9663,7 +9665,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.5.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.6.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -9759,7 +9761,7 @@ async function installSkills(target, source = SKILLS_SOURCE) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.5.0" : "0.0.0-dev";
+var VERSION = true ? "1.6.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage

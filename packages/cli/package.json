@@ -1,8 +1,29 @@
 {
   "name": "advanced-preset",
-  "version": "1.5.0",
+  "version": "1.6.0",
+  "description": "Advanced Preset CLI (ap) — build, check, preview and hot-reload Advanced Preset sources for SillyTavern.",
+  "keywords": [
+    "advanced-preset",
+    "sillytavern",
+    "preset",
+    "prompt",
+    "chat-completion",
+    "llm",
+    "roleplay",
+    "cli"
+  ],
+  "homepage": "https://github.com/mirrorange/advanced-preset#readme",
+  "bugs": {
+    "url": "https://github.com/mirrorange/advanced-preset/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mirrorange/advanced-preset.git",
+    "directory": "packages/cli"
+  },
+  "license": "MIT",
+  "author": "mirrorange",
   "type": "module",
-  "description": "Advanced Preset CLI \u2014 build, check, preview and hot-reload Advanced Preset sources.",
   "bin": {
     "ap": "dist/ap.js"
   },
@@ -10,6 +31,9 @@
     "dist",
     "template"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json"
@@ -17,14 +41,5 @@
   "devDependencies": {
     "@advanced-preset/protocol": "workspace:*",
     "yaml": "^2.9.1"
-  },
-  "engines": {
-    "node": ">=20"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mirrorange/advanced-preset.git",
-    "directory": "packages/cli"
-  },
-  "license": "MIT"
+  }
 }

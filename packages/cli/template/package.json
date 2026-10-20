@@ -2,6 +2,7 @@
   "name": "__PRESET_ID__",
   "version": "0.1.0",
   "private": true,
+  "license": "CC0-1.0",
   "type": "module",
   "scripts": {
     "build": "ap build",
@@ -11,6 +12,6 @@
     "skills": "ap skills install"
   },
   "devDependencies": {
-    "advanced-preset": "https://github.com/mirrorange/advanced-preset/releases/download/v__CLI_VERSION__/advanced-preset-__CLI_VERSION__.tgz"
+    "advanced-preset": "^__CLI_VERSION__"
   }
 }
