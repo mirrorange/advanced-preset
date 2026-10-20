@@ -1,6 +1,6 @@
 // Run after `um`: export all user modules, import the file back, then delete the copy.
 export default async function (page, shots) {
-  await page.evaluate(() => document.getElementById('ap-preset-button').click());
+  await page.evaluate(() => window.AdvancedPreset.togglePanel());
   await page.waitForTimeout(400);
   await page.locator('ap-panel .tab').nth(2).click();
   await page.waitForTimeout(400);

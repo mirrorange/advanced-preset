@@ -6,7 +6,7 @@ const shot = async (page, shots, name) => {
   const box = await page.locator('ap-panel .panel-head').evaluate((h) => { const r = h.parentElement.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; });
   await page.screenshot({ path: `${shots}/bv-${name}.png`, clip: box });
 };
-const toggle = () => document.getElementById('ap-preset-button').click();
+const toggle = () => window.AdvancedPreset.togglePanel();
 
 export default async function (page, shots) {
   fs.writeFileSync(new URL('../mock.json', import.meta.url).pathname, JSON.stringify({ delay: 5 }));

@@ -12,7 +12,7 @@ export default async function (page, shots) {
     fs.writeFileSync(f, src.replace(/version: 7\.3\.0/, 'version: 7.3.1').replace(/  - id: after-identity\n(    .*\n){4}/, ''));
     await page.waitForTimeout(5000);
     console.log('toasts', await page.evaluate(() => [...document.querySelectorAll('#toast-container .toast')].map((t) => t.textContent).join(' | ')));
-    await page.evaluate(() => document.getElementById('ap-preset-button').click());
+    await page.evaluate(() => window.AdvancedPreset.togglePanel());
     await page.waitForTimeout(400);
     await page.locator('ap-panel .tab').nth(2).click();
     await page.waitForTimeout(400);

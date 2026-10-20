@@ -5,7 +5,7 @@ export default async function (page, shots) {
   const tag = `${transport}-${workflow}`.replace(/\s+/g, '').toLowerCase();
   await page.evaluate(() => document.querySelector('.character_select')?.click());
   await page.waitForTimeout(2500);
-  await page.evaluate(() => document.getElementById('ap-preset-button').click());
+  await page.evaluate(() => window.AdvancedPreset.togglePanel());
   await page.waitForTimeout(400);
   await page.locator('ap-panel .tab').nth(1).click();
   await page.waitForTimeout(300);
@@ -13,7 +13,7 @@ export default async function (page, shots) {
   await page.locator('ap-panel .segmented button', { hasText: new RegExp(`^${workflow}$`) }).first().click();
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${shots}/cfg-${tag}.png` });
-  await page.evaluate(() => document.getElementById('ap-preset-button').click());
+  await page.evaluate(() => window.AdvancedPreset.togglePanel());
   fs.writeFileSync(new URL('../mock.json', import.meta.url).pathname, JSON.stringify({ delay: Number(process.env.AP_DELAY || 60) }));
   fs.writeFileSync(new URL('../mock-requests.jsonl', import.meta.url).pathname, '');
   await page.fill('#send_textarea', process.env.AP_INPUT || 'Mira walks to the lighthouse.');

@@ -1,4 +1,4 @@
-/** UI bootstrap: custom elements, theme, message mounts, preset-panel entry, settings row and panel. */
+/** UI bootstrap: custom elements, theme, message mounts, preset banner, settings row and panel. */
 import { st } from '@/st/host';
 import { createApp } from 'vue';
 import { defineHost } from './host';
@@ -11,6 +11,7 @@ import Cards from './message/Cards.vue';
 import Dock from './message/Dock.vue';
 import Panel from './panel/Panel.vue';
 import SettingsDrawer from './SettingsDrawer.vue';
+import PresetBanner from './PresetBanner.vue';
 
 export { refreshMessages };
 
@@ -29,6 +30,7 @@ export function mountUi(): void {
   defineHost('ap-cards', Cards, ['mesid']);
   defineHost('ap-dock', Dock);
   defineHost('ap-panel', Panel);
+  defineHost('ap-preset-banner', PresetBanner);
   installTheme();
   refreshActivePreset();
 

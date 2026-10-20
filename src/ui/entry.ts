@@ -1,15 +1,14 @@
 /**
- * Panel placement: AP's entry is an icon button beside ST's Chat Completion preset select, and the
- * panel itself (`<ap-panel>`) lives inside ST's AI Response Configuration drawer (`#left-nav-panel`),
- * covering it. The drawer already handles desktop / mobile sizing and the top bar, so AP inherits a
+ * Panel placement: AP's entry is a banner below ST's Chat Completion preset select, shown while a
+ * Carrier is selected (I-71); the panel itself (`<ap-panel>`) lives inside ST's AI Response
+ * Configuration drawer (`#left-nav-panel`), covering it. The drawer already handles desktop / mobile sizing and the top bar, so AP inherits a
  * layout that never sits under ST's own UI.
  */
 import { watch } from 'vue';
-import { t } from '@/i18n';
 import { ui } from './state';
 
 const DRAWER = 'left-nav-panel';
-const BUTTON = 'ap-preset-button';
+const BANNER = 'ap-preset-banner';
 
 function drawer(): HTMLElement | null {
   return document.getElementById(DRAWER);
@@ -23,25 +22,19 @@ export function openDrawer(): void {
   toggle?.click();
 }
 
-function mountButton(): void {
-  // Next to the preset select, before save / rename / save-as (the header row already wraps).
-  const group = document.querySelector('#settings_preset_openai')?.nextElementSibling;
-  if (!group || group.querySelector(`#${BUTTON}`)) return;
-  const btn = document.createElement('div');
-  btn.id = BUTTON;
-  btn.className = 'menu_button menu_button_icon';
-  btn.setAttribute('role', 'button');
-  btn.tabIndex = 0;
-  btn.title = t('panel.open.title');
-  btn.setAttribute('aria-label', t('panel.open.title'));
-  const icon = document.createElement('i');
-  icon.className = 'fa-fw fa-solid fa-layer-group';
-  btn.append(icon);
-  const toggle = () => { ui.panelOpen = !ui.panelOpen; };
-  btn.addEventListener('click', toggle);
-  btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
-  group.prepend(btn);
-  watch(() => ui.panelOpen, (open) => btn.classList.toggle('active', open), { immediate: true });
+/** Banner right below the preset select row (the row is the select's parent). */
+function mountBanner(): void {
+  const row = document.getElementById('settings_preset_openai')?.parentElement;
+  if (!row || row.nextElementSibling?.localName === BANNER) return;
+  row.after(document.createElement(BANNER));
+}
+
+/** Carriers are rebuilt from their AP preset, so renaming or copying them only creates orphans (I-72). */
+const CARRIER_HIDDEN = ['[data-preset-manager-rename="openai"]', '#new_oai_preset'];
+function hideCarrierButtons(): void {
+  watch(() => ui.presetId, (id) => {
+    for (const el of document.querySelectorAll(CARRIER_HIDDEN.join(','))) el.classList.toggle('ap-carrier-hidden', Boolean(id));
+  }, { immediate: true });
 }
 
 function mountPanel(): void {
@@ -57,9 +50,10 @@ function mountPanel(): void {
 }
 
 export function mountEntry(): void {
-  mountButton();
+  mountBanner();
+  hideCarrierButtons();
   mountPanel();
-  // Whoever opens AP (entry button, extension settings, cards) also needs the drawer visible, and
+  // Whoever opens AP (banner, extension settings, cards) also needs the drawer visible, and
   // closing the drawer closes AP so it reopens on ST's own settings.
   watch(() => ui.panelOpen, (open) => { if (open) openDrawer(); });
   const el = drawer();

@@ -64,6 +64,6 @@ You are Freesia, daughter of day and night, …
 
 ## 安装构建好的预设
 
-不用开发服务器时，也可以手动安装：运行 `npm run build`，然后在 AP 面板 → **预设** → 导入 **文件**，选择 `dist/` 里的 `.apreset.json`。发布到网上后，用户还可以通过 **链接** 导入，并在之后“从来源更新”（见[测试、发布与更新](12-test-and-release.md)）。
+不用开发服务器时，也可以手动安装：运行 `npm run build`，然后在 AP 面板 → **预设** → 导入 **文件**（或直接用 ST 对话补全预设的导入按钮），选择 `dist/` 里的 `.apreset.json`。发布到网上后，用户还可以通过 **链接** 导入，并在之后“从来源更新”（见[测试、发布与更新](12-test-and-release.md)）。
 
 下一章：[区域、模组与条目](04-regions-and-modules.md)。
