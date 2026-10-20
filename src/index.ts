@@ -18,6 +18,7 @@ import { onMessageReceived } from '@/app/receive';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
+import { installPresetIo } from '@/app/st-preset-io';
 import { mountUi } from '@/ui';
 import './global.css';
 
@@ -57,6 +58,7 @@ async function init(): Promise<void> {
   settings();
   installFetchGate();
   installImpersonate();
+  installPresetIo();
   await loadHostModules();
   await loadBuiltins();
   for (const { preset } of listPresets()) {
