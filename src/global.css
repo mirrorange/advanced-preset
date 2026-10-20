@@ -1,2 +1,4 @@
-/* The only global rule AP ships (§16.2): pure-meta turns hide ST’s message text behind the reply card. */
+/* AP's only global rules (§16.2): pure-meta turns hide ST’s message text behind the reply card;
+   rename / save-as of ST's Chat Completion preset are hidden while a Carrier is selected (I-72). */
 .mes_text.ap-hidden { display: none !important; }
+.ap-carrier-hidden { display: none !important; }

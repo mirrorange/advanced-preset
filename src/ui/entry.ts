@@ -29,6 +29,14 @@ function mountBanner(): void {
   row.after(document.createElement(BANNER));
 }
 
+/** Carriers are rebuilt from their AP preset, so renaming or copying them only creates orphans (I-72). */
+const CARRIER_HIDDEN = ['[data-preset-manager-rename="openai"]', '#new_oai_preset'];
+function hideCarrierButtons(): void {
+  watch(() => ui.presetId, (id) => {
+    for (const el of document.querySelectorAll(CARRIER_HIDDEN.join(','))) el.classList.toggle('ap-carrier-hidden', Boolean(id));
+  }, { immediate: true });
+}
+
 function mountPanel(): void {
   const el = drawer();
   if (!el) {
@@ -43,6 +51,7 @@ function mountPanel(): void {
 
 export function mountEntry(): void {
   mountBanner();
+  hideCarrierButtons();
   mountPanel();
   // Whoever opens AP (banner, extension settings, cards) also needs the drawer visible, and
   // closing the drawer closes AP so it reopens on ST's own settings.
