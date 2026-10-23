@@ -7377,7 +7377,9 @@ var FORMAT_VERSION = 3;
 var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-multi"];
 var TOOL_ARG_STREAMING = ["auto", "on", "off"];
 var BUILD_VAR_TYPES = ["string", "list", "dict"];
-var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom"];
+var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom", "annotations"];
+var INLINE_STRUCTURE_KINDS = ["annotations"];
+var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
 
 // ../protocol/src/expr.ts
 var ExprError = class extends Error {
@@ -7610,7 +7612,8 @@ var STRUCTURE_PROPERTIES = {
   memory: ["scope", "operation", "key", "content"],
   synopsis: ["time", "location", "event", "summary"],
   options: ["label", "content"],
-  custom: []
+  custom: [],
+  annotations: []
 };
 function structureFieldSchema(decl, expand = (t) => t) {
   const d = (t) => t ? expand(t).trim() || void 0 : void 0;
@@ -7659,6 +7662,8 @@ function structureFieldSchema(decl, expand = (t) => t) {
         },
         ...decl.count ? { minItems: decl.count, maxItems: decl.count } : {}
       });
+    case "annotations":
+      return withDesc({ type: "string" });
     case "custom":
       return decl.shape === "kv" ? withDesc({ type: "object", additionalProperties: { type: "string" } }) : withDesc({ type: "string" });
   }
@@ -7739,7 +7744,8 @@ function stageSchema(stage, description, tools = DEFAULT_TOOLS, expand = same) {
 function tool(name, description, parameters) {
   return { type: "function", function: { name, ...description ? { description } : {}, parameters } };
 }
-function turnArtifacts(tools, workflow, stages, structures, expand = same) {
+function turnArtifacts(tools, workflow, stages, allStructures, expand = same) {
+  const structures = allStructures.filter((s) => !isInlineStructure(s));
   const desc = (template, stage) => {
     if (!template) return void 0;
     const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();
@@ -8827,6 +8833,14 @@ function compile(tree) {
       decl.shape = o.shape === "kv" ? "kv" : "text";
       decl.display = o.display === "hidden" ? "hidden" : "card";
     }
+    if (kind === "annotations") {
+      if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
+      if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
+      if (o.history !== void 0) {
+        if (typeof o.history === "number" && Number.isInteger(o.history) && o.history >= 0) decl.history = o.history;
+        else diag.error("history must be a non-negative integer", { ...where, path: `${where.path}.history` });
+      }
+    } else if (o.history !== void 0) diag.error("only annotations structures support `history`", { ...where, path: `${where.path}.history` });
     if (o.title !== void 0) decl.title = text(str2(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);
@@ -9433,6 +9447,7 @@ function validate(p, map, diag) {
   for (const [k, ids] of byKind) if (ids.length > 1) diag.error(`only one structure of kind ${k} is allowed (${ids.join(", ")})`, { file: M, path: "structures" });
   const fields = /* @__PURE__ */ new Map();
   for (const s of Object.values(p.structures)) {
+    if (isInlineStructure(s)) continue;
     if (fields.has(s.field)) diag.error(`structures ${fields.get(s.field)} and ${s.id} share field \`${s.field}\``, { file: M, path: "structures" });
     fields.set(s.field, s.id);
   }
@@ -9446,7 +9461,7 @@ function validate(p, map, diag) {
   if (env.thinking.name === env.result.name) diag.error("envelope thinking and result fields must differ", T);
   const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
   if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
-  const structureFields = new Set(Object.values(p.structures).map((s) => s.field));
+  const structureFields = new Set(Object.values(p.structures).filter((s) => !isInlineStructure(s)).map((s) => s.field));
   function checkNames(w, where) {
     const structs = Object.values(p.structures);
     const a = turnArtifacts(p.tools, w, w.stages, structs);

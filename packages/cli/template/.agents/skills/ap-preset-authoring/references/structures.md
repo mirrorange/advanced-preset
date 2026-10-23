@@ -1,6 +1,6 @@
 # 结构
 
-**结构**是模型在正文之外交回的附加数据：叙述者的回复、记忆更新、剧情总结、代写、事件摘要、选项，以及预设自定义的块。结构的**机制**（数据形状、解析、保存、卡片 UI）由 AP 内置；预设只为它们**命名**（标签名 / 字段名）并提供**说明文字**。
+**结构**是模型在正文之外交回的附加数据：叙述者的回复、记忆更新、剧情总结、代写、事件摘要、选项、行内批注，以及预设自定义的块。结构的**机制**（数据形状、解析、保存、卡片 UI）由 AP 内置；预设只为它们**命名**（标签名 / 字段名）并提供**说明文字**。
 
 ```yaml
 structures:
@@ -27,7 +27,7 @@ structures:
 
 | 字段 | 默认 | 说明 |
 | --- | --- | --- |
-| `kind` | 结构 id | 种类：`reply` `memory` `recap` `impersonate` `synopsis` `options` `custom`。其他值报错 |
+| `kind` | 结构 id | 种类：`reply` `memory` `recap` `impersonate` `synopsis` `options` `annotations` `custom`。其他值报错 |
 | `tag` | 结构 id | 对话式写法中的 XML 标签名，须匹配 `^[A-Za-z_][\w.-]*$` |
 | `field` | 结构 id | 指令式写法中的 JSON 字段名 / 工具参数名，须匹配 `^[A-Za-z_]\w*$` |
 | `description` | — | 字段整体的说明，进入 JSON Schema 的 `description`（模型可见，支持宏） |
@@ -38,6 +38,7 @@ structures:
 | `formatPrompt.field` | `''` | 指令式下的格式说明，由 `{{ap::structure::<id>}}` 输出 |
 | `shape` | `text` | 仅 `custom`：`text`（一段文字）或 `kv`（键值对） |
 | `display` | `card` | 仅 `custom`：`card`（消息下方显示可折叠卡片）或 `hidden`（只保存，不显示） |
+| `history` | `0` | 仅 `annotations`：把批注以 CriticMarkup 重新注入最近 N 条助手消息的历史（见 [annotations](#annotations)） |
 
 约束（报错）：
 
@@ -54,9 +55,12 @@ structures:
 | `impersonate` | `string` | — | 是 | 代写的用户下一条输入，卡片可“填入输入框” |
 | `synopsis` | `{ time, location, event, summary }` | `time` `location` `event` `summary` | 是 | 本段的事件摘要卡片；省 token 时替代旧回复 |
 | `options` | `{ label, content }[]` | `label` `content` | 是 | 选项卡片，点击填入输入框 |
+| `annotations` | 正文内标记 → `Annotation[]` | — | — | **行内**结构：写在正文里，解析后从正文移除，显示为虚线下划线与气泡 |
 | `custom` | `string` 或 `Record<string, string>` | — | 是 | 预设自定义的块（状态栏等） |
 
 “必填”指生成的 JSON Schema 中该字段是否进入 `required`。`memory` 与 `recap` 是可选的：模型可以不写。
+
+`annotations` 是唯一的**行内结构**：它不是 schema 字段，也没有标签，两种写法下都由模型直接写在正文里（`tag` / `field` / `description` / `properties` 不使用）。
 
 ## 何时请求结构
 
@@ -74,6 +78,7 @@ structures: [options]
 
 - 指令式：作为字段加入回合 schema（结构化、单工具），或作为锚点阶段工具的附加参数（多工具），位置见 [workflows.md](workflows.md#结构的位置)；
 - 对话式：AP 从模型输出中提取对应标签；
+- 行内结构（`annotations`）：两种写法相同，AP 从正文中解析标记；
 
 由脚本或其他扩展发起的任务生成（`gen.type == "script"` 且 `gen.origin == "task"`）不请求任何结构，即使模组列出了它们。
 
@@ -185,6 +190,48 @@ structures:
 Previous status: {{ap::structure::status::last}}
 ```
 
+### annotations
+
+行内批注：模型在正文中用 CriticMarkup 的子集标出一段文字并附上批注：
+
+```text
+她{==轻轻推开门==}{>>这里的“轻轻”呼应上一幕的犹豫。<<}，走了进去。
+```
+
+```yaml
+structures:
+  annotations:
+    kind: annotations
+    history: 0
+    formatPrompt:
+      tag: |-
+        You may annotate up to 3 phrases of your prose: {==quoted text==}{>>your note<<}.
+```
+
+`formatPrompt` 只需写 `tag` 或 `field` 之一，另一个自动取相同文字（行内写法与输出方式无关）。
+
+**语法**（严格成对）：
+
+| 写法 | 结果 |
+| --- | --- |
+| `{==原文==}{>>批注<<}` | 一条批注；正文保留“原文” |
+| 单独的 `{==原文==}` | 去掉标记，保留“原文” |
+| 单独的 `{>>批注<<}` | 整段移除 |
+| 未闭合的 `{==` | 丢弃标记，保留其后文字 |
+| 未闭合的 `{>>` | 按原文保留 |
+
+标记不能跨段落（空行），也不能嵌套。被批注的“原文”应是短语或句子。
+
+**保存**：消息的 `mes` 始终是**去掉标记后的干净正文**；批注单独存于 sidecar 的 `annotations`（见 [artifact-and-runtime.md](artifact-and-runtime.md#行内批注)）。每条批注用偏移 + 原文 + 前后各约 32 字的上下文锚定；用户编辑正文后 AP 重新定位，找不到的批注成为**孤立批注**——保留但不显示，可在调试页查看。工作流的补丁作用于带标记的文本，因此补丁前后各有一份批注，随“显示 / 撤销补丁”切换。
+
+**流式**：生成过程中 AP 只把已确定的部分交给 ST，标记不会闪现；下划线在生成结束后出现。
+
+**历史**：默认（`history: 0`）历史中只有干净正文。`history: N` 时，最近 N 条助手消息（未被用户改动过的）在组装时把批注以 CriticMarkup 重新注入，帮助模型保持批注风格；代价是更多 token。
+
+**显示**：被批注的文字显示虚线下划线（CSS Custom Highlight API，不改动消息 DOM；不支持时退化为 `<ap-anno>` 包裹），悬停或轻点弹出气泡，署名为叙述者。同源 iframe 前端（如酒馆助手渲染的界面）自动适配，详见 [artifact-and-runtime.md](artifact-and-runtime.md#行内批注)。用户可在外观设置中关闭显示或更改下划线颜色。
+
+请求方式与其他结构相同：由生效模组的 `structures: [annotations]` 请求，并在正文里放 `{{ap::structure::annotations}}` 输出格式说明。
+
 ### 保存条件
 
-记忆与总结只在**拦截器参与的生成**中保存，且生成类型不是 `quiet`（后台生成）。所有结构值都写在消息的 `extra.advanced_preset.structures` 中（见 [artifact-and-runtime.md](artifact-and-runtime.md)）。
+记忆与总结只在**拦截器参与的生成**中保存，且生成类型不是 `quiet`（后台生成）。所有结构值都写在消息的 `extra.advanced_preset.structures` 中，行内批注除外（`extra.advanced_preset.annotations`，见 [artifact-and-runtime.md](artifact-and-runtime.md)）。

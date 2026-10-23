@@ -30,7 +30,7 @@ let bubbleHost: () => Element | null = () => null;
 export function setBubbleHost(f: () => Element | null): void { bubbleHost = f; }
 
 function css(): string {
-  const deco = 'text-decoration-line: underline; text-decoration-style: dashed; text-decoration-color: var(--ap-anno-color); text-decoration-thickness: 1px; text-underline-offset: 0.25em;';
+  const deco = 'text-decoration-line: underline; text-decoration-style: dashed; text-decoration-color: var(--ap-anno-color); text-decoration-thickness: max(1px, 0.08em); text-underline-offset: 0.25em;';
   return `:root { --ap-anno-color: ${color}; }
 ::highlight(${NAME}) { ${deco} }
 ap-anno { ${deco} text-decoration-skip-ink: none; cursor: help; }`;
