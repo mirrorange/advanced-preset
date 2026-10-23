@@ -1,5 +1,6 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
+  isInlineStructure,
   MACRO_HEADS, TOOL_ARG_STREAMING, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
@@ -178,6 +179,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   for (const [k, ids] of byKind) if (ids.length > 1) diag.error(`only one structure of kind ${k} is allowed (${ids.join(', ')})`, { file: M, path: 'structures' });
   const fields = new Map<string, string>();
   for (const s of Object.values(p.structures)) {
+    if (isInlineStructure(s)) continue;
     if (fields.has(s.field)) diag.error(`structures ${fields.get(s.field)} and ${s.id} share field \`${s.field}\``, { file: M, path: 'structures' });
     fields.set(s.field, s.id);
   }
@@ -193,7 +195,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   if (env.thinking.name === env.result.name) diag.error('envelope thinking and result fields must differ', T);
   const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
   if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
-  const structureFields = new Set(Object.values(p.structures).map((s) => s.field));
+  const structureFields = new Set(Object.values(p.structures).filter((s) => !isInlineStructure(s)).map((s) => s.field));
   function checkNames(w: APreset['workflows'][number], where: Where) {
     const structs = Object.values(p.structures);
     const a = turnArtifacts(p.tools, w, w.stages, structs);

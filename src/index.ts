@@ -15,6 +15,7 @@ import { setNextGeneration } from '@/core/classify';
 import { registry } from '@/core/context';
 import { debugLog } from '@/core/debug';
 import { onMessageReceived } from '@/app/receive';
+import { annotationsApi, installAnnotations } from '@/app/annotations';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
@@ -39,6 +40,8 @@ const api = {
   update: updateExtension,
   /** Open / close the AP panel (toggles without an argument). */
   togglePanel: (open?: boolean) => { ui.panelOpen = open ?? !ui.panelOpen; },
+  /** Inline annotations of messages (I-83). */
+  annotations: annotationsApi,
 };
 
 // Must exist synchronously: ST resolves the interceptor by name when generating.
@@ -62,6 +65,7 @@ async function init(): Promise<void> {
   installFetchGate();
   installImpersonate();
   installPresetIo();
+  installAnnotations();
   await loadHostModules();
   await loadBuiltins();
   for (const { preset } of listPresets()) {

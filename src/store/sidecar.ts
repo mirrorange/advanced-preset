@@ -3,7 +3,7 @@
  * stages, structures, events and diagnostics live here.
  */
 import { cloneData } from '@advanced-preset/protocol';
-import type { PatchResult, StageKind, Transport } from '@advanced-preset/protocol';
+import type { Annotation, PatchResult, StageKind, Transport } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
 import type { ChatEvent } from './eventlog';
 
@@ -34,6 +34,10 @@ export interface Sidecar {
   /** Patched content (kept so it can be re-applied after reverting to the draft). */
   patched?: string;
   patchesApplied: boolean;
+  /** Inline annotations anchored in `mes` (I-79). */
+  annotations?: Annotation[];
+  /** Patched workflows: annotations of the draft and of the patched text (swapped with `patchesApplied`). */
+  annotationVersions?: { draft: Annotation[]; patched: Annotation[] };
   structures: Record<string, unknown>;
   events: ChatEvent[];
   /** Meta segments of the user input of this turn (for `recent_meta`). */

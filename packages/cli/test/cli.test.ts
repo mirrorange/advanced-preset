@@ -269,6 +269,19 @@ tools:
     expect(diag.errors.map((e) => e.message).join('\n')).toMatch(/synopsis has no sub-field `mood`/);
     expect(preset!.structures.synopsis!.properties).toEqual({ time: 'When' });
   });
+
+  it('compiles inline annotations: shared format text, history, no field collisions', () => {
+    const t = tree();
+    t.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, field: reply, history: 2, formatPrompt: { tag: "Use {==x==}{>>y<<}." } }\n'));
+    const { preset, diag } = build(t);
+    expect(diag.errors).toEqual([]);
+    expect(preset!.structures.annotations).toMatchObject({ kind: 'annotations', history: 2, formatPrompt: { tag: 'Use {==x==}{>>y<<}.', field: 'Use {==x==}{>>y<<}.' } });
+    const bad = tree();
+    bad.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, history: -1 }\n  synopsis: { kind: synopsis, history: 1 }\n'));
+    const msgs = build(bad).diag.errors.map((e) => e.message).join('\n');
+    expect(msgs).toMatch(/history must be a non-negative integer/);
+    expect(msgs).toMatch(/only annotations structures support `history`/);
+  });
 });
 
 describe('assemble', () => {

@@ -339,6 +339,15 @@ export function compile(tree: SourceTree): CompileResult {
       decl.shape = o.shape === 'kv' ? 'kv' : 'text';
       decl.display = o.display === 'hidden' ? 'hidden' : 'card';
     }
+    if (kind === 'annotations') {
+      // Inline: the same instructions apply to every transport, so one text may serve both.
+      if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
+      if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
+      if (o.history !== undefined) {
+        if (typeof o.history === 'number' && Number.isInteger(o.history) && o.history >= 0) decl.history = o.history;
+        else diag.error('history must be a non-negative integer', { ...where, path: `${where.path}.history` });
+      }
+    } else if (o.history !== undefined) diag.error('only annotations structures support `history`', { ...where, path: `${where.path}.history` });
     if (o.title !== undefined) decl.title = text(str(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);

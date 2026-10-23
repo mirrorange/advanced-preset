@@ -4,8 +4,8 @@
  * a synthesised response that only carries story content (D1, D2, D20).
  */
 import {
-  applyPatches, partialTagTail, replyToPlainText, stripComments, terminalContentIndex,
-  type MemoryOp, type PatchResult, type TurnResult,
+  applyPatches, parseAnnotations, partialTagTail, replyToPlainText, stripComments, terminalContentIndex,
+  type Annotation, type MemoryOp, type PatchResult, type TurnResult,
 } from '@advanced-preset/protocol';
 import { nativeFetch, st, streamContextOf, toast } from '@/st/host';
 import { presetState } from '@/store/config';
@@ -111,6 +111,8 @@ async function run(
   const hasPatch = ctx.stages.some((s) => s.kind === 'patch');
   // Only the terminal content of a story turn streams into the message; drafts and patched text stay in the UI.
   const gate = ctx.origin === 'story' && !caller.schema && !hasPatch && terminalId !== null;
+  // Inline annotations (I-81): only the clean text that can no longer change is streamed.
+  const clean = ctx.structures.some((s) => s.kind === 'annotations') ? (s: string) => parseAnnotations(s, { final: false }).text : (s: string) => s;
   const maxSteps = ctx.transport === 'tool-multi' ? Math.max(1, ctx.config.connection.maxSteps) : 1;
   const started = Date.now();
   let reasoning = '';
@@ -139,7 +141,7 @@ async function run(
         updateLive(g, turn, reasoning + r.reasoning);
         if (gate && terminalId) {
           const text = turn.stages[terminalId]?.text ?? '';
-          if (text) onContent(text.slice(0, text.length - partialTagTail(text)).trimEnd());
+          if (text) onContent(clean(text.slice(0, text.length - partialTagTail(text))).trimEnd());
         }
       }
       rec.response = read.text || JSON.stringify(read.toolCalls);
@@ -205,6 +207,24 @@ function finish(
     if (plain && !raw.trim().startsWith('{')) { content = plain; warnings.push('fallback: plain text used as content'); }
   }
 
+  // Inline annotations (I-79): parsed after patches (applied to the marked-up text), draft and patched separately.
+  let annotations: Annotation[] | undefined;
+  let annotationVersions: Sidecar['annotationVersions'];
+  if (ctx.structures.some((s) => s.kind === 'annotations')) {
+    const parse = (s: string) => {
+      const r = parseAnnotations(s);
+      warnings.push(...r.warnings);
+      return r;
+    };
+    if (content) { const r = parse(content); content = r.text; annotations = r.annotations; }
+    if (draft !== undefined && patched !== undefined) {
+      const d = parseAnnotations(draft);
+      draft = d.text;
+      patched = content;
+      annotationVersions = { draft: d.annotations, patched: annotations ?? [] };
+    }
+  }
+
   const kindOf = (k: string) => Object.values(preset.structures).find((s) => s.kind === k);
   const replyDecl = kindOf('reply');
   const reply = replyDecl ? (turn.structures[replyDecl.id] as string | undefined) : undefined;
@@ -255,6 +275,8 @@ function finish(
     turn: turnKind,
     stages,
     ...(draft !== undefined ? { draft, patched } : {}),
+    ...(annotations?.length ? { annotations } : {}),
+    ...(annotationVersions && (annotationVersions.draft.length || annotationVersions.patched.length) ? { annotationVersions } : {}),
     patchesApplied: draft !== undefined,
     structures: turn.structures,
     events,
