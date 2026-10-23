@@ -4,6 +4,7 @@ import { createApp } from 'vue';
 import { defineHost } from './host';
 import { installTheme } from './theme';
 import { installMounts, refreshMessages } from './mounts';
+import { installAnnotationUi } from './annotations';
 import { mountEntry } from './entry';
 import { refreshActivePreset } from './state';
 import Stages from './message/Stages.vue';
@@ -40,4 +41,5 @@ export function mountUi(): void {
   mountEntry();
   mountSettings();
   installMounts();
+  installAnnotationUi();
 }

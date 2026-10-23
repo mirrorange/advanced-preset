@@ -22,6 +22,7 @@ import { installImpersonate } from '@/app/impersonate';
 import { installPresetIo } from '@/app/st-preset-io';
 import { mountUi } from '@/ui';
 import { ui } from '@/ui/state';
+import { registerChatSurface } from '@/ui/annotations';
 import './global.css';
 
 declare global {
@@ -102,5 +103,8 @@ async function init(): Promise<void> {
 
 /** ST manifest hook `update` (see manifest.json `hooks`). */
 export const advancedPresetOnUpdate = onExtensionUpdated;
+
+/** TauriTavern manifest hook `chatSurface` (I-85): registers the annotation participant in managed mode. */
+export const advancedPresetRegisterChatSurface = registerChatSurface;
 
 void init().catch((e) => console.error('[AP] init failed', e));

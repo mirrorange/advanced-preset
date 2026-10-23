@@ -76,3 +76,14 @@
 .kv-list dd { margin: 0; }
 
 .dock { margin: var(--ap-space-2) var(--ap-space-3); padding: var(--ap-space-2) var(--ap-space-3); border-radius: var(--ap-radius-md); background: var(--ap-panel-bg); border: 1px solid var(--ap-border); backdrop-filter: blur(8px); }
+
+/* Inline annotation bubble (I-86): parent document, top layer, placed against the annotated line. */
+.anno-bubble {
+  --actor: var(--ap-primary);
+  position: fixed; inset: auto; left: 0; top: 0; z-index: 2147483000; margin: 0; overflow: auto;
+  width: max-content; max-width: min(320px, calc(100vw - 16px)); max-height: min(50vh, 24em);
+  padding: var(--ap-space-2) var(--ap-space-3); border: 1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border)); border-radius: var(--ap-radius-md);
+  background: var(--ap-panel-bg); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: var(--ap-text); box-shadow: var(--ap-shadow);
+  font-size: var(--ap-font-size-sm); line-height: 1.55; text-align: left; overflow-wrap: anywhere;
+}
+.anno-author { font-weight: 700; font-size: var(--ap-font-size-xs); color: var(--actor); letter-spacing: 0.02em; margin-bottom: 2px; }
