@@ -8586,7 +8586,7 @@ function km(e) {
 }
 async function Am() {
 	let e = await Om();
-	e && e !== "2004738dba1a5188" && sessionStorage.getItem(Dm) !== e && km(e);
+	e && e !== "65e7d2b76b45241a" && sessionStorage.getItem(Dm) !== e && km(e);
 }
 async function jm() {
 	await Am();
@@ -8595,7 +8595,7 @@ async function Mm() {
 	let e = a().replace(/^third-party\//, ""), t = await Nm(e, !1);
 	if (t.status === 404 && (t = await Nm(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Om();
-	return r && r !== "2004738dba1a5188" ? (km(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "65e7d2b76b45241a" ? (km(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Nm = (t, n) => p("/api/extensions/update", {
 	method: "POST",
@@ -14037,7 +14037,7 @@ var fx = ["data-id"], px = ["aria-label", "onPointerdown"], mx = ["onClick"], hx
 				"icon",
 				"help"
 			]),
-			V("div", Cw, "Advanced Preset " + k(N("1.6.0")) + " · " + k(N("2004738dba1a5188")), 1)
+			V("div", Cw, "Advanced Preset " + k(N("1.6.0")) + " · " + k(N("65e7d2b76b45241a")), 1)
 		], 64));
 	}
 }), Tw = ["aria-label"], Ew = { class: "panel-head" }, Dw = { class: "panel-logo" }, Ow = { class: "grow" }, kw = { class: "panel-title ellipsis" }, Aw = { class: "panel-sub ellipsis" }, jw = {
@@ -14201,7 +14201,7 @@ function Jw() {
 //#region src/index.ts
 var Yw = {
 	version: "1.6.0",
-	buildId: "2004738dba1a5188",
+	buildId: "65e7d2b76b45241a",
 	nextGeneration: (e) => Ed(e),
 	listPresets: () => vu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -14253,7 +14253,7 @@ async function Qw() {
 	};
 	t.on(n.APP_READY, () => void a()), Jw(), cf("init", {
 		version: "1.6.0",
-		build: "2004738dba1a5188",
+		build: "65e7d2b76b45241a",
 		enabled: G().enabled
 	});
 }

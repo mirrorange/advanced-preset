@@ -14,7 +14,7 @@ AP 内置了一批角色扮演和写作中常用的功能。它们的“机制�
 | 代写（impersonate） | 替用户写的下一条消息 | `<Freesia_Impersonate>` |
 | 事件摘要（synopsis） | 本段的时间、地点、事件、概要 | `<synopsis>` |
 | 选项（options） | 几条供用户选择的下一步输入 | `<options>` |
-| 行内批注（annotations） | 叙述者在正文里给某段文字加的批注 | `annotations`（默认关闭） |
+| 行内批注（annotations） | 写在正文里、针对某段文字的批注 | `annotations`（用于“Freesia 的评论”） |
 | 自定义（custom） | 任何你想要的块，比如状态栏 | — |
 
 在 `preset.yaml` 里，你为每个结构写好：
@@ -127,7 +127,7 @@ ST 的“代写”（Impersonate）按钮会被 AP 接管：点击后，AP 发�
 - 酒馆助手等前端界面若在同源 iframe 中显示了同样的文字，也会自动画上下划线；前端可以用 `data-ap-annotations="off"` 关闭，或用 `"manual"` 自己通过 API 绘制；
 - 默认历史里只有干净正文；结构的 `history: N` 可把最近 N 条消息的批注重新放回历史，代价是 token。
 
-批注最好**少而精**：花瓣的 `annotations` 模组默认关闭，打开后每轮至多三条。语法与字段见 [结构参考](../reference/structures.md#annotations)。
+批注最好**少而精**。建议把**语法**写在结构的 `formatPrompt` 里（与用途无关，可被不同模组复用），把**写什么、写多少、用谁的口吻**写在模组里。花瓣就是这样做的：结构 `annotations` 只说明标记语法；模组“Freesia 的评论”（默认关闭）让 Freesia 以自己的口吻在正文上留下至多三条评论，而且只在她本来就会回复时发送（开启“始终请求元回复”，或输入中含混合元指令）。语法与字段见 [结构参考](../reference/structures.md#annotations)。
 
 ## 自定义结构
 

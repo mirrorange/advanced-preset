@@ -205,10 +205,11 @@ structures:
     history: 0
     formatPrompt:
       tag: |-
-        You may annotate up to 3 phrases of your prose: {==quoted text==}{>>your note<<}.
+        Inline annotations are written inside the story text as `{==phrase==}{>>note<<}`.
+        Mark a short phrase or a single sentence, never across paragraphs, and never nest marks.
 ```
 
-`formatPrompt` 只需写 `tag` 或 `field` 之一，另一个自动取相同文字（行内写法与输出方式无关）。
+`formatPrompt` 只需写 `tag` 或 `field` 之一，另一个自动取相同文字（行内写法与输出方式无关）。建议这里只写语法，批注的用途、口吻与数量写在请求它的模组里，这样不同模组（如作者评论、术语注释）可以复用同一份语法说明。
 
 **语法**（严格成对）：
 
