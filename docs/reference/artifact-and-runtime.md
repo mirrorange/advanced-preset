@@ -82,6 +82,7 @@ AP 接管的每条助手消息在 `message.extra.advanced_preset` 中保存一�
 - 阶段 `status`：`done`（完成）、`missing`（必需阶段没有输出）、`interrupted`（生成被中断）；
 - 消息正文 `mes` 只包含终结正文（或纯轮次的回复文字），阶段与结构不写进正文，所以切换预设或关闭 AP 后聊天记录仍然干净；
 - 用户在 UI 中切换原稿 / 修订稿时，`mes`、`patchesApplied` 与 `annotations` 随之改变。
+- 用户在事件摘要卡片上编辑后，`structures` 中对应的值被直接覆盖（只改当前 swipe，`mes` 不变）。
 
 ### 行内批注
 

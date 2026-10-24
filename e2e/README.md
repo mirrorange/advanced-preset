@@ -8,6 +8,8 @@ node e2e/mock.mjs &                                  # :5055, reads e2e/mock.jso
 CHROMIUM=$(which chromium) node e2e/run.mjs setup   # connect ST to the mock (custom source)
 AP_TRANSPORT=Tool AP_WORKFLOW=Edit node e2e/run.mjs gen
 node e2e/run.mjs panel | imp | interact | err | dev | ext
+node e2e/run.mjs carrier                             # select the AP Carrier (fresh ST)
+node e2e/run.mjs syn-edit                            # edit the last synopsis from its card (after gen)
 ```
 
 Screenshots land in `e2e/shots/`; requests the mock saw in `e2e/mock-requests.jsonl`.
