@@ -8666,7 +8666,7 @@ function Pm(e) {
 }
 async function Fm() {
 	let e = await Nm();
-	e && e !== "fe9f3abd58cab6cf" && sessionStorage.getItem(Mm) !== e && Pm(e);
+	e && e !== "e281ea48d45fec07" && sessionStorage.getItem(Mm) !== e && Pm(e);
 }
 async function Im() {
 	await Fm();
@@ -8675,7 +8675,7 @@ async function Lm() {
 	let e = a().replace(/^third-party\//, ""), t = await Rm(e, !1);
 	if (t.status === 404 && (t = await Rm(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Nm();
-	return r && r !== "fe9f3abd58cab6cf" ? (Pm(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "e281ea48d45fec07" ? (Pm(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Rm = (t, n) => p("/api/extensions/update", {
 	method: "POST",
@@ -8863,7 +8863,7 @@ function _h() {
 }
 //#endregion
 //#region src/ui/styles/tokens.css?inline
-var vh = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-shadow:0 8px 28px #00000073}", yh = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", bh = ":host(ap-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.synopsis-edit{opacity:0;margin:-4px -6px -4px auto;transition:opacity .15s;display:inline-flex}.synopsis:hover .synopsis-edit,.synopsis-edit:focus-within{opacity:1}@media (hover:none){.synopsis-edit{opacity:.7}}.synopsis-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.synopsis-fields{grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:6px;display:grid}.synopsis-field{min-width:0;display:block;position:relative}.synopsis-field svg.lucide{pointer-events:none;width:1em;height:1em;position:absolute;top:50%;left:.6em;transform:translateY(-50%)}.synopsis-field .input{padding-left:2em}.synopsis-event-input{font-weight:600}.synopsis-editor textarea.input{resize:none;min-height:3.4em;max-height:18em;overflow-y:auto}.synopsis-actions{align-items:center;gap:6px;margin-top:2px;display:flex}.synopsis-actions .btn svg.lucide{width:1em;height:1em}@media (hover:none){.synopsis-keys{visibility:hidden}}.row.tight{white-space:nowrap;gap:4px}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.anno-bubble{--actor:var(--ap-primary);z-index:2147483000;width:max-content;max-width:min(320px,100vw - 16px);max-height:min(50vh,24em);padding:var(--ap-space-2) var(--ap-space-3);border:1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--ap-text);box-shadow:var(--ap-shadow);font-size:var(--ap-font-size-sm);text-align:left;overflow-wrap:anywhere;margin:0;line-height:1.55;position:fixed;inset:0 auto auto 0;overflow:auto}.anno-author{font-weight:700;font-size:var(--ap-font-size-xs);color:var(--actor);letter-spacing:.02em;margin-bottom:2px}", xh = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;background:var(--ap-panel-bg);color:var(--ap-text);-webkit-backdrop-filter:blur(var(--SmartThemeBlurStrength,10px));flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden;container:ap-panel/inline-size}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice-list.nested{padding-left:var(--ap-space-2);border-left:1px solid var(--ap-border);margin-left:.5em}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}.tab-col{gap:var(--ap-space-3)}.input.bare{background-color:#0000;border-color:#0000;width:auto;min-width:0;padding-left:.35em}.input.bare:hover{border-color:var(--ap-border)}.input.bare:focus{border-color:var(--ap-primary)}.chip.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint);color:var(--ap-primary)}.um-list{margin:0 calc(-1 * var(--ap-space-2));flex-direction:column;gap:2px;display:flex}.um-row{min-height:2.6em;padding:0 var(--ap-space-2);border-radius:var(--ap-radius-sm);align-items:center;gap:4px;transition:background .15s,opacity .15s;display:flex}.um-row:hover{background:var(--ap-surface-2)}.um-row.dragging{background:var(--ap-tint)}.um-row.off .um-open{opacity:.55}.um-grip{color:var(--ap-faint);cursor:grab;touch-action:none;margin-left:-4px;display:inline-flex}.um-row.dragging .um-grip{cursor:grabbing;color:var(--ap-primary)}.um-open{text-align:left;cursor:pointer;background:0 0;border:0;flex-direction:column;flex:auto;align-items:flex-start;gap:0;min-width:0;padding:4px 0;display:flex}.um-row-name{max-width:100%}.um-row-meta{max-width:100%;line-height:1.3}.um-flag{width:1em;height:1em;margin:0 2px}.um-zap{color:var(--ap-primary)}.um-new{border:1px dashed var(--ap-border);border-radius:var(--ap-radius-md);width:100%;min-height:2.6em;color:var(--ap-muted);cursor:pointer;background:0 0;justify-content:center;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s;display:flex}.um-new:hover{color:var(--ap-primary);border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.um-editor{gap:var(--ap-space-3);flex-direction:column;display:flex}.um-head{align-items:center;gap:var(--ap-space-2);margin-left:-6px;display:flex}.um-name{font-size:var(--ap-font-size-lg);flex:auto;font-weight:600}.um-entry{flex-direction:column;gap:6px;display:flex}.um-entry+.um-entry{padding-top:var(--ap-space-3);border-top:1px solid var(--ap-border)}.um-entry-head{flex-wrap:wrap;align-items:center;gap:2px;min-width:0;display:flex}.um-entry-head>svg.lucide{width:1em;height:1em}.um-entry-head select.grow{text-overflow:ellipsis;flex:8em;min-width:0;font-weight:600}.um-entry.lost .um-entry-head select.grow{color:var(--ap-warning)}.um-role{field-sizing:content;text-overflow:ellipsis;min-width:0;color:var(--ap-muted);font-size:var(--ap-font-size-sm);flex:none}.um-text{field-sizing:content;min-height:5.5em;max-height:24em;font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-sm)}.um-warn{color:var(--ap-warning);align-items:center;gap:6px;display:flex}.um-warn svg.lucide{width:1.1em;height:1.1em}.um-var-label{flex:8em;min-width:0;padding:0 .35em;font-weight:600}.um-entry.lost .um-var-label{color:var(--ap-warning)}.um-var-row{grid-template-columns:minmax(5em,36%) 1fr auto;align-items:start;gap:4px;display:grid}.um-var-row.list{grid-template-columns:1fr auto}.um-var-key{text-overflow:ellipsis;min-width:0;font-weight:600}.um-var-key::-webkit-calendar-picker-indicator{display:none!important}textarea.input.um-var-value{field-sizing:content;resize:none;min-width:0;min-height:0;max-height:12em}.um-var-add{align-self:flex-start}.um-foot{flex-wrap:wrap;align-items:center;gap:2px;margin:0 -.5em;display:flex}.um-foot .btn{color:var(--ap-muted)}.um-foot .btn:hover:not(:disabled){color:var(--ap-text);background:var(--ap-surface-2)}.um-foot .btn.danger:hover:not(:disabled),.um-foot .btn.armed{color:var(--ap-danger)}.um-foot .btn.armed{background:color-mix(in srgb, var(--ap-danger) 10%, transparent)}.trigger{gap:var(--ap-space-2);flex-direction:column;display:flex}.always{padding:2px 0}.rule{padding:6px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.rule-head{align-items:center;gap:2px;min-width:0;margin-left:-.35em;display:flex}.rule-subject{field-sizing:content;text-overflow:ellipsis;flex:none;min-width:0;max-width:60%;font-weight:600}.rule-target{text-overflow:ellipsis;flex:auto;min-width:0}.rule-body{flex-direction:column;gap:6px;display:flex}.rule-op{color:var(--ap-muted);align-self:flex-start;margin-left:-.35em}.rule-cmp{flex:none;width:4.2em}.rule-scope{flex:10em}.rule-join{text-transform:uppercase;letter-spacing:.04em;align-self:center;margin:-4px 0}.rule-error{color:var(--ap-danger)}.option-chips{gap:4px}.option-chips .chip{cursor:pointer}.depth{width:3.6em;padding-right:.2em}.kw-words{align-items:flex-start;gap:4px}.chips-input{cursor:text;flex-wrap:wrap;align-items:center;gap:4px;min-height:2.1em;padding:3px 4px;display:flex}.chips-input .chip{background:var(--ap-tint);color:var(--ap-primary);border-color:#0000;gap:2px;padding-right:2px}.chips-input .chip.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.chip-x{width:1.3em;height:1.3em;color:inherit;cursor:pointer;opacity:.7;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:inline-grid}.chip-x:hover{opacity:1;background:color-mix(in srgb, var(--ap-primary) 16%, transparent)}.chip-x svg.lucide{width:.85em;height:.85em}.chips-draft{background:0 0;border:0;outline:none;flex:5em;min-width:5em;padding:2px 4px}.btn.add.picker{position:relative;overflow:hidden}.btn.add.picker select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}@container ap-panel (width<=340px){.tab span{display:none}.tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tab svg.lucide{width:1.35em;height:1.35em}.panel-head{padding-left:var(--ap-space-3)}.panel-body{padding-left:var(--ap-space-3);padding-right:var(--ap-space-3)}.segmented{grid-template-columns:repeat(auto-fit,minmax(4.6em,1fr));grid-auto-flow:row}.segmented.dense button{padding:0 .4em}.um-foot .btn:not(.armed)>span{display:none}.um-role{order:1;margin-left:1.15em}}.preset-banner{align-items:center;gap:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:var(--ap-tint);border:1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);font-size:var(--ap-font-size-sm);flex-wrap:wrap;margin-top:6px;margin-bottom:4px;padding:5px 5px 5px 10px;line-height:1.35;display:flex}.preset-banner-icon{color:var(--ap-primary)}.preset-banner-text{flex:11em;min-width:0}.preset-banner .btn{min-height:1.8em;margin-left:auto;padding:0 .7em}", Sh = /* @__PURE__ */ nn({ mode: "light" }), Ch = new CSSStyleSheet();
+var vh = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-shadow:0 8px 28px #00000073}", yh = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", bh = ":host(ap-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-head{align-items:flex-start;gap:var(--ap-space-2);display:flex}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.synopsis-edit{opacity:0;flex:none;margin:-2px -6px -4px 0;transition:opacity .15s;display:inline-flex}.synopsis:hover .synopsis-edit,.synopsis-edit:focus-within{opacity:1}@media (hover:none){.synopsis-edit{opacity:.7}}.synopsis-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.synopsis-fields{grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:6px;display:grid}.synopsis-field{min-width:0;display:block;position:relative}.synopsis-field svg.lucide{pointer-events:none;width:1em;height:1em;position:absolute;top:50%;left:.6em;transform:translateY(-50%)}.synopsis-field .input{padding-left:2em}.synopsis-event-input{font-weight:600}.synopsis-editor textarea.input{resize:none;min-height:3.4em;max-height:18em;overflow-y:auto}.synopsis-actions{align-items:center;gap:6px;margin-top:2px;display:flex}.synopsis-actions .btn svg.lucide{width:1em;height:1em}@media (hover:none){.synopsis-keys{visibility:hidden}}.row.tight{white-space:nowrap;gap:4px}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.anno-bubble{--actor:var(--ap-primary);z-index:2147483000;width:max-content;max-width:min(320px,100vw - 16px);max-height:min(50vh,24em);padding:var(--ap-space-2) var(--ap-space-3);border:1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--ap-text);box-shadow:var(--ap-shadow);font-size:var(--ap-font-size-sm);text-align:left;overflow-wrap:anywhere;margin:0;line-height:1.55;position:fixed;inset:0 auto auto 0;overflow:auto}.anno-author{font-weight:700;font-size:var(--ap-font-size-xs);color:var(--actor);letter-spacing:.02em;margin-bottom:2px}", xh = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;background:var(--ap-panel-bg);color:var(--ap-text);-webkit-backdrop-filter:blur(var(--SmartThemeBlurStrength,10px));flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden;container:ap-panel/inline-size}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice-list.nested{padding-left:var(--ap-space-2);border-left:1px solid var(--ap-border);margin-left:.5em}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}.tab-col{gap:var(--ap-space-3)}.input.bare{background-color:#0000;border-color:#0000;width:auto;min-width:0;padding-left:.35em}.input.bare:hover{border-color:var(--ap-border)}.input.bare:focus{border-color:var(--ap-primary)}.chip.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint);color:var(--ap-primary)}.um-list{margin:0 calc(-1 * var(--ap-space-2));flex-direction:column;gap:2px;display:flex}.um-row{min-height:2.6em;padding:0 var(--ap-space-2);border-radius:var(--ap-radius-sm);align-items:center;gap:4px;transition:background .15s,opacity .15s;display:flex}.um-row:hover{background:var(--ap-surface-2)}.um-row.dragging{background:var(--ap-tint)}.um-row.off .um-open{opacity:.55}.um-grip{color:var(--ap-faint);cursor:grab;touch-action:none;margin-left:-4px;display:inline-flex}.um-row.dragging .um-grip{cursor:grabbing;color:var(--ap-primary)}.um-open{text-align:left;cursor:pointer;background:0 0;border:0;flex-direction:column;flex:auto;align-items:flex-start;gap:0;min-width:0;padding:4px 0;display:flex}.um-row-name{max-width:100%}.um-row-meta{max-width:100%;line-height:1.3}.um-flag{width:1em;height:1em;margin:0 2px}.um-zap{color:var(--ap-primary)}.um-new{border:1px dashed var(--ap-border);border-radius:var(--ap-radius-md);width:100%;min-height:2.6em;color:var(--ap-muted);cursor:pointer;background:0 0;justify-content:center;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s;display:flex}.um-new:hover{color:var(--ap-primary);border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.um-editor{gap:var(--ap-space-3);flex-direction:column;display:flex}.um-head{align-items:center;gap:var(--ap-space-2);margin-left:-6px;display:flex}.um-name{font-size:var(--ap-font-size-lg);flex:auto;font-weight:600}.um-entry{flex-direction:column;gap:6px;display:flex}.um-entry+.um-entry{padding-top:var(--ap-space-3);border-top:1px solid var(--ap-border)}.um-entry-head{flex-wrap:wrap;align-items:center;gap:2px;min-width:0;display:flex}.um-entry-head>svg.lucide{width:1em;height:1em}.um-entry-head select.grow{text-overflow:ellipsis;flex:8em;min-width:0;font-weight:600}.um-entry.lost .um-entry-head select.grow{color:var(--ap-warning)}.um-role{field-sizing:content;text-overflow:ellipsis;min-width:0;color:var(--ap-muted);font-size:var(--ap-font-size-sm);flex:none}.um-text{field-sizing:content;min-height:5.5em;max-height:24em;font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-sm)}.um-warn{color:var(--ap-warning);align-items:center;gap:6px;display:flex}.um-warn svg.lucide{width:1.1em;height:1.1em}.um-var-label{flex:8em;min-width:0;padding:0 .35em;font-weight:600}.um-entry.lost .um-var-label{color:var(--ap-warning)}.um-var-row{grid-template-columns:minmax(5em,36%) 1fr auto;align-items:start;gap:4px;display:grid}.um-var-row.list{grid-template-columns:1fr auto}.um-var-key{text-overflow:ellipsis;min-width:0;font-weight:600}.um-var-key::-webkit-calendar-picker-indicator{display:none!important}textarea.input.um-var-value{field-sizing:content;resize:none;min-width:0;min-height:0;max-height:12em}.um-var-add{align-self:flex-start}.um-foot{flex-wrap:wrap;align-items:center;gap:2px;margin:0 -.5em;display:flex}.um-foot .btn{color:var(--ap-muted)}.um-foot .btn:hover:not(:disabled){color:var(--ap-text);background:var(--ap-surface-2)}.um-foot .btn.danger:hover:not(:disabled),.um-foot .btn.armed{color:var(--ap-danger)}.um-foot .btn.armed{background:color-mix(in srgb, var(--ap-danger) 10%, transparent)}.trigger{gap:var(--ap-space-2);flex-direction:column;display:flex}.always{padding:2px 0}.rule{padding:6px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.rule-head{align-items:center;gap:2px;min-width:0;margin-left:-.35em;display:flex}.rule-subject{field-sizing:content;text-overflow:ellipsis;flex:none;min-width:0;max-width:60%;font-weight:600}.rule-target{text-overflow:ellipsis;flex:auto;min-width:0}.rule-body{flex-direction:column;gap:6px;display:flex}.rule-op{color:var(--ap-muted);align-self:flex-start;margin-left:-.35em}.rule-cmp{flex:none;width:4.2em}.rule-scope{flex:10em}.rule-join{text-transform:uppercase;letter-spacing:.04em;align-self:center;margin:-4px 0}.rule-error{color:var(--ap-danger)}.option-chips{gap:4px}.option-chips .chip{cursor:pointer}.depth{width:3.6em;padding-right:.2em}.kw-words{align-items:flex-start;gap:4px}.chips-input{cursor:text;flex-wrap:wrap;align-items:center;gap:4px;min-height:2.1em;padding:3px 4px;display:flex}.chips-input .chip{background:var(--ap-tint);color:var(--ap-primary);border-color:#0000;gap:2px;padding-right:2px}.chips-input .chip.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.chip-x{width:1.3em;height:1.3em;color:inherit;cursor:pointer;opacity:.7;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:inline-grid}.chip-x:hover{opacity:1;background:color-mix(in srgb, var(--ap-primary) 16%, transparent)}.chip-x svg.lucide{width:.85em;height:.85em}.chips-draft{background:0 0;border:0;outline:none;flex:5em;min-width:5em;padding:2px 4px}.btn.add.picker{position:relative;overflow:hidden}.btn.add.picker select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}@container ap-panel (width<=340px){.tab span{display:none}.tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tab svg.lucide{width:1.35em;height:1.35em}.panel-head{padding-left:var(--ap-space-3)}.panel-body{padding-left:var(--ap-space-3);padding-right:var(--ap-space-3)}.segmented{grid-template-columns:repeat(auto-fit,minmax(4.6em,1fr));grid-auto-flow:row}.segmented.dense button{padding:0 .4em}.um-foot .btn:not(.armed)>span{display:none}.um-role{order:1;margin-left:1.15em}}.preset-banner{align-items:center;gap:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:var(--ap-tint);border:1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);font-size:var(--ap-font-size-sm);flex-wrap:wrap;margin-top:6px;margin-bottom:4px;padding:5px 5px 5px 10px;line-height:1.35;display:flex}.preset-banner-icon{color:var(--ap-primary)}.preset-banner-text{flex:11em;min-width:0}.preset-banner .btn{min-height:1.8em;margin-left:auto;padding:0 .7em}", Sh = /* @__PURE__ */ nn({ mode: "light" }), Ch = new CSSStyleSheet();
 Ch.replaceSync([
 	vh,
 	yh,
@@ -11213,16 +11213,16 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 }), Ry = { class: "synopsis-fields" }, zy = { class: "synopsis-field" }, By = ["placeholder", "aria-label"], Vy = { class: "synopsis-field" }, Hy = ["placeholder", "aria-label"], Uy = ["placeholder", "aria-label"], Wy = ["placeholder", "aria-label"], Gy = { class: "synopsis-actions" }, Ky = { class: "xs faint grow synopsis-keys" }, qy = {
 	type: "submit",
 	class: "btn primary sm-btn"
-}, Jy = { class: "synopsis-line small" }, Yy = {
+}, Jy = { class: "synopsis-head" }, Yy = { class: "synopsis-line small" }, Xy = {
 	key: 0,
 	class: "row tight"
-}, Xy = {
+}, Zy = {
 	key: 1,
 	class: "row tight"
-}, Zy = { class: "synopsis-event ellipsis" }, Qy = {
+}, Qy = { class: "synopsis-event ellipsis" }, $y = {
 	key: 0,
 	class: "small muted pre synopsis-summary"
-}, $y = /* @__PURE__ */ I({
+}, eb = /* @__PURE__ */ I({
 	__name: "SynopsisCard",
 	props: {
 		synopsis: {},
@@ -11315,27 +11315,26 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 			key: 1,
 			class: O(["synopsis", { open: i.value }]),
 			onClick: n[9] ||= (e) => i.value = !i.value
-		}, [H("div", Jy, [
-			e.synopsis.time ? (z(), B("span", Yy, [U(N(rv), { class: "faint" }), ua(k(e.synopsis.time), 1)])) : W("", !0),
-			e.synopsis.location ? (z(), B("span", Xy, [U(N(bv), { class: "faint" }), ua(k(e.synopsis.location), 1)])) : W("", !0),
-			H("span", Zy, k(e.synopsis.event), 1),
-			e.editable ? (z(), B("span", {
-				key: 2,
-				class: "synopsis-edit",
-				onClick: n[8] ||= os(() => {}, ["stop"])
-			}, [U($, {
-				icon: N(Ov),
-				label: N(J)("cards.synopsis.edit"),
-				small: "",
-				align: "end",
-				onClick: p
-			}, null, 8, ["icon", "label"])])) : W("", !0)
-		]), i.value && e.synopsis.summary ? (z(), B("div", Qy, k(e.synopsis.summary), 1)) : W("", !0)], 2));
+		}, [H("div", Jy, [H("div", Yy, [
+			e.synopsis.time ? (z(), B("span", Xy, [U(N(rv), { class: "faint" }), ua(k(e.synopsis.time), 1)])) : W("", !0),
+			e.synopsis.location ? (z(), B("span", Zy, [U(N(bv), { class: "faint" }), ua(k(e.synopsis.location), 1)])) : W("", !0),
+			H("span", Qy, k(e.synopsis.event), 1)
+		]), e.editable ? (z(), B("span", {
+			key: 0,
+			class: "synopsis-edit",
+			onClick: n[8] ||= os(() => {}, ["stop"])
+		}, [U($, {
+			icon: N(Ov),
+			label: N(J)("cards.synopsis.edit"),
+			small: "",
+			align: "end",
+			onClick: p
+		}, null, 8, ["icon", "label"])])) : W("", !0)]), i.value && e.synopsis.summary ? (z(), B("div", $y, k(e.synopsis.summary), 1)) : W("", !0)], 2));
 	}
-}), eb = ["innerHTML"], tb = {
+}), tb = ["innerHTML"], nb = {
 	key: 1,
 	class: "kv-list small"
-}, nb = { class: "pre" }, rb = /* @__PURE__ */ I({
+}, rb = { class: "pre" }, ib = /* @__PURE__ */ I({
 	__name: "CustomCard",
 	props: {
 		title: {},
@@ -11353,14 +11352,14 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 				key: 0,
 				class: "rich small",
 				innerHTML: n.value
-			}, null, 8, eb)) : (z(), B("dl", tb, [(z(!0), B(R, null, L(e.value, (e, t) => (z(), B(R, { key: t }, [H("dt", null, k(t), 1), H("dd", nb, k(e), 1)], 64))), 128))]))]),
+			}, null, 8, tb)) : (z(), B("dl", nb, [(z(!0), B(R, null, L(e.value, (e, t) => (z(), B(R, { key: t }, [H("dt", null, k(t), 1), H("dd", rb, k(e), 1)], 64))), 128))]))]),
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), ib = {
+}), ab = {
 	key: 0,
 	class: "cards"
-}, ab = /* @__PURE__ */ I({
+}, ob = /* @__PURE__ */ I({
 	__name: "Cards",
 	props: { mesid: {} },
 	setup(e) {
@@ -11389,7 +11388,7 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 				}))
 			};
 		});
-		return (t, n) => r.value ? (z(), B("div", ib, [
+		return (t, n) => r.value ? (z(), B("div", ab, [
 			r.value.reply ? (z(), V(hy, {
 				key: 0,
 				text: r.value.reply,
@@ -11408,7 +11407,7 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 				key: 2,
 				options: r.value.options
 			}, null, 8, ["options"])) : W("", !0),
-			r.value.synopsis ? (z(), V($y, {
+			r.value.synopsis ? (z(), V(eb, {
 				key: 3,
 				synopsis: r.value.synopsis,
 				editable: "",
@@ -11424,20 +11423,20 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 				text: r.value.recap.text,
 				"covers-up-to": r.value.recap.coversUpTo
 			}, null, 8, ["text", "covers-up-to"])) : W("", !0),
-			(z(!0), B(R, null, L(r.value.custom, (e) => (z(), V(rb, {
+			(z(!0), B(R, null, L(r.value.custom, (e) => (z(), V(ib, {
 				key: e.id,
 				title: e.title,
 				value: e.value
 			}, null, 8, ["title", "value"]))), 128))
 		])) : W("", !0);
 	}
-}), ob = {
+}), sb = {
 	key: 0,
 	class: "dock stages live"
-}, sb = { class: "stage-bar" }, cb = { class: "ellipsis" }, lb = {
+}, cb = { class: "stage-bar" }, lb = { class: "ellipsis" }, ub = {
 	key: 0,
 	class: "small muted"
-}, ub = /* @__PURE__ */ I({
+}, db = /* @__PURE__ */ I({
 	__name: "Dock",
 	setup(e) {
 		let t = G(() => sm.current && !sm.current.streaming && sm.current.status === "running" ? sm.current : null), n = G(() => {
@@ -11450,21 +11449,21 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 				color: Jh(n, t.actor)
 			}));
 		}), r = G(() => n.value.find((e) => e.status === "streaming") ?? [...n.value].reverse().find((e) => e.text));
-		return (e, i) => t.value ? (z(), B("div", ob, [H("div", sb, [
+		return (e, i) => t.value ? (z(), B("div", sb, [H("div", cb, [
 			U(N(yv), { class: "spin faint" }),
 			(z(!0), B(R, null, L(n.value, (e) => (z(), B("span", {
 				key: e.id,
 				class: O(["chip stage-chip", [e.status, { open: r.value?.id === e.id }]]),
 				style: Oe({ "--actor": e.color })
-			}, [H("span", cb, k(e.label), 1)], 6))), 128)),
-			n.value.length ? W("", !0) : (z(), B("span", lb, k(N(J)("stages.waiting")), 1))
+			}, [H("span", lb, k(e.label), 1)], 6))), 128)),
+			n.value.length ? W("", !0) : (z(), B("span", ub, k(N(J)("stages.waiting")), 1))
 		]), r.value ? (z(), V(ny, {
 			key: 0,
 			stage: r.value,
 			follow: ""
 		}, null, 8, ["stage"])) : W("", !0)])) : W("", !0);
 	}
-}), db = ["aria-label"], fb = ["disabled"], pb = /* @__PURE__ */ I({
+}), fb = ["aria-label"], pb = ["disabled"], mb = /* @__PURE__ */ I({
 	__name: "Switch",
 	props: /*@__PURE__*/ ei({
 		label: {},
@@ -11488,15 +11487,15 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 				type: "checkbox",
 				role: "switch",
 				disabled: e.disabled
-			}, null, 8, fb), [[Zo, t.value]]),
+			}, null, 8, pb), [[Zo, t.value]]),
 			r[1] ||= H("span", { class: "track" }, null, -1),
 			r[2] ||= H("span", { class: "thumb" }, null, -1)
-		], 8, db));
+		], 8, fb));
 	}
-}), mb = { class: "field-label" }, hb = { class: "ellipsis" }, gb = {
+}), hb = { class: "field-label" }, gb = { class: "ellipsis" }, _b = {
 	key: 0,
 	class: "dot modified"
-}, _b = { class: "field-control" }, vb = /* @__PURE__ */ I({
+}, vb = { class: "field-control" }, yb = /* @__PURE__ */ I({
 	__name: "Field",
 	props: {
 		label: {},
@@ -11505,16 +11504,16 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 		modified: { type: Boolean }
 	},
 	setup(e) {
-		return (t, n) => (z(), B("div", { class: O(["field", { inline: e.inline }]) }, [H("div", mb, [
-			H("span", hb, k(e.label), 1),
-			e.modified ? (z(), B("span", gb)) : W("", !0),
+		return (t, n) => (z(), B("div", { class: O(["field", { inline: e.inline }]) }, [H("div", hb, [
+			H("span", gb, k(e.label), 1),
+			e.modified ? (z(), B("span", _b)) : W("", !0),
 			U(jy, {
 				text: e.help,
 				align: "start"
 			}, null, 8, ["text"])
-		]), H("div", _b, [qr(t.$slots, "default")])], 2));
+		]), H("div", vb, [qr(t.$slots, "default")])], 2));
 	}
-}), yb = { class: "swatches" }, bb = ["title"], xb = ["title"], Sb = { class: "swatches" }, Cb = ["title"], wb = /* @__PURE__ */ I({
+}), bb = { class: "swatches" }, xb = ["title"], Sb = ["title"], Cb = { class: "swatches" }, wb = ["title"], Tb = /* @__PURE__ */ I({
 	__name: "Appearance",
 	setup(e) {
 		let t = K().ui, n = (e) => G({
@@ -11547,12 +11546,12 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 			open: !1
 		}, {
 			default: P(() => [
-				U(vb, {
+				U(yb, {
 					label: N(J)("appearance.colors"),
 					help: N(J)("appearance.colors.hint"),
 					inline: ""
 				}, {
-					default: P(() => [H("div", yb, [
+					default: P(() => [H("div", bb, [
 						H("label", {
 							class: "swatch",
 							style: Oe({ background: N(r) || "var(--ap-primary-500)" }),
@@ -11565,7 +11564,7 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 							N(r),
 							void 0,
 							{ lazy: !0 }
-						]])], 12, bb),
+						]])], 12, xb),
 						H("label", {
 							class: "swatch",
 							style: Oe({ background: N(i) || "var(--ap-accent-500)" }),
@@ -11578,7 +11577,7 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 							N(i),
 							void 0,
 							{ lazy: !0 }
-						]])], 12, xb),
+						]])], 12, Sb),
 						U($, {
 							icon: N(Nv),
 							label: N(J)("common.reset"),
@@ -11594,33 +11593,33 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 					])]),
 					_: 1
 				}, 8, ["label", "help"]),
-				U(vb, {
+				U(yb, {
 					label: N(J)("appearance.collapseStages"),
 					inline: ""
 				}, {
-					default: P(() => [U(pb, {
+					default: P(() => [U(mb, {
 						modelValue: a.value,
 						"onUpdate:modelValue": t[2] ||= (e) => a.value = e
 					}, null, 8, ["modelValue"])]),
 					_: 1
 				}, 8, ["label"]),
-				U(vb, {
+				U(yb, {
 					label: N(J)("appearance.annotations"),
 					help: N(J)("appearance.annotations.hint"),
 					inline: ""
 				}, {
-					default: P(() => [U(pb, {
+					default: P(() => [U(mb, {
 						modelValue: c.value,
 						"onUpdate:modelValue": t[3] ||= (e) => c.value = e
 					}, null, 8, ["modelValue"])]),
 					_: 1
 				}, 8, ["label", "help"]),
-				c.value ? (z(), V(vb, {
+				c.value ? (z(), V(yb, {
 					key: 0,
 					label: N(J)("appearance.annotationColor"),
 					inline: ""
 				}, {
-					default: P(() => [H("div", Sb, [H("label", {
+					default: P(() => [H("div", Cb, [H("label", {
 						class: "swatch",
 						style: Oe({ background: l.value || "var(--ap-accent)" }),
 						title: N(J)("appearance.annotationColor")
@@ -11632,7 +11631,7 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 						l.value,
 						void 0,
 						{ lazy: !0 }
-					]])], 12, Cb), U($, {
+					]])], 12, wb), U($, {
 						icon: N(Nv),
 						label: N(J)("common.reset"),
 						small: "",
@@ -11650,16 +11649,16 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), Tb = { class: "toolbar" }, Eb = ["disabled"], Db = ["disabled"], Ob = { class: "preset-list" }, kb = ["onClick", "onKeydown"], Ab = { class: "preset-mark" }, jb = { class: "grow col preset-info" }, Mb = { class: "row wrap preset-head" }, Nb = { class: "preset-name" }, Pb = { class: "badge neutral" }, Fb = {
+}), Eb = { class: "toolbar" }, Db = ["disabled"], Ob = ["disabled"], kb = { class: "preset-list" }, Ab = ["onClick", "onKeydown"], jb = { class: "preset-mark" }, Mb = { class: "grow col preset-info" }, Nb = { class: "row wrap preset-head" }, Pb = { class: "preset-name" }, Fb = { class: "badge neutral" }, Ib = {
 	key: 0,
 	class: "xs muted"
-}, Ib = {
+}, Lb = {
 	key: 1,
 	class: "small muted preset-desc"
-}, Lb = {
+}, Rb = {
 	key: 0,
 	class: "empty"
-}, Rb = /* @__PURE__ */ I({
+}, zb = /* @__PURE__ */ I({
 	__name: "PresetsTab",
 	setup(e) {
 		let t = G(() => yu()), n = /* @__PURE__ */ M(null), r = /* @__PURE__ */ M(!1), i = /* @__PURE__ */ M(""), a = /* @__PURE__ */ M(null);
@@ -11683,13 +11682,13 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 			t && o("file", () => eh(t), J("presets.installed")), e.target.value = "";
 		}, u = (e) => o(`update:${e.preset.id}`, () => $m(K().sources[e.preset.id]), J("presets.updated")), d = (e) => o(`remove:${e.preset.id}`, () => th(e.preset.id)), p = () => o("ext", async () => f("info", await Lm() === "current" ? J("update.none") : J("update.reloading")));
 		return (e, o) => (z(), B(R, null, [
-			H("div", Tb, [
+			H("div", Eb, [
 				H("button", {
 					type: "button",
 					class: "btn",
 					disabled: n.value === "file",
 					onClick: o[0] ||= (e) => a.value?.click()
-				}, [U(N(Wv)), ua(k(N(J)("presets.importFile")), 1)], 8, Eb),
+				}, [U(N(Wv)), ua(k(N(J)("presets.importFile")), 1)], 8, Db),
 				H("button", {
 					type: "button",
 					class: O(["btn", { primary: r.value }]),
@@ -11733,8 +11732,8 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 			}, [n.value === "url" ? (z(), V(N(yv), {
 				key: 0,
 				class: "spin"
-			})) : (z(), V(N(cv), { key: 1 })), ua(k(N(J)("common.install")), 1)], 8, Db)], 32)) : W("", !0),
-			H("div", Ob, [(z(!0), B(R, null, L(t.value, (e) => (z(), B("div", {
+			})) : (z(), V(N(cv), { key: 1 })), ua(k(N(J)("common.install")), 1)], 8, Ob)], 32)) : W("", !0),
+			H("div", kb, [(z(!0), B(R, null, L(t.value, (e) => (z(), B("div", {
 				key: e.preset.id,
 				class: O(["preset-item", { on: N(oh)?.id === e.preset.id }]),
 				role: "button",
@@ -11742,21 +11741,21 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 				onClick: (t) => s(e),
 				onKeydown: cs((t) => s(e), ["enter"])
 			}, [
-				H("span", Ab, [n.value === `select:${e.preset.id}` ? (z(), V(N(yv), {
+				H("span", jb, [n.value === `select:${e.preset.id}` ? (z(), V(N(yv), {
 					key: 0,
 					class: "spin"
 				})) : N(oh)?.id === e.preset.id ? (z(), V(N(Z_), { key: 1 })) : W("", !0)]),
-				H("div", jb, [
-					H("div", Mb, [
-						H("span", Nb, k(N(Mu)(e.preset)), 1),
-						H("span", Pb, "v" + k(e.preset.version), 1),
+				H("div", Mb, [
+					H("div", Nb, [
+						H("span", Pb, k(N(Mu)(e.preset)), 1),
+						H("span", Fb, "v" + k(e.preset.version), 1),
 						e.source === "builtin" ? W("", !0) : (z(), B("span", {
 							key: 0,
 							class: O(["badge", { warn: e.source === "dev" }])
 						}, k(N(J)(`presets.source.${e.source}`)), 3))
 					]),
-					e.preset.author ? (z(), B("span", Fb, k(e.preset.author), 1)) : W("", !0),
-					N(Nu)(e.preset) ? (z(), B("span", Ib, k(N(Nu)(e.preset)), 1)) : W("", !0)
+					e.preset.author ? (z(), B("span", Ib, k(e.preset.author), 1)) : W("", !0),
+					N(Nu)(e.preset) ? (z(), B("span", Lb, k(N(Nu)(e.preset)), 1)) : W("", !0)
 				]),
 				H("div", {
 					class: "row preset-actions",
@@ -11785,16 +11784,16 @@ var ay = { class: "stage-bar" }, oy = ["onClick"], sy = { class: "ellipsis" }, c
 					"label",
 					"onClick"
 				])) : W("", !0)])
-			], 42, kb))), 128)), t.value.length ? W("", !0) : (z(), B("div", Lb, k(N(J)("presets.none")), 1))]),
-			U(wb)
+			], 42, Ab))), 128)), t.value.length ? W("", !0) : (z(), B("div", Rb, k(N(J)("presets.none")), 1))]),
+			U(Tb)
 		], 64));
 	}
-}), zb;
-function Bb() {
+}), Bb;
+function Vb() {
 	let e = oh, t = G(() => e.value ? Lu(e.value) : null);
 	function n(t, n = {}) {
 		let r = e.value;
-		r && (zu(r, t), n.sampling && (clearTimeout(zb), zb = setTimeout(() => void od(r), 400)));
+		r && (zu(r, t), n.sampling && (clearTimeout(Bb), Bb = setTimeout(() => void od(r), 400)));
 	}
 	return {
 		preset: e,
@@ -11804,10 +11803,10 @@ function Bb() {
 }
 //#endregion
 //#region src/ui/panel/NoPreset.vue?vue&type=script&setup=true&lang.ts
-var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
+var Hb = { class: "empty" }, Ub = /* @__PURE__ */ I({
 	__name: "NoPreset",
 	setup(e) {
-		return (e, t) => (z(), B("div", Vb, [
+		return (e, t) => (z(), B("div", Hb, [
 			U(N(Tv)),
 			H("span", null, k(N(J)("panel.noPreset")), 1),
 			H("button", {
@@ -11817,11 +11816,11 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 			}, k(N(J)("panel.choosePreset")), 1)
 		]));
 	}
-}), Ub = [
+}), Wb = [
 	"aria-checked",
 	"title",
 	"onClick"
-], Wb = { class: "ellipsis" }, Gb = /* @__PURE__ */ I({
+], Gb = { class: "ellipsis" }, Kb = /* @__PURE__ */ I({
 	__name: "Segmented",
 	props: /*@__PURE__*/ ei({ options: {} }, {
 		modelValue: {},
@@ -11841,27 +11840,27 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 			class: O({ on: t.value === e.value }),
 			title: e.hint,
 			onClick: (n) => t.value = e.value
-		}, [e.icon ? (z(), V(Ur(e.icon), { key: 0 })) : W("", !0), H("span", Wb, k(e.label), 1)], 10, Ub))), 128))], 2));
+		}, [e.icon ? (z(), V(Ur(e.icon), { key: 0 })) : W("", !0), H("span", Gb, k(e.label), 1)], 10, Wb))), 128))], 2));
 	}
-}), Kb = { class: "col" }, qb = { class: "row" }, Jb = ["aria-label"], Yb = ["label"], Xb = ["value"], Zb = ["label"], Qb = ["value"], $b = ["placeholder"], ex = {
+}), qb = { class: "col" }, Jb = { class: "row" }, Yb = ["aria-label"], Xb = ["label"], Zb = ["value"], Qb = ["label"], $b = ["value"], ex = ["placeholder"], tx = {
 	key: 1,
 	class: "xs muted row tight"
-}, tx = { value: "" }, nx = ["value"], rx = ["value"], ix = ["value"], ax = { class: "slider" }, ox = [
+}, nx = { value: "" }, rx = ["value"], ix = ["value"], ax = ["value"], ox = { class: "slider" }, sx = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onInput"
-], sx = [
+], cx = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onChange"
-], cx = { class: "field-grid" }, lx = ["value", "onChange"], ux = ["value"], dx = ["value"], fx = /* @__PURE__ */ I({
+], lx = { class: "field-grid" }, ux = ["value", "onChange"], dx = ["value"], fx = ["value"], px = /* @__PURE__ */ I({
 	__name: "ConfigTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Bb(), i = G(() => t.value ? Pu(t.value) : null), a = G({
+		let { preset: t, config: n, update: r } = Vb(), i = G(() => t.value ? Pu(t.value) : null), a = G({
 			get: () => i.value ? `${i.value.active.ref.kind}:${i.value.active.ref.id}` : "",
 			set: (e) => {
 				let n = t.value;
@@ -11981,9 +11980,9 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 		], D = G(() => n.value?.sampling ?? {}), se = (e) => e in D.value, ce = (e, t) => r((n) => {
 			n.sampling[e] = t;
 		}, { sampling: !0 }), le = (e) => Number(e.target.value);
-		return (e, r) => !N(t) || !N(n) || !i.value ? (z(), V(Hb, { key: 0 })) : (z(), B(R, { key: 1 }, [
-			H("div", Kb, [
-				H("div", qb, [
+		return (e, r) => !N(t) || !N(n) || !i.value ? (z(), V(Ub, { key: 0 })) : (z(), B(R, { key: 1 }, [
+			H("div", qb, [
+				H("div", Jb, [
 					F(H("select", {
 						"onUpdate:modelValue": r[0] ||= (e) => a.value = e,
 						class: "input grow",
@@ -11991,13 +11990,13 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 					}, [H("optgroup", { label: N(J)("config.recommended") }, [(z(!0), B(R, null, L(N(t).configurations, (e) => (z(), B("option", {
 						key: e.id,
 						value: `recommended:${e.id}`
-					}, k(N(Y)(N(t), "configurations", e.id, "name", e.name)), 9, Xb))), 128))], 8, Yb), i.value.saved.length ? (z(), B("optgroup", {
+					}, k(N(Y)(N(t), "configurations", e.id, "name", e.name)), 9, Zb))), 128))], 8, Xb), i.value.saved.length ? (z(), B("optgroup", {
 						key: 0,
 						label: N(J)("config.saved")
 					}, [(z(!0), B(R, null, L(i.value.saved, (e) => (z(), B("option", {
 						key: e.id,
 						value: `saved:${e.id}`
-					}, k(e.name), 9, Qb))), 128))], 8, Zb)) : W("", !0)], 8, Jb), [[$o, a.value]]),
+					}, k(e.name), 9, $b))), 128))], 8, Qb)) : W("", !0)], 8, Yb), [[$o, a.value]]),
 					s.value && o.value ? (z(), V($, {
 						key: 0,
 						icon: N(Pv),
@@ -12048,7 +12047,7 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 						class: "input grow",
 						placeholder: N(J)("config.name"),
 						autofocus: ""
-					}, null, 8, $b), [[Xo, l.value]]),
+					}, null, 8, ex), [[Xo, l.value]]),
 					U($, {
 						icon: N(qv),
 						label: N(J)("common.cancel"),
@@ -12063,18 +12062,18 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 						onClick: d
 					}, null, 8, ["icon", "label"])
 				], 32)) : W("", !0),
-				o.value ? (z(), B("span", ex, [r[15] ||= H("span", { class: "dot modified" }, null, -1), ua(k(N(J)("config.modified")), 1)])) : W("", !0)
+				o.value ? (z(), B("span", tx, [r[15] ||= H("span", { class: "dot modified" }, null, -1), ua(k(N(J)("config.modified")), 1)])) : W("", !0)
 			]),
 			U(Py, {
 				title: N(J)("config.connection"),
 				icon: N(X_)
 			}, {
 				default: P(() => [
-					U(vb, {
+					U(yb, {
 						label: N(J)("config.transport"),
 						help: N(J)(`transport.${g.value}.hint`)
 					}, {
-						default: P(() => [U(Gb, {
+						default: P(() => [U(Kb, {
 							modelValue: g.value,
 							"onUpdate:modelValue": r[5] ||= (e) => g.value = e,
 							options: h.value
@@ -12082,29 +12081,29 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 						_: 1
 					}, 8, ["label", "help"]),
 					_.value ? (z(), B(R, { key: 0 }, [
-						U(vb, {
+						U(yb, {
 							label: N(J)("config.forceTool"),
 							help: N(J)("config.forceTool.hint"),
 							inline: ""
 						}, {
-							default: P(() => [U(pb, {
+							default: P(() => [U(mb, {
 								modelValue: N(ee),
 								"onUpdate:modelValue": r[6] ||= (e) => /* @__PURE__ */ mn(ee) ? ee.value = e : null
 							}, null, 8, ["modelValue"])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						U(vb, {
+						U(yb, {
 							label: N(J)("config.parallelTools"),
 							help: N(J)("config.parallelTools.hint"),
 							inline: ""
 						}, {
-							default: P(() => [U(pb, {
+							default: P(() => [U(mb, {
 								modelValue: N(te),
 								"onUpdate:modelValue": r[7] ||= (e) => /* @__PURE__ */ mn(te) ? te.value = e : null
 							}, null, 8, ["modelValue"])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						U(vb, {
+						U(yb, {
 							label: N(J)("config.syntheticTurn"),
 							help: N(J)("config.syntheticTurn.hint"),
 							inline: ""
@@ -12112,24 +12111,24 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 							default: P(() => [F(H("select", {
 								"onUpdate:modelValue": r[8] ||= (e) => ie.value = e,
 								class: "input"
-							}, [H("option", tx, k(N(J)("common.none")), 1), (z(!0), B(R, null, L(N(t).syntheticTurns, (e) => (z(), B("option", {
+							}, [H("option", nx, k(N(J)("common.none")), 1), (z(!0), B(R, null, L(N(t).syntheticTurns, (e) => (z(), B("option", {
 								key: e.id,
 								value: e.id
-							}, k(e.label), 9, nx))), 128))], 512), [[$o, ie.value]])]),
+							}, k(e.label), 9, rx))), 128))], 512), [[$o, ie.value]])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						U(vb, {
+						U(yb, {
 							label: N(J)("config.thoughtSignature"),
 							help: N(J)("config.thoughtSignature.hint"),
 							inline: ""
 						}, {
-							default: P(() => [U(pb, {
+							default: P(() => [U(mb, {
 								modelValue: N(C),
 								"onUpdate:modelValue": r[9] ||= (e) => /* @__PURE__ */ mn(C) ? C.value = e : null
 							}, null, 8, ["modelValue"])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						U(vb, {
+						U(yb, {
 							label: N(J)("config.streamToolArguments"),
 							help: N(J)("config.streamToolArguments.hint"),
 							inline: ""
@@ -12140,10 +12139,10 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 							}, [(z(!0), B(R, null, L(N(vs), (e) => (z(), B("option", {
 								key: e,
 								value: e
-							}, k(N(J)(`config.streamToolArguments.${e}`)), 9, rx))), 128))], 512), [[$o, N(w)]])]),
+							}, k(N(J)(`config.streamToolArguments.${e}`)), 9, ix))), 128))], 512), [[$o, N(w)]])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						g.value === "tool-multi" ? (z(), V(vb, {
+						g.value === "tool-multi" ? (z(), V(yb, {
 							key: 0,
 							label: N(J)("config.maxSteps"),
 							inline: ""
@@ -12155,16 +12154,16 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 								max: "20",
 								value: N(re),
 								onChange: r[11] ||= (e) => re.value = le(e)
-							}, null, 40, ix)]),
+							}, null, 40, ax)]),
 							_: 1
 						}, 8, ["label"])) : W("", !0)
 					], 64)) : W("", !0),
-					U(vb, {
+					U(yb, {
 						label: N(J)("config.finalFallback"),
 						help: N(J)("config.finalFallback.hint"),
 						inline: ""
 					}, {
-						default: P(() => [U(pb, {
+						default: P(() => [U(mb, {
 							modelValue: N(ne),
 							"onUpdate:modelValue": r[12] ||= (e) => /* @__PURE__ */ mn(ne) ? ne.value = e : null
 						}, null, 8, ["modelValue"])]),
@@ -12179,7 +12178,7 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 				icon: N(Kv),
 				help: x.value
 			}, {
-				default: P(() => [U(Gb, {
+				default: P(() => [U(Kb, {
 					modelValue: b.value,
 					"onUpdate:modelValue": r[13] ||= (e) => b.value = e,
 					options: y.value
@@ -12197,18 +12196,18 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 				open: !1
 			}, {
 				default: P(() => [
-					(z(), B(R, null, L(ae, (e) => (z(), B(R, { key: e.key }, [se(e.key) ? (z(), V(vb, {
+					(z(), B(R, null, L(ae, (e) => (z(), B(R, { key: e.key }, [se(e.key) ? (z(), V(yb, {
 						key: 0,
 						label: N(J)(`sampling.${e.key}`)
 					}, {
-						default: P(() => [H("div", ax, [H("input", {
+						default: P(() => [H("div", ox, [H("input", {
 							type: "range",
 							min: e.min,
 							max: e.max,
 							step: e.step,
 							value: D.value[e.key],
 							onInput: (t) => ce(e.key, le(t))
-						}, null, 40, ox), H("input", {
+						}, null, 40, sx), H("input", {
 							class: "input",
 							type: "number",
 							min: e.min,
@@ -12216,10 +12215,10 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 							step: e.step,
 							value: D.value[e.key],
 							onChange: (t) => ce(e.key, le(t))
-						}, null, 40, sx)])]),
+						}, null, 40, cx)])]),
 						_: 2
 					}, 1032, ["label"])) : W("", !0)], 64))), 64)),
-					H("div", cx, [(z(), B(R, null, L(T, (e) => (z(), B(R, { key: e }, [se(e) ? (z(), V(vb, {
+					H("div", lx, [(z(), B(R, null, L(T, (e) => (z(), B(R, { key: e }, [se(e) ? (z(), V(yb, {
 						key: 0,
 						label: N(J)(`sampling.${e}`)
 					}, {
@@ -12228,9 +12227,9 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 							type: "number",
 							value: D.value[e],
 							onChange: (t) => ce(e, le(t))
-						}, null, 40, lx)]),
+						}, null, 40, ux)]),
 						_: 2
-					}, 1032, ["label"])) : W("", !0)], 64))), 64)), se("reasoning_effort") ? (z(), V(vb, {
+					}, 1032, ["label"])) : W("", !0)], 64))), 64)), se("reasoning_effort") ? (z(), V(yb, {
 						key: 0,
 						label: N(J)("sampling.reasoning_effort")
 					}, {
@@ -12241,15 +12240,15 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 						}, [(z(), B(R, null, L(oe, (e) => H("option", {
 							key: e,
 							value: e
-						}, k(N(J)(`effort.${e}`)), 9, dx)), 64))], 40, ux)]),
+						}, k(N(J)(`effort.${e}`)), 9, fx)), 64))], 40, dx)]),
 						_: 1
 					}, 8, ["label"])) : W("", !0)]),
-					(z(), B(R, null, L(E, (e) => (z(), B(R, { key: e }, [se(e) ? (z(), V(vb, {
+					(z(), B(R, null, L(E, (e) => (z(), B(R, { key: e }, [se(e) ? (z(), V(yb, {
 						key: 0,
 						label: N(J)(`sampling.${e}`),
 						inline: ""
 					}, {
-						default: P(() => [U(pb, {
+						default: P(() => [U(mb, {
 							"model-value": !!D.value[e],
 							"onUpdate:modelValue": (t) => ce(e, t)
 						}, null, 8, ["model-value", "onUpdate:modelValue"])]),
@@ -12260,7 +12259,7 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 			}, 8, ["title", "icon"])
 		], 64));
 	}
-}), px = [
+}), mx = [
 	"normal",
 	"regenerate",
 	"swipe",
@@ -12268,7 +12267,7 @@ var Vb = { class: "empty" }, Hb = /* @__PURE__ */ I({
 	"quiet",
 	"impersonate"
 ];
-function mx(e) {
+function hx(e) {
 	let t = (e, t) => e.map((e) => ({
 		value: e,
 		label: t(String(e))
@@ -12300,7 +12299,7 @@ function mx(e) {
 		"gen.type": {
 			kind: "enum",
 			label: J("um.var.genType"),
-			options: t(px, (e) => J(`um.genType.${e}`))
+			options: t(mx, (e) => J(`um.genType.${e}`))
 		},
 		"meta.present": {
 			kind: "bool",
@@ -12332,13 +12331,13 @@ function mx(e) {
 		}
 	};
 }
-var hx = (e) => e.modules.filter((e) => e.toggle === "user");
-function gx(e) {
-	let t = mx(e), n = (e) => e.filter((e) => t[e]).map((e) => ({
+var gx = (e) => e.modules.filter((e) => e.toggle === "user");
+function _x(e) {
+	let t = hx(e), n = (e) => e.filter((e) => t[e]).map((e) => ({
 		id: e,
 		label: t[e].label
 	})), r = [];
-	return hx(e).length && r.push({
+	return gx(e).length && r.push({
 		id: "module",
 		label: J("um.var.module")
 	}), e.params.length && r.push({
@@ -12387,13 +12386,13 @@ function gx(e) {
 		}
 	].filter((e) => e.subjects.length);
 }
-function _x(e) {
+function vx(e) {
 	if (e.kind !== "var") return e.kind;
 	let t = e.path.split(".")[0];
 	return t === "modules" ? "module" : t === "params" ? "param" : t === "flags" ? "flag" : e.path;
 }
-function vx(e, t) {
-	return t === "module" ? hx(e).map((t) => ({
+function yx(e, t) {
+	return t === "module" ? gx(e).map((t) => ({
 		value: t.id,
 		label: Y(e, "modules", t.id, "name", t.name)
 	})) : t === "param" ? e.params.map((t) => ({
@@ -12404,11 +12403,11 @@ function vx(e, t) {
 		label: e.id
 	})) : [];
 }
-function yx(e, t) {
+function bx(e, t) {
 	let [n, r = ""] = t.split(".", 2);
 	if (n === "modules") return {
 		kind: "bool",
-		label: vx(e, "module").find((e) => e.value === r)?.label ?? r
+		label: yx(e, "module").find((e) => e.value === r)?.label ?? r
 	};
 	if (n === "flags") return {
 		kind: "bool",
@@ -12426,7 +12425,7 @@ function yx(e, t) {
 		};
 		let i = (t.options ?? []).map((n) => ({
 			value: n.value,
-			label: bx(e, t.id, n.value, n.label)
+			label: xx(e, t.id, n.value, n.label)
 		}));
 		return t.type === "select" ? {
 			kind: "enum",
@@ -12438,12 +12437,12 @@ function yx(e, t) {
 			suggestions: i.map((e) => String(e.value))
 		};
 	}
-	return mx(e)[t] ?? {
+	return hx(e)[t] ?? {
 		kind: "text",
 		label: t
 	};
 }
-var bx = (e, t, n, r) => ju(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String(n), xx = {
+var xx = (e, t, n, r) => ju(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String(n), Sx = {
 	bool: ["on", "off"],
 	enum: ["in", "notIn"],
 	number: [
@@ -12456,7 +12455,7 @@ var bx = (e, t, n, r) => ju(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String
 	],
 	text: ["==", "!="]
 };
-function Sx(e, t) {
+function Cx(e, t) {
 	if (t === "keyword") return {
 		kind: "keyword",
 		target: "input",
@@ -12468,8 +12467,8 @@ function Sx(e, t) {
 		source: ""
 	};
 	if (t === "module" || t === "param" || t === "flag") {
-		let n = String(vx(e, t)[0]?.value ?? "");
-		return Cx(e, {
+		let n = String(yx(e, t)[0]?.value ?? "");
+		return wx(e, {
 			kind: "var",
 			path: "",
 			op: "on"
@@ -12479,15 +12478,15 @@ function Sx(e, t) {
 			flag: "flags"
 		}[t]}.${n}`);
 	}
-	return Cx(e, {
+	return wx(e, {
 		kind: "var",
 		path: "",
 		op: "on"
 	}, t);
 }
-function Cx(e, t, n) {
-	let r = yx(e, n);
-	return t.path && yx(e, t.path).kind === r.kind && xx[r.kind].includes(t.op) && r.kind !== "enum" ? {
+function wx(e, t, n) {
+	let r = bx(e, n);
+	return t.path && bx(e, t.path).kind === r.kind && Sx[r.kind].includes(t.op) && r.kind !== "enum" ? {
 		...t,
 		path: n
 	} : r.kind === "bool" ? {
@@ -12511,32 +12510,32 @@ function Cx(e, t, n) {
 		value: ""
 	};
 }
-function wx(e, t, n = "") {
+function Tx(e, t, n = "") {
 	return e === "bool" ? J(n.startsWith("modules.") ? `um.op.module.${t}` : `um.op.${t}`) : e === "enum" ? J(`um.op.${t}`) : t === "==" ? "=" : t === "!=" ? "≠" : t === ">=" ? "≥" : t === "<=" ? "≤" : t;
 }
-var Tx = (e, t) => {
+var Ex = (e, t) => {
 	let n = (t) => e.options?.find((e) => String(e.value) === String(t))?.label ?? String(t);
 	return Array.isArray(t) ? t.map(n).join(J("um.or")) : t === void 0 ? "" : n(t);
 };
-function Ex(e, t) {
+function Dx(e, t) {
 	if (t.kind === "expr") return t.source;
 	if (t.kind === "keyword") return `${t.target === "input" ? J("um.kw.input") : J("um.kw.recentN", { n: t.depth ?? 3 })} ${J(`um.kw.${t.op}`)} ${t.words.join(J("um.or"))}`;
-	let n = yx(e, t.path);
+	let n = bx(e, t.path);
 	return n.kind === "bool" ? J("um.boolDesc", {
 		label: n.label,
-		value: wx("bool", t.op, t.path)
-	}) : `${n.label} ${wx(n.kind, t.op)} ${Tx(n, t.value)}`;
+		value: Tx("bool", t.op, t.path)
+	}) : `${n.label} ${Tx(n.kind, t.op)} ${Ex(n, t.value)}`;
 }
-function Dx(e, t) {
+function Ox(e, t) {
 	let n = t.rules.filter(Dl);
-	return n.length ? n.map((t) => Ex(e, t)).join(t.match === "any" ? `\n${J("um.match.anyJoin")} ` : `\n${J("um.match.allJoin")} `) : J("um.always");
+	return n.length ? n.map((t) => Dx(e, t)).join(t.match === "any" ? `\n${J("um.match.anyJoin")} ` : `\n${J("um.match.allJoin")} `) : J("um.always");
 }
 //#endregion
 //#region src/ui/panel/user-modules/UserModulesSection.vue?vue&type=script&setup=true&lang.ts
-var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx = { class: "um-row-name ellipsis" }, Mx = { class: "um-row-meta xs muted ellipsis" }, Nx = {
+var kx = ["data-id"], Ax = ["aria-label", "onPointerdown"], jx = ["onClick"], Mx = { class: "um-row-name ellipsis" }, Nx = { class: "um-row-meta xs muted ellipsis" }, Px = {
 	key: 2,
 	class: "faint small"
-}, Px = /* @__PURE__ */ I({
+}, Fx = /* @__PURE__ */ I({
 	__name: "UserModulesSection",
 	props: { preset: {} },
 	emits: ["open"],
@@ -12635,12 +12634,12 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					onPointermove: x,
 					onPointerup: S,
 					onPointercancel: S
-				}, [U(N(hv))], 40, kx)) : W("", !0),
+				}, [U(N(hv))], 40, Ax)) : W("", !0),
 				H("button", {
 					type: "button",
 					class: "um-open",
 					onClick: (e) => r("open", t.id)
-				}, [H("span", jx, k(t.name || N(J)("um.untitled")), 1), H("span", Mx, k(c(t) || N(J)("um.noEntries")), 1)], 8, Ax),
+				}, [H("span", Mx, k(t.name || N(J)("um.untitled")), 1), H("span", Nx, k(c(t) || N(J)("um.noEntries")), 1)], 8, jx),
 				l(t).length ? (z(), V(Yv, {
 					key: 1,
 					text: u(t),
@@ -12654,7 +12653,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				}, 8, ["text"])) : W("", !0),
 				d(t) ? (z(), V(Yv, {
 					key: 2,
-					text: N(Dx)(e.preset, t.trigger),
+					text: N(Ox)(e.preset, t.trigger),
 					align: "end"
 				}, {
 					default: P(() => [U(N(Jv), {
@@ -12663,7 +12662,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					})]),
 					_: 1
 				}, 8, ["text"])) : W("", !0),
-				U(pb, {
+				U(mb, {
 					"model-value": t.enabled,
 					label: t.name,
 					"onUpdate:modelValue": (e) => p(t, e)
@@ -12672,12 +12671,12 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					"label",
 					"onUpdate:modelValue"
 				])
-			], 10, Ox))), 128))], 512)) : a.value ? (z(), B("button", {
+			], 10, kx))), 128))], 512)) : a.value ? (z(), B("button", {
 				key: 1,
 				type: "button",
 				class: "um-new",
 				onClick: m
-			}, [U(N(kv)), ua(k(N(J)("um.new")), 1)])) : (z(), B("div", Nx, k(N(J)("um.noPoints")), 1)), H("input", {
+			}, [U(N(kv)), ua(k(N(J)("um.new")), 1)])) : (z(), B("div", Px, k(N(J)("um.noPoints")), 1)), H("input", {
 				ref_key: "fileInput",
 				ref: h,
 				type: "file",
@@ -12688,7 +12687,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			_: 1
 		}, 8, ["title", "help"]));
 	}
-}), Fx = { class: "ellipsis" }, Ix = ["aria-label", "onClick"], Lx = ["placeholder"], Rx = /* @__PURE__ */ I({
+}), Ix = { class: "ellipsis" }, Lx = ["aria-label", "onClick"], Rx = ["placeholder"], zx = /* @__PURE__ */ I({
 	__name: "ChipsInput",
 	props: /*@__PURE__*/ ei({
 		placeholder: {},
@@ -12728,12 +12727,12 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 		}, [(z(!0), B(R, null, L(t.value, (t, n) => (z(), B("span", {
 			key: t,
 			class: O(["chip", { mono: e.mono }])
-		}, [H("span", Fx, k(t), 1), H("button", {
+		}, [H("span", Ix, k(t), 1), H("button", {
 			type: "button",
 			class: "chip-x",
 			"aria-label": e.removeLabel,
 			onClick: os((e) => c(n), ["stop"])
-		}, [U(N(qv))], 8, Ix)], 2))), 128)), F(H("input", {
+		}, [U(N(qv))], 8, Lx)], 2))), 128)), F(H("input", {
 			ref_key: "input",
 			ref: i,
 			"onUpdate:modelValue": l[0] ||= (e) => r.value = e,
@@ -12742,30 +12741,30 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			onKeydown: o,
 			onBlur: l[1] ||= (e) => a(),
 			onPaste: s
-		}, null, 42, Lx), [[Xo, r.value]])]));
+		}, null, 42, Rx), [[Xo, r.value]])]));
 	}
-}), zx = { class: "rule" }, Bx = { class: "rule-head" }, Vx = ["value", "aria-label"], Hx = ["label"], Ux = ["value"], Wx = ["value"], Gx = ["value"], Kx = ["value"], qx = ["value"], Jx = {
+}), Bx = { class: "rule" }, Vx = { class: "rule-head" }, Hx = ["value", "aria-label"], Ux = ["label"], Wx = ["value"], Gx = ["value"], Kx = ["value"], qx = ["value"], Jx = ["value"], Yx = {
 	key: 1,
 	class: "grow"
-}, Yx = {
+}, Xx = {
 	key: 0,
 	class: "rule-body"
-}, Xx = { class: "row wrap" }, Zx = {
+}, Zx = { class: "row wrap" }, Qx = {
 	key: 0,
 	class: "unit small muted"
-}, Qx = ["value"], $x = ["value"], eS = { value: "any" }, tS = { value: "none" }, nS = { class: "row kw-words" }, rS = {
+}, $x = ["value"], eS = ["value"], tS = { value: "any" }, nS = { value: "none" }, rS = { class: "row kw-words" }, iS = {
 	key: 1,
 	class: "rule-body"
-}, iS = ["value"], aS = {
+}, aS = ["value"], oS = {
 	key: 2,
 	class: "rule-body"
-}, oS = ["value"], sS = ["value"], cS = { class: "row wrap option-chips" }, lS = ["aria-pressed", "onClick"], uS = {
+}, sS = ["value"], cS = ["value"], lS = { class: "row wrap option-chips" }, uS = ["aria-pressed", "onClick"], dS = {
 	key: 2,
 	class: "row"
-}, dS = ["value"], fS = ["value"], pS = ["value"], mS = ["list", "value"], hS = ["value"], gS = {
+}, fS = ["value"], pS = ["value"], mS = ["value"], hS = ["list", "value"], gS = ["value"], _S = {
 	key: 3,
 	class: "rule-error xs"
-}, _S = /* @__PURE__ */ I({
+}, vS = /* @__PURE__ */ I({
 	__name: "RuleRow",
 	props: /*@__PURE__*/ ei({ preset: {} }, {
 		modelValue: { required: !0 },
@@ -12773,13 +12772,13 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 	}),
 	emits: /*@__PURE__*/ ei(["remove"], ["update:modelValue"]),
 	setup(e) {
-		let t = e, n = ai(e, "modelValue"), r = G(() => gx(t.preset)), i = G(() => _x(n.value)), a = G(() => vx(t.preset, i.value)), o = G(() => n.value.kind === "var" ? n.value.path.split(".").slice(1).join(".") : ""), s = G(() => n.value.kind === "var" ? yx(t.preset, n.value.path) : null), c = G(() => Nl(n.value)), l = `ap-um-${Math.random().toString(36).slice(2, 8)}`;
+		let t = e, n = ai(e, "modelValue"), r = G(() => _x(t.preset)), i = G(() => vx(n.value)), a = G(() => yx(t.preset, i.value)), o = G(() => n.value.kind === "var" ? n.value.path.split(".").slice(1).join(".") : ""), s = G(() => n.value.kind === "var" ? bx(t.preset, n.value.path) : null), c = G(() => Nl(n.value)), l = `ap-um-${Math.random().toString(36).slice(2, 8)}`;
 		function u(e) {
-			e !== i.value && (n.value = Sx(t.preset, e));
+			e !== i.value && (n.value = Cx(t.preset, e));
 		}
 		function d(e) {
 			let r = n.value, i = r.path.split(".")[0];
-			n.value = Cx(t.preset, r, `${i}.${e}`);
+			n.value = wx(t.preset, r, `${i}.${e}`);
 		}
 		let f = (e) => {
 			n.value = {
@@ -12799,12 +12798,12 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			let t = n.value.value, r = Array.isArray(t) ? [...t] : [], i = r.findIndex((t) => String(t) === String(e));
 			i >= 0 ? r.splice(i, 1) : r.push(e), f({ value: r });
 		}
-		let g = G(() => xx.bool.map((e) => ({
+		let g = G(() => Sx.bool.map((e) => ({
 			value: e,
-			label: wx("bool", e, n.value.path)
-		}))), _ = G(() => (s.value ? xx[s.value.kind] : []).map((e) => ({
+			label: Tx("bool", e, n.value.path)
+		}))), _ = G(() => (s.value ? Sx[s.value.kind] : []).map((e) => ({
 			value: e,
-			label: wx(s.value.kind, e)
+			label: Tx(s.value.kind, e)
 		}))), v = G({
 			get: () => n.value.target,
 			set: (e) => p(e === "recent" ? {
@@ -12821,8 +12820,8 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			value: "recent",
 			label: J("um.kw.recent")
 		}]);
-		return (e, t) => (z(), B("div", zx, [
-			H("div", Bx, [
+		return (e, t) => (z(), B("div", Bx, [
+			H("div", Vx, [
 				H("select", {
 					class: "input bare rule-subject",
 					value: i.value,
@@ -12834,10 +12833,10 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				}, [(z(!0), B(R, null, L(e.subjects, (e) => (z(), B("option", {
 					key: e.id,
 					value: e.id
-				}, k(e.label), 9, Ux))), 128))], 8, Hx))), 128)), n.value.kind === "var" && !r.value.some((e) => e.subjects.some((e) => e.id === i.value)) ? (z(), B("option", {
+				}, k(e.label), 9, Wx))), 128))], 8, Ux))), 128)), n.value.kind === "var" && !r.value.some((e) => e.subjects.some((e) => e.id === i.value)) ? (z(), B("option", {
 					key: 0,
 					value: i.value
-				}, k(n.value.path), 9, Wx)) : W("", !0)], 40, Vx),
+				}, k(n.value.path), 9, Gx)) : W("", !0)], 40, Hx),
 				a.value.length ? (z(), B("select", {
 					key: 0,
 					class: "input bare rule-target grow",
@@ -12846,11 +12845,11 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				}, [(z(!0), B(R, null, L(a.value, (e) => (z(), B("option", {
 					key: String(e.value),
 					value: e.value
-				}, k(e.label), 9, Kx))), 128)), a.value.some((e) => String(e.value) === o.value) ? W("", !0) : (z(), B("option", {
+				}, k(e.label), 9, qx))), 128)), a.value.some((e) => String(e.value) === o.value) ? W("", !0) : (z(), B("option", {
 					key: 0,
 					value: o.value,
 					disabled: ""
-				}, k(o.value), 9, qx))], 40, Gx)) : (z(), B("span", Jx)),
+				}, k(o.value), 9, Jx))], 40, Kx)) : (z(), B("span", Yx)),
 				U($, {
 					icon: N(qv),
 					label: N(J)("um.removeRule"),
@@ -12859,27 +12858,27 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					onClick: t[2] ||= (t) => e.$emit("remove")
 				}, null, 8, ["icon", "label"])
 			]),
-			n.value.kind === "keyword" ? (z(), B("div", Yx, [H("div", Xx, [
-				U(Gb, {
+			n.value.kind === "keyword" ? (z(), B("div", Xx, [H("div", Zx, [
+				U(Kb, {
 					modelValue: v.value,
 					"onUpdate:modelValue": t[3] ||= (e) => v.value = e,
 					class: "rule-scope",
 					options: y.value
 				}, null, 8, ["modelValue", "options"]),
-				n.value.target === "recent" ? (z(), B("label", Zx, [H("input", {
+				n.value.target === "recent" ? (z(), B("label", Qx, [H("input", {
 					class: "input depth",
 					type: "number",
 					min: "1",
 					max: "50",
 					value: n.value.depth ?? N(3),
 					onChange: t[4] ||= (e) => p({ depth: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })
-				}, null, 40, Qx), ua(" " + k(N(J)("um.kw.messages")), 1)])) : W("", !0),
+				}, null, 40, $x), ua(" " + k(N(J)("um.kw.messages")), 1)])) : W("", !0),
 				H("select", {
 					class: "input bare rule-op",
 					value: n.value.op,
 					onChange: t[5] ||= (e) => p({ op: e.target.value })
-				}, [H("option", eS, k(N(J)("um.kw.any")), 1), H("option", tS, k(N(J)("um.kw.none")), 1)], 40, $x)
-			]), H("div", nS, [U(Rx, {
+				}, [H("option", tS, k(N(J)("um.kw.any")), 1), H("option", nS, k(N(J)("um.kw.none")), 1)], 40, eS)
+			]), H("div", rS, [U(zx, {
 				class: "grow",
 				"model-value": n.value.words,
 				literal: n.value.regex,
@@ -12903,7 +12902,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				"icon",
 				"label",
 				"active"
-			])])])) : n.value.kind === "expr" ? (z(), B("div", rS, [H("input", {
+			])])])) : n.value.kind === "expr" ? (z(), B("div", iS, [H("input", {
 				class: "input mono",
 				value: n.value.source,
 				spellcheck: "false",
@@ -12912,7 +12911,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					kind: "expr",
 					source: e.target.value
 				}
-			}, null, 40, iS)])) : s.value ? (z(), B("div", aS, [s.value.kind === "bool" ? (z(), V(Gb, {
+			}, null, 40, aS)])) : s.value ? (z(), B("div", oS, [s.value.kind === "bool" ? (z(), V(Kb, {
 				key: 0,
 				"model-value": n.value.op,
 				options: g.value,
@@ -12924,47 +12923,47 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			}, [(z(!0), B(R, null, L(_.value, (e) => (z(), B("option", {
 				key: e.value,
 				value: e.value
-			}, k(e.label), 9, sS))), 128))], 40, oS), H("div", cS, [(z(!0), B(R, null, L(s.value.options, (e) => (z(), B("button", {
+			}, k(e.label), 9, cS))), 128))], 40, sS), H("div", lS, [(z(!0), B(R, null, L(s.value.options, (e) => (z(), B("button", {
 				key: String(e.value),
 				type: "button",
 				class: O(["chip", { on: m.value.includes(String(e.value)) }]),
 				"aria-pressed": m.value.includes(String(e.value)),
 				onClick: (t) => h(e.value)
-			}, k(e.label), 11, lS))), 128))])], 64)) : (z(), B("div", uS, [H("select", {
+			}, k(e.label), 11, uS))), 128))])], 64)) : (z(), B("div", dS, [H("select", {
 				class: "input rule-cmp",
 				value: n.value.op,
 				onChange: t[11] ||= (e) => f({ op: e.target.value })
 			}, [(z(!0), B(R, null, L(_.value, (e) => (z(), B("option", {
 				key: e.value,
 				value: e.value
-			}, k(e.label), 9, fS))), 128))], 40, dS), s.value.kind === "number" ? (z(), B("input", {
+			}, k(e.label), 9, pS))), 128))], 40, fS), s.value.kind === "number" ? (z(), B("input", {
 				key: 0,
 				class: "input grow",
 				type: "number",
 				value: n.value.value,
 				onChange: t[12] ||= (e) => f({ value: Number(e.target.value) })
-			}, null, 40, pS)) : (z(), B(R, { key: 1 }, [H("input", {
+			}, null, 40, mS)) : (z(), B(R, { key: 1 }, [H("input", {
 				class: "input grow",
 				list: s.value.suggestions?.length ? l : void 0,
 				value: n.value.value,
 				onInput: t[13] ||= (e) => f({ value: e.target.value })
-			}, null, 40, mS), s.value.suggestions?.length ? (z(), B("datalist", {
+			}, null, 40, hS), s.value.suggestions?.length ? (z(), B("datalist", {
 				key: 0,
 				id: l
 			}, [(z(!0), B(R, null, L(s.value.suggestions, (e) => (z(), B("option", {
 				key: e,
 				value: e
-			}, null, 8, hS))), 128))])) : W("", !0)], 64))]))])) : W("", !0),
-			c.value ? (z(), B("div", gS, k(c.value), 1)) : W("", !0)
+			}, null, 8, gS))), 128))])) : W("", !0)], 64))]))])) : W("", !0),
+			c.value ? (z(), B("div", _S, k(c.value), 1)) : W("", !0)
 		]));
 	}
-}), vS = { class: "trigger" }, yS = {
+}), yS = { class: "trigger" }, bS = {
 	key: 1,
 	class: "always faint small"
-}, bS = {
+}, xS = {
 	key: 0,
 	class: "rule-join xs faint"
-}, xS = { class: "btn ghost add picker" }, SS = ["aria-label"], CS = ["label"], wS = ["value"], TS = /* @__PURE__ */ I({
+}, SS = { class: "btn ghost add picker" }, CS = ["aria-label"], wS = ["label"], TS = ["value"], ES = /* @__PURE__ */ I({
 	__name: "TriggerEditor",
 	props: /*@__PURE__*/ ei({ preset: {} }, {
 		modelValue: { required: !0 },
@@ -12972,7 +12971,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 	}),
 	emits: ["update:modelValue"],
 	setup(e) {
-		let t = e, n = ai(e, "modelValue"), r = G(() => gx(t.preset)), i = /* @__PURE__ */ M(null), a = G(() => [{
+		let t = e, n = ai(e, "modelValue"), r = G(() => _x(t.preset)), i = /* @__PURE__ */ M(null), a = G(() => [{
 			value: "all",
 			label: J("um.match.all")
 		}, {
@@ -12980,22 +12979,22 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			label: J("um.match.any")
 		}]);
 		function o(e) {
-			e && (n.value.rules.push(Sx(t.preset, e)), i.value && (i.value.value = ""));
+			e && (n.value.rules.push(Cx(t.preset, e)), i.value && (i.value.value = ""));
 		}
 		let s = (e, t) => {
 			n.value.rules.splice(e, 1, t);
 		}, c = (e) => {
 			n.value.rules.splice(e, 1);
 		};
-		return (t, l) => (z(), B("div", vS, [
-			n.value.rules.length > 1 ? (z(), V(Gb, {
+		return (t, l) => (z(), B("div", yS, [
+			n.value.rules.length > 1 ? (z(), V(Kb, {
 				key: 0,
 				modelValue: n.value.match,
 				"onUpdate:modelValue": l[0] ||= (e) => n.value.match = e,
 				options: a.value
 			}, null, 8, ["modelValue", "options"])) : W("", !0),
-			n.value.rules.length ? W("", !0) : (z(), B("div", yS, k(N(J)("um.always")), 1)),
-			(z(!0), B(R, null, L(n.value.rules, (t, r) => (z(), B(R, { key: r }, [r > 0 ? (z(), B("div", bS, k(n.value.match === "any" ? N(J)("um.match.anyJoin") : N(J)("um.match.allJoin")), 1)) : W("", !0), U(_S, {
+			n.value.rules.length ? W("", !0) : (z(), B("div", bS, k(N(J)("um.always")), 1)),
+			(z(!0), B(R, null, L(n.value.rules, (t, r) => (z(), B(R, { key: r }, [r > 0 ? (z(), B("div", xS, k(n.value.match === "any" ? N(J)("um.match.anyJoin") : N(J)("um.match.allJoin")), 1)) : W("", !0), U(vS, {
 				"model-value": t,
 				preset: e.preset,
 				"onUpdate:modelValue": (e) => s(r, e),
@@ -13006,7 +13005,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				"onUpdate:modelValue",
 				"onRemove"
 			])], 64))), 128)),
-			H("label", xS, [
+			H("label", SS, [
 				U(N(kv)),
 				ua(k(N(J)("um.addRule")) + " ", 1),
 				H("select", {
@@ -13025,23 +13024,23 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				}, [(z(!0), B(R, null, L(e.subjects, (e) => (z(), B("option", {
 					key: e.id,
 					value: e.id
-				}, k(e.label), 9, wS))), 128))], 8, CS))), 128))], 40, SS)
+				}, k(e.label), 9, TS))), 128))], 8, wS))), 128))], 40, CS)
 			])
 		]));
 	}
-}), ES = { class: "um-entry-head" }, DS = { class: "um-var-label grow ellipsis" }, OS = {
+}), DS = { class: "um-entry-head" }, OS = { class: "um-var-label grow ellipsis" }, kS = {
 	key: 0,
 	class: "um-warn xs"
-}, kS = ["placeholder"], AS = ["onUpdate:modelValue", "placeholder"], jS = [
+}, AS = ["placeholder"], jS = ["onUpdate:modelValue", "placeholder"], MS = [
 	"onUpdate:modelValue",
 	"list",
 	"placeholder",
 	"onChange"
-], MS = [
+], NS = [
 	"value",
 	"placeholder",
 	"onInput"
-], NS = ["id"], PS = ["value"], FS = /* @__PURE__ */ I({
+], PS = ["id"], FS = ["value"], IS = /* @__PURE__ */ I({
 	__name: "VarUpdateEditor",
 	props: {
 		preset: {},
@@ -13067,9 +13066,9 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			});
 		}
 		return (t, n) => (z(), B("div", { class: O(["um-entry", { lost: a.value }]) }, [
-			H("div", ES, [
+			H("div", DS, [
 				U(N(q_), { class: "faint" }),
-				H("span", DS, k(o.value), 1),
+				H("span", OS, k(o.value), 1),
 				U(jy, {
 					text: s.value,
 					align: "end"
@@ -13082,7 +13081,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					onClick: n[0] ||= (e) => r("remove")
 				}, null, 8, ["icon", "label"])
 			]),
-			a.value ? (z(), B("div", OS, [U(N(Hv)), ua(k(N(J)("um.bv.lost")), 1)])) : W("", !0),
+			a.value ? (z(), B("div", kS, [U(N(Hv)), ua(k(N(J)("um.bv.lost")), 1)])) : W("", !0),
 			e.update.type === "string" ? F((z(), B("textarea", {
 				key: 1,
 				"onUpdate:modelValue": n[1] ||= (t) => e.update.text = t,
@@ -13090,7 +13089,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				rows: "3",
 				spellcheck: "false",
 				placeholder: N(J)("um.bv.append")
-			}, null, 8, kS)), [[Xo, e.update.text]]) : e.update.type === "list" ? (z(!0), B(R, { key: 2 }, L(e.update.items, (t, n) => (z(), B("div", {
+			}, null, 8, AS)), [[Xo, e.update.text]]) : e.update.type === "list" ? (z(!0), B(R, { key: 2 }, L(e.update.items, (t, n) => (z(), B("div", {
 				key: n,
 				class: "um-var-row list"
 			}, [F(H("textarea", {
@@ -13099,7 +13098,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				rows: "1",
 				spellcheck: "false",
 				placeholder: N(J)("um.bv.item")
-			}, null, 8, AS), [[Xo, e.update.items[n]]]), U($, {
+			}, null, 8, jS), [[Xo, e.update.items[n]]]), U($, {
 				icon: N(qv),
 				label: N(J)("um.removeEntry"),
 				small: "",
@@ -13120,7 +13119,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					spellcheck: "false",
 					placeholder: N(J)("um.bv.key"),
 					onChange: (e) => u(t)
-				}, null, 40, jS), [[Xo, t.key]]),
+				}, null, 40, MS), [[Xo, t.key]]),
 				H("textarea", {
 					value: t.value ?? "",
 					class: "input um-var-value",
@@ -13128,7 +13127,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					spellcheck: "false",
 					placeholder: c.value.has(t.key.trim()) ? N(J)("um.bv.removes") : N(J)("um.bv.value"),
 					onInput: (e) => t.value = e.target.value
-				}, null, 40, MS),
+				}, null, 40, NS),
 				U($, {
 					icon: N(qv),
 					label: N(J)("um.removeEntry"),
@@ -13143,7 +13142,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			]))), 128)), H("datalist", { id: l.value }, [(z(!0), B(R, null, L(c.value, ([e]) => (z(), B("option", {
 				key: e,
 				value: e
-			}, null, 8, PS))), 128))], 8, NS)], 64)),
+			}, null, 8, FS))), 128))], 8, PS)], 64)),
 			e.update.type === "string" ? W("", !0) : (z(), B("button", {
 				key: 4,
 				type: "button",
@@ -13152,20 +13151,20 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			}, [U(N(kv)), ua(k(e.update.type === "dict" ? N(J)("um.bv.addKey") : N(J)("um.bv.addItem")), 1)]))
 		], 2));
 	}
-}), IS = { class: "um-editor" }, LS = { class: "um-head" }, RS = ["placeholder", "aria-label"], zS = { class: "um-entry-head" }, BS = ["onUpdate:modelValue", "aria-label"], VS = ["value"], HS = ["value"], US = [
+}), LS = { class: "um-editor" }, RS = { class: "um-head" }, zS = ["placeholder", "aria-label"], BS = { class: "um-entry-head" }, VS = ["onUpdate:modelValue", "aria-label"], HS = ["value"], US = ["value"], WS = [
 	"value",
 	"aria-label",
 	"onChange"
-], WS = ["value"], GS = {
+], GS = ["value"], KS = {
 	key: 0,
 	class: "um-warn xs"
-}, KS = ["onUpdate:modelValue", "placeholder"], qS = {
+}, qS = ["onUpdate:modelValue", "placeholder"], JS = {
 	key: 1,
 	class: "rule-error xs pre"
-}, JS = {
+}, YS = {
 	key: 0,
 	class: "btn ghost add picker"
-}, YS = ["aria-label"], XS = ["value"], ZS = { class: "um-foot" }, QS = ["title"], $S = ["title"], eC = ["title"], tC = /* @__PURE__ */ I({
+}, XS = ["aria-label"], ZS = ["value"], QS = { class: "um-foot" }, $S = ["title"], eC = ["title"], tC = ["title"], nC = /* @__PURE__ */ I({
 	__name: "UserModuleEditor",
 	props: {
 		preset: {},
@@ -13234,8 +13233,8 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			e && r("open", e.id);
 		}
 		let x = () => nh(`${n.preset.id}.${rh(n.module.name)}.ap-modules.json`, of(n.preset, [n.module.id]));
-		return (t, n) => (z(), B("div", IS, [
-			H("header", LS, [
+		return (t, n) => (z(), B("div", LS, [
+			H("header", RS, [
 				U($, {
 					icon: N(W_),
 					label: N(J)("um.back"),
@@ -13249,8 +13248,8 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					class: "input bare um-name grow",
 					placeholder: N(J)("um.untitled"),
 					"aria-label": N(J)("um.name")
-				}, null, 8, RS), [[Xo, e.module.name]]),
-				U(pb, {
+				}, null, 8, zS), [[Xo, e.module.name]]),
+				U(mb, {
 					modelValue: e.module.enabled,
 					"onUpdate:modelValue": n[2] ||= (t) => e.module.enabled = t,
 					label: N(J)("panel.enabled")
@@ -13264,7 +13263,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					key: t.id,
 					class: O(["um-entry", { lost: s(t) }])
 				}, [
-					H("div", zS, [
+					H("div", BS, [
 						U(N(bv), { class: "faint" }),
 						F(H("select", {
 							"onUpdate:modelValue": (e) => t.point = e,
@@ -13273,11 +13272,11 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						}, [(z(!0), B(R, null, L(a.value, (e) => (z(), B("option", {
 							key: e.id,
 							value: e.id
-						}, k(e.label), 9, VS))), 128)), s(t) ? (z(), B("option", {
+						}, k(e.label), 9, HS))), 128)), s(t) ? (z(), B("option", {
 							key: 0,
 							value: t.point,
 							disabled: ""
-						}, k(N(J)("um.pointMissing", { id: t.point })), 9, HS)) : W("", !0)], 8, BS), [[$o, t.point]]),
+						}, k(N(J)("um.pointMissing", { id: t.point })), 9, US)) : W("", !0)], 8, VS), [[$o, t.point]]),
 						U(jy, {
 							text: o(t)?.description,
 							align: "end"
@@ -13290,7 +13289,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						}, [(z(), B(R, null, L(c, (e) => H("option", {
 							key: e,
 							value: e
-						}, k(N(J)(`um.role.${e || "merge"}`)), 9, WS)), 64))], 40, US),
+						}, k(N(J)(`um.role.${e || "merge"}`)), 9, GS)), 64))], 40, WS),
 						e.module.entries.length > 1 || e.module.vars.length ? (z(), V($, {
 							key: 0,
 							icon: N(qv),
@@ -13304,15 +13303,15 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 							"onClick"
 						])) : W("", !0)
 					]),
-					s(t) ? (z(), B("div", GS, [U(N(Hv)), ua(k(N(J)("um.pointLost")), 1)])) : W("", !0),
+					s(t) ? (z(), B("div", KS, [U(N(Hv)), ua(k(N(J)("um.pointLost")), 1)])) : W("", !0),
 					F(H("textarea", {
 						"onUpdate:modelValue": (e) => t.text = e,
 						class: "input um-text",
 						rows: "4",
 						spellcheck: "false",
 						placeholder: N(J)("um.text.placeholder")
-					}, null, 8, KS), [[Xo, t.text]]),
-					u(t).length ? (z(), B("div", qS, k(d(t)), 1)) : W("", !0)
+					}, null, 8, qS), [[Xo, t.text]]),
+					u(t).length ? (z(), B("div", JS, k(d(t)), 1)) : W("", !0)
 				], 2))), 128)), a.value.length ? (z(), B("button", {
 					key: 0,
 					type: "button",
@@ -13326,7 +13325,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				title: N(J)("um.bv"),
 				help: N(J)("um.bv.help")
 			}, {
-				default: P(() => [(z(!0), B(R, null, L(e.module.vars, (t, n) => (z(), V(FS, {
+				default: P(() => [(z(!0), B(R, null, L(e.module.vars, (t, n) => (z(), V(IS, {
 					key: t.var,
 					preset: e.preset,
 					update: t,
@@ -13335,7 +13334,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					"preset",
 					"update",
 					"onRemove"
-				]))), 128)), h.value.length ? (z(), B("label", JS, [
+				]))), 128)), h.value.length ? (z(), B("label", YS, [
 					U(N(kv)),
 					ua(k(N(J)("um.bv.add")) + " ", 1),
 					H("select", {
@@ -13351,7 +13350,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					}, null, -1), (z(!0), B(R, null, L(h.value, (e) => (z(), B("option", {
 						key: e.id,
 						value: e.id
-					}, k(e.label), 9, XS))), 128))], 40, YS)
+					}, k(e.label), 9, ZS))), 128))], 40, XS)
 				])) : W("", !0)]),
 				_: 1
 			}, 8, ["title", "help"])) : W("", !0),
@@ -13359,46 +13358,46 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				title: N(J)("um.trigger"),
 				help: N(J)("um.trigger.help")
 			}, {
-				default: P(() => [U(TS, {
+				default: P(() => [U(ES, {
 					modelValue: e.module.trigger,
 					"onUpdate:modelValue": n[4] ||= (t) => e.module.trigger = t,
 					preset: e.preset
 				}, null, 8, ["modelValue", "preset"])]),
 				_: 1
 			}, 8, ["title", "help"]),
-			H("footer", ZS, [
+			H("footer", QS, [
 				H("button", {
 					type: "button",
 					class: "btn ghost",
 					title: N(J)("um.export"),
 					onClick: x
-				}, [U(N(cv)), H("span", null, k(N(J)("um.export")), 1)], 8, QS),
+				}, [U(N(cv)), H("span", null, k(N(J)("um.export")), 1)], 8, $S),
 				H("button", {
 					type: "button",
 					class: "btn ghost",
 					title: N(J)("um.duplicate"),
 					onClick: b
-				}, [U(N(ov)), H("span", null, k(N(J)("um.duplicate")), 1)], 8, $S),
+				}, [U(N(ov)), H("span", null, k(N(J)("um.duplicate")), 1)], 8, eC),
 				n[6] ||= H("span", { class: "grow" }, null, -1),
 				H("button", {
 					type: "button",
 					class: O(["btn ghost danger", { armed: v.value }]),
 					title: N(J)("common.delete"),
 					onClick: y
-				}, [U(N(Vv)), H("span", null, k(v.value ? N(J)("um.confirmDelete") : N(J)("common.delete")), 1)], 10, eC)
+				}, [U(N(Vv)), H("span", null, k(v.value ? N(J)("um.confirmDelete") : N(J)("common.delete")), 1)], 10, tC)
 			])
 		]));
 	}
-}), nC = {
+}), rC = {
 	key: 0,
 	class: "module-row"
-}, rC = { class: "grow" }, iC = { class: "ellipsis" }, aC = ["aria-label"], oC = ["aria-checked", "onClick"], sC = { class: "grow" }, cC = { class: "grow" }, lC = { class: "ellipsis" }, uC = {
+}, iC = { class: "grow" }, aC = { class: "ellipsis" }, oC = ["aria-label"], sC = ["aria-checked", "onClick"], cC = { class: "grow" }, lC = { class: "grow" }, uC = { class: "ellipsis" }, dC = {
 	key: 0,
 	class: "empty"
-}, dC = /* @__PURE__ */ I({
+}, fC = /* @__PURE__ */ I({
 	__name: "ModulesTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Bb(), i = G(() => t.value && n.value ? Jc(t.value, n.value) : {}), a = G(() => {
+		let { preset: t, config: n, update: r } = Vb(), i = G(() => t.value && n.value ? Jc(t.value, n.value) : {}), a = G(() => {
 			let e = t.value;
 			if (!e) return [];
 			let n = e.modules.filter((e) => e.toggle === "user");
@@ -13456,12 +13455,12 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 		}
 		return or(() => t.value?.id, () => {
 			h.value = null;
-		}), (e, r) => !N(t) || !N(n) ? (z(), V(Hb, { key: 0 })) : _.value ? (z(), B("div", {
+		}), (e, r) => !N(t) || !N(n) ? (z(), V(Ub, { key: 0 })) : _.value ? (z(), B("div", {
 			key: 1,
 			ref_key: "root",
 			ref: g,
 			class: "col tab-col"
-		}, [(z(), V(tC, {
+		}, [(z(), V(nC, {
 			key: _.value.id,
 			preset: N(t),
 			module: _.value,
@@ -13473,7 +13472,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			ref: g,
 			class: "col tab-col"
 		}, [
-			U(Px, {
+			U(Fx, {
 				preset: N(t),
 				onOpen: b
 			}, null, 8, ["preset"]),
@@ -13482,10 +13481,10 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				title: e.label,
 				help: e.help
 			}, Kr({
-				default: P(() => [(z(!0), B(R, null, L(e.sets, (t) => (z(), B(R, { key: t.key }, [t.label ? (z(), B("div", nC, [H("span", rC, [H("span", iC, k(t.label), 1), U(jy, {
+				default: P(() => [(z(!0), B(R, null, L(e.sets, (t) => (z(), B(R, { key: t.key }, [t.label ? (z(), B("div", rC, [H("span", iC, [H("span", aC, k(t.label), 1), U(jy, {
 					text: t.help,
 					align: "start"
-				}, null, 8, ["text"])]), t.optional ? (z(), V(pb, {
+				}, null, 8, ["text"])]), t.optional ? (z(), V(mb, {
 					key: 0,
 					"model-value": c(t) !== null,
 					label: t.label,
@@ -13508,18 +13507,18 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					onClick: (n) => p(t, e.id)
 				}, [
 					r[0] ||= H("span", { class: "radio" }, null, -1),
-					H("span", sC, k(o(e)), 1),
+					H("span", cC, k(o(e)), 1),
 					U(jy, {
 						text: s(e),
 						align: "end"
 					}, null, 8, ["text"])
-				], 10, oC))), 128))], 10, aC)) : W("", !0)], 64))), 128)), (z(!0), B(R, null, L(e.toggles, (e) => (z(), B("div", {
+				], 10, sC))), 128))], 10, oC)) : W("", !0)], 64))), 128)), (z(!0), B(R, null, L(e.toggles, (e) => (z(), B("div", {
 					key: e.id,
 					class: "module-row"
-				}, [H("span", cC, [H("span", lC, k(o(e)), 1), U(jy, {
+				}, [H("span", lC, [H("span", uC, k(o(e)), 1), U(jy, {
 					text: s(e),
 					align: "start"
-				}, null, 8, ["text"])]), U(pb, {
+				}, null, 8, ["text"])]), U(mb, {
 					"model-value": i.value[e.id],
 					label: o(e),
 					"onUpdate:modelValue": (t) => u(e, t)
@@ -13531,7 +13530,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				_: 2
 			}, [e.header ? {
 				name: "actions",
-				fn: P(() => [U(pb, {
+				fn: P(() => [U(mb, {
 					"model-value": c(e.header) !== null,
 					label: e.label,
 					"onUpdate:modelValue": (t) => m(e.header, t)
@@ -13542,38 +13541,38 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				])]),
 				key: "0"
 			} : void 0]), 1032, ["title", "help"]))), 128)),
-			a.value.length ? W("", !0) : (z(), B("div", uC, k(N(J)("modules.none")), 1))
+			a.value.length ? W("", !0) : (z(), B("div", dC, k(N(J)("modules.none")), 1))
 		], 512));
 	}
-}), fC = ["value", "onChange"], pC = ["value"], mC = {
+}), pC = ["value", "onChange"], mC = ["value"], hC = {
 	key: 1,
 	class: "unit"
-}, hC = [
+}, gC = [
 	"min",
 	"max",
 	"value",
 	"placeholder",
 	"onChange"
-], gC = {
+], _C = {
 	key: 0,
 	class: "small muted"
-}, _C = [
+}, vC = [
 	"list",
 	"value",
 	"placeholder",
 	"onChange"
-], vC = ["id"], yC = ["value"], bC = [
+], yC = ["id"], bC = ["value"], xC = [
 	"value",
 	"placeholder",
 	"onChange"
-], xC = [
+], SC = [
 	"value",
 	"placeholder",
 	"onChange"
-], SC = ["value"], CC = ["value"], wC = ["value"], TC = /* @__PURE__ */ I({
+], CC = ["value"], wC = ["value"], TC = ["value"], EC = /* @__PURE__ */ I({
 	__name: "WritingTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Bb(), i = G(() => {
+		let { preset: t, config: n, update: r } = Vb(), i = G(() => {
 			let e = t.value;
 			return e ? [...new Set(e.params.map((e) => e.group ?? ""))].map((t) => ({
 				id: t,
@@ -13605,14 +13604,14 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 		}), g = (e) => r((t) => {
 			t.meta.recentCount = Math.max(0, Number(e) || 0);
 		}), _ = (e) => `ap-param-${e.id}`;
-		return (e, r) => !N(t) || !N(n) ? (z(), V(Hb, { key: 0 })) : (z(), B(R, { key: 1 }, [
+		return (e, r) => !N(t) || !N(n) ? (z(), V(Ub, { key: 0 })) : (z(), B(R, { key: 1 }, [
 			(z(!0), B(R, null, L(i.value, (e) => (z(), V(Py, {
 				key: e.id,
 				title: e.label,
 				help: e.help,
 				icon: N(zv)
 			}, {
-				default: P(() => [(z(!0), B(R, null, L(e.params, (e) => (z(), V(vb, {
+				default: P(() => [(z(!0), B(R, null, L(e.params, (e) => (z(), V(yb, {
 					key: e.id,
 					label: a(e),
 					help: o(e)
@@ -13625,7 +13624,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					}, [(z(!0), B(R, null, L(e.options, (t) => (z(), B("option", {
 						key: String(t.value),
 						value: t.value
-					}, k(s(e, t.value, t.label)), 9, pC))), 128))], 40, fC)) : e.type === "number" ? (z(), B("div", mC, [H("input", {
+					}, k(s(e, t.value, t.label)), 9, mC))), 128))], 40, pC)) : e.type === "number" ? (z(), B("div", hC, [H("input", {
 						class: "input",
 						type: "number",
 						min: e.min,
@@ -13633,19 +13632,19 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						value: c(e),
 						placeholder: e.unset,
 						onChange: (t) => l(e, t.target.value)
-					}, null, 40, hC), e.unit ? (z(), B("span", gC, k(e.unit), 1)) : W("", !0)])) : (z(), B(R, { key: 2 }, [H("input", {
+					}, null, 40, gC), e.unit ? (z(), B("span", _C, k(e.unit), 1)) : W("", !0)])) : (z(), B(R, { key: 2 }, [H("input", {
 						class: "input",
 						list: e.options?.length ? _(e) : void 0,
 						value: c(e),
 						placeholder: e.unset,
 						onChange: (t) => l(e, t.target.value)
-					}, null, 40, _C), e.options?.length ? (z(), B("datalist", {
+					}, null, 40, vC), e.options?.length ? (z(), B("datalist", {
 						key: 0,
 						id: _(e)
 					}, [(z(!0), B(R, null, L(e.options, (t) => (z(), B("option", {
 						key: String(t.value),
 						value: t.value
-					}, k(s(e, t.value, t.label)), 9, yC))), 128))], 8, vC)) : W("", !0)], 64))]),
+					}, k(s(e, t.value, t.label)), 9, bC))), 128))], 8, yC)) : W("", !0)], 64))]),
 					_: 2
 				}, 1032, ["label", "help"]))), 128))]),
 				_: 2
@@ -13663,21 +13662,21 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				default: P(() => [(z(!0), B(R, null, L(u.value, ([e, t]) => (z(), B("div", {
 					key: e,
 					class: "field-grid"
-				}, [U(vb, { label: N(J)("writing.actorName", { actor: e }) }, {
+				}, [U(yb, { label: N(J)("writing.actorName", { actor: e }) }, {
 					default: P(() => [H("input", {
 						class: "input",
 						value: N(n).identity.names[e] ?? "",
 						placeholder: t.name,
 						onChange: (t) => d("names", e, t.target.value)
-					}, null, 40, bC)]),
+					}, null, 40, xC)]),
 					_: 2
-				}, 1032, ["label"]), U(vb, { label: N(J)("writing.actorPrefix") }, {
+				}, 1032, ["label"]), U(yb, { label: N(J)("writing.actorPrefix") }, {
 					default: P(() => [H("input", {
 						class: "input",
 						value: N(n).identity.prefixes[e] ?? "",
 						placeholder: t.prefix,
 						onChange: (t) => d("prefixes", e, t.target.value)
-					}, null, 40, xC)]),
+					}, null, 40, SC)]),
 					_: 2
 				}, 1032, ["label"])]))), 128))]),
 				_: 1
@@ -13687,13 +13686,13 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				icon: N(av),
 				help: N(J)("writing.tokenSaving.hint")
 			}, {
-				actions: P(() => [U(pb, {
+				actions: P(() => [U(mb, {
 					modelValue: f.value,
 					"onUpdate:modelValue": r[0] ||= (e) => f.value = e,
 					label: N(J)("writing.tokenSaving")
 				}, null, 8, ["modelValue", "label"])]),
 				default: P(() => [f.value ? (z(), B(R, { key: 0 }, [
-					U(vb, {
+					U(yb, {
 						label: N(J)("writing.keepFullTurns"),
 						help: N(J)("writing.keepFullTurns.hint"),
 						inline: ""
@@ -13704,21 +13703,21 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 							min: "0",
 							value: N(n).tokenSaving.keepFullTurns,
 							onChange: r[1] ||= (e) => p("keepFullTurns", e.target.value)
-						}, null, 40, SC)]),
+						}, null, 40, CC)]),
 						_: 1
 					}, 8, ["label", "help"]),
-					U(vb, {
+					U(yb, {
 						label: N(J)("writing.userInput"),
 						help: N(J)("writing.userInput.hint")
 					}, {
-						default: P(() => [U(Gb, {
+						default: P(() => [U(Kb, {
 							modelValue: h.value,
 							"onUpdate:modelValue": r[2] ||= (e) => h.value = e,
 							options: m.value
 						}, null, 8, ["modelValue", "options"])]),
 						_: 1
 					}, 8, ["label", "help"]),
-					h.value === "truncate" ? (z(), V(vb, {
+					h.value === "truncate" ? (z(), V(yb, {
 						key: 0,
 						label: N(J)("writing.truncateUserAfter"),
 						help: N(J)("writing.truncateUserAfter.hint"),
@@ -13730,7 +13729,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 							min: "0",
 							value: N(n).tokenSaving.truncateUserAfter,
 							onChange: r[3] ||= (e) => p("truncateUserAfter", e.target.value)
-						}, null, 40, CC)]),
+						}, null, 40, wC)]),
 						_: 1
 					}, 8, ["label", "help"])) : W("", !0)
 				], 64)) : W("", !0)]),
@@ -13744,7 +13743,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				title: N(J)("writing.meta"),
 				icon: N(Cv)
 			}, {
-				default: P(() => [U(vb, {
+				default: P(() => [U(yb, {
 					label: N(J)("writing.recentCount"),
 					help: N(J)("writing.recentCount.hint"),
 					inline: ""
@@ -13756,29 +13755,29 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						max: "20",
 						value: N(n).meta.recentCount,
 						onChange: r[4] ||= (e) => g(e.target.value)
-					}, null, 40, wC)]),
+					}, null, 40, TC)]),
 					_: 1
 				}, 8, ["label", "help"])]),
 				_: 1
 			}, 8, ["title", "icon"])
 		], 64));
 	}
-}), EC = { class: "kv" }, DC = {
+}), DC = { class: "kv" }, OC = {
 	key: 0,
 	class: "kv-row"
-}, OC = { class: "kv-key ellipsis" }, kC = { class: "kv-value pre small" }, AC = {
+}, kC = { class: "kv-key ellipsis" }, AC = { class: "kv-value pre small" }, jC = {
 	key: 0,
 	class: "kv-actions"
-}, jC = {
+}, MC = {
 	key: 1,
 	class: "kv-edit col"
-}, MC = ["placeholder"], NC = ["placeholder"], PC = { class: "row end" }, FC = {
+}, NC = ["placeholder"], PC = ["placeholder"], FC = { class: "row end" }, IC = {
 	key: 0,
 	class: "kv-edit col"
-}, IC = ["placeholder"], LC = ["placeholder"], RC = { class: "row end" }, zC = {
+}, LC = ["placeholder"], RC = ["placeholder"], zC = { class: "row end" }, BC = {
 	key: 1,
 	class: "faint small kv-empty"
-}, BC = /* @__PURE__ */ I({
+}, VC = /* @__PURE__ */ I({
 	__name: "KvEditor",
 	props: {
 		entries: {},
@@ -13794,20 +13793,20 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			let e = a.value.trim();
 			e && (i.value && i.value !== e && r("remove", i.value), r("set", e, o.value), i.value = null);
 		}
-		return (t, n) => (z(), B("div", EC, [
-			(z(!0), B(R, null, L(e.entries, (t, l) => (z(), B(R, { key: l }, [i.value === l ? (z(), B("div", jC, [
+		return (t, n) => (z(), B("div", DC, [
+			(z(!0), B(R, null, L(e.entries, (t, l) => (z(), B(R, { key: l }, [i.value === l ? (z(), B("div", MC, [
 				F(H("input", {
 					"onUpdate:modelValue": n[0] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: N(J)("memory.key")
-				}, null, 8, MC), [[Xo, a.value]]),
+				}, null, 8, NC), [[Xo, a.value]]),
 				F(H("textarea", {
 					"onUpdate:modelValue": n[1] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: N(J)("memory.content")
-				}, null, 8, NC), [[Xo, o.value]]),
-				H("div", PC, [U($, {
+				}, null, 8, PC), [[Xo, o.value]]),
+				H("div", FC, [U($, {
 					icon: N(qv),
 					label: N(J)("common.cancel"),
 					onClick: n[2] ||= (e) => i.value = null
@@ -13817,10 +13816,10 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					active: "",
 					onClick: c
 				}, null, 8, ["icon", "label"])])
-			])) : (z(), B("div", DC, [
-				H("div", OC, k(l), 1),
-				H("div", kC, k(t), 1),
-				e.readonly ? W("", !0) : (z(), B("div", AC, [U($, {
+			])) : (z(), B("div", OC, [
+				H("div", kC, k(l), 1),
+				H("div", AC, k(t), 1),
+				e.readonly ? W("", !0) : (z(), B("div", jC, [U($, {
 					icon: N(Ov),
 					label: N(J)("common.edit"),
 					small: "",
@@ -13843,19 +13842,19 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					"onClick"
 				])]))
 			]))], 64))), 128)),
-			i.value === "" ? (z(), B("div", FC, [
+			i.value === "" ? (z(), B("div", IC, [
 				F(H("input", {
 					"onUpdate:modelValue": n[3] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: N(J)("memory.key")
-				}, null, 8, IC), [[Xo, a.value]]),
+				}, null, 8, LC), [[Xo, a.value]]),
 				F(H("textarea", {
 					"onUpdate:modelValue": n[4] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: N(J)("memory.content")
-				}, null, 8, LC), [[Xo, o.value]]),
-				H("div", RC, [U($, {
+				}, null, 8, RC), [[Xo, o.value]]),
+				H("div", zC, [U($, {
 					icon: N(qv),
 					label: N(J)("common.cancel"),
 					onClick: n[5] ||= (e) => i.value = null
@@ -13866,7 +13865,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					onClick: c
 				}, null, 8, ["icon", "label"])])
 			])) : W("", !0),
-			!Object.keys(e.entries).length && i.value === null ? (z(), B("div", zC, k(N(J)("memory.empty")), 1)) : W("", !0),
+			!Object.keys(e.entries).length && i.value === null ? (z(), B("div", BC, k(N(J)("memory.empty")), 1)) : W("", !0),
 			!e.readonly && i.value === null ? (z(), B("button", {
 				key: 2,
 				type: "button",
@@ -13875,19 +13874,19 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			}, [U(N(kv)), ua(k(N(J)("common.add")), 1)])) : W("", !0)
 		]));
 	}
-}), VC = {
+}), HC = {
 	key: 1,
 	class: "faint small"
-}, HC = {
+}, UC = {
 	key: 0,
 	class: "badge neutral"
-}, UC = ["placeholder"], WC = {
+}, WC = ["placeholder"], GC = {
 	key: 1,
 	class: "faint small"
-}, GC = /* @__PURE__ */ I({
+}, KC = /* @__PURE__ */ I({
 	__name: "MemoryTab",
 	setup(t) {
-		let { preset: n } = Bb(), r = G(() => n.value ? Pu(n.value) : null), i = G(() => (X.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = G(() => (X.chatRev, i.value ? gd() : {})), o = G(() => r.value ? yd(r.value) : {}), s = G(() => (X.chatRev, i.value ? _d() : null));
+		let { preset: n } = Vb(), r = G(() => n.value ? Pu(n.value) : null), i = G(() => (X.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = G(() => (X.chatRev, i.value ? gd() : {})), o = G(() => r.value ? yd(r.value) : {}), s = G(() => (X.chatRev, i.value ? _d() : null));
 		async function c(e, t) {
 			await vd({
 				type: "memory.replace",
@@ -13916,18 +13915,18 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				source: "user"
 			}), ih();
 		}
-		return (e, t) => !N(n) || !r.value ? (z(), V(Hb, { key: 0 })) : (z(), B(R, { key: 1 }, [
+		return (e, t) => !N(n) || !r.value ? (z(), V(Ub, { key: 0 })) : (z(), B(R, { key: 1 }, [
 			U(Py, {
 				title: N(J)("memory.chat"),
 				icon: N(xv),
 				help: N(J)("memory.chat.hint")
 			}, {
-				default: P(() => [i.value ? (z(), V(BC, {
+				default: P(() => [i.value ? (z(), V(VC, {
 					key: 0,
 					entries: a.value,
 					onSet: c,
 					onRemove: l
-				}, null, 8, ["entries"])) : (z(), B("div", VC, k(N(J)("memory.noChat")), 1))]),
+				}, null, 8, ["entries"])) : (z(), B("div", HC, k(N(J)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
@@ -13962,7 +13961,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					"label",
 					"disabled"
 				])]),
-				default: P(() => [U(BC, {
+				default: P(() => [U(VC, {
 					entries: o.value,
 					onSet: u,
 					onRemove: d
@@ -13978,7 +13977,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				icon: N(Fv),
 				help: N(J)("memory.recap.hint")
 			}, {
-				actions: P(() => [s.value ? (z(), B("span", HC, "#0–" + k(s.value.coversUpTo), 1)) : W("", !0), i.value ? (z(), V($, {
+				actions: P(() => [s.value ? (z(), B("span", UC, "#0–" + k(s.value.coversUpTo), 1)) : W("", !0), i.value ? (z(), V($, {
 					key: 1,
 					icon: N(Z_),
 					label: N(J)("common.save"),
@@ -13998,7 +13997,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					class: "input",
 					rows: "6",
 					placeholder: N(J)("memory.recap.empty")
-				}, null, 8, UC)), [[Xo, f.value]]) : (z(), B("div", WC, k(N(J)("memory.noChat")), 1))]),
+				}, null, 8, WC)), [[Xo, f.value]]) : (z(), B("div", GC, k(N(J)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
@@ -14007,43 +14006,43 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			])
 		], 64));
 	}
-}), KC = { class: "row tight xs muted" }, qC = { class: "row" }, JC = {
+}), qC = { class: "row tight xs muted" }, JC = { class: "row" }, YC = {
 	key: 0,
 	class: "xs text-danger"
-}, YC = { class: "row wrap xs muted" }, XC = { class: "badge neutral" }, ZC = {
+}, XC = { class: "row wrap xs muted" }, ZC = { class: "badge neutral" }, QC = {
 	key: 0,
 	class: "badge neutral"
-}, QC = { class: "badge neutral" }, $C = {
+}, $C = { class: "badge neutral" }, ew = {
 	key: 1,
 	class: "badge warn"
-}, ew = ["onClick"], tw = { class: "grow mono" }, nw = { class: "xs muted" }, rw = { class: "row xs muted" }, iw = { class: "badge neutral" }, aw = { class: "pre mono scroll" }, ow = {
+}, tw = ["onClick"], nw = { class: "grow mono" }, rw = { class: "xs muted" }, iw = { class: "row xs muted" }, aw = { class: "badge neutral" }, ow = { class: "pre mono scroll" }, sw = {
 	key: 0,
 	class: "xs faint region-msg"
-}, sw = { key: 0 }, cw = ["onClick"], lw = { class: "grow mono" }, uw = { class: "xs muted" }, dw = {
+}, cw = { key: 0 }, lw = ["onClick"], uw = { class: "grow mono" }, dw = { class: "xs muted" }, fw = {
 	key: 0,
 	class: "region-msg"
-}, fw = { class: "pre mono scroll" }, pw = {
+}, pw = { class: "pre mono scroll" }, mw = {
 	key: 0,
 	class: "xs faint"
-}, mw = {
-	key: 1,
-	class: "xs text-warning"
 }, hw = {
 	key: 1,
+	class: "xs text-warning"
+}, gw = {
+	key: 1,
 	class: "faint small"
-}, gw = ["onClick"], _w = { class: "mono grow ellipsis" }, vw = {
+}, _w = ["onClick"], vw = { class: "mono grow ellipsis" }, yw = {
 	key: 0,
 	class: "badge warn"
-}, yw = { class: "xs muted" }, bw = { class: "xs muted" }, xw = { class: "row xs muted" }, Sw = { class: "grow" }, Cw = { class: "mono scroll" }, ww = { class: "row xs muted" }, Tw = { class: "grow" }, Ew = { class: "mono scroll" }, Dw = {
+}, bw = { class: "xs muted" }, xw = { class: "xs muted" }, Sw = { class: "row xs muted" }, Cw = { class: "grow" }, ww = { class: "mono scroll" }, Tw = { class: "row xs muted" }, Ew = { class: "grow" }, Dw = { class: "mono scroll" }, Ow = {
 	key: 0,
 	class: "faint small"
-}, Ow = { class: "row xs" }, kw = { class: "badge neutral" }, Aw = { class: "muted" }, jw = { class: "mono scroll" }, Mw = {
+}, kw = { class: "row xs" }, Aw = { class: "badge neutral" }, jw = { class: "muted" }, Mw = { class: "mono scroll" }, Nw = {
 	key: 0,
 	class: "faint small"
-}, Nw = { class: "row xs" }, Pw = { class: "badge neutral" }, Fw = { class: "grow muted" }, Iw = { class: "small" }, Lw = {
+}, Pw = { class: "row xs" }, Fw = { class: "badge neutral" }, Iw = { class: "grow muted" }, Lw = { class: "small" }, Rw = {
 	key: 0,
 	class: "faint small"
-}, Rw = { class: "xs faint mono build" }, zw = /* @__PURE__ */ I({
+}, zw = { class: "xs faint mono build" }, Bw = /* @__PURE__ */ I({
 	__name: "DebugTab",
 	setup(t) {
 		let n = G(() => uf.log.find((e) => e.kind === "assembly")?.data), r = /* @__PURE__ */ nn(/* @__PURE__ */ new Set()), i = (e) => r.has(e) ? r.delete(e) : r.add(e), a = /* @__PURE__ */ nn({});
@@ -14094,9 +14093,9 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				icon: N(Iv),
 				help: N(J)("debug.dev.hint")
 			}, {
-				actions: P(() => [H("span", KC, [H("span", { class: O(["dot status-dot", N(zm).status]) }, null, 2), ua(k(N(J)(`debug.dev.${N(zm).status}`)), 1)])]),
-				default: P(() => [U(vb, { label: N(J)("debug.dev.url") }, {
-					default: P(() => [H("div", qC, [F(H("input", {
+				actions: P(() => [H("span", qC, [H("span", { class: O(["dot status-dot", N(zm).status]) }, null, 2), ua(k(N(J)(`debug.dev.${N(zm).status}`)), 1)])]),
+				default: P(() => [U(yb, { label: N(J)("debug.dev.url") }, {
+					default: P(() => [H("div", JC, [F(H("input", {
 						"onUpdate:modelValue": t[0] ||= (e) => p.value = e,
 						class: "input grow",
 						type: "url",
@@ -14106,13 +14105,13 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						p.value,
 						void 0,
 						{ lazy: !0 }
-					]]), U(pb, {
+					]]), U(mb, {
 						modelValue: f.value,
 						"onUpdate:modelValue": t[1] ||= (e) => f.value = e,
 						label: N(J)("debug.dev")
 					}, null, 8, ["modelValue", "label"])])]),
 					_: 1
-				}, 8, ["label"]), N(zm).error ? (z(), B("span", JC, k(N(zm).error), 1)) : W("", !0)]),
+				}, 8, ["label"]), N(zm).error ? (z(), B("span", YC, k(N(zm).error), 1)) : W("", !0)]),
 				_: 1
 			}, 8, [
 				"title",
@@ -14125,11 +14124,11 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				collapsible: ""
 			}, {
 				default: P(() => [n.value ? (z(), B(R, { key: 0 }, [
-					H("div", YC, [
-						H("span", XC, k(N(J)(`transport.${n.value.transport}`)), 1),
-						n.value.workflow ? (z(), B("span", ZC, k(n.value.workflow), 1)) : W("", !0),
-						H("span", QC, k(n.value.origin), 1),
-						n.value.dryRun ? (z(), B("span", $C, "dry run")) : W("", !0),
+					H("div", XC, [
+						H("span", ZC, k(N(J)(`transport.${n.value.transport}`)), 1),
+						n.value.workflow ? (z(), B("span", QC, k(n.value.workflow), 1)) : W("", !0),
+						H("span", $C, k(n.value.origin), 1),
+						n.value.dryRun ? (z(), B("span", ew, "dry run")) : W("", !0),
 						t[3] ||= H("span", { class: "grow" }, null, -1),
 						ua(k(l(n.value.at)), 1)
 					]),
@@ -14141,13 +14140,13 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						onClick: (t) => i(e.id)
 					}, [
 						U(N($_), { class: O(["faint caret", { open: r.has(e.id) }]) }, null, 8, ["class"]),
-						H("span", tw, k(e.id), 1),
-						H("span", nw, k(e.messages.length) + " · " + k(a[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + k(a[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
-					], 8, ew), r.has(e.id) ? (z(), B(R, { key: 0 }, [(z(!0), B(R, null, L(e.messages, (e, t) => (z(), B("div", {
+						H("span", nw, k(e.id), 1),
+						H("span", rw, k(e.messages.length) + " · " + k(a[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + k(a[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
+					], 8, tw), r.has(e.id) ? (z(), B(R, { key: 0 }, [(z(!0), B(R, null, L(e.messages, (e, t) => (z(), B("div", {
 						key: t,
 						class: "region-msg"
-					}, [H("div", rw, [H("span", iw, k(e.role), 1), ua(k(e.chars) + " ch", 1)]), H("div", aw, k(e.content), 1)]))), 128)), e.messages.length ? W("", !0) : (z(), B("div", ow, k(N(J)("debug.emptyRegion")), 1))], 64)) : W("", !0)]))), 128))]),
-					n.value.vars?.length ? (z(), B("div", sw, [(z(!0), B(R, null, L(n.value.vars, (e) => (z(), B("div", {
+					}, [H("div", iw, [H("span", aw, k(e.role), 1), ua(k(e.chars) + " ch", 1)]), H("div", ow, k(e.content), 1)]))), 128)), e.messages.length ? W("", !0) : (z(), B("div", sw, k(N(J)("debug.emptyRegion")), 1))], 64)) : W("", !0)]))), 128))]),
+					n.value.vars?.length ? (z(), B("div", cw, [(z(!0), B(R, null, L(n.value.vars, (e) => (z(), B("div", {
 						key: e.id,
 						class: "region"
 					}, [H("div", {
@@ -14155,11 +14154,11 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						onClick: (t) => i(`var:${e.id}`)
 					}, [
 						U(N($_), { class: O(["faint caret", { open: r.has(`var:${e.id}`) }]) }, null, 8, ["class"]),
-						H("span", lw, k(e.id), 1),
-						H("span", uw, k(e.text.length) + " ch", 1)
-					], 8, cw), r.has(`var:${e.id}`) ? (z(), B("div", dw, [H("div", fw, k(e.text), 1), e.text ? W("", !0) : (z(), B("div", pw, k(N(J)("debug.emptyRegion")), 1))])) : W("", !0)]))), 128))])) : W("", !0),
-					n.value.warnings.length ? (z(), B("div", mw, k(n.value.warnings.join(" · ")), 1)) : W("", !0)
-				], 64)) : (z(), B("div", hw, k(N(J)("debug.noAssembly")), 1))]),
+						H("span", uw, k(e.id), 1),
+						H("span", dw, k(e.text.length) + " ch", 1)
+					], 8, lw), r.has(`var:${e.id}`) ? (z(), B("div", fw, [H("div", pw, k(e.text), 1), e.text ? W("", !0) : (z(), B("div", mw, k(N(J)("debug.emptyRegion")), 1))])) : W("", !0)]))), 128))])) : W("", !0),
+					n.value.warnings.length ? (z(), B("div", hw, k(n.value.warnings.join(" · ")), 1)) : W("", !0)
+				], 64)) : (z(), B("div", gw, k(N(J)("debug.noAssembly")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			U(Py, {
@@ -14174,12 +14173,12 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					class: "row small clickable",
 					onClick: (e) => o.value = o.value === t ? null : t
 				}, [
-					H("span", _w, k(e.genId) + " · #" + k(e.step), 1),
-					e.error ? (z(), B("span", vw, k(N(J)("debug.error")), 1)) : W("", !0),
-					H("span", yw, k(d(e.usage)), 1),
-					H("span", bw, k(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
-				], 8, gw), o.value === t ? (z(), B(R, { key: 0 }, [
-					H("div", xw, [H("span", Sw, k(N(J)("debug.request")), 1), U($, {
+					H("span", vw, k(e.genId) + " · #" + k(e.step), 1),
+					e.error ? (z(), B("span", yw, k(N(J)("debug.error")), 1)) : W("", !0),
+					H("span", bw, k(d(e.usage)), 1),
+					H("span", xw, k(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
+				], 8, _w), o.value === t ? (z(), B(R, { key: 0 }, [
+					H("div", Sw, [H("span", Cw, k(N(J)("debug.request")), 1), U($, {
 						icon: N(sv),
 						label: N(J)("common.copy"),
 						small: "",
@@ -14190,8 +14189,8 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						"label",
 						"onClick"
 					])]),
-					H("pre", Cw, k(s(e.request)), 1),
-					H("div", ww, [H("span", Tw, k(N(J)("debug.response")), 1), U($, {
+					H("pre", ww, k(s(e.request)), 1),
+					H("div", Tw, [H("span", Ew, k(N(J)("debug.response")), 1), U($, {
 						icon: N(sv),
 						label: N(J)("common.copy"),
 						small: "",
@@ -14202,8 +14201,8 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						"label",
 						"onClick"
 					])]),
-					H("pre", Ew, k(e.error ?? s(e.response ?? "")), 1)
-				], 64)) : W("", !0)]))), 128)), N(uf).requests.length ? W("", !0) : (z(), B("div", Dw, k(N(J)("debug.noRequests")), 1))]),
+					H("pre", Dw, k(e.error ?? s(e.response ?? "")), 1)
+				], 64)) : W("", !0)]))), 128)), N(uf).requests.length ? W("", !0) : (z(), B("div", Ow, k(N(J)("debug.noRequests")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			U(Py, {
@@ -14222,11 +14221,11 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				default: P(() => [(z(!0), B(R, null, L(m.value, (e, n) => (z(), B("div", {
 					key: n,
 					class: "req"
-				}, [H("div", Ow, [
-					H("span", kw, k(e.kind), 1),
+				}, [H("div", kw, [
+					H("span", Aw, k(e.kind), 1),
 					t[4] ||= H("span", { class: "grow" }, null, -1),
-					H("span", Aw, k(l(e.at)), 1)
-				]), H("pre", jw, k(s(e.data)), 1)]))), 128)), m.value.length ? W("", !0) : (z(), B("div", Mw, k(N(J)("debug.noLog")), 1))]),
+					H("span", jw, k(l(e.at)), 1)
+				]), H("pre", Mw, k(s(e.data)), 1)]))), 128)), m.value.length ? W("", !0) : (z(), B("div", Nw, k(N(J)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			U(Py, {
@@ -14239,56 +14238,56 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				default: P(() => [(z(!0), B(R, null, L(h.value, (e, t) => (z(), B("div", {
 					key: t,
 					class: "req"
-				}, [H("div", Nw, [H("span", Pw, "#" + k(e.mesId), 1), H("span", Fw, "“" + k(e.quote) + "”", 1)]), H("div", Iw, k(e.comment), 1)]))), 128)), h.value.length ? W("", !0) : (z(), B("div", Lw, k(N(J)("debug.noOrphans")), 1))]),
+				}, [H("div", Pw, [H("span", Fw, "#" + k(e.mesId), 1), H("span", Iw, "“" + k(e.quote) + "”", 1)]), H("div", Lw, k(e.comment), 1)]))), 128)), h.value.length ? W("", !0) : (z(), B("div", Rw, k(N(J)("debug.noOrphans")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
 				"icon",
 				"help"
 			]),
-			H("div", Rw, "Advanced Preset " + k(N("1.6.0")) + " · " + k(N("fe9f3abd58cab6cf")), 1)
+			H("div", zw, "Advanced Preset " + k(N("1.6.0")) + " · " + k(N("e281ea48d45fec07")), 1)
 		], 64));
 	}
-}), Bw = ["aria-label"], Vw = { class: "panel-head" }, Hw = { class: "panel-logo" }, Uw = { class: "grow" }, Ww = { class: "panel-title ellipsis" }, Gw = { class: "panel-sub ellipsis" }, Kw = {
+}), Vw = ["aria-label"], Hw = { class: "panel-head" }, Uw = { class: "panel-logo" }, Ww = { class: "grow" }, Gw = { class: "panel-title ellipsis" }, Kw = { class: "panel-sub ellipsis" }, qw = {
 	class: "tabs",
 	role: "tablist"
-}, qw = [
+}, Jw = [
 	"title",
 	"aria-selected",
 	"onClick"
-], Jw = { class: "panel-body scroll" }, Yw = /* @__PURE__ */ I({
+], Yw = { class: "panel-body scroll" }, Xw = /* @__PURE__ */ I({
 	__name: "Panel",
 	setup(e) {
 		let t = [
 			{
 				id: "presets",
 				icon: Tv,
-				view: Rb
+				view: zb
 			},
 			{
 				id: "config",
 				icon: Rv,
-				view: fx
+				view: px
 			},
 			{
 				id: "modules",
 				icon: K_,
-				view: dC
+				view: fC
 			},
 			{
 				id: "writing",
 				icon: Dv,
-				view: TC
+				view: EC
 			},
 			{
 				id: "memory",
 				icon: J_,
-				view: GC
+				view: KC
 			},
 			{
 				id: "debug",
 				icon: Y_,
-				view: zw
+				view: Bw
 			}
 		], n = G(() => t.find((e) => e.id === X.tab) ?? t[0]), r = G({
 			get: () => K().enabled,
@@ -14308,10 +14307,10 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				role: "dialog",
 				"aria-label": N(J)("app.name")
 			}, [
-				H("header", Vw, [
-					H("div", Hw, [U(N(_v))]),
-					H("div", Uw, [H("div", Ww, k(N(oh) ? N(Mu)(N(oh)) : N(J)("app.name")), 1), H("div", Gw, k(i.value), 1)]),
-					U(pb, {
+				H("header", Hw, [
+					H("div", Uw, [U(N(_v))]),
+					H("div", Ww, [H("div", Gw, k(N(oh) ? N(Mu)(N(oh)) : N(J)("app.name")), 1), H("div", Kw, k(i.value), 1)]),
+					U(mb, {
 						modelValue: r.value,
 						"onUpdate:modelValue": a[0] ||= (e) => r.value = e,
 						label: N(J)("panel.enabled")
@@ -14324,7 +14323,7 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 						onClick: a[1] ||= (e) => N(X).panelOpen = !1
 					}, null, 8, ["icon", "label"])
 				]),
-				H("nav", Kw, [(z(), B(R, null, L(t, (e) => H("button", {
+				H("nav", qw, [(z(), B(R, null, L(t, (e) => H("button", {
 					key: e.id,
 					type: "button",
 					role: "tab",
@@ -14332,19 +14331,19 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 					title: N(J)(`tab.${e.id}`),
 					"aria-selected": e.id === N(X).tab,
 					onClick: (t) => N(X).tab = e.id
-				}, [(z(), V(Ur(e.icon))), H("span", null, k(N(J)(`tab.${e.id}`)), 1)], 10, qw)), 64))]),
-				H("main", Jw, [(z(), V(Mr, null, [(z(), V(Ur(n.value.view), { key: n.value.id }))], 1024))])
-			], 8, Bw)) : W("", !0)]),
+				}, [(z(), V(Ur(e.icon))), H("span", null, k(N(J)(`tab.${e.id}`)), 1)], 10, Jw)), 64))]),
+				H("main", Yw, [(z(), V(Mr, null, [(z(), V(Ur(n.value.view), { key: n.value.id }))], 1024))])
+			], 8, Vw)) : W("", !0)]),
 			_: 1
 		}));
 	}
-}), Xw = { class: "inline-drawer" }, Zw = { class: "inline-drawer-toggle inline-drawer-header" }, Qw = { class: "inline-drawer-content" }, $w = { class: "flex-container alignItemsCenter spaceBetween" }, eT = {
+}), Zw = { class: "inline-drawer" }, Qw = { class: "inline-drawer-toggle inline-drawer-header" }, $w = { class: "inline-drawer-content" }, eT = { class: "flex-container alignItemsCenter spaceBetween" }, tT = {
 	class: "checkbox_label flex1",
 	for: "ap_settings_enabled"
-}, tT = { key: 0 }, nT = { class: "text_muted" }, rT = {
+}, nT = { key: 0 }, rT = { class: "text_muted" }, iT = {
 	key: 1,
 	class: "text_muted"
-}, iT = /* @__PURE__ */ I({
+}, aT = /* @__PURE__ */ I({
 	__name: "SettingsDrawer",
 	setup(e) {
 		let t = G({
@@ -14353,8 +14352,8 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 				K().enabled = e, q();
 			}
 		});
-		return (e, n) => (z(), B("div", Xw, [H("div", Zw, [H("b", null, k(N(J)("app.name")), 1), n[3] ||= H("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), H("div", Qw, [
-			H("div", $w, [H("label", eT, [F(H("input", {
+		return (e, n) => (z(), B("div", Zw, [H("div", Qw, [H("b", null, k(N(J)("app.name")), 1), n[3] ||= H("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), H("div", $w, [
+			H("div", eT, [H("label", tT, [F(H("input", {
 				id: "ap_settings_enabled",
 				"onUpdate:modelValue": n[0] ||= (e) => t.value = e,
 				type: "checkbox"
@@ -14367,18 +14366,18 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 			}, [n[4] ||= H("i", { class: "fa-solid fa-layer-group" }, null, -1), H("span", null, k(N(J)("panel.open")), 1)], 32)]),
 			n[5] ||= H("hr", null, null, -1),
 			H("h4", null, k(N(J)("settings.preset")), 1),
-			N(oh) ? (z(), B("div", tT, [ua(k(N(Mu)(N(oh))) + " ", 1), H("span", nT, "v" + k(N(oh).version) + " · " + k(N(sh).config), 1)])) : (z(), B("i", rT, k(N(J)("settings.inactive")), 1))
+			N(oh) ? (z(), B("div", nT, [ua(k(N(Mu)(N(oh))) + " ", 1), H("span", rT, "v" + k(N(oh).version) + " · " + k(N(sh).config), 1)])) : (z(), B("i", iT, k(N(J)("settings.inactive")), 1))
 		])]));
 	}
-}), aT = {
+}), oT = {
 	key: 0,
 	class: "preset-banner"
-}, oT = { class: "preset-banner-text" }, sT = /* @__PURE__ */ I({
+}, sT = { class: "preset-banner-text" }, cT = /* @__PURE__ */ I({
 	__name: "PresetBanner",
 	setup(e) {
-		return (e, t) => N(oh) ? (z(), B("div", aT, [
+		return (e, t) => N(oh) ? (z(), B("div", oT, [
 			U(N(_v), { class: "preset-banner-icon" }),
-			H("span", oT, k(N(J)("banner.usesAp")), 1),
+			H("span", sT, k(N(J)("banner.usesAp")), 1),
 			H("button", {
 				type: "button",
 				class: "btn primary",
@@ -14389,14 +14388,14 @@ var Ox = ["data-id"], kx = ["aria-label", "onPointerdown"], Ax = ["onClick"], jx
 });
 //#endregion
 //#region src/ui/index.ts
-function cT() {
+function lT() {
 	let e = document.getElementById("extensions_settings2") ?? document.getElementById("extensions_settings");
 	if (!e || e.querySelector("#advanced_preset_settings")) return;
 	let t = document.createElement("div");
-	t.id = "advanced_preset_settings", e.append(t), fs(iT).mount(t);
+	t.id = "advanced_preset_settings", e.append(t), fs(aT).mount(t);
 }
-function lT() {
-	Fh("ap-stages", fy, ["mesid"]), Fh("ap-cards", ab, ["mesid"]), Fh("ap-dock", ub), Fh("ap-panel", Yw), Fh("ap-preset-banner", sT), Nh(), ah();
+function uT() {
+	Fh("ap-stages", fy, ["mesid"]), Fh("ap-cards", ob, ["mesid"]), Fh("ap-dock", db), Fh("ap-panel", Xw), Fh("ap-preset-banner", cT), Nh(), ah();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.OAI_PRESET_CHANGED_AFTER,
@@ -14404,13 +14403,13 @@ function lT() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, ah);
-	P_(), cT(), T_(), p_();
+	P_(), lT(), T_(), p_();
 }
 //#endregion
 //#region src/index.ts
-var uT = {
+var dT = {
 	version: "1.6.0",
-	buildId: "fe9f3abd58cab6cf",
+	buildId: "e281ea48d45fec07",
 	nextGeneration: (e) => Od(e),
 	listPresets: () => yu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -14425,21 +14424,21 @@ var uT = {
 	},
 	annotations: jm
 };
-globalThis.advancedPresetInterceptor = lf, window.AdvancedPreset = uT;
-function dT(e, t) {
+globalThis.advancedPresetInterceptor = lf, window.AdvancedPreset = dT;
+function fT(e, t) {
 	let n;
 	return (...r) => {
 		clearTimeout(n), n = setTimeout(() => e(...r), t);
 	};
 }
-async function fT() {
+async function pT() {
 	for (let { preset: e } of yu()) try {
 		await id(e);
 	} catch (t) {
 		console.error("[AP] carrier sync failed", e.id, t);
 	}
 }
-async function pT() {
+async function mT() {
 	let { eventSource: t, eventTypes: n } = e();
 	K(), xm(), Xm(), _h(), Am(), await i(), await _u();
 	for (let { preset: e } of yu()) {
@@ -14452,21 +14451,21 @@ async function pT() {
 	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => wf(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => Sm(e)), t.on(n.MESSAGE_RECEIVED, (e, t) => Tm(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		Rd.setPending(null), Rd.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => Rd.sweep());
-	let r = dT(() => {
+	let r = fT(() => {
 		let e = $u(), t = e ? Cu(e) : void 0;
 		t && cd(t);
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, r), t.on(n.OAI_PRESET_CHANGED_AFTER, r);
 	let a = async () => {
-		await fT(), Wm(), Fm();
+		await pT(), Wm(), Fm();
 	};
-	t.on(n.APP_READY, () => void a()), lT(), ff("init", {
+	t.on(n.APP_READY, () => void a()), uT(), ff("init", {
 		version: "1.6.0",
-		build: "fe9f3abd58cab6cf",
+		build: "e281ea48d45fec07",
 		enabled: K().enabled
 	});
 }
-var mT = Im, hT = l_;
-pT().catch((e) => console.error("[AP] init failed", e));
+var hT = Im, gT = l_;
+mT().catch((e) => console.error("[AP] init failed", e));
 //#endregion
-export { mT as advancedPresetOnUpdate, hT as advancedPresetRegisterChatSurface };
+export { hT as advancedPresetOnUpdate, gT as advancedPresetRegisterChatSurface };
