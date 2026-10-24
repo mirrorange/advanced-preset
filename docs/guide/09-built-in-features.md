@@ -110,13 +110,28 @@ ST 的“代写”（Impersonate）按钮会被 AP 接管：点击后，AP 发�
 
 ## 事件摘要与节省 Token
 
-事件摘要是每段故事结尾的一张小卡片：时间、地点、事件标题、简要经过。它本身方便用户回顾，更重要的是配合**节省 Token** 功能：
+事件摘要是每段故事结尾的一张小卡片：时间、地点、事件标题、简要经过。它本身方便用户回顾，更重要的是它会随历史一起发回给模型，有两种方式：
 
-- 用户在“写作”页打开“节省 Token”后，最近若干轮（默认 6 轮）保留原文；
-- 更早的助手回复用它的事件摘要代替，格式由预设决定，花瓣是 `[时间 · 地点] 事件: 概要`；
-- 更早的较长用户消息被截断（默认保留 2000 字符）。
+- **最近几条附带摘要**：很多角色卡的正文里没有精确时间，模型只能从先前的事件摘要推断“现在几点”。在结构上声明 `history: 3`，最近 3 条助手回复保留原文，并在后面附上自己的摘要，格式由 `historyTemplate` 决定。这与是否打开节省 Token 无关。
+- **节省 Token**：用户在“写作”页打开“节省 Token”后，最近若干轮（默认 6 轮）保留原文，更早的助手回复用它的事件摘要代替，格式由 `tokenSaving.synopsisTemplate` 决定，花瓣是 `[时间 · 地点] 事件: 概要`。
 
-所以如果你的预设想支持节省 Token，就提供一个事件摘要模组，并让它默认打开。
+节省 Token 时，更早的用户消息有三种处理方式，预设在 `tokenSaving.userInput` 中指定默认值，用户可在“写作”页修改：保留、截断（默认保留 2000 字符）或移除。花瓣默认移除——它的扩写模式会把用户输入写进正文，事件摘要里也已经有了，再发送原始输入只是重复。
+
+```yaml
+structures:
+  synopsis:
+    kind: synopsis
+    history: 3                # 最近 3 条回复附带摘要
+    historyTemplate: |-
+      {{content}}
+
+      <synopsis>…</synopsis>
+tokenSaving:
+  userInput: remove           # keep / truncate / remove
+  synopsisTemplate: "[{{time}} · {{location}}] {{event}}: {{summary}}"
+```
+
+所以如果你的预设想支持节省 Token，就提供一个事件摘要模组，并让它默认打开。完整字段见 [structures.md](../reference/structures.md#synopsis) 与 [manifest.md](../reference/manifest.md#省-token-tokensaving)。
 
 ## 行内批注
 

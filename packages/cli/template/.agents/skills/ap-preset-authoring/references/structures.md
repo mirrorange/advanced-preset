@@ -33,6 +33,8 @@ structures:
 | `description` | — | 字段整体的说明，进入 JSON Schema 的 `description`（模型可见，支持宏） |
 | `properties` | — | 子字段说明，键只能是该种类的固定子字段（见下表），其他键报错 |
 | `count` | — | 仅 `options`：要求的选项数，写入 schema 的 `minItems` / `maxItems` |
+| `history` | `0` | 仅 `synopsis`：最近几条原样发送的助手消息附带自己的事件摘要（0 表示不附带），见下 |
+| `historyTemplate` | `{{content}}` + 空行 + `[{{time}} · {{location}}] {{event}}: {{summary}}` | 仅 `synopsis`：附带摘要的消息的格式 |
 | `title` | 结构 id | 卡片标题（自定义结构用；`reply` 等也可以设，如花瓣的回复卡片显示叙述者名字）。可在 `locales` 中翻译 |
 | `formatPrompt.tag` | `''` | 对话式下的格式说明，由 `{{ap::structure::<id>}}` 输出 |
 | `formatPrompt.field` | `''` | 指令式下的格式说明，由 `{{ap::structure::<id>}}` 输出 |
@@ -162,7 +164,28 @@ SillyTavern 的“代写”按钮会发送清单中的 `meta.impersonatePrompt`�
 
 ### synopsis
 
-显示为事件摘要卡片。启用省 token 时，较早的助手消息会被 `tokenSaving.synopsisTemplate` 渲染的摘要替代（见 [meta-and-tasks.md](meta-and-tasks.md#省-token)）。
+显示为事件摘要卡片。事件摘要在历史中有两种用法，模板都由预设指定：
+
+- **替换**：启用省 token 时，较早的助手消息被 `tokenSaving.synopsisTemplate` 渲染的摘要替代（见 [meta-and-tasks.md](meta-and-tasks.md#省-token)）；
+- **附带**：`history: N` 时，最近 N 条助手消息保留原文，并按 `historyTemplate` 附上自己的摘要（与是否启用省 token 无关）。占位符 `{{content}}`（消息原文）与 `{{time}}` `{{location}}` `{{event}}` `{{summary}}`。
+
+故事中没有明确时间时，模型往往只能从先前的事件摘要推断时间；附带最近几条摘要可以避免时间线混乱。只有请求了该结构的模组开启时才附带；已被省 token 替换的消息也计入 N。
+
+```yaml
+structures:
+  synopsis:
+    kind: synopsis
+    history: 3
+    historyTemplate: |-
+      {{content}}
+
+      <synopsis>
+        <time>{{time}}</time>
+        <location>{{location}}</location>
+        <event>{{event}}</event>
+        <summary>{{summary}}</summary>
+      </synopsis>
+```
 
 ### options
 

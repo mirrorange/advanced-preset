@@ -7380,6 +7380,8 @@ var BUILD_VAR_TYPES = ["string", "list", "dict"];
 var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom", "annotations"];
 var INLINE_STRUCTURE_KINDS = ["annotations"];
 var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
+var USER_INPUT_MODES = ["keep", "truncate", "remove"];
+var DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = "{{content}}\n\n[{{time}} \xB7 {{location}}] {{event}}: {{summary}}";
 
 // ../protocol/src/expr.ts
 var ExprError = class extends Error {
@@ -8836,11 +8838,16 @@ function compile(tree) {
     if (kind === "annotations") {
       if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
       if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
-      if (o.history !== void 0) {
-        if (typeof o.history === "number" && Number.isInteger(o.history) && o.history >= 0) decl.history = o.history;
-        else diag.error("history must be a non-negative integer", { ...where, path: `${where.path}.history` });
-      }
-    } else if (o.history !== void 0) diag.error("only annotations structures support `history`", { ...where, path: `${where.path}.history` });
+    }
+    if (o.history !== void 0) {
+      if (kind !== "annotations" && kind !== "synopsis") diag.error("only annotations and synopsis structures support `history`", { ...where, path: `${where.path}.history` });
+      else if (typeof o.history === "number" && Number.isInteger(o.history) && o.history >= 0) decl.history = o.history;
+      else diag.error("`history` must be a non-negative integer", { ...where, path: `${where.path}.history` });
+    }
+    if (kind === "synopsis" && (o.history !== void 0 || o.historyTemplate !== void 0)) {
+      decl.historyTemplate = str2(o.historyTemplate, DEFAULT_SYNOPSIS_HISTORY_TEMPLATE);
+      if (!decl.historyTemplate.includes("{{content}}")) diag.warn("`historyTemplate` has no `{{content}}`: kept messages would lose their text", { ...where, path: `${where.path}.historyTemplate` });
+    } else if (o.historyTemplate !== void 0) diag.warn("`historyTemplate` only applies to synopsis structures and is ignored", { ...where, path: `${where.path}.historyTemplate` });
     if (o.title !== void 0) decl.title = text(str2(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);
@@ -8878,9 +8885,16 @@ function compile(tree) {
     if (e) meta.tasks[task] = e;
   }
   const tsSrc = isObj3(raw.tokenSaving) ? raw.tokenSaving : {};
+  const userInputMode = (v, path) => {
+    if (v === void 0) return void 0;
+    if (USER_INPUT_MODES.includes(v)) return v;
+    diag.error(`\`userInput\` must be one of ${USER_INPUT_MODES.join(", ")}`, { file: M, path });
+    return void 0;
+  };
   const tokenSaving = {
     keepFullTurns: typeof tsSrc.keepFullTurns === "number" ? tsSrc.keepFullTurns : 6,
     truncateUserAfter: typeof tsSrc.truncateUserAfter === "number" ? tsSrc.truncateUserAfter : 2e3,
+    userInput: userInputMode(tsSrc.userInput, "tokenSaving.userInput") ?? "truncate",
     synopsisTemplate: str2(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
   };
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
@@ -8991,7 +9005,7 @@ function compile(tree) {
     },
     modules: Object.fromEntries(modules.filter((m) => m.toggle === "user").map((m) => [m.id, m.default])),
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
-    tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, ...sect("tokenSaving") },
+    tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...sect("tokenSaving") },
     meta: { recentCount: meta.recentCount, ...sect("meta") }
   };
   for (const k of ["names", "prefixes"]) if (isObj3(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
@@ -9003,12 +9017,14 @@ function compile(tree) {
     if (!(k in configurationDefaults.params)) diag.error(`configurationDefaults.params: unknown param \`${k}\``, { file: M, path: `configurationDefaults.params.${k}` });
     else configurationDefaults.params[k] = v;
   }
+  userInputMode(sect("tokenSaving").userInput, "configurationDefaults.tokenSaving.userInput");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
     const o = isObj3(c) ? c : {};
     const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj3(o.diff) ? o.diff : {} };
     if (o.description !== void 0) rc.description = str2(o.description);
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
+    if (isObj3(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });

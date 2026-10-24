@@ -10,7 +10,7 @@ import { settings } from '@/store/settings';
 import { st, type STMessage } from '@/st/host';
 import { classify, metaTrigger } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
-import { annotationHistory, rewriteHistory } from './history';
+import { annotationHistory, rewriteHistory, synopsisOptions } from './history';
 import { keywordTexts } from '@/store/user-modules';
 
 export async function advancedPresetInterceptor(chat: STMessage[], _contextSize: number, _abort: (immediately: boolean) => void, type?: string): Promise<void> {
@@ -40,8 +40,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
     tokenSaving: config.tokenSaving,
-    synopsisTemplate: preset.tokenSaving.synopsisTemplate,
-    synopsisId: Object.values(preset.structures).find((s) => s.kind === 'synopsis')?.id,
+    ...synopsisOptions(preset, config),
     recap: currentRecap(),
     realIndex: (i) => realIndexOf[i] ?? -1,
     currentInput,

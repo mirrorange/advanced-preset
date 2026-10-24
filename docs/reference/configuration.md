@@ -38,7 +38,7 @@ configurationDefaults:
     prefixes: { narrator: "" } # 空字符串 = 使用角色的默认前缀
   modules: { options: true }   # 只能写用户可开关的模组
   params: { length: 600 }
-  tokenSaving: { enabled: false, keepFullTurns: 6, truncateUserAfter: 2000 }
+  tokenSaving: { enabled: false, keepFullTurns: 6, truncateUserAfter: 2000, userInput: truncate }
   meta: { recentCount: 3 }
 ```
 
@@ -57,7 +57,7 @@ configurationDefaults:
 | `identity` | `names.<actor>` / `prefixes.<actor>` | `''` | 覆盖角色名字 / 前缀；空字符串表示用清单 `actors` 的值 |
 | `modules` | `<module id>` | 模组的 `default` | 用户可开关模组的状态 |
 | `params` | `<param id>` | 参数的 `default` | 参数值 |
-| `tokenSaving` | `enabled` / `keepFullTurns` / `truncateUserAfter` | `false` / 清单 `tokenSaving` 的值 | 省 token（[meta-and-tasks.md](meta-and-tasks.md#省-token)） |
+| `tokenSaving` | `enabled` / `keepFullTurns` / `truncateUserAfter` / `userInput` | `false` / 清单 `tokenSaving` 的值 | 省 token（[meta-and-tasks.md](meta-and-tasks.md#省-token)） |
 | `meta` | `recentCount` | 清单 `meta.recentCount` | `{{ap::recent_meta}}` 的条数 |
 
 ### sampling

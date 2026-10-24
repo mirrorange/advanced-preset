@@ -270,16 +270,18 @@ meta:
 tokenSaving:
   keepFullTurns: 6
   truncateUserAfter: 2000
+  userInput: truncate
   synopsisTemplate: "[{{time}} · {{location}}] {{event}}: {{summary}}"
 ```
 
 | 字段 | 默认 | 说明 |
 | --- | --- | --- |
 | `keepFullTurns` | `6` | 保留最近几轮完整内容 |
-| `truncateUserAfter` | `2000` | 更早的用户消息超过这个字符数就截断并加 `…`（0 表示不截断） |
+| `truncateUserAfter` | `2000` | `userInput: truncate` 时，更早的用户消息超过这个字符数就截断并加 `…`（0 表示不截断） |
+| `userInput` | `truncate` | 更早的用户消息：`keep`（原样）/ `truncate`（截断）/ `remove`（不发送） |
 | `synopsisTemplate` | 如上 | 更早的助手消息替换成事件摘要时的格式 |
 
-是否启用由配置 `tokenSaving.enabled` 决定（默认关闭）；`keepFullTurns` / `truncateUserAfter` 也可在配置中覆盖。规则见 [meta-and-tasks.md](meta-and-tasks.md#省-token)。
+是否启用由配置 `tokenSaving.enabled` 决定（默认关闭）；`keepFullTurns` / `truncateUserAfter` / `userInput` 是配置的默认值，用户可在面板中修改。最近几条消息附带事件摘要由 `synopsis` 结构的 `history` / `historyTemplate` 声明（见 [structures.md](structures.md#synopsis)）。规则见 [meta-and-tasks.md](meta-and-tasks.md#省-token)。
 
 ## 主题 `theme`
 
