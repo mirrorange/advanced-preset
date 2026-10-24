@@ -462,3 +462,44 @@ vars:
     expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/key `outline` is set by q, y \(the later module wins\)/);
   });
 });
+
+describe('synopsis history & token saving', () => {
+  const withManifest = (structures: string, rest = '') =>
+    tree({ 'preset.yaml': MANIFEST.replace('structures:\n', `structures:\n${structures}`) + rest });
+
+  it('compiles synopsis history and the user input mode', () => {
+    const r = build(withManifest(`  synopsis:
+    kind: synopsis
+    history: 3
+    historyTemplate: "{{content}}\\n<synopsis>{{time}}</synopsis>"
+`, `tokenSaving:
+  userInput: remove
+configurationDefaults:
+  tokenSaving: { keepFullTurns: 4 }
+`));
+    expect(r.diag.errors).toEqual([]);
+    const s = r.preset!.structures.synopsis!;
+    expect(s.history).toBe(3);
+    expect(s.historyTemplate).toBe('{{content}}\n<synopsis>{{time}}</synopsis>');
+    expect(r.preset!.tokenSaving.userInput).toBe('remove');
+    expect(r.preset!.configurationDefaults.tokenSaving).toMatchObject({ enabled: false, keepFullTurns: 4, userInput: 'remove' });
+  });
+
+  it('defaults to truncate and the default history template', () => {
+    const r = build(withManifest('  synopsis: { kind: synopsis, history: 2 }\n'));
+    expect(r.preset!.tokenSaving.userInput).toBe('truncate');
+    expect(r.preset!.structures.synopsis!.historyTemplate).toMatch(/^\{\{content\}\}/);
+    expect(r.preset!.structures.reply!.history).toBeUndefined();
+  });
+
+  it('flags bad values', () => {
+    const r = build(tree({ 'preset.yaml': MANIFEST
+      .replace('structures:\n', 'structures:\n  synopsis: { kind: synopsis, history: -1, historyTemplate: "{{time}}" }\n  options: { kind: options, history: 2 }\n')
+      .replace('diff: { connection: { transport: prefill } }', 'diff: { tokenSaving: { userInput: nope } }') + 'tokenSaving:\n  userInput: drop\n' }));
+    const msgs = [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+    expect(msgs).toMatch(/history` must be a non-negative integer/);
+    expect(msgs).toMatch(/no `\{\{content\}\}`/);
+    expect(msgs).toMatch(/only apply to synopsis/);
+    expect(r.diag.errors.filter((d) => /userInput/.test(d.message))).toHaveLength(2);
+  });
+});

@@ -223,6 +223,10 @@ export interface StructureDecl {
   /** custom only */
   shape?: 'text' | 'kv';
   display?: 'card' | 'hidden';
+  /** synopsis only: append the synopsis to the last N verbatim assistant messages in history (0 = off). */
+  history?: number;
+  /** synopsis only: how a kept message carries its synopsis; `{{content}}` + `{{time}}` `{{location}}` `{{event}}` `{{summary}}`. */
+  historyTemplate?: string;
   title?: string;
   formatPrompt: { tag: string; field: string };
 }
@@ -246,11 +250,21 @@ export interface MetaDecl {
   impersonatePrompt: string;
 }
 
+/** What token saving does with older user messages. */
+export type UserInputMode = 'keep' | 'truncate' | 'remove';
+export const USER_INPUT_MODES: readonly UserInputMode[] = ['keep', 'truncate', 'remove'];
+/** Default `historyTemplate` of a synopsis structure. */
+export const DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = '{{content}}\n\n[{{time}} · {{location}}] {{event}}: {{summary}}';
+
 export interface TokenSavingDecl {
   keepFullTurns: number;
   truncateUserAfter: number;
+  userInput: UserInputMode;
+  /** Replaces an older assistant message that has a synopsis. */
   synopsisTemplate: string;
 }
+
+export interface TokenSavingConfig { enabled: boolean; keepFullTurns: number; truncateUserAfter: number; userInput: UserInputMode }
 
 export interface SyntheticTurn {
   id: string;
@@ -335,7 +349,7 @@ export interface Configuration {
   identity: { names: Record<ActorId, string>; prefixes: Record<ActorId, string> };
   modules: Record<string, boolean>;
   params: Record<string, string | number>;
-  tokenSaving: { enabled: boolean; keepFullTurns: number; truncateUserAfter: number };
+  tokenSaving: TokenSavingConfig;
   meta: { recentCount: number };
 }
 

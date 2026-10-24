@@ -19,9 +19,25 @@ function withConnectionDefaults(p: APreset): APreset {
   return { ...p, configurationDefaults: { ...p.configurationDefaults, connection: { ...CONNECTION_DEFAULTS, ...conn } } };
 }
 
+/**
+ * Token saving's `userInput` mode was added without a format bump. Older artifacts always truncated
+ * (when `truncateUserAfter` > 0), so they resolve to `truncate`.
+ */
+function withTokenSavingDefaults(p: APreset): APreset {
+  const decl = p.tokenSaving;
+  const conf = p.configurationDefaults?.tokenSaving;
+  if ((!isObj(decl) || 'userInput' in decl) && (!isObj(conf) || 'userInput' in conf)) return p;
+  const userInput = (isObj(decl) && decl.userInput) || 'truncate';
+  return {
+    ...p,
+    tokenSaving: isObj(decl) ? { ...decl, userInput } : decl,
+    configurationDefaults: isObj(conf) ? { ...p.configurationDefaults, tokenSaving: { ...conf, userInput: 'userInput' in conf ? conf.userInput : userInput } } : p.configurationDefaults,
+  };
+}
+
 /** Fields added without a format bump get their empty defaults. */
 function withOptionalDefaults(p: APreset): APreset {
-  const out = withConnectionDefaults(p);
+  const out = withTokenSavingDefaults(withConnectionDefaults(p));
   return Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
 }
 
