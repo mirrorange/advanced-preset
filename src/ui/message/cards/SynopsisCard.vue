@@ -71,10 +71,12 @@ function onKey(e: KeyboardEvent) {
     </div>
   </form>
   <div v-else class="synopsis" :class="{ open }" @click="open = !open">
-    <div class="synopsis-line small">
-      <span v-if="synopsis.time" class="row tight"><Clock class="faint" />{{ synopsis.time }}</span>
-      <span v-if="synopsis.location" class="row tight"><MapPin class="faint" />{{ synopsis.location }}</span>
-      <span class="synopsis-event ellipsis">{{ synopsis.event }}</span>
+    <div class="synopsis-head">
+      <div class="synopsis-line small">
+        <span v-if="synopsis.time" class="row tight"><Clock class="faint" />{{ synopsis.time }}</span>
+        <span v-if="synopsis.location" class="row tight"><MapPin class="faint" />{{ synopsis.location }}</span>
+        <span class="synopsis-event ellipsis">{{ synopsis.event }}</span>
+      </div>
       <span v-if="editable" class="synopsis-edit" @click.stop>
         <IconButton :icon="Pencil" :label="t('cards.synopsis.edit')" small align="end" @click="startEdit" />
       </span>
