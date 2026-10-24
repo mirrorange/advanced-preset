@@ -16,7 +16,7 @@ import { settings } from '@/store/settings';
 import { keywordTexts, userModules } from '@/store/user-modules';
 import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
-import { alignHistory, rewriteHistory, type HistoryItem } from './history';
+import { alignHistory, rewriteHistory, synopsisOptions, type HistoryItem } from './history';
 import { debugLog } from './debug';
 
 export const ANCHOR_RE = /⟦ap:region:([\w.-]+)⟧/g;
@@ -123,8 +123,7 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
     tokenSaving: config.tokenSaving,
-    synopsisTemplate: preset.tokenSaving.synopsisTemplate,
-    synopsisId: Object.values(preset.structures).find((s) => s.kind === 'synopsis')?.id,
+    ...synopsisOptions(preset, config),
     recap: currentRecap(),
     realIndex: (i) => real[i] ?? -1,
     currentInput: -1,

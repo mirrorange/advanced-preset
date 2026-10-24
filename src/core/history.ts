@@ -2,7 +2,7 @@
  * History rewriting (§9.1) on the interceptor's shallow chat copy, plus the alignment used by the
  * script path (§9.2). Pure functions over a minimal message shape; the real chat is never touched.
  */
-import { parseMeta, type Synopsis } from '@advanced-preset/protocol';
+import { DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, activeModules, parseMeta, type APreset, type Configuration, type Synopsis, type TokenSavingConfig } from '@advanced-preset/protocol';
 import type { Sidecar } from '@/store/sidecar';
 
 export interface HistoryItem {
@@ -16,10 +16,14 @@ export interface HistoryItem {
 export interface RewriteOptions {
   trigger: string;
   wrap: boolean;
-  tokenSaving: { enabled: boolean; keepFullTurns: number; truncateUserAfter: number };
+  /** `userInput` missing (older stored shapes) behaves as `truncate`. */
+  tokenSaving: Omit<TokenSavingConfig, 'userInput'> & { userInput?: TokenSavingConfig['userInput'] };
+  /** Token saving: replaces an older assistant message that has a synopsis. */
   synopsisTemplate: string;
   /** Structure id of the synopsis kind (if declared). */
   synopsisId?: string;
+  /** Append the synopsis to the last `depth` assistant messages that are still verbatim. */
+  synopsisHistory?: { depth: number; template: string };
   /** Latest effective recap: messages up to `coversUpTo` (real index) may be dropped. */
   recap?: { coversUpTo: number } | null;
   /** Real chat index of each item (for recap coverage). */
@@ -34,9 +38,13 @@ const sidecarOf = (m: HistoryItem): Sidecar | undefined => {
 };
 const PURE_TURNS = new Set(['meta-pure', 'summary', 'impersonate']);
 
-export function formatSynopsis(template: string, s: Synopsis): string {
-  return template.replace(/\{\{(time|location|event|summary)\}\}/g, (_, k: keyof Synopsis) => s[k] ?? '');
+/** Fills `{{time}}` `{{location}}` `{{event}}` `{{summary}}` and (history template) `{{content}}`. */
+export function formatSynopsis(template: string, s: Synopsis, content = ''): string {
+  return template.replace(/\{\{(time|location|event|summary|content)\}\}/g, (_, k: keyof Synopsis | 'content') => (k === 'content' ? content : s[k] ?? ''));
 }
+
+const synopsisOf = (item: HistoryItem, id?: string): Synopsis | undefined =>
+  id ? (sidecarOf(item)?.structures?.[id] as Synopsis | undefined) : undefined;
 
 /** Returns the rewritten list (new array; items are shallow copies when changed). */
 export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): HistoryItem[] {
@@ -81,14 +89,45 @@ export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): History
       if (inFull(i) || r.index === o.currentInput) return [r];
       if (covered >= 0 && o.realIndex(r.index) <= covered) return [];
       if (r.item.is_user) {
+        const mode = o.tokenSaving.userInput ?? 'truncate';
+        if (mode === 'remove') return [];
         const max = o.tokenSaving.truncateUserAfter;
-        return [max > 0 && r.item.mes.length > max ? { ...r, item: { ...r.item, mes: `${r.item.mes.slice(0, max)}…` } } : r];
+        return [mode === 'truncate' && max > 0 && r.item.mes.length > max ? { ...r, item: { ...r.item, mes: `${r.item.mes.slice(0, max)}…` } } : r];
       }
-      const syn = o.synopsisId ? (sidecarOf(r.item)?.structures?.[o.synopsisId] as Synopsis | undefined) : undefined;
+      const syn = synopsisOf(r.item, o.synopsisId);
       return [syn ? { ...r, item: { ...r.item, mes: formatSynopsis(o.synopsisTemplate, syn) } } : r];
     });
   }
+
+  // 4. Recent synopses: the last `depth` assistant messages keep their text and also carry their
+  //    synopsis, so the story keeps a time/place reference even when older turns are verbatim.
+  const sh = o.synopsisHistory;
+  if (sh && sh.depth > 0 && o.synopsisId) {
+    let seen = 0;
+    for (let i = rows.length - 1; i >= 0 && seen < sh.depth; i--) {
+      const r = rows[i]!;
+      if (r.item.is_user || r.item.is_system) continue;
+      seen++;
+      // replaced by its synopsis (token saving) or otherwise rewritten: leave as is
+      if (r.item.mes !== items[r.index]!.mes) continue;
+      const syn = synopsisOf(r.item, o.synopsisId);
+      if (syn) rows[i] = { ...r, item: { ...r.item, mes: formatSynopsis(sh.template, syn, r.item.mes) } };
+    }
+  }
   return rows.map((r) => r.item);
+}
+
+/**
+ * Synopsis options for {@link rewriteHistory}: the replacement template (token saving) and, when a
+ * switched-on module requests the synopsis structure, how many recent messages carry theirs.
+ */
+export function synopsisOptions(preset: APreset, config: Configuration): Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory'> {
+  const decl = Object.values(preset.structures).find((s) => s.kind === 'synopsis');
+  const out: Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory'> = { synopsisTemplate: preset.tokenSaving.synopsisTemplate, synopsisId: decl?.id };
+  if (decl?.history && activeModules(preset, config).some((m) => m.structures.includes(decl.id))) {
+    out.synopsisHistory = { depth: decl.history, template: decl.historyTemplate ?? DEFAULT_SYNOPSIS_HISTORY_TEMPLATE };
+  }
+  return out;
 }
 
 // ---- script path alignment (§9.2) ----------------------------------------------------------
