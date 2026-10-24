@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** UI preferences (outside the configuration layer): theme colours and stage collapsing. */
+/** UI preferences (outside the configuration layer): theme colours, stage collapsing and inline annotations. */
 import { computed } from 'vue';
 import { Palette, RotateCcw } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
@@ -18,6 +18,9 @@ const primary = color('primary');
 const accent = color('accent');
 const collapse = computed({ get: () => ui.collapseStages, set: (v: boolean) => { ui.collapseStages = v; save(); } });
 const reset = () => { ui.primary = undefined; ui.accent = undefined; save(); };
+const annotations = () => (ui.annotations ??= { show: true });
+const showAnnotations = computed({ get: () => ui.annotations?.show !== false, set: (v: boolean) => { annotations().show = v; save(); } });
+const annotationColor = computed({ get: () => ui.annotations?.color ?? '', set: (v: string) => { annotations().color = v || undefined; save(); } });
 </script>
 
 <template>
@@ -30,5 +33,12 @@ const reset = () => { ui.primary = undefined; ui.accent = undefined; save(); };
       </div>
     </Field>
     <Field :label="t('appearance.collapseStages')" inline><Switch v-model="collapse" /></Field>
+    <Field :label="t('appearance.annotations')" :help="t('appearance.annotations.hint')" inline><Switch v-model="showAnnotations" /></Field>
+    <Field v-if="showAnnotations" :label="t('appearance.annotationColor')" inline>
+      <div class="swatches">
+        <label class="swatch" :style="{ background: annotationColor || 'var(--ap-accent)' }" :title="t('appearance.annotationColor')"><input v-model.lazy="annotationColor" type="color" /></label>
+        <IconButton :icon="RotateCcw" :label="t('common.reset')" small align="end" :disabled="!annotationColor" @click="annotationColor = ''" />
+      </div>
+    </Field>
   </Section>
 </template>

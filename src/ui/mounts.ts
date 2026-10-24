@@ -8,6 +8,7 @@ import { st } from '@/st/host';
 import { getSidecar, type TurnKind } from '@/store/sidecar';
 import { live } from '@/core/live';
 import { bumpChat } from './state';
+import { pruneViews, syncAnnotationView } from './annotations';
 
 const HIDDEN = 'ap-hidden';
 const REPLACED_TURNS: TurnKind[] = ['meta-pure', 'impersonate', 'summary'];
@@ -26,6 +27,7 @@ function sync(mes: Element): void {
   const msg = st().chat[id];
   const sc = getSidecar(msg);
   const isLive = live.current?.mesId === id;
+  if (msg && !msg.is_user) syncAnnotationView(text as HTMLElement, Boolean(sc?.annotations?.length || isLive));
   const want = Boolean(msg && !msg.is_user && (sc || isLive));
   let stages = block.querySelector<HTMLElement>(':scope > ap-stages');
   let cards = block.querySelector<HTMLElement>(':scope > ap-cards');
@@ -68,6 +70,7 @@ function schedule(mes?: Element | null): void {
     pending.clear();
     full = false;
     ensureDock();
+    pruneViews();
   });
 }
 

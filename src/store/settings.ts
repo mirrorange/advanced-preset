@@ -37,7 +37,13 @@ export interface APSettings {
   installed: Record<string, APreset>;
   /** Where installed artifacts came from (URL), for one-click updates. */
   sources: Record<string, string>;
-  ui: { primary?: string; accent?: string; collapseStages: boolean };
+  ui: {
+    primary?: string;
+    accent?: string;
+    collapseStages: boolean;
+    /** Inline annotations (I-86): shown by default; underline colour defaults to the accent. */
+    annotations?: { show: boolean; color?: string };
+  };
   dev: { url: string; enabled: boolean };
   debug: { keepRequests: number };
 }
@@ -48,7 +54,7 @@ const defaults = (): APSettings => ({
   presets: {},
   installed: {},
   sources: {},
-  ui: { collapseStages: true },
+  ui: { collapseStages: true, annotations: { show: true } },
   dev: { url: 'http://localhost:4747', enabled: false },
   debug: { keepRequests: 20 },
 });

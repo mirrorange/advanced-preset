@@ -10,7 +10,7 @@ import { settings } from '@/store/settings';
 import { st, type STMessage } from '@/st/host';
 import { classify, metaTrigger } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
-import { rewriteHistory } from './history';
+import { annotationHistory, rewriteHistory } from './history';
 import { keywordTexts } from '@/store/user-modules';
 
 export async function advancedPresetInterceptor(chat: STMessage[], _contextSize: number, _abort: (immediately: boolean) => void, type?: string): Promise<void> {
@@ -45,6 +45,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     recap: currentRecap(),
     realIndex: (i) => realIndexOf[i] ?? -1,
     currentInput,
+    annotations: annotationHistory(preset, config),
   });
   chat.splice(0, chat.length, ...(rewritten as STMessage[]));
 

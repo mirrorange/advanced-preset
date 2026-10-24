@@ -207,8 +207,11 @@ export interface Workflow {
   sections: WorkflowSections;
 }
 
-export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'custom';
-export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'custom'];
+export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'custom' | 'annotations';
+export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'custom', 'annotations'];
+/** Kinds written inside the story content rather than as a tag block / field (I-77). */
+export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations'];
+export const isInlineStructure = (s: { kind: StructureKind }): boolean => INLINE_STRUCTURE_KINDS.includes(s.kind);
 
 export interface StructureDecl {
   id: string;
@@ -223,6 +226,8 @@ export interface StructureDecl {
   /** custom only */
   shape?: 'text' | 'kv';
   display?: 'card' | 'hidden';
+  /** annotations only: re-inject the annotations of the last N assistant messages into history (I-80). */
+  history?: number;
   title?: string;
   formatPrompt: { tag: string; field: string };
 }

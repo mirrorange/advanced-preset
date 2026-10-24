@@ -2,7 +2,7 @@
  * History rewriting (§9.1) on the interceptor's shallow chat copy, plus the alignment used by the
  * script path (§9.2). Pure functions over a minimal message shape; the real chat is never touched.
  */
-import { parseMeta, type Synopsis } from '@advanced-preset/protocol';
+import { activeModules, injectAnnotations, parseMeta, type APreset, type Configuration, type Synopsis } from '@advanced-preset/protocol';
 import type { Sidecar } from '@/store/sidecar';
 
 export interface HistoryItem {
@@ -26,6 +26,8 @@ export interface RewriteOptions {
   realIndex: (i: number) => number;
   /** Item index of the current user input (kept verbatim), or -1. */
   currentInput: number;
+  /** Re-inject inline annotations as CriticMarkup into the last `depth` assistant messages (I-80). */
+  annotations?: { depth: number };
 }
 
 const sidecarOf = (m: HistoryItem): Sidecar | undefined => {
@@ -88,7 +90,29 @@ export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): History
       return [syn ? { ...r, item: { ...r.item, mes: formatSynopsis(o.synopsisTemplate, syn) } } : r];
     });
   }
+  // 4. Inline annotations: only untouched assistant messages near the end.
+  const depth = o.annotations?.depth ?? 0;
+  if (depth > 0) {
+    let seen = 0;
+    for (let i = rows.length - 1; i >= 0 && seen < depth; i--) {
+      const r = rows[i]!;
+      if (r.item.is_user || r.item.is_system) continue;
+      seen++;
+      const list = sidecarOf(r.item)?.annotations;
+      if (!list?.length || r.item.mes !== items[r.index]!.mes) continue;
+      const mes = injectAnnotations(r.item.mes, list);
+      if (mes !== r.item.mes) rows[i] = { ...r, item: { ...r.item, mes } };
+    }
+  }
   return rows.map((r) => r.item);
+}
+
+/** History re-injection depth for the preset (I-80): the annotations structure is declared by a switched-on module. */
+export function annotationHistory(preset: APreset, config: Configuration): { depth: number } | undefined {
+  const decl = Object.values(preset.structures).find((s) => s.kind === 'annotations');
+  if (!decl?.history) return undefined;
+  const requested = activeModules(preset, config).some((m) => m.structures.includes(decl.id));
+  return requested ? { depth: decl.history } : undefined;
 }
 
 // ---- script path alignment (§9.2) ----------------------------------------------------------
