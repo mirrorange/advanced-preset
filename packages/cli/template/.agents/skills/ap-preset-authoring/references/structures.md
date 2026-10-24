@@ -164,7 +164,7 @@ SillyTavern 的“代写”按钮会发送清单中的 `meta.impersonatePrompt`�
 
 ### synopsis
 
-显示为事件摘要卡片。事件摘要在历史中有两种用法，模板都由预设指定：
+显示为事件摘要卡片，用户可在卡片上编辑四个字段，保存后直接覆盖该楼层（当前 swipe）Sidecar 中的结构值，不改正文 `mes`，也不保留原值。事件摘要在历史中有两种用法，模板都由预设指定，都读取编辑后的值：
 
 - **替换**：启用省 token 时，较早的助手消息被 `tokenSaving.synopsisTemplate` 渲染的摘要替代（见 [meta-and-tasks.md](meta-and-tasks.md#省-token)）；
 - **附带**：`history: N` 时，最近 N 条助手消息保留原文，并按 `historyTemplate` 附上自己的摘要（与是否启用省 token 无关）。占位符 `{{content}}`（消息原文）与 `{{time}}` `{{location}}` `{{event}}` `{{summary}}`。
