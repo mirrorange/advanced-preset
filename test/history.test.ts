@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { formatSynopsis, rewriteHistory, type HistoryItem, type RewriteOptions } from '@/core/history';
+import { resolveConfiguration } from '@advanced-preset/protocol';
+import { formatSynopsis, rewriteHistory, synopsisOptions, type HistoryItem, type RewriteOptions } from '@/core/history';
+import { petals } from './helpers';
 
 const syn = (n: number) => ({ time: `Day1 0${n}:00`, location: `L${n}`, event: `E${n}`, summary: `S${n}` });
 const ai = (n: number, withSyn = true): HistoryItem => ({
@@ -96,5 +98,15 @@ describe('history: token saving user input', () => {
     const { userInput: _, ...legacy } = ts('keep');
     const out = rewriteHistory(items, base(items, { tokenSaving: legacy }));
     expect(out[0]!.mes).toBe('input…');
+  });
+});
+
+describe('history: Petals synopsis options', () => {
+  it('keeps the last 3 synopses while event synopsis is on, and removes older input by default', () => {
+    const config = resolveConfiguration(petals, petals.defaultConfiguration, {});
+    expect(config.tokenSaving.userInput).toBe('remove');
+    expect(synopsisOptions(petals, config).synopsisHistory?.depth).toBe(3);
+    const off = { ...config, modules: { ...config.modules, 'event-synopsis': false } };
+    expect(synopsisOptions(petals, off).synopsisHistory).toBeUndefined();
   });
 });
