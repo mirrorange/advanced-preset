@@ -85,7 +85,8 @@ AdvancedPreset.nextGeneration({ origin: 'story' }); // 只影响下一次生成
 
 1. **剔除纯轮次**：`turn` 为 `meta-pure` / `summary` / `impersonate` 的助手消息，连同触发它的用户消息一起不发送（当前输入除外）；
 2. **剥离元指令**：较早用户消息中的元指令片段被去掉；剥离后为空的用户消息不发送；当前输入保持原样；
-3. **省 token**（启用时，见下）。
+3. **省 token**（启用时，见下）；
+4. **附带事件摘要**：`synopsis` 结构声明了 `history: N` 且请求它的模组已开启时，最近 N 条助手消息（含已被省 token 替换的）中仍为原文的，按 `historyTemplate` 附上自己的事件摘要（见 [structures.md](structures.md#synopsis)）。
 
 ## 省 token
 
@@ -94,10 +95,10 @@ AdvancedPreset.nextGeneration({ origin: 'story' }); // 只影响下一次生成
 - 最近 `keepFullTurns` 条助手消息以及它们前面的用户消息保持完整（用户消息与其后的助手回复算同一轮）；当前输入总是保留；
 - 更早的消息中：
   - 已被总结覆盖的（真实索引 ≤ 当前总结的 `coversUpTo`）**不发送**，由模组通过 `{{ap::recap}}` 提供总结；
-  - 用户消息超过 `truncateUserAfter` 个字符时截断并加 `…`（0 表示不截断）；
+  - 用户消息按 `userInput` 处理：`keep` 原样发送；`truncate` 超过 `truncateUserAfter` 个字符时截断并加 `…`（0 表示不截断）；`remove` 不发送。扩写类写法中正文（及其事件摘要）已包含用户输入，适合 `remove`；
   - 助手消息如果有事件摘要（`synopsis` 结构），替换为 `tokenSaving.synopsisTemplate` 渲染的一行（占位符 `{{time}}` `{{location}}` `{{event}}` `{{summary}}`）；没有则保持原样。
 
-`keepFullTurns`、`truncateUserAfter` 的默认值来自清单 `tokenSaving`，可被配置覆盖。条件变量 `features.tokenSaving` 表示已开启，`recap.present` 表示有生效的总结。
+`keepFullTurns`、`truncateUserAfter`、`userInput` 的默认值来自清单 `tokenSaving`，可被配置覆盖。条件变量 `features.tokenSaving` 表示已开启，`recap.present` 表示有生效的总结。
 
 ## 脚本路径的回填
 
