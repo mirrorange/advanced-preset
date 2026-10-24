@@ -53,6 +53,11 @@ export function getSidecar(msg: STMessage | undefined): Sidecar | undefined {
   return s && typeof s === 'object' && (s as Sidecar).v === 1 ? (s as Sidecar) : undefined;
 }
 
+/** A copy of the sidecar with one structure value replaced (user edits overwrite the model's value). */
+export function withStructure(sidecar: Sidecar, id: string, value: unknown): Sidecar {
+  return { ...sidecar, structures: { ...sidecar.structures, [id]: cloneData(value) } };
+}
+
 /** Write the sidecar to the message and its current swipe slot. */
 export function writeSidecar(mesId: number, sidecar: Sidecar): void {
   const msg = st().chat[mesId];
