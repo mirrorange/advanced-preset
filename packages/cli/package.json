@@ -1,6 +1,6 @@
 {
   "name": "advanced-preset",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Advanced Preset CLI (ap) — build, check, preview and hot-reload Advanced Preset sources for SillyTavern.",
   "keywords": [
     "advanced-preset",
