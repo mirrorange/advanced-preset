@@ -68,6 +68,10 @@ AP 接管的每条助手消息在 `message.extra.advanced_preset` 中保存一�
   "patched": "…",                 // 有补丁时：修订后的正文
   "patchesApplied": true,         // 当前显示的是否为修订稿
   "structures": { "options": [ { "label": "…", "content": "…" } ] },
+  "annotations": [                // 行内批注（有 annotations 结构时）
+    { "id": "a1", "start": 12, "end": 17, "quote": "轻轻推开门", "prefix": "…", "suffix": "…", "comment": "…" }
+  ],
+  "annotationVersions": { "draft": [ ], "patched": [ ] }, // 有补丁时：两份正文各自的批注
   "events": [ { "type": "memory.replace", "key": "…", "content": "…", "source": "model" } ],
   "metaInput": ["…"],             // 本轮输入中的元指令片段
   "reasoning": "…",               // 模型的推理内容（如果有）
@@ -77,7 +81,23 @@ AP 接管的每条助手消息在 `message.extra.advanced_preset` 中保存一�
 
 - 阶段 `status`：`done`（完成）、`missing`（必需阶段没有输出）、`interrupted`（生成被中断）；
 - 消息正文 `mes` 只包含终结正文（或纯轮次的回复文字），阶段与结构不写进正文，所以切换预设或关闭 AP 后聊天记录仍然干净；
-- 用户在 UI 中切换原稿 / 修订稿时，`mes` 与 `patchesApplied` 随之改变。
+- 用户在 UI 中切换原稿 / 修订稿时，`mes`、`patchesApplied` 与 `annotations` 随之改变。
+- 用户在事件摘要卡片上编辑后，`structures` 中对应的值被直接覆盖（只改当前 swipe，`mes` 不变）。
+
+### 行内批注
+
+`annotations` 中每条批注的 `start` / `end` 是干净正文 `mes` 中的 UTF-16 偏移，`quote` 是被批注的原文，`prefix` / `suffix` 是前后各约 32 字的上下文，`comment` 是批注文字。用户编辑消息后 AP 用 `quote` 与上下文重新定位并更新偏移；找不到时标记 `"orphan": true`，保留但不显示。
+
+**显示面**：AP 在每个显示面中分别定位批注——ST 的 `.mes_text`，以及其中每个**同源** iframe（例如酒馆助手渲染的前端界面）的文档。匹配按可见文字进行（跳过隐藏元素、`script` / `style`，忽略 Markdown 强调符号、零宽字符与引号样式差异），每个显示面里一条批注至多标记一处；有多处时依次用上下文、出现序号消歧。划线使用各文档自己的 `CSS.highlights`（名为 `ap-anno`），不修改前端的 DOM；气泡统一显示在 ST 主页面。跨源 iframe 无法适配。
+
+**前端控制**：在 iframe 的 `<html>` 或 `<body>` 上设置
+
+| 属性 | 效果 |
+| --- | --- |
+| `data-ap-annotations="off"` | 不在此 iframe 中显示批注 |
+| `data-ap-annotations="manual"` | 不自动标记，前端通过 `window.parent.AdvancedPreset.annotations` 自行绘制 |
+
+**TauriTavern**：在受管 ChatSurface 模式下（`isManagedOwnershipRequired()` 为真），AP 通过清单 hook `chatSurface` 注册 participant `advanced-preset/annotations`，在 `didCommitContent` 中挂载批注并返回 disposer；其他模式使用常规 DOM 监听。
 
 ### 事件
 
@@ -106,6 +126,9 @@ AP 接管的每条助手消息在 `message.extra.advanced_preset` 中保存一�
 | `listPresets()` | 可用预设：`[{ id, name, version, source }]`，`source` 为 `builtin` / `installed` / `dev` |
 | `activePresetId()` | 当前选中的 Carrier 对应的预设 id，未选中时为 `null` |
 | `update()` | 检查并应用扩展更新，返回 `'updated'` / `'current'` |
+| `togglePanel(open?)` | 打开 / 关闭 AP 面板（不传参数时切换） |
+| `annotations.get(mesId)` | 消息当前可见的行内批注（不含孤立批注），偏移对应当前 `mes` |
+| `annotations.on('change', (mesId) => …)` | 订阅批注变化（生成、编辑、切换 swipe 或补丁），返回取消订阅函数 |
 
 脚本调用 ST 生成（如 `generateRaw` / `generateQuietPrompt`）时，如果当前选中的是 Carrier，AP 同样会组装区域并接管请求，来源为 `task`；调用方的工具与 JSON Schema 的处理见 [transports.md](transports.md#调用方的工具与-schema)。
 

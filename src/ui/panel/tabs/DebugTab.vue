@@ -1,13 +1,15 @@
 <script setup lang="ts">
 /** Assembly preview, request segments, log and the `ap dev` source (§16.5, §18.3). */
 import { computed, reactive, ref, watch } from 'vue';
-import { ChevronRight, Code, Copy, FileStack, ScrollText, Server, Trash2 } from 'lucide-vue-next';
+import { ChevronRight, Code, Copy, FileStack, MessageSquareDashed, ScrollText, Server, Trash2 } from 'lucide-vue-next';
 import { debugState } from '@/core/debug';
 import type { AssemblySnapshot } from '@/core/assembler';
 import { settings, save } from '@/store/settings';
 import { st } from '@/st/host';
 import { t } from '@/i18n';
 import { devSource } from '@/app/dev-source';
+import { annotationsOf } from '@/app/annotations';
+import { ui } from '../../state';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
@@ -47,6 +49,16 @@ const devUrl = computed({ get: () => settings().dev.url, set: (v: string) => { s
 const version = __AP_VERSION__;
 const build = __AP_BUILD_ID__;
 const logEntries = computed(() => debugState.log.filter((e) => e.kind !== 'assembly'));
+/** Orphaned inline annotations of the current chat (I-86: shown only here). */
+const orphans = computed(() => {
+  void ui.chatRev;
+  const out: { mesId: number; quote: string; comment: string }[] = [];
+  const chat = st().chat ?? [];
+  for (let i = 0; i < chat.length; i++) {
+    for (const a of annotationsOf(i)) if (a.orphan) out.push({ mesId: i, quote: a.quote, comment: a.comment });
+  }
+  return out;
+});
 </script>
 
 <template>
@@ -129,6 +141,14 @@ const logEntries = computed(() => debugState.log.filter((e) => e.kind !== 'assem
       <pre class="mono scroll">{{ pretty(e.data) }}</pre>
     </div>
     <div v-if="!logEntries.length" class="faint small">{{ t('debug.noLog') }}</div>
+  </Section>
+
+  <Section :title="t('debug.annotations')" :icon="MessageSquareDashed" :help="t('debug.annotations.hint')" collapsible :open="false">
+    <div v-for="(o, i) in orphans" :key="i" class="req">
+      <div class="row xs"><span class="badge neutral">#{{ o.mesId }}</span><span class="grow muted">“{{ o.quote }}”</span></div>
+      <div class="small">{{ o.comment }}</div>
+    </div>
+    <div v-if="!orphans.length" class="faint small">{{ t('debug.noOrphans') }}</div>
   </Section>
 
   <div class="xs faint mono build">Advanced Preset {{ version }} · {{ build }}</div>

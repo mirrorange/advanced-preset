@@ -2,7 +2,7 @@
  * Built-in structure kinds (D4). The extension owns the semantics, data schema, parsing and UI of
  * each kind; presets only name them (tag / field) and supply format prompts.
  */
-import type { StructureDecl, StructureKind } from './types';
+import { isInlineStructure, type StructureDecl, type StructureKind } from './types';
 import { childText, findTags, removeBlocks, unescapeXml } from './tags';
 
 export type JsonSchema = Record<string, unknown>;
@@ -35,6 +35,7 @@ export const STRUCTURE_PROPERTIES: Record<StructureKind, readonly string[]> = {
   synopsis: ['time', 'location', 'event', 'summary'],
   options: ['label', 'content'],
   custom: [],
+  annotations: [],
 };
 
 /**
@@ -88,6 +89,8 @@ export function structureFieldSchema(decl: StructureDecl, expand: (text: string)
         },
         ...(decl.count ? { minItems: decl.count, maxItems: decl.count } : {}),
       });
+    case 'annotations':
+      return withDesc({ type: 'string' });
     case 'custom':
       return decl.shape === 'kv' ? withDesc({ type: 'object', additionalProperties: { type: 'string' } }) : withDesc({ type: 'string' });
   }
@@ -104,6 +107,8 @@ const asString = (v: unknown): string => (typeof v === 'string' ? v : v == null 
 export function normalizeStructure(kind: StructureKind, value: unknown, decl?: StructureDecl): unknown {
   if (value === undefined) return undefined;
   switch (kind) {
+    case 'annotations':
+      return undefined;
     case 'reply':
     case 'impersonate': {
       const s = asString(value).trim();
@@ -168,6 +173,8 @@ function parseTagBlocks(decl: StructureDecl, blocks: ReturnType<typeof findTags>
   const last = blocks[blocks.length - 1];
   if (!last) return undefined;
   switch (decl.kind) {
+    case 'annotations':
+      return undefined;
     case 'reply':
     case 'impersonate':
       return normalizeStructure(decl.kind, unescapeXml(last.inner));
@@ -211,6 +218,7 @@ export function extractStructureTags(text: string, decls: StructureDecl[]): TagE
   const open: string[] = [];
   const all: { start: number; end: number }[] = [];
   for (const decl of decls) {
+    if (isInlineStructure(decl)) continue;
     const blocks = findTags(text, decl.tag);
     if (!blocks.length) continue;
     all.push(...blocks);

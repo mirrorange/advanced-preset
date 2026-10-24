@@ -3,7 +3,7 @@
  * stages, structures, events and diagnostics live here.
  */
 import { cloneData } from '@advanced-preset/protocol';
-import type { PatchResult, StageKind, Transport } from '@advanced-preset/protocol';
+import type { Annotation, PatchResult, StageKind, Transport } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
 import type { ChatEvent } from './eventlog';
 
@@ -34,6 +34,10 @@ export interface Sidecar {
   /** Patched content (kept so it can be re-applied after reverting to the draft). */
   patched?: string;
   patchesApplied: boolean;
+  /** Inline annotations anchored in `mes` (I-79). */
+  annotations?: Annotation[];
+  /** Patched workflows: annotations of the draft and of the patched text (swapped with `patchesApplied`). */
+  annotationVersions?: { draft: Annotation[]; patched: Annotation[] };
   structures: Record<string, unknown>;
   events: ChatEvent[];
   /** Meta segments of the user input of this turn (for `recent_meta`). */
@@ -47,6 +51,11 @@ export const SIDECAR_KEY = 'advanced_preset';
 export function getSidecar(msg: STMessage | undefined): Sidecar | undefined {
   const s = msg?.extra?.[SIDECAR_KEY];
   return s && typeof s === 'object' && (s as Sidecar).v === 1 ? (s as Sidecar) : undefined;
+}
+
+/** A copy of the sidecar with one structure value replaced (user edits overwrite the model's value). */
+export function withStructure(sidecar: Sidecar, id: string, value: unknown): Sidecar {
+  return { ...sidecar, structures: { ...sidecar.structures, [id]: cloneData(value) } };
 }
 
 /** Write the sidecar to the message and its current swipe slot. */

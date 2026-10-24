@@ -207,8 +207,11 @@ export interface Workflow {
   sections: WorkflowSections;
 }
 
-export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'custom';
-export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'custom'];
+export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'custom' | 'annotations';
+export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'custom', 'annotations'];
+/** Kinds written inside the story content rather than as a tag block / field (I-77). */
+export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations'];
+export const isInlineStructure = (s: { kind: StructureKind }): boolean => INLINE_STRUCTURE_KINDS.includes(s.kind);
 
 export interface StructureDecl {
   id: string;
@@ -223,6 +226,13 @@ export interface StructureDecl {
   /** custom only */
   shape?: 'text' | 'kv';
   display?: 'card' | 'hidden';
+  /**
+   * Recent history (I-80 / I-88): the last N assistant messages carry this structure again —
+   * annotations are re-injected as CriticMarkup, a synopsis is appended via `historyTemplate`. 0 = off.
+   */
+  history?: number;
+  /** synopsis only: how a kept message carries its synopsis; `{{content}}` + `{{time}}` `{{location}}` `{{event}}` `{{summary}}`. */
+  historyTemplate?: string;
   title?: string;
   formatPrompt: { tag: string; field: string };
 }
@@ -246,11 +256,21 @@ export interface MetaDecl {
   impersonatePrompt: string;
 }
 
+/** What token saving does with older user messages. */
+export type UserInputMode = 'keep' | 'truncate' | 'remove';
+export const USER_INPUT_MODES: readonly UserInputMode[] = ['keep', 'truncate', 'remove'];
+/** Default `historyTemplate` of a synopsis structure. */
+export const DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = '{{content}}\n\n[{{time}} · {{location}}] {{event}}: {{summary}}';
+
 export interface TokenSavingDecl {
   keepFullTurns: number;
   truncateUserAfter: number;
+  userInput: UserInputMode;
+  /** Replaces an older assistant message that has a synopsis. */
   synopsisTemplate: string;
 }
+
+export interface TokenSavingConfig { enabled: boolean; keepFullTurns: number; truncateUserAfter: number; userInput: UserInputMode }
 
 export interface SyntheticTurn {
   id: string;
@@ -335,7 +355,7 @@ export interface Configuration {
   identity: { names: Record<ActorId, string>; prefixes: Record<ActorId, string> };
   modules: Record<string, boolean>;
   params: Record<string, string | number>;
-  tokenSaving: { enabled: boolean; keepFullTurns: number; truncateUserAfter: number };
+  tokenSaving: TokenSavingConfig;
   meta: { recentCount: number };
 }
 

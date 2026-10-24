@@ -5,7 +5,7 @@
  * The shapes (which fields / tools exist and what they hold) are defined here; every name and
  * description comes from the preset (`tools`, `Stage.field`, `Stage.tool`, structure texts).
  */
-import type { FieldText, Stage, StructureDecl, ToolsDecl, Workflow } from './types';
+import { isInlineStructure, type FieldText, type Stage, type StructureDecl, type ToolsDecl, type Workflow } from './types';
 import { test, type Resolver } from './expr';
 import { isStructureOptional, structureFieldSchema, type JsonSchema } from './structures';
 
@@ -140,7 +140,9 @@ export interface TurnArtifacts {
   toolNames(): string[];
 }
 
-export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stage[], structures: StructureDecl[], expand: Expand = same): TurnArtifacts {
+export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stage[], allStructures: StructureDecl[], expand: Expand = same): TurnArtifacts {
+  // Inline structures (annotations) live in the content itself: no field, no tool parameter.
+  const structures = allStructures.filter((s) => !isInlineStructure(s));
   const desc = (template: string | undefined, stage?: Stage) => {
     if (!template) return undefined;
     const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();

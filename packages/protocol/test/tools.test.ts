@@ -98,4 +98,18 @@ describe('artifact upgrade', () => {
     expect(pruneDiff(diff, up.configurationDefaults as never)).toEqual([]);
     expect(resolveConfiguration(up, '', diff as never).connection.streamToolArguments).toBe('off');
   });
+
+  it('fills token saving userInput (older artifacts truncate)', () => {
+    const old = {
+      formatVersion: FORMAT_VERSION, id: 'x', entries: [], configurations: [],
+      tokenSaving: { keepFullTurns: 6, truncateUserAfter: 2000, synopsisTemplate: '' },
+      configurationDefaults: { tokenSaving: { enabled: false, keepFullTurns: 6, truncateUserAfter: 2000 } },
+    };
+    const up = upgradeArtifact(old) as APreset;
+    expect(up.tokenSaving.userInput).toBe('truncate');
+    expect(up.configurationDefaults.tokenSaving.userInput).toBe('truncate');
+    const diff = { tokenSaving: { userInput: 'remove' } };
+    expect(pruneDiff(diff, up.configurationDefaults as never)).toEqual([]);
+    expect(resolveConfiguration(up, '', diff as never).tokenSaving.userInput).toBe('remove');
+  });
 });

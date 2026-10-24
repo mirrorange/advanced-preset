@@ -65,10 +65,28 @@
 
 .synopsis { padding: 4px var(--ap-space-3); border-radius: var(--ap-radius-sm); cursor: pointer; color: var(--ap-muted); }
 .synopsis:hover { background: var(--ap-surface); }
-.synopsis-line { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); min-width: 0; }
+.synopsis-head { display: flex; align-items: flex-start; gap: var(--ap-space-2); }
+.synopsis-line { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); min-width: 0; }
 .synopsis-line > .row { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .synopsis-event { color: var(--ap-text); }
 .synopsis-summary { margin-top: 4px; }
+/* Edit entry: top-right corner (outside the wrapping line), revealed on hover / focus; always shown (quietly) on touch screens. */
+.synopsis-edit { display: inline-flex; flex: none; margin: -2px -6px -4px 0; opacity: 0; transition: opacity 0.15s; }
+.synopsis:hover .synopsis-edit, .synopsis-edit:focus-within { opacity: 1; }
+@media (hover: none) { .synopsis-edit { opacity: 0.7; } }
+.synopsis-editor {
+  display: flex; flex-direction: column; gap: 6px; padding: var(--ap-space-2) var(--ap-space-3); font-size: var(--ap-font-size-sm);
+  border: 1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border)); border-radius: var(--ap-radius-md); background: var(--ap-surface);
+}
+.synopsis-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(10em, 1fr)); gap: 6px; }
+.synopsis-field { position: relative; display: block; min-width: 0; }
+.synopsis-field svg.lucide { position: absolute; left: 0.6em; top: 50%; width: 1em; height: 1em; transform: translateY(-50%); pointer-events: none; }
+.synopsis-field .input { padding-left: 2em; }
+.synopsis-event-input { font-weight: 600; }
+.synopsis-editor textarea.input { min-height: 3.4em; max-height: 18em; resize: none; overflow-y: auto; }
+.synopsis-actions { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.synopsis-actions .btn svg.lucide { width: 1em; height: 1em; }
+@media (hover: none) { .synopsis-keys { visibility: hidden; } }
 .row.tight { gap: 4px; white-space: nowrap; }
 .row.end { justify-content: flex-end; }
 .kv-list { display: grid; grid-template-columns: max-content 1fr; gap: 4px var(--ap-space-3); margin: 0; }
@@ -76,3 +94,14 @@
 .kv-list dd { margin: 0; }
 
 .dock { margin: var(--ap-space-2) var(--ap-space-3); padding: var(--ap-space-2) var(--ap-space-3); border-radius: var(--ap-radius-md); background: var(--ap-panel-bg); border: 1px solid var(--ap-border); backdrop-filter: blur(8px); }
+
+/* Inline annotation bubble (I-86): parent document, top layer, placed against the annotated line. */
+.anno-bubble {
+  --actor: var(--ap-primary);
+  position: fixed; inset: auto; left: 0; top: 0; z-index: 2147483000; margin: 0; overflow: auto;
+  width: max-content; max-width: min(320px, calc(100vw - 16px)); max-height: min(50vh, 24em);
+  padding: var(--ap-space-2) var(--ap-space-3); border: 1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border)); border-radius: var(--ap-radius-md);
+  background: var(--ap-panel-bg); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: var(--ap-text); box-shadow: var(--ap-shadow);
+  font-size: var(--ap-font-size-sm); line-height: 1.55; text-align: left; overflow-wrap: anywhere;
+}
+.anno-author { font-weight: 700; font-size: var(--ap-font-size-xs); color: var(--actor); letter-spacing: 0.02em; margin-bottom: 2px; }

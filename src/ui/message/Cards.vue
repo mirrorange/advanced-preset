@@ -5,6 +5,7 @@ import { actorName, type StructureDecl, type Synopsis, type UserOption } from '@
 import { activeConfiguration } from '@/store/config';
 import { pt } from '@/i18n';
 import { useMessageView, colorOf } from './model';
+import { setStructure } from '../actions';
 import ReplyCard from './cards/ReplyCard.vue';
 import ImpersonateCard from './cards/ImpersonateCard.vue';
 import OptionsCard from './cards/OptionsCard.vue';
@@ -26,6 +27,7 @@ const data = computed(() => {
     const d = decls.find((x) => x.kind === kind);
     return d ? sc.structures[d.id] : undefined;
   };
+  const synopsisId = decls.find((x) => x.kind === 'synopsis')?.id;
   const recap = sc.events.find((e) => e.type === 'recap.set');
   return {
     preset,
@@ -36,6 +38,7 @@ const data = computed(() => {
     options: Array.isArray(valueOf('options')) ? (valueOf('options') as UserOption[]) : [],
     memory: sc.events.filter((e) => e.type === 'memory.replace' || e.type === 'memory.delete' || e.type === 'global.ref'),
     recap: recap?.type === 'recap.set' ? recap : null,
+    synopsisId,
     synopsis: valueOf('synopsis') && typeof valueOf('synopsis') === 'object' ? (valueOf('synopsis') as Synopsis) : null,
     custom: decls
       .filter((d): d is StructureDecl => d.kind === 'custom' && d.display !== 'hidden' && sc.structures[d.id] !== undefined)
@@ -49,7 +52,7 @@ const data = computed(() => {
     <ReplyCard v-if="data.reply" :text="data.reply" :name="data.narrator" :color="data.color" />
     <ImpersonateCard v-if="data.impersonate" :text="data.impersonate" />
     <OptionsCard v-if="data.options.length" :options="data.options" />
-    <SynopsisCard v-if="data.synopsis" :synopsis="data.synopsis" />
+    <SynopsisCard v-if="data.synopsis" :synopsis="data.synopsis" editable @save="(v) => data?.synopsisId && setStructure(mesid, data.synopsisId, v)" />
     <MemoryCard v-if="data.memory.length" :events="data.memory" :preset="data.preset" />
     <RecapCard v-if="data.recap" :text="data.recap.text" :covers-up-to="data.recap.coversUpTo" />
     <CustomCard v-for="c in data.custom" :key="c.id" :title="c.title" :value="c.value" />

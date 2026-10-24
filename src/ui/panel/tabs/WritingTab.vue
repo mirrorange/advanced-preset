@@ -2,13 +2,14 @@
 /** Preset parameters, actor names / prefixes, token saving and meta settings. */
 import { computed } from 'vue';
 import { Coins, Drama, MessagesSquare, SlidersVertical } from 'lucide-vue-next';
-import type { Param } from '@advanced-preset/protocol';
+import { USER_INPUT_MODES, type Param, type UserInputMode } from '@advanced-preset/protocol';
 import { t, pt, presetLocale } from '@/i18n';
 import { usePreset } from '../use';
 import NoPreset from '../NoPreset.vue';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
+import Segmented from '../../components/Segmented.vue';
 
 const { preset, config, update } = usePreset();
 
@@ -43,6 +44,11 @@ const tokenSaving = computed({
   set: (v: boolean) => update((c) => { c.tokenSaving.enabled = v; }),
 });
 const setTs = (k: 'keepFullTurns' | 'truncateUserAfter', v: string) => update((c) => { c.tokenSaving[k] = Math.max(0, Number(v) || 0); });
+const userInputOptions = computed(() => USER_INPUT_MODES.map((x) => ({ value: x, label: t(`writing.userInput.${x}`), hint: t(`writing.userInput.${x}.hint`) })));
+const userInput = computed({
+  get: () => config.value?.tokenSaving.userInput ?? 'truncate',
+  set: (v: UserInputMode) => update((c) => { c.tokenSaving.userInput = v; }),
+});
 const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const listId = (x: Param) => `ap-param-${x.id}`;
 </script>
@@ -81,14 +87,17 @@ const listId = (x: Param) => `ap-param-${x.id}`;
 
     <Section :title="t('writing.tokenSaving')" :icon="Coins" :help="t('writing.tokenSaving.hint')">
       <template #actions><Switch v-model="tokenSaving" :label="t('writing.tokenSaving')" /></template>
-      <div v-if="tokenSaving" class="field-grid">
-        <Field :label="t('writing.keepFullTurns')" :help="t('writing.keepFullTurns.hint')">
+      <template v-if="tokenSaving">
+        <Field :label="t('writing.keepFullTurns')" :help="t('writing.keepFullTurns.hint')" inline>
           <input class="input" type="number" min="0" :value="config.tokenSaving.keepFullTurns" @change="setTs('keepFullTurns', ($event.target as HTMLInputElement).value)" />
         </Field>
-        <Field :label="t('writing.truncateUserAfter')" :help="t('writing.truncateUserAfter.hint')">
+        <Field :label="t('writing.userInput')" :help="t('writing.userInput.hint')">
+          <Segmented v-model="userInput" :options="userInputOptions" />
+        </Field>
+        <Field v-if="userInput === 'truncate'" :label="t('writing.truncateUserAfter')" :help="t('writing.truncateUserAfter.hint')" inline>
           <input class="input" type="number" min="0" :value="config.tokenSaving.truncateUserAfter" @change="setTs('truncateUserAfter', ($event.target as HTMLInputElement).value)" />
         </Field>
-      </div>
+      </template>
     </Section>
 
     <Section :title="t('writing.meta')" :icon="MessagesSquare">

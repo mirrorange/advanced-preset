@@ -2,7 +2,7 @@
  * Turn output parsing: dialogue style (actor prefixes / tags) and object style (JSON fields or tool
  * arguments) both produce a {@link TurnResult}.
  */
-import type { Stage, StructureDecl } from './types';
+import { isInlineStructure, type Stage, type StructureDecl } from './types';
 import { extractStructureTags, normalizeStructure } from './structures';
 import { childText, escapeRe, findTags, partialTagTail, removeBlocks, stripComments, unescapeXml } from './tags';
 import { stageFieldName, terminalContentIndex, type Patch } from './workflow';
@@ -251,6 +251,7 @@ export function parseTurnObject(obj: Record<string, unknown> | null | undefined,
     else r.stages[s.id]!.text = typeof v === 'string' ? v : JSON.stringify(v);
   }
   for (const d of o.structures) {
+    if (isInlineStructure(d)) continue;
     const v = findKey(d.field);
     const n = normalizeStructure(d.kind, v, d);
     if (n !== undefined) r.structures[d.id] = n;
