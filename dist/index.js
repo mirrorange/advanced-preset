@@ -6984,7 +6984,7 @@ function Vf(e, t, n, r) {
 	return !e || e.v !== 1 ? "first" : n.ttlMinutes > 0 && r - e.at > n.ttlMinutes * 6e4 ? "ttl" : e.model === t.model ? e.tools === t.tools ? e.prompt === t.prompt ? null : "prompt" : "tools" : "model";
 }
 function Hf(e, t, n, r, i, a = {}) {
-	let o = Vf(t, n, r, i), s = 0;
+	let o = Vf(t, n, r, i), s = 0, c = !1;
 	if (!o) {
 		let n = t.seq, r = 0;
 		s = e.length;
@@ -6998,26 +6998,27 @@ function Hf(e, t, n, r, i, a = {}) {
 				}
 			}
 		}
+		c = s === e.length && r === n.length;
 	}
-	let c = ((t) => e.slice(0, t).filter((e) => e.key !== void 0 && e.sticky !== e.fresh).length)(s), l = c ? (t?.deferred ?? 0) + 1 : 0;
-	!o && c && l > r.maxDeferredTurns && (o = "turns", s = 0, c = 0, l = 0), o && (l = 0);
-	let u = [], d = { ...a };
+	let l = ((t) => e.slice(0, t).filter((e) => e.key !== void 0 && e.sticky !== e.fresh).length)(s), u = t?.deferred ?? 0, d = l ? c ? Math.max(u, 1) : u + 1 : 0;
+	!o && l && d > r.maxDeferredTurns && (o = "turns", s = 0, l = 0, d = 0), o && (d = 0);
+	let f = [], p = { ...a };
 	return e.forEach((e, t) => {
 		let n = t < s, r = n ? e.sticky : e.fresh;
-		r !== null && u.push(Pf(r));
+		r !== null && f.push(Pf(r));
 		let i = n ? e.stickyMode : e.freshMode;
-		e.key !== void 0 && i && (d[e.key] = i);
+		e.key !== void 0 && i && (p[e.key] = i);
 	}), {
 		from: s,
 		reason: o,
-		deferred: l,
-		postponed: c,
+		deferred: d,
+		postponed: l,
 		next: {
 			v: 1,
 			...n,
-			seq: u,
-			modes: d,
-			deferred: l
+			seq: f,
+			modes: p,
+			deferred: d
 		}
 	};
 }
@@ -9196,7 +9197,7 @@ function jh(e) {
 }
 async function Mh() {
 	let e = await Ah();
-	e && e !== "23badbe1365fec49" && sessionStorage.getItem(kh) !== e && jh(e);
+	e && e !== "1b7cb1dbde30880c" && sessionStorage.getItem(kh) !== e && jh(e);
 }
 async function Nh() {
 	await Mh();
@@ -9205,7 +9206,7 @@ async function Ph() {
 	let e = o().replace(/^third-party\//, ""), t = await Fh(e, !1);
 	if (t.status === 404 && (t = await Fh(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ah();
-	return r && r !== "23badbe1365fec49" ? (jh(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "1b7cb1dbde30880c" ? (jh(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Fh = (t, n) => m("/api/extensions/update", {
 	method: "POST",
@@ -14870,7 +14871,7 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 				"icon",
 				"help"
 			]),
-			U("div", UT, "Advanced Preset " + A(P("1.7.0")) + " · " + A(P("23badbe1365fec49")), 1)
+			U("div", UT, "Advanced Preset " + A(P("1.7.0")) + " · " + A(P("1b7cb1dbde30880c")), 1)
 		], 64));
 	}
 }), GT = ["aria-label"], KT = { class: "panel-head" }, qT = { class: "panel-logo" }, JT = { class: "grow" }, YT = { class: "panel-title ellipsis" }, XT = { class: "panel-sub ellipsis" }, ZT = {
@@ -15034,7 +15035,7 @@ function mE() {
 //#region src/index.ts
 var hE = {
 	version: "1.7.0",
-	buildId: "23badbe1365fec49",
+	buildId: "1b7cb1dbde30880c",
 	nextGeneration: (e) => Rd(e),
 	listPresets: () => xu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -15086,7 +15087,7 @@ async function vE() {
 	};
 	t.on(n.APP_READY, () => void a()), mE(), qf("init", {
 		version: "1.7.0",
-		build: "23badbe1365fec49",
+		build: "1b7cb1dbde30880c",
 		enabled: q().enabled
 	});
 }
