@@ -18,6 +18,9 @@ import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { alignHistory, annotationHistory, rewriteHistory, synopsisOptions, type HistoryItem } from './history';
 import { debugLog } from './debug';
+import { markerOf, messageKey, stickyRewrite } from './cache';
+import { applySticky, stripMarkers, type CacheReport } from './sticky';
+import { cacheState, currentChatKey } from '@/store/cache-state';
 
 export const ANCHOR_RE = /⟦ap:region:([\w.-]+)⟧/g;
 
@@ -116,20 +119,29 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
   map.forEach((ci, hi) => {
     if (ci < 0) return;
     const real = C[ci]!;
-    items.push({ is_user: real.m.is_user, mes: textOf(H[hi]!.m.content), extra: real.m.extra, name: real.m.name, __h: hi });
+    items.push({ is_user: real.m.is_user, mes: textOf(H[hi]!.m.content), extra: real.m.extra, name: real.m.name, send_date: real.m.send_date, __h: hi });
   });
   const real = items.map((it) => C[map[it.__h]!]!.index);
-  const rewritten = rewriteHistory(items, {
+  const options = {
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
     tokenSaving: config.tokenSaving,
     ...synopsisOptions(preset, config),
     recap: currentRecap(),
-    realIndex: (i) => real[i] ?? -1,
+    realIndex: (i: number) => real[i] ?? -1,
     currentInput: -1,
     annotations: annotationHistory(preset, config),
-  }) as (HistoryItem & { __h: number })[];
-  const keep = new Map(rewritten.map((r) => [r.__h, r.mes]));
+  };
+  const keep = new Map<number, string>();
+  if (config.cache?.enabled) {
+    // Cache optimization: the marked sticky text, resolved below like the interceptor's.
+    const chatKey = currentChatKey();
+    const rw = stickyRewrite(items, options, cacheState(chatKey)?.modes, (i) => messageKey(items[i]!, real[i] ?? i));
+    for (const r of rw.out) keep.set(items[r.index]!.__h, r.entry === undefined ? r.item.mes : r.item.mes + markerOf(r.entry));
+    ctx.sticky = { chat: chatKey, entries: rw.entries, omitted: rw.omitted };
+  } else {
+    for (const r of rewriteHistory(items, options) as (HistoryItem & { __h: number })[]) keep.set(r.__h, r.mes);
+  }
   const removed = new Set<number>();
   items.forEach((it) => {
     const target = H[it.__h]!;
@@ -189,6 +201,8 @@ export interface AssemblySnapshot {
   /** Build variables as the prompts read them in full (before macro expansion). */
   vars: { id: string; text: string }[];
   regions: { id: string; messages: { role: string; chars: number; content: string }[] }[];
+  /** Cache optimization (sticky rendering) of this request. */
+  cache?: CacheReport | null;
   warnings: string[];
 }
 export let lastSnapshot: AssemblySnapshot | null = null;
@@ -196,6 +210,7 @@ export let lastSnapshot: AssemblySnapshot | null = null;
 export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolean }): Promise<void> {
   const { chat, dryRun } = event;
   if (!settings().enabled || !chat.some((m) => typeof m.content === 'string' && m.content.includes('⟦ap:region:'))) {
+    stripMarkers(chat);
     if (!dryRun) { registry.setPending(null); registry.takeArmed(); }
     return;
   }
@@ -204,6 +219,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   if (!preset) {
     // Anchors without a known preset: strip them so they never reach the model.
     const cleaned = isolateAnchors(chat).filter((m) => !m.__anchor);
+    stripMarkers(cleaned);
     chat.splice(0, chat.length, ...cleaned);
     return;
   }
@@ -226,6 +242,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   const sub = (s: string) => st().substituteParams(s);
   const final: ChatMessage[] = [];
   let historyAt = -1;
+  let historyEnd = -1;
   const snapshot: AssemblySnapshot = {
     genId: ctx.id, at: Date.now(), dryRun, origin: ctx.origin, transport: ctx.transport, workflow: workflow?.id ?? '',
     modules: assembly.modules.map((m) => m.id), regions: [], warnings: ctx.warnings,
@@ -234,6 +251,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   for (const m of list) {
     if (!m.__anchor) { final.push(m); continue; }
     const id = m.__anchor;
+    if (id === preset.anchors.historyEnd && historyEnd < 0) historyEnd = final.length;
     const msgs = (assembly.regions[id] ?? []).map((r) => {
       const msg: ChatMessage = { role: r.role, content: sub(r.content) };
       Object.defineProperty(msg, AP_MESSAGE, { value: true });
@@ -243,6 +261,8 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
     final.push(...msgs);
     if (id === preset.anchors.historyStart) historyAt = final.length;
   }
+
+  snapshot.cache = applySticky(ctx, final, historyAt, historyEnd < 0 ? final.length : historyEnd);
 
   const shaped = ctx.transport === 'prefill' && !passthrough && historyAt >= 0 ? renderPrefill(ctx, final, historyAt) : final;
   chat.splice(0, chat.length, ...shaped.map((m) => {

@@ -73,7 +73,7 @@ export interface StreamContext { chatCompletionSource: string; model?: string | 
 type StreamingReply = (data: unknown, state: StreamState, options: Partial<StreamContext> & { overrideShowThoughts?: boolean }) => string;
 export interface StreamState { reasoning: string; images: string[]; signature: string; toolSignatures: Record<string, string> }
 
-let openaiModule: { getStreamingReply?: StreamingReply } = {};
+let openaiModule: { getStreamingReply?: StreamingReply; getChatCompletionModel?: (settings?: unknown) => string } = {};
 
 /** URL of a ST module relative to this bundle (`/scripts/extensions/third-party/<name>/dist/index.js`). */
 const hostUrl = (path: string) => new URL(path, import.meta.url).href;
@@ -84,6 +84,23 @@ export async function loadHostModules(): Promise<void> {
   } catch (e) {
     console.warn('[AP] openai.js not importable, using built-in stream extraction', e);
   }
+}
+
+/**
+ * Source, model and endpoint of the current Chat Completion connection (cache optimization: a
+ * change means the provider cache is gone). Uses ST's own model lookup when available.
+ */
+export function connectionKey(): string {
+  const s = st().chatCompletionSettings ?? {};
+  const source = String(s.chat_completion_source ?? '');
+  let model = '';
+  try { model = String(openaiModule.getChatCompletionModel?.() ?? ''); } catch { model = ''; }
+  if (!model) {
+    const key = ({ makersuite: 'google_model', mistralai: 'mistralai_model' } as Record<string, string>)[source] ?? `${source}_model`;
+    model = String(s[key] ?? '');
+  }
+  const endpoint = source === 'custom' ? String(s.custom_url ?? '') : String(s.reverse_proxy ?? '');
+  return [source, model, endpoint].join('|');
 }
 
 /** Extension folder id as ST knows it, e.g. `third-party/advanced-preset`. */

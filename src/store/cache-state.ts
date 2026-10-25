@@ -3,6 +3,7 @@
  * chat file: it is only useful while the provider cache lives, and survives a page reload.
  */
 import type { CacheState } from '@/core/cache';
+import { st } from '@/st/host';
 
 const STORAGE_KEY = 'advanced-preset.cache.v1';
 /** States older than this are dropped regardless of the configured TTL. */
@@ -33,6 +34,12 @@ function persist(store: Store, now: number): void {
   const live = Object.entries(store).filter(([, s]) => s && now - s.at <= MAX_AGE_MS).sort((a, b) => b[1].at - a[1].at).slice(0, MAX_CHATS);
   memory = Object.fromEntries(live);
   try { storage()?.setItem(STORAGE_KEY, JSON.stringify(memory)); } catch { /* quota / private mode: memory only */ }
+}
+
+/** Key of the open chat. */
+export function currentChatKey(): string {
+  const c = st();
+  return String(c.getCurrentChatId?.() || `${c.characterId ?? ''}|${c.groupId ?? ''}`);
 }
 
 export function cacheState(chat: string): CacheState | undefined {
