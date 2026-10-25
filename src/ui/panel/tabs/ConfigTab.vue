@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Cable, Check, Gauge, Pencil, Plus, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
-import { TOOL_ARG_STREAMING, TRANSPORTS, type Transport } from '@advanced-preset/protocol';
+import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, Pencil, Plus, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
+import { TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, type Transport, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
 } from '@/store/config';
@@ -78,6 +78,24 @@ const syntheticTurn = computed({
   set: (v: string) => update((c) => { c.connection.syntheticTurn = v || null; }),
 });
 
+const actors = computed(() => Object.entries(preset.value?.actors ?? {}));
+const setIdentity = (kind: 'names' | 'prefixes', id: string, v: string) => update((c) => { c.identity[kind][id] = v; });
+
+const tokenSaving = computed({
+  get: () => config.value?.tokenSaving.enabled ?? false,
+  set: (v: boolean) => update((c) => { c.tokenSaving.enabled = v; }),
+});
+const setTs = (k: 'keepFullTurns' | 'truncateUserAfter', v: string) => update((c) => { c.tokenSaving[k] = Math.max(0, Number(v) || 0); });
+const userInputOptions = computed(() => USER_INPUT_MODES.map((x) => ({ value: x, label: t(`writing.userInput.${x}`), hint: t(`writing.userInput.${x}.hint`) })));
+const userInput = computed({
+  get: () => config.value?.tokenSaving.userInput ?? 'truncate',
+  set: (v: UserInputMode) => update((c) => { c.tokenSaving.userInput = v; }),
+});
+const cache = computed({
+  get: () => config.value?.cache?.enabled ?? false,
+  set: (v: boolean) => update((c) => { c.cache.enabled = v; }),
+});
+const setCache = (k: 'ttlMinutes' | 'maxDeferredTurns', v: string) => update((c) => { c.cache[k] = Math.max(0, Math.round(Number(v) || 0)); });
 /** Sampling controls shown here; everything else stays editable in ST and syncs back. */
 const SLIDERS: { key: string; min: number; max: number; step: number }[] = [
   { key: 'temperature', min: 0, max: 2, step: 0.01 },
@@ -153,6 +171,44 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
 
     <Section v-if="workflowOptions.length > 1" :title="t('config.workflow')" :icon="WorkflowIcon" :help="workflowHelp">
       <Segmented v-model="workflow" :options="workflowOptions" />
+    </Section>
+
+    <Section :title="t('writing.actors')" :icon="Drama" collapsible :open="false">
+      <div v-for="[id, a] in actors" :key="id" class="field-grid">
+        <Field :label="t('writing.actorName', { actor: id })">
+          <input class="input" :value="config.identity.names[id] ?? ''" :placeholder="a.name" @change="setIdentity('names', id, ($event.target as HTMLInputElement).value)" />
+        </Field>
+        <Field :label="t('writing.actorPrefix')">
+          <input class="input" :value="config.identity.prefixes[id] ?? ''" :placeholder="a.prefix" @change="setIdentity('prefixes', id, ($event.target as HTMLInputElement).value)" />
+        </Field>
+      </div>
+    </Section>
+
+    <Section :title="t('writing.tokenSaving')" :icon="Coins" :help="t('writing.tokenSaving.hint')">
+      <template #actions><Switch v-model="tokenSaving" :label="t('writing.tokenSaving')" /></template>
+      <template v-if="tokenSaving">
+        <Field :label="t('writing.keepFullTurns')" :help="t('writing.keepFullTurns.hint')" inline>
+          <input class="input" type="number" min="0" :value="config.tokenSaving.keepFullTurns" @change="setTs('keepFullTurns', ($event.target as HTMLInputElement).value)" />
+        </Field>
+        <Field :label="t('writing.userInput')" :help="t('writing.userInput.hint')">
+          <Segmented v-model="userInput" :options="userInputOptions" />
+        </Field>
+        <Field v-if="userInput === 'truncate'" :label="t('writing.truncateUserAfter')" :help="t('writing.truncateUserAfter.hint')" inline>
+          <input class="input" type="number" min="0" :value="config.tokenSaving.truncateUserAfter" @change="setTs('truncateUserAfter', ($event.target as HTMLInputElement).value)" />
+        </Field>
+      </template>
+    </Section>
+
+    <Section :title="t('writing.cache')" :icon="DatabaseZap" :help="t('writing.cache.hint')">
+      <template #actions><Switch v-model="cache" :label="t('writing.cache')" /></template>
+      <template v-if="cache">
+        <Field :label="t('writing.cacheTtl')" :help="t('writing.cacheTtl.hint')" inline>
+          <input class="input" type="number" min="0" :value="config.cache.ttlMinutes" @change="setCache('ttlMinutes', ($event.target as HTMLInputElement).value)" />
+        </Field>
+        <Field :label="t('writing.cacheMaxDeferred')" :help="t('writing.cacheMaxDeferred.hint')" inline>
+          <input class="input" type="number" min="0" :value="config.cache.maxDeferredTurns" @change="setCache('maxDeferredTurns', ($event.target as HTMLInputElement).value)" />
+        </Field>
+      </template>
     </Section>
 
     <Section :title="t('config.sampling')" :icon="Gauge" collapsible :open="false">
