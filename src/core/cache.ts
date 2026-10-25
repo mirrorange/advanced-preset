@@ -162,6 +162,8 @@ export function flushReason(prev: CacheState | undefined, fp: CacheFingerprint, 
 export function resolveSticky(cands: Candidate[], prev: CacheState | undefined, fp: CacheFingerprint, cfg: CacheConfig, now: number, omitted: Record<string, string> = {}): Resolution {
   let reason = flushReason(prev, fp, cfg, now);
   let from = 0;
+  /** The same history as the previous request (regenerate, swipe, retry): not a new round. */
+  let repeat = false;
   if (!reason) {
     const seq = prev!.seq;
     let j = 0;
@@ -173,10 +175,12 @@ export function resolveSticky(cands: Candidate[], prev: CacheState | undefined, 
       from = i;
       break;
     }
+    repeat = from === cands.length && j === seq.length;
   }
   const postponedBefore = (n: number) => cands.slice(0, n).filter((c) => c.key !== undefined && c.sticky !== c.fresh).length;
   let postponed = postponedBefore(from);
-  let deferred = postponed ? (prev?.deferred ?? 0) + 1 : 0;
+  const before = prev?.deferred ?? 0;
+  let deferred = postponed ? (repeat ? Math.max(before, 1) : before + 1) : 0;
   if (!reason && postponed && deferred > cfg.maxDeferredTurns) { reason = 'turns'; from = 0; postponed = 0; deferred = 0; }
   if (reason) deferred = 0;
 

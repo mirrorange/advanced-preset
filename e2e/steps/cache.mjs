@@ -66,6 +66,14 @@ export default async function (page, shots) {
     await page.waitForTimeout(800);
     badges.push(await cacheBadge(page, shots));
   }
+  if (process.env.AP_REGEN) {
+    // Regenerate the last reply: same history as the previous request, the cache should still hit.
+    await page.evaluate(() => { SillyTavern.getContext().generate('regenerate'); });
+    await page.waitForTimeout(800);
+    await idle(page);
+    await page.waitForTimeout(800);
+    badges.push('regenerate · ' + (await cacheBadge(page, shots)));
+  }
   await page.evaluate(() => window.AdvancedPreset.togglePanel(true));
   await page.screenshot({ path: `${shots}/cache-debug-${on ? 'on' : 'off'}.png` });
   await page.evaluate(() => window.AdvancedPreset.togglePanel(false));

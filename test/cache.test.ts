@@ -106,6 +106,20 @@ describe('cache: sticky rendering', () => {
     expect(flushedAt).toBe(6);
   });
 
+  it('does not count a repeated request (regenerate / swipe) as another round', () => {
+    const c = cfg({ maxDeferredTurns: 1 });
+    const t1 = request(chat(3), undefined);
+    const t2 = request(chat(4), t1.state, { now: 1, cfg: c });
+    expect(t2.res.deferred).toBe(1);
+    // regenerating the reply to input 4 sends the same history again
+    const t3 = request(chat(4), t2.state, { now: 2, cfg: c });
+    expect(t3.res.reason).toBeNull();
+    expect(t3.res.deferred).toBe(1);
+    expect(t3.sent).toEqual(t2.sent);
+    // the next real turn exceeds the limit
+    expect(request(chat(5), t3.state, { now: 3, cfg: c }).res.reason).toBe('turns');
+  });
+
   it.each([
     ['ttl', { now: 6 * 60_000 }],
     ['model', { fp: fp({ model: 'other' }) }],
