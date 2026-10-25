@@ -8,6 +8,7 @@ import { settings } from '@/store/settings';
 import { getPreset } from '@/store/presets';
 import { activeConfiguration } from '@/store/config';
 import { activeCarrierPresetId } from '@/store/carrier';
+import { metaEnabled } from '@/core/classify';
 
 const BUTTONS = '#option_impersonate, #mes_impersonate';
 
@@ -29,6 +30,8 @@ function impersonatePrompt(): string | null {
   const preset = id ? getPreset(id) : undefined;
   if (!preset?.meta.impersonatePrompt) return null;
   const config = activeConfiguration(preset);
+  // With meta instructions off, ST's own impersonate runs.
+  if (!metaEnabled(config)) return null;
   const text = expandMacros(preset.meta.impersonatePrompt, (args) => (args[0] === 'name' ? actorName(preset, config, args[1]!) : undefined));
   try { return st().substituteParams(text); } catch { return text; }
 }

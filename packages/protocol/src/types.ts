@@ -217,6 +217,7 @@ export interface StructureDecl {
   id: string;
   kind: StructureKind;
   tag: string;
+  /** Model-visible field name, including `tools.structurePrefix` (applied by the CLI). */
   field: string;
   description?: string;
   /** Descriptions of the kind's sub-fields (e.g. memory `key`, synopsis `time`), keyed by the fixed sub-field name. */
@@ -272,6 +273,18 @@ export interface TokenSavingDecl {
 
 export interface TokenSavingConfig { enabled: boolean; keepFullTurns: number; truncateUserAfter: number; userInput: UserInputMode }
 
+/**
+ * Cache optimization (sticky rendering): while the provider's prompt cache may still hit, every
+ * history message keeps the rendering of the previous request; only new messages follow the rules.
+ */
+export interface CacheConfig {
+  enabled: boolean;
+  /** Minutes after the last successful request during which the cache is assumed alive. */
+  ttlMinutes: number;
+  /** Requests a pending rendering change may be postponed before everything is applied at once. */
+  maxDeferredTurns: number;
+}
+
 export interface SyntheticTurn {
   id: string;
   label: string;
@@ -313,6 +326,13 @@ export interface ToolsDecl {
    * message when the model stops early (`{{next}}`). `{{submit}}` / `{{first}}` are also available.
    */
   results: { next: string; done: string; unknown: string; nudge: string };
+  /**
+   * Prefix of every structure field (structured output, single tool, anchor stage tool), applied
+   * at build time to `StructureDecl.field` (I-94). Some APIs (Gemini) generate object fields in
+   * alphabetical order; a prefix that sorts after the stage fields keeps structures after the
+   * content. `''` = no prefix.
+   */
+  structurePrefix?: string;
   /** Appended to the description of free-form maps sent as JSON-encoded strings (Gemini). */
   jsonStringHint?: string;
   /** Prefill / plaintext task turns with a caller JSON schema: system hint asking for a JSON block (`{{schema}}`). */
@@ -356,7 +376,9 @@ export interface Configuration {
   modules: Record<string, boolean>;
   params: Record<string, string | number>;
   tokenSaving: TokenSavingConfig;
-  meta: { recentCount: number };
+  cache: CacheConfig;
+  /** `enabled: false` turns meta-instruction handling off (input is plain story text). */
+  meta: { enabled: boolean; recentCount: number };
 }
 
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };

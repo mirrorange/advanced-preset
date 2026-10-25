@@ -252,14 +252,42 @@ tools:
     const { diag } = withTools(`
 tools:
   submit: { name: "bad name" }
-  stage: { name: same, param: reply }
-  turn: { field: reply }
+  stage: { name: same, param: z_reply }
+  turn: { field: z_reply }
 `);
     const msgs = diag.errors.map((e) => e.message).join('\n');
     expect(msgs).toMatch(/tools.submit.name `bad name`/);
     expect(msgs).toMatch(/tool `same` is also used by stage plan/);
-    expect(msgs).toMatch(/field `reply` collides with a structure field/);
-    expect(msgs).toMatch(/tool parameter `reply` collides with a structure field/);
+    expect(msgs).toMatch(/field `z_reply` collides with a structure field/);
+    expect(msgs).toMatch(/tool parameter `z_reply` collides with a structure field/);
+  });
+
+  it('prefixes structure fields so they sort after the stages (I-94)', () => {
+    const { preset, diag } = build(tree({ 'preset.yaml': MANIFEST.replace('field: "Use the reply field." } }', 'field: "Use the `{{field}}` field." }, description: "Reply in `{{field}}`." }') }));
+    expect(preset!.tools.structurePrefix).toBe('z_');
+    expect(preset!.structures.reply).toMatchObject({ field: 'z_reply', description: 'Reply in `z_reply`.', formatPrompt: { field: 'Use the `z_reply` field.' } });
+    expect(diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/sorts before/);
+  });
+
+  it('honours tools.structurePrefix and warns about order and stale names', () => {
+    const { preset, diag } = withTools(`
+tools:
+  structurePrefix: ""
+  stage: { param: text }
+`);
+    expect(preset!.structures.reply!.field).toBe('reply');
+    const warnings = diag.warnings.map((w) => w.message).join('\n');
+    expect(warnings).toMatch(/structure field `reply` sorts before stage field `step\d_/);
+    expect(warnings).toMatch(/structure field `reply` sorts before `text` of tool/);
+    const stale = build(tree({ 'preset.yaml': MANIFEST.replace('field: "Use the reply field."', 'field: "Use the `reply` field."') }));
+    expect(stale.diag.warnings.map((w) => w.message).join('\n')).toMatch(/mentions `reply`, but the field is `z_reply`/);
+    const bad = withTools('tools:\n  structurePrefix: "1x"\n');
+    expect(bad.diag.errors.map((e) => e.message).join('\n')).toMatch(/tools.structurePrefix `1x`/);
+  });
+
+  it('warns when stage fields do not sort in order', () => {
+    const { diag } = withTools('tools:\n  turn: { field: "{{stage}}" }\n');
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/stage field `\w+` sorts before `\w+`/);
   });
 
   it('checks structure sub-field descriptions', () => {
@@ -514,5 +542,25 @@ configurationDefaults:
     expect(msgs).toMatch(/no `\{\{content\}\}`/);
     expect(msgs).toMatch(/only annotations and synopsis structures support `history`/);
     expect(r.diag.errors.filter((d) => /userInput/.test(d.message))).toHaveLength(2);
+  });
+});
+
+describe('cache optimization defaults', () => {
+  it('fills the built-in defaults and accepts overrides', () => {
+    const plain = build(tree({ 'preset.yaml': MANIFEST }));
+    expect(plain.preset!.configurationDefaults.cache).toEqual({ enabled: false, ttlMinutes: 5, maxDeferredTurns: 6 });
+    const r = build(tree({ 'preset.yaml': MANIFEST + 'configurationDefaults:\n  cache: { maxDeferredTurns: 8 }\n' }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.preset!.configurationDefaults.cache).toEqual({ enabled: false, ttlMinutes: 5, maxDeferredTurns: 8 });
+  });
+
+  it('flags bad values', () => {
+    const r = build(tree({ 'preset.yaml': MANIFEST.replace('diff: { connection: { transport: prefill } }', 'diff: { cache: { ttlMinutes: -1 } }')
+      + 'configurationDefaults:\n  cache: { enabled: yes please, maxDeferredTurns: many, ttl: 5 }\n' }));
+    const errors = r.diag.errors.map((d) => d.message).join('\n');
+    expect(errors).toMatch(/`enabled` must be a boolean/);
+    expect(errors).toMatch(/`maxDeferredTurns` must be a number/);
+    expect(errors).toMatch(/`ttlMinutes` must be a number/);
+    expect(r.diag.warnings.map((d) => d.message).join('\n')).toMatch(/unknown cache option `ttl`/);
   });
 });

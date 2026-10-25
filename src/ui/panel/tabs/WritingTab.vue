@@ -1,15 +1,13 @@
 <script setup lang="ts">
-/** Preset parameters, actor names / prefixes, token saving and meta settings. */
+/** Preset parameters. */
 import { computed } from 'vue';
-import { Coins, Drama, MessagesSquare, SlidersVertical } from 'lucide-vue-next';
-import { USER_INPUT_MODES, type Param, type UserInputMode } from '@advanced-preset/protocol';
+import { SlidersVertical } from 'lucide-vue-next';
+import type { Param } from '@advanced-preset/protocol';
 import { t, pt, presetLocale } from '@/i18n';
 import { usePreset } from '../use';
 import NoPreset from '../NoPreset.vue';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
-import Switch from '../../components/Switch.vue';
-import Segmented from '../../components/Segmented.vue';
 
 const { preset, config, update } = usePreset();
 
@@ -36,20 +34,6 @@ const optionLabel = (x: Param, value: string | number, fallback?: string) => {
 const value = (x: Param) => config.value?.params[x.id] ?? x.default;
 const setParam = (x: Param, raw: string) => update((c) => { c.params[x.id] = x.type === 'number' ? Number(raw) || 0 : raw; });
 
-const actors = computed(() => Object.entries(preset.value?.actors ?? {}));
-const setIdentity = (kind: 'names' | 'prefixes', id: string, v: string) => update((c) => { c.identity[kind][id] = v; });
-
-const tokenSaving = computed({
-  get: () => config.value?.tokenSaving.enabled ?? false,
-  set: (v: boolean) => update((c) => { c.tokenSaving.enabled = v; }),
-});
-const setTs = (k: 'keepFullTurns' | 'truncateUserAfter', v: string) => update((c) => { c.tokenSaving[k] = Math.max(0, Number(v) || 0); });
-const userInputOptions = computed(() => USER_INPUT_MODES.map((x) => ({ value: x, label: t(`writing.userInput.${x}`), hint: t(`writing.userInput.${x}.hint`) })));
-const userInput = computed({
-  get: () => config.value?.tokenSaving.userInput ?? 'truncate',
-  set: (v: UserInputMode) => update((c) => { c.tokenSaving.userInput = v; }),
-});
-const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const listId = (x: Param) => `ap-param-${x.id}`;
 </script>
 
@@ -71,38 +55,6 @@ const listId = (x: Param) => `ap-param-${x.id}`;
             <option v-for="o in x.options" :key="String(o.value)" :value="o.value">{{ optionLabel(x, o.value, o.label) }}</option>
           </datalist>
         </template>
-      </Field>
-    </Section>
-
-    <Section :title="t('writing.actors')" :icon="Drama" collapsible :open="false">
-      <div v-for="[id, a] in actors" :key="id" class="field-grid">
-        <Field :label="t('writing.actorName', { actor: id })">
-          <input class="input" :value="config.identity.names[id] ?? ''" :placeholder="a.name" @change="setIdentity('names', id, ($event.target as HTMLInputElement).value)" />
-        </Field>
-        <Field :label="t('writing.actorPrefix')">
-          <input class="input" :value="config.identity.prefixes[id] ?? ''" :placeholder="a.prefix" @change="setIdentity('prefixes', id, ($event.target as HTMLInputElement).value)" />
-        </Field>
-      </div>
-    </Section>
-
-    <Section :title="t('writing.tokenSaving')" :icon="Coins" :help="t('writing.tokenSaving.hint')">
-      <template #actions><Switch v-model="tokenSaving" :label="t('writing.tokenSaving')" /></template>
-      <template v-if="tokenSaving">
-        <Field :label="t('writing.keepFullTurns')" :help="t('writing.keepFullTurns.hint')" inline>
-          <input class="input" type="number" min="0" :value="config.tokenSaving.keepFullTurns" @change="setTs('keepFullTurns', ($event.target as HTMLInputElement).value)" />
-        </Field>
-        <Field :label="t('writing.userInput')" :help="t('writing.userInput.hint')">
-          <Segmented v-model="userInput" :options="userInputOptions" />
-        </Field>
-        <Field v-if="userInput === 'truncate'" :label="t('writing.truncateUserAfter')" :help="t('writing.truncateUserAfter.hint')" inline>
-          <input class="input" type="number" min="0" :value="config.tokenSaving.truncateUserAfter" @change="setTs('truncateUserAfter', ($event.target as HTMLInputElement).value)" />
-        </Field>
-      </template>
-    </Section>
-
-    <Section :title="t('writing.meta')" :icon="MessagesSquare">
-      <Field :label="t('writing.recentCount')" :help="t('writing.recentCount.hint')" inline>
-        <input class="input" type="number" min="0" max="20" :value="config.meta.recentCount" @change="setRecent(($event.target as HTMLInputElement).value)" />
       </Field>
     </Section>
   </template>

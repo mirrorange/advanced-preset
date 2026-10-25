@@ -18,7 +18,7 @@ structures:
         <options>
         <option title="...">...</option>
         </options>
-      field: 'Fill the `options` field with 4 items, each `{ "label": "...", "content": "..." }`.'
+      field: 'Fill the `{{field}}` field with 4 items, each `{ "label": "...", "content": "..." }`.'
 ```
 
 ## 声明字段
@@ -29,15 +29,15 @@ structures:
 | --- | --- | --- |
 | `kind` | 结构 id | 种类：`reply` `memory` `recap` `impersonate` `synopsis` `options` `annotations` `custom`。其他值报错 |
 | `tag` | 结构 id | 对话式写法中的 XML 标签名，须匹配 `^[A-Za-z_][\w.-]*$` |
-| `field` | 结构 id | 指令式写法中的 JSON 字段名 / 工具参数名，须匹配 `^[A-Za-z_]\w*$` |
-| `description` | — | 字段整体的说明，进入 JSON Schema 的 `description`（模型可见，支持宏） |
+| `field` | 结构 id | 指令式写法中的 JSON 字段名 / 工具参数名，须匹配 `^[A-Za-z_]\w*$`。模型实际看到的名字会加上 `tools.structurePrefix`（默认 `z_`，即 `z_options`），见 [字段前缀](#字段前缀) |
+| `description` | — | 字段整体的说明，进入 JSON Schema 的 `description`（模型可见，支持宏；`{{field}}` 为实际字段名） |
 | `properties` | — | 子字段说明，键只能是该种类的固定子字段（见下表），其他键报错 |
 | `count` | — | 仅 `options`：要求的选项数，写入 schema 的 `minItems` / `maxItems` |
 | `history` | `0` | 仅 `synopsis`：最近几条原样发送的助手消息附带自己的事件摘要（0 表示不附带），见下 |
 | `historyTemplate` | `{{content}}` + 空行 + `[{{time}} · {{location}}] {{event}}: {{summary}}` | 仅 `synopsis`：附带摘要的消息的格式 |
 | `title` | 结构 id | 卡片标题（自定义结构用；`reply` 等也可以设，如花瓣的回复卡片显示叙述者名字）。可在 `locales` 中翻译 |
 | `formatPrompt.tag` | `''` | 对话式下的格式说明，由 `{{ap::structure::<id>}}` 输出 |
-| `formatPrompt.field` | `''` | 指令式下的格式说明，由 `{{ap::structure::<id>}}` 输出 |
+| `formatPrompt.field` | `''` | 指令式下的格式说明，由 `{{ap::structure::<id>}}` 输出；`{{field}}` 为实际字段名 |
 | `shape` | `text` | 仅 `custom`：`text`（一段文字）或 `kv`（键值对） |
 | `display` | `card` | 仅 `custom`：`card`（消息下方显示可折叠卡片）或 `hidden`（只保存，不显示） |
 | `history` | `0` | 仅 `annotations`：把批注以 CriticMarkup 重新注入最近 N 条助手消息的历史（见 [annotations](#annotations)） |
@@ -45,7 +45,16 @@ structures:
 约束（报错）：
 
 - 除 `custom` 外，**每种 kind 最多一个**结构；
-- 结构之间的 `field` 不能重复；结构字段也不能与工作流阶段字段、锚点阶段工具的参数同名（见 [workflows.md](workflows.md)）。
+- 结构之间的 `field` 不能重复；结构字段（加前缀后）也不能与工作流阶段字段、锚点阶段工具的参数同名（见 [workflows.md](workflows.md)）。
+
+## 字段前缀
+
+部分 API（如 Gemini）不论 schema 中的顺序，都按**字母顺序**生成对象字段。结构字段如果排在阶段字段（`step1_…`）之前，模型会在开始规划和写正文之前先写出选项、摘要等，结果与正文不一致。
+
+因此 `ap build` 会给每个结构字段加上 `tools.structurePrefix`（默认 `z_`，见 [transports.md](transports.md#tools-文案)），让它排在工作流字段之后：`options` → `z_options`。前缀在构建时写入产物的 `field`，结构化输出、单步工具与锚点阶段工具的参数都使用加前缀后的名字；对话式的标签名不受影响。`structurePrefix: ""` 表示不加前缀。
+
+- `formatPrompt.field`、`description` 与 `properties` 中的 `{{field}}` 会替换为实际字段名，说明文字里提到字段名时都用它：`Fill the \`{{field}}\` field …`；
+- `ap check` 告警：上述文字直接写了未加前缀的字段名（如 `` `options` ``）；结构字段按字母顺序排在锚点阶段及其之前的阶段字段、或锚点阶段工具的参数之前；阶段字段本身不按字母顺序排列（如 `step10_…` 排在 `step2_…` 之前、或只用阶段 id 作字段名）。
 
 ## 种类一览
 
@@ -151,7 +160,7 @@ Gemini 不支持自由键的对象：`kv` 形式会改为 JSON 字符串字段�
 ### memory
 
 - `scope: memory`：本聊天的记忆。每个操作保存为消息 sidecar 中的事件（`memory.replace` / `memory.delete`）。当前记忆由聊天从第 0 条消息开始按顺序折叠得到，因此**切换 swipe、删除消息会自动回滚**对应的记忆修改；
-- `scope: global_memory`：全局记忆，按预设保存（所有聊天共享），是只追加的日志，可在面板中撤销；
+- `scope: global_memory`：全局记忆，按预设保存（所有聊天共享），是只追加的日志，可在面板中撤销。消息 sidecar 保存条目 id（`global.ref`）：删除、重新生成、滑走该消息时条目失效，滑回该版本时重新生效（见 [artifact-and-runtime.md](artifact-and-runtime.md#事件)）；
 - `{{ap::memory}}` / `{{ap::memory::global}}` 输出当前记忆的 JSON（见 [macros.md](macros.md)）；条件变量 `memory.hasChat` / `memory.hasGlobal` 见 [expressions.md](expressions.md)。
 
 ### recap
@@ -206,7 +215,7 @@ structures:
     description: Current status of {{ap::name::char}}.
     formatPrompt:
       tag: "<status><mood>…</mood><location>…</location></status>"
-      field: "Fill `status` with keys `mood` and `location`."
+      field: "Fill `{{field}}` with keys `mood` and `location`."
 ```
 
 ```markdown

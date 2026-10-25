@@ -4,6 +4,7 @@
  */
 import { streamingReply, type StreamContext, type StreamState } from '@/st/host';
 import { PartialArgs } from './partial-args';
+import { mergeUsage, usageOf } from './usage';
 
 export interface ToolCallAcc { id: string; name: string; arguments: string; signature?: string }
 
@@ -190,7 +191,7 @@ export async function* readResponse(resp: Response, source: string | StreamConte
     tools.fromBody(data);
     state.toolCalls = tools.list;
     state.finishReason = data?.choices?.[0]?.finish_reason ?? data?.stop_reason;
-    state.usage = data?.usage ?? data?.usageMetadata;
+    state.usage = usageOf(data);
     yield state;
     return;
   }
@@ -208,7 +209,8 @@ export async function* readResponse(resp: Response, source: string | StreamConte
     if (st.signature) state.signature = st.signature;
     const fr = parsed?.choices?.[0]?.finish_reason ?? parsed?.delta?.stop_reason ?? parsed?.candidates?.[0]?.finishReason;
     if (fr) state.finishReason = fr;
-    if (parsed?.usage || parsed?.usageMetadata) state.usage = parsed.usage ?? parsed.usageMetadata;
+    const usage = usageOf(parsed);
+    if (usage) state.usage = mergeUsage(state.usage, usage);
     yield state;
   }
 }

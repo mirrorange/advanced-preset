@@ -12,6 +12,9 @@ import { classify, metaTrigger } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { annotationHistory, rewriteHistory, synopsisOptions } from './history';
 import { keywordTexts } from '@/store/user-modules';
+import { detachRegeneratingSidecar } from '@/store/sidecar';
+import { cacheState, currentChatKey } from '@/store/cache-state';
+import { markerOf, messageKey, stickyRewrite } from './cache';
 
 export async function advancedPresetInterceptor(chat: STMessage[], _contextSize: number, _abort: (immediately: boolean) => void, type?: string): Promise<void> {
   registry.setPending(null);
@@ -21,6 +24,8 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
   if (!preset) return;
   const config = activeConfiguration(preset);
   const stType = type || 'normal';
+  // Backup for swipes that did not go through MESSAGE_SWIPED: the regenerated turn's memory must not count.
+  if (stType === 'swipe') detachRegeneratingSidecar(st().chat.length - 1);
 
   const last = chat.length - 1;
   const currentInput = stType !== 'continue' && chat[last]?.is_user ? last : -1;
@@ -36,17 +41,26 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     const i = real.findIndex((r) => r.send_date === m.send_date && r.is_user === m.is_user && r.name === m.name);
     return i;
   });
-  const rewritten = rewriteHistory(chat, {
+  const rewriteOptions = {
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
     tokenSaving: config.tokenSaving,
     ...synopsisOptions(preset, config),
     recap: currentRecap(),
-    realIndex: (i) => realIndexOf[i] ?? -1,
+    realIndex: (i: number) => realIndexOf[i] ?? -1,
     currentInput,
     annotations: annotationHistory(preset, config),
-  });
-  chat.splice(0, chat.length, ...(rewritten as STMessage[]));
+  };
+  // Cache optimization: hand ST the sticky rendering with a marker; PROMPT_READY picks the final one.
+  let sticky: GenerationContext['sticky'];
+  if (config.cache?.enabled) {
+    const chatKey = currentChatKey();
+    const rw = stickyRewrite(chat, rewriteOptions, cacheState(chatKey)?.modes, (i) => messageKey(chat[i]!, realIndexOf[i] ?? i));
+    chat.splice(0, chat.length, ...rw.out.map(({ item, entry }) => (entry === undefined ? item : { ...item, mes: item.mes + markerOf(entry) }) as STMessage));
+    sticky = { chat: chatKey, entries: rw.entries, omitted: rw.omitted };
+  } else {
+    chat.splice(0, chat.length, ...(rewriteHistory(chat, rewriteOptions) as STMessage[]));
+  }
 
   const ctx: GenerationContext = {
     id: newGenId(),
@@ -64,6 +78,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     inputIndex: currentInput >= 0 ? (realIndexOf[currentInput] ?? real.length - 1) : -1,
     continueFrom: stType === 'continue' ? chat[last]?.mes : undefined,
     keywords,
+    sticky,
     createdAt: Date.now(),
     warnings: [],
   };

@@ -4,6 +4,7 @@
  */
 import type { APreset, Assembly, Configuration, Stage, StructureDecl, Transport, Workflow } from '@advanced-preset/protocol';
 import type { KeywordTexts, MetaParse } from '@advanced-preset/protocol';
+import type { CacheState, StickyEntry } from './cache';
 
 export type Origin = 'story' | 'task';
 
@@ -30,6 +31,10 @@ export interface GenerationContext {
   /** Chat text scanned by user-module keyword rules. */
   keywords?: KeywordTexts;
   createdAt: number;
+  /** Cache optimization: history messages rendered both ways, identified by markers (interceptor / backfill). */
+  sticky?: { chat: string; entries: StickyEntry[]; omitted: Record<string, string> };
+  /** Cache optimization: state to store once the request succeeded (`touch`: only refresh its time). */
+  cacheCommit?: { chat: string; next: Omit<CacheState, 'at'>; touch: boolean };
   /** Set once FetchGate took over the request. */
   claimed?: boolean;
   warnings: string[];

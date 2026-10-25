@@ -8,8 +8,7 @@ import {
   type Annotation, type MemoryOp, type PatchResult, type TurnResult,
 } from '@advanced-preset/protocol';
 import { nativeFetch, st, streamContextOf, toast } from '@/st/host';
-import { presetState } from '@/store/config';
-import { applyMemoryOps, type ChatEvent } from '@/store/eventlog';
+import { planMemoryOps, type ChatEvent, type PendingGlobalOp } from '@/store/eventlog';
 import type { Sidecar, SidecarStage, TurnKind } from '@/store/sidecar';
 import { t } from '@/i18n';
 import type { GenerationContext } from './context';
@@ -19,6 +18,8 @@ import { encodeJson, errorResponse, familyOf, streamEncoder, type EncodedToolCal
 import { BackendError, readResponse, type ReadState } from './reader';
 import { live, startLive, updateLive, type LiveGeneration } from './live';
 import { recordRequest } from './debug';
+import { commitCache } from './sticky';
+import { addUsage } from './usage';
 
 export const GENERATE_URL = '/api/backends/chat-completions/generate';
 
@@ -26,7 +27,11 @@ export interface Outcome {
   content: string;
   reasoning: string;
   toolCalls?: EncodedToolCall[];
+  /** Provider usage of the turn's requests (summed), re-emitted for ST extensions. */
+  usage?: Record<string, unknown>;
   sidecar: Sidecar;
+  /** Global memory operations, committed with the message (I-98). */
+  global?: PendingGlobalOp[];
 }
 
 /** Sidecar waiting for its message (MESSAGE_RECEIVED). */
@@ -77,7 +82,7 @@ export async function orchestrate(ctx: GenerationContext, base: Record<string, a
       // A Claude thinking block without a signature cannot be replayed with tool calls; keep it out of those.
       if (outcome.reasoning && !(family === 'claude' && outcome.toolCalls?.length)) await write(enc.reasoning(outcome.reasoning));
       if (outcome.toolCalls?.length) await write(enc.toolCalls(outcome.toolCalls));
-      await write(enc.end());
+      await write(enc.end(outcome.usage));
     } catch (e) {
       if (!isAbort(e)) { await write(enc.error(messageOf(e))); failure(g, e); }
     } finally {
@@ -116,7 +121,7 @@ async function run(
   const maxSteps = ctx.transport === 'tool-multi' ? Math.max(1, ctx.config.connection.maxSteps) : 1;
   const started = Date.now();
   let reasoning = '';
-  let usage: unknown;
+  let usage: Record<string, unknown> | undefined;
   let requests = 0;
   let interrupted = false;
   let callerToolCalls: EncodedToolCall[] | undefined;
@@ -144,16 +149,23 @@ async function run(
           if (text) onContent(clean(text.slice(0, text.length - partialTagTail(text))).trimEnd());
         }
       }
+      // Cache optimization: the state counts from the last successful request.
+      commitCache(ctx);
       rec.response = read.text || JSON.stringify(read.toolCalls);
       rec.durationMs = Date.now() - rec.at;
       rec.usage = read.usage;
     } catch (e) {
       rec.error = messageOf(e);
-      if (isAbort(e) || signal?.aborted) { interrupted = true; partial = driver.progress(read, false); break; }
+      if (isAbort(e) || signal?.aborted) {
+        // Output had started: the prompt was processed (and cached) by the provider.
+        if (read.text || read.reasoning || read.toolCalls.length) commitCache(ctx);
+        usage = addUsage(usage, read.usage);
+        interrupted = true; partial = driver.progress(read, false); break;
+      }
       throw e;
     }
     reasoning += read.reasoning;
-    usage = read.usage ?? usage;
+    usage = addUsage(usage, read.usage);
     driver.progress(read, true);
     const verdict = driver.complete(read, step);
     if (verdict.callerToolCalls) {
@@ -168,6 +180,7 @@ async function run(
   updateLive(g, turn, reasoning);
   const outcome = finish(ctx, turn, driver.rawText(), driver.callerResult?.(), reasoning, { usage, requests, durationMs: Date.now() - started, interrupted });
   outcome.toolCalls = callerToolCalls;
+  outcome.usage = usage;
   if (callerToolCalls) outcome.content = '';
   g.status = interrupted ? 'aborted' : 'done';
   return outcome;
@@ -246,10 +259,16 @@ function finish(
   }
   if (!mes && !diag.interrupted) throw new Error(t('error.emptyTurn'));
 
-  // Events: chat memory as sidecar events, global memory applied now (D13), recap (§12.3).
+  // Events: chat memory as sidecar events, global memory referenced by id and committed with the
+  // message (D13, I-98), recap (§12.3).
   const events: ChatEvent[] = [];
+  let global: PendingGlobalOp[] = [];
   const persisted = ctx.interceptorRan && ctx.stType !== 'quiet';
-  if (persisted && memoryDecl && Array.isArray(turn.structures[memoryDecl.id])) events.push(...applyMemoryOps(presetState(preset), turn.structures[memoryDecl.id] as MemoryOp[]));
+  if (persisted && memoryDecl && Array.isArray(turn.structures[memoryDecl.id])) {
+    const plan = planMemoryOps(turn.structures[memoryDecl.id] as MemoryOp[]);
+    events.push(...plan.events);
+    global = plan.global;
+  }
   if (persisted && recapDecl && typeof turn.structures[recapDecl.id] === 'string') {
     const at = ctx.inputIndex >= 0 ? ctx.inputIndex : st().chat.length - 1;
     events.push({ type: 'recap.set', text: turn.structures[recapDecl.id] as string, coversUpTo: at - 1, source: 'model' });
@@ -284,7 +303,7 @@ function finish(
     ...(reasoning ? { reasoning } : {}),
     diagnostics: { warnings, requests: diag.requests, usage: diag.usage, durationMs: diag.durationMs },
   };
-  const outcome: Outcome = { content: mes, reasoning, sidecar };
+  const outcome: Outcome = { content: mes, reasoning, sidecar, ...(global.length ? { global } : {}) };
   if (persisted) handoff.pending = { ctx, outcome, at: Date.now() };
   else void st().eventSource.emit('advanced_preset_generation_completed', { genId: ctx.id, sidecar });
   if (live.current?.genId === ctx.id) live.current.structures = turn.structures;

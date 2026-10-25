@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DEFAULT_TOOLS, FORMAT_VERSION, parseTurnObject, pruneDiff, resolveConfiguration, toGeminiSchema, turnArtifacts, upgradeArtifact,
+  CACHE_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, parseTurnObject, pruneDiff, resolveConfiguration, toGeminiSchema, turnArtifacts, upgradeArtifact,
   type APreset, type Stage, type StructureDecl, type ToolsDecl, type Workflow,
 } from '../src';
 
@@ -111,5 +111,19 @@ describe('artifact upgrade', () => {
     const diff = { tokenSaving: { userInput: 'remove' } };
     expect(pruneDiff(diff, up.configurationDefaults as never)).toEqual([]);
     expect(resolveConfiguration(up, '', diff as never).tokenSaving.userInput).toBe('remove');
+  });
+
+  it('fills cache optimization defaults (older artifacts)', () => {
+    const old = {
+      formatVersion: FORMAT_VERSION, id: 'x', entries: [], configurations: [],
+      configurationDefaults: { tokenSaving: { enabled: false, keepFullTurns: 6, truncateUserAfter: 2000, userInput: 'truncate' } },
+    };
+    const up = upgradeArtifact(old) as APreset;
+    expect(up.configurationDefaults.cache).toEqual(CACHE_DEFAULTS);
+    const partial = upgradeArtifact({ ...old, configurationDefaults: { ...old.configurationDefaults, cache: { maxDeferredTurns: 8 } } }) as APreset;
+    expect(partial.configurationDefaults.cache).toEqual({ ...CACHE_DEFAULTS, maxDeferredTurns: 8 });
+    const diff = { cache: { enabled: true } };
+    expect(pruneDiff(diff, up.configurationDefaults as never)).toEqual([]);
+    expect(resolveConfiguration(up, '', diff as never).cache.enabled).toBe(true);
   });
 });

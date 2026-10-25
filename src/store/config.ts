@@ -9,6 +9,7 @@ import {
 } from '@advanced-preset/protocol';
 import { toast } from '@/st/host';
 import { presetName, t } from '@/i18n';
+import { ensureEventIds } from './eventlog';
 import { settings, save, type ConfigRef, type PresetState, type SavedConfig } from './settings';
 
 export function presetState(preset: APreset): PresetState {
@@ -24,6 +25,7 @@ export function presetState(preset: APreset): PresetState {
     };
     save();
   }
+  if (ensureEventIds(s.globalMemory.log)) save();
   return s;
 }
 

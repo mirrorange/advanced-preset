@@ -3,7 +3,7 @@
  * ignored, and the built-in copy of that preset is used instead); fields added without a format
  * bump get their defaults in memory.
  */
-import { CONNECTION_DEFAULTS } from './config';
+import { CACHE_DEFAULTS, CONNECTION_DEFAULTS } from './config';
 import { FORMAT_VERSION, type APreset } from './types';
 
 type Obj = Record<string, any>;
@@ -35,9 +35,27 @@ function withTokenSavingDefaults(p: APreset): APreset {
   };
 }
 
+/** Cache optimization was added without a format bump: older artifacts get the built-in defaults. */
+function withCacheDefaults(p: APreset): APreset {
+  const conf = p.configurationDefaults as APreset['configurationDefaults'] | undefined;
+  if (!isObj(conf)) return p;
+  const cache = (conf as Obj).cache;
+  if (isObj(cache) && Object.keys(CACHE_DEFAULTS).every((k) => k in cache)) return p;
+  return { ...p, configurationDefaults: { ...conf, cache: { ...CACHE_DEFAULTS, ...(isObj(cache) ? cache : {}) } } };
+}
+
+/** The meta switch was added without a format bump: older artifacts keep meta instructions on. */
+function withMetaDefaults(p: APreset): APreset {
+  const conf = p.configurationDefaults as APreset['configurationDefaults'] | undefined;
+  if (!isObj(conf)) return p;
+  const meta = (conf as Obj).meta;
+  if (isObj(meta) && 'enabled' in meta) return p;
+  return { ...p, configurationDefaults: { ...conf, meta: { enabled: true, ...(isObj(meta) ? meta : {}) } as Obj } } as APreset;
+}
+
 /** Fields added without a format bump get their empty defaults. */
 function withOptionalDefaults(p: APreset): APreset {
-  const out = withTokenSavingDefaults(withConnectionDefaults(p));
+  const out = withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p))));
   return Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
 }
 

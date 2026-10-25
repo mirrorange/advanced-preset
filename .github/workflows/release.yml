@@ -1,19 +1,32 @@
 name: release
 
+# One workflow for both channels — npm Trusted Publishing is bound to this file name.
+#   v* tag  → stable release (`latest`) + GitHub Release
+#   dev     → rebuild & commit dist, then a prerelease on the `dev` dist-tag
 on:
   push:
     tags: ['v*']
+    branches: [dev]
   workflow_dispatch:
 
 permissions:
-  contents: write   # GitHub Release
+  contents: write   # GitHub Release; dist commit on dev
   id-token: write   # npm Trusted Publishing (OIDC) + provenance
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref == 'refs/heads/dev' }}
+
+env:
+  DEV: ${{ github.ref == 'refs/heads/dev' }}
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # dev: diff against the last published dev build
 
       - uses: pnpm/action-setup@v4
 
@@ -38,15 +51,51 @@ jobs:
 
       - run: pnpm build
       - name: Committed bundles are up to date
+        if: env.DEV != 'true'
         run: git diff --exit-code -- dist packages/cli/dist || (echo "::error::dist/ is stale — run pnpm build and commit" && exit 1)
       - run: pnpm typecheck
       - run: pnpm test
 
+      # dev: commit the rebuilt bundles so ST users tracking dev always get a fresh build.
+      # Pushes made with GITHUB_TOKEN do not trigger workflows, so this cannot loop.
+      - name: Commit rebuilt dist (dev)
+        if: env.DEV == 'true'
+        run: |
+          if git diff --quiet -- dist packages/cli/dist; then echo "dist is up to date"; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- dist packages/cli/dist
+          git commit -m "build: rebuild dist ($(node -p "require('./dist/build.json').id")) [skip ci]"
+          git push origin HEAD:dev || echo "::warning::dev moved on; dist will be committed by the next run"
+
+      - name: Dev version
+        if: env.DEV == 'true'
+        run: |
+          last=$(npm view advanced-preset@dev gitHead 2>/dev/null || true)
+          if [ -n "$last" ] && git cat-file -e "$last^{commit}" 2>/dev/null \
+             && git diff --quiet "$last" HEAD -- packages pnpm-lock.yaml; then
+            echo "CLI unchanged since advanced-preset@dev (${last::7}), skipping publish"
+            echo "SKIP_PUBLISH=1" >> "$GITHUB_ENV"; exit 0
+          fi
+          # Released version → prerelease of the next patch; unreleased (already bumped) → prerelease of it.
+          base=$VERSION
+          if npm view "advanced-preset@$VERSION" version >/dev/null 2>&1; then
+            base=$(node -p "const [a,b,c]=process.argv[1].split('-')[0].split('.').map(Number); [a,b,c+1].join('.')" "$VERSION")
+          fi
+          v="$base-dev.$(date -u +%Y%m%d%H%M%S).g$(git rev-parse --short=7 HEAD)"
+          (cd packages/cli && npm pkg set version="$v")
+          pnpm --filter advanced-preset build     # embeds the dev version in ap.js (not committed)
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+
       - name: Publish to npm
+        if: env.SKIP_PUBLISH != '1'
         working-directory: packages/cli
         run: |
           if npm view "advanced-preset@$VERSION" version >/dev/null 2>&1; then
             echo "advanced-preset@$VERSION is already on npm, skipping"
+          elif [ "$DEV" = true ]; then
+            npm publish --provenance --access public --tag dev
+            echo "Published \`advanced-preset@$VERSION\` (dist-tag \`dev\`; depend on \`\"advanced-preset\": \"dev\"\`)" >> "$GITHUB_STEP_SUMMARY"
           else
             npm publish --provenance --access public
           fi

@@ -43,6 +43,7 @@ https://github.com/mirrorange/advanced-preset
 | **工作流** | 由预设声明的阶段序列（如 linear / iterative / edit / task），流式展示每个阶段 |
 | **结构** | 回复、代写、选项、记忆、回顾、事件摘要、自定义结构，以卡片显示在消息下方 |
 | **元指令** | `@叙述者 …` 触发任务回合；代写按钮直接走元指令 |
+| **省 Token** | 较早回复替换为事件摘要、用户输入截断或移除；缓存优化让历史沿用上次的渲染，提高提示词缓存命中 |
 | **配置** | 推荐配置 ⊕ 用户差异（稀疏存储），采样参数与 Carrier 预设双向同步 |
 | **我的模组** | 在预设开放的插入位置加入自己的提示词，可视化触发条件，可导入导出，随预设更新保留 |
 | **多语言** | 面板中英双语；预设可翻译自己的名称、描述、模组、参数等面板文字 |
@@ -97,7 +98,7 @@ pnpm typecheck    # vue-tsc
 
 - 修改内置预设后运行 `pnpm sync-presets`，把 `../petals-preset/dist` 同步到 `dist/presets/`；
 - 修改 `docs/reference/` 或 `docs/guide/13-petals-case-study.md` 后运行 `pnpm sync-skills`，更新 Agent Skills 中的文档副本（`pnpm test` 会检查是否同步）；
-- `dist/` 与 `packages/cli/dist/ap.js` 需随源码一起提交：ST 直接从仓库加载扩展。
+- `dist/` 与 `packages/cli/dist/ap.js` 需随源码一起提交：ST 直接从仓库加载扩展（推送到 `dev` 时 CI 会自动重建并提交，功能分支仍需手动构建）。
 
 <details>
 <summary><b>仓库结构</b></summary>
@@ -119,6 +120,15 @@ pnpm typecheck    # vue-tsc
 
 1. 同步修改 `package.json`、`manifest.json`、`packages/cli/package.json` 中的版本号，`pnpm build` 后提交；
 2. 推送 `v<版本>` 标签。GitHub Actions（[`release.yml`](.github/workflows/release.yml)）会检查标签与版本号一致、运行测试与类型检查、通过 npm Trusted Publishing 发布 `advanced-preset`，并创建 GitHub Release。
+
+### dev 预发布
+
+功能分支合并进 `dev` 并推送后，同一工作流会：
+
+1. 构建、类型检查、测试；`dist/` 与已提交的不同时由 `github-actions[bot]` 自动提交 `build: rebuild dist`；
+2. 若 CLI（`packages/`、`pnpm-lock.yaml`）自上一个 dev 版本以来有变化，以 `dev` 标签发布预发布版本到 npm，版本号为 `<下一补丁版本>-dev.<UTC 时间>.g<提交>`（如 `1.7.1-dev.20261025083000.g7ca1ca3`；若版本号已升但未发布，则用该版本号）。
+
+预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.8.0` 这类范围，也不会移动 `latest`。
 
 ## 📄 许可
 

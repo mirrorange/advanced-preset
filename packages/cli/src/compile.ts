@@ -12,7 +12,8 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
-  CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
+  isInlineStructure,
+  CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
   type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
@@ -127,7 +128,9 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
   };
   const hint = o.jsonStringHint === undefined ? D.jsonStringHint : opt(o.jsonStringHint, 'jsonStringHint');
   if (hint) tools.jsonStringHint = hint;
-  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
+  tools.structurePrefix = o.structurePrefix === undefined || o.structurePrefix === null ? D.structurePrefix! : str(o.structurePrefix);
+  if (tools.structurePrefix && !/^[A-Za-z_]\w*$/.test(tools.structurePrefix)) diag.error(`tools.structurePrefix \`${tools.structurePrefix}\` must be letters, digits and underscores, not starting with a digit`, at('structurePrefix'));
+  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'structurePrefix', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }
@@ -310,7 +313,10 @@ export function compile(tree: SourceTree): CompileResult {
     };
   }
 
+  const tools = compileTools(raw.tools, diag, text, M);
+
   // ── structures ──────────────────────────────────────────────────────────────
+  // Field names get `tools.structurePrefix` (I-94); `{{field}}` in the field-style texts is the final name.
   const structures: Record<string, StructureDecl> = {};
   for (const [sid, s] of Object.entries(isObj(raw.structures) ? raw.structures : {})) {
     const o = isObj(s) ? s : {};
@@ -318,20 +324,29 @@ export function compile(tree: SourceTree): CompileResult {
     const kind = str(o.kind, sid) as StructureDecl['kind'];
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(', ')}`, where);
     const fp = isObj(o.formatPrompt) ? o.formatPrompt : {};
+    const inline = isInlineStructure({ kind });
+    const base = str(o.field, sid);
+    const field = inline ? base : `${tools.structurePrefix ?? ''}${base}`;
+    const fieldText = (v: unknown, path: string, check = true) => {
+      const t = str(v).replaceAll('{{field}}', field);
+      if (check && !inline && field !== base && t.includes(`\`${base}\``))
+        diag.warn(`mentions \`${base}\`, but the field is \`${field}\` (tools.structurePrefix); write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
+      return text(t, where);
+    };
     const decl: StructureDecl = {
       id: sid,
       kind,
       tag: str(o.tag, sid),
-      field: str(o.field, sid),
-      formatPrompt: { tag: text(str(fp.tag), where), field: text(str(fp.field), where) },
+      field,
+      formatPrompt: { tag: text(str(fp.tag), where), field: fieldText(fp.field, 'formatPrompt.field') },
     };
-    if (o.description !== undefined) decl.description = text(str(o.description), where);
+    if (o.description !== undefined) decl.description = fieldText(o.description, 'description');
     if (isObj(o.properties)) {
       const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
       const props: Record<string, string> = {};
       for (const [k, v] of Object.entries(o.properties)) {
         if (!allowed.includes(k)) { diag.error(`${kind} has no sub-field \`${k}\`${allowed.length ? ` (expected ${allowed.join(' | ')})` : ''}`, { ...where, path: `${where.path}.properties.${k}` }); continue; }
-        props[k] = text(str(v), where);
+        props[k] = fieldText(v, `properties.${k}`, false);
       }
       if (Object.keys(props).length) decl.properties = props;
     }
@@ -420,7 +435,6 @@ export function compile(tree: SourceTree): CompileResult {
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error('invalid tool name', where);
     return turn;
   });
-  const tools = compileTools(raw.tools, diag, text, M);
   const theme = isObj(raw.theme) ? (raw.theme as APreset['theme']) : {};
 
   // ── modules ─────────────────────────────────────────────────────────────────
@@ -524,7 +538,8 @@ export function compile(tree: SourceTree): CompileResult {
     modules: Object.fromEntries(modules.filter((m) => m.toggle === 'user').map((m) => [m.id, m.default])),
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...(sect('tokenSaving') as object) },
-    meta: { recentCount: meta.recentCount, ...(sect('meta') as object) },
+    cache: { ...CACHE_DEFAULTS, ...(sect('cache') as Partial<Configuration['cache']>) },
+    meta: { enabled: true, recentCount: meta.recentCount, ...(sect('meta') as object) },
   };
   for (const k of ['names', 'prefixes'] as const) if (isObj(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect('modules'))) {
@@ -536,6 +551,20 @@ export function compile(tree: SourceTree): CompileResult {
     else configurationDefaults.params[k] = v as string | number;
   }
   userInputMode(sect('tokenSaving').userInput, 'configurationDefaults.tokenSaving.userInput');
+  /** `cache` section of the defaults or of a recommended configuration's diff. */
+  const checkCache = (c: Obj, path: string) => {
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (!(k in CACHE_DEFAULTS)) diag.warn(`unknown cache option \`${k}\``, where);
+      else if (k === 'enabled' ? typeof v !== 'boolean' : typeof v !== 'number' || !Number.isFinite(v) || v < 0) diag.error(k === 'enabled' ? '`enabled` must be a boolean' : `\`${k}\` must be a number ≥ 0`, where);
+    }
+  };
+  checkCache(sect('cache'), 'configurationDefaults.cache');
+  /** `meta` section of the defaults or of a recommended configuration's diff. */
+  const checkMeta = (c: Obj, path: string) => {
+    if ('enabled' in c && typeof c.enabled !== 'boolean') diag.error('`enabled` must be a boolean', { file: M, path: `${path}.enabled` });
+  };
+  checkMeta(sect('meta'), 'configurationDefaults.meta');
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
 
   const configurations: RecommendedConfiguration[] = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c: unknown, i: number) => {
@@ -544,6 +573,8 @@ export function compile(tree: SourceTree): CompileResult {
     if (o.description !== undefined) rc.description = str(o.description);
     if (!rc.id) diag.error('configuration id is required', { file: M, path: `configurations[${i}]` });
     if (isObj(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
+    if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
+    if (isObj(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: 'default', name: 'Default', diff: {} });

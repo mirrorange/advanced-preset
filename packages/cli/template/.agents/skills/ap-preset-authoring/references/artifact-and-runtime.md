@@ -108,11 +108,24 @@ AP 接管的每条助手消息在 `message.extra.advanced_preset` 中保存一�
 | `memory.replace` | `key` `content` `source` | 写入聊天记忆 |
 | `memory.delete` | `key` `source` | 删除聊天记忆 |
 | `recap.set` | `text` `coversUpTo` `source` | 设置总结，覆盖到消息 `coversUpTo` |
-| `global.ref` | `index` | 本轮产生的全局记忆日志条目 |
+| `global.ref` | `id` | 本轮产生的全局记忆日志条目（旧版本写入的引用为日志下标 `index`） |
 
-`source` 为 `model`（模型输出）或 `user`（用户在面板中编辑）。当前状态 = 按消息顺序折叠所有事件，所以删除消息、切换 swipe 会自然回滚。用户在聊天还没有 AP 消息时所做的编辑，保存在聊天元数据 `chat_metadata.advanced_preset.seedEvents` 中，排在所有消息之前。
+`source` 为 `model`（模型输出）或 `user`（用户在面板中编辑）。当前状态 = 按消息顺序折叠所有事件，所以删除消息、重新生成、切换 swipe 会自然回滚。滑动生成新 swipe 时，正在重新生成的楼层不再带有上一个 swipe 的 sidecar（上一个 swipe 在 `swipe_info` 中保留自己的副本），因此这一轮写入的聊天记忆在新请求中已经回滚。用户在聊天还没有 AP 消息时所做的编辑，保存在聊天元数据 `chat_metadata.advanced_preset.seedEvents` 中，排在所有消息之前。
 
-全局记忆按预设保存在扩展设置中，是只追加的日志（每条记录修改前的值，撤销即追加补偿记录）。
+全局记忆按预设保存在扩展设置中，是只追加的日志（每条记录有稳定的 `id` 与修改前的值，撤销即追加补偿记录；撤销后再做新的修改会丢弃被撤销的记录）。模型写入的条目在消息到达时才写入日志，并跟随写入它的消息版本：
+
+- 楼层当前选中的版本引用的条目生效；只被其他 swipe 引用的条目失效（`inactive`），折叠时跳过；
+- 删除消息、重新生成、滑动生成新 swipe、滑动到其他版本时，原版本的条目失效；滑回该版本时重新生效；
+- 引用的条目已不在日志中（撤销后又做了新修改）时忽略；
+- 切换聊天不会使任何条目失效，只会按载入聊天中各楼层选中的版本更新它们引用的条目；用户在面板中的编辑不跟随任何消息。
+
+## 返回给 ST 的响应
+
+AP 接管的生成由自己向后端发出一次或多次请求，再按当前来源的格式（OpenAI / Claude / Gemini / Cohere，流式为 SSE，否则为 JSON）合成一份响应交给 ST，其中只有终结正文、推理内容与（任务轮）调用方的工具调用。后端返回的用量（token 数、缓存命中等）原样附在合成响应中：OpenAI 系（含 DeepSeek）为 `[DONE]` 前一个 `choices` 为空、带 `usage` 的块，Claude 写入 `message_delta.usage`（合并 `message_start` 中的输入与缓存 token），Gemini 为最后一个带 `usageMetadata` 的块；非流式响应在顶层带 `usage`（Gemini 为 `usageMetadata`）。多步工具等一轮多次请求时，各数值字段相加。因此通过包装 `fetch` 读取生成响应用量的扩展（费用、缓存命中统计等）无需适配 AP；后端没有返回用量时不附带。
+
+## 缓存状态
+
+缓存优化（[meta-and-tasks.md](meta-and-tasks.md#缓存优化粘性渲染)）的状态不写入聊天，而是保存在浏览器 `localStorage` 的 `advanced-preset.cache.v1` 中，按聊天分开：上一次成功请求的时间、来源与模型、工具指纹、历史前提示词的哈希、历史各消息文本的哈希序列、每条消息的渲染方式（按发送时间、发送方与名字识别），以及连续推迟的请求数。超过 24 小时的记录与最旧的记录（最多保留 30 个聊天）会被清除；清除或丢失只会让下一次请求刷新。
 
 ## 全局 API
 

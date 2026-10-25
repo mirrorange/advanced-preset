@@ -114,7 +114,7 @@ describe('preset-defined tool texts', () => {
     expect(names).toEqual(['start_workflow', 'ask_questions', 'give_creative_input', 'write_story', 'review_story', 'edit_story']);
     expect(names.some((n: string) => n.startsWith('ap_'))).toBe(false);
     const write = (multi.driver.body(0) as any).tools.find((t: any) => t.function.name === 'write_story').function;
-    expect(Object.keys(write.parameters.properties)).toEqual(['story', 'synopsis', 'options']);
+    expect(Object.keys(write.parameters.properties)).toEqual(['story', 'z_synopsis', 'z_options']);
     expect(write.description).toContain('Freesia');
     const st = driverFor('structured', 'linear');
     const js = (st.driver.body(0) as any).json_schema;
