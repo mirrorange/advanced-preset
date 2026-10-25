@@ -1,6 +1,6 @@
 // Cache optimization (sticky rendering): several story turns with token saving on, then compare
 // consecutive requests. AP_CACHE=off sends the same turns without sticky rendering for comparison.
-// Env: AP_TURNS (5), AP_KEEP (keepFullTurns, 1), AP_MAX_DEFERRED (2), AP_CACHE (on).
+// Env: AP_TURNS (5), AP_KEEP (keepFullTurns, 1), AP_MAX_DEFERRED (2), AP_CACHE (on), AP_TRANSPORT (Structured), AP_REGEN (regenerate once at the end).
 import fs from 'node:fs';
 const MOCK = new URL('../mock.json', import.meta.url).pathname;
 const LOG = new URL('../mock-requests.jsonl', import.meta.url).pathname;
@@ -40,6 +40,9 @@ export default async function (page, shots) {
   await page.evaluate(() => localStorage.removeItem('advanced-preset.cache.v1'));
 
   await page.evaluate(() => window.AdvancedPreset.togglePanel(true));
+  await page.locator('ap-panel .tab', { hasText: 'Config' }).click();
+  await page.waitForTimeout(300);
+  await page.locator('ap-panel .segmented button', { hasText: new RegExp(`^${process.env.AP_TRANSPORT || 'Structured'}$`) }).first().click();
   await page.locator('ap-panel .tab', { hasText: 'Writing' }).click();
   await page.waitForTimeout(300);
   await setSwitch(page, 'Token saving', true);
