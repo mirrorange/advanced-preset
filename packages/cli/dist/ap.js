@@ -7681,6 +7681,7 @@ var DEFAULT_TOOLS = {
   stage: { name: "ap_stage_{{stage}}", description: "{{label}}", param: { name: "content" }, patchParam: { name: "edits" } },
   patch: {},
   envelope: { thinking: { name: "thinking" }, result: { name: "result" } },
+  structurePrefix: "z_",
   results: {
     next: "Recorded. Continue with `{{next}}`.",
     done: "Recorded. The workflow is complete.",
@@ -8634,7 +8635,9 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   };
   const hint = o.jsonStringHint === void 0 ? D.jsonStringHint : opt(o.jsonStringHint, "jsonStringHint");
   if (hint) tools.jsonStringHint = hint;
-  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "jsonStringHint", "callerSchemaHint", ...legacy]);
+  tools.structurePrefix = o.structurePrefix === void 0 || o.structurePrefix === null ? D.structurePrefix : str2(o.structurePrefix);
+  if (tools.structurePrefix && !/^[A-Za-z_]\w*$/.test(tools.structurePrefix)) diag.error(`tools.structurePrefix \`${tools.structurePrefix}\` must be letters, digits and underscores, not starting with a digit`, at("structurePrefix"));
+  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "structurePrefix", "jsonStringHint", "callerSchemaHint", ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }
@@ -8803,6 +8806,7 @@ function compile(tree) {
       ...o.tab ? { tab: str2(o.tab) } : {}
     };
   }
+  const tools = compileTools(raw.tools, diag, text, M);
   const structures = {};
   for (const [sid, s] of Object.entries(isObj3(raw.structures) ? raw.structures : {})) {
     const o = isObj3(s) ? s : {};
@@ -8810,14 +8814,23 @@ function compile(tree) {
     const kind = str2(o.kind, sid);
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(", ")}`, where);
     const fp = isObj3(o.formatPrompt) ? o.formatPrompt : {};
+    const inline = isInlineStructure({ kind });
+    const base = str2(o.field, sid);
+    const field = inline ? base : `${tools.structurePrefix ?? ""}${base}`;
+    const fieldText = (v, path, check = true) => {
+      const t = str2(v).replaceAll("{{field}}", field);
+      if (check && !inline && field !== base && t.includes(`\`${base}\``))
+        diag.warn(`mentions \`${base}\`, but the field is \`${field}\` (tools.structurePrefix); write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
+      return text(t, where);
+    };
     const decl = {
       id: sid,
       kind,
       tag: str2(o.tag, sid),
-      field: str2(o.field, sid),
-      formatPrompt: { tag: text(str2(fp.tag), where), field: text(str2(fp.field), where) }
+      field,
+      formatPrompt: { tag: text(str2(fp.tag), where), field: fieldText(fp.field, "formatPrompt.field") }
     };
-    if (o.description !== void 0) decl.description = text(str2(o.description), where);
+    if (o.description !== void 0) decl.description = fieldText(o.description, "description");
     if (isObj3(o.properties)) {
       const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
       const props = {};
@@ -8826,7 +8839,7 @@ function compile(tree) {
           diag.error(`${kind} has no sub-field \`${k}\`${allowed.length ? ` (expected ${allowed.join(" | ")})` : ""}`, { ...where, path: `${where.path}.properties.${k}` });
           continue;
         }
-        props[k] = text(str2(v), where);
+        props[k] = fieldText(v, `properties.${k}`, false);
       }
       if (Object.keys(props).length) decl.properties = props;
     }
@@ -8913,7 +8926,6 @@ function compile(tree) {
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error("invalid tool name", where);
     return turn;
   });
-  const tools = compileTools(raw.tools, diag, text, M);
   const theme = isObj3(raw.theme) ? raw.theme : {};
   const modules = [];
   const entries = [];
@@ -9500,6 +9512,25 @@ function validate(p, map, diag) {
       if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
       if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
     });
+    checkOrder(w, a, anchor, where);
+  }
+  function checkOrder(w, a, anchor, where) {
+    const hint = "APIs that generate fields alphabetically (Gemini) would write them out of order";
+    const fields2 = w.stages.map((s) => a.fieldOf(s));
+    for (let i = 1; i < fields2.length; i++) {
+      if (fields2[i] < fields2[i - 1]) {
+        diag.warn(`workflow ${w.id}: stage field \`${fields2[i]}\` sorts before \`${fields2[i - 1]}\`; ${hint}`, where);
+        break;
+      }
+    }
+    if (anchor < 0) return;
+    const structs = [...structureFields].sort();
+    const first = structs[0];
+    if (first === void 0) return;
+    const last = fields2.slice(0, anchor + 1).sort().at(-1);
+    if (first < last) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before stage field \`${last}\`; ${hint} (set tools.structurePrefix)`, where);
+    const param = a.paramOf(w.stages[anchor]);
+    if (first < param) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before \`${param}\` of tool \`${a.toolOf(w.stages[anchor])}\`; ${hint} (set tools.structurePrefix)`, where);
   }
   const usedStyles = new Set(Object.values(p.styles));
   for (const w of p.workflows) {
