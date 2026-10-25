@@ -8,8 +8,7 @@ import {
   type Annotation, type MemoryOp, type PatchResult, type TurnResult,
 } from '@advanced-preset/protocol';
 import { nativeFetch, st, streamContextOf, toast } from '@/st/host';
-import { presetState } from '@/store/config';
-import { applyMemoryOps, type ChatEvent } from '@/store/eventlog';
+import { planMemoryOps, type ChatEvent, type PendingGlobalOp } from '@/store/eventlog';
 import type { Sidecar, SidecarStage, TurnKind } from '@/store/sidecar';
 import { t } from '@/i18n';
 import type { GenerationContext } from './context';
@@ -27,6 +26,8 @@ export interface Outcome {
   reasoning: string;
   toolCalls?: EncodedToolCall[];
   sidecar: Sidecar;
+  /** Global memory operations, committed with the message (I-98). */
+  global?: PendingGlobalOp[];
 }
 
 /** Sidecar waiting for its message (MESSAGE_RECEIVED). */
@@ -246,10 +247,16 @@ function finish(
   }
   if (!mes && !diag.interrupted) throw new Error(t('error.emptyTurn'));
 
-  // Events: chat memory as sidecar events, global memory applied now (D13), recap (§12.3).
+  // Events: chat memory as sidecar events, global memory referenced by id and committed with the
+  // message (D13, I-98), recap (§12.3).
   const events: ChatEvent[] = [];
+  let global: PendingGlobalOp[] = [];
   const persisted = ctx.interceptorRan && ctx.stType !== 'quiet';
-  if (persisted && memoryDecl && Array.isArray(turn.structures[memoryDecl.id])) events.push(...applyMemoryOps(presetState(preset), turn.structures[memoryDecl.id] as MemoryOp[]));
+  if (persisted && memoryDecl && Array.isArray(turn.structures[memoryDecl.id])) {
+    const plan = planMemoryOps(turn.structures[memoryDecl.id] as MemoryOp[]);
+    events.push(...plan.events);
+    global = plan.global;
+  }
   if (persisted && recapDecl && typeof turn.structures[recapDecl.id] === 'string') {
     const at = ctx.inputIndex >= 0 ? ctx.inputIndex : st().chat.length - 1;
     events.push({ type: 'recap.set', text: turn.structures[recapDecl.id] as string, coversUpTo: at - 1, source: 'model' });
@@ -284,7 +291,7 @@ function finish(
     ...(reasoning ? { reasoning } : {}),
     diagnostics: { warnings, requests: diag.requests, usage: diag.usage, durationMs: diag.durationMs },
   };
-  const outcome: Outcome = { content: mes, reasoning, sidecar };
+  const outcome: Outcome = { content: mes, reasoning, sidecar, ...(global.length ? { global } : {}) };
   if (persisted) handoff.pending = { ctx, outcome, at: Date.now() };
   else void st().eventSource.emit('advanced_preset_generation_completed', { genId: ctx.id, sidecar });
   if (live.current?.genId === ctx.id) live.current.structures = turn.structures;
