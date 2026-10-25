@@ -7848,6 +7848,11 @@ var CONNECTION_DEFAULTS = {
   maxSteps: 6,
   finalFallback: true
 };
+var CACHE_DEFAULTS = {
+  enabled: false,
+  ttlMinutes: 5,
+  maxDeferredTurns: 6
+};
 function deepMerge(base, ...layers) {
   let out = cloneData(base);
   for (const layer of layers) out = mergeTwo(out, layer);
@@ -9018,6 +9023,7 @@ function compile(tree) {
     modules: Object.fromEntries(modules.filter((m) => m.toggle === "user").map((m) => [m.id, m.default])),
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...sect("tokenSaving") },
+    cache: { ...CACHE_DEFAULTS, ...sect("cache") },
     meta: { recentCount: meta.recentCount, ...sect("meta") }
   };
   for (const k of ["names", "prefixes"]) if (isObj3(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
@@ -9030,6 +9036,14 @@ function compile(tree) {
     else configurationDefaults.params[k] = v;
   }
   userInputMode(sect("tokenSaving").userInput, "configurationDefaults.tokenSaving.userInput");
+  const checkCache = (c, path) => {
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (!(k in CACHE_DEFAULTS)) diag.warn(`unknown cache option \`${k}\``, where);
+      else if (k === "enabled" ? typeof v !== "boolean" : typeof v !== "number" || !Number.isFinite(v) || v < 0) diag.error(k === "enabled" ? "`enabled` must be a boolean" : `\`${k}\` must be a number \u2265 0`, where);
+    }
+  };
+  checkCache(sect("cache"), "configurationDefaults.cache");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
     const o = isObj3(c) ? c : {};
@@ -9037,6 +9051,7 @@ function compile(tree) {
     if (o.description !== void 0) rc.description = str2(o.description);
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
     if (isObj3(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
+    if (isObj3(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
