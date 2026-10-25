@@ -15,6 +15,7 @@ import { setNextGeneration } from '@/core/classify';
 import { registry } from '@/core/context';
 import { debugLog } from '@/core/debug';
 import { onMessageReceived } from '@/app/receive';
+import { installMemorySync } from '@/app/memory-sync';
 import { annotationsApi, installAnnotations } from '@/app/annotations';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
@@ -77,6 +78,7 @@ async function init(): Promise<void> {
   const first = (e: string, f: (...a: any[]) => unknown) => (eventSource.makeFirst ? eventSource.makeFirst(e, f) : eventSource.on(e, f));
   first(E.CHAT_COMPLETION_PROMPT_READY!, (data: { chat: ChatMessage[]; dryRun: boolean }) => onPromptReady(data));
   eventSource.on(E.CHAT_COMPLETION_SETTINGS_READY!, (data: Record<string, unknown>) => onSettingsReady(data));
+  installMemorySync();
   eventSource.on(E.MESSAGE_RECEIVED!, (mesId: number, type?: string) => onMessageReceived(Number(mesId), type));
   eventSource.on(E.GENERATION_STOPPED!, () => { registry.setPending(null); registry.takeArmed(); });
   eventSource.on(E.GENERATION_ENDED!, () => registry.sweep());

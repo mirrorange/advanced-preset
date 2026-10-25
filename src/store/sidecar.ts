@@ -72,6 +72,21 @@ export function writeSidecar(mesId: number, sidecar: Sidecar): void {
   }
 }
 
+/**
+ * A swipe being generated (ST overswipe: `swipe_id === swipes.length`) has no sidecar yet, but ST keeps
+ * the previous swipe's `extra` on the message and even clones it into the new swipe slot while
+ * streaming. Drop the mirror so the old turn's events, structures and cards stop counting; the old
+ * swipe keeps its own copy in `swipe_info`. Returns whether anything was removed.
+ */
+export function detachRegeneratingSidecar(mesId: number): boolean {
+  const msg = st().chat[mesId];
+  if (!msg || msg.is_user || !Array.isArray(msg.swipes) || !msg.extra?.[SIDECAR_KEY]) return false;
+  const sw = msg.swipe_id ?? 0;
+  if (sw < msg.swipes.length && msg.swipe_info?.[sw]) return false;
+  delete msg.extra[SIDECAR_KEY];
+  return true;
+}
+
 /** Index of a message in the chat (identity first, then by send date). */
 export function messageIndex(msg: STMessage): number {
   const chat = st().chat;
