@@ -9255,7 +9255,7 @@ function Lh(e) {
 }
 async function Rh() {
 	let e = await Ih();
-	e && e !== "58ed700ab093ea5a" && sessionStorage.getItem(Fh) !== e && Lh(e);
+	e && e !== "757baf529f0b8b63" && sessionStorage.getItem(Fh) !== e && Lh(e);
 }
 async function zh() {
 	await Rh();
@@ -9264,7 +9264,7 @@ async function Bh() {
 	let e = o().replace(/^third-party\//, ""), t = await Vh(e, !1);
 	if (t.status === 404 && (t = await Vh(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ih();
-	return r && r !== "58ed700ab093ea5a" ? (Lh(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "757baf529f0b8b63" ? (Lh(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Vh = (t, n) => m("/api/extensions/update", {
 	method: "POST",
@@ -14945,7 +14945,7 @@ var VS = ["data-id"], HS = ["aria-label", "onPointerdown"], US = ["onClick"], WS
 				"icon",
 				"help"
 			]),
-			H("div", YT, "Advanced Preset " + A(N("1.8.0")) + " · " + A(N("58ed700ab093ea5a")), 1)
+			H("div", YT, "Advanced Preset " + A(N("1.8.0")) + " · " + A(N("757baf529f0b8b63")), 1)
 		], 64));
 	}
 }), ZT = ["aria-label"], QT = { class: "panel-head" }, $T = { class: "panel-logo" }, eE = { class: "grow" }, tE = { class: "panel-title ellipsis" }, nE = { class: "panel-sub ellipsis" }, rE = {
@@ -15109,7 +15109,7 @@ function bE() {
 //#region src/index.ts
 var xE = {
 	version: "1.8.0",
-	buildId: "58ed700ab093ea5a",
+	buildId: "757baf529f0b8b63",
 	nextGeneration: (e) => Bd(e),
 	listPresets: () => Cu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -15161,7 +15161,7 @@ async function wE() {
 	};
 	t.on(n.APP_READY, () => void a()), bE(), Xf("init", {
 		version: "1.8.0",
-		build: "58ed700ab093ea5a",
+		build: "757baf529f0b8b63",
 		enabled: K().enabled
 	});
 }
