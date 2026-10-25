@@ -24,6 +24,7 @@ export const DEFAULT_TOOLS: ToolsDecl = {
   stage: { name: 'ap_stage_{{stage}}', description: '{{label}}', param: { name: 'content' }, patchParam: { name: 'edits' } },
   patch: {},
   envelope: { thinking: { name: 'thinking' }, result: { name: 'result' } },
+  structurePrefix: 'z_',
   results: {
     next: 'Recorded. Continue with `{{next}}`.',
     done: 'Recorded. The workflow is complete.',

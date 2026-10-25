@@ -217,6 +217,7 @@ export interface StructureDecl {
   id: string;
   kind: StructureKind;
   tag: string;
+  /** Model-visible field name, including `tools.structurePrefix` (applied by the CLI). */
   field: string;
   description?: string;
   /** Descriptions of the kind's sub-fields (e.g. memory `key`, synopsis `time`), keyed by the fixed sub-field name. */
@@ -313,6 +314,13 @@ export interface ToolsDecl {
    * message when the model stops early (`{{next}}`). `{{submit}}` / `{{first}}` are also available.
    */
   results: { next: string; done: string; unknown: string; nudge: string };
+  /**
+   * Prefix of every structure field (structured output, single tool, anchor stage tool), applied
+   * at build time to `StructureDecl.field` (I-94). Some APIs (Gemini) generate object fields in
+   * alphabetical order; a prefix that sorts after the stage fields keeps structures after the
+   * content. `''` = no prefix.
+   */
+  structurePrefix?: string;
   /** Appended to the description of free-form maps sent as JSON-encoded strings (Gemini). */
   jsonStringHint?: string;
   /** Prefill / plaintext task turns with a caller JSON schema: system hint asking for a JSON block (`{{schema}}`). */

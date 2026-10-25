@@ -12,6 +12,7 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
+  isInlineStructure,
   CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
@@ -127,7 +128,9 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
   };
   const hint = o.jsonStringHint === undefined ? D.jsonStringHint : opt(o.jsonStringHint, 'jsonStringHint');
   if (hint) tools.jsonStringHint = hint;
-  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
+  tools.structurePrefix = o.structurePrefix === undefined || o.structurePrefix === null ? D.structurePrefix! : str(o.structurePrefix);
+  if (tools.structurePrefix && !/^[A-Za-z_]\w*$/.test(tools.structurePrefix)) diag.error(`tools.structurePrefix \`${tools.structurePrefix}\` must be letters, digits and underscores, not starting with a digit`, at('structurePrefix'));
+  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'structurePrefix', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }
@@ -310,7 +313,10 @@ export function compile(tree: SourceTree): CompileResult {
     };
   }
 
+  const tools = compileTools(raw.tools, diag, text, M);
+
   // ── structures ──────────────────────────────────────────────────────────────
+  // Field names get `tools.structurePrefix` (I-94); `{{field}}` in the field-style texts is the final name.
   const structures: Record<string, StructureDecl> = {};
   for (const [sid, s] of Object.entries(isObj(raw.structures) ? raw.structures : {})) {
     const o = isObj(s) ? s : {};
@@ -318,20 +324,29 @@ export function compile(tree: SourceTree): CompileResult {
     const kind = str(o.kind, sid) as StructureDecl['kind'];
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(', ')}`, where);
     const fp = isObj(o.formatPrompt) ? o.formatPrompt : {};
+    const inline = isInlineStructure({ kind });
+    const base = str(o.field, sid);
+    const field = inline ? base : `${tools.structurePrefix ?? ''}${base}`;
+    const fieldText = (v: unknown, path: string, check = true) => {
+      const t = str(v).replaceAll('{{field}}', field);
+      if (check && !inline && field !== base && t.includes(`\`${base}\``))
+        diag.warn(`mentions \`${base}\`, but the field is \`${field}\` (tools.structurePrefix); write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
+      return text(t, where);
+    };
     const decl: StructureDecl = {
       id: sid,
       kind,
       tag: str(o.tag, sid),
-      field: str(o.field, sid),
-      formatPrompt: { tag: text(str(fp.tag), where), field: text(str(fp.field), where) },
+      field,
+      formatPrompt: { tag: text(str(fp.tag), where), field: fieldText(fp.field, 'formatPrompt.field') },
     };
-    if (o.description !== undefined) decl.description = text(str(o.description), where);
+    if (o.description !== undefined) decl.description = fieldText(o.description, 'description');
     if (isObj(o.properties)) {
       const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
       const props: Record<string, string> = {};
       for (const [k, v] of Object.entries(o.properties)) {
         if (!allowed.includes(k)) { diag.error(`${kind} has no sub-field \`${k}\`${allowed.length ? ` (expected ${allowed.join(' | ')})` : ''}`, { ...where, path: `${where.path}.properties.${k}` }); continue; }
-        props[k] = text(str(v), where);
+        props[k] = fieldText(v, `properties.${k}`, false);
       }
       if (Object.keys(props).length) decl.properties = props;
     }
@@ -420,7 +435,6 @@ export function compile(tree: SourceTree): CompileResult {
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error('invalid tool name', where);
     return turn;
   });
-  const tools = compileTools(raw.tools, diag, text, M);
   const theme = isObj(raw.theme) ? (raw.theme as APreset['theme']) : {};
 
   // ── modules ─────────────────────────────────────────────────────────────────
