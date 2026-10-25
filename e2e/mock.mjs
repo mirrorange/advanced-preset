@@ -23,10 +23,15 @@ function gen(schema, key = '', depth = 0) {
   return `(${key || 'value'}) A short considered note about the scene and what should happen next.`;
 }
 function lastMsg(b) { return b.messages?.[b.messages.length - 1]; }
-function respond(b) {
+function respond(b, cfg = {}) {
   const tools = b.tools || [];
   const rf = b.response_format;
-  if (rf?.type === 'json_schema') return { text: JSON.stringify(gen(rf.json_schema.schema)) };
+  if (rf?.type === 'json_schema') {
+    const out = gen(rf.json_schema.schema);
+    // mock.json `memoryOps`: fixed memory operations for the memory structure field (e.g. z_memory_ops).
+    if (cfg.memoryOps && out && typeof out === 'object') for (const k of Object.keys(out)) if (/memory/.test(k)) out[k] = cfg.memoryOps;
+    return { text: JSON.stringify(out) };
+  }
   if (tools.length) {
     const called = new Set((b.messages || []).flatMap((m) => (m.tool_calls || []).map((c) => c.function.name)));
     let name;
@@ -59,7 +64,7 @@ http.createServer((req, res) => {
     try { b = JSON.parse(data || '{}'); } catch {}
     let cfg = {}; try { cfg = JSON.parse(fs.readFileSync(new URL('mock.json', import.meta.url).pathname, 'utf8')); } catch {}
     if (cfg.mode === 'error') { res.writeHead(500, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ error: { message: 'Mock upstream exploded' } })); }
-    const r = respond(b);
+    const r = respond(b, cfg);
     fs.appendFileSync(LOG, JSON.stringify({ t: Date.now(), url: req.url, body: b, reply: r }) + '\n');
     const id = 'chatcmpl-mock';
     if (b.stream) {
