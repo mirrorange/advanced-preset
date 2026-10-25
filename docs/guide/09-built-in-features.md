@@ -131,6 +131,13 @@ tokenSaving:
   synopsisTemplate: "[{{time}} · {{location}}] {{event}}: {{summary}}"
 ```
 
+这些都是“滑动窗口”：每一轮都有一条较早的消息从原文变成摘要、或者去掉了摘要附件，提示词在那里变了，服务商的提示词缓存也就从那里失效。“写作”页的**缓存优化**打开后，缓存还可能命中时，每条历史消息沿用上一次请求的渲染，只有新消息按规则渲染；缓存过期（默认 5 分钟）、换了模型、工具或历史之前的提示词变了，或者已经连续推迟了太多轮（AP 默认 6 轮），才一次性按规则刷新。预设可以在 `configurationDefaults.cache` 中调整默认值，花瓣把最大推迟轮次设为 8：
+
+```yaml
+configurationDefaults:
+  cache: { maxDeferredTurns: 8 }   # enabled 默认 false，由用户打开
+```
+
 所以如果你的预设想支持节省 Token，就提供一个事件摘要模组，并让它默认打开。完整字段见 [structures.md](../reference/structures.md#synopsis) 与 [manifest.md](../reference/manifest.md#省-token-tokensaving)。
 
 ## 行内批注
