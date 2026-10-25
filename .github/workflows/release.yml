@@ -95,7 +95,7 @@ jobs:
             echo "advanced-preset@$VERSION is already on npm, skipping"
           elif [ "$DEV" = true ]; then
             npm publish --provenance --access public --tag dev
-            echo "Published \`advanced-preset@$VERSION\` (dist-tag \`dev\`; depend on \`"advanced-preset": "dev"\`)" >> "$GITHUB_STEP_SUMMARY"
+            echo "Published \`advanced-preset@$VERSION\` (dist-tag \`dev\`; depend on \`\"advanced-preset\": \"dev\"\`)" >> "$GITHUB_STEP_SUMMARY"
           else
             npm publish --provenance --access public
           fi
