@@ -9196,7 +9196,7 @@ function jh(e) {
 }
 async function Mh() {
 	let e = await Ah();
-	e && e !== "7de082c83d167133" && sessionStorage.getItem(kh) !== e && jh(e);
+	e && e !== "23badbe1365fec49" && sessionStorage.getItem(kh) !== e && jh(e);
 }
 async function Nh() {
 	await Mh();
@@ -9205,7 +9205,7 @@ async function Ph() {
 	let e = o().replace(/^third-party\//, ""), t = await Fh(e, !1);
 	if (t.status === 404 && (t = await Fh(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ah();
-	return r && r !== "7de082c83d167133" ? (jh(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "23badbe1365fec49" ? (jh(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Fh = (t, n) => m("/api/extensions/update", {
 	method: "POST",
@@ -14622,61 +14622,61 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 }, nT = {
 	key: 0,
 	class: "row wrap xs muted"
-}, rT = ["onClick"], iT = { class: "grow mono" }, aT = { class: "xs muted" }, oT = { class: "row xs muted" }, sT = { class: "badge neutral" }, cT = { class: "pre mono scroll" }, lT = {
+}, rT = { class: "grow" }, iT = { key: 0 }, aT = ["onClick"], oT = { class: "grow mono" }, sT = { class: "xs muted" }, cT = { class: "row xs muted" }, lT = { class: "badge neutral" }, uT = { class: "pre mono scroll" }, dT = {
 	key: 0,
 	class: "xs faint region-msg"
-}, uT = { key: 1 }, dT = ["onClick"], fT = { class: "grow mono" }, pT = { class: "xs muted" }, mT = {
+}, fT = { key: 1 }, pT = ["onClick"], mT = { class: "grow mono" }, hT = { class: "xs muted" }, gT = {
 	key: 0,
 	class: "region-msg"
-}, hT = { class: "pre mono scroll" }, gT = {
+}, _T = { class: "pre mono scroll" }, vT = {
 	key: 0,
 	class: "xs faint"
-}, _T = {
+}, yT = {
 	key: 2,
 	class: "xs text-warning"
-}, vT = {
+}, bT = {
 	key: 1,
 	class: "faint small"
-}, yT = ["onClick"], bT = { class: "mono grow ellipsis" }, xT = {
+}, xT = ["onClick"], ST = { class: "mono grow ellipsis" }, CT = {
 	key: 0,
 	class: "badge warn"
-}, ST = { class: "xs muted" }, CT = { class: "xs muted" }, wT = { class: "row xs muted" }, TT = { class: "grow" }, ET = { class: "mono scroll" }, DT = { class: "row xs muted" }, OT = { class: "grow" }, kT = { class: "mono scroll" }, AT = {
+}, wT = { class: "xs muted" }, TT = { class: "xs muted" }, ET = { class: "row xs muted" }, DT = { class: "grow" }, OT = { class: "mono scroll" }, kT = { class: "row xs muted" }, AT = { class: "grow" }, jT = { class: "mono scroll" }, MT = {
 	key: 0,
 	class: "faint small"
-}, jT = { class: "row xs" }, MT = { class: "badge neutral" }, NT = { class: "muted" }, PT = { class: "mono scroll" }, FT = {
+}, NT = { class: "row xs" }, PT = { class: "badge neutral" }, FT = { class: "muted" }, IT = { class: "mono scroll" }, LT = {
 	key: 0,
 	class: "faint small"
-}, IT = { class: "row xs" }, LT = { class: "badge neutral" }, RT = { class: "grow muted" }, zT = { class: "small" }, BT = {
+}, RT = { class: "row xs" }, zT = { class: "badge neutral" }, BT = { class: "grow muted" }, VT = { class: "small" }, HT = {
 	key: 0,
 	class: "faint small"
-}, VT = { class: "xs faint mono build" }, HT = /* @__PURE__ */ L({
+}, UT = { class: "xs faint mono build" }, WT = /* @__PURE__ */ L({
 	__name: "DebugTab",
 	setup(t) {
-		let n = K(() => Gf.log.find((e) => e.kind === "assembly")?.data), r = /* @__PURE__ */ nn(/* @__PURE__ */ new Set()), i = (e) => r.has(e) ? r.delete(e) : r.add(e), a = /* @__PURE__ */ nn({});
+		let n = K(() => Gf.log.find((e) => e.kind === "assembly")?.data), r = K(() => Gf.log.find((e) => e.kind === "assembly" && e.data.cache)?.data?.cache ?? void 0), i = /* @__PURE__ */ nn(/* @__PURE__ */ new Set()), a = (e) => i.has(e) ? i.delete(e) : i.add(e), o = /* @__PURE__ */ nn({});
 		or(n, async (t) => {
 			if (t) for (let n of t.regions) {
 				let r = n.messages.map((e) => e.content).join("\n"), i = `${t.genId}:${n.id}`;
-				if (a[i] === void 0 && r) try {
-					a[i] = await e().getTokenCountAsync(r);
+				if (o[i] === void 0 && r) try {
+					o[i] = await e().getTokenCountAsync(r);
 				} catch {}
 			}
 		}, { immediate: !0 });
-		let o = /* @__PURE__ */ N(null), s = (e) => typeof e == "string" ? c(e) : JSON.stringify(e, null, 2);
-		function c(e) {
+		let s = /* @__PURE__ */ N(null), c = (e) => typeof e == "string" ? l(e) : JSON.stringify(e, null, 2);
+		function l(e) {
 			try {
 				return JSON.stringify(JSON.parse(e), null, 2);
 			} catch {
 				return e;
 			}
 		}
-		let l = (e) => new Date(e).toLocaleTimeString(), u = (e) => navigator.clipboard?.writeText(s(e)), d = (e) => {
+		let u = (e) => new Date(e).toLocaleTimeString(), d = (e) => navigator.clipboard?.writeText(c(e)), f = (e) => {
 			let t = e;
 			if (!t) return "";
 			let n = t.prompt_tokens ?? t.input_tokens ?? t.promptTokenCount, r = t.completion_tokens ?? t.output_tokens ?? t.candidatesTokenCount;
 			if (n === void 0 && r === void 0) return "";
 			let i = e.prompt_tokens_details?.cached_tokens ?? t.prompt_cache_hit_tokens ?? t.cache_read_input_tokens ?? t.cachedContentTokenCount;
 			return `${n ?? "?"} → ${r ?? "?"}` + (i ? ` · ${Y("debug.cached", { n: i })}` : "");
-		}, f = (e) => [
+		}, p = (e) => [
 			Y("debug.cache.stats", {
 				sticky: e.sticky,
 				fresh: e.fresh
@@ -14687,17 +14687,17 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 				max: e.maxDeferredTurns || "∞"
 			}) : "",
 			e.unmatched ? Y("debug.cache.unmatched", { n: e.unmatched }) : ""
-		].filter(Boolean).join(" · "), p = K({
+		].filter(Boolean).join(" · "), m = K({
 			get: () => q().dev.enabled,
 			set: (e) => {
 				q().dev.enabled = e, J();
 			}
-		}), m = K({
+		}), h = K({
 			get: () => q().dev.url,
 			set: (e) => {
 				q().dev.url = e.trim(), J();
 			}
-		}), h = K(() => Gf.log.filter((e) => e.kind !== "assembly")), g = K(() => {
+		}), g = K(() => Gf.log.filter((e) => e.kind !== "assembly")), _ = K(() => {
 			tg.chatRev;
 			let t = [], n = e().chat ?? [];
 			for (let e = 0; e < n.length; e++) for (let n of Th(e)) n.orphan && t.push({
@@ -14716,18 +14716,18 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 				actions: F(() => [U("span", Jw, [U("span", { class: k(["dot status-dot", P(Ih).status]) }, null, 2), ua(A(P(Y)(`debug.dev.${P(Ih).status}`)), 1)])]),
 				default: F(() => [W(vx, { label: P(Y)("debug.dev.url") }, {
 					default: F(() => [U("div", Yw, [I(U("input", {
-						"onUpdate:modelValue": t[0] ||= (e) => m.value = e,
+						"onUpdate:modelValue": t[0] ||= (e) => h.value = e,
 						class: "input grow",
 						type: "url",
 						placeholder: "http://localhost:4747"
 					}, null, 512), [[
 						Xo,
-						m.value,
+						h.value,
 						void 0,
 						{ lazy: !0 }
 					]]), W(px, {
-						modelValue: p.value,
-						"onUpdate:modelValue": t[1] ||= (e) => p.value = e,
+						modelValue: m.value,
+						"onUpdate:modelValue": t[1] ||= (e) => m.value = e,
 						label: P(Y)("debug.dev")
 					}, null, 8, ["modelValue", "label"])])]),
 					_: 1
@@ -14750,36 +14750,40 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 						U("span", eT, A(n.value.origin), 1),
 						n.value.dryRun ? (B(), V("span", tT, "dry run")) : G("", !0),
 						t[3] ||= U("span", { class: "grow" }, null, -1),
-						ua(A(l(n.value.at)), 1)
+						ua(A(u(n.value.at)), 1)
 					]),
-					n.value.cache ? (B(), V("div", nT, [U("span", { class: k(["badge", n.value.cache.reason ? "warn" : "neutral"]) }, A(n.value.cache.reason ? P(Y)(`debug.cache.flush.${n.value.cache.reason}`) : P(Y)("debug.cache.kept")), 3), U("span", null, A(f(n.value.cache)), 1)])) : G("", !0),
+					r.value ? (B(), V("div", nT, [
+						U("span", { class: k(["badge", r.value.reason ? "warn" : "neutral"]) }, A(r.value.reason ? P(Y)(`debug.cache.flush.${r.value.reason}`) : P(Y)("debug.cache.kept")), 3),
+						U("span", rT, A(p(r.value)), 1),
+						r.value === n.value.cache ? G("", !0) : (B(), V("span", iT, A(u(r.value.at)), 1))
+					])) : G("", !0),
 					U("div", null, [(B(!0), V(z, null, R(n.value.regions, (e) => (B(), V("div", {
 						key: e.id,
 						class: "region"
 					}, [U("div", {
 						class: "region-head",
-						onClick: (t) => i(e.id)
+						onClick: (t) => a(e.id)
 					}, [
-						W(P(Zv), { class: k(["faint caret", { open: r.has(e.id) }]) }, null, 8, ["class"]),
-						U("span", iT, A(e.id), 1),
-						U("span", aT, A(e.messages.length) + " · " + A(a[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + A(a[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
-					], 8, rT), r.has(e.id) ? (B(), V(z, { key: 0 }, [(B(!0), V(z, null, R(e.messages, (e, t) => (B(), V("div", {
+						W(P(Zv), { class: k(["faint caret", { open: i.has(e.id) }]) }, null, 8, ["class"]),
+						U("span", oT, A(e.id), 1),
+						U("span", sT, A(e.messages.length) + " · " + A(o[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + A(o[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
+					], 8, aT), i.has(e.id) ? (B(), V(z, { key: 0 }, [(B(!0), V(z, null, R(e.messages, (e, t) => (B(), V("div", {
 						key: t,
 						class: "region-msg"
-					}, [U("div", oT, [U("span", sT, A(e.role), 1), ua(A(e.chars) + " ch", 1)]), U("div", cT, A(e.content), 1)]))), 128)), e.messages.length ? G("", !0) : (B(), V("div", lT, A(P(Y)("debug.emptyRegion")), 1))], 64)) : G("", !0)]))), 128))]),
-					n.value.vars?.length ? (B(), V("div", uT, [(B(!0), V(z, null, R(n.value.vars, (e) => (B(), V("div", {
+					}, [U("div", cT, [U("span", lT, A(e.role), 1), ua(A(e.chars) + " ch", 1)]), U("div", uT, A(e.content), 1)]))), 128)), e.messages.length ? G("", !0) : (B(), V("div", dT, A(P(Y)("debug.emptyRegion")), 1))], 64)) : G("", !0)]))), 128))]),
+					n.value.vars?.length ? (B(), V("div", fT, [(B(!0), V(z, null, R(n.value.vars, (e) => (B(), V("div", {
 						key: e.id,
 						class: "region"
 					}, [U("div", {
 						class: "region-head",
-						onClick: (t) => i(`var:${e.id}`)
+						onClick: (t) => a(`var:${e.id}`)
 					}, [
-						W(P(Zv), { class: k(["faint caret", { open: r.has(`var:${e.id}`) }]) }, null, 8, ["class"]),
-						U("span", fT, A(e.id), 1),
-						U("span", pT, A(e.text.length) + " ch", 1)
-					], 8, dT), r.has(`var:${e.id}`) ? (B(), V("div", mT, [U("div", hT, A(e.text), 1), e.text ? G("", !0) : (B(), V("div", gT, A(P(Y)("debug.emptyRegion")), 1))])) : G("", !0)]))), 128))])) : G("", !0),
-					n.value.warnings.length ? (B(), V("div", _T, A(n.value.warnings.join(" · ")), 1)) : G("", !0)
-				], 64)) : (B(), V("div", vT, A(P(Y)("debug.noAssembly")), 1))]),
+						W(P(Zv), { class: k(["faint caret", { open: i.has(`var:${e.id}`) }]) }, null, 8, ["class"]),
+						U("span", mT, A(e.id), 1),
+						U("span", hT, A(e.text.length) + " ch", 1)
+					], 8, pT), i.has(`var:${e.id}`) ? (B(), V("div", gT, [U("div", _T, A(e.text), 1), e.text ? G("", !0) : (B(), V("div", vT, A(P(Y)("debug.emptyRegion")), 1))])) : G("", !0)]))), 128))])) : G("", !0),
+					n.value.warnings.length ? (B(), V("div", yT, A(n.value.warnings.join(" · ")), 1)) : G("", !0)
+				], 64)) : (B(), V("div", bT, A(P(Y)("debug.noAssembly")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			W(Nb, {
@@ -14792,38 +14796,38 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 					class: "req"
 				}, [U("div", {
 					class: "row small clickable",
-					onClick: (e) => o.value = o.value === t ? null : t
+					onClick: (e) => s.value = s.value === t ? null : t
 				}, [
-					U("span", bT, A(e.genId) + " · #" + A(e.step), 1),
-					e.error ? (B(), V("span", xT, A(P(Y)("debug.error")), 1)) : G("", !0),
-					U("span", ST, A(d(e.usage)), 1),
-					U("span", CT, A(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
-				], 8, yT), o.value === t ? (B(), V(z, { key: 0 }, [
-					U("div", wT, [U("span", TT, A(P(Y)("debug.request")), 1), W($, {
+					U("span", ST, A(e.genId) + " · #" + A(e.step), 1),
+					e.error ? (B(), V("span", CT, A(P(Y)("debug.error")), 1)) : G("", !0),
+					U("span", wT, A(f(e.usage)), 1),
+					U("span", TT, A(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
+				], 8, xT), s.value === t ? (B(), V(z, { key: 0 }, [
+					U("div", ET, [U("span", DT, A(P(Y)("debug.request")), 1), W($, {
 						icon: P(ay),
 						label: P(Y)("common.copy"),
 						small: "",
 						align: "end",
-						onClick: (t) => u(e.request)
+						onClick: (t) => d(e.request)
 					}, null, 8, [
 						"icon",
 						"label",
 						"onClick"
 					])]),
-					U("pre", ET, A(s(e.request)), 1),
-					U("div", DT, [U("span", OT, A(P(Y)("debug.response")), 1), W($, {
+					U("pre", OT, A(c(e.request)), 1),
+					U("div", kT, [U("span", AT, A(P(Y)("debug.response")), 1), W($, {
 						icon: P(ay),
 						label: P(Y)("common.copy"),
 						small: "",
 						align: "end",
-						onClick: (t) => u(e.response ?? e.error ?? "")
+						onClick: (t) => d(e.response ?? e.error ?? "")
 					}, null, 8, [
 						"icon",
 						"label",
 						"onClick"
 					])]),
-					U("pre", kT, A(e.error ?? s(e.response ?? "")), 1)
-				], 64)) : G("", !0)]))), 128)), P(Gf).requests.length ? G("", !0) : (B(), V("div", AT, A(P(Y)("debug.noRequests")), 1))]),
+					U("pre", jT, A(e.error ?? c(e.response ?? "")), 1)
+				], 64)) : G("", !0)]))), 128)), P(Gf).requests.length ? G("", !0) : (B(), V("div", MT, A(P(Y)("debug.noRequests")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			W(Nb, {
@@ -14839,14 +14843,14 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 					align: "end",
 					onClick: t[2] ||= (e) => P(Gf).log.splice(0)
 				}, null, 8, ["icon", "label"])]),
-				default: F(() => [(B(!0), V(z, null, R(h.value, (e, n) => (B(), V("div", {
+				default: F(() => [(B(!0), V(z, null, R(g.value, (e, n) => (B(), V("div", {
 					key: n,
 					class: "req"
-				}, [U("div", jT, [
-					U("span", MT, A(e.kind), 1),
+				}, [U("div", NT, [
+					U("span", PT, A(e.kind), 1),
 					t[4] ||= U("span", { class: "grow" }, null, -1),
-					U("span", NT, A(l(e.at)), 1)
-				]), U("pre", PT, A(s(e.data)), 1)]))), 128)), h.value.length ? G("", !0) : (B(), V("div", FT, A(P(Y)("debug.noLog")), 1))]),
+					U("span", FT, A(u(e.at)), 1)
+				]), U("pre", IT, A(c(e.data)), 1)]))), 128)), g.value.length ? G("", !0) : (B(), V("div", LT, A(P(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			W(Nb, {
@@ -14856,27 +14860,27 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 				collapsible: "",
 				open: !1
 			}, {
-				default: F(() => [(B(!0), V(z, null, R(g.value, (e, t) => (B(), V("div", {
+				default: F(() => [(B(!0), V(z, null, R(_.value, (e, t) => (B(), V("div", {
 					key: t,
 					class: "req"
-				}, [U("div", IT, [U("span", LT, "#" + A(e.mesId), 1), U("span", RT, "“" + A(e.quote) + "”", 1)]), U("div", zT, A(e.comment), 1)]))), 128)), g.value.length ? G("", !0) : (B(), V("div", BT, A(P(Y)("debug.noOrphans")), 1))]),
+				}, [U("div", RT, [U("span", zT, "#" + A(e.mesId), 1), U("span", BT, "“" + A(e.quote) + "”", 1)]), U("div", VT, A(e.comment), 1)]))), 128)), _.value.length ? G("", !0) : (B(), V("div", HT, A(P(Y)("debug.noOrphans")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
 				"icon",
 				"help"
 			]),
-			U("div", VT, "Advanced Preset " + A(P("1.7.0")) + " · " + A(P("7de082c83d167133")), 1)
+			U("div", UT, "Advanced Preset " + A(P("1.7.0")) + " · " + A(P("23badbe1365fec49")), 1)
 		], 64));
 	}
-}), UT = ["aria-label"], WT = { class: "panel-head" }, GT = { class: "panel-logo" }, KT = { class: "grow" }, qT = { class: "panel-title ellipsis" }, JT = { class: "panel-sub ellipsis" }, YT = {
+}), GT = ["aria-label"], KT = { class: "panel-head" }, qT = { class: "panel-logo" }, JT = { class: "grow" }, YT = { class: "panel-title ellipsis" }, XT = { class: "panel-sub ellipsis" }, ZT = {
 	class: "tabs",
 	role: "tablist"
-}, XT = [
+}, QT = [
 	"title",
 	"aria-selected",
 	"onClick"
-], ZT = { class: "panel-body scroll" }, QT = /* @__PURE__ */ L({
+], $T = { class: "panel-body scroll" }, eE = /* @__PURE__ */ L({
 	__name: "Panel",
 	setup(e) {
 		let t = [
@@ -14908,7 +14912,7 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 			{
 				id: "debug",
 				icon: qv,
-				view: HT
+				view: WT
 			}
 		], n = K(() => t.find((e) => e.id === tg.tab) ?? t[0]), r = K({
 			get: () => q().enabled,
@@ -14928,9 +14932,9 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 				role: "dialog",
 				"aria-label": P(Y)("app.name")
 			}, [
-				U("header", WT, [
-					U("div", GT, [W(P(gy))]),
-					U("div", KT, [U("div", qT, A(P(ig) ? P(Pu)(P(ig)) : P(Y)("app.name")), 1), U("div", JT, A(i.value), 1)]),
+				U("header", KT, [
+					U("div", qT, [W(P(gy))]),
+					U("div", JT, [U("div", YT, A(P(ig) ? P(Pu)(P(ig)) : P(Y)("app.name")), 1), U("div", XT, A(i.value), 1)]),
 					W(px, {
 						modelValue: r.value,
 						"onUpdate:modelValue": a[0] ||= (e) => r.value = e,
@@ -14944,7 +14948,7 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 						onClick: a[1] ||= (e) => P(tg).panelOpen = !1
 					}, null, 8, ["icon", "label"])
 				]),
-				U("nav", YT, [(B(), V(z, null, R(t, (e) => U("button", {
+				U("nav", ZT, [(B(), V(z, null, R(t, (e) => U("button", {
 					key: e.id,
 					type: "button",
 					role: "tab",
@@ -14952,19 +14956,19 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 					title: P(Y)(`tab.${e.id}`),
 					"aria-selected": e.id === P(tg).tab,
 					onClick: (t) => P(tg).tab = e.id
-				}, [(B(), H(Ur(e.icon))), U("span", null, A(P(Y)(`tab.${e.id}`)), 1)], 10, XT)), 64))]),
-				U("main", ZT, [(B(), H(Mr, null, [(B(), H(Ur(n.value.view), { key: n.value.id }))], 1024))])
-			], 8, UT)) : G("", !0)]),
+				}, [(B(), H(Ur(e.icon))), U("span", null, A(P(Y)(`tab.${e.id}`)), 1)], 10, QT)), 64))]),
+				U("main", $T, [(B(), H(Mr, null, [(B(), H(Ur(n.value.view), { key: n.value.id }))], 1024))])
+			], 8, GT)) : G("", !0)]),
 			_: 1
 		}));
 	}
-}), $T = { class: "inline-drawer" }, eE = { class: "inline-drawer-toggle inline-drawer-header" }, tE = { class: "inline-drawer-content" }, nE = { class: "flex-container alignItemsCenter spaceBetween" }, rE = {
+}), tE = { class: "inline-drawer" }, nE = { class: "inline-drawer-toggle inline-drawer-header" }, rE = { class: "inline-drawer-content" }, iE = { class: "flex-container alignItemsCenter spaceBetween" }, aE = {
 	class: "checkbox_label flex1",
 	for: "ap_settings_enabled"
-}, iE = { key: 0 }, aE = { class: "text_muted" }, oE = {
+}, oE = { key: 0 }, sE = { class: "text_muted" }, cE = {
 	key: 1,
 	class: "text_muted"
-}, sE = /* @__PURE__ */ L({
+}, lE = /* @__PURE__ */ L({
 	__name: "SettingsDrawer",
 	setup(e) {
 		let t = K({
@@ -14973,8 +14977,8 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 				q().enabled = e, J();
 			}
 		});
-		return (e, n) => (B(), V("div", $T, [U("div", eE, [U("b", null, A(P(Y)("app.name")), 1), n[3] ||= U("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), U("div", tE, [
-			U("div", nE, [U("label", rE, [I(U("input", {
+		return (e, n) => (B(), V("div", tE, [U("div", nE, [U("b", null, A(P(Y)("app.name")), 1), n[3] ||= U("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), U("div", rE, [
+			U("div", iE, [U("label", aE, [I(U("input", {
 				id: "ap_settings_enabled",
 				"onUpdate:modelValue": n[0] ||= (e) => t.value = e,
 				type: "checkbox"
@@ -14987,18 +14991,18 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 			}, [n[4] ||= U("i", { class: "fa-solid fa-layer-group" }, null, -1), U("span", null, A(P(Y)("panel.open")), 1)], 32)]),
 			n[5] ||= U("hr", null, null, -1),
 			U("h4", null, A(P(Y)("settings.preset")), 1),
-			P(ig) ? (B(), V("div", iE, [ua(A(P(Pu)(P(ig))) + " ", 1), U("span", aE, "v" + A(P(ig).version) + " · " + A(P(ag).config), 1)])) : (B(), V("i", oE, A(P(Y)("settings.inactive")), 1))
+			P(ig) ? (B(), V("div", oE, [ua(A(P(Pu)(P(ig))) + " ", 1), U("span", sE, "v" + A(P(ig).version) + " · " + A(P(ag).config), 1)])) : (B(), V("i", cE, A(P(Y)("settings.inactive")), 1))
 		])]));
 	}
-}), cE = {
+}), uE = {
 	key: 0,
 	class: "preset-banner"
-}, lE = { class: "preset-banner-text" }, uE = /* @__PURE__ */ L({
+}, dE = { class: "preset-banner-text" }, fE = /* @__PURE__ */ L({
 	__name: "PresetBanner",
 	setup(e) {
-		return (e, t) => P(ig) ? (B(), V("div", cE, [
+		return (e, t) => P(ig) ? (B(), V("div", uE, [
 			W(P(gy), { class: "preset-banner-icon" }),
-			U("span", lE, A(P(Y)("banner.usesAp")), 1),
+			U("span", dE, A(P(Y)("banner.usesAp")), 1),
 			U("button", {
 				type: "button",
 				class: "btn primary",
@@ -15009,14 +15013,14 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 });
 //#endregion
 //#region src/ui/index.ts
-function dE() {
+function pE() {
 	let e = document.getElementById("extensions_settings2") ?? document.getElementById("extensions_settings");
 	if (!e || e.querySelector("#advanced_preset_settings")) return;
 	let t = document.createElement("div");
-	t.id = "advanced_preset_settings", e.append(t), fs(sE).mount(t);
+	t.id = "advanced_preset_settings", e.append(t), fs(lE).mount(t);
 }
-function fE() {
-	Ng("ap-stages", db, ["mesid"]), Ng("ap-cards", ax, ["mesid"]), Ng("ap-dock", ux), Ng("ap-panel", QT), Ng("ap-preset-banner", uE), jg(), rg();
+function mE() {
+	Ng("ap-stages", db, ["mesid"]), Ng("ap-cards", ax, ["mesid"]), Ng("ap-dock", ux), Ng("ap-panel", eE), Ng("ap-preset-banner", fE), jg(), rg();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.OAI_PRESET_CHANGED_AFTER,
@@ -15024,13 +15028,13 @@ function fE() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, rg);
-	Mv(), dE(), Cv(), dv();
+	Mv(), pE(), Cv(), dv();
 }
 //#endregion
 //#region src/index.ts
-var pE = {
+var hE = {
 	version: "1.7.0",
-	buildId: "7de082c83d167133",
+	buildId: "23badbe1365fec49",
 	nextGeneration: (e) => Rd(e),
 	listPresets: () => xu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -15045,21 +15049,21 @@ var pE = {
 	},
 	annotations: Oh
 };
-globalThis.advancedPresetInterceptor = Wf, window.AdvancedPreset = pE;
-function mE(e, t) {
+globalThis.advancedPresetInterceptor = Wf, window.AdvancedPreset = hE;
+function gE(e, t) {
 	let n;
 	return (...r) => {
 		clearTimeout(n), n = setTimeout(() => e(...r), t);
 	};
 }
-async function hE() {
+async function _E() {
 	for (let { preset: e } of xu()) try {
 		await Md(e);
 	} catch (t) {
 		console.error("[AP] carrier sync failed", e.id, t);
 	}
 }
-async function gE() {
+async function vE() {
 	let { eventSource: t, eventTypes: n } = e();
 	q(), dh(), qh(), hg(), Dh(), await i(), await yu();
 	for (let { preset: e } of xu()) {
@@ -15072,21 +15076,21 @@ async function gE() {
 	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => kp(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => fh(e)), yh(), t.on(n.MESSAGE_RECEIVED, (e, t) => Sh(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		Jd.setPending(null), Jd.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => Jd.sweep());
-	let r = mE(() => {
+	let r = gE(() => {
 		let e = Dd(), t = e ? Tu(e) : void 0;
 		t && Id(t);
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, r), t.on(n.OAI_PRESET_CHANGED_AFTER, r);
 	let a = async () => {
-		await hE(), _h({ reload: !0 }), Vh(), Mh();
+		await _E(), _h({ reload: !0 }), Vh(), Mh();
 	};
-	t.on(n.APP_READY, () => void a()), fE(), qf("init", {
+	t.on(n.APP_READY, () => void a()), mE(), qf("init", {
 		version: "1.7.0",
-		build: "7de082c83d167133",
+		build: "23badbe1365fec49",
 		enabled: q().enabled
 	});
 }
-var _E = Nh, vE = sv;
-gE().catch((e) => console.error("[AP] init failed", e));
+var yE = Nh, bE = sv;
+vE().catch((e) => console.error("[AP] init failed", e));
 //#endregion
-export { _E as advancedPresetOnUpdate, vE as advancedPresetRegisterChatSurface };
+export { yE as advancedPresetOnUpdate, bE as advancedPresetRegisterChatSurface };
