@@ -59,6 +59,7 @@ export interface STContext {
   getTokenCountAsync(text: string): Promise<number>;
   stopGeneration(): boolean;
   getCurrentLocale?(): string;
+  getCurrentChatId?(): string | undefined;
   streamingProcessor: { messageId: number; type: string } | null;
 }
 

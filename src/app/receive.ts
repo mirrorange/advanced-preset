@@ -9,6 +9,7 @@ import { handoff } from '@/core/orchestrator';
 import { live } from '@/core/live';
 import { presetState } from '@/store/config';
 import { commitGlobalOps } from '@/store/eventlog';
+import { syncGlobalRefs } from './memory-sync';
 
 const MAX_AGE_MS = 10 * 60_000;
 const NO_MESSAGE_TYPES = new Set(['impersonate', 'quiet']);
@@ -26,8 +27,9 @@ export async function onMessageReceived(mesId: number, type?: string): Promise<v
     if (Array.isArray(msg.swipes)) msg.swipes[msg.swipe_id ?? 0] = outcome.content;
   }
   writeSidecar(mesId, outcome.sidecar);
-  // Global memory exists once its message does (I-98).
+  // Global memory exists once its message does (I-98); the sync also records the new refs as active.
   if (outcome.global?.length) commitGlobalOps(presetState(p.ctx.preset), outcome.global);
+  syncGlobalRefs();
   if (live.current?.genId === p.ctx.id) live.current.mesId = mesId;
   st().updateMessageBlock(mesId, msg);
   await st().saveChat();

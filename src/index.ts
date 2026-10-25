@@ -15,7 +15,7 @@ import { setNextGeneration } from '@/core/classify';
 import { registry } from '@/core/context';
 import { debugLog } from '@/core/debug';
 import { onMessageReceived } from '@/app/receive';
-import { installMemorySync } from '@/app/memory-sync';
+import { installMemorySync, syncGlobalRefs } from '@/app/memory-sync';
 import { annotationsApi, installAnnotations } from '@/app/annotations';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
@@ -93,6 +93,7 @@ async function init(): Promise<void> {
 
   const ready = async () => {
     await syncCarriers();
+    syncGlobalRefs({ reload: true });
     startDevSource();
     void checkStaleBundle();
   };

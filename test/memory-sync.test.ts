@@ -10,7 +10,7 @@ const sidecar = (events: ChatEvent[], presetId = 'p'): Sidecar => ({
 });
 
 function mockST(chat: any[], extra: Record<string, unknown> = {}) {
-  const ctx = { chat, chatMetadata: {}, saveChat: vi.fn(async () => {}), eventSource: { emit: vi.fn(async () => {}) }, eventTypes: {}, ...extra };
+  const ctx = { chat, chatMetadata: {}, extensionSettings: {}, saveSettingsDebounced: vi.fn(), saveChat: vi.fn(async () => {}), eventSource: { emit: vi.fn(async () => {}) }, eventTypes: {}, ...extra };
   (globalThis as any).SillyTavern = { getContext: () => ctx };
   return ctx;
 }
