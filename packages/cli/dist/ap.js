@@ -9024,7 +9024,7 @@ function compile(tree) {
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...sect("tokenSaving") },
     cache: { ...CACHE_DEFAULTS, ...sect("cache") },
-    meta: { recentCount: meta.recentCount, ...sect("meta") }
+    meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") }
   };
   for (const k of ["names", "prefixes"]) if (isObj3(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
@@ -9044,6 +9044,10 @@ function compile(tree) {
     }
   };
   checkCache(sect("cache"), "configurationDefaults.cache");
+  const checkMeta = (c, path) => {
+    if ("enabled" in c && typeof c.enabled !== "boolean") diag.error("`enabled` must be a boolean", { file: M, path: `${path}.enabled` });
+  };
+  checkMeta(sect("meta"), "configurationDefaults.meta");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
     const o = isObj3(c) ? c : {};
@@ -9052,6 +9056,7 @@ function compile(tree) {
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
     if (isObj3(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj3(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
+    if (isObj3(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
