@@ -25,7 +25,8 @@ export interface StreamEncoder {
   reasoning(delta: string): string;
   toolCalls(calls: EncodedToolCall[]): string;
   error(message: string): string;
-  end(): string;
+  /** Closes the stream; `usage` (the provider's, in this family's shape) goes into the final chunk. */
+  end(usage?: Record<string, unknown>): string;
 }
 
 export function streamEncoder(family: Family): StreamEncoder {
@@ -70,8 +71,8 @@ export function streamEncoder(family: Family): StreamEncoder {
           return out;
         },
         error: (message) => sse({ type: 'error', error: { type: 'api_error', message } }),
-        end: () => head() + close()
-          + sse({ type: 'message_delta', delta: { stop_reason: toolUse ? 'tool_use' : 'end_turn', stop_sequence: null }, usage: { output_tokens: 0 } })
+        end: (usage) => head() + close()
+          + sse({ type: 'message_delta', delta: { stop_reason: toolUse ? 'tool_use' : 'end_turn', stop_sequence: null }, usage: { output_tokens: 0, ...usage } })
           + sse({ type: 'message_stop' }),
       };
     }
@@ -83,7 +84,7 @@ export function streamEncoder(family: Family): StreamEncoder {
           candidates: [{ index: 0, content: { role: 'model', parts: calls.map((c) => ({ functionCall: { name: c.name, args: safeParse(c.arguments) }, ...(c.signature ? { thoughtSignature: c.signature } : {}) })) } }],
         }) : ''),
         error: (message) => sse({ error: { message } }),
-        end: () => '',
+        end: (usage) => (usage ? sse({ usageMetadata: usage }) : ''),
       };
     case 'cohere':
       return {
@@ -93,7 +94,7 @@ export function streamEncoder(family: Family): StreamEncoder {
           type: 'tool-call-start', index, delta: { message: { tool_calls: { id: c.id, type: 'function', function: { name: c.name, arguments: c.arguments } } } },
         })).join(''),
         error: (message) => sse({ error: { message } }),
-        end: () => sse({ type: 'message-end' }),
+        end: (usage) => sse({ type: 'message-end', ...(usage ? { delta: { usage }, usage } : {}) }),
       };
     default:
       return {
@@ -103,7 +104,8 @@ export function streamEncoder(family: Family): StreamEncoder {
           choices: [{ index: 0, delta: { tool_calls: calls.map((c, index) => ({ index, id: c.id, type: 'function', function: { name: c.name, arguments: c.arguments } })) } }],
         }) : ''),
         error: (message) => sse({ error: { message } }),
-        end: () => sse('[DONE]'),
+        // OpenAI `stream_options.include_usage` / DeepSeek: a final chunk with empty choices.
+        end: (usage) => (usage ? sse({ object: 'chat.completion.chunk', choices: [], usage }) : '') + sse('[DONE]'),
       };
   }
 }
@@ -112,7 +114,7 @@ function safeParse(s: string): unknown {
   try { return JSON.parse(s || '{}'); } catch { return {}; }
 }
 
-export interface FinalMessage { content: string; reasoning?: string; toolCalls?: EncodedToolCall[] }
+export interface FinalMessage { content: string; reasoning?: string; toolCalls?: EncodedToolCall[]; usage?: Record<string, unknown> }
 
 /** Non-streaming body: an OpenAI-shaped core every family reads, plus family-specific mirrors. */
 export function encodeJson(family: Family, m: FinalMessage): Record<string, unknown> {
@@ -126,6 +128,7 @@ export function encodeJson(family: Family, m: FinalMessage): Record<string, unkn
       finish_reason: toolCalls ? 'tool_calls' : 'stop',
     }],
   };
+  if (m.usage) body[family === 'gemini' ? 'usageMetadata' : 'usage'] = m.usage;
   if (family === 'claude') {
     body.content = [
       ...(m.reasoning ? [{ type: 'thinking', thinking: m.reasoning }] : []),

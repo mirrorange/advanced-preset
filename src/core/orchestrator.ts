@@ -19,6 +19,7 @@ import { BackendError, readResponse, type ReadState } from './reader';
 import { live, startLive, updateLive, type LiveGeneration } from './live';
 import { recordRequest } from './debug';
 import { commitCache } from './sticky';
+import { addUsage } from './usage';
 
 export const GENERATE_URL = '/api/backends/chat-completions/generate';
 
@@ -26,6 +27,8 @@ export interface Outcome {
   content: string;
   reasoning: string;
   toolCalls?: EncodedToolCall[];
+  /** Provider usage of the turn's requests (summed), re-emitted for ST extensions. */
+  usage?: Record<string, unknown>;
   sidecar: Sidecar;
   /** Global memory operations, committed with the message (I-98). */
   global?: PendingGlobalOp[];
@@ -79,7 +82,7 @@ export async function orchestrate(ctx: GenerationContext, base: Record<string, a
       // A Claude thinking block without a signature cannot be replayed with tool calls; keep it out of those.
       if (outcome.reasoning && !(family === 'claude' && outcome.toolCalls?.length)) await write(enc.reasoning(outcome.reasoning));
       if (outcome.toolCalls?.length) await write(enc.toolCalls(outcome.toolCalls));
-      await write(enc.end());
+      await write(enc.end(outcome.usage));
     } catch (e) {
       if (!isAbort(e)) { await write(enc.error(messageOf(e))); failure(g, e); }
     } finally {
@@ -118,7 +121,7 @@ async function run(
   const maxSteps = ctx.transport === 'tool-multi' ? Math.max(1, ctx.config.connection.maxSteps) : 1;
   const started = Date.now();
   let reasoning = '';
-  let usage: unknown;
+  let usage: Record<string, unknown> | undefined;
   let requests = 0;
   let interrupted = false;
   let callerToolCalls: EncodedToolCall[] | undefined;
@@ -156,12 +159,13 @@ async function run(
       if (isAbort(e) || signal?.aborted) {
         // Output had started: the prompt was processed (and cached) by the provider.
         if (read.text || read.reasoning || read.toolCalls.length) commitCache(ctx);
+        usage = addUsage(usage, read.usage);
         interrupted = true; partial = driver.progress(read, false); break;
       }
       throw e;
     }
     reasoning += read.reasoning;
-    usage = read.usage ?? usage;
+    usage = addUsage(usage, read.usage);
     driver.progress(read, true);
     const verdict = driver.complete(read, step);
     if (verdict.callerToolCalls) {
@@ -176,6 +180,7 @@ async function run(
   updateLive(g, turn, reasoning);
   const outcome = finish(ctx, turn, driver.rawText(), driver.callerResult?.(), reasoning, { usage, requests, durationMs: Date.now() - started, interrupted });
   outcome.toolCalls = callerToolCalls;
+  outcome.usage = usage;
   if (callerToolCalls) outcome.content = '';
   g.status = interrupted ? 'aborted' : 'done';
   return outcome;
