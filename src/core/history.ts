@@ -11,6 +11,7 @@ export interface HistoryItem {
   extra?: Record<string, any>;
   is_system?: boolean;
   name?: string;
+  send_date?: string;
 }
 
 export interface RewriteOptions {
@@ -24,6 +25,8 @@ export interface RewriteOptions {
   synopsisId?: string;
   /** Append the synopsis to the last `depth` assistant messages that are still verbatim. */
   synopsisHistory?: { depth: number; template: string };
+  /** Template used when a sticky rendering still carries a synopsis while synopsis history is off. */
+  synopsisHistoryTemplate?: string;
   /** Latest effective recap: messages up to `coversUpTo` (real index) may be dropped. */
   recap?: { coversUpTo: number } | null;
   /** Real chat index of each item (for recap coverage). */
@@ -32,6 +35,36 @@ export interface RewriteOptions {
   currentInput: number;
   /** Re-inject inline annotations as CriticMarkup into the last `depth` assistant messages (I-80). */
   annotations?: { depth: number };
+}
+
+/**
+ * How one history message is rendered. Plain data so that cache optimization can keep the rendering
+ * of the previous request (sticky rendering) and apply the current rules later.
+ */
+export interface RenderMode {
+  /** Full text, replaced by its synopsis (assistant), truncated (user) or left out. */
+  body: 'full' | 'synopsis' | 'truncate' | 'drop';
+  /** `truncate`: character limit. */
+  max?: number;
+  /** Full assistant text that also carries its synopsis (synopsis history). */
+  synopsis?: boolean;
+  /** Inline annotations re-injected as CriticMarkup. */
+  annotations?: boolean;
+}
+
+/** Compact form stored between requests: `f` / `s` / `x` / `t<max>`, then `y` (synopsis) and `a` (annotations). */
+export function encodeMode(m: RenderMode): string {
+  const body = m.body === 'full' ? 'f' : m.body === 'synopsis' ? 's' : m.body === 'drop' ? 'x' : `t${m.max ?? 0}`;
+  return body + (m.body === 'full' && m.synopsis ? 'y' : '') + (m.body === 'full' && m.annotations ? 'a' : '');
+}
+
+export function decodeMode(code: string | undefined): RenderMode | undefined {
+  const m = code ? /^(?:(f)(y?)(a?)|(s)|(x)|t(\d+))$/.exec(code) : null;
+  if (!m) return undefined;
+  if (m[1]) return { body: 'full', ...(m[2] ? { synopsis: true } : {}), ...(m[3] ? { annotations: true } : {}) };
+  if (m[4]) return { body: 'synopsis' };
+  if (m[5]) return { body: 'drop' };
+  return { body: 'truncate', max: Number(m[6]) };
 }
 
 const sidecarOf = (m: HistoryItem): Sidecar | undefined => {
@@ -48,8 +81,22 @@ export function formatSynopsis(template: string, s: Synopsis, content = ''): str
 const synopsisOf = (item: HistoryItem, id?: string): Synopsis | undefined =>
   id ? (sidecarOf(item)?.structures?.[id] as Synopsis | undefined) : undefined;
 
-/** Returns the rewritten list (new array; items are shallow copies when changed). */
-export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): HistoryItem[] {
+/** A history message after the fixed rewrites (pure meta turns dropped, meta segments stripped). */
+export interface PlannedItem {
+  item: HistoryItem;
+  /** Index in the input list. */
+  index: number;
+  /** Rendering by the current rules; `null` for system items (passed through as is). */
+  fresh: RenderMode | null;
+  /** Rendering fixed by a deterministic rule (recap coverage): sticky rendering does not apply. */
+  forced?: boolean;
+}
+
+/**
+ * History rewriting as a plan (§9.1): steps 1–2 change the list, steps 3–5 only decide the
+ * {@link RenderMode} of each remaining message.
+ */
+export function planHistory(items: HistoryItem[], o: RewriteOptions): PlannedItem[] {
   type Row = { item: HistoryItem; index: number };
   let rows: Row[] = items.map((item, index) => ({ item, index }));
 
@@ -75,48 +122,47 @@ export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): History
     return { ...r, item: { ...r.item, mes: m.stripped } };
   }).filter((r) => r.item.mes.trim() !== '' || !r.item.is_user);
 
+  const plan: PlannedItem[] = rows.map((r) => ({ ...r, fresh: r.item.is_system ? null : { body: 'full' } }));
+
   // 3. Token saving: count assistant turns from the end.
   if (o.tokenSaving.enabled) {
     let assistants = 0;
-    const depth: number[] = new Array(rows.length).fill(0);
-    for (let i = rows.length - 1; i >= 0; i--) {
-      if (!rows[i]!.item.is_user && !rows[i]!.item.is_system) assistants++;
+    const depth: number[] = new Array(plan.length).fill(0);
+    for (let i = plan.length - 1; i >= 0; i--) {
+      if (!plan[i]!.item.is_user && !plan[i]!.item.is_system) assistants++;
       depth[i] = assistants;
     }
     const keep = Math.max(0, o.tokenSaving.keepFullTurns);
     // a user message shares the depth of the assistant reply that follows it
     const inFull = (i: number) => depth[i]! <= keep;
     const covered = o.recap?.coversUpTo ?? -1;
-    rows = rows.flatMap((r, i) => {
-      if (inFull(i) || r.index === o.currentInput) return [r];
-      if (covered >= 0 && o.realIndex(r.index) <= covered) return [];
-      if (r.item.is_user) {
+    plan.forEach((p, i) => {
+      if (!p.fresh || inFull(i) || p.index === o.currentInput) return;
+      if (covered >= 0 && o.realIndex(p.index) <= covered) { p.fresh = { body: 'drop' }; p.forced = true; return; }
+      if (p.item.is_user) {
         const mode = o.tokenSaving.userInput ?? 'truncate';
-        if (mode === 'remove') return [];
         const max = o.tokenSaving.truncateUserAfter;
-        return [mode === 'truncate' && max > 0 && r.item.mes.length > max ? { ...r, item: { ...r.item, mes: `${r.item.mes.slice(0, max)}…` } } : r];
+        if (mode === 'remove') p.fresh = { body: 'drop' };
+        else if (mode === 'truncate' && max > 0 && p.item.mes.length > max) p.fresh = { body: 'truncate', max };
+        return;
       }
-      const syn = synopsisOf(r.item, o.synopsisId);
-      return [syn ? { ...r, item: { ...r.item, mes: formatSynopsis(o.synopsisTemplate, syn) } } : r];
+      if (synopsisOf(p.item, o.synopsisId)) p.fresh = { body: 'synopsis' };
     });
   }
-  // Steps 4–5 only touch messages that are still verbatim after the rewrites above.
-  const verbatim = rows.map((r) => r.item.mes === items[r.index]!.mes);
-  const recentAssistants = (depth: number): number[] => {
-    const out: number[] = [];
-    for (let i = rows.length - 1; i >= 0 && out.length < depth; i--) {
-      if (!rows[i]!.item.is_user && !rows[i]!.item.is_system) out.push(i);
+
+  // Steps 4–5 only touch assistant messages that are still verbatim after the rewrites above.
+  const recentAssistants = (depth: number): PlannedItem[] => {
+    const out: PlannedItem[] = [];
+    for (let i = plan.length - 1; i >= 0 && out.length < depth; i--) {
+      const p = plan[i]!;
+      if (p.fresh && !p.item.is_user && p.fresh.body !== 'drop') out.push(p);
     }
     return out;
   };
 
   // 4. Inline annotations: only untouched assistant messages near the end.
-  for (const i of recentAssistants(o.annotations?.depth ?? 0)) {
-    const r = rows[i]!;
-    const list = sidecarOf(r.item)?.annotations;
-    if (!list?.length || !verbatim[i]) continue;
-    const mes = injectAnnotations(r.item.mes, list);
-    if (mes !== r.item.mes) rows[i] = { ...r, item: { ...r.item, mes } };
+  for (const p of recentAssistants(o.annotations?.depth ?? 0)) {
+    if (p.fresh!.body === 'full' && sidecarOf(p.item)?.annotations?.length) p.fresh!.annotations = true;
   }
 
   // 5. Recent synopses: the last `depth` assistant messages keep their text and also carry their
@@ -124,13 +170,48 @@ export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): History
   //    Messages replaced by their synopsis (token saving) still count towards the depth.
   const sh = o.synopsisHistory;
   if (sh && o.synopsisId) {
-    for (const i of recentAssistants(sh.depth)) {
-      const r = rows[i]!;
-      const syn = verbatim[i] ? synopsisOf(r.item, o.synopsisId) : undefined;
-      if (syn) rows[i] = { ...r, item: { ...r.item, mes: formatSynopsis(sh.template, syn, r.item.mes) } };
+    for (const p of recentAssistants(sh.depth)) {
+      if (p.fresh!.body === 'full' && synopsisOf(p.item, o.synopsisId)) p.fresh!.synopsis = true;
     }
   }
-  return rows.map((r) => r.item);
+  return plan;
+}
+
+/** Text of a planned message under `mode` (`null`: left out). Missing data falls back to the full text. */
+export function renderItem(p: PlannedItem, mode: RenderMode | null, o: RewriteOptions): string | null {
+  const { item } = p;
+  if (!mode || item.is_system) return item.mes;
+  switch (mode.body) {
+    case 'drop': return null;
+    case 'truncate': {
+      const max = mode.max ?? 0;
+      return max > 0 && item.mes.length > max ? `${item.mes.slice(0, max)}…` : item.mes;
+    }
+    case 'synopsis': {
+      const syn = item.is_user ? undefined : synopsisOf(item, o.synopsisId);
+      return syn ? formatSynopsis(o.synopsisTemplate, syn) : item.mes;
+    }
+    default: {
+      let mes = item.mes;
+      if (item.is_user) return mes;
+      const list = mode.annotations ? sidecarOf(item)?.annotations : undefined;
+      if (list?.length) mes = injectAnnotations(mes, list);
+      const syn = mode.synopsis ? synopsisOf(item, o.synopsisId) : undefined;
+      if (syn) mes = formatSynopsis(o.synopsisHistory?.template ?? o.synopsisHistoryTemplate ?? DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, syn, mes);
+      return mes;
+    }
+  }
+}
+
+/** Returns the rewritten list (new array; items are shallow copies when changed). */
+export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): HistoryItem[] {
+  const out: HistoryItem[] = [];
+  for (const p of planHistory(items, o)) {
+    const mes = renderItem(p, p.fresh, o);
+    if (mes === null) continue;
+    out.push(mes === p.item.mes ? p.item : { ...p.item, mes });
+  }
+  return out;
 }
 
 /** History re-injection depth for the preset (I-80): the annotations structure is declared by a switched-on module. */
@@ -145,9 +226,13 @@ export function annotationHistory(preset: APreset, config: Configuration): { dep
  * Synopsis options for {@link rewriteHistory}: the replacement template (token saving) and, when a
  * switched-on module requests the synopsis structure, how many recent messages carry theirs.
  */
-export function synopsisOptions(preset: APreset, config: Configuration): Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory'> {
+export function synopsisOptions(preset: APreset, config: Configuration): Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory' | 'synopsisHistoryTemplate'> {
   const decl = Object.values(preset.structures).find((s) => s.kind === 'synopsis');
-  const out: Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory'> = { synopsisTemplate: preset.tokenSaving.synopsisTemplate, synopsisId: decl?.id };
+  const out: Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory' | 'synopsisHistoryTemplate'> = {
+    synopsisTemplate: preset.tokenSaving.synopsisTemplate,
+    synopsisId: decl?.id,
+    synopsisHistoryTemplate: decl?.historyTemplate ?? DEFAULT_SYNOPSIS_HISTORY_TEMPLATE,
+  };
   if (decl?.history && activeModules(preset, config).some((m) => m.structures.includes(decl.id))) {
     out.synopsisHistory = { depth: decl.history, template: decl.historyTemplate ?? DEFAULT_SYNOPSIS_HISTORY_TEMPLATE };
   }
