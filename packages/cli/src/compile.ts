@@ -13,7 +13,7 @@ import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
   isInlineStructure,
-  CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
+  CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
   type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
@@ -538,6 +538,7 @@ export function compile(tree: SourceTree): CompileResult {
     modules: Object.fromEntries(modules.filter((m) => m.toggle === 'user').map((m) => [m.id, m.default])),
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...(sect('tokenSaving') as object) },
+    cache: { ...CACHE_DEFAULTS, ...(sect('cache') as Partial<Configuration['cache']>) },
     meta: { recentCount: meta.recentCount, ...(sect('meta') as object) },
   };
   for (const k of ['names', 'prefixes'] as const) if (isObj(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
@@ -550,6 +551,15 @@ export function compile(tree: SourceTree): CompileResult {
     else configurationDefaults.params[k] = v as string | number;
   }
   userInputMode(sect('tokenSaving').userInput, 'configurationDefaults.tokenSaving.userInput');
+  /** `cache` section of the defaults or of a recommended configuration's diff. */
+  const checkCache = (c: Obj, path: string) => {
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (!(k in CACHE_DEFAULTS)) diag.warn(`unknown cache option \`${k}\``, where);
+      else if (k === 'enabled' ? typeof v !== 'boolean' : typeof v !== 'number' || !Number.isFinite(v) || v < 0) diag.error(k === 'enabled' ? '`enabled` must be a boolean' : `\`${k}\` must be a number ≥ 0`, where);
+    }
+  };
+  checkCache(sect('cache'), 'configurationDefaults.cache');
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
 
   const configurations: RecommendedConfiguration[] = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c: unknown, i: number) => {
@@ -558,6 +568,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (o.description !== undefined) rc.description = str(o.description);
     if (!rc.id) diag.error('configuration id is required', { file: M, path: `configurations[${i}]` });
     if (isObj(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
+    if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: 'default', name: 'Default', diff: {} });

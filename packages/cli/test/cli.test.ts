@@ -544,3 +544,23 @@ configurationDefaults:
     expect(r.diag.errors.filter((d) => /userInput/.test(d.message))).toHaveLength(2);
   });
 });
+
+describe('cache optimization defaults', () => {
+  it('fills the built-in defaults and accepts overrides', () => {
+    const plain = build(tree({ 'preset.yaml': MANIFEST }));
+    expect(plain.preset!.configurationDefaults.cache).toEqual({ enabled: false, ttlMinutes: 5, maxDeferredTurns: 6 });
+    const r = build(tree({ 'preset.yaml': MANIFEST + 'configurationDefaults:\n  cache: { maxDeferredTurns: 8 }\n' }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.preset!.configurationDefaults.cache).toEqual({ enabled: false, ttlMinutes: 5, maxDeferredTurns: 8 });
+  });
+
+  it('flags bad values', () => {
+    const r = build(tree({ 'preset.yaml': MANIFEST.replace('diff: { connection: { transport: prefill } }', 'diff: { cache: { ttlMinutes: -1 } }')
+      + 'configurationDefaults:\n  cache: { enabled: yes please, maxDeferredTurns: many, ttl: 5 }\n' }));
+    const errors = r.diag.errors.map((d) => d.message).join('\n');
+    expect(errors).toMatch(/`enabled` must be a boolean/);
+    expect(errors).toMatch(/`maxDeferredTurns` must be a number/);
+    expect(errors).toMatch(/`ttlMinutes` must be a number/);
+    expect(r.diag.warnings.map((d) => d.message).join('\n')).toMatch(/unknown cache option `ttl`/);
+  });
+});

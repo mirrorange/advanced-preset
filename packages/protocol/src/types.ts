@@ -273,6 +273,18 @@ export interface TokenSavingDecl {
 
 export interface TokenSavingConfig { enabled: boolean; keepFullTurns: number; truncateUserAfter: number; userInput: UserInputMode }
 
+/**
+ * Cache optimization (sticky rendering): while the provider's prompt cache may still hit, every
+ * history message keeps the rendering of the previous request; only new messages follow the rules.
+ */
+export interface CacheConfig {
+  enabled: boolean;
+  /** Minutes after the last successful request during which the cache is assumed alive. */
+  ttlMinutes: number;
+  /** Requests a pending rendering change may be postponed before everything is applied at once. */
+  maxDeferredTurns: number;
+}
+
 export interface SyntheticTurn {
   id: string;
   label: string;
@@ -364,6 +376,7 @@ export interface Configuration {
   modules: Record<string, boolean>;
   params: Record<string, string | number>;
   tokenSaving: TokenSavingConfig;
+  cache: CacheConfig;
   meta: { recentCount: number };
 }
 
