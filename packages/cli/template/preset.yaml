@@ -69,7 +69,7 @@ structures:
     field: reply
     formatPrompt:
       tag: "<Reply>[your reply to the user, plain paragraphs as <p>…</p>]</Reply>"
-      field: Put your reply to the user in the `reply` field as `<p>` paragraphs.
+      field: Put your reply to the user in the `{{field}}` field as `<p>` paragraphs.
   options:
     kind: options
     tag: options
@@ -80,7 +80,7 @@ structures:
         <options>
         <option title="...">...</option>
         </options>
-      field: 'Fill `options` with 3 items `{ "label": "...", "content": "..." }`.'
+      field: 'Fill `{{field}}` with 3 items `{ "label": "...", "content": "..." }`.'
 
 regex:
   - { id: summary, pattern: "(summary|summarize|recap|总结)", flags: i, target: meta, requires: meta.pure }
@@ -114,6 +114,9 @@ tools:
     description: "Step {{n}}: {{label}}"
     param: { name: content, description: Text of this step. }
     patchParam: { name: edits, description: Exact replacements applied to the content. }
+  # Structure fields become `z_reply`, `z_options`: some APIs (Gemini) write fields alphabetically,
+  # and the prefix keeps them after the steps. `{{field}}` in structure texts is the final name.
+  structurePrefix: z_
   results:
     next: Recorded. Next, call `{{next}}`.
     done: Recorded. The turn is complete.

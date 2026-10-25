@@ -218,6 +218,24 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
       if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
     });
+    checkOrder(w, a, anchor, where);
+  }
+  // Some APIs (Gemini) generate object fields in alphabetical order regardless of the schema order (I-94):
+  // stages must sort in order, and structures after the content they describe.
+  function checkOrder(w: APreset['workflows'][number], a: ReturnType<typeof turnArtifacts>, anchor: number, where: Where) {
+    const hint = 'APIs that generate fields alphabetically (Gemini) would write them out of order';
+    const fields = w.stages.map((s) => a.fieldOf(s));
+    for (let i = 1; i < fields.length; i++) {
+      if (fields[i]! < fields[i - 1]!) { diag.warn(`workflow ${w.id}: stage field \`${fields[i]}\` sorts before \`${fields[i - 1]}\`; ${hint}`, where); break; }
+    }
+    if (anchor < 0) return;
+    const structs = [...structureFields].sort();
+    const first = structs[0];
+    if (first === undefined) return;
+    const last = fields.slice(0, anchor + 1).sort().at(-1)!;
+    if (first < last) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before stage field \`${last}\`; ${hint} (set tools.structurePrefix)`, where);
+    const param = a.paramOf(w.stages[anchor]!);
+    if (first < param) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before \`${param}\` of tool \`${a.toolOf(w.stages[anchor]!)}\`; ${hint} (set tools.structurePrefix)`, where);
   }
 
   // ── workflows ───────────────────────────────────────────────────────────────
