@@ -160,7 +160,7 @@ Gemini 不支持自由键的对象：`kv` 形式会改为 JSON 字符串字段�
 ### memory
 
 - `scope: memory`：本聊天的记忆。每个操作保存为消息 sidecar 中的事件（`memory.replace` / `memory.delete`）。当前记忆由聊天从第 0 条消息开始按顺序折叠得到，因此**切换 swipe、删除消息会自动回滚**对应的记忆修改；
-- `scope: global_memory`：全局记忆，按预设保存（所有聊天共享），是只追加的日志，可在面板中撤销；
+- `scope: global_memory`：全局记忆，按预设保存（所有聊天共享），是只追加的日志，可在面板中撤销。消息 sidecar 保存条目 id（`global.ref`）：删除、重新生成、滑走该消息时条目失效，滑回该版本时重新生效（见 [artifact-and-runtime.md](artifact-and-runtime.md#事件)）；
 - `{{ap::memory}}` / `{{ap::memory::global}}` 输出当前记忆的 JSON（见 [macros.md](macros.md)）；条件变量 `memory.hasChat` / `memory.hasGlobal` 见 [expressions.md](expressions.md)。
 
 ### recap

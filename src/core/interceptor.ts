@@ -12,6 +12,7 @@ import { classify, metaTrigger } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { annotationHistory, rewriteHistory, synopsisOptions } from './history';
 import { keywordTexts } from '@/store/user-modules';
+import { detachRegeneratingSidecar } from '@/store/sidecar';
 
 export async function advancedPresetInterceptor(chat: STMessage[], _contextSize: number, _abort: (immediately: boolean) => void, type?: string): Promise<void> {
   registry.setPending(null);
@@ -21,6 +22,8 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
   if (!preset) return;
   const config = activeConfiguration(preset);
   const stType = type || 'normal';
+  // Backup for swipes that did not go through MESSAGE_SWIPED: the regenerated turn's memory must not count.
+  if (stType === 'swipe') detachRegeneratingSidecar(st().chat.length - 1);
 
   const last = chat.length - 1;
   const currentInput = stType !== 'continue' && chat[last]?.is_user ? last : -1;
