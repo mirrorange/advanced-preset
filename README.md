@@ -127,7 +127,7 @@ pnpm typecheck    # vue-tsc
 1. 构建、类型检查、测试；`dist/` 与已提交的不同时由 `github-actions[bot]` 自动提交 `build: rebuild dist`；
 2. 若 CLI（`packages/`、`pnpm-lock.yaml`）自上一个 dev 版本以来有变化，以 `dev` 标签发布预发布版本到 npm，版本号为 `<下一补丁版本>-dev.<UTC 时间>.g<提交>`（如 `1.7.1-dev.20261025083000.g7ca1ca3`；若版本号已升但未发布，则用该版本号）。
 
-预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.7.0` 这类范围，也不会移动 `latest`。
+预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.8.0` 这类范围，也不会移动 `latest`。
 
 ## 📄 许可
 
