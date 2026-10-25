@@ -14,7 +14,7 @@ import { chatMemory, currentRecap, globalMemory } from '@/store/eventlog';
 import { getSidecar } from '@/store/sidecar';
 import { settings } from '@/store/settings';
 import { keywordTexts, userModules } from '@/store/user-modules';
-import { classify, metaTrigger, pickWorkflow } from './classify';
+import { classify, metaEnabled, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { alignHistory, annotationHistory, rewriteHistory, synopsisOptions, type HistoryItem } from './history';
 import { debugLog } from './debug';
@@ -47,6 +47,7 @@ function isolateAnchors(chat: ChatMessage[]): (ChatMessage & { __anchor?: string
 }
 
 function recentMeta(preset: APreset, ctxConfig: ReturnType<typeof activeConfiguration>): string {
+  if (!metaEnabled(ctxConfig)) return '';
   const replyId = Object.values(preset.structures).find((s) => s.kind === 'reply')?.id;
   const chat = st().chat;
   const lines: string[] = [];

@@ -44,9 +44,18 @@ function withCacheDefaults(p: APreset): APreset {
   return { ...p, configurationDefaults: { ...conf, cache: { ...CACHE_DEFAULTS, ...(isObj(cache) ? cache : {}) } } };
 }
 
+/** The meta switch was added without a format bump: older artifacts keep meta instructions on. */
+function withMetaDefaults(p: APreset): APreset {
+  const conf = p.configurationDefaults as APreset['configurationDefaults'] | undefined;
+  if (!isObj(conf)) return p;
+  const meta = (conf as Obj).meta;
+  if (isObj(meta) && 'enabled' in meta) return p;
+  return { ...p, configurationDefaults: { ...conf, meta: { enabled: true, ...(isObj(meta) ? meta : {}) } as Obj } } as APreset;
+}
+
 /** Fields added without a format bump get their empty defaults. */
 function withOptionalDefaults(p: APreset): APreset {
-  const out = withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p)));
+  const out = withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p))));
   return Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
 }
 

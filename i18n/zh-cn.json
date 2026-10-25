@@ -140,6 +140,7 @@
   "writing.cacheMaxDeferred": "最大缓存保护轮次",
   "writing.cacheMaxDeferred.hint": "渲染变化最多推迟多少轮请求，超过后一次性全部应用。数值越大缓存命中越多，但历史中按旧规则渲染的消息也越多；0 为不推迟。",
   "writing.meta": "元指令",
+  "writing.meta.hint": "以触发词（如 @Freesia）开头、写给叙述者的故事外指令。关闭后不再识别，按普通故事输入发送。",
   "writing.recentCount": "保留近期元指令",
   "writing.recentCount.hint": "模型可见的之前元指令条数。",
   "memory.chat": "聊天记忆",

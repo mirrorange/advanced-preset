@@ -140,6 +140,7 @@
   "writing.cacheMaxDeferred": "Max cache-protected turns",
   "writing.cacheMaxDeferred.hint": "How many requests a rendering change may be postponed before everything is applied at once. Higher means more cache hits but more history rendered by older rules; 0 = never postpone.",
   "writing.meta": "Meta instructions",
+  "writing.meta.hint": "Out-of-story instructions to the narrator, starting with the trigger (e.g. @Freesia). When off, they are sent as ordinary story input.",
   "writing.recentCount": "Recent meta kept",
   "writing.recentCount.hint": "How many earlier meta instructions stay visible to the model.",
   "memory.chat": "Chat memory",

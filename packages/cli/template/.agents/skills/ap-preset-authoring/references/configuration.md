@@ -40,7 +40,7 @@ configurationDefaults:
   params: { length: 600 }
   tokenSaving: { enabled: false, keepFullTurns: 6, truncateUserAfter: 2000, userInput: truncate }
   cache: { enabled: false, ttlMinutes: 5, maxDeferredTurns: 6 }
-  meta: { recentCount: 3 }
+  meta: { enabled: true, recentCount: 3 }
 ```
 
 | 段 | 字段 | 默认 | 说明 |
@@ -60,7 +60,8 @@ configurationDefaults:
 | `params` | `<param id>` | 参数的 `default` | 参数值 |
 | `tokenSaving` | `enabled` / `keepFullTurns` / `truncateUserAfter` / `userInput` | `false` / 清单 `tokenSaving` 的值 | 省 token（[meta-and-tasks.md](meta-and-tasks.md#省-token)） |
 | `cache` | `enabled` / `ttlMinutes` / `maxDeferredTurns` | `false` / `5` / `6` | 缓存优化：粘性渲染历史（[meta-and-tasks.md](meta-and-tasks.md#缓存优化粘性渲染)）；`ttlMinutes`、`maxDeferredTurns` 为 0 分别表示不限时、从不推迟 |
-| `meta` | `recentCount` | 清单 `meta.recentCount` | `{{ap::recent_meta}}` 的条数 |
+| `meta` | `enabled` | `true` | 元指令总开关；`false` 时不处理元指令（[meta-and-tasks.md](meta-and-tasks.md#元指令)） |
+| | `recentCount` | 清单 `meta.recentCount` | `{{ap::recent_meta}}` 的条数 |
 
 ### sampling
 

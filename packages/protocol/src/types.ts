@@ -377,7 +377,8 @@ export interface Configuration {
   params: Record<string, string | number>;
   tokenSaving: TokenSavingConfig;
   cache: CacheConfig;
-  meta: { recentCount: number };
+  /** `enabled: false` turns meta-instruction handling off (input is plain story text). */
+  meta: { enabled: boolean; recentCount: number };
 }
 
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };

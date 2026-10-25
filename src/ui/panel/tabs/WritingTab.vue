@@ -1,7 +1,7 @@
 <script setup lang="ts">
-/** Preset parameters and meta settings. */
+/** Preset parameters. */
 import { computed } from 'vue';
-import { MessagesSquare, SlidersVertical } from 'lucide-vue-next';
+import { SlidersVertical } from 'lucide-vue-next';
 import type { Param } from '@advanced-preset/protocol';
 import { t, pt, presetLocale } from '@/i18n';
 import { usePreset } from '../use';
@@ -34,7 +34,6 @@ const optionLabel = (x: Param, value: string | number, fallback?: string) => {
 const value = (x: Param) => config.value?.params[x.id] ?? x.default;
 const setParam = (x: Param, raw: string) => update((c) => { c.params[x.id] = x.type === 'number' ? Number(raw) || 0 : raw; });
 
-const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const listId = (x: Param) => `ap-param-${x.id}`;
 </script>
 
@@ -56,12 +55,6 @@ const listId = (x: Param) => `ap-param-${x.id}`;
             <option v-for="o in x.options" :key="String(o.value)" :value="o.value">{{ optionLabel(x, o.value, o.label) }}</option>
           </datalist>
         </template>
-      </Field>
-    </Section>
-
-    <Section :title="t('writing.meta')" :icon="MessagesSquare">
-      <Field :label="t('writing.recentCount')" :help="t('writing.recentCount.hint')" inline>
-        <input class="input" type="number" min="0" max="20" :value="config.meta.recentCount" @change="setRecent(($event.target as HTMLInputElement).value)" />
       </Field>
     </Section>
   </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, Pencil, Plus, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
+import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, MessagesSquare, Pencil, Plus, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
 import { TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, type Transport, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
@@ -91,6 +91,11 @@ const userInput = computed({
   get: () => config.value?.tokenSaving.userInput ?? 'truncate',
   set: (v: UserInputMode) => update((c) => { c.tokenSaving.userInput = v; }),
 });
+const metaOn = computed({
+  get: () => config.value?.meta?.enabled !== false,
+  set: (v: boolean) => update((c) => { c.meta.enabled = v; }),
+});
+const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const cache = computed({
   get: () => config.value?.cache?.enabled ?? false,
   set: (v: boolean) => update((c) => { c.cache.enabled = v; }),
@@ -182,6 +187,15 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
           <input class="input" :value="config.identity.prefixes[id] ?? ''" :placeholder="a.prefix" @change="setIdentity('prefixes', id, ($event.target as HTMLInputElement).value)" />
         </Field>
       </div>
+    </Section>
+
+    <Section :title="t('writing.meta')" :icon="MessagesSquare" :help="t('writing.meta.hint')">
+      <template #actions><Switch v-model="metaOn" :label="t('writing.meta')" /></template>
+      <template v-if="metaOn">
+        <Field :label="t('writing.recentCount')" :help="t('writing.recentCount.hint')" inline>
+          <input class="input" type="number" min="0" max="20" :value="config.meta.recentCount" @change="setRecent(($event.target as HTMLInputElement).value)" />
+        </Field>
+      </template>
     </Section>
 
     <Section :title="t('writing.tokenSaving')" :icon="Coins" :help="t('writing.tokenSaving.hint')">
