@@ -9197,7 +9197,7 @@ function jh(e) {
 }
 async function Mh() {
 	let e = await Ah();
-	e && e !== "1b7cb1dbde30880c" && sessionStorage.getItem(kh) !== e && jh(e);
+	e && e !== "d62503c7e07c1885" && sessionStorage.getItem(kh) !== e && jh(e);
 }
 async function Nh() {
 	await Mh();
@@ -9206,7 +9206,7 @@ async function Ph() {
 	let e = o().replace(/^third-party\//, ""), t = await Fh(e, !1);
 	if (t.status === 404 && (t = await Fh(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ah();
-	return r && r !== "1b7cb1dbde30880c" ? (jh(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "d62503c7e07c1885" ? (jh(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Fh = (t, n) => m("/api/extensions/update", {
 	method: "POST",
@@ -9299,7 +9299,7 @@ function Jh(e) {
 async function Yh(e, t) {
 	let n = bu(e);
 	if (!n) throw Error(Y("presets.invalid"));
-	if (n.minAdvancedPreset && wc("1.7.0", n.minAdvancedPreset) < 0) throw Error(Y("presets.tooNew", { version: n.minAdvancedPreset }));
+	if (n.minAdvancedPreset && wc("1.8.0", n.minAdvancedPreset) < 0) throw Error(Y("presets.tooNew", { version: n.minAdvancedPreset }));
 	Eu(n), t && (q().sources[n.id] = t), J();
 	let r = Tu(n.id) ?? n;
 	return xd(r), await Md(r), r;
@@ -14871,7 +14871,7 @@ var OS = ["data-id"], kS = ["aria-label", "onPointerdown"], AS = ["onClick"], jS
 				"icon",
 				"help"
 			]),
-			U("div", UT, "Advanced Preset " + A(P("1.7.0")) + " · " + A(P("1b7cb1dbde30880c")), 1)
+			U("div", UT, "Advanced Preset " + A(P("1.8.0")) + " · " + A(P("d62503c7e07c1885")), 1)
 		], 64));
 	}
 }), GT = ["aria-label"], KT = { class: "panel-head" }, qT = { class: "panel-logo" }, JT = { class: "grow" }, YT = { class: "panel-title ellipsis" }, XT = { class: "panel-sub ellipsis" }, ZT = {
@@ -15034,8 +15034,8 @@ function mE() {
 //#endregion
 //#region src/index.ts
 var hE = {
-	version: "1.7.0",
-	buildId: "1b7cb1dbde30880c",
+	version: "1.8.0",
+	buildId: "d62503c7e07c1885",
 	nextGeneration: (e) => Rd(e),
 	listPresets: () => xu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -15086,8 +15086,8 @@ async function vE() {
 		await _E(), _h({ reload: !0 }), Vh(), Mh();
 	};
 	t.on(n.APP_READY, () => void a()), mE(), qf("init", {
-		version: "1.7.0",
-		build: "1b7cb1dbde30880c",
+		version: "1.8.0",
+		build: "d62503c7e07c1885",
 		enabled: q().enabled
 	});
 }
