@@ -3,7 +3,7 @@
  * User data only stores sparse diffs, so new defaults flow in automatically.
  */
 import { cloneData } from './clone';
-import type { APreset, Configuration, ConnectionConfig, Migration, SparseDiff } from './types';
+import type { APreset, CacheConfig, Configuration, ConnectionConfig, Migration, SparseDiff } from './types';
 import { satisfies } from './semver';
 
 type Obj = Record<string, unknown>;
@@ -18,6 +18,13 @@ export const CONNECTION_DEFAULTS: Omit<ConnectionConfig, 'workflow' | 'synthetic
   streamToolArguments: 'auto',
   maxSteps: 6,
   finalFallback: true,
+};
+
+/** Cache optimization defaults (a preset may override them in `configurationDefaults.cache`). */
+export const CACHE_DEFAULTS: CacheConfig = {
+  enabled: false,
+  ttlMinutes: 5,
+  maxDeferredTurns: 6,
 };
 
 export function deepMerge<T>(base: T, ...layers: unknown[]): T {

@@ -18,6 +18,7 @@ import { encodeJson, errorResponse, familyOf, streamEncoder, type EncodedToolCal
 import { BackendError, readResponse, type ReadState } from './reader';
 import { live, startLive, updateLive, type LiveGeneration } from './live';
 import { recordRequest } from './debug';
+import { commitCache } from './sticky';
 
 export const GENERATE_URL = '/api/backends/chat-completions/generate';
 
@@ -145,12 +146,18 @@ async function run(
           if (text) onContent(clean(text.slice(0, text.length - partialTagTail(text))).trimEnd());
         }
       }
+      // Cache optimization: the state counts from the last successful request.
+      commitCache(ctx);
       rec.response = read.text || JSON.stringify(read.toolCalls);
       rec.durationMs = Date.now() - rec.at;
       rec.usage = read.usage;
     } catch (e) {
       rec.error = messageOf(e);
-      if (isAbort(e) || signal?.aborted) { interrupted = true; partial = driver.progress(read, false); break; }
+      if (isAbort(e) || signal?.aborted) {
+        // Output had started: the prompt was processed (and cached) by the provider.
+        if (read.text || read.reasoning || read.toolCalls.length) commitCache(ctx);
+        interrupted = true; partial = driver.progress(read, false); break;
+      }
       throw e;
     }
     reasoning += read.reasoning;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Preset parameters, actor names / prefixes, token saving and meta settings. */
 import { computed } from 'vue';
-import { Coins, Drama, MessagesSquare, SlidersVertical } from 'lucide-vue-next';
+import { Coins, DatabaseZap, Drama, MessagesSquare, SlidersVertical } from 'lucide-vue-next';
 import { USER_INPUT_MODES, type Param, type UserInputMode } from '@advanced-preset/protocol';
 import { t, pt, presetLocale } from '@/i18n';
 import { usePreset } from '../use';
@@ -49,6 +49,11 @@ const userInput = computed({
   get: () => config.value?.tokenSaving.userInput ?? 'truncate',
   set: (v: UserInputMode) => update((c) => { c.tokenSaving.userInput = v; }),
 });
+const cache = computed({
+  get: () => config.value?.cache?.enabled ?? false,
+  set: (v: boolean) => update((c) => { c.cache.enabled = v; }),
+});
+const setCache = (k: 'ttlMinutes' | 'maxDeferredTurns', v: string) => update((c) => { c.cache[k] = Math.max(0, Math.round(Number(v) || 0)); });
 const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const listId = (x: Param) => `ap-param-${x.id}`;
 </script>
@@ -96,6 +101,18 @@ const listId = (x: Param) => `ap-param-${x.id}`;
         </Field>
         <Field v-if="userInput === 'truncate'" :label="t('writing.truncateUserAfter')" :help="t('writing.truncateUserAfter.hint')" inline>
           <input class="input" type="number" min="0" :value="config.tokenSaving.truncateUserAfter" @change="setTs('truncateUserAfter', ($event.target as HTMLInputElement).value)" />
+        </Field>
+      </template>
+    </Section>
+
+    <Section :title="t('writing.cache')" :icon="DatabaseZap" :help="t('writing.cache.hint')">
+      <template #actions><Switch v-model="cache" :label="t('writing.cache')" /></template>
+      <template v-if="cache">
+        <Field :label="t('writing.cacheTtl')" :help="t('writing.cacheTtl.hint')" inline>
+          <input class="input" type="number" min="0" :value="config.cache.ttlMinutes" @change="setCache('ttlMinutes', ($event.target as HTMLInputElement).value)" />
+        </Field>
+        <Field :label="t('writing.cacheMaxDeferred')" :help="t('writing.cacheMaxDeferred.hint')" inline>
+          <input class="input" type="number" min="0" :value="config.cache.maxDeferredTurns" @change="setCache('maxDeferredTurns', ($event.target as HTMLInputElement).value)" />
         </Field>
       </template>
     </Section>

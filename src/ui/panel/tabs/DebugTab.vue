@@ -4,6 +4,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { ChevronRight, Code, Copy, FileStack, MessageSquareDashed, ScrollText, Server, Trash2 } from 'lucide-vue-next';
 import { debugState } from '@/core/debug';
 import type { AssemblySnapshot } from '@/core/assembler';
+import type { CacheReport } from '@/core/sticky';
 import { settings, save } from '@/store/settings';
 import { st } from '@/st/host';
 import { t } from '@/i18n';
@@ -16,6 +17,8 @@ import Switch from '../../components/Switch.vue';
 import IconButton from '../../components/IconButton.vue';
 
 const snapshot = computed(() => debugState.log.find((e) => e.kind === 'assembly')?.data as AssemblySnapshot | undefined);
+/** Dry runs (token counting, prompt itemization) skip the interceptor: keep showing the last real report. */
+const cacheReport = computed(() => (debugState.log.find((e) => e.kind === 'assembly' && (e.data as AssemblySnapshot).cache)?.data as AssemblySnapshot | undefined)?.cache ?? undefined);
 const openRegions = reactive(new Set<string>());
 const toggleRegion = (id: string) => (openRegions.has(id) ? openRegions.delete(id) : openRegions.add(id));
 
@@ -41,8 +44,16 @@ const usageText = (u: unknown) => {
   if (!x) return '';
   const inp = x.prompt_tokens ?? x.input_tokens ?? x.promptTokenCount;
   const out = x.completion_tokens ?? x.output_tokens ?? x.candidatesTokenCount;
-  return inp !== undefined || out !== undefined ? `${inp ?? '?'} → ${out ?? '?'}` : '';
+  if (inp === undefined && out === undefined) return '';
+  const details = (u as { prompt_tokens_details?: { cached_tokens?: number } }).prompt_tokens_details;
+  const hit = details?.cached_tokens ?? x.prompt_cache_hit_tokens ?? x.cache_read_input_tokens ?? x.cachedContentTokenCount;
+  return `${inp ?? '?'} → ${out ?? '?'}` + (hit ? ` · ${t('debug.cached', { n: hit })}` : '');
 };
+const cacheText = (c: CacheReport) => [
+  t('debug.cache.stats', { sticky: c.sticky, fresh: c.fresh }),
+  c.postponed ? t('debug.cache.postponed', { n: c.postponed, d: c.deferred, max: c.maxDeferredTurns || '∞' }) : '',
+  c.unmatched ? t('debug.cache.unmatched', { n: c.unmatched }) : '',
+].filter(Boolean).join(' · ');
 
 const devEnabled = computed({ get: () => settings().dev.enabled, set: (v: boolean) => { settings().dev.enabled = v; save(); } });
 const devUrl = computed({ get: () => settings().dev.url, set: (v: string) => { settings().dev.url = v.trim(); save(); } });
@@ -81,6 +92,11 @@ const orphans = computed(() => {
         <span class="badge neutral">{{ snapshot.origin }}</span>
         <span v-if="snapshot.dryRun" class="badge warn">dry run</span>
         <span class="grow" />{{ time(snapshot.at) }}
+      </div>
+      <div v-if="cacheReport" class="row wrap xs muted">
+        <span class="badge" :class="cacheReport.reason ? 'warn' : 'neutral'">{{ cacheReport.reason ? t(`debug.cache.flush.${cacheReport.reason}`) : t('debug.cache.kept') }}</span>
+        <span class="grow">{{ cacheText(cacheReport) }}</span>
+        <span v-if="cacheReport !== snapshot.cache">{{ time(cacheReport.at) }}</span>
       </div>
       <div>
         <div v-for="r in snapshot.regions" :key="r.id" class="region">

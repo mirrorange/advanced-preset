@@ -10,6 +10,7 @@ AP_TRANSPORT=Tool AP_WORKFLOW=Edit node e2e/run.mjs gen
 node e2e/run.mjs panel | imp | interact | err | dev | ext
 node e2e/run.mjs carrier                             # select the AP Carrier (fresh ST)
 node e2e/run.mjs syn-edit                            # edit the last synopsis from its card (after gen)
+node e2e/run.mjs cache                               # token saving + cache optimization over 5 turns, prefix reuse per request (AP_CACHE=off to compare)
 node e2e/run.mjs memory                              # memory follows message versions: swipe, swipe back, regenerate, delete (after carrier)
 ```
 
