@@ -97,7 +97,7 @@ pnpm typecheck    # vue-tsc
 
 - 修改内置预设后运行 `pnpm sync-presets`，把 `../petals-preset/dist` 同步到 `dist/presets/`；
 - 修改 `docs/reference/` 或 `docs/guide/13-petals-case-study.md` 后运行 `pnpm sync-skills`，更新 Agent Skills 中的文档副本（`pnpm test` 会检查是否同步）；
-- `dist/` 与 `packages/cli/dist/ap.js` 需随源码一起提交：ST 直接从仓库加载扩展。
+- `dist/` 与 `packages/cli/dist/ap.js` 需随源码一起提交：ST 直接从仓库加载扩展（推送到 `dev` 时 CI 会自动重建并提交，功能分支仍需手动构建）。
 
 <details>
 <summary><b>仓库结构</b></summary>
@@ -119,6 +119,15 @@ pnpm typecheck    # vue-tsc
 
 1. 同步修改 `package.json`、`manifest.json`、`packages/cli/package.json` 中的版本号，`pnpm build` 后提交；
 2. 推送 `v<版本>` 标签。GitHub Actions（[`release.yml`](.github/workflows/release.yml)）会检查标签与版本号一致、运行测试与类型检查、通过 npm Trusted Publishing 发布 `advanced-preset`，并创建 GitHub Release。
+
+### dev 预发布
+
+功能分支合并进 `dev` 并推送后，同一工作流会：
+
+1. 构建、类型检查、测试；`dist/` 与已提交的不同时由 `github-actions[bot]` 自动提交 `build: rebuild dist`；
+2. 若 CLI（`packages/`、`pnpm-lock.yaml`）自上一个 dev 版本以来有变化，以 `dev` 标签发布预发布版本到 npm，版本号为 `<下一补丁版本>-dev.<UTC 时间>.g<提交>`（如 `1.7.1-dev.20261025083000.g7ca1ca3`；若版本号已升但未发布，则用该版本号）。
+
+预设仓库的 `dev` 分支可用 `npm i -D advanced-preset@dev` 试用未发布的 CLI 功能。预发布版本不会匹配 `^1.7.0` 这类范围，也不会移动 `latest`。
 
 ## 📄 许可
 
