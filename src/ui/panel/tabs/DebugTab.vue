@@ -4,6 +4,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { ChevronRight, Code, Copy, FileStack, MessageSquareDashed, ScrollText, Server, Trash2 } from 'lucide-vue-next';
 import { debugState } from '@/core/debug';
 import type { AssemblySnapshot } from '@/core/assembler';
+import type { CacheReport } from '@/core/sticky';
 import { settings, save } from '@/store/settings';
 import { st } from '@/st/host';
 import { t } from '@/i18n';
@@ -41,8 +42,16 @@ const usageText = (u: unknown) => {
   if (!x) return '';
   const inp = x.prompt_tokens ?? x.input_tokens ?? x.promptTokenCount;
   const out = x.completion_tokens ?? x.output_tokens ?? x.candidatesTokenCount;
-  return inp !== undefined || out !== undefined ? `${inp ?? '?'} → ${out ?? '?'}` : '';
+  if (inp === undefined && out === undefined) return '';
+  const details = (u as { prompt_tokens_details?: { cached_tokens?: number } }).prompt_tokens_details;
+  const hit = details?.cached_tokens ?? x.prompt_cache_hit_tokens ?? x.cache_read_input_tokens ?? x.cachedContentTokenCount;
+  return `${inp ?? '?'} → ${out ?? '?'}` + (hit ? ` · ${t('debug.cached', { n: hit })}` : '');
 };
+const cacheText = (c: CacheReport) => [
+  t('debug.cache.stats', { sticky: c.sticky, fresh: c.fresh }),
+  c.postponed ? t('debug.cache.postponed', { n: c.postponed, d: c.deferred, max: c.maxDeferredTurns || '∞' }) : '',
+  c.unmatched ? t('debug.cache.unmatched', { n: c.unmatched }) : '',
+].filter(Boolean).join(' · ');
 
 const devEnabled = computed({ get: () => settings().dev.enabled, set: (v: boolean) => { settings().dev.enabled = v; save(); } });
 const devUrl = computed({ get: () => settings().dev.url, set: (v: string) => { settings().dev.url = v.trim(); save(); } });
@@ -81,6 +90,10 @@ const orphans = computed(() => {
         <span class="badge neutral">{{ snapshot.origin }}</span>
         <span v-if="snapshot.dryRun" class="badge warn">dry run</span>
         <span class="grow" />{{ time(snapshot.at) }}
+      </div>
+      <div v-if="snapshot.cache" class="row wrap xs muted">
+        <span class="badge" :class="snapshot.cache.reason ? 'warn' : 'neutral'">{{ snapshot.cache.reason ? t(`debug.cache.flush.${snapshot.cache.reason}`) : t('debug.cache.kept') }}</span>
+        <span>{{ cacheText(snapshot.cache) }}</span>
       </div>
       <div>
         <div v-for="r in snapshot.regions" :key="r.id" class="region">
