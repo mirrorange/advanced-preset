@@ -17,6 +17,8 @@ import Switch from '../../components/Switch.vue';
 import IconButton from '../../components/IconButton.vue';
 
 const snapshot = computed(() => debugState.log.find((e) => e.kind === 'assembly')?.data as AssemblySnapshot | undefined);
+/** Dry runs (token counting, prompt itemization) skip the interceptor: keep showing the last real report. */
+const cacheReport = computed(() => (debugState.log.find((e) => e.kind === 'assembly' && (e.data as AssemblySnapshot).cache)?.data as AssemblySnapshot | undefined)?.cache ?? undefined);
 const openRegions = reactive(new Set<string>());
 const toggleRegion = (id: string) => (openRegions.has(id) ? openRegions.delete(id) : openRegions.add(id));
 
@@ -91,9 +93,10 @@ const orphans = computed(() => {
         <span v-if="snapshot.dryRun" class="badge warn">dry run</span>
         <span class="grow" />{{ time(snapshot.at) }}
       </div>
-      <div v-if="snapshot.cache" class="row wrap xs muted">
-        <span class="badge" :class="snapshot.cache.reason ? 'warn' : 'neutral'">{{ snapshot.cache.reason ? t(`debug.cache.flush.${snapshot.cache.reason}`) : t('debug.cache.kept') }}</span>
-        <span>{{ cacheText(snapshot.cache) }}</span>
+      <div v-if="cacheReport" class="row wrap xs muted">
+        <span class="badge" :class="cacheReport.reason ? 'warn' : 'neutral'">{{ cacheReport.reason ? t(`debug.cache.flush.${cacheReport.reason}`) : t('debug.cache.kept') }}</span>
+        <span class="grow">{{ cacheText(cacheReport) }}</span>
+        <span v-if="cacheReport !== snapshot.cache">{{ time(cacheReport.at) }}</span>
       </div>
       <div>
         <div v-for="r in snapshot.regions" :key="r.id" class="region">
