@@ -16,7 +16,12 @@ let override: { origin?: Origin } | null = null;
 export const setNextGeneration = (o: { origin?: Origin } | null) => { override = o; };
 export const takeOverride = () => { const o = override; override = null; return o; };
 
+/** Whether meta instructions are handled (configuration switch, on by default). */
+export const metaEnabled = (config: Configuration) => config.meta?.enabled !== false;
+
+/** The meta trigger, or `''` when meta instructions are turned off (nothing is parsed or stripped). */
 export function metaTrigger(preset: APreset, config: Configuration): string {
+  if (!metaEnabled(config)) return '';
   const text = expandMacros(preset.meta.trigger, (args) => (args[0] === 'name' ? actorName(preset, config, args[1]!) : undefined));
   try { return st().substituteParams(text); } catch { return text; }
 }

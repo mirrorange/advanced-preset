@@ -539,7 +539,7 @@ export function compile(tree: SourceTree): CompileResult {
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...(sect('tokenSaving') as object) },
     cache: { ...CACHE_DEFAULTS, ...(sect('cache') as Partial<Configuration['cache']>) },
-    meta: { recentCount: meta.recentCount, ...(sect('meta') as object) },
+    meta: { enabled: true, recentCount: meta.recentCount, ...(sect('meta') as object) },
   };
   for (const k of ['names', 'prefixes'] as const) if (isObj(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect('modules'))) {
@@ -560,6 +560,11 @@ export function compile(tree: SourceTree): CompileResult {
     }
   };
   checkCache(sect('cache'), 'configurationDefaults.cache');
+  /** `meta` section of the defaults or of a recommended configuration's diff. */
+  const checkMeta = (c: Obj, path: string) => {
+    if ('enabled' in c && typeof c.enabled !== 'boolean') diag.error('`enabled` must be a boolean', { file: M, path: `${path}.enabled` });
+  };
+  checkMeta(sect('meta'), 'configurationDefaults.meta');
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
 
   const configurations: RecommendedConfiguration[] = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c: unknown, i: number) => {
@@ -569,6 +574,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (!rc.id) diag.error('configuration id is required', { file: M, path: `configurations[${i}]` });
     if (isObj(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
+    if (isObj(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: 'default', name: 'Default', diff: {} });
