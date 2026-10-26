@@ -93,6 +93,21 @@ Start the workflow {{ap::workflow::hint}} now. Deliver every stage in order, exa
 
 `<!-- … -->` 是 HTML 注释的写法，这里被 AP 用作**指令**。不是指令的普通注释会作为文字保留，例如花瓣里的 `<!-- Workflow Indicator -->` 就是写给模型看的标记。
 
+想给自己或协作者留说明、又不想发给模型时，写**注释** `<!--# … -->`（`<!--` 后面紧跟 `#`）。注释可以写在行内，也可以跨多行；里面的指令不会执行，所以也能用来临时停用一段内容：
+
+```markdown
+<!--# 这段是给 Claude 的预填充，改动前先看第 7 章 -->
+<!-- @entry id=bottom-prefill region=bottom order=900 when='transport == "prefill"' -->
+…
+
+<!--#
+旧版写法，暂时停用：
+<!-- @if params.length > 0 -->Aim for about {{ap::param::length}} words.<!-- @end -->
+-->
+```
+
+完整规则见 [指令参考](../reference/directives.md#注释)。
+
 没有 `@entry` 的模组，整个正文就是一个条目，使用 frontmatter 里的 `region` 和 `order`。
 
 ## 区域里的内容怎样排列
