@@ -30,7 +30,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 | 改 `preset.yaml` 任一顶层字段（角色、写法、区域、参数、分组、正则、元指令、主题……） | [manifest.md](references/manifest.md) |
 | 新建 / 修改模组，开关与单选，排序 | [modules.md](references/modules.md) |
 | 新建 / 修改工作流、阶段、字段名与工具名 | [workflows.md](references/workflows.md) |
-| `@entry` `@section` `@as` `@style` `@if` | [directives.md](references/directives.md) |
+| `@entry` `@section` `@as` `@style` `@if`、注释 `<!--# … -->` | [directives.md](references/directives.md) |
 | `when` / `@if` 条件与可用变量 | [expressions.md](references/expressions.md) |
 | `{{ap::…}}` 宏 | [macros.md](references/macros.md) |
 | 多个模组共同填写的清单 | [build-variables.md](references/build-variables.md) |
@@ -101,7 +101,7 @@ Outline the next scene.
 Write the story content.
 ```
 
-**指令**：`@entry`（模组）、`@section preamble|intro|outro|stage:<id> [style=…]`（工作流）、`@as system|user|assistant`（新消息）、`@style dialogue|imperative … @end`、`@if <expr> … @else … @end`。其他 HTML 注释原样留给模型。
+**指令**：`@entry`（模组）、`@section preamble|intro|outro|stage:<id> [style=…]`（工作流）、`@as system|user|assistant`（新消息）、`@style dialogue|imperative … @end`、`@if <expr> … @else … @end`。`<!--# … -->` 是作者注释（可跨行，内部指令不执行，不发送）；其他 HTML 注释原样留给模型。
 
 **常用条件变量**：`transport`、`style`、`workflow`、`gen.origin`（story/task）、`gen.type`、`meta.present` / `meta.pure` / `meta.mixed` / `meta.task`、`modules.<id>`、`params.<id>`、`flags.<id>`、`stages.<id>`、`memory.hasChat`、`recap.present`、`features.tokenSaving`、`chat.group`。
 

@@ -231,7 +231,7 @@
   "um.lostHint": "No longer in the preset: {points}. That part is skipped.",
   "um.lostAfterUpdate": "After the preset update, some insertion points or variables of these modules no longer exist: {names}",
   "um.content": "Content",
-  "um.content.help": "Pick an insertion point and write the prompt. {{ap::…}} macros and directives such as <!-- @if condition --> … <!-- @end --> or <!-- @as assistant --> work here. The role follows the point's region unless set.",
+  "um.content.help": "Pick an insertion point and write the prompt. {{ap::…}} macros and directives such as <!-- @if condition --> … <!-- @end --> or <!-- @as assistant --> work here; <!--# … --> is a note that is never sent (it may span lines). The role follows the point's region unless set.",
   "um.point": "Insertion point",
   "um.pointMissing": "{id} (missing)",
   "um.pointLost": "The preset removed this insertion point; this content is skipped.",

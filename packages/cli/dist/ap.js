@@ -8185,21 +8185,27 @@ function parseAttributes(src) {
   }
   return { args, attrs };
 }
-function tokenizeDirectives(body, split = [], firstLine = 1) {
+var COMMENT_OPEN_RE = /<!--[ \t]*#/g;
+var COMMENT_SCAN_RE = /<!--|-->/g;
+function scanComment(line, from, state) {
+  COMMENT_SCAN_RE.lastIndex = from;
+  for (let m = COMMENT_SCAN_RE.exec(line); m; m = COMMENT_SCAN_RE.exec(line)) {
+    state.depth += m[0] === "<!--" ? 1 : -1;
+    if (state.depth === 0) return m.index + m[0].length;
+  }
+  return -1;
+}
+function tokenizeDirectives(body, split = [], firstLine = 1, error) {
   const chunks = [{ tokens: [], line: firstLine }];
   const push = (t) => {
+    if (t.kind === "text" && !t.text) return;
     const tokens = chunks[chunks.length - 1].tokens;
     const last = tokens[tokens.length - 1];
     if (t.kind === "text" && last?.kind === "text") last.text += t.text;
     else tokens.push(t);
   };
-  const lines = body.replace(/\r\n?/g, "\n").split("\n");
-  let fenced = false;
-  lines.forEach((line, i) => {
-    const nl = i < lines.length - 1 ? "\n" : "";
-    const lineNo = firstLine + i;
-    if (FENCE_RE.test(line)) fenced = !fenced;
-    if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
+  const emit = (line, nl, lineNo, keepNewline = false) => {
+    if (!line.includes("<!--")) return push({ kind: "text", text: line + nl });
     const matches = [...line.matchAll(DIRECTIVE_RE)];
     if (!matches.length) return push({ kind: "text", text: line + nl });
     const alone = line.replace(DIRECTIVE_RE, "").trim() === "";
@@ -8213,8 +8219,63 @@ function tokenizeDirectives(body, split = [], firstLine = 1) {
       pos = m.index + m[0].length;
     }
     if (!alone) push({ kind: "text", text: line.slice(pos) + nl });
+    else if (keepNewline) push({ kind: "text", text: nl });
+  };
+  const lines = body.replace(/\r\n?/g, "\n").split("\n");
+  let fenced = false;
+  let comment;
+  lines.forEach((line, i) => {
+    const nl = i < lines.length - 1 ? "\n" : "";
+    const lineNo = firstLine + i;
+    let pos = 0;
+    let blankBefore = true;
+    let touched = false;
+    if (comment) {
+      const end = scanComment(line, 0, comment);
+      if (end < 0) return;
+      blankBefore = comment.blankBefore;
+      comment = void 0;
+      touched = true;
+      pos = blankBefore ? skipSpace(line, end) : end;
+    } else {
+      if (FENCE_RE.test(line)) fenced = !fenced;
+      if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
+    }
+    let out = "";
+    COMMENT_OPEN_RE.lastIndex = pos;
+    for (let m = COMMENT_OPEN_RE.exec(line); m; m = COMMENT_OPEN_RE.exec(line)) {
+      if (m.index < pos) continue;
+      out += line.slice(pos, m.index);
+      touched = true;
+      const state = { depth: 1, line: lineNo, blankBefore: blankBefore && !out.trim() };
+      const end = scanComment(line, m.index + m[0].length, state);
+      if (end < 0) {
+        comment = state;
+        pos = line.length;
+        break;
+      }
+      pos = !out || /\s$/.test(out) ? skipSpace(line, end) : end;
+      COMMENT_OPEN_RE.lastIndex = pos;
+    }
+    if (!touched) return emit(line, nl, lineNo);
+    out += line.slice(pos);
+    if (comment || !line.slice(pos).trim()) out = out.replace(/[ \t]+$/, "");
+    if (comment) {
+      if (out.trim()) emit(out, "", lineNo);
+      return;
+    }
+    if (!out.trim()) {
+      if (!blankBefore) push({ kind: "text", text: nl });
+      return;
+    }
+    emit(out, nl, lineNo, !blankBefore);
   });
+  if (comment) error?.(`unclosed comment <!--# (opened at line ${comment.line})`, comment.line);
   return chunks;
+}
+function skipSpace(line, from) {
+  while (from < line.length && (line[from] === " " || line[from] === "	")) from++;
+  return from;
 }
 var ROLES = ["system", "user", "assistant"];
 var STYLES = ["dialogue", "imperative"];
@@ -8281,8 +8342,9 @@ function compileTokens(tokens, error, onExpr) {
 }
 function compileText(text, role) {
   const errors = [];
-  const [chunk] = tokenizeDirectives(text);
-  const content = compileTokens(chunk.tokens, (message, line) => errors.push({ message, line }));
+  const sink = (message, line) => errors.push({ message, line });
+  const [chunk] = tokenizeDirectives(text, [], 1, sink);
+  const content = compileTokens(chunk.tokens, sink);
   if (role && content[0] && !content[0].role) content[0] = { ...content[0], role };
   return { content, errors };
 }
@@ -8556,7 +8618,12 @@ function parseMarkdown(src, split, diag, where) {
       diag.error(`invalid frontmatter: ${e.message}`, where);
     }
   }
-  const chunks = tokenizeDirectives(body, split, bodyLine);
+  const chunks = tokenizeDirectives(
+    body,
+    split,
+    bodyLine,
+    (message, line) => diag.error(message, line === void 0 ? where : { ...where, line })
+  );
   return { data, chunks };
 }
 function compileContent(tokens, diag, where, onExpr) {

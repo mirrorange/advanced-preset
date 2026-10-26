@@ -68,7 +68,7 @@ insertionPoints:
 
 - 条目放在插入点的区域与 `order` 上，排在**同区域、同 `order` 的预设条目之后**；多个用户模组按列表顺序排列；
 - 没有 `role` 的条目与区域中的其他文字合并；有 `role` 时成为单独的消息（等同于 `@as`）；
-- `text` 支持 `{{ap::…}}` 宏、ST 宏，以及 `@if` / `@as` / `@style` 指令（[directives.md](directives.md)），不支持 `@entry` / `@section`；
+- `text` 支持 `{{ap::…}}` 宏、ST 宏，以及 `@if` / `@as` / `@style` 指令与 `<!--# … -->` 注释（[directives.md](directives.md)），不支持 `@entry` / `@section`；
 - 插入点不存在（例如预设更新后被删除）的条目被跳过，并在调试信息中警告；空文字的条目忽略。
 
 ### 构建变量更新

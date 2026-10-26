@@ -137,6 +137,21 @@ describe('markdown directives', () => {
     expect(c[1]).toMatchObject({ role: 'assistant' });
   });
 
+  it('strips author comments, including commented-out entries', () => {
+    const d = new Diagnostics();
+    const f = parseMarkdown('a <!--# note -->\n<!--#\n<!-- @entry id=old -->\nold text\n-->\n<!-- @entry id=x -->\nb\n', ['entry'], d, {});
+    expect(d.ok).toBe(true);
+    expect(f.chunks).toHaveLength(2);
+    expect(f.chunks[0]!.tokens).toEqual([{ kind: 'text', text: 'a\n' }]);
+    expect(f.chunks[1]!.head).toMatchObject({ name: 'entry', line: 6 });
+  });
+
+  it('reports an unclosed comment with file and line', () => {
+    const d = new Diagnostics();
+    parseMarkdown('---\nid: m\n---\ntext\n<!--# todo\n', [], d, { file: 'modules/m.md' });
+    expect(d.errors[0]).toMatchObject({ message: expect.stringMatching(/unclosed comment/), file: 'modules/m.md', line: 5 });
+  });
+
   it('reports unbalanced blocks', () => {
     const d = new Diagnostics();
     const f = parseMarkdown('<!-- @if modules.x -->\ntext\n', [], d, {});
