@@ -7,7 +7,8 @@
  *   <!-- @style dialogue --> … <!-- @end -->                                     style-only fragment
  *   <!-- @if params.x != "" --> … <!-- @else --> … <!-- @end -->                 conditional fragment
  *
- * Directives inside fenced code blocks are literal text. Ordinary comments (e.g. `<!-- Workflow
+ * Author comments (`<!--# … -->`, single- or multi-line) are removed and never sent. Directives and
+ * comments inside fenced code blocks are literal text. Ordinary comments (e.g. `<!-- Workflow
  * Start -->`) are prompt text and are kept. The tokenizer and content compiler live in the protocol
  * package (`directives.ts`) so the extension can compile user modules with the same rules.
  */
@@ -46,7 +47,9 @@ export function parseMarkdown(src: string, split: string[], diag: Diagnostics, w
     }
   }
 
-  const chunks = tokenizeDirectives(body, split, bodyLine);
+  const chunks = tokenizeDirectives(body, split, bodyLine, (message, line) =>
+    diag.error(message, line === undefined ? where : { ...where, line }),
+  );
   return { data, chunks };
 }
 
