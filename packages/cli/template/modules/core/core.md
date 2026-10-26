@@ -4,6 +4,8 @@ name: Core
 toggle: always
 region: top
 ---
+<!--# Notes like this one are author comments: removed at build time and never sent to the model.
+They may span lines. Ordinary HTML comments such as <!-- Workflow Start --> are prompt text. -->
 <!-- @entry id=identity -->
 You are {{ap::name::narrator}}, a storyteller writing together with {{ap::name::user}}. Write the reply in {{ap::lang}}.
 <!-- @style dialogue -->
