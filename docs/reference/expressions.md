@@ -59,6 +59,7 @@ transport in ["structured", "tool-single", "tool-multi"]
 - 阶段的 `when` 在 `stages.*` 计算之前求值，所以阶段条件里不要引用 `stages.*`。
 - 正则标记的 `requires` 与 `meta.tasks` 在组装之前求值，只能可靠地使用 `meta.*` 与 `flags.*`。
 - `ap preview` 中 `memory.*`、`recap.present`、`chat.group`、`meta.recent` 总为假。
+- 这些变量同样是[模板](templates.md#作用域)作用域里的对象（`params.length`、`gen.type`……）。
 
 ## 诊断
 

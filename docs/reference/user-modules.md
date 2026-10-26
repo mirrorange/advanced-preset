@@ -68,7 +68,7 @@ insertionPoints:
 
 - 条目放在插入点的区域与 `order` 上，排在**同区域、同 `order` 的预设条目之后**；多个用户模组按列表顺序排列；
 - 没有 `role` 的条目与区域中的其他文字合并；有 `role` 时成为单独的消息（等同于 `@as`）；
-- `text` 支持 `{{ap::…}}` 宏、ST 宏，以及 `@if` / `@as` / `@style` 指令与 `<!--# … -->` 注释（[directives.md](directives.md)），不支持 `@entry` / `@section`；
+- `text` 支持 `{{ap::…}}` 宏、ST 宏，以及 `@if` / `@as` / `@style` / `@template` 指令与 `<!--# … -->` 注释（[directives.md](directives.md)），不支持 `@entry` / `@section`；
 - 插入点不存在（例如预设更新后被删除）的条目被跳过，并在调试信息中警告；空文字的条目忽略。
 
 ### 构建变量更新
@@ -113,6 +113,7 @@ insertionPoints:
 ```
 
 - 导入时数据被宽松规范化（缺失的条目 id 补为 `e1`、`e2`……，非法规则丢弃），作为**新副本**加入，不覆盖已有模组；
-- 文件来自预设的较旧版本时，先按预设的[迁移](configuration.md#迁移)重命名插入点、变量与条件中引用的模组 / 参数。
+- 文件来自预设的较旧版本时，先按预设的[迁移](configuration.md#迁移)重命名插入点、变量与条件中引用的模组 / 参数（[模板](templates.md)代码不会被改写）；
+- 文件包含模板时，导入前显示代码并请用户确认信任（见 [templates.md](templates.md#信任)）。
 
 预设作者可以提供示例用户模组文件，用 `ap preview --user-modules <file>` 检查它们的效果（预览时关键词规则看到的是空文本，见 [cli.md](cli.md)）。

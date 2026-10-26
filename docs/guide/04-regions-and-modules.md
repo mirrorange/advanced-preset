@@ -108,6 +108,18 @@ Start the workflow {{ap::workflow::hint}} now. Deliver every stage in order, exa
 
 完整规则见 [指令参考](../reference/directives.md#注释)。
 
+条件和宏不够用时（比如要把一个列表编号、按参数算一个数），可以写**模板**：`<!-- @template -->` 与 `<!-- @end -->` 之间是 [EJS](https://ejs.co/) 模板，每次生成时运行，能读取 `params`、`gen`、`vars` 等变量：
+
+```markdown
+<!-- @template -->
+<% vars.rules.forEach((rule, i) => { -%>
+<%- i + 1 %>. <%- rule %>
+<% }) -%>
+<!-- @end -->
+```
+
+模板是 JavaScript 代码，用户安装含模板的预设时，AP 会显示代码并请他们确认信任。所以只在确有需要时使用，并把 `minAdvancedPreset` 设为 `1.9.0`。详见 [模板参考](../reference/templates.md)。
+
 没有 `@entry` 的模组，整个正文就是一个条目，使用 frontmatter 里的 `region` 和 `order`。
 
 ## 区域里的内容怎样排列
