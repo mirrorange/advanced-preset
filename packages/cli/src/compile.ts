@@ -12,7 +12,7 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
-  isInlineStructure,
+  isInlineStructure, templateLiterals,
   CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
@@ -36,6 +36,8 @@ export const SOURCE_FORMAT_VERSION = 1;
 export interface SourceMap {
   exprs: { expr: Expr; where: Where }[];
   texts: { text: string; where: Where }[];
+  /** `@template` sources (checked for references; their literal text is in `texts`). */
+  templates: { source: string; where: Where }[];
   entries: Map<string, Where>;
   modules: Map<string, Where>;
   workflows: Map<string, Where>;
@@ -137,7 +139,7 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
 
 export function compile(tree: SourceTree): CompileResult {
   const diag = new Diagnostics();
-  const map: SourceMap = { exprs: [], texts: [], entries: new Map(), modules: new Map(), workflows: new Map() };
+  const map: SourceMap = { exprs: [], texts: [], templates: [], entries: new Map(), modules: new Map(), workflows: new Map() };
   const manifestSrc = tree.get('preset.yaml');
   if (manifestSrc === undefined) {
     diag.error('preset.yaml not found');
@@ -172,7 +174,13 @@ export function compile(tree: SourceTree): CompileResult {
   };
   const content = (tokens: Chunk['tokens'], where: Where): Content => {
     const c = compileContent(tokens, diag, where, (e, w) => map.exprs.push({ expr: e, where: w }));
-    for (const b of c) for (const p of b.pieces) map.texts.push({ text: p.text, where });
+    for (const b of c) for (const p of b.pieces) {
+      if (!p.template) { map.texts.push({ text: p.text, where }); continue; }
+      const at = { ...where, ...(p.template.line !== undefined ? { line: p.template.line } : {}) };
+      map.templates.push({ source: p.text, where: at });
+      // Macros are checked in the literal text only: code may build macro text at runtime.
+      for (const lit of templateLiterals(p.text)) map.texts.push({ text: lit, where: at });
+    }
     return c;
   };
 

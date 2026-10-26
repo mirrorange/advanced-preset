@@ -16,6 +16,9 @@
  * installs presets / user modules containing templates after the user trusts them.
  */
 
+/** First Advanced Preset version that renders `@template` (older versions would send the source as text). */
+export const TEMPLATES_SINCE = '1.9.0';
+
 /** A template problem. `line` is the 1-based line inside the template source when known. */
 export class TemplateError extends Error {
   readonly line?: number;
