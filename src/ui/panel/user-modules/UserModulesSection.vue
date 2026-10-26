@@ -2,7 +2,8 @@
 /** "My modules" list: open, toggle, reorder (drag the grip), import / export, create. */
 import { computed, ref } from 'vue';
 import { Download, GripVertical, Plus, Upload, TriangleAlert, Zap } from 'lucide-vue-next';
-import { lostRefs, ruleComplete, type APreset, type UserModule } from '@advanced-preset/protocol';
+import { lostRefs, parseUserModuleFile, ruleComplete, type APreset, type UserModule } from '@advanced-preset/protocol';
+import { confirmUserModuleTemplates, isTrustDeclined } from '@/app/trust';
 import { t, pt } from '@/i18n';
 import { toast } from '@/st/host';
 import { save } from '@/store/settings';
@@ -47,10 +48,14 @@ async function importFile(ev: Event) {
   input.value = '';
   if (!file) return;
   try {
-    const { added, missing } = importUserModules(props.preset, JSON.parse(await file.text()));
+    const raw: unknown = JSON.parse(await file.text());
+    // Templates in someone else's modules run code: ask first (I-110).
+    await confirmUserModuleTemplates(parseUserModuleFile(raw).modules);
+    const { added, missing } = importUserModules(props.preset, raw);
     toast(missing ? 'warning' : 'success', missing ? t('um.importedMissing', { n: added.length, missing }) : t('um.imported', { n: added.length }));
   } catch (e) {
-    toast('error', t('um.importFailed', { error: e instanceof Error ? e.message : String(e) }));
+    if (isTrustDeclined(e)) toast('info', e.message);
+    else toast('error', t('um.importFailed', { error: e instanceof Error ? e.message : String(e) }));
   }
 }
 const exportAll = () => downloadJson(`${props.preset.id}.ap-modules.json`, exportUserModules(props.preset));

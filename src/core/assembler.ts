@@ -6,7 +6,8 @@
 import {
   actorName, assemble, defaultVars, formatVar, replyToPlainText, withUserModules, type APreset, type MacroData, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
-import { st, type ChatMessage } from '@/st/host';
+import { st, toast, type ChatMessage } from '@/st/host';
+import { t } from '@/i18n';
 import { getPreset } from '@/store/presets';
 import { activeConfiguration, presetState } from '@/store/config';
 import { activeCarrierPresetId } from '@/store/carrier';
@@ -208,6 +209,18 @@ export interface AssemblySnapshot {
 }
 export let lastSnapshot: AssemblySnapshot | null = null;
 
+/** Template errors (I-109): kept in the assembly warnings (debug tab), logged, and toasted once per message. */
+const toasted = new Set<string>();
+function reportTemplateWarnings(found: string[], into: string[]): void {
+  for (const w of found) {
+    into.push(w);
+    console.warn('[AP]', w);
+    if (toasted.has(w)) continue;
+    toasted.add(w);
+    toast('warning', t('warn.template', { error: w }), t('app.name'));
+  }
+}
+
 export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolean }): Promise<void> {
   const { chat, dryRun } = event;
   if (!settings().enabled || !chat.some((m) => typeof m.content === 'string' && m.content.includes('⟦ap:region:'))) {
@@ -235,6 +248,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   const merged = withUserModules(preset, userModules(preset), ctx.keywords);
   for (const x of merged.skipped) ctx.warnings.push(`user module ${x.module}: insertion point \`${x.point}\` is missing, entry ${x.entry} skipped`);
   const assembly = assemble({ preset: merged.preset, config: ctx.config, vars, data }, workflow);
+  if (assembly.warnings.length) reportTemplateWarnings(assembly.warnings, ctx.warnings);
   ctx.workflow = workflow;
   ctx.assembly = assembly;
   ctx.stages = assembly.stages;

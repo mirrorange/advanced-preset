@@ -6,6 +6,7 @@ import { getPreset, installPreset, isBuiltin, removeInstalled, toArtifact } from
 import { migratePresetState } from '@/store/config';
 import { ensureCarrier, findCarrier } from '@/store/carrier';
 import { t } from '@/i18n';
+import { confirmPresetTemplates } from './trust';
 
 /** GitHub page URLs → raw file URLs. */
 export function rawUrl(url: string): string {
@@ -19,6 +20,8 @@ export async function installArtifact(raw: unknown, source?: string): Promise<AP
   if (data.minAdvancedPreset && compareVersions(__AP_VERSION__, data.minAdvancedPreset) < 0) {
     throw new Error(t('presets.tooNew', { version: data.minAdvancedPreset }));
   }
+  // Templates run code: ask unless the code is unchanged from the copy being replaced (I-110).
+  await confirmPresetTemplates(data, getPreset(data.id));
   installPreset(data);
   if (source) settings().sources[data.id] = source;
   save();
