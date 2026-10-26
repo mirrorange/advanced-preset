@@ -36,6 +36,16 @@ export type ActorId = string;
 export interface Piece {
   text: string;
   when?: Expr;
+  /**
+   * `@template` (I-109): `text` is an EJS template, rendered at assembly time; its output then goes
+   * through macro expansion like any other text. The origin is for error messages.
+   */
+  template?: TemplateOrigin;
+}
+/** Where a template was written: source file (preset sources) and 1-based line of its first line. */
+export interface TemplateOrigin {
+  file?: string;
+  line?: number;
 }
 /** One chat message worth of content. `role` overrides the region role (`@as`). */
 export interface Block {

@@ -6,9 +6,11 @@
 import type { APreset, Configuration, Content, Module, Region, Role, Stage, StructureDecl, Style, Transport, Workflow } from './types';
 import { test, type Resolver } from './expr';
 import { expandMacros } from './macros';
-import { renderContent } from './content';
+import { renderContent, type TemplateRenderer } from './content';
+import { cloneData } from './clone';
+import { deepFreeze, renderTemplate, TemplateError } from './template';
 import { activeStages, stageFieldName, stageToolName, workflowSummary } from './workflow';
-import { computeBuildVars, formatVar, type BuildVars } from './build-vars';
+import { computeBuildVars, formatVar, plainBuildVars, type BuildVars } from './build-vars';
 
 export interface Message {
   role: Role;
@@ -113,6 +115,8 @@ export interface Assembly {
   /** Rendered messages per region id (non-native regions only). */
   regions: Record<string, Message[]>;
   expand: (text: string) => string;
+  /** Problems found while assembling (template errors). */
+  warnings: string[];
 }
 
 /** Display name of an actor (configuration override first). Native ST macros remain for substituteParams. */
@@ -121,6 +125,12 @@ export function actorName(preset: APreset, config: Configuration, actor: string)
 }
 
 export function createMacroExpander(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, buildVars: BuildVars): (text: string) => string {
+  const resolve = createMacroResolver(input, stages, workflow, buildVars);
+  return (text) => expandMacros(text, resolve);
+}
+
+/** Resolves one `{{ap::…}}` macro (argument list) to its text; `undefined` for unknown macros. */
+export function createMacroResolver(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, buildVars: BuildVars): (args: string[]) => string | undefined {
   const { preset, config, vars, data = {} } = input;
   const paramText = (id: string, depth = 0): string => {
     const p = preset.params.find((x) => x.id === id);
@@ -176,7 +186,40 @@ export function createMacroExpander(input: AssemblyInput, stages: Stage[], workf
       default: return undefined;
     }
   };
-  return (text) => expandMacros(text, resolve);
+  return resolve;
+}
+
+/**
+ * The scope of `@template` templates (I-109): every condition variable (`transport`, `gen`, `params`,
+ * `modules`, …), the build variables as plain values (`vars`: string / array / object), the
+ * configuration's sampling settings and `macro(name, ...args)` (= `{{ap::name::args}}`). Frozen:
+ * templates cannot change what later templates or the assembly see.
+ */
+export function templateScope(vars: Vars, buildVars: BuildVars, config: Configuration, macro: (args: string[]) => string | undefined, expand: (text: string) => string): Record<string, unknown> {
+  return deepFreeze({
+    ...cloneData(vars),
+    vars: cloneData(plainBuildVars(buildVars)),
+    sampling: cloneData(config.sampling ?? {}),
+    macro: (...args: unknown[]) => {
+      const v = macro(args.map((x) => String(x).trim()));
+      return v === undefined ? '' : expand(v);
+    },
+  });
+}
+
+/** Template renderer of one assembly: errors become warnings and the template renders nothing. */
+function templateRenderer(scope: () => Record<string, unknown>, warnings: string[], where: string): TemplateRenderer {
+  return (piece) => {
+    try {
+      return renderTemplate(piece.text, scope());
+    } catch (e) {
+      const rel = e instanceof TemplateError ? e.line : undefined;
+      const line = piece.template?.line !== undefined && rel !== undefined ? piece.template.line + rel - 1 : piece.template?.line;
+      const loc = [piece.template?.file, line].filter((x) => x !== undefined).join(':');
+      warnings.push(`template in ${where}${loc ? ` (${loc})` : ''}: ${e instanceof Error ? e.message : String(e)}`);
+      return '';
+    }
+  };
 }
 
 function regionMessages(region: Region, blocks: { role?: Role; text: string }[]): Message[] {
@@ -234,20 +277,25 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   const modules = activeModules(preset, config, resolve);
   const structures = activeStructures(preset, modules);
   const buildVars = computeBuildVars(preset.vars, modules);
-  const expand = createMacroExpander({ ...input, vars }, stages, workflow, buildVars);
+  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars);
+  const expand = (text: string) => expandMacros(text, macro);
   const activeIds = new Set(modules.map((m) => m.id));
+  const warnings: string[] = [];
+  let scope: Record<string, unknown> | undefined;
+  const getScope = () => (scope ??= templateScope(vars, buildVars, config, macro, expand));
 
   const blocksByRegion = new Map<string, { role?: Role; text: string; workflow?: boolean }[]>();
   for (const e of preset.entries) {
     if (!activeIds.has(e.module) || !test(e.when, resolve)) continue;
     const list = blocksByRegion.get(e.region) ?? [];
-    list.push(...renderContent(e.content, resolve, expand));
+    list.push(...renderContent(e.content, resolve, expand, templateRenderer(getScope, warnings, `entry ${e.id}`)));
     blocksByRegion.set(e.region, list);
   }
   if (workflow) {
     const list = blocksByRegion.get(preset.workflowRegion) ?? [];
     // One workflow is one prompt: role-less blocks merge into a single message; `@as` blocks stay separate.
-    for (const b of renderContent(workflowContent(preset, workflow, stages, vars.style, vars.transport, config), resolve, expand)) {
+    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config);
+    for (const b of renderContent(content, resolve, expand, templateRenderer(getScope, warnings, `workflow ${workflow.id}`))) {
       const last = list[list.length - 1];
       if (!b.role && last && !last.role && last.workflow) last.text += `\n\n${b.text}`;
       else list.push({ ...b, workflow: true });
@@ -256,7 +304,7 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   }
   const regions: Record<string, Message[]> = {};
   for (const r of preset.regions) if (!r.native) regions[r.id] = regionMessages(r, blocksByRegion.get(r.id) ?? []);
-  return { vars, resolve, modules, structures, buildVars, workflow, stages, regions, expand };
+  return { vars, resolve, modules, structures, buildVars, workflow, stages, regions, expand, warnings };
 }
 
 /** Default variables for previews and tests. */
