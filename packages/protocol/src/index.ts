@@ -18,3 +18,4 @@ export * from './directives';
 export * from './user-modules';
 export * from './build-vars';
 export * from './annotations';
+export * from './template';
