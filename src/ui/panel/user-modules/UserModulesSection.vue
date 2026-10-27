@@ -1,13 +1,16 @@
 <script setup lang="ts">
-/** "My modules" list: open, toggle, reorder (drag the grip), import / export, create. */
-import { computed, ref } from 'vue';
-import { Download, GripVertical, Plus, Upload, TriangleAlert, Zap } from 'lucide-vue-next';
-import { lostRefs, parseUserModuleFile, ruleComplete, type APreset, type UserModule } from '@advanced-preset/protocol';
+/**
+ * "My modules" list: open, toggle, reorder (drag the grip), import / export, create. When the preset
+ * ships module templates, "new" first asks (inline) whether to start blank or from a template.
+ */
+import { computed, nextTick, ref } from 'vue';
+import { Download, FilePlus, GripVertical, LayoutTemplate, Plus, Upload, TriangleAlert, X, Zap } from 'lucide-vue-next';
+import { lostRefs, moduleTemplates, parseUserModuleFile, ruleComplete, type APreset, type ModuleTemplate, type UserModule } from '@advanced-preset/protocol';
 import { confirmUserModuleTemplates, isTrustDeclined } from '@/app/trust';
-import { t, pt } from '@/i18n';
+import { localTemplate, t, pt } from '@/i18n';
 import { toast } from '@/st/host';
 import { save } from '@/store/settings';
-import { createUserModule, exportUserModules, importUserModules, moveUserModule, userModules } from '@/store/user-modules';
+import { createUserModule, createUserModuleFromTemplate, exportUserModules, importUserModules, moveUserModule, userModules } from '@/store/user-modules';
 import { downloadJson } from '../../download';
 import IconButton from '../../components/IconButton.vue';
 import Section from '../../components/Section.vue';
@@ -36,9 +39,27 @@ const hasTrigger = (m: UserModule) => m.trigger.rules.some(ruleComplete);
 
 function setEnabled(m: UserModule, v: boolean) { m.enabled = v; save(); }
 
-function create() {
+const templates = computed(() => moduleTemplates(props.preset).map((tpl) => ({ tpl, body: localTemplate(props.preset, tpl) })));
+const picking = ref(false);
+const pickerEl = ref<HTMLElement | null>(null);
+
+function createBlank() {
+  picking.value = false;
   const m = createUserModule(props.preset, t('um.newName', { n: list.value.length + 1 }));
   emit('open', m.id);
+}
+function createFrom(tpl: ModuleTemplate) {
+  picking.value = false;
+  const m = createUserModuleFromTemplate(props.preset, localTemplate(props.preset, tpl));
+  emit('open', m.id);
+}
+/** "New": straight to a blank module, or the inline picker when there are templates. */
+async function create() {
+  if (!templates.value.length) return createBlank();
+  picking.value = !picking.value;
+  if (!picking.value) return;
+  await nextTick();
+  pickerEl.value?.querySelector<HTMLButtonElement>('.um-choice')?.focus();
 }
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -84,8 +105,22 @@ const endDrag = () => { dragging.value = null; };
     <template #actions>
       <IconButton v-if="hasPoints" :icon="Upload" :label="t('um.import')" small align="end" @click="fileInput?.click()" />
       <IconButton v-if="list.length" :icon="Download" :label="t('um.exportAll')" small align="end" @click="exportAll" />
-      <IconButton v-if="hasPoints && list.length" :icon="Plus" :label="t('um.new')" small align="end" @click="create" />
+      <IconButton v-if="hasPoints && list.length" :icon="Plus" :label="t('um.new')" :active="picking" small align="end" @click="create" />
     </template>
+    <div v-if="picking" ref="pickerEl" class="um-picker" role="group" :aria-label="t('um.startFrom')" @keydown.esc.stop="picking = false">
+      <div class="um-picker-head">
+        <span class="small muted">{{ t('um.startFrom') }}</span>
+        <IconButton :icon="X" :label="t('common.cancel')" small align="end" @click="picking = false" />
+      </div>
+      <button type="button" class="um-choice" @click="createBlank">
+        <FilePlus />
+        <span class="um-choice-text"><span>{{ t('um.blank') }}</span><span class="xs muted">{{ t('um.blank.desc') }}</span></span>
+      </button>
+      <button v-for="x in templates" :key="x.tpl.id" type="button" class="um-choice" :data-template="x.tpl.id" @click="createFrom(x.tpl)">
+        <LayoutTemplate />
+        <span class="um-choice-text"><span>{{ x.body.name }}</span><span v-if="x.body.description" class="xs muted um-choice-desc">{{ x.body.description }}</span></span>
+      </button>
+    </div>
     <div v-if="list.length" ref="listEl" class="um-list">
       <div v-for="m in list" :key="m.id" class="um-row" :class="{ off: !m.enabled, dragging: dragging === m.id }" :data-id="m.id">
         <span
@@ -101,7 +136,7 @@ const endDrag = () => { dragging.value = null; };
         <Switch :model-value="m.enabled" :label="m.name" @update:model-value="setEnabled(m, $event)" />
       </div>
     </div>
-    <button v-else-if="hasPoints" type="button" class="um-new" @click="create"><Plus />{{ t('um.new') }}</button>
+    <button v-else-if="hasPoints && !picking" type="button" class="um-new" @click="create"><Plus />{{ t('um.new') }}</button>
     <div v-else class="faint small">{{ t('um.noPoints') }}</div>
     <input ref="fileInput" type="file" accept=".json,application/json" hidden @change="importFile" />
   </Section>

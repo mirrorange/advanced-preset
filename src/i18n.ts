@@ -1,7 +1,7 @@
 /** Extension UI strings (`i18n/*.json`), following ST's locale; preset strings come from preset locales. */
 import en from '../i18n/en.json';
 import zhCN from '../i18n/zh-cn.json';
-import type { APreset, LocaleTable } from '@advanced-preset/protocol';
+import { localizeModuleTemplate, type APreset, type LocaleTable, type ModuleTemplate, type ModuleTemplateBody } from '@advanced-preset/protocol';
 
 type Table = Record<string, string>;
 const tables: Record<string, Table> = { en, 'zh-cn': zhCN };
@@ -39,4 +39,9 @@ export function presetName(preset: APreset): string {
 export function presetDescription(preset: APreset): string | undefined {
   const v = presetLocale(preset)?.description;
   return typeof v === 'string' && v ? v : preset.description;
+}
+
+/** A module template as shown in the current locale (translated file, then locale labels, then source). */
+export function localTemplate(preset: APreset, tpl: ModuleTemplate): ModuleTemplateBody {
+  return localizeModuleTemplate(tpl, locale(), presetLocale(preset)?.moduleTemplates?.[tpl.id]);
 }
