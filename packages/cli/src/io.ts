@@ -4,7 +4,7 @@ import type { APreset } from '@advanced-preset/protocol';
 import { compile, type CompileResult, type SourceTree } from './compile';
 import { validate } from './validate';
 
-const SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
+const SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 
 export function isSourcePath(rel: string): boolean {
   return SOURCE_RE.test(rel.split(sep).join('/'));

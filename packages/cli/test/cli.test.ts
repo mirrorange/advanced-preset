@@ -410,6 +410,118 @@ migrations:
   });
 });
 
+describe('module templates', () => {
+  const EXTRA = `
+insertionPoints:
+  - { id: intro-end, label: After intro, region: top, order: 1000 }
+  - { id: guide, label: Guidelines, region: guide, order: 5 }
+vars:
+  questions: { type: dict, label: Questions }
+`;
+  const STYLE = `---
+name: Custom style
+description: Start your own style.
+point: guide
+when: '!meta.pure'
+vars:
+  questions:
+    my-style: How does {{ap::name::narrator}} keep the style?
+---
+<!--# Replace the text below.
+<!-- @entry point=intro-end --> is text inside this comment
+-->
+## My style
+
+Short sentences.
+
+\`\`\`
+<!-- @entry point=nowhere -->
+\`\`\`
+
+<!-- @entry point=intro-end role=user -->
+
+Remember the style.
+`;
+  const ZH = `---
+name: 自定义文风
+point: guide
+---
+<!--# 在下面写文风 -->
+## 我的文风
+`;
+
+  it('keeps the raw text, splits entries and compiles translations', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'module-templates/style.md': STYLE,
+      'module-templates/style.zh-CN.md': ZH,
+      'locales/zh-cn.yaml': 'moduleTemplates: { style: { name: 文风 }, nope: { name: x } }\n',
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/moduleTemplates\.nope does not exist/);
+    const [tpl] = preset!.moduleTemplates;
+    expect(tpl).toMatchObject({
+      id: 'style',
+      name: 'Custom style',
+      description: 'Start your own style.',
+      vars: [{ var: 'questions', type: 'dict', items: [{ key: 'my-style', value: 'How does {{ap::name::narrator}} keep the style?' }] }],
+      trigger: { match: 'all', rules: [{ kind: 'expr', source: '!meta.pure' }] },
+    });
+    expect(tpl!.entries).toEqual([
+      { point: 'guide', text: '<!--# Replace the text below.\n<!-- @entry point=intro-end --> is text inside this comment\n-->\n## My style\n\nShort sentences.\n\n```\n<!-- @entry point=nowhere -->\n```' },
+      { point: 'intro-end', role: 'user', text: 'Remember the style.' },
+    ]);
+    expect(tpl!.locales).toEqual({ 'zh-cn': { name: '自定义文风', entries: [{ point: 'guide', text: '<!--# 在下面写文风 -->\n## 我的文风' }], vars: [], trigger: { match: 'all', rules: [] } } });
+  });
+
+  it('reports bad points, roles, triggers, variables and directives', () => {
+    const { diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'module-templates/bad.md': `---
+trigger: { match: any, rules: [{ kind: var, path: params.nope, op: on }, { kind: wat }] }
+vars: { nope: x }
+color: red
+---
+<!-- @entry point=gone -->
+x
+<!-- @entry point=guide role=robot -->
+<!-- @if -->
+`,
+      'module-templates/loose.md': 'Text without a point.\n',
+      'module-templates/Bad_Name.md': '',
+      'module-templates/orphan.zh-cn.md': '',
+      'module-templates/both.md': '---\npoint: guide\nwhen: x\ntrigger: { rules: [] }\n---\nx\n',
+    }));
+    const errors = diag.errors.map((e) => `${e.file}: ${e.message}`).join('\n');
+    expect(errors).toMatch(/bad\.md: unknown insertion point `gone`/);
+    expect(errors).toMatch(/bad\.md: role must be/);
+    expect(errors).toMatch(/bad\.md: trigger has 1 invalid rule/);
+    expect(errors).toMatch(/bad\.md: unknown variable `nope`/);
+    expect(errors).toMatch(/bad\.md: unknown param `nope` in condition/);
+    expect(errors).toMatch(/bad\.md: .*@if/);
+    expect(errors).toMatch(/loose\.md: text before the first `@entry` needs `point`/);
+    expect(errors).toMatch(/Bad_Name\.md: module template files are/);
+    expect(errors).toMatch(/orphan\.zh-cn\.md: translation of unknown module template `orphan`/);
+    expect(errors).toMatch(/both\.md: use either `when` or `trigger`/);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/unknown frontmatter key `color`/);
+  });
+
+  it('previews templates as user modules', async () => {
+    const { templateModules, preview } = await import('../src/preview');
+    const { preset } = build(tree({ 'preset.yaml': MANIFEST + EXTRA, 'module-templates/style.md': STYLE, 'module-templates/style.zh-cn.md': ZH }));
+    expect(templateModules(preset!, ['nope'])).toMatch(/unknown module template nope \(have: style\)/);
+    const [en] = templateModules(preset!, ['all']) as UserModule[];
+    expect(en).toMatchObject({ id: 'tpl-style', name: 'Custom style', enabled: true });
+    expect(en!.entries.map((e) => e.id)).toEqual(['e1', 'e2']);
+    const [zh] = templateModules(preset!, ['style'], 'zh-cn') as UserModule[];
+    expect(zh!.name).toBe('自定义文风');
+    const out = preview(preset!, { config: 'fast', userModules: [en!] });
+    expect(out).toContain('## My style\n\nShort sentences.');
+    expect(out).not.toContain('Replace the text below');
+    expect(out).toContain('Remember the style.');
+  });
+});
+
 describe('build variables', () => {
   const VARS = `
 vars:

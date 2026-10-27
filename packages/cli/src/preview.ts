@@ -1,6 +1,6 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  TRANSPORTS, assemble, localizeModuleTemplate, moduleTemplates, userModuleFromTemplate, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
   type APreset, type Transport, type UserModule,
 } from '@advanced-preset/protocol';
 
@@ -13,6 +13,19 @@ export interface PreviewOptions {
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
   json?: boolean;
+}
+
+/**
+ * User modules created from module templates (`ids`, or `all`), as the panel would create them for
+ * the UI language `lang`. Returns an error message for unknown ids.
+ */
+export function templateModules(preset: APreset, ids: string[], lang?: string): UserModule[] | string {
+  const all = moduleTemplates(preset);
+  const picked = ids.includes('all') ? all : ids.map((id) => all.find((t) => t.id === id));
+  const unknown = ids.filter((id) => id !== 'all' && !all.some((t) => t.id === id));
+  if (unknown.length) return `unknown module template ${unknown.join(', ')} (have: ${all.map((t) => t.id).join(', ') || 'none'})`;
+  const labels = (id: string) => (lang ? preset.locales[lang.toLowerCase()]?.moduleTemplates?.[id] : undefined);
+  return picked.map((t) => userModuleFromTemplate(localizeModuleTemplate(t!, lang, labels(t!.id)), `tpl-${t!.id}`));
 }
 
 export function preview(source: APreset, o: PreviewOptions): string {

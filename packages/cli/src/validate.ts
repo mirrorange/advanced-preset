@@ -308,6 +308,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       configurations: new Set(p.configurations.map((x) => x.id)),
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
+      moduleTemplates: new Set((p.moduleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys()),
     };
     for (const [section, ids] of Object.entries(known)) {

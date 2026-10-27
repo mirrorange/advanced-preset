@@ -5,7 +5,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { parseUserModuleFile } from '@advanced-preset/protocol';
 import { buildDir, writeArtifact } from './io';
 import { report } from './diagnostics';
-import { preview } from './preview';
+import { preview, templateModules } from './preview';
 import { dev } from './dev';
 import { init } from './init';
 import { DEFAULT_TARGET, installSkills, listSkills } from './skills';
@@ -21,7 +21,8 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
+                   [--enable a,b] [--disable c] [--user-modules file]
+                   [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
                                              scaffold a new preset repository
   ap skills  list                            list the bundled Agent Skills
@@ -48,6 +49,8 @@ async function main(argv: string[]): Promise<number> {
       disable: { type: 'string' },
       json: { type: 'boolean' },
       'user-modules': { type: 'string' },
+      'module-templates': { type: 'string' },
+      lang: { type: 'string' },
       id: { type: 'string' },
       name: { type: 'string' },
       author: { type: 'string' },
@@ -64,7 +67,7 @@ async function main(argv: string[]): Promise<number> {
       const failed = !diag.ok || (values.strict && diag.warnings.length > 0);
       if (failed || !preset) return 1;
       if (command === 'check') {
-        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows`);
+        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${preset.moduleTemplates.length ? `, ${preset.moduleTemplates.length} module templates` : ''}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? 'dist'));
@@ -81,7 +84,12 @@ async function main(argv: string[]): Promise<number> {
       for (const id of values.enable?.split(',').filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(',').filter(Boolean) ?? []) toggles[id.trim()] = false;
       const meta = values.meta === 'pure' || values.meta === 'mixed' ? values.meta : undefined;
-      const userModules = values['user-modules'] ? parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8'))).modules : undefined;
+      let userModules = values['user-modules'] ? parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8'))).modules : undefined;
+      if (values['module-templates']) {
+        const picked = templateModules(preset, values['module-templates'].split(',').map((x) => x.trim()).filter(Boolean), values.lang);
+        if (typeof picked === 'string') { console.error(picked); return 1; }
+        userModules = [...(userModules ?? []), ...picked];
+      }
       const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);

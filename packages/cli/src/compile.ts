@@ -4,6 +4,7 @@
  *   preset.yaml          manifest
  *   modules/**\/*.md      one module per file (frontmatter + entries)
  *   workflows/*.md       one workflow per file (frontmatter + sections)
+ *   module-templates/*.md  example user modules (raw text; see module-templates.ts)
  *   locales/<lang>.yaml  panel strings
  *
  * Compilation is pure over a `SourceTree` (path → text) so it can be tested without a disk.
@@ -23,6 +24,7 @@ import {
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
+import { compileModuleTemplates } from './module-templates';
 
 export type SourceTree = Map<string, string>;
 
@@ -508,6 +510,16 @@ export function compile(tree: SourceTree): CompileResult {
   const regionIndex = (rid: string) => regions.findIndex((r) => r.id === rid);
   entries.sort((a, b) => regionIndex(a.region) - regionIndex(b.region) || a.order - b.order || rank(a.module) - rank(b.module));
 
+  // ── module templates (example user modules) ─────────────────────────────────
+  const moduleTemplates = compileModuleTemplates(tree, {
+    diag,
+    insertionPoints,
+    expr,
+    content,
+    varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
+    onExpr: (e, where) => map.exprs.push({ expr: e, where }),
+  });
+
   // ── workflows ───────────────────────────────────────────────────────────────
   const workflows: Workflow[] = [];
   const workflowFiles = [...tree.keys()].filter((p) => /^workflows\/[^/]+\.md$/.test(p)).sort();
@@ -647,6 +659,7 @@ export function compile(tree: SourceTree): CompileResult {
     modules,
     entries,
     insertionPoints,
+    moduleTemplates,
     vars,
     workflows,
     structures,
