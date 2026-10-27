@@ -23,11 +23,11 @@ ap --version
 
 ```
 error modules/pacing.md:12 entries.reminder: unknown region `tasks`
-warn  preset.yaml groups: module `x` has no group
+warn  preset.yaml:41 groups: module `x` has no group
 2 errors, 1 warning
 ```
 
-格式为 `<级别> <文件>:<行> <路径>: <消息>`（文件、行、路径在已知时出现）。**错误**使构建失败；**警告**只在 `--strict` 时导致失败。建议提交前和 CI 中总是使用 `--strict`。
+格式为 `<级别> <文件>:<行> <路径>: <消息>`（文件、行、路径在已知时出现；清单字段指向定义它的 `preset.yaml` 或 `manifest/` 片段）。**错误**使构建失败；**警告**只在 `--strict` 时导致失败。建议提交前和 CI 中总是使用 `--strict`。
 
 ## ap build
 
@@ -47,9 +47,11 @@ warn  preset.yaml groups: module `x` has no group
 ✓ my-preset 0.1.0: 12 modules, 18 entries, 2 workflows
 ```
 
+使用了[清单片段](manifest.md#拆分清单-manifest)时还会显示片段数，例如 `, 5 manifest fragments`。
+
 ## ap dev
 
-开发服务器：先构建一次，然后监视源码（`preset.yaml`、`modules/`、`workflows/`、`locales/`），变化后约 120 ms 重新构建并写入 `dist/`。构建失败时继续提供上一次成功的产物。
+开发服务器：先构建一次，然后监视源码（`preset.yaml`、`manifest/`、`modules/`、`workflows/`、`module-templates/`、`locales/`），变化后约 120 ms 重新构建并写入 `dist/`。构建失败时继续提供上一次成功的产物。
 
 | 端点 | 内容 |
 | --- | --- |

@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | 预设 | preset | 决定模型以什么身份、按什么要求写作的一组提示词和设定 |
 | 产物 | artifact，`*.apreset.json` | 构建后得到的预设文件，用户安装的就是它 |
-| 清单 | manifest，`preset.yaml` | 预设的总设定文件 |
+| 清单 | manifest，`preset.yaml` | 预设的总设定文件；除元数据外可拆到 `manifest/*.yaml` |
 | 区域 | region | 请求中的一段固定位置，模组的内容放在区域里 |
 | 原生区域 | native region | 由 ST 填入内容（角色卡、世界书等）的区域 |
 | 模组 | module | 一个 Markdown 文件，代表一个功能或一组规则 |
