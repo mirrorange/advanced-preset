@@ -1,6 +1,6 @@
 ---
 name: ap-preset-authoring
-description: Write and edit Advanced Preset (AP) source files for SillyTavern — preset.yaml, modules/*.md, workflows/*.md, module-templates/*.md, locales/*.yaml — following the AP format reference bundled with this skill. Use for implementing a DESIGN.md, adding or changing modules, params, workflows, structures, configurations, insertion points, module templates or translations, and fixing `ap check` errors. 编写或修改 AP 预设源码（模组、工作流、参数、结构、推荐配置、模组模板、翻译）、修复构建报错时使用。
+description: Write and edit Advanced Preset (AP) source files for SillyTavern — preset.yaml, manifest/*.yaml, modules/*.md, workflows/*.md, module-templates/*.md, locales/*.yaml — following the AP format reference bundled with this skill. Use for implementing a DESIGN.md, adding or changing modules, params, workflows, structures, configurations, insertion points, module templates or translations, and fixing `ap check` errors. 编写或修改 AP 预设源码（模组、工作流、参数、结构、推荐配置、模组模板、翻译）、修复构建报错时使用。
 ---
 
 # 编写 Advanced Preset 预设
@@ -10,7 +10,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 ## 开始之前
 
 1. 读 `DESIGN.md`（如果有）。没有设计稿、而改动涉及新增角色 / 工作流 / 大量模组时，先建议用户用 `ap-preset-design` 技能。
-2. 读 `preset.yaml`，`ls -R modules workflows module-templates locales`，了解现有 id、区域、分组。
+2. 读 `preset.yaml` 与 `manifest/`（如果有），`ls -R manifest modules workflows module-templates locales`，了解现有 id、区域、分组。
 3. 运行 `npx ap check`，记下已有的错误和警告，不要把它们算到你的改动上。
 4. 如果用户正在用 `npm run dev` 实时预览，保持它运行；每次保存都会自动重新构建。
 
@@ -27,7 +27,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 
 | 要做的事 | 参考 |
 | --- | --- |
-| 改 `preset.yaml` 任一顶层字段（角色、写法、区域、参数、分组、正则、元指令、主题……） | [manifest.md](references/manifest.md) |
+| 改清单（`preset.yaml` 或 `manifest/` 片段）任一顶层字段（角色、写法、区域、参数、分组、正则、元指令、主题……） | [manifest.md](references/manifest.md) |
 | 新建 / 修改模组，开关与单选，排序 | [modules.md](references/modules.md) |
 | 新建 / 修改工作流、阶段、字段名与工具名 | [workflows.md](references/workflows.md) |
 | `@entry` `@section` `@as` `@style` `@if`、注释 `<!--# … -->` | [directives.md](references/directives.md) |
@@ -49,7 +49,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 
 ## 速查
 
-**源码**：`preset.yaml`（清单）、`modules/**/*.md`（一个文件一个模组，子目录随意）、`workflows/*.md`（只认一层）、`locales/<lang>.yaml`。以 `.` 开头的文件、`node_modules/`、`dist/` 被忽略；其他文件（README、DESIGN.md）不参与编译。
+**源码**：`preset.yaml`（清单）、`manifest/**/*.yaml`（可选的清单片段：顶层键同 `preset.yaml`，映射逐层合并，标量 / 列表只能定义一次，元数据只能在 `preset.yaml`）、`modules/**/*.md`（一个文件一个模组，子目录随意）、`workflows/*.md`（只认一层）、`locales/<lang>.yaml`。以 `.` 开头的文件、`node_modules/`、`dist/` 被忽略；其他文件（README、DESIGN.md）不参与编译。
 
 **模组**：
 

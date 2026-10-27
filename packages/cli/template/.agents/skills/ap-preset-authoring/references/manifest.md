@@ -1,6 +1,6 @@
 # `preset.yaml` 清单
 
-`preset.yaml` 是预设的根文件。本页按字段列出全部顶层键；每个键的默认值、取值范围和相关诊断都在对应小节里。涉及较多规则的部分（结构、工具文案、配置、插入点等）给出摘要并链接到专门的页面。
+`preset.yaml` 是预设的根文件。清单较长时，除元数据外的字段可以拆到 `manifest/` 下的多个文件中，见[拆分清单](#拆分清单-manifest)。本页按字段列出全部顶层键；每个键的默认值、取值范围和相关诊断都在对应小节里。涉及较多规则的部分（结构、工具文案、配置、插入点等）给出摘要并链接到专门的页面。
 
 ## 顶层字段一览
 
@@ -65,6 +65,28 @@ workflowRegion: task
 carrier:
   order: [top, { main: false }, worldInfoBefore, charDescription, scenario, worldInfoAfter, dialogueExamples, history, chatHistory, task, tail]
 ```
+
+## 拆分清单 `manifest/`
+
+`manifest/` 下的每个 `*.yaml` / `*.yml`（可以放在子目录里）都是一份**部分清单**：顶层键与 `preset.yaml` 相同，构建时合并进 `preset.yaml`。可以把一整段原样剪切过去，写法不变。
+
+```
+preset.yaml                  元数据、角色、区域、Carrier……
+manifest/structures.yaml     structures:
+manifest/params.yaml         groups: / params: / vars: / insertionPoints:
+manifest/configurations.yaml configurationDefaults: / configurations:
+```
+
+规则：
+
+- **元数据只能写在 `preset.yaml`**：`formatVersion`、`id`、`name`、`version`、`author`、`description`、`minAdvancedPreset`。写在片段中时报错（并被忽略）。其他字段写在哪个文件都可以。
+- **映射逐层合并**：同一个映射可以分在多个文件里，例如 `structures.synopsis` 与 `structures.options` 各占一个文件，`groups` 的不同分组也可以分开写。
+- **标量与列表只能定义一次**：同一个键路径在两个文件中都写了值（字符串、数字、列表等），报错并指出两处位置。列表（`params`、`regions`、`configurations`……）的顺序有意义，所以整个列表必须写在同一个文件里，不会拼接。
+- **合并顺序**：先 `preset.yaml`，再按路径排序的片段。映射中键的顺序随之确定，例如 `groups` 未写 `order` 时按出现顺序排。
+- 片段必须是映射；空文件忽略。以 `.` 开头的文件和目录被忽略。
+- YAML 锚点（`&a` / `*a`）只在同一个文件内有效，引用同一锚点的内容要放在一起。
+
+诊断会指向定义该字段的文件与行，例如 `error manifest/structures.yaml:30 structures.synopsis.history: …`。产物与不拆分时完全相同，拆分不影响已安装的预设。`ap check` 的统计中会显示片段数（`5 manifest fragments`）。
 
 ## 角色 `actors`
 

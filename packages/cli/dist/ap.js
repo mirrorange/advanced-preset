@@ -50,10 +50,10 @@ var require_identity = __commonJS({
     var NODE_TYPE = /* @__PURE__ */ Symbol.for("yaml.node.type");
     var isAlias = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
     var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
-    var isMap = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
+    var isMap2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
     var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
-    var isScalar2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
-    var isSeq = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
+    var isScalar3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
+    var isSeq2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
     function isCollection(node) {
       if (node && typeof node === "object")
         switch (node[NODE_TYPE]) {
@@ -74,7 +74,7 @@ var require_identity = __commonJS({
         }
       return false;
     }
-    var hasAnchor = (node) => (isScalar2(node) || isCollection(node)) && !!node.anchor;
+    var hasAnchor = (node) => (isScalar3(node) || isCollection(node)) && !!node.anchor;
     exports.ALIAS = ALIAS;
     exports.DOC = DOC;
     exports.MAP = MAP;
@@ -86,11 +86,11 @@ var require_identity = __commonJS({
     exports.isAlias = isAlias;
     exports.isCollection = isCollection;
     exports.isDocument = isDocument;
-    exports.isMap = isMap;
+    exports.isMap = isMap2;
     exports.isNode = isNode;
     exports.isPair = isPair;
-    exports.isScalar = isScalar2;
-    exports.isSeq = isSeq;
+    exports.isScalar = isScalar3;
+    exports.isSeq = isSeq2;
   }
 });
 
@@ -4198,9 +4198,9 @@ var require_resolve_flow_collection = __commonJS({
     var blockMsg = "Block collections are not allowed within flow collections";
     var isBlock = (token) => token && (token.type === "block-map" || token.type === "block-seq");
     function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
-      const isMap = fc.start.source === "{";
-      const fcName = isMap ? "flow map" : "flow sequence";
-      const NodeClass = tag?.nodeClass ?? (isMap ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
+      const isMap2 = fc.start.source === "{";
+      const fcName = isMap2 ? "flow map" : "flow sequence";
+      const NodeClass = tag?.nodeClass ?? (isMap2 ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
       const coll = new NodeClass(ctx.schema);
       coll.flow = true;
       const atRoot = ctx.atRoot;
@@ -4236,7 +4236,7 @@ var require_resolve_flow_collection = __commonJS({
             offset = props.end;
             continue;
           }
-          if (!isMap && ctx.options.strict && utilContainsNewline.containsNewline(key))
+          if (!isMap2 && ctx.options.strict && utilContainsNewline.containsNewline(key))
             onError(
               key,
               // checked by containsNewline()
@@ -4276,7 +4276,7 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep2 && !props.found) {
+        if (!isMap2 && !sep2 && !props.found) {
           const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep2, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
@@ -4299,7 +4299,7 @@ var require_resolve_flow_collection = __commonJS({
             startOnNewline: false
           });
           if (valueProps.found) {
-            if (!isMap && !props.found && ctx.options.strict) {
+            if (!isMap2 && !props.found && ctx.options.strict) {
               if (sep2)
                 for (const st of sep2) {
                   if (st === valueProps.found)
@@ -4331,7 +4331,7 @@ var require_resolve_flow_collection = __commonJS({
           const pair = new Pair.Pair(keyNode, valueNode);
           if (ctx.options.keepSourceTokens)
             pair.srcToken = collItem;
-          if (isMap) {
+          if (isMap2) {
             const map = coll;
             if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
               onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
@@ -4347,7 +4347,7 @@ var require_resolve_flow_collection = __commonJS({
           offset = valueNode ? valueNode.range[2] : valueProps.end;
         }
       }
-      const expectedEnd = isMap ? "}" : "]";
+      const expectedEnd = isMap2 ? "}" : "]";
       const [ce, ...ee] = fc.end;
       let cePos = offset;
       if (ce?.source === expectedEnd)
@@ -5634,7 +5634,7 @@ var require_cst = __commonJS({
     var FLOW_END = "";
     var SCALAR = "";
     var isCollection = (token) => !!token && "items" in token;
-    var isScalar2 = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
+    var isScalar3 = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
     function prettyToken(token) {
       switch (token) {
         case BOM:
@@ -5718,7 +5718,7 @@ var require_cst = __commonJS({
     exports.FLOW_END = FLOW_END;
     exports.SCALAR = SCALAR;
     exports.isCollection = isCollection;
-    exports.isScalar = isScalar2;
+    exports.isScalar = isScalar3;
     exports.prettyToken = prettyToken;
     exports.tokenType = tokenType;
   }
@@ -6317,7 +6317,7 @@ var require_lexer = __commonJS({
 var require_line_counter = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/parse/line-counter.js"(exports) {
     "use strict";
-    var LineCounter = class {
+    var LineCounter2 = class {
       constructor() {
         this.lineStarts = [];
         this.addNewLine = (offset) => this.lineStarts.push(offset);
@@ -6340,7 +6340,7 @@ var require_line_counter = __commonJS({
         };
       }
     };
-    exports.LineCounter = LineCounter;
+    exports.LineCounter = LineCounter2;
   }
 });
 
@@ -7248,7 +7248,7 @@ var require_public_api = __commonJS({
         return docs;
       return Object.assign([], { empty: true }, composer$1.streamInfo());
     }
-    function parseDocument(source, options = {}) {
+    function parseDocument2(source, options = {}) {
       const { lineCounter: lineCounter2, prettyErrors } = parseOptions(options);
       const parser$1 = new parser.Parser(lineCounter2?.addNewLine);
       const composer$1 = new composer.Composer(options);
@@ -7274,7 +7274,7 @@ var require_public_api = __commonJS({
       } else if (options === void 0 && reviver && typeof reviver === "object") {
         options = reviver;
       }
-      const doc = parseDocument(src, options);
+      const doc = parseDocument2(src, options);
       if (!doc)
         return null;
       doc.warnings.forEach((warning) => log.warn(doc.options.logLevel, warning));
@@ -7310,7 +7310,7 @@ var require_public_api = __commonJS({
     }
     exports.parse = parse;
     exports.parseAllDocuments = parseAllDocuments;
-    exports.parseDocument = parseDocument;
+    exports.parseDocument = parseDocument2;
     exports.stringify = stringify;
   }
 });
@@ -8866,17 +8866,19 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 
 // src/compile.ts
-var import_yaml3 = __toESM(require_dist(), 1);
+var import_yaml4 = __toESM(require_dist(), 1);
 import { createHash } from "node:crypto";
 
 // src/diagnostics.ts
 var Diagnostics = class {
   items = [];
+  /** Rewrites locations as they are reported (the manifest maps `preset.yaml` paths to fragments). */
+  locate;
   error(message, where = {}) {
-    this.items.push({ level: "error", message, ...where });
+    this.items.push({ level: "error", message, ...this.locate ? this.locate(where) : where });
   }
   warn(message, where = {}) {
-    this.items.push({ level: "warn", message, ...where });
+    this.items.push({ level: "warn", message, ...this.locate ? this.locate(where) : where });
   }
   get errors() {
     return this.items.filter((d) => d.level === "error");
@@ -9097,9 +9099,121 @@ function compileModuleTemplates(tree, ctx) {
   return templates;
 }
 
+// src/manifest.ts
+var import_yaml3 = __toESM(require_dist(), 1);
+var MANIFEST_FILE = "preset.yaml";
+var FRAGMENT_RE = /^manifest\/(?:[^/.][^/]*\/)*[^/.][^/]*\.ya?ml$/;
+var ROOT_ONLY_KEYS = ["formatVersion", "id", "name", "version", "author", "description", "minAdvancedPreset"];
+var isObj3 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+function parsePath(path) {
+  const out = [];
+  for (const m of path.matchAll(/([^.[\]]+)|\[(\d+)\]/g)) out.push(m[2] !== void 0 ? Number(m[2]) : m[1]);
+  return out;
+}
+var keyOf = (segs) => segs.join("\0");
+function lineOf(src, segs) {
+  let node = src.doc.contents;
+  let offset;
+  for (const seg of segs) {
+    if ((0, import_yaml3.isMap)(node)) {
+      const pair = node.items.find((p) => (0, import_yaml3.isScalar)(p.key) && String(p.key.value) === String(seg));
+      if (!pair) break;
+      if ((0, import_yaml3.isScalar)(pair.key) && pair.key.range) offset = pair.key.range[0];
+      node = pair.value;
+    } else if ((0, import_yaml3.isSeq)(node) && typeof seg === "number") {
+      const item = node.items[seg];
+      if (!item?.range) break;
+      offset = item.range[0];
+      node = item;
+    } else break;
+  }
+  return offset === void 0 ? void 0 : src.lines.linePos(offset).line;
+}
+function loadManifest(tree, diag) {
+  const rootSrc = tree.get(MANIFEST_FILE);
+  if (rootSrc === void 0) {
+    diag.error(`${MANIFEST_FILE} not found`);
+    return void 0;
+  }
+  const fragments = [...tree.keys()].filter((p) => FRAGMENT_RE.test(p)).sort();
+  const docs = [];
+  let parsedOk = true;
+  for (const file of [MANIFEST_FILE, ...fragments]) {
+    const lines = new import_yaml3.LineCounter();
+    const doc = (0, import_yaml3.parseDocument)(tree.get(file), { lineCounter: lines });
+    if (doc.errors.length) {
+      parsedOk = false;
+      for (const e of doc.errors) diag.error(`invalid YAML: ${e.message}`, { file, ...e.linePos ? { line: e.linePos[0].line } : {} });
+      continue;
+    }
+    docs.push({ file, doc, lines });
+  }
+  if (!parsedOk) return void 0;
+  const origin = /* @__PURE__ */ new Map();
+  const owner = (segs) => {
+    for (let i = segs.length; i > 0; i--) {
+      const src = origin.get(keyOf(segs.slice(0, i)));
+      if (src) return src;
+    }
+    return void 0;
+  };
+  const at = (src, segs) => {
+    const line = lineOf(src, segs);
+    return { file: src.file, ...line !== void 0 ? { line } : {}, path: segs.join(".") };
+  };
+  const merge = (target, from, path, src) => {
+    for (const [k, v] of Object.entries(from)) {
+      const segs = [...path, k];
+      if (!own(target, k)) {
+        target[k] = v;
+        origin.set(keyOf(segs), src);
+      } else if (isObj3(target[k]) && isObj3(v)) merge(target[k], v, segs, src);
+      else {
+        const prev = owner(segs);
+        const prevLine = prev && lineOf(prev, segs);
+        diag.error(`\`${segs.join(".")}\` is already defined in ${prev ? `${prev.file}${prevLine !== void 0 ? `:${prevLine}` : ""}` : "another file"}`, at(src, segs));
+      }
+    }
+  };
+  const raw = {};
+  const files2 = [];
+  for (const src of docs) {
+    const value = src.doc.toJS();
+    if (src.file === MANIFEST_FILE) {
+      if (!isObj3(value)) {
+        diag.error("invalid YAML: top level must be a mapping", { file: src.file });
+        return void 0;
+      }
+    } else {
+      if (value === null || value === void 0) continue;
+      if (!isObj3(value)) {
+        diag.error("a manifest fragment must be a mapping of manifest keys", { file: src.file, line: 1 });
+        continue;
+      }
+      for (const k of ROOT_ONLY_KEYS)
+        if (own(value, k)) {
+          diag.error(`\`${k}\` may only be set in ${MANIFEST_FILE}`, at(src, [k]));
+          delete value[k];
+        }
+    }
+    files2.push(src.file);
+    merge(raw, value, [], src);
+  }
+  const locate = (where) => {
+    if (where.file !== MANIFEST_FILE || where.path === void 0 || where.line !== void 0) return where;
+    const segs = parsePath(where.path);
+    const src = owner(segs);
+    if (!src) return where;
+    const line = lineOf(src, segs);
+    return { ...where, file: src.file, ...line !== void 0 ? { line } : {} };
+  };
+  return { raw, files: files2, locate };
+}
+
 // src/compile.ts
 var SOURCE_FORMAT_VERSION = 1;
-var isObj3 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var isObj4 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
 var str2 = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
 var ROLES4 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
@@ -9122,11 +9236,11 @@ var NATIVE_PROMPTS = {
 var anchorText = (region) => `\u27E6ap:region:${region}\u27E7`;
 var anchorIdentifier = (region) => `ap_${region}`;
 function compileTools(src, diag, text, file = "preset.yaml") {
-  const o = isObj3(src) ? src : {};
+  const o = isObj4(src) ? src : {};
   const at = (path) => ({ file, path: `tools.${path}` });
   const opt = (v, path) => v === void 0 || v === null ? void 0 : text(str2(v), at(path));
   const field = (v, path, fallback) => {
-    const f = typeof v === "string" ? { name: v } : isObj3(v) ? v : {};
+    const f = typeof v === "string" ? { name: v } : isObj4(v) ? v : {};
     const description = f.description !== void 0 ? opt(f.description, `${path}.description`) : fallback.description;
     return { name: str2(f.name, fallback.name), ...description ? { description } : {} };
   };
@@ -9134,12 +9248,12 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   if (legacy.length || typeof o.submit === "string")
     diag.warn(`legacy tools keys (${[...legacy, ...typeof o.submit === "string" ? ["submit: <text>"] : []].join(", ")}); see the README for the tools section`, { file, path: "tools" });
   const D = DEFAULT_TOOLS;
-  const turn = isObj3(o.turn) ? o.turn : {};
-  const submit = isObj3(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
-  const stage = isObj3(o.stage) ? o.stage : {};
-  const patch = isObj3(o.patch) ? o.patch : {};
-  const env = isObj3(o.envelope) ? o.envelope : {};
-  const results = isObj3(o.results) ? o.results : {};
+  const turn = isObj4(o.turn) ? o.turn : {};
+  const submit = isObj4(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
+  const stage = isObj4(o.stage) ? o.stage : {};
+  const patch = isObj4(o.patch) ? o.patch : {};
+  const env = isObj4(o.envelope) ? o.envelope : {};
+  const results = isObj4(o.results) ? o.results : {};
   const pick = (v, fallback) => v === void 0 ? fallback : v;
   const tools = {
     turn: {
@@ -9179,21 +9293,11 @@ function compileTools(src, diag, text, file = "preset.yaml") {
 function compile(tree) {
   const diag = new Diagnostics();
   const map = { exprs: [], texts: [], templates: [], entries: /* @__PURE__ */ new Map(), modules: /* @__PURE__ */ new Map(), workflows: /* @__PURE__ */ new Map() };
-  const manifestSrc = tree.get("preset.yaml");
-  if (manifestSrc === void 0) {
-    diag.error("preset.yaml not found");
-    return { diag, map };
-  }
-  const M = "preset.yaml";
-  let raw;
-  try {
-    const parsed = (0, import_yaml3.parse)(manifestSrc);
-    if (!isObj3(parsed)) throw new Error("top level must be a mapping");
-    raw = parsed;
-  } catch (e) {
-    diag.error(`invalid YAML: ${e.message}`, { file: M });
-    return { diag, map };
-  }
+  const manifest = loadManifest(tree, diag);
+  if (!manifest) return { diag, map };
+  diag.locate = manifest.locate;
+  const M = MANIFEST_FILE;
+  const raw = manifest.raw;
   const expr = (src, where) => {
     if (src === void 0 || src === null || src === "") return void 0;
     if (typeof src === "boolean") return { t: "lit", v: src };
@@ -9230,8 +9334,8 @@ function compile(tree) {
   const version = str2(raw.version, "0.0.0");
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error("version must be semver", { file: M, path: "version" });
   const actors = {};
-  for (const [aid, a] of Object.entries(isObj3(raw.actors) ? raw.actors : {})) {
-    const o = isObj3(a) ? a : {};
+  for (const [aid, a] of Object.entries(isObj4(raw.actors) ? raw.actors : {})) {
+    const o = isObj4(a) ? a : {};
     actors[aid] = {
       name: text(str2(o.name, aid), { file: M, path: `actors.${aid}.name` }),
       prefix: text(str2(o.prefix, `{{ap::name::${aid}}}: `), { file: M, path: `actors.${aid}.prefix` }),
@@ -9243,7 +9347,7 @@ function compile(tree) {
   const user = str2(raw.user, "user");
   for (const [k, v] of [["narrator", narrator], ["user", user]])
     if (!actors[v]) diag.error(`${k} actor \`${v}\` is not declared`, { file: M, path: k });
-  const styleSrc = isObj3(raw.styles) ? raw.styles : {};
+  const styleSrc = isObj4(raw.styles) ? raw.styles : {};
   const styles = Object.fromEntries(
     TRANSPORTS.map((t) => {
       const s = str2(styleSrc[t], t === "prefill" || t === "plaintext" ? "dialogue" : "imperative");
@@ -9255,7 +9359,7 @@ function compile(tree) {
   const regions = [];
   const anchors = {};
   (Array.isArray(raw.regions) ? raw.regions : []).forEach((r, i) => {
-    const o = isObj3(r) ? r : {};
+    const o = isObj4(r) ? r : {};
     const where = { file: M, path: `regions[${i}]` };
     const rid = str2(o.id);
     if (!rid) return diag.error("region id is required", where);
@@ -9264,7 +9368,7 @@ function compile(tree) {
     if (!ROLES4.includes(role)) diag.error(`role must be ${ROLES4.join(" | ")}`, where);
     let merge = "none";
     if (o.merge === "join" || o.merge === "none") merge = o.merge;
-    else if (isObj3(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
+    else if (isObj4(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
     else if (o.merge !== void 0) diag.error("merge must be none | join | { wrap: <tag> }", where);
     regions.push({ id: rid, role, merge, separator: str2(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
     if (o.anchor !== void 0) {
@@ -9273,14 +9377,14 @@ function compile(tree) {
       else anchors[a] = rid;
     }
   });
-  for (const [a, rid] of Object.entries(isObj3(raw.anchors) ? raw.anchors : {})) {
+  for (const [a, rid] of Object.entries(isObj4(raw.anchors) ? raw.anchors : {})) {
     if (!ANCHORS.includes(a)) diag.error(`unknown semantic anchor \`${a}\``, { file: M, path: `anchors.${a}` });
     else anchors[a] = str2(rid);
   }
   for (const a of ANCHORS) if (!anchors[a]) diag.error(`semantic anchor \`${a}\` is not mapped to a region`, { file: M, path: "anchors" });
   const insertionPoints = [];
   (Array.isArray(raw.insertionPoints) ? raw.insertionPoints : []).forEach((r, i) => {
-    const o = isObj3(r) ? r : {};
+    const o = isObj4(r) ? r : {};
     const where = { file: M, path: `insertionPoints[${i}]` };
     const pid = str2(o.id);
     if (!/^[a-z0-9][a-z0-9-]*$/.test(pid)) return diag.error("insertion point id must be lower-case kebab-case", where);
@@ -9296,10 +9400,10 @@ function compile(tree) {
     insertionPoints.push(point);
   });
   const vars = [];
-  if (raw.vars !== void 0 && !isObj3(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
-  for (const [vid, v] of Object.entries(isObj3(raw.vars) ? raw.vars : {})) {
+  if (raw.vars !== void 0 && !isObj4(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
+  for (const [vid, v] of Object.entries(isObj4(raw.vars) ? raw.vars : {})) {
     const where = { file: M, path: `vars.${vid}` };
-    const o = isObj3(v) ? v : { type: v };
+    const o = isObj4(v) ? v : { type: v };
     if (!/^[A-Za-z][\w-]*$/.test(vid)) {
       diag.error("variable id must start with a letter (letters, digits, _ and -)", where);
       continue;
@@ -9318,11 +9422,11 @@ function compile(tree) {
     vars.push(decl);
   }
   const params = (Array.isArray(raw.params) ? raw.params : []).map((p, i) => {
-    const o = isObj3(p) ? p : {};
+    const o = isObj4(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
     const type = str2(o.type, "text");
     if (!["text", "number", "select"].includes(type)) diag.error("param type must be text | number | select", where);
-    const options = Array.isArray(o.options) ? o.options.map((x) => isObj3(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
+    const options = Array.isArray(o.options) ? o.options.map((x) => isObj4(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
     const param = {
       id: str2(o.id),
       type,
@@ -9338,8 +9442,8 @@ function compile(tree) {
   });
   const groups = {};
   let groupOrder = 0;
-  for (const [gid, g] of Object.entries(isObj3(raw.groups) ? raw.groups : {})) {
-    const o = isObj3(g) ? g : {};
+  for (const [gid, g] of Object.entries(isObj4(raw.groups) ? raw.groups : {})) {
+    const o = isObj4(g) ? g : {};
     groupOrder += 10;
     groups[gid] = {
       label: str2(o.label, gid),
@@ -9351,12 +9455,12 @@ function compile(tree) {
   }
   const tools = compileTools(raw.tools, diag, text, M);
   const structures = {};
-  for (const [sid, s] of Object.entries(isObj3(raw.structures) ? raw.structures : {})) {
-    const o = isObj3(s) ? s : {};
+  for (const [sid, s] of Object.entries(isObj4(raw.structures) ? raw.structures : {})) {
+    const o = isObj4(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
     const kind = str2(o.kind, sid);
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(", ")}`, where);
-    const fp = isObj3(o.formatPrompt) ? o.formatPrompt : {};
+    const fp = isObj4(o.formatPrompt) ? o.formatPrompt : {};
     const inline = isInlineStructure({ kind });
     const base = str2(o.field, sid);
     const field = inline ? base : `${tools.structurePrefix ?? ""}${base}`;
@@ -9374,7 +9478,7 @@ function compile(tree) {
       formatPrompt: { tag: text(str2(fp.tag), where), field: fieldText(fp.field, "formatPrompt.field") }
     };
     if (o.description !== void 0) decl.description = fieldText(o.description, "description");
-    if (isObj3(o.properties)) {
+    if (isObj4(o.properties)) {
       const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
       const props = {};
       for (const [k, v] of Object.entries(o.properties)) {
@@ -9410,7 +9514,7 @@ function compile(tree) {
     structures[sid] = decl;
   }
   const regex = (Array.isArray(raw.regex) ? raw.regex : []).map((r, i) => {
-    const o = isObj3(r) ? r : {};
+    const o = isObj4(r) ? r : {};
     const where = { file: M, path: `regex[${i}]` };
     const decl = { id: str2(o.id), pattern: str2(o.pattern), flags: str2(o.flags, "i"), target: str2(o.target, "meta") };
     try {
@@ -9423,8 +9527,8 @@ function compile(tree) {
     if (req) decl.requires = req;
     return decl;
   });
-  const metaSrc = isObj3(raw.meta) ? raw.meta : {};
-  const tasksSrc = isObj3(metaSrc.tasks) ? metaSrc.tasks : {};
+  const metaSrc = isObj4(raw.meta) ? raw.meta : {};
+  const tasksSrc = isObj4(metaSrc.tasks) ? metaSrc.tasks : {};
   const meta = {
     trigger: text(str2(metaSrc.trigger, `@{{ap::name::${narrator}}}`), { file: M, path: "meta.trigger" }),
     wrap: metaSrc.wrap !== false,
@@ -9440,7 +9544,7 @@ function compile(tree) {
     const e = expr(cond, { file: M, path: `meta.tasks.${task}` });
     if (e) meta.tasks[task] = e;
   }
-  const tsSrc = isObj3(raw.tokenSaving) ? raw.tokenSaving : {};
+  const tsSrc = isObj4(raw.tokenSaving) ? raw.tokenSaving : {};
   const userInputMode = (v, path) => {
     if (v === void 0) return void 0;
     if (USER_INPUT_MODES.includes(v)) return v;
@@ -9454,10 +9558,10 @@ function compile(tree) {
     synopsisTemplate: str2(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
   };
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
-    const o = isObj3(s) ? s : {};
+    const o = isObj4(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
-    const toolSrc = isObj3(o.tool) ? o.tool : {};
-    const resp = isObj3(o.response) ? o.response : {};
+    const toolSrc = isObj4(o.tool) ? o.tool : {};
+    const resp = isObj4(o.response) ? o.response : {};
     const turn = {
       id: str2(o.id),
       label: str2(o.label, str2(o.id)),
@@ -9469,7 +9573,7 @@ function compile(tree) {
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error("invalid tool name", where);
     return turn;
   });
-  const theme = isObj3(raw.theme) ? raw.theme : {};
+  const theme = isObj4(raw.theme) ? raw.theme : {};
   const modules = [];
   const entries = [];
   const moduleFiles = [...tree.keys()].filter((p) => p.startsWith("modules/") && p.endsWith(".md")).sort();
@@ -9549,9 +9653,9 @@ function compile(tree) {
     const order = raw.workflowOrder.map((x) => str2(x));
     workflows.sort((a, b) => (order.indexOf(a.id) + 1 || 1e6) - (order.indexOf(b.id) + 1 || 1e6));
   }
-  const carrier = compileCarrier(isObj3(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
-  const cd = isObj3(raw.configurationDefaults) ? raw.configurationDefaults : {};
-  const sect = (k) => isObj3(cd[k]) ? cd[k] : {};
+  const carrier = compileCarrier(isObj4(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
+  const cd = isObj4(raw.configurationDefaults) ? raw.configurationDefaults : {};
+  const sect = (k) => isObj4(cd[k]) ? cd[k] : {};
   const storyWorkflow = workflows.find((w) => w.kind === "story")?.id ?? "";
   const identitySrc = sect("identity");
   const configurationDefaults = {
@@ -9572,7 +9676,7 @@ function compile(tree) {
     cache: { ...CACHE_DEFAULTS, ...sect("cache") },
     meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") }
   };
-  for (const k of ["names", "prefixes"]) if (isObj3(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
+  for (const k of ["names", "prefixes"]) if (isObj4(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
     if (!(k in configurationDefaults.modules)) diag.error(`configurationDefaults.modules: unknown user module \`${k}\``, { file: M, path: `configurationDefaults.modules.${k}` });
     else configurationDefaults.modules[k] = Boolean(v);
@@ -9596,20 +9700,20 @@ function compile(tree) {
   checkMeta(sect("meta"), "configurationDefaults.meta");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
-    const o = isObj3(c) ? c : {};
-    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj3(o.diff) ? o.diff : {} };
+    const o = isObj4(c) ? c : {};
+    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj4(o.diff) ? o.diff : {} };
     if (o.description !== void 0) rc.description = str2(o.description);
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
-    if (isObj3(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
-    if (isObj3(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
-    if (isObj3(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj4(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
+    if (isObj4(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
+    if (isObj4(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
   const defaultConfiguration = str2(raw.defaultConfiguration, configurations[0].id);
   const migrations = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m, i) => {
-    const o = isObj3(m) ? m : {};
-    const rename2 = isObj3(o.rename) ? o.rename : {};
+    const o = isObj4(m) ? m : {};
+    const rename2 = isObj4(o.rename) ? o.rename : {};
     const known = {
       modules: new Set(modules.map((x) => x.id)),
       params: new Set(params.map((x) => x.id)),
@@ -9622,7 +9726,7 @@ function compile(tree) {
         diag.warn(`unknown rename section \`${section}\``, where);
         continue;
       }
-      for (const [from, to] of Object.entries(isObj3(rename2[section]) ? rename2[section] : {}))
+      for (const [from, to] of Object.entries(isObj4(rename2[section]) ? rename2[section] : {}))
         if (!known[section].has(String(to))) diag.warn(`\`${from}\` is renamed to \`${String(to)}\`, which this version does not declare`, where);
     }
     return { from: str2(o.from), rename: rename2 };
@@ -9632,8 +9736,8 @@ function compile(tree) {
     const m = /^locales\/([\w-]+)\.ya?ml$/.exec(file);
     if (!m) continue;
     try {
-      const parsed = (0, import_yaml3.parse)(src);
-      if (isObj3(parsed)) locales[m[1].toLowerCase()] = parsed;
+      const parsed = (0, import_yaml4.parse)(src);
+      if (isObj4(parsed)) locales[m[1].toLowerCase()] = parsed;
       else diag.error("locale file must be a mapping", { file });
     } catch (e) {
       diag.error(`invalid YAML: ${e.message}`, { file });
@@ -9685,12 +9789,12 @@ function compile(tree) {
     locales
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map };
+  return { preset, diag, map, manifestFiles: manifest.files };
 }
-var isScalar = (v) => ["string", "number", "boolean"].includes(typeof v);
+var isScalar2 = (v) => ["string", "number", "boolean"].includes(typeof v);
 function varUpdates(src, decls, diag, where, text) {
   if (src === void 0) return [];
-  if (!isObj3(src)) {
+  if (!isObj4(src)) {
     diag.error("vars must be a mapping of variable id \u2192 value", where);
     return [];
   }
@@ -9705,12 +9809,12 @@ function varUpdates(src, decls, diag, where, text) {
     const scalarText = (x, w) => text(String(x), w);
     switch (decl.type) {
       case "string":
-        if (!isScalar(v)) diag.error(`\`${id}\` is a string variable: expected text`, at);
+        if (!isScalar2(v)) diag.error(`\`${id}\` is a string variable: expected text`, at);
         else out.push({ var: id, type: "string", text: scalarText(v, at) });
         break;
       case "list": {
         const items = Array.isArray(v) ? v : [v];
-        if (!items.every(isScalar)) {
+        if (!items.every(isScalar2)) {
           diag.error(`\`${id}\` is a list variable: expected an item or a list of plain items`, at);
           break;
         }
@@ -9718,11 +9822,11 @@ function varUpdates(src, decls, diag, where, text) {
         break;
       }
       case "dict": {
-        if (!isObj3(v)) {
+        if (!isObj4(v)) {
           diag.error(`\`${id}\` is a dict variable: expected a mapping`, at);
           break;
         }
-        const bad = Object.entries(v).filter(([, x]) => x !== null && !isScalar(x)).map(([k]) => k);
+        const bad = Object.entries(v).filter(([, x]) => x !== null && !isScalar2(x)).map(([k]) => k);
         if (bad.length) {
           diag.error(`\`${id}\` is a dict variable: values must be plain (${bad.join(", ")})`, at);
           break;
@@ -9741,7 +9845,7 @@ function compileWorkflow(file, src, diag, expr, content, text) {
   const kind = fm.kind === "task" ? "task" : "story";
   const stages = [];
   (Array.isArray(fm.stages) ? fm.stages : []).forEach((s, i) => {
-    const o = isObj3(s) ? s : {};
+    const o = isObj4(s) ? s : {};
     const where = { file, path: `stages[${i}]` };
     const stage = { id: str2(o.id), actor: str2(o.actor), kind: str2(o.kind, "text"), label: str2(o.label, str2(o.id)) };
     if (!/^[a-z][\w-]*$/i.test(stage.id)) diag.error("stage id is required (letters, digits, _ and -)", where);
@@ -9750,19 +9854,19 @@ function compileWorkflow(file, src, diag, expr, content, text) {
     if (o.optional) stage.optional = true;
     if (o.tag !== void 0) stage.tag = str2(o.tag);
     if (o.field !== void 0) {
-      const f = isObj3(o.field) ? o.field : { description: o.field };
+      const f = isObj4(o.field) ? o.field : { description: o.field };
       const out = {};
       if (f.name !== void 0) out.name = str2(f.name);
       if (f.description !== void 0) out.description = text(str2(f.description), where);
       stage.field = out;
     }
     if (o.tool !== void 0) {
-      const t = isObj3(o.tool) ? o.tool : { description: o.tool };
+      const t = isObj4(o.tool) ? o.tool : { description: o.tool };
       const out = {};
       if (t.name !== void 0) out.name = str2(t.name);
       if (t.description !== void 0) out.description = text(str2(t.description), where);
       if (t.param !== void 0) {
-        const p = isObj3(t.param) ? t.param : { name: t.param };
+        const p = isObj4(t.param) ? t.param : { name: t.param };
         out.param = {};
         if (p.name !== void 0) out.param.name = str2(p.name);
         if (p.description !== void 0) out.param.description = text(str2(p.description), where);
@@ -9822,7 +9926,7 @@ function compileWorkflow(file, src, diag, expr, content, text) {
   const wf = { id, name: str2(fm.name, id), kind, stages, sections };
   if (fm.description !== void 0) wf.description = str2(fm.description).trim();
   if (fm.hint !== void 0) wf.hint = str2(fm.hint).trim();
-  const after = isObj3(fm.structures) ? fm.structures.after : void 0;
+  const after = isObj4(fm.structures) ? fm.structures.after : void 0;
   if (after !== void 0) {
     wf.structuresAfter = str2(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
@@ -9832,7 +9936,7 @@ function compileWorkflow(file, src, diag, expr, content, text) {
 function compileCarrier(src, regions, presetName, diag) {
   const M = "preset.yaml";
   const label = str2(src.label, presetName);
-  const overrides = isObj3(src.prompts) ? src.prompts : {};
+  const overrides = isObj4(src.prompts) ? src.prompts : {};
   const prompts = [];
   const prompt_order = [];
   const order = Array.isArray(src.order) ? src.order : [];
@@ -9844,12 +9948,12 @@ function compileCarrier(src, regions, presetName, diag) {
     } else if (NATIVE_PROMPTS[identifier]) {
       const n = NATIVE_PROMPTS[identifier];
       p = n.marker ? { identifier, name: n.name, system_prompt: true, marker: true } : { identifier, name: n.name, system_prompt: true, role: "system", content: "", marker: false };
-    } else if (isObj3(overrides[identifier])) {
+    } else if (isObj4(overrides[identifier])) {
       p = { identifier, name: identifier, role: "system", content: "", system_prompt: false, marker: false, injection_position: 0, injection_depth: 4 };
     } else {
       return diag.error(`carrier.order: \`${identifier}\` is neither a region, an ST prompt nor declared in carrier.prompts`, where);
     }
-    if (isObj3(overrides[identifier])) Object.assign(p, overrides[identifier]);
+    if (isObj4(overrides[identifier])) Object.assign(p, overrides[identifier]);
     if (prompts.some((x) => x.identifier === p.identifier)) return diag.error(`carrier.order: duplicate \`${identifier}\``, where);
     prompts.push(p);
     prompt_order.push({ identifier: p.identifier, enabled });
@@ -9857,7 +9961,7 @@ function compileCarrier(src, regions, presetName, diag) {
   order.forEach((item, i) => {
     const where = { file: M, path: `carrier.order[${i}]` };
     if (typeof item === "string") add(item, true, where);
-    else if (isObj3(item) && Object.keys(item).length === 1) {
+    else if (isObj4(item) && Object.keys(item).length === 1) {
       const [k, v] = Object.entries(item)[0];
       add(k, v !== false, where);
     } else diag.error("carrier.order items are `id` or `{ id: false }`", where);
@@ -10183,7 +10287,8 @@ function validate(p, map, diag) {
 // src/io.ts
 var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 function isSourcePath(rel) {
-  return SOURCE_RE.test(rel.split(sep).join("/"));
+  const p = rel.split(sep).join("/");
+  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p);
 }
 async function walk(dir, root, out) {
   for (const ent of await readdir(dir, { withFileTypes: true })) {
@@ -10349,7 +10454,7 @@ async function init(o) {
 }
 
 // src/skills.ts
-var import_yaml4 = __toESM(require_dist(), 1);
+var import_yaml5 = __toESM(require_dist(), 1);
 import { cp as cp2, mkdir as mkdir3, readdir as readdir3, readFile as readFile3, rm, stat as stat2 } from "node:fs/promises";
 import { join as join3, relative as relative3 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -10359,7 +10464,7 @@ var isDir = (p) => stat2(p).then((s) => s.isDirectory(), () => false);
 function parseSkillFrontmatter(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
   if (!m) return {};
-  const data = (0, import_yaml4.parse)(m[1]);
+  const data = (0, import_yaml5.parse)(m[1]);
   return {
     name: typeof data?.name === "string" ? data.name : void 0,
     description: typeof data?.description === "string" ? data.description : void 0
@@ -10468,12 +10573,12 @@ async function main(argv) {
   switch (command) {
     case "build":
     case "check": {
-      const { preset, diag } = await buildDir(dir);
+      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
       report(diag);
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${preset.moduleTemplates.length ? `, ${preset.moduleTemplates.length} module templates` : ""}`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.moduleTemplates.length ? `, ${preset.moduleTemplates.length} module templates` : ""}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? "dist"));
@@ -10485,7 +10590,7 @@ async function main(argv) {
       return new Promise(() => {
       });
     case "preview": {
-      const { preset, diag } = await buildDir(dir);
+      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
       if (!preset || !diag.ok) {
         report(diag);
         return 1;

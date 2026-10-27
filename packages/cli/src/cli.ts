@@ -62,12 +62,12 @@ async function main(argv: string[]): Promise<number> {
   switch (command) {
     case 'build':
     case 'check': {
-      const { preset, diag } = await buildDir(dir);
+      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
       report(diag);
       const failed = !diag.ok || (values.strict && diag.warnings.length > 0);
       if (failed || !preset) return 1;
       if (command === 'check') {
-        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${preset.moduleTemplates.length ? `, ${preset.moduleTemplates.length} module templates` : ''}`);
+        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.moduleTemplates.length ? `, ${preset.moduleTemplates.length} module templates` : ''}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? 'dist'));
@@ -78,7 +78,7 @@ async function main(argv: string[]): Promise<number> {
       await dev({ root: dir, outDir: resolve(dir, values.out ?? 'dist'), port: Number(values.port ?? 4747), host: values.host ?? '127.0.0.1' });
       return new Promise<number>(() => {});
     case 'preview': {
-      const { preset, diag } = await buildDir(dir);
+      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
       if (!preset || !diag.ok) { report(diag); return 1; }
       const toggles: Record<string, boolean> = {};
       for (const id of values.enable?.split(',').filter(Boolean) ?? []) toggles[id.trim()] = true;
