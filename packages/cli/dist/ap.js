@@ -7816,97 +7816,6 @@ function workflowSummary(stages, actorName2, label = (s) => s.label) {
   return ["Start", ...parts, "(End)"].join(" -> ");
 }
 
-// ../protocol/src/content.ts
-function renderContent(content, resolve2, post = (s) => s, template) {
-  if (!content) return [];
-  const out = [];
-  for (const block of content) {
-    const joined = block.pieces.filter((p) => test(p.when, resolve2)).map((p) => p.template ? template?.(p) ?? "" : p.text).join("");
-    const text = post(joined).replace(/\n{3,}/g, "\n\n").trim();
-    if (!text) continue;
-    out.push(block.role ? { role: block.role, text } : { text });
-  }
-  return out;
-}
-
-// ../protocol/src/clone.ts
-function cloneData(value) {
-  if (value === null || typeof value !== "object") return value;
-  if (Array.isArray(value)) return value.map((v) => cloneData(v));
-  const out = {};
-  for (const [k, v] of Object.entries(value)) if (v !== void 0) out[k] = cloneData(v);
-  return out;
-}
-
-// ../protocol/src/semver.ts
-function parseVersion(v) {
-  const m = /^v?(\d+)(?:\.(\d+|x|\*))?(?:\.(\d+|x|\*))?(?:-([0-9A-Za-z.-]+))?/.exec(v.trim());
-  if (!m) return [0, 0, 0, ""];
-  const n = (s) => s === void 0 || s === "x" || s === "*" ? 0 : Number(s);
-  return [n(m[1]), n(m[2]), n(m[3]), m[4] ?? ""];
-}
-function compareVersions(a, b) {
-  const x = parseVersion(a);
-  const y = parseVersion(b);
-  for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i];
-  if (x[3] === y[3]) return 0;
-  if (!x[3]) return 1;
-  if (!y[3]) return -1;
-  return x[3] < y[3] ? -1 : 1;
-}
-
-// ../protocol/src/config.ts
-var isObj = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
-var CONNECTION_DEFAULTS = {
-  transport: "structured",
-  forceTool: true,
-  parallelTools: false,
-  sendThoughtSignature: false,
-  streamToolArguments: "auto",
-  maxSteps: 6,
-  finalFallback: true
-};
-var CACHE_DEFAULTS = {
-  enabled: false,
-  ttlMinutes: 5,
-  maxDeferredTurns: 6
-};
-function deepMerge(base, ...layers) {
-  let out = cloneData(base);
-  for (const layer of layers) out = mergeTwo(out, layer);
-  return out;
-}
-function mergeTwo(a, b) {
-  if (b === void 0) return a;
-  if (!isObj(a) || !isObj(b)) return cloneData(b);
-  const out = { ...a };
-  for (const [k, v] of Object.entries(b)) out[k] = mergeTwo(a[k], v);
-  return out;
-}
-function pruneDiff(diff, shape, path = "", removed = [], openMaps = OPEN_MAPS) {
-  for (const k of Object.keys(diff)) {
-    const p = path ? `${path}.${k}` : k;
-    if (openMaps.has(path)) continue;
-    if (!(k in shape)) {
-      delete diff[k];
-      removed.push(p);
-      continue;
-    }
-    if (isObj(diff[k]) && isObj(shape[k])) {
-      pruneDiff(diff[k], shape[k], p, removed, openMaps);
-      if (!Object.keys(diff[k]).length) delete diff[k];
-    }
-  }
-  return removed;
-}
-var OPEN_MAPS = /* @__PURE__ */ new Set(["sampling"]);
-function recommended(preset, id) {
-  return preset.configurations.find((c) => c.id === id) ?? preset.configurations.find((c) => c.id === preset.defaultConfiguration);
-}
-function resolveConfiguration(preset, base, diff) {
-  return deepMerge(preset.configurationDefaults, recommended(preset, base)?.diff, diff);
-}
-
 // ../protocol/src/template.ts
 var TEMPLATES_SINCE = "1.9.0";
 var TemplateError = class extends Error {
@@ -8091,6 +8000,298 @@ function deepFreeze(value) {
     for (const v of Object.values(value)) deepFreeze(v);
   }
   return value;
+}
+
+// ../protocol/src/directives.ts
+var DIRECTIVE_RE = /<!--\s*@([a-z][\w-]*)\b([\s\S]*?)-->/g;
+var FENCE_RE = /^\s*(```|~~~)/;
+function parseAttributes(src) {
+  const args = [];
+  const attrs = {};
+  const re = /([\w:.-]+)(?:\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"']+)))?/g;
+  for (const m of src.matchAll(re)) {
+    const value = m[2] ?? m[3] ?? m[4];
+    if (value === void 0) args.push(m[1]);
+    else attrs[m[1]] = value.replace(/\\(["'\\])/g, "$1");
+  }
+  return { args, attrs };
+}
+var COMMENT_OPEN_RE = /<!--[ \t]*#/g;
+var COMMENT_SCAN_RE = /<!--|-->/g;
+function scanComment(line, from, state) {
+  COMMENT_SCAN_RE.lastIndex = from;
+  for (let m = COMMENT_SCAN_RE.exec(line); m; m = COMMENT_SCAN_RE.exec(line)) {
+    state.depth += m[0] === "<!--" ? 1 : -1;
+    if (state.depth === 0) return m.index + m[0].length;
+  }
+  return -1;
+}
+function tokenizeDirectives(body, split = [], firstLine = 1, error) {
+  const chunks = [{ tokens: [], line: firstLine }];
+  const push = (t) => {
+    if (t.kind === "text" && !t.text) return;
+    const tokens2 = chunks[chunks.length - 1].tokens;
+    const last = tokens2[tokens2.length - 1];
+    if (t.kind === "text" && last?.kind === "text") last.text += t.text;
+    else tokens2.push(t);
+  };
+  const emit = (line, nl, lineNo, keepNewline = false) => {
+    if (!line.includes("<!--")) return push({ kind: "text", text: line + nl });
+    const matches = [...line.matchAll(DIRECTIVE_RE)];
+    if (!matches.length) return push({ kind: "text", text: line + nl });
+    const alone = line.replace(DIRECTIVE_RE, "").trim() === "";
+    let pos = 0;
+    for (const m of matches) {
+      if (m.index > pos) push({ kind: "text", text: line.slice(pos, m.index) });
+      const raw = m[2].trim();
+      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo, ...alone ? { alone } : {} };
+      if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
+      else push({ kind: "directive", directive });
+      pos = m.index + m[0].length;
+    }
+    if (!alone) push({ kind: "text", text: line.slice(pos) + nl });
+    else if (keepNewline) push({ kind: "text", text: nl });
+  };
+  const lines = body.replace(/\r\n?/g, "\n").split("\n");
+  let fenced = false;
+  let comment;
+  lines.forEach((line, i) => {
+    const nl = i < lines.length - 1 ? "\n" : "";
+    const lineNo = firstLine + i;
+    let pos = 0;
+    let blankBefore = true;
+    let touched = false;
+    if (comment) {
+      const end = scanComment(line, 0, comment);
+      if (end < 0) return;
+      blankBefore = comment.blankBefore;
+      comment = void 0;
+      touched = true;
+      pos = blankBefore ? skipSpace(line, end) : end;
+    } else {
+      if (FENCE_RE.test(line)) fenced = !fenced;
+      if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
+    }
+    let out = "";
+    COMMENT_OPEN_RE.lastIndex = pos;
+    for (let m = COMMENT_OPEN_RE.exec(line); m; m = COMMENT_OPEN_RE.exec(line)) {
+      if (m.index < pos) continue;
+      out += line.slice(pos, m.index);
+      touched = true;
+      const state = { depth: 1, line: lineNo, blankBefore: blankBefore && !out.trim() };
+      const end = scanComment(line, m.index + m[0].length, state);
+      if (end < 0) {
+        comment = state;
+        pos = line.length;
+        break;
+      }
+      pos = !out || /\s$/.test(out) ? skipSpace(line, end) : end;
+      COMMENT_OPEN_RE.lastIndex = pos;
+    }
+    if (!touched) return emit(line, nl, lineNo);
+    out += line.slice(pos);
+    if (comment || !line.slice(pos).trim()) out = out.replace(/[ \t]+$/, "");
+    if (comment) {
+      if (out.trim()) emit(out, "", lineNo);
+      return;
+    }
+    if (!out.trim()) {
+      if (!blankBefore) push({ kind: "text", text: nl });
+      return;
+    }
+    emit(out, nl, lineNo, !blankBefore);
+  });
+  if (comment) error?.(`unclosed comment <!--# (opened at line ${comment.line})`, comment.line);
+  return chunks;
+}
+function skipSpace(line, from) {
+  while (from < line.length && (line[from] === " " || line[from] === "	")) from++;
+  return from;
+}
+var ROLES = ["system", "user", "assistant"];
+var STYLES = ["dialogue", "imperative"];
+function compileTokens(tokens2, error, onExpr, file) {
+  const blocks = [{ pieces: [] }];
+  const stack = [];
+  const current = () => and(...stack.map((f) => f.negated ? { t: "not", e: f.cond } : f.cond));
+  let template;
+  const closeTemplate = () => {
+    const tpl = template;
+    template = void 0;
+    const problem = checkTemplate(tpl.text);
+    if (problem) error(`template: ${problem.message}`, problem.line !== void 0 ? tpl.line + problem.line - 1 : tpl.open);
+    const origin = { ...file ? { file } : {}, line: tpl.line };
+    blocks[blocks.length - 1].pieces.push(tpl.when ? { text: tpl.text, when: tpl.when, template: origin } : { text: tpl.text, template: origin });
+  };
+  for (const token of tokens2) {
+    if (template) {
+      if (token.kind === "text") template.text += token.text;
+      else if (token.directive.name === "end") closeTemplate();
+      else error(`@${token.directive.name} cannot be used inside @template (use EJS tags such as <% if (\u2026) { %>)`, token.directive.line);
+      continue;
+    }
+    if (token.kind === "text") {
+      const when = current();
+      blocks[blocks.length - 1].pieces.push(when ? { text: token.text, when } : { text: token.text });
+      continue;
+    }
+    const d = token.directive;
+    switch (d.name) {
+      case "as": {
+        const role = d.args[0];
+        if (!ROLES.includes(role)) error(`@as expects one of ${ROLES.join(" | ")}`, d.line);
+        if (stack.length) error("@as cannot be used inside @if / @style", d.line);
+        blocks.push({ role: ROLES.includes(role) ? role : void 0, pieces: [] });
+        break;
+      }
+      case "style": {
+        const style = d.args[0];
+        if (style === "end") {
+          stack.pop();
+          break;
+        }
+        if (!style || !STYLES.includes(style)) {
+          error(`@style expects dialogue | imperative`, d.line);
+          break;
+        }
+        if (stack.length && stack[stack.length - 1].style) stack.pop();
+        stack.push({ cond: parseExpr(`style == "${style}"`), style: true, line: d.line });
+        break;
+      }
+      case "if": {
+        try {
+          const cond = parseExpr(d.raw);
+          onExpr?.(cond, d.line);
+          stack.push({ cond, line: d.line });
+        } catch (e) {
+          error(e.message, d.line);
+          stack.push({ cond: { t: "lit", v: false }, line: d.line });
+        }
+        break;
+      }
+      case "else": {
+        const top = stack[stack.length - 1];
+        if (!top || top.negated) error("@else without matching @if", d.line);
+        else top.negated = true;
+        break;
+      }
+      case "end":
+        if (!stack.length) error("@end without matching @if / @style / @template", d.line);
+        stack.pop();
+        break;
+      case "template":
+        if (d.args.length || Object.keys(d.attrs).length) error("@template takes no arguments", d.line);
+        template = { text: "", line: d.alone ? d.line + 1 : d.line, open: d.line, when: current() };
+        break;
+      default:
+        error(`unknown directive @${d.name}`, d.line);
+    }
+  }
+  if (template) {
+    error(`unclosed @template (opened at line ${template.open})`, template.open);
+    template = void 0;
+  }
+  if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1].line})`);
+  return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
+}
+function compileText(text, role) {
+  const errors = [];
+  const sink = (message, line) => errors.push({ message, line });
+  const [chunk] = tokenizeDirectives(text, [], 1, sink);
+  const content = compileTokens(chunk.tokens, sink);
+  if (role && content[0] && !content[0].role) content[0] = { ...content[0], role };
+  return { content, errors };
+}
+
+// ../protocol/src/content.ts
+function renderContent(content, resolve2, post = (s) => s, template) {
+  if (!content) return [];
+  const out = [];
+  for (const block of content) {
+    const joined = block.pieces.filter((p) => test(p.when, resolve2)).map((p) => p.template ? template?.(p) ?? "" : p.text).join("");
+    const text = post(joined).replace(/\n{3,}/g, "\n\n").trim();
+    if (!text) continue;
+    out.push(block.role ? { role: block.role, text } : { text });
+  }
+  return out;
+}
+
+// ../protocol/src/clone.ts
+function cloneData(value) {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map((v) => cloneData(v));
+  const out = {};
+  for (const [k, v] of Object.entries(value)) if (v !== void 0) out[k] = cloneData(v);
+  return out;
+}
+
+// ../protocol/src/semver.ts
+function parseVersion(v) {
+  const m = /^v?(\d+)(?:\.(\d+|x|\*))?(?:\.(\d+|x|\*))?(?:-([0-9A-Za-z.-]+))?/.exec(v.trim());
+  if (!m) return [0, 0, 0, ""];
+  const n = (s) => s === void 0 || s === "x" || s === "*" ? 0 : Number(s);
+  return [n(m[1]), n(m[2]), n(m[3]), m[4] ?? ""];
+}
+function compareVersions(a, b) {
+  const x = parseVersion(a);
+  const y = parseVersion(b);
+  for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i];
+  if (x[3] === y[3]) return 0;
+  if (!x[3]) return 1;
+  if (!y[3]) return -1;
+  return x[3] < y[3] ? -1 : 1;
+}
+
+// ../protocol/src/config.ts
+var isObj = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var CONNECTION_DEFAULTS = {
+  transport: "structured",
+  forceTool: true,
+  parallelTools: false,
+  sendThoughtSignature: false,
+  streamToolArguments: "auto",
+  maxSteps: 6,
+  finalFallback: true
+};
+var CACHE_DEFAULTS = {
+  enabled: false,
+  ttlMinutes: 5,
+  maxDeferredTurns: 6
+};
+function deepMerge(base, ...layers) {
+  let out = cloneData(base);
+  for (const layer of layers) out = mergeTwo(out, layer);
+  return out;
+}
+function mergeTwo(a, b) {
+  if (b === void 0) return a;
+  if (!isObj(a) || !isObj(b)) return cloneData(b);
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b)) out[k] = mergeTwo(a[k], v);
+  return out;
+}
+function pruneDiff(diff, shape, path = "", removed = [], openMaps = OPEN_MAPS) {
+  for (const k of Object.keys(diff)) {
+    const p = path ? `${path}.${k}` : k;
+    if (openMaps.has(path)) continue;
+    if (!(k in shape)) {
+      delete diff[k];
+      removed.push(p);
+      continue;
+    }
+    if (isObj(diff[k]) && isObj(shape[k])) {
+      pruneDiff(diff[k], shape[k], p, removed, openMaps);
+      if (!Object.keys(diff[k]).length) delete diff[k];
+    }
+  }
+  return removed;
+}
+var OPEN_MAPS = /* @__PURE__ */ new Set(["sampling"]);
+function recommended(preset, id) {
+  return preset.configurations.find((c) => c.id === id) ?? preset.configurations.find((c) => c.id === preset.defaultConfiguration);
+}
+function resolveConfiguration(preset, base, diff) {
+  return deepMerge(preset.configurationDefaults, recommended(preset, base)?.diff, diff);
 }
 
 // ../protocol/src/build-vars.ts
@@ -8404,212 +8605,14 @@ function defaultVars(preset, config, over = {}) {
   };
 }
 
-// ../protocol/src/directives.ts
-var DIRECTIVE_RE = /<!--\s*@([a-z][\w-]*)\b([\s\S]*?)-->/g;
-var FENCE_RE = /^\s*(```|~~~)/;
-function parseAttributes(src) {
-  const args = [];
-  const attrs = {};
-  const re = /([\w:.-]+)(?:\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"']+)))?/g;
-  for (const m of src.matchAll(re)) {
-    const value = m[2] ?? m[3] ?? m[4];
-    if (value === void 0) args.push(m[1]);
-    else attrs[m[1]] = value.replace(/\\(["'\\])/g, "$1");
-  }
-  return { args, attrs };
-}
-var COMMENT_OPEN_RE = /<!--[ \t]*#/g;
-var COMMENT_SCAN_RE = /<!--|-->/g;
-function scanComment(line, from, state) {
-  COMMENT_SCAN_RE.lastIndex = from;
-  for (let m = COMMENT_SCAN_RE.exec(line); m; m = COMMENT_SCAN_RE.exec(line)) {
-    state.depth += m[0] === "<!--" ? 1 : -1;
-    if (state.depth === 0) return m.index + m[0].length;
-  }
-  return -1;
-}
-function tokenizeDirectives(body, split = [], firstLine = 1, error) {
-  const chunks = [{ tokens: [], line: firstLine }];
-  const push = (t) => {
-    if (t.kind === "text" && !t.text) return;
-    const tokens2 = chunks[chunks.length - 1].tokens;
-    const last = tokens2[tokens2.length - 1];
-    if (t.kind === "text" && last?.kind === "text") last.text += t.text;
-    else tokens2.push(t);
-  };
-  const emit = (line, nl, lineNo, keepNewline = false) => {
-    if (!line.includes("<!--")) return push({ kind: "text", text: line + nl });
-    const matches = [...line.matchAll(DIRECTIVE_RE)];
-    if (!matches.length) return push({ kind: "text", text: line + nl });
-    const alone = line.replace(DIRECTIVE_RE, "").trim() === "";
-    let pos = 0;
-    for (const m of matches) {
-      if (m.index > pos) push({ kind: "text", text: line.slice(pos, m.index) });
-      const raw = m[2].trim();
-      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo, ...alone ? { alone } : {} };
-      if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
-      else push({ kind: "directive", directive });
-      pos = m.index + m[0].length;
-    }
-    if (!alone) push({ kind: "text", text: line.slice(pos) + nl });
-    else if (keepNewline) push({ kind: "text", text: nl });
-  };
-  const lines = body.replace(/\r\n?/g, "\n").split("\n");
-  let fenced = false;
-  let comment;
-  lines.forEach((line, i) => {
-    const nl = i < lines.length - 1 ? "\n" : "";
-    const lineNo = firstLine + i;
-    let pos = 0;
-    let blankBefore = true;
-    let touched = false;
-    if (comment) {
-      const end = scanComment(line, 0, comment);
-      if (end < 0) return;
-      blankBefore = comment.blankBefore;
-      comment = void 0;
-      touched = true;
-      pos = blankBefore ? skipSpace(line, end) : end;
-    } else {
-      if (FENCE_RE.test(line)) fenced = !fenced;
-      if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
-    }
-    let out = "";
-    COMMENT_OPEN_RE.lastIndex = pos;
-    for (let m = COMMENT_OPEN_RE.exec(line); m; m = COMMENT_OPEN_RE.exec(line)) {
-      if (m.index < pos) continue;
-      out += line.slice(pos, m.index);
-      touched = true;
-      const state = { depth: 1, line: lineNo, blankBefore: blankBefore && !out.trim() };
-      const end = scanComment(line, m.index + m[0].length, state);
-      if (end < 0) {
-        comment = state;
-        pos = line.length;
-        break;
-      }
-      pos = !out || /\s$/.test(out) ? skipSpace(line, end) : end;
-      COMMENT_OPEN_RE.lastIndex = pos;
-    }
-    if (!touched) return emit(line, nl, lineNo);
-    out += line.slice(pos);
-    if (comment || !line.slice(pos).trim()) out = out.replace(/[ \t]+$/, "");
-    if (comment) {
-      if (out.trim()) emit(out, "", lineNo);
-      return;
-    }
-    if (!out.trim()) {
-      if (!blankBefore) push({ kind: "text", text: nl });
-      return;
-    }
-    emit(out, nl, lineNo, !blankBefore);
-  });
-  if (comment) error?.(`unclosed comment <!--# (opened at line ${comment.line})`, comment.line);
-  return chunks;
-}
-function skipSpace(line, from) {
-  while (from < line.length && (line[from] === " " || line[from] === "	")) from++;
-  return from;
-}
-var ROLES = ["system", "user", "assistant"];
-var STYLES = ["dialogue", "imperative"];
-function compileTokens(tokens2, error, onExpr, file) {
-  const blocks = [{ pieces: [] }];
-  const stack = [];
-  const current = () => and(...stack.map((f) => f.negated ? { t: "not", e: f.cond } : f.cond));
-  let template;
-  const closeTemplate = () => {
-    const tpl = template;
-    template = void 0;
-    const problem = checkTemplate(tpl.text);
-    if (problem) error(`template: ${problem.message}`, problem.line !== void 0 ? tpl.line + problem.line - 1 : tpl.open);
-    const origin = { ...file ? { file } : {}, line: tpl.line };
-    blocks[blocks.length - 1].pieces.push(tpl.when ? { text: tpl.text, when: tpl.when, template: origin } : { text: tpl.text, template: origin });
-  };
-  for (const token of tokens2) {
-    if (template) {
-      if (token.kind === "text") template.text += token.text;
-      else if (token.directive.name === "end") closeTemplate();
-      else error(`@${token.directive.name} cannot be used inside @template (use EJS tags such as <% if (\u2026) { %>)`, token.directive.line);
-      continue;
-    }
-    if (token.kind === "text") {
-      const when = current();
-      blocks[blocks.length - 1].pieces.push(when ? { text: token.text, when } : { text: token.text });
-      continue;
-    }
-    const d = token.directive;
-    switch (d.name) {
-      case "as": {
-        const role = d.args[0];
-        if (!ROLES.includes(role)) error(`@as expects one of ${ROLES.join(" | ")}`, d.line);
-        if (stack.length) error("@as cannot be used inside @if / @style", d.line);
-        blocks.push({ role: ROLES.includes(role) ? role : void 0, pieces: [] });
-        break;
-      }
-      case "style": {
-        const style = d.args[0];
-        if (style === "end") {
-          stack.pop();
-          break;
-        }
-        if (!style || !STYLES.includes(style)) {
-          error(`@style expects dialogue | imperative`, d.line);
-          break;
-        }
-        if (stack.length && stack[stack.length - 1].style) stack.pop();
-        stack.push({ cond: parseExpr(`style == "${style}"`), style: true, line: d.line });
-        break;
-      }
-      case "if": {
-        try {
-          const cond = parseExpr(d.raw);
-          onExpr?.(cond, d.line);
-          stack.push({ cond, line: d.line });
-        } catch (e) {
-          error(e.message, d.line);
-          stack.push({ cond: { t: "lit", v: false }, line: d.line });
-        }
-        break;
-      }
-      case "else": {
-        const top = stack[stack.length - 1];
-        if (!top || top.negated) error("@else without matching @if", d.line);
-        else top.negated = true;
-        break;
-      }
-      case "end":
-        if (!stack.length) error("@end without matching @if / @style / @template", d.line);
-        stack.pop();
-        break;
-      case "template":
-        if (d.args.length || Object.keys(d.attrs).length) error("@template takes no arguments", d.line);
-        template = { text: "", line: d.alone ? d.line + 1 : d.line, open: d.line, when: current() };
-        break;
-      default:
-        error(`unknown directive @${d.name}`, d.line);
-    }
-  }
-  if (template) {
-    error(`unclosed @template (opened at line ${template.open})`, template.open);
-    template = void 0;
-  }
-  if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1].line})`);
-  return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
-}
-function compileText(text, role) {
-  const errors = [];
-  const sink = (message, line) => errors.push({ message, line });
-  const [chunk] = tokenizeDirectives(text, [], 1, sink);
-  const content = compileTokens(chunk.tokens, sink);
-  if (role && content[0] && !content[0].role) content[0] = { ...content[0], role };
-  return { content, errors };
-}
-
 // ../protocol/src/user-modules.ts
 var USER_MODULE_PREFIX = "user-";
 var DEFAULT_KEYWORD_DEPTH = 3;
 var USER_MODULES_FORMAT = "advanced-preset.user-modules";
 var userModuleId = (id) => `${USER_MODULE_PREFIX}${id}`;
+function emptyTrigger() {
+  return { match: "all", rules: [] };
+}
 var VALUELESS = ["on", "off"];
 function ruleComplete(rule) {
   switch (rule.kind) {
@@ -8680,6 +8683,27 @@ function compileTrigger(trigger, texts = { input: "", recent: [] }) {
   if (!parts.length) return void 0;
   const op = trigger.match === "any" ? "||" : "&&";
   return parts.reduce((l, r) => ({ t: "bin", op, l, r }));
+}
+function ruleError(rule) {
+  if (rule.kind === "expr") {
+    if (!rule.source.trim()) return null;
+    try {
+      parseExpr(rule.source);
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  }
+  if (rule.kind === "keyword" && rule.regex) {
+    for (const w of rule.words) {
+      try {
+        new RegExp(w, "iu");
+      } catch (e) {
+        return e.message;
+      }
+    }
+  }
+  return null;
 }
 function findPoint(preset, id) {
   return (preset.insertionPoints ?? []).find((p) => p.id === id);
@@ -8814,12 +8838,35 @@ function parseUserModuleFile(raw) {
   throw new Error("not a user module file");
 }
 
+// ../protocol/src/module-templates.ts
+function moduleTemplates(preset) {
+  return Array.isArray(preset.moduleTemplates) ? preset.moduleTemplates : [];
+}
+function localizeModuleTemplate(tpl, lang, labels) {
+  const l = lang?.toLowerCase();
+  const body = l && (tpl.locales?.[l] ?? tpl.locales?.[l.split("-")[0]]) || void 0;
+  if (body) return body;
+  const name = typeof labels?.name === "string" && labels.name ? labels.name : tpl.name;
+  const description = typeof labels?.description === "string" && labels.description ? labels.description : tpl.description;
+  return { name, ...description ? { description } : {}, entries: tpl.entries, vars: tpl.vars, trigger: tpl.trigger };
+}
+function userModuleFromTemplate(body, id, name = body.name) {
+  return {
+    id,
+    name,
+    enabled: true,
+    entries: body.entries.map((e, i) => ({ id: `e${i + 1}`, ...cloneData(e) })),
+    vars: cloneData(body.vars ?? []),
+    trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger()
+  };
+}
+
 // src/io.ts
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 
 // src/compile.ts
-var import_yaml2 = __toESM(require_dist(), 1);
+var import_yaml3 = __toESM(require_dist(), 1);
 import { createHash } from "node:crypto";
 
 // src/diagnostics.ts
@@ -8891,11 +8938,170 @@ function compileContent(tokens2, diag, where, onExpr) {
   );
 }
 
+// src/module-templates.ts
+var import_yaml2 = __toESM(require_dist(), 1);
+var MODULE_TEMPLATE_DIR = "module-templates/";
+var FILE_RE = /^module-templates\/([a-z0-9][a-z0-9-]*)(?:\.([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*))?\.md$/;
+var ROLES3 = ["system", "user", "assistant"];
+var ENTRY_RE = /^\s*<!--\s*@entry\b([\s\S]*?)-->\s*$/;
+var FENCE_RE2 = /^\s*(```|~~~)/;
+function splitTemplateBody(body, firstLine) {
+  const parts = [{ lines: [] }];
+  let fenced = false;
+  let depth = 0;
+  const scan = (line, from) => {
+    const re = /<!--|-->/g;
+    re.lastIndex = from;
+    for (let m = re.exec(line); m; m = re.exec(line)) {
+      depth += m[0] === "<!--" ? 1 : -1;
+      if (depth === 0) return re.lastIndex;
+    }
+    return line.length;
+  };
+  body.split("\n").forEach((line, i) => {
+    const no = firstLine + i;
+    let pos = 0;
+    if (depth > 0) pos = scan(line, 0);
+    else {
+      const m = ENTRY_RE.exec(line);
+      if (!fenced && m) {
+        parts.push({ attrs: parseAttributes(m[1].trim()).attrs, markerLine: no, lines: [] });
+        return;
+      }
+      if (FENCE_RE2.test(line)) fenced = !fenced;
+    }
+    if (!fenced) {
+      const open = /<!--[ \t]*#/g;
+      open.lastIndex = pos;
+      for (let m = depth === 0 ? open.exec(line) : null; m; m = depth === 0 ? open.exec(line) : null) {
+        depth = 1;
+        open.lastIndex = scan(line, m.index + m[0].length);
+      }
+    }
+    parts[parts.length - 1].lines.push({ text: line, no });
+  });
+  return parts.map((p) => {
+    let a = 0;
+    let b = p.lines.length;
+    while (a < b && !p.lines[a].text.trim()) a++;
+    while (b > a && !p.lines[b - 1].text.trim()) b--;
+    const kept = p.lines.slice(a, b);
+    return {
+      ...p.attrs ? { attrs: p.attrs } : {},
+      ...p.markerLine !== void 0 ? { markerLine: p.markerLine } : {},
+      text: kept.map((x) => x.text).join("\n").replace(/[ \t]+$/, ""),
+      line: kept[0]?.no ?? p.markerLine ?? firstLine
+    };
+  });
+}
+function parseTrigger(fm, ctx, where) {
+  const { diag } = ctx;
+  if (fm.when !== void 0 && fm.trigger !== void 0) diag.error("use either `when` or `trigger`, not both", where);
+  let trigger = { match: "all", rules: [] };
+  if (fm.when !== void 0 && fm.when !== null && fm.when !== "") {
+    trigger = { match: "all", rules: [{ kind: "expr", source: String(fm.when) }] };
+  } else if (fm.trigger !== void 0) {
+    const raw = fm.trigger;
+    const n = normalizeUserModule({ entries: [], trigger: fm.trigger });
+    const given = Array.isArray(raw?.rules) ? raw.rules.length : 0;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) diag.error("trigger must be a mapping `{ match, rules }`", where);
+    else if (n.trigger.rules.length !== given) diag.error(`trigger has ${given - n.trigger.rules.length} invalid rule(s) (see the user module format)`, where);
+    trigger = n.trigger;
+  }
+  trigger.rules.forEach((r, i) => {
+    const err = ruleError(r);
+    if (err) diag.error(`trigger rule ${i + 1}: ${err}`, where);
+  });
+  const e = compileTrigger(trigger);
+  if (e) ctx.onExpr(e, where);
+  return trigger;
+}
+function compileBody(file, src, ctx, id) {
+  const { diag } = ctx;
+  const { yaml, body, bodyLine } = splitFrontmatter(src);
+  const where = { file, line: 1 };
+  let fm = {};
+  if (yaml) {
+    try {
+      const parsed = (0, import_yaml2.parse)(yaml);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) fm = parsed;
+      else diag.error("frontmatter must be a mapping", where);
+    } catch (e) {
+      diag.error(`invalid frontmatter: ${e.message}`, where);
+      return void 0;
+    }
+  }
+  if (fm.id !== void 0 && String(fm.id) !== id) diag.error(`module template id comes from the file name (\`${id}\`)`, { ...where, path: "id" });
+  const entries = [];
+  const parts = splitTemplateBody(body, bodyLine);
+  parts.forEach((part, i) => {
+    const head = i === 0 ? { point: fm.point, role: fm.role } : part.attrs ?? {};
+    const at = { file, line: part.markerLine ?? part.line };
+    if (i === 0 && head.point === void 0) {
+      if (part.text.trim()) diag.error("text before the first `@entry` needs `point` in the frontmatter", { file, line: part.line });
+      if (fm.role !== void 0) diag.error("`role` needs `point` in the frontmatter", where);
+      return;
+    }
+    const point = String(head.point ?? "");
+    if (!point) return diag.error("@entry needs `point=<insertion point>`", at);
+    if (!ctx.insertionPoints.some((p) => p.id === point)) diag.error(`unknown insertion point \`${point}\``, at);
+    const entry = { point, text: part.text };
+    if (head.role !== void 0) {
+      if (!ROLES3.includes(head.role)) diag.error(`role must be ${ROLES3.join(" | ")}`, at);
+      else entry.role = head.role;
+    }
+    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== "point" && k !== "role") diag.warn(`unknown @entry attribute \`${k}\` in a module template`, at);
+    const [chunk] = tokenizeDirectives(part.text, [], part.line, (message, line) => diag.error(message, { file, ...line !== void 0 ? { line } : {} }));
+    ctx.content(chunk.tokens, { file, line: part.line });
+    entries.push(entry);
+  });
+  if (!entries.length) diag.warn("module template has no entries (set `point` in the frontmatter or add `@entry point=\u2026`)", where);
+  const name = fm.name === void 0 ? id : String(fm.name);
+  const out = {
+    name,
+    ...fm.description !== void 0 ? { description: String(fm.description).trim() } : {},
+    entries,
+    vars: ctx.varUpdates(fm.vars, { ...where, path: "vars" }),
+    trigger: parseTrigger(fm, ctx, { ...where, path: fm.trigger !== void 0 ? "trigger" : "when" })
+  };
+  const known = /* @__PURE__ */ new Set(["id", "name", "description", "point", "role", "vars", "when", "trigger"]);
+  for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a module template`, { ...where, path: k });
+  return out;
+}
+function compileModuleTemplates(tree, ctx) {
+  const files2 = [...tree.keys()].filter((p) => p.startsWith(MODULE_TEMPLATE_DIR)).sort();
+  const templates = [];
+  const translations = [];
+  for (const file of files2) {
+    const m = FILE_RE.exec(file);
+    if (!m) {
+      ctx.diag.error("module template files are `module-templates/<id>.md` or `<id>.<lang>.md` (id in lower-case kebab-case)", { file });
+      continue;
+    }
+    if (m[2]) {
+      translations.push({ file, id: m[1], lang: m[2].toLowerCase() });
+      continue;
+    }
+    const body = compileBody(file, tree.get(file), ctx, m[1]);
+    if (body) templates.push({ id: m[1], ...body });
+  }
+  for (const { file, id, lang } of translations) {
+    const tpl = templates.find((x) => x.id === id);
+    if (!tpl) {
+      ctx.diag.error(`translation of unknown module template \`${id}\` (add module-templates/${id}.md)`, { file });
+      continue;
+    }
+    const body = compileBody(file, tree.get(file), ctx, id);
+    if (body) (tpl.locales ??= {})[lang] = body;
+  }
+  return templates;
+}
+
 // src/compile.ts
 var SOURCE_FORMAT_VERSION = 1;
 var isObj3 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
 var str2 = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
-var ROLES3 = ["system", "user", "assistant"];
+var ROLES4 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
 var STAGE_KINDS = ["text", "content", "patch"];
 var STYLES2 = ["dialogue", "imperative"];
@@ -8981,7 +9187,7 @@ function compile(tree) {
   const M = "preset.yaml";
   let raw;
   try {
-    const parsed = (0, import_yaml2.parse)(manifestSrc);
+    const parsed = (0, import_yaml3.parse)(manifestSrc);
     if (!isObj3(parsed)) throw new Error("top level must be a mapping");
     raw = parsed;
   } catch (e) {
@@ -9055,7 +9261,7 @@ function compile(tree) {
     if (!rid) return diag.error("region id is required", where);
     if (regions.some((x) => x.id === rid)) diag.error(`duplicate region \`${rid}\``, where);
     const role = str2(o.role, "system");
-    if (!ROLES3.includes(role)) diag.error(`role must be ${ROLES3.join(" | ")}`, where);
+    if (!ROLES4.includes(role)) diag.error(`role must be ${ROLES4.join(" | ")}`, where);
     let merge = "none";
     if (o.merge === "join" || o.merge === "none") merge = o.merge;
     else if (isObj3(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
@@ -9322,6 +9528,14 @@ function compile(tree) {
   modules.sort((a, b) => rank(a.id) - rank(b.id));
   const regionIndex = (rid) => regions.findIndex((r) => r.id === rid);
   entries.sort((a, b) => regionIndex(a.region) - regionIndex(b.region) || a.order - b.order || rank(a.module) - rank(b.module));
+  const moduleTemplates2 = compileModuleTemplates(tree, {
+    diag,
+    insertionPoints,
+    expr,
+    content,
+    varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
+    onExpr: (e, where) => map.exprs.push({ expr: e, where })
+  });
   const workflows = [];
   const workflowFiles = [...tree.keys()].filter((p) => /^workflows\/[^/]+\.md$/.test(p)).sort();
   for (const file of workflowFiles) {
@@ -9418,7 +9632,7 @@ function compile(tree) {
     const m = /^locales\/([\w-]+)\.ya?ml$/.exec(file);
     if (!m) continue;
     try {
-      const parsed = (0, import_yaml2.parse)(src);
+      const parsed = (0, import_yaml3.parse)(src);
       if (isObj3(parsed)) locales[m[1].toLowerCase()] = parsed;
       else diag.error("locale file must be a mapping", { file });
     } catch (e) {
@@ -9452,6 +9666,7 @@ function compile(tree) {
     modules,
     entries,
     insertionPoints,
+    moduleTemplates: moduleTemplates2,
     vars,
     workflows,
     structures,
@@ -9949,6 +10164,7 @@ function validate(p, map, diag) {
       configurations: new Set(p.configurations.map((x) => x.id)),
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
+      moduleTemplates: new Set((p.moduleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys())
     };
     for (const [section, ids] of Object.entries(known)) {
@@ -9965,7 +10181,7 @@ function validate(p, map, diag) {
 }
 
 // src/io.ts
-var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
+var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 function isSourcePath(rel) {
   return SOURCE_RE.test(rel.split(sep).join("/"));
 }
@@ -9998,6 +10214,14 @@ async function writeArtifact(preset, outDir) {
 }
 
 // src/preview.ts
+function templateModules(preset, ids, lang) {
+  const all = moduleTemplates(preset);
+  const picked = ids.includes("all") ? all : ids.map((id) => all.find((t) => t.id === id));
+  const unknown = ids.filter((id) => id !== "all" && !all.some((t) => t.id === id));
+  if (unknown.length) return `unknown module template ${unknown.join(", ")} (have: ${all.map((t) => t.id).join(", ") || "none"})`;
+  const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.moduleTemplates?.[id] : void 0;
+  return picked.map((t) => userModuleFromTemplate(localizeModuleTemplate(t, lang, labels(t.id)), `tpl-${t.id}`));
+}
 function preview(source, o) {
   const { preset, skipped } = o.userModules ? withUserModules(source, o.userModules) : { preset: source, skipped: [] };
   const config = resolveConfiguration(preset, o.config ?? preset.defaultConfiguration, {
@@ -10125,7 +10349,7 @@ async function init(o) {
 }
 
 // src/skills.ts
-var import_yaml3 = __toESM(require_dist(), 1);
+var import_yaml4 = __toESM(require_dist(), 1);
 import { cp as cp2, mkdir as mkdir3, readdir as readdir3, readFile as readFile3, rm, stat as stat2 } from "node:fs/promises";
 import { join as join3, relative as relative3 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -10135,7 +10359,7 @@ var isDir = (p) => stat2(p).then((s) => s.isDirectory(), () => false);
 function parseSkillFrontmatter(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
   if (!m) return {};
-  const data = (0, import_yaml3.parse)(m[1]);
+  const data = (0, import_yaml4.parse)(m[1]);
   return {
     name: typeof data?.name === "string" ? data.name : void 0,
     description: typeof data?.description === "string" ? data.description : void 0
@@ -10205,7 +10429,8 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
+                   [--enable a,b] [--disable c] [--user-modules file]
+                   [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
                                              scaffold a new preset repository
   ap skills  list                            list the bundled Agent Skills
@@ -10231,6 +10456,8 @@ async function main(argv) {
       disable: { type: "string" },
       json: { type: "boolean" },
       "user-modules": { type: "string" },
+      "module-templates": { type: "string" },
+      lang: { type: "string" },
       id: { type: "string" },
       name: { type: "string" },
       author: { type: "string" },
@@ -10246,7 +10473,7 @@ async function main(argv) {
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${preset.moduleTemplates.length ? `, ${preset.moduleTemplates.length} module templates` : ""}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? "dist"));
@@ -10267,7 +10494,15 @@ async function main(argv) {
       for (const id of values.enable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = false;
       const meta = values.meta === "pure" || values.meta === "mixed" ? values.meta : void 0;
-      const userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules : void 0;
+      let userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules : void 0;
+      if (values["module-templates"]) {
+        const picked = templateModules(preset, values["module-templates"].split(",").map((x) => x.trim()).filter(Boolean), values.lang);
+        if (typeof picked === "string") {
+          console.error(picked);
+          return 1;
+        }
+        userModules = [...userModules ?? [], ...picked];
+      }
       const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
