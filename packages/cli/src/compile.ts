@@ -1,7 +1,8 @@
 /**
  * Source tree → `APreset` artifact.
  *
- *   preset.yaml          manifest
+ *   preset.yaml          manifest (metadata; other keys may live in fragments)
+ *   manifest/**\/*.yaml   manifest fragments, merged into preset.yaml (see manifest.ts)
  *   modules/**\/*.md      one module per file (frontmatter + entries)
  *   workflows/*.md       one workflow per file (frontmatter + sections)
  *   module-templates/*.md  example user modules (raw text; see module-templates.ts)
@@ -25,6 +26,7 @@ import {
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
 import { compileModuleTemplates } from './module-templates';
+import { MANIFEST_FILE, loadManifest } from './manifest';
 
 export type SourceTree = Map<string, string>;
 
@@ -47,6 +49,8 @@ export interface SourceMap {
 
 export interface CompileResult {
   preset?: APreset;
+  /** Manifest files that were merged: `preset.yaml`, then fragments in merge order. */
+  manifestFiles?: string[];
   diag: Diagnostics;
   map: SourceMap;
 }
@@ -142,21 +146,11 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
 export function compile(tree: SourceTree): CompileResult {
   const diag = new Diagnostics();
   const map: SourceMap = { exprs: [], texts: [], templates: [], entries: new Map(), modules: new Map(), workflows: new Map() };
-  const manifestSrc = tree.get('preset.yaml');
-  if (manifestSrc === undefined) {
-    diag.error('preset.yaml not found');
-    return { diag, map };
-  }
-  const M = 'preset.yaml';
-  let raw: Obj;
-  try {
-    const parsed = parseYaml(manifestSrc);
-    if (!isObj(parsed)) throw new Error('top level must be a mapping');
-    raw = parsed;
-  } catch (e) {
-    diag.error(`invalid YAML: ${(e as Error).message}`, { file: M });
-    return { diag, map };
-  }
+  const manifest = loadManifest(tree, diag);
+  if (!manifest) return { diag, map };
+  diag.locate = manifest.locate;
+  const M = MANIFEST_FILE;
+  const raw: Obj = manifest.raw;
 
   const expr = (src: unknown, where: Where): Expr | undefined => {
     if (src === undefined || src === null || src === '') return undefined;
@@ -678,7 +672,7 @@ export function compile(tree: SourceTree): CompileResult {
     locales,
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map };
+  return { preset, diag, map, manifestFiles: manifest.files };
 }
 
 const isScalar = (v: unknown): v is string | number | boolean => ['string', 'number', 'boolean'].includes(typeof v);
