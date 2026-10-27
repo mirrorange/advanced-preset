@@ -7,7 +7,8 @@ ap build   [dir] [--out dist] [--strict]
 ap check   [dir] [--strict]
 ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
 ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                 [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
+                 [--enable a,b] [--disable c] [--user-modules file]
+                 [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
 ap init    <dir> [--id x] [--name "My Preset"] [--author me]
 ap skills  list
 ap skills  install [dir] [--target .agents/skills]
@@ -74,6 +75,8 @@ warn  preset.yaml groups: module `x` has no group
 | `--meta mixed` | 模拟混合元指令：来源 `story` |
 | `--enable a,b` / `--disable c` | 打开 / 关闭模组（逗号分隔的 id） |
 | `--user-modules <file>` | 合并用户模组文件（[user-modules.md](user-modules.md#导入导出格式)） |
+| `--module-templates <ids>` | 把模组模板当作新建的用户模组合并（逗号分隔的 id，`all` 为全部），排在 `--user-modules` 之后（[user-modules.md](user-modules.md#模组模板-module-templates)） |
+| `--lang <lang>` | 与 `--module-templates` 一起使用：按该面板语言选用模板的翻译 |
 | `--json` | 输出 JSON：`vars`、`buildVars`、`skipped`、`modules`、`structures`、`stages`、`regions`，以及 `schema`（structured）或 `tools`（工具传输） |
 | `--out <file>` | 写入文件而不是标准输出 |
 

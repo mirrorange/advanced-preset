@@ -27,6 +27,7 @@ Advanced Preset（AP）是 SillyTavern 的扩展。预设作者写源码（`pres
 | 构建变量 vars | 多个模组共同填写的清单（如“规划时要考虑的问题”），用户模组也能增删 |
 | 推荐配置 configurations | 为不同模型准备的一键设置（传输方式、工作流、采样、模组开关） |
 | 插入点 insertionPoints | 用户“我的模组”可以插入的位置 |
+| 模组模板 module-templates | 预设附带的示例用户模组，用户新建模组时可从它开始 |
 
 细节在 `ap-preset-authoring` 技能的 `references/` 中；入门讲解见[预设开发指南](https://github.com/mirrorange/advanced-preset/blob/main/docs/guide/README.md)。
 

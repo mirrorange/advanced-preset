@@ -1,6 +1,6 @@
 ---
 name: ap-preset-authoring
-description: Write and edit Advanced Preset (AP) source files for SillyTavern — preset.yaml, modules/*.md, workflows/*.md, locales/*.yaml — following the AP format reference bundled with this skill. Use for implementing a DESIGN.md, adding or changing modules, params, workflows, structures, configurations, insertion points or translations, and fixing `ap check` errors. 编写或修改 AP 预设源码（模组、工作流、参数、结构、推荐配置、翻译）、修复构建报错时使用。
+description: Write and edit Advanced Preset (AP) source files for SillyTavern — preset.yaml, modules/*.md, workflows/*.md, module-templates/*.md, locales/*.yaml — following the AP format reference bundled with this skill. Use for implementing a DESIGN.md, adding or changing modules, params, workflows, structures, configurations, insertion points, module templates or translations, and fixing `ap check` errors. 编写或修改 AP 预设源码（模组、工作流、参数、结构、推荐配置、模组模板、翻译）、修复构建报错时使用。
 ---
 
 # 编写 Advanced Preset 预设
@@ -10,7 +10,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 ## 开始之前
 
 1. 读 `DESIGN.md`（如果有）。没有设计稿、而改动涉及新增角色 / 工作流 / 大量模组时，先建议用户用 `ap-preset-design` 技能。
-2. 读 `preset.yaml`，`ls -R modules workflows locales`，了解现有 id、区域、分组。
+2. 读 `preset.yaml`，`ls -R modules workflows module-templates locales`，了解现有 id、区域、分组。
 3. 运行 `npx ap check`，记下已有的错误和警告，不要把它们算到你的改动上。
 4. 如果用户正在用 `npm run dev` 实时预览，保持它运行；每次保存都会自动重新构建。
 
@@ -39,7 +39,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 | 传输方式、schema / 工具、`tools` 文案、示范轮次 | [transports.md](references/transports.md) |
 | 元指令、任务工作流、生成来源、省 token | [meta-and-tasks.md](references/meta-and-tasks.md) |
 | `configurationDefaults`、推荐配置、Carrier、迁移 | [configuration.md](references/configuration.md) |
-| 插入点、用户模组 | [user-modules.md](references/user-modules.md) |
+| 插入点、用户模组、模组模板 `module-templates/` | [user-modules.md](references/user-modules.md) |
 | 面板翻译 | [locales.md](references/locales.md) |
 | 一次生成的完整组装流程（排查“为什么出现 / 没出现”） | [assembly.md](references/assembly.md) |
 | `ap` 命令 | [cli.md](references/cli.md) |
