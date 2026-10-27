@@ -9537,7 +9537,7 @@ function fg(e) {
 }
 async function pg() {
 	let e = await dg();
-	e && e !== "45745ef505614737" && sessionStorage.getItem(ug) !== e && fg(e);
+	e && e !== "fbbd36c2e7e90e11" && sessionStorage.getItem(ug) !== e && fg(e);
 }
 async function mg() {
 	await pg();
@@ -9546,7 +9546,7 @@ async function hg() {
 	let e = o().replace(/^third-party\//, ""), t = await gg(e, !1);
 	if (t.status === 404 && (t = await gg(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await dg();
-	return r && r !== "45745ef505614737" ? (fg(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "fbbd36c2e7e90e11" ? (fg(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var gg = (t, n) => g("/api/extensions/update", {
 	method: "POST",
@@ -9673,7 +9673,7 @@ function Ig(e) {
 async function Lg(e, t) {
 	let n = Yu(e);
 	if (!n) throw Error(Y("presets.invalid"));
-	if (n.minAdvancedPreset && Oc("1.8.0", n.minAdvancedPreset) < 0) throw Error(Y("presets.tooNew", { version: n.minAdvancedPreset }));
+	if (n.minAdvancedPreset && Oc("1.9.0", n.minAdvancedPreset) < 0) throw Error(Y("presets.tooNew", { version: n.minAdvancedPreset }));
 	await Pg(n, ed(n.id)), td(n), t && (q().sources[n.id] = t), J();
 	let r = ed(n.id) ?? n;
 	return Xd(r), await cf(r), r;
@@ -15281,7 +15281,7 @@ var EC = ["data-id"], DC = ["aria-label", "onPointerdown"], OC = ["onClick"], kC
 				"icon",
 				"help"
 			]),
-			U("div", PE, "Advanced Preset " + A(P("1.8.0")) + " · " + A(P("45745ef505614737")), 1)
+			U("div", PE, "Advanced Preset " + A(P("1.9.0")) + " · " + A(P("fbbd36c2e7e90e11")), 1)
 		], 64));
 	}
 }), IE = ["aria-label"], LE = { class: "panel-head" }, RE = { class: "panel-logo" }, zE = { class: "grow" }, BE = { class: "panel-title ellipsis" }, VE = { class: "panel-sub ellipsis" }, HE = {
@@ -15444,8 +15444,8 @@ function aD() {
 //#endregion
 //#region src/index.ts
 var oD = {
-	version: "1.8.0",
-	buildId: "45745ef505614737",
+	version: "1.9.0",
+	buildId: "fbbd36c2e7e90e11",
 	nextGeneration: (e) => mf(e),
 	listPresets: () => Xu().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -15496,8 +15496,8 @@ async function lD() {
 		await cD(), Qh({ reload: !0 }), Sg(), pg();
 	};
 	t.on(n.APP_READY, () => void a()), aD(), Cp("init", {
-		version: "1.8.0",
-		build: "45745ef505614737",
+		version: "1.9.0",
+		build: "fbbd36c2e7e90e11",
 		enabled: q().enabled
 	});
 }
