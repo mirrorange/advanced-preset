@@ -1,5 +1,6 @@
 import type { APreset, Content, Piece, Role } from './types';
 import { test, type Resolver } from './expr';
+import { compileText } from './directives';
 
 export interface RenderedBlock {
   role?: Role;
@@ -36,13 +37,19 @@ export const contentHasTemplates = (content: Content | undefined): boolean => Bo
 /** Template sources of content, in order. */
 export const contentTemplates = (content: Content | undefined): string[] => (content ?? []).flatMap((b) => b.pieces.filter((p) => p.template).map((p) => p.text));
 
-/** Every template source of a preset (entries and workflow sections), in artifact order. */
-export function presetTemplates(preset: Pick<APreset, 'entries' | 'workflows'>): string[] {
+/**
+ * Every template source of a preset (entries, workflow sections, then module templates in all
+ * locales), in artifact order.
+ */
+export function presetTemplates(preset: Pick<APreset, 'entries' | 'workflows'> & Partial<Pick<APreset, 'moduleTemplates'>>): string[] {
   const out = preset.entries.flatMap((e) => contentTemplates(e.content));
   for (const w of preset.workflows ?? []) {
     const s = w.sections;
     const styled = (x: Partial<Record<string, Content>> | undefined) => Object.values(x ?? {}).flatMap((c) => contentTemplates(c));
     out.push(...contentTemplates(s?.preamble), ...styled(s?.intro), ...Object.values(s?.stages ?? {}).flatMap(styled), ...styled(s?.outro));
   }
+  // Module templates become the user's modules, so their code counts as the preset's (I-110).
+  const bodies = (preset.moduleTemplates ?? []).flatMap((t) => [t, ...Object.values(t.locales ?? {})]);
+  for (const b of bodies) for (const e of b.entries) out.push(...contentTemplates(compileText(e.text, e.role).content));
   return out;
 }

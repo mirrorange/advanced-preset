@@ -56,7 +56,8 @@ function withMetaDefaults(p: APreset): APreset {
 /** Fields added without a format bump get their empty defaults. */
 function withOptionalDefaults(p: APreset): APreset {
   const out = withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p))));
-  return Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
+  const withPoints = Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
+  return Array.isArray(withPoints.moduleTemplates) ? withPoints : { ...withPoints, moduleTemplates: [] };
 }
 
 /** A parsed artifact in the current format, or `null` for anything else. */
