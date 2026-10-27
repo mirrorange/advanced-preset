@@ -43,13 +43,14 @@ export function preview(source: APreset, o: PreviewOptions): string {
     if (transport === 'tool-single') artifacts.tools = [...init, t.submitTool()];
     if (transport === 'tool-multi') artifacts.tools = [...init, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...(skipped.length ? { skipped } : {}), modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...(skipped.length ? { skipped } : {}), ...(a.warnings.length ? { warnings: a.warnings } : {}), modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
 
   const lines: string[] = [];
   const rule = (title: string) => lines.push('', `━━ ${title} ${'━'.repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} · ${transport} (${vars.style}) · workflow ${wf?.id ?? '—'} · config ${o.config ?? preset.defaultConfiguration}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(', ')}`);
   for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
+  for (const w of a.warnings) lines.push(`warning: ${w}`);
   const size = (v: (typeof a.buildVars)[string]) => (typeof v === 'string' ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`);
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(', ')}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);

@@ -11,9 +11,10 @@
 | [manifest.md](manifest.md) | `preset.yaml` 的每个顶层字段 |
 | [modules.md](modules.md) | 模组文件：frontmatter、条目、激活规则、排序 |
 | [workflows.md](workflows.md) | 工作流文件：阶段、分节、字段名与工具名 |
-| [directives.md](directives.md) | `@entry` `@section` `@as` `@style` `@if` 指令 |
+| [directives.md](directives.md) | `@entry` `@section` `@as` `@style` `@if` `@template` 指令 |
 | [expressions.md](expressions.md) | 条件表达式语法与全部条件变量 |
 | [macros.md](macros.md) | `{{ap::…}}` 宏 |
+| [templates.md](templates.md) | `@template` EJS 模板：语法、作用域、信任 |
 | [build-variables.md](build-variables.md) | 构建变量 `vars` |
 | [structures.md](structures.md) | 结构（回复、记忆、总结、代写、事件摘要、选项、自定义） |
 | [transports.md](transports.md) | 五种传输方式、JSON Schema / 工具生成、`tools` 文案、示范轮次 |

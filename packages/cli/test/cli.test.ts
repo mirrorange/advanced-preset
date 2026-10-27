@@ -579,3 +579,65 @@ describe('cache optimization defaults', () => {
     expect(r.diag.warnings.map((d) => d.message).join('\n')).toMatch(/unknown cache option `ttl`/);
   });
 });
+
+describe('templates (I-109)', () => {
+  const TPL = `---
+id: tpl
+toggle: always
+region: top
+---
+Before {{ap::name::narrator}}.
+<!-- @template -->
+<% if (params.language) { -%>
+Lang: <%- params.language %> / <%- macro('name', 'narrator') %> {{ap::param::language}}
+<% } -%>
+<%- vars.notes %> <%- '{{ap::' + 'frob}}' %>
+<!-- @end -->
+`;
+
+  it('compiles templates with their file and line and renders them', () => {
+    const manifest = MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.9.0') + 'vars:\n  notes: string\n';
+    const { preset, diag } = build(tree({ 'preset.yaml': manifest, 'modules/tpl.md': TPL }));
+    expect(diag.errors).toEqual([]);
+    const warns = diag.warnings.map((w) => w.message).join('\n');
+    // Macros are checked in the literal text only; template reads count as reads.
+    expect(warns).not.toMatch(/frob|never read|minAdvancedPreset/);
+    const piece = preset!.entries.find((e) => e.id === 'tpl/main')!.content[0]!.pieces[1]!;
+    expect(piece.template).toEqual({ file: 'modules/tpl.md', line: 8 });
+    const config = resolveConfiguration(preset!, 'default', { params: { language: 'French' } });
+    const a = assemble({ preset: preset!, config, vars: defaultVars(preset!, config) });
+    expect(a.warnings).toEqual([]);
+    expect(a.regions.top!.map((m) => m.content).join('\n')).toContain('Before Nia.\nLang: French / Nia French');
+  });
+
+  it('reports template errors at their source line and checks references', () => {
+    const bad = `---
+id: bad
+toggle: always
+region: top
+---
+text
+<!-- @template -->
+ok
+<%= params.language
+<!-- @end -->
+<!-- @template --><%- vars.ghost %> <%- params['nope'] %> <%- modules.core %> <%- stages.x %> <%- {{ap::nope}} %><!-- @end -->
+`;
+    const { diag } = build(tree({ 'modules/bad.md': bad }));
+    expect(diag.errors).toContainEqual(expect.objectContaining({ message: 'template: Could not find matching close tag for "<%=".', file: 'modules/bad.md', line: 9 }));
+    const warns = diag.warnings.map((w) => w.message);
+    expect(warns).toContain('template reads unknown variable `ghost`');
+    expect(warns).toContain('template reads unknown param `nope`');
+    expect(warns).toContain('template reads unknown stage `x`');
+    expect(warns).not.toContain('template reads unknown module `core`');
+    expect(warns.join('\n')).toMatch(/templates need Advanced Preset 1\.9\.0/);
+    // Code is not scanned for macros.
+    expect(diag.errors.map((e) => e.message).join('\n')).not.toMatch(/ap::nope/);
+  });
+
+  it('treats dynamic use of vars as reading every variable', () => {
+    const manifest = MANIFEST + 'vars:\n  notes: string\n  tags: list\n';
+    const t = tree({ 'preset.yaml': manifest, 'modules/tpl.md': '---\nid: tpl\ntoggle: always\nregion: top\n---\n<!-- @template --><%- Object.keys(vars).join() %><!-- @end -->\n' });
+    expect(build(t).diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/never read/);
+  });
+});

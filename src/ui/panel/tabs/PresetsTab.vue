@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Check, Link, LoaderCircle, RefreshCw, Trash2, Upload, Download } from 'lucide-vue-next';
+import { Check, CodeXml, Link, LoaderCircle, RefreshCw, Trash2, Upload, Download } from 'lucide-vue-next';
+import { presetTemplates } from '@advanced-preset/protocol';
 import { listPresets, type PresetEntry } from '@/store/presets';
 import { activatePreset } from '@/store/carrier';
 import { settings } from '@/store/settings';
 import { toast } from '@/st/host';
 import { presetDescription, presetName, t } from '@/i18n';
 import { installFromFile, installFromUrl, removePreset } from '@/app/install';
+import { isTrustDeclined } from '@/app/trust';
 import { updateExtension } from '@/app/updater';
 import { activePreset, refreshActivePreset } from '../../state';
 import IconButton from '../../components/IconButton.vue';
+import Tip from '../../components/Tip.vue';
 import Appearance from '../Appearance.vue';
 
 const entries = computed(() => listPresets());
+const hasTemplates = (e: PresetEntry) => presetTemplates(e.preset).length > 0;
 const busy = ref<string | null>(null);
 const urlOpen = ref(false);
 const url = ref('');
@@ -24,7 +28,8 @@ async function run(key: string, f: () => Promise<unknown>, ok?: string) {
     await f();
     if (ok) toast('success', ok);
   } catch (e) {
-    toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
+    if (isTrustDeclined(e)) toast('info', e.message);
+    else toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
   } finally {
     busy.value = null;
   }
@@ -66,6 +71,7 @@ const checkUpdates = () => run('ext', async () => toast('info', (await updateExt
           <span class="preset-name">{{ presetName(e.preset) }}</span>
           <span class="badge neutral">v{{ e.preset.version }}</span>
           <span v-if="e.source !== 'builtin'" class="badge" :class="{ warn: e.source === 'dev' }">{{ t(`presets.source.${e.source}`) }}</span>
+          <Tip v-if="hasTemplates(e)" :text="t('presets.templates.help')"><span class="badge neutral icon-badge"><CodeXml />{{ t('presets.templates') }}</span></Tip>
         </div>
         <span v-if="e.preset.author" class="xs muted">{{ e.preset.author }}</span>
         <span v-if="presetDescription(e.preset)" class="small muted preset-desc">{{ presetDescription(e.preset) }}</span>

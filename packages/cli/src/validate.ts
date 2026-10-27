@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  MACRO_HEADS, TOOL_ARG_STREAMING, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
+  MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -124,6 +124,26 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
         }
       }
     }
+  }
+
+  // ── templates ───────────────────────────────────────────────────────────────
+  if (map.templates.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, TEMPLATES_SINCE) < 0))
+    diag.warn(`templates need Advanced Preset ${TEMPLATES_SINCE}: set minAdvancedPreset to ${TEMPLATES_SINCE} or later (older versions send the template source as text)`, { file: M, path: 'minAdvancedPreset' });
+  const refSets: Record<string, Set<string>> = { vars: new Set(varDecls.keys()), params: paramIds, modules: moduleIds, flags: flagIds, stages: stageIds };
+  const REF_RE = /(?<![\w$.])(vars|params|modules|flags|stages)\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*(['"`])([^'"`]+)\3\s*\])/g;
+  for (const { source, where } of map.templates) {
+    const code = templateCode(source).join('\n');
+    let staticVarReads = 0;
+    for (const m of code.matchAll(REF_RE)) {
+      const [, root, dotted, , quoted] = m;
+      const key = (dotted ?? quoted)!;
+      if (root === 'vars') { staticVarReads++; usedVars.add(key); }
+      if (key in Object.prototype) continue;
+      if (!refSets[root!]!.has(key)) diag.warn(`template reads unknown ${root === 'vars' ? 'variable' : root!.slice(0, -1)} \`${key}\``, where);
+    }
+    // `vars` used as a whole (iterated, indexed dynamically): every variable may be read.
+    const wholeVarUses = [...code.matchAll(/(?<![\w$.])vars(?![\w$])/g)].length;
+    if (wholeVarUses > staticVarReads) for (const id of varDecls.keys()) usedVars.add(id);
   }
 
   // ── regions / anchors ───────────────────────────────────────────────────────

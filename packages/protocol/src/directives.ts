@@ -4,6 +4,7 @@
  *   <!-- @as assistant -->                                       start a new message
  *   <!-- @style dialogue --> … <!-- @end -->                     style-only fragment
  *   <!-- @if params.x != "" --> … <!-- @else --> … <!-- @end -->  conditional fragment
+ *   <!-- @template --> … <!-- @end -->                            EJS template (I-109)
  *
  * Author comments are removed before directives are read and are never sent to the model:
  *
@@ -16,6 +17,7 @@
  * text.
  */
 import { and, parseExpr, type Expr } from './expr';
+import { checkTemplate } from './template';
 import type { Block, Content, Role } from './types';
 
 export interface Directive {
@@ -26,6 +28,8 @@ export interface Directive {
   /** Raw attribute source, used by `@if` which takes an expression. */
   raw: string;
   line: number;
+  /** Alone on its line (the line, newline included, was consumed). */
+  alone?: boolean;
 }
 
 export type Token = { kind: 'text'; text: string } | { kind: 'directive'; directive: Directive };
@@ -107,7 +111,7 @@ export function tokenizeDirectives(body: string, split: string[] = [], firstLine
     for (const m of matches) {
       if (m.index! > pos) push({ kind: 'text', text: line.slice(pos, m.index) });
       const raw = m[2]!.trim();
-      const directive: Directive = { name: m[1]!, ...parseAttributes(raw), raw, line: lineNo };
+      const directive: Directive = { name: m[1]!, ...parseAttributes(raw), raw, line: lineNo, ...(alone ? { alone } : {}) };
       if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
       else push({ kind: 'directive', directive });
       pos = m.index! + m[0].length;
@@ -183,14 +187,33 @@ function skipSpace(line: string, from: number): number {
 const ROLES: Role[] = ['system', 'user', 'assistant'];
 const STYLES = ['dialogue', 'imperative'];
 
-/** Compile body tokens into message blocks with conditional pieces. */
-export function compileTokens(tokens: Token[], error: DirectiveErrorSink, onExpr?: (e: Expr, line: number) => void): Content {
+/**
+ * Compile body tokens into message blocks with conditional pieces. `file` is recorded on template
+ * pieces for error messages.
+ */
+export function compileTokens(tokens: Token[], error: DirectiveErrorSink, onExpr?: (e: Expr, line: number) => void, file?: string): Content {
   const blocks: Block[] = [{ pieces: [] }];
   type Frame = { cond: Expr; negated?: boolean; style?: boolean; line: number };
   const stack: Frame[] = [];
   const current = () => and(...stack.map((f) => (f.negated ? ({ t: 'not', e: f.cond } as Expr) : f.cond)));
+  /** Open `@template`: its body is collected verbatim until the matching `@end`. */
+  let template: { text: string; line: number; open: number; when?: Expr } | undefined;
+  const closeTemplate = () => {
+    const tpl = template!;
+    template = undefined;
+    const problem = checkTemplate(tpl.text);
+    if (problem) error(`template: ${problem.message}`, problem.line !== undefined ? tpl.line + problem.line - 1 : tpl.open);
+    const origin = { ...(file ? { file } : {}), line: tpl.line };
+    blocks[blocks.length - 1]!.pieces.push(tpl.when ? { text: tpl.text, when: tpl.when, template: origin } : { text: tpl.text, template: origin });
+  };
 
   for (const token of tokens) {
+    if (template) {
+      if (token.kind === 'text') template.text += token.text;
+      else if (token.directive.name === 'end') closeTemplate();
+      else error(`@${token.directive.name} cannot be used inside @template (use EJS tags such as <% if (…) { %>)`, token.directive.line);
+      continue;
+    }
     if (token.kind === 'text') {
       const when = current();
       blocks[blocks.length - 1]!.pieces.push(when ? { text: token.text, when } : { text: token.text });
@@ -232,12 +255,20 @@ export function compileTokens(tokens: Token[], error: DirectiveErrorSink, onExpr
         break;
       }
       case 'end':
-        if (!stack.length) error('@end without matching @if / @style', d.line);
+        if (!stack.length) error('@end without matching @if / @style / @template', d.line);
         stack.pop();
+        break;
+      case 'template':
+        if (d.args.length || Object.keys(d.attrs).length) error('@template takes no arguments', d.line);
+        template = { text: '', line: d.alone ? d.line + 1 : d.line, open: d.line, when: current() };
         break;
       default:
         error(`unknown directive @${d.name}`, d.line);
     }
+  }
+  if (template) {
+    error(`unclosed @template (opened at line ${template.open})`, template.open);
+    template = undefined;
   }
   if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1]!.line})`);
   return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));

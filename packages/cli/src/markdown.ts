@@ -6,6 +6,7 @@
  *   <!-- @as assistant -->                                                       start a new message
  *   <!-- @style dialogue --> … <!-- @end -->                                     style-only fragment
  *   <!-- @if params.x != "" --> … <!-- @else --> … <!-- @end -->                 conditional fragment
+ *   <!-- @template --> … <!-- @end -->                                           EJS template
  *
  * Author comments (`<!--# … -->`, single- or multi-line) are removed and never sent. Directives and
  * comments inside fenced code blocks are literal text. Ordinary comments (e.g. `<!-- Workflow
@@ -59,5 +60,6 @@ export function compileContent(tokens: Token[], diag: Diagnostics, where: Where,
     tokens,
     (message, line) => diag.error(message, line === undefined ? where : { ...where, line }),
     onExpr && ((e, line) => onExpr(e, { ...where, line })),
+    where.file,
   );
 }

@@ -3775,7 +3775,7 @@ ${pointer}
 var require_resolve_props = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/compose/resolve-props.js"(exports) {
     "use strict";
-    function resolveProps(tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
+    function resolveProps(tokens2, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
       let spaceBefore = false;
       let atNewline = startOnNewline;
       let hasSpace = startOnNewline;
@@ -3790,7 +3790,7 @@ var require_resolve_props = __commonJS({
       let comma = null;
       let found = null;
       let start = null;
-      for (const token of tokens) {
+      for (const token of tokens2) {
         if (reqSpace) {
           if (token.type !== "space" && token.type !== "newline" && token.type !== "comma")
             onError(token.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
@@ -3881,7 +3881,7 @@ var require_resolve_props = __commonJS({
             hasSpace = false;
         }
       }
-      const last = tokens[tokens.length - 1];
+      const last = tokens2[tokens2.length - 1];
       const end = last ? last.offset + last.source.length : offset;
       if (reqSpace && next && next.type !== "space" && next.type !== "newline" && next.type !== "comma" && (next.type !== "scalar" || next.source !== "")) {
         onError(next.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
@@ -5221,8 +5221,8 @@ ${cb}` : comment;
        * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
        * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
        */
-      *compose(tokens, forceDoc = false, endOffset = -1) {
-        for (const token of tokens)
+      *compose(tokens2, forceDoc = false, endOffset = -1) {
+        for (const token of tokens2)
           yield* this.next(token);
         yield* this.end(forceDoc, endOffset);
       }
@@ -7817,11 +7817,12 @@ function workflowSummary(stages, actorName2, label = (s) => s.label) {
 }
 
 // ../protocol/src/content.ts
-function renderContent(content, resolve2, post = (s) => s) {
+function renderContent(content, resolve2, post = (s) => s, template) {
   if (!content) return [];
   const out = [];
   for (const block of content) {
-    const text = post(block.pieces.filter((p) => test(p.when, resolve2)).map((p) => p.text).join("")).replace(/\n{3,}/g, "\n\n").trim();
+    const joined = block.pieces.filter((p) => test(p.when, resolve2)).map((p) => p.template ? template?.(p) ?? "" : p.text).join("");
+    const text = post(joined).replace(/\n{3,}/g, "\n\n").trim();
     if (!text) continue;
     out.push(block.role ? { role: block.role, text } : { text });
   }
@@ -7835,6 +7836,23 @@ function cloneData(value) {
   const out = {};
   for (const [k, v] of Object.entries(value)) if (v !== void 0) out[k] = cloneData(v);
   return out;
+}
+
+// ../protocol/src/semver.ts
+function parseVersion(v) {
+  const m = /^v?(\d+)(?:\.(\d+|x|\*))?(?:\.(\d+|x|\*))?(?:-([0-9A-Za-z.-]+))?/.exec(v.trim());
+  if (!m) return [0, 0, 0, ""];
+  const n = (s) => s === void 0 || s === "x" || s === "*" ? 0 : Number(s);
+  return [n(m[1]), n(m[2]), n(m[3]), m[4] ?? ""];
+}
+function compareVersions(a, b) {
+  const x = parseVersion(a);
+  const y = parseVersion(b);
+  for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i];
+  if (x[3] === y[3]) return 0;
+  if (!x[3]) return 1;
+  if (!y[3]) return -1;
+  return x[3] < y[3] ? -1 : 1;
 }
 
 // ../protocol/src/config.ts
@@ -7887,6 +7905,192 @@ function recommended(preset, id) {
 }
 function resolveConfiguration(preset, base, diff) {
   return deepMerge(preset.configurationDefaults, recommended(preset, base)?.diff, diff);
+}
+
+// ../protocol/src/template.ts
+var TEMPLATES_SINCE = "1.9.0";
+var TemplateError = class extends Error {
+  line;
+  constructor(message, line) {
+    super(message);
+    this.name = "TemplateError";
+    this.line = line;
+  }
+};
+var TOKEN_RE = /(<%%|%%>|<%=|<%-|<%_|<%#|<%|%>|-%>|_%>)/;
+var CLOSERS = /* @__PURE__ */ new Set(["%>", "-%>", "_%>"]);
+function escapeXML(markup) {
+  if (markup == void 0) return "";
+  return String(markup).replace(/[&<>'"]/g, (c) => ESCAPES[c]);
+}
+var ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&#34;", "'": "&#39;" };
+function tokens(text) {
+  return text.split(TOKEN_RE).filter((s) => s !== "");
+}
+var slurp = (src) => src.replace(/[ \t]*<%_/gm, "<%_").replace(/_%>[ \t]*/gm, "_%>");
+function templateSource(src) {
+  const matches = tokens(slurp(src));
+  let out = "";
+  let mode = null;
+  let truncate = false;
+  let line = 1;
+  const addOutput = (text) => {
+    if (truncate) {
+      text = text.replace(/^(?:\r\n|\r|\n)/, "");
+      truncate = false;
+    }
+    if (text) out += `    ; __append(${JSON.stringify(text)})
+`;
+  };
+  const stripSemi = (s) => s.replace(/;(\s*$)/, "$1");
+  matches.forEach((tok, i) => {
+    if (tok.startsWith("<%") && !tok.startsWith("<%%")) {
+      const closing = matches[i + 2];
+      if (!closing || !CLOSERS.has(closing)) throw new TemplateError(`Could not find matching close tag for "${tok}".`, line);
+    }
+    const newlines = tok.split("\n").length - 1;
+    switch (tok) {
+      case "<%":
+      case "<%_":
+        mode = "eval";
+        break;
+      case "<%=":
+        mode = "escaped";
+        break;
+      case "<%-":
+        mode = "raw";
+        break;
+      case "<%#":
+        mode = "comment";
+        break;
+      case "<%%":
+        mode = "literal";
+        out += `    ; __append("<%")
+`;
+        break;
+      case "%%>":
+        mode = "literal";
+        out += `    ; __append("%>")
+`;
+        break;
+      case "%>":
+      case "-%>":
+      case "_%>":
+        if (mode === "literal") addOutput(tok);
+        mode = null;
+        truncate = tok.startsWith("-") || tok.startsWith("_");
+        break;
+      default: {
+        let code = tok;
+        if ((mode === "eval" || mode === "escaped" || mode === "raw") && code.lastIndexOf("//") > code.lastIndexOf("\n")) code += "\n";
+        switch (mode) {
+          case "eval":
+            out += `    ; ${code}
+`;
+            break;
+          case "escaped":
+            out += `    ; __append(escapeFn(${stripSemi(code)}))
+`;
+            break;
+          case "raw":
+            out += `    ; __append(${stripSemi(code)})
+`;
+            break;
+          case "comment":
+            break;
+          case "literal":
+          case null:
+            addOutput(code);
+            break;
+        }
+      }
+    }
+    if (newlines) {
+      line += newlines;
+      out += `    ; __line = ${line}
+`;
+    }
+  });
+  return [
+    "var __line = 1;",
+    'var __output = "";',
+    "function __append(s) { if (s !== undefined && s !== null) __output += s }",
+    "try {",
+    "  with (locals || {}) {",
+    out,
+    "  }",
+    "  return __output;",
+    "} catch (e) { rethrow(e, __line); }"
+  ].join("\n");
+}
+var include = () => {
+  throw new Error("include() is not supported in Advanced Preset templates");
+};
+var rethrow = (e, line) => {
+  throw new TemplateError(e instanceof Error ? `${e.name === "Error" ? "" : `${e.name}: `}${e.message}` : String(e), line);
+};
+var cache = /* @__PURE__ */ new Map();
+var CACHE_LIMIT = 500;
+function compileTemplate(src) {
+  const hit = cache.get(src);
+  if (hit) return hit;
+  const body = templateSource(src);
+  let fn;
+  try {
+    fn = new Function("locals, escapeFn, include, rethrow", body);
+  } catch (e) {
+    throw new TemplateError(`${e instanceof Error ? e.message : String(e)} (while compiling the template)`);
+  }
+  const render = (data) => fn(data, escapeXML, include, rethrow);
+  if (cache.size >= CACHE_LIMIT) cache.clear();
+  cache.set(src, render);
+  return render;
+}
+function renderTemplate(src, data) {
+  return compileTemplate(src)(data);
+}
+function checkTemplate(src) {
+  try {
+    compileTemplate(src);
+    return null;
+  } catch (e) {
+    return e instanceof TemplateError ? e : new TemplateError(String(e));
+  }
+}
+function templateLiterals(src) {
+  const out = [];
+  let mode = null;
+  for (const tok of tokens(slurp(src))) {
+    if (tok === "<%" || tok === "<%_") mode = "eval";
+    else if (tok === "<%=" || tok === "<%-" || tok === "<%#") mode = "raw";
+    else if (tok === "<%%" || tok === "%%>") {
+      mode = "literal";
+      out.push(tok === "<%%" ? "<%" : "%>");
+    } else if (CLOSERS.has(tok)) {
+      if (mode === "literal") out.push(tok);
+      mode = null;
+    } else if (mode === null || mode === "literal") out.push(tok);
+  }
+  return out;
+}
+function templateCode(src) {
+  const out = [];
+  let mode = null;
+  for (const tok of tokens(slurp(src))) {
+    if (tok === "<%" || tok === "<%_" || tok === "<%=" || tok === "<%-") mode = "eval";
+    else if (tok === "<%#") mode = "comment";
+    else if (tok === "<%%" || tok === "%%>") mode = "literal";
+    else if (CLOSERS.has(tok)) mode = null;
+    else if (mode === "eval") out.push(tok);
+  }
+  return out;
+}
+function deepFreeze(value) {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const v of Object.values(value)) deepFreeze(v);
+  }
+  return value;
 }
 
 // ../protocol/src/build-vars.ts
@@ -8009,7 +8213,7 @@ function activeStructures(preset, modules) {
 function actorName(preset, config, actor) {
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
 }
-function createMacroExpander(input, stages, workflow, buildVars) {
+function createMacroResolver(input, stages, workflow, buildVars) {
   const { preset, config, vars, data = {} } = input;
   const paramText = (id, depth = 0) => {
     const p = preset.params.find((x) => x.id === id);
@@ -8074,7 +8278,31 @@ function createMacroExpander(input, stages, workflow, buildVars) {
         return void 0;
     }
   };
-  return (text) => expandMacros(text, resolve2);
+  return resolve2;
+}
+function templateScope(vars, buildVars, config, macro, expand) {
+  return deepFreeze({
+    ...cloneData(vars),
+    vars: cloneData(plainBuildVars(buildVars)),
+    sampling: cloneData(config.sampling ?? {}),
+    macro: (...args) => {
+      const v = macro(args.map((x) => String(x).trim()));
+      return v === void 0 ? "" : expand(v);
+    }
+  });
+}
+function templateRenderer(scope, warnings, where) {
+  return (piece) => {
+    try {
+      return renderTemplate(piece.text, scope());
+    } catch (e) {
+      const rel = e instanceof TemplateError ? e.line : void 0;
+      const line = piece.template?.line !== void 0 && rel !== void 0 ? piece.template.line + rel - 1 : piece.template?.line;
+      const loc = [piece.template?.file, line].filter((x) => x !== void 0).join(":");
+      warnings.push(`template in ${where}${loc ? ` (${loc})` : ""}: ${e instanceof Error ? e.message : String(e)}`);
+      return "";
+    }
+  };
 }
 function regionMessages(region, blocks) {
   if (!blocks.length) return [];
@@ -8127,18 +8355,23 @@ function assemble(input, workflowOverride) {
   const modules = activeModules(preset, config, resolve2);
   const structures = activeStructures(preset, modules);
   const buildVars = computeBuildVars(preset.vars, modules);
-  const expand = createMacroExpander({ ...input, vars }, stages, workflow, buildVars);
+  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars);
+  const expand = (text) => expandMacros(text, macro);
   const activeIds = new Set(modules.map((m) => m.id));
+  const warnings = [];
+  let scope;
+  const getScope = () => scope ??= templateScope(vars, buildVars, config, macro, expand);
   const blocksByRegion = /* @__PURE__ */ new Map();
   for (const e of preset.entries) {
     if (!activeIds.has(e.module) || !test(e.when, resolve2)) continue;
     const list = blocksByRegion.get(e.region) ?? [];
-    list.push(...renderContent(e.content, resolve2, expand));
+    list.push(...renderContent(e.content, resolve2, expand, templateRenderer(getScope, warnings, `entry ${e.id}`)));
     blocksByRegion.set(e.region, list);
   }
   if (workflow) {
     const list = blocksByRegion.get(preset.workflowRegion) ?? [];
-    for (const b of renderContent(workflowContent(preset, workflow, stages, vars.style, vars.transport, config), resolve2, expand)) {
+    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config);
+    for (const b of renderContent(content, resolve2, expand, templateRenderer(getScope, warnings, `workflow ${workflow.id}`))) {
       const last = list[list.length - 1];
       if (!b.role && last && !last.role && last.workflow) last.text += `
 
@@ -8149,7 +8382,7 @@ ${b.text}`;
   }
   const regions = {};
   for (const r of preset.regions) if (!r.native) regions[r.id] = regionMessages(r, blocksByRegion.get(r.id) ?? []);
-  return { vars, resolve: resolve2, modules, structures, buildVars, workflow, stages, regions, expand };
+  return { vars, resolve: resolve2, modules, structures, buildVars, workflow, stages, regions, expand, warnings };
 }
 function defaultVars(preset, config, over = {}) {
   const transport = over.transport ?? config.connection.transport;
@@ -8199,10 +8432,10 @@ function tokenizeDirectives(body, split = [], firstLine = 1, error) {
   const chunks = [{ tokens: [], line: firstLine }];
   const push = (t) => {
     if (t.kind === "text" && !t.text) return;
-    const tokens = chunks[chunks.length - 1].tokens;
-    const last = tokens[tokens.length - 1];
+    const tokens2 = chunks[chunks.length - 1].tokens;
+    const last = tokens2[tokens2.length - 1];
     if (t.kind === "text" && last?.kind === "text") last.text += t.text;
-    else tokens.push(t);
+    else tokens2.push(t);
   };
   const emit = (line, nl, lineNo, keepNewline = false) => {
     if (!line.includes("<!--")) return push({ kind: "text", text: line + nl });
@@ -8213,7 +8446,7 @@ function tokenizeDirectives(body, split = [], firstLine = 1, error) {
     for (const m of matches) {
       if (m.index > pos) push({ kind: "text", text: line.slice(pos, m.index) });
       const raw = m[2].trim();
-      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo };
+      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo, ...alone ? { alone } : {} };
       if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
       else push({ kind: "directive", directive });
       pos = m.index + m[0].length;
@@ -8279,11 +8512,26 @@ function skipSpace(line, from) {
 }
 var ROLES = ["system", "user", "assistant"];
 var STYLES = ["dialogue", "imperative"];
-function compileTokens(tokens, error, onExpr) {
+function compileTokens(tokens2, error, onExpr, file) {
   const blocks = [{ pieces: [] }];
   const stack = [];
   const current = () => and(...stack.map((f) => f.negated ? { t: "not", e: f.cond } : f.cond));
-  for (const token of tokens) {
+  let template;
+  const closeTemplate = () => {
+    const tpl = template;
+    template = void 0;
+    const problem = checkTemplate(tpl.text);
+    if (problem) error(`template: ${problem.message}`, problem.line !== void 0 ? tpl.line + problem.line - 1 : tpl.open);
+    const origin = { ...file ? { file } : {}, line: tpl.line };
+    blocks[blocks.length - 1].pieces.push(tpl.when ? { text: tpl.text, when: tpl.when, template: origin } : { text: tpl.text, template: origin });
+  };
+  for (const token of tokens2) {
+    if (template) {
+      if (token.kind === "text") template.text += token.text;
+      else if (token.directive.name === "end") closeTemplate();
+      else error(`@${token.directive.name} cannot be used inside @template (use EJS tags such as <% if (\u2026) { %>)`, token.directive.line);
+      continue;
+    }
     if (token.kind === "text") {
       const when = current();
       blocks[blocks.length - 1].pieces.push(when ? { text: token.text, when } : { text: token.text });
@@ -8330,12 +8578,20 @@ function compileTokens(tokens, error, onExpr) {
         break;
       }
       case "end":
-        if (!stack.length) error("@end without matching @if / @style", d.line);
+        if (!stack.length) error("@end without matching @if / @style / @template", d.line);
         stack.pop();
+        break;
+      case "template":
+        if (d.args.length || Object.keys(d.attrs).length) error("@template takes no arguments", d.line);
+        template = { text: "", line: d.alone ? d.line + 1 : d.line, open: d.line, when: current() };
         break;
       default:
         error(`unknown directive @${d.name}`, d.line);
     }
+  }
+  if (template) {
+    error(`unclosed @template (opened at line ${template.open})`, template.open);
+    template = void 0;
   }
   if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1].line})`);
   return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
@@ -8626,11 +8882,12 @@ function parseMarkdown(src, split, diag, where) {
   );
   return { data, chunks };
 }
-function compileContent(tokens, diag, where, onExpr) {
+function compileContent(tokens2, diag, where, onExpr) {
   return compileTokens(
-    tokens,
+    tokens2,
     (message, line) => diag.error(message, line === void 0 ? where : { ...where, line }),
-    onExpr && ((e, line) => onExpr(e, { ...where, line }))
+    onExpr && ((e, line) => onExpr(e, { ...where, line })),
+    where.file
   );
 }
 
@@ -8715,7 +8972,7 @@ function compileTools(src, diag, text, file = "preset.yaml") {
 }
 function compile(tree) {
   const diag = new Diagnostics();
-  const map = { exprs: [], texts: [], entries: /* @__PURE__ */ new Map(), modules: /* @__PURE__ */ new Map(), workflows: /* @__PURE__ */ new Map() };
+  const map = { exprs: [], texts: [], templates: [], entries: /* @__PURE__ */ new Map(), modules: /* @__PURE__ */ new Map(), workflows: /* @__PURE__ */ new Map() };
   const manifestSrc = tree.get("preset.yaml");
   if (manifestSrc === void 0) {
     diag.error("preset.yaml not found");
@@ -8747,9 +9004,17 @@ function compile(tree) {
     map.texts.push({ text: s, where });
     return s;
   };
-  const content = (tokens, where) => {
-    const c = compileContent(tokens, diag, where, (e, w) => map.exprs.push({ expr: e, where: w }));
-    for (const b of c) for (const p of b.pieces) map.texts.push({ text: p.text, where });
+  const content = (tokens2, where) => {
+    const c = compileContent(tokens2, diag, where, (e, w) => map.exprs.push({ expr: e, where: w }));
+    for (const b of c) for (const p of b.pieces) {
+      if (!p.template) {
+        map.texts.push({ text: p.text, where });
+        continue;
+      }
+      const at = { ...where, ...p.template.line !== void 0 ? { line: p.template.line } : {} };
+      map.templates.push({ source: p.text, where: at });
+      for (const lit2 of templateLiterals(p.text)) map.texts.push({ text: lit2, where: at });
+    }
     return c;
   };
   if (raw.formatVersion !== void 0 && raw.formatVersion !== SOURCE_FORMAT_VERSION)
@@ -9516,6 +9781,26 @@ function validate(p, map, diag) {
       }
     }
   }
+  if (map.templates.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, TEMPLATES_SINCE) < 0))
+    diag.warn(`templates need Advanced Preset ${TEMPLATES_SINCE}: set minAdvancedPreset to ${TEMPLATES_SINCE} or later (older versions send the template source as text)`, { file: M, path: "minAdvancedPreset" });
+  const refSets = { vars: new Set(varDecls.keys()), params: paramIds, modules: moduleIds, flags: flagIds, stages: stageIds };
+  const REF_RE = /(?<![\w$.])(vars|params|modules|flags|stages)\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*(['"`])([^'"`]+)\3\s*\])/g;
+  for (const { source, where } of map.templates) {
+    const code = templateCode(source).join("\n");
+    let staticVarReads = 0;
+    for (const m of code.matchAll(REF_RE)) {
+      const [, root, dotted, , quoted] = m;
+      const key = dotted ?? quoted;
+      if (root === "vars") {
+        staticVarReads++;
+        usedVars.add(key);
+      }
+      if (key in Object.prototype) continue;
+      if (!refSets[root].has(key)) diag.warn(`template reads unknown ${root === "vars" ? "variable" : root.slice(0, -1)} \`${key}\``, where);
+    }
+    const wholeVarUses = [...code.matchAll(/(?<![\w$.])vars(?![\w$])/g)].length;
+    if (wholeVarUses > staticVarReads) for (const id of varDecls.keys()) usedVars.add(id);
+  }
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
   if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: "workflowRegion" });
   for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
@@ -9739,12 +10024,13 @@ function preview(source, o) {
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, ...a.warnings.length ? { warnings: a.warnings } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
   const lines = [];
   const rule = (title) => lines.push("", `\u2501\u2501 ${title} ${"\u2501".repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} \xB7 ${transport} (${vars.style}) \xB7 workflow ${wf?.id ?? "\u2014"} \xB7 config ${o.config ?? preset.defaultConfiguration}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(", ")}`);
   for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
+  for (const w of a.warnings) lines.push(`warning: ${w}`);
   const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);

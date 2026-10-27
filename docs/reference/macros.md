@@ -42,6 +42,7 @@ Known facts about this chat:
 ## 注意
 
 - 宏在**组装时**展开，`@if` 片段先按条件取舍再展开宏。
+- [模板](templates.md)先运行，输出里的宏随后展开；模板代码里也可以用 `macro("param", "length")` 直接展开宏。
 - 用户的元指令文本（`{{ap::input::meta}}`）里如果出现 `{{ap::…}}`，同样会被展开。
 - 运行期数据（记忆、总结、最近元指令、自定义结构的 `last`）在 `ap preview` 中为空。
 - `{{ap::name::…}}` 是唯一在“组装之前”也会展开的宏：元指令触发词 `meta.trigger` 与 `meta.impersonatePrompt` 只支持它。
