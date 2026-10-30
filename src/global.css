@@ -1,4 +1,6 @@
 /* AP's only global rules (§16.2): pure-meta turns hide ST’s message text behind the reply card;
-   rename / save-as of ST's Chat Completion preset are hidden while a Carrier is selected (I-72). */
+   rename / save-as of ST's Chat Completion preset are hidden while a Carrier is selected (I-72);
+   the drawer's own content is hidden while the AP panel covers it (I-122). */
 .mes_text.ap-hidden { display: none !important; }
 .ap-carrier-hidden { display: none !important; }
+#left-nav-panel.ap-panel-covering > :not(ap-panel) { visibility: hidden !important; opacity: 0 !important; }

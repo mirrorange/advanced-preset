@@ -1,10 +1,11 @@
 <script setup lang="ts">
 /** Settings panel (§16.5): header with preset + enable switch and six tabs, overlaid on ST's AI Response Configuration drawer. */
-import { computed, onBeforeUnmount, onMounted, type Component } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch, type Component } from 'vue';
 import { Blocks, Brain, Bug, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
 import { presetName, t } from '@/i18n';
 import { activePreset, presetSummary, ui, type PanelTab } from '../state';
+import { coverDrawer } from '../entry';
 import IconButton from '../components/IconButton.vue';
 import Switch from '../components/Switch.vue';
 import PresetsTab from './tabs/PresetsTab.vue';
@@ -32,11 +33,13 @@ const subtitle = computed(() => {
 
 const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && ui.panelOpen) ui.panelOpen = false; };
 onMounted(() => document.addEventListener('keydown', onKey));
-onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
+onBeforeUnmount(() => { document.removeEventListener('keydown', onKey); coverDrawer(false); });
+// Hide the drawer's own content while the panel covers it; restored once the leave transition ends (I-122).
+watch(() => ui.panelOpen, (open) => { if (open) coverDrawer(true); }, { immediate: true });
 </script>
 
 <template>
-  <Transition name="panel">
+  <Transition name="panel" @after-leave="coverDrawer(false)">
     <aside v-if="ui.panelOpen" class="panel" role="dialog" :aria-label="t('app.name')">
       <header class="panel-head">
         <div class="panel-logo"><Layers /></div>
