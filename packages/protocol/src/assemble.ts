@@ -3,13 +3,14 @@
  * condition variables, `ap::` macros, module activation, region rendering and workflow sections.
  * Everything that needs SillyTavern (history, substituteParams, Carrier positions) stays outside.
  */
-import type { APreset, Configuration, Content, Module, Region, Role, Stage, StructureDecl, Style, Transport, Workflow } from './types';
+import type { APreset, Configuration, Content, Module, ParamValue, Region, Role, Stage, StructureDecl, Style, Transport, Workflow } from './types';
 import { test, type Resolver } from './expr';
 import { expandMacros } from './macros';
 import { renderContent, type TemplateRenderer } from './content';
 import { cloneData } from './clone';
 import { deepFreeze, renderTemplate, TemplateError } from './template';
 import { activeStages, stageFieldName, stageToolName, workflowSummary } from './workflow';
+import { DEFAULT_LIST_SEPARATOR, isParamUnset, paramValue, paramValues } from './params';
 import { computeBuildVars, formatVar, plainBuildVars, type BuildVars } from './build-vars';
 
 export interface Message {
@@ -25,7 +26,8 @@ export interface Vars {
   gen: { origin: 'story' | 'task'; type: string; callerTools: boolean; callerSchema: boolean };
   meta: { present: boolean; pure: boolean; mixed: boolean; task: 'summary' | 'impersonate' | null; recent: boolean };
   modules: Record<string, boolean>;
-  params: Record<string, string | number>;
+  /** Effective value of every declared param (lists are string arrays). */
+  params: Record<string, ParamValue>;
   flags: Record<string, boolean>;
   features: { tokenSaving: boolean };
   /** `stages.<id>`: whether the current workflow runs that stage this turn. */
@@ -135,15 +137,15 @@ export function createMacroResolver(input: AssemblyInput, stages: Stage[], workf
   const paramText = (id: string, depth = 0): string => {
     const p = preset.params.find((x) => x.id === id);
     if (!p) return '';
-    const v = config.params[id] ?? p.default;
-    const unset = v === '' || v === 0 || v === undefined;
-    if (unset) {
+    const v = paramValue(p, config.params[id]);
+    if (isParamUnset(v)) {
       if (p.fallback && depth < 4) {
         const fb = paramText(p.fallback, depth + 1);
         if (fb) return fb;
       }
       return p.unset ?? '';
     }
+    if (Array.isArray(v)) return v.join(p.separator ?? DEFAULT_LIST_SEPARATOR);
     const opt = p.options?.find((o) => String(o.value) === String(v));
     return opt?.text ?? String(v);
   };
@@ -317,7 +319,7 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     gen: { origin: 'story', type: 'normal', callerTools: false, callerSchema: false },
     meta: { present: false, pure: false, mixed: false, task: null, recent: false },
     modules: moduleSwitches(preset, config),
-    params: { ...config.params },
+    params: paramValues(preset, config),
     flags: Object.fromEntries(preset.regex.map((r) => [r.id, false])),
     features: { tokenSaving: config.tokenSaving.enabled },
     stages: {},

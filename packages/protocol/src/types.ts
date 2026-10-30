@@ -82,21 +82,28 @@ export interface ParamOption {
   /** Text used by `{{ap::param::id}}`; defaults to `value`. */
   text?: string;
 }
+export type ParamType = 'text' | 'number' | 'select' | 'list';
+/** Value of a param: scalars for text / number / select, a list of strings for `list`. */
+export type ParamValue = string | number | string[];
+
 export interface Param {
   id: string;
-  type: 'text' | 'number' | 'select';
+  type: ParamType;
   label: string;
   description?: string;
   group?: string;
-  /** Text used when the parameter is unset ('' / 0). */
+  /** Text used when the parameter is unset ('' / 0 / empty list). */
   unset?: string;
   /** Another parameter whose value is used when this one is unset. */
   fallback?: string;
   unit?: string;
   min?: number;
   max?: number;
+  /** Text options (suggestions) / select choices; not used by lists. */
   options?: ParamOption[];
-  default: string | number;
+  /** Lists: text between items in `{{ap::param::id}}` (default `", "`). */
+  separator?: string;
+  default: ParamValue;
 }
 
 export interface Group {
@@ -385,7 +392,7 @@ export interface Configuration {
   sampling: Record<string, unknown>;
   identity: { names: Record<ActorId, string>; prefixes: Record<ActorId, string> };
   modules: Record<string, boolean>;
-  params: Record<string, string | number>;
+  params: Record<string, ParamValue>;
   tokenSaving: TokenSavingConfig;
   cache: CacheConfig;
   /** `enabled: false` turns meta-instruction handling off (input is plain story text). */

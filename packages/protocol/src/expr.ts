@@ -4,6 +4,8 @@
  *
  * Grammar: `== != < <= > >= in && || !`, parentheses, string / number / boolean / null / array
  * literals, dotted identifiers (segments may contain `-`, e.g. `modules.mode-preface`).
+ * Truthiness follows JavaScript except that an empty array is false, so a `list` param can be
+ * tested directly (`params.bannedWords`); `"x" in params.bannedWords` tests membership.
  */
 
 export type Literal = string | number | boolean | null;
@@ -144,15 +146,20 @@ function looseEq(a: unknown, b: unknown): boolean {
   return false;
 }
 
+/** JavaScript truthiness, except that an empty array is false (an empty `list` param is unset). */
+export function truthy(v: unknown): boolean {
+  return Array.isArray(v) ? v.length > 0 : Boolean(v);
+}
+
 export function evaluate(e: Expr, resolve: Resolver): unknown {
   switch (e.t) {
     case 'lit': return e.v;
     case 'arr': return e.items.map((x) => evaluate(x, resolve));
     case 'var': return resolve(e.path);
-    case 'not': return !evaluate(e.e, resolve);
+    case 'not': return !truthy(evaluate(e.e, resolve));
     case 'bin': {
-      if (e.op === '&&') return Boolean(evaluate(e.l, resolve)) && Boolean(evaluate(e.r, resolve));
-      if (e.op === '||') return Boolean(evaluate(e.l, resolve)) || Boolean(evaluate(e.r, resolve));
+      if (e.op === '&&') return truthy(evaluate(e.l, resolve)) && truthy(evaluate(e.r, resolve));
+      if (e.op === '||') return truthy(evaluate(e.l, resolve)) || truthy(evaluate(e.r, resolve));
       const l = evaluate(e.l, resolve);
       const r = evaluate(e.r, resolve);
       switch (e.op) {
@@ -176,7 +183,7 @@ export function evaluate(e: Expr, resolve: Resolver): unknown {
 }
 
 export function test(e: Expr | undefined, resolve: Resolver): boolean {
-  return e ? Boolean(evaluate(e, resolve)) : true;
+  return e ? truthy(evaluate(e, resolve)) : true;
 }
 
 /** Every variable path referenced by an expression. */
