@@ -160,8 +160,8 @@ describe('input shaping in a generation', () => {
   });
 
   it('extract: the input leaves the history', async () => {
-    const { prompt, snapshot, text } = await generate(withShaping('extract'), [user(1), ai(1), user(2, 'go north')], 'normal', { depth0: true });
-    expect(text).not.toContain('go north');
+    const { prompt, snapshot } = await generate(withShaping('extract'), [user(1), ai(1), user(2, 'go north')], 'normal', { depth0: true });
+    expect(prompt.some((m) => m.role === 'user' && m.content === 'go north')).toBe(false);
     expect(prompt.some((m) => m.content === 'input 1')).toBe(true);
     expect(prompt.some((m) => m.content === '[D0 lore after]')).toBe(true);
     expect(snapshot.input?.shaped).toBe(true);
@@ -180,7 +180,9 @@ describe('input shaping in a generation', () => {
   });
 
   it('presets without inputShaping are untouched', async () => {
-    const { prompt, snapshot, text } = await generate(petals, [user(1), ai(1), user(2, 'go north')]);
+    const plain = cloneData(petals);
+    delete plain.inputShaping;
+    const { prompt, snapshot, text } = await generate(plain, [user(1), ai(1), user(2, 'go north')]);
     expect(prompt.some((m) => m.content === 'go north')).toBe(true);
     expect(snapshot.input).toBeUndefined();
     expect(text).not.toContain(INPUT_MARK);
@@ -230,5 +232,42 @@ describe('input shaping in a generation', () => {
     const prompt = stPrompt(preset, realChat.map((m) => ({ ...m })));
     await onPromptReady({ chat: prompt, dryRun: true });
     expect(JSON.stringify(prompt)).not.toContain('<input>');
+  });
+});
+
+describe('Petals: the input moves to the input region', () => {
+  it('extracts the input from the history and places it in <input> between memory and questions', async () => {
+    expect(petals.inputShaping?.mode).toBe('extract');
+    const { prompt, snapshot } = await generate(petals, [user(1), ai(1), user(2, 'go north')], 'normal', { depth0: true });
+    const region = snapshot.regions.find((r) => r.id === 'input')!;
+    expect(region.messages).toEqual([{ role: 'user', chars: '<input>\ngo north\n</input>'.length, content: '<input>\ngo north\n</input>' }]);
+    const at = (c: string) => prompt.findIndex((m) => m.content === c);
+    expect(prompt.filter((m) => typeof m.content === 'string' && m.content.includes('go north'))).toHaveLength(1);
+    expect(at('[D0 lore after]')).toBeLessThan(at('<input>\ngo north\n</input>'));
+    const order = snapshot.regions.map((r) => r.id);
+    expect(order.indexOf('memory')).toBeLessThan(order.indexOf('input'));
+    expect(order.indexOf('input')).toBeLessThan(order.indexOf('questions'));
+  });
+
+  it('continue leaves the history alone and the input region empty', async () => {
+    const { snapshot, prompt } = await generate(petals, [user(1), ai(1)], 'continue');
+    expect(snapshot.regions.find((r) => r.id === 'input')!.messages).toEqual([]);
+    expect(prompt.some((m) => m.content === 'input 1')).toBe(true);
+  });
+
+  it('prefill: the input appears once, in <input> after the history', async () => {
+    state.preset = petals;
+    const { text } = await (async () => {
+      state.config = resolveConfiguration(petals, 'other', { connection: { transport: 'prefill', workflow: 'linear' } });
+      realChat.splice(0, realChat.length, user(1), ai(1), user(2, 'go north'));
+      const copy = realChat.map((m) => ({ ...m }));
+      await advancedPresetInterceptor(copy, 0, () => {}, 'normal');
+      const prompt = stPrompt(petals, copy);
+      await onPromptReady({ chat: prompt, dryRun: false });
+      return { text: JSON.stringify(prompt) };
+    })();
+    expect(text.split('go north')).toHaveLength(2);
+    expect(text).toContain('<input>\\ngo north\\n</input>');
+    expect(text).not.toContain(INPUT_SLOT);
   });
 });
