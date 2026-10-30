@@ -51,7 +51,7 @@ textarea.input { resize: vertical; line-height: 1.45; min-height: 4.5em; }
 select.input { appearance: none; padding-right: 1.8em; cursor: pointer;
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
   background-position: calc(100% - 13px) 55%, calc(100% - 8px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
-select.input option { background: var(--ap-panel-bg); color: var(--ap-text); }
+select.input option { background: var(--ap-panel-bg-solid); color: var(--ap-text); }
 input[type='number'].input { font-variant-numeric: tabular-nums; }
 input[type='range'] { width: 100%; accent-color: var(--ap-primary); }
 

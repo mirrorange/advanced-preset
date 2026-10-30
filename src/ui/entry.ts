@@ -37,10 +37,24 @@ function hideCarrierButtons(): void {
   }, { immediate: true });
 }
 
+/**
+ * While the panel is shown, the drawer's own children are hidden (global `.ap-panel-covering`) and the
+ * panel itself stays transparent, so the drawer's theme tint and blur show exactly as ST draws them (I-122).
+ * Set before the panel enters and cleared after it has left.
+ */
+export function coverDrawer(on: boolean): void {
+  const el = drawer();
+  if (el && el.querySelector(':scope > ap-panel')) el.classList.toggle('ap-panel-covering', on);
+}
+
 function mountPanel(): void {
   const el = drawer();
   if (!el) {
-    if (!document.querySelector('ap-panel')) document.body.append(document.createElement('ap-panel'));
+    if (!document.querySelector('ap-panel')) {
+      const panel = document.createElement('ap-panel');
+      panel.dataset.apStandalone = '';
+      document.body.append(panel);
+    }
     return;
   }
   const existing = document.querySelector('ap-panel');

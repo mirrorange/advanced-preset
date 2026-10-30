@@ -12,6 +12,7 @@ node e2e/run.mjs carrier                             # select the AP Carrier (fr
 node e2e/run.mjs syn-edit                            # edit the last synopsis from its card (after gen)
 node e2e/run.mjs cache                               # token saving + cache optimization over 5 turns, prefix reuse per request (AP_CACHE=off to compare)
 node e2e/run.mjs memory                              # memory follows message versions: swipe, swipe back, regenerate, delete (after carrier)
+AP_THEMES=Azure,Cappuccino node e2e/run.mjs theme        # panel over ST themes: drawer content hidden, panel transparent (I-122)
 ```
 
 Screenshots land in `e2e/shots/`; requests the mock saw in `e2e/mock-requests.jsonl`.
