@@ -6,7 +6,7 @@
  * every prompt is a list of message blocks made of (optionally conditional) text pieces.
  */
 import type { Expr } from './expr';
-import type { ModuleTemplate } from './module-templates';
+import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -433,7 +433,8 @@ export interface LocaleTable {
   configurations?: Record<string, { name?: string; description?: string }>;
   structures?: Record<string, { title?: string }>;
   insertionPoints?: Record<string, { label?: string; description?: string }>;
-  moduleTemplates?: Record<string, { name?: string; description?: string }>;
+  userModules?: Record<string, { name?: string }>;
+  userModuleTemplates?: Record<string, { name?: string; description?: string }>;
   vars?: Record<string, { label?: string; description?: string }>;
   [key: string]: unknown;
 }
@@ -474,8 +475,10 @@ export interface APreset {
   entries: Entry[];
   /** Places where user modules may insert content (absent in older artifacts → `[]`). */
   insertionPoints: InsertionPoint[];
-  /** Example user modules offered when creating one (absent in older artifacts → `[]`). */
-  moduleTemplates: ModuleTemplate[];
+  /** User modules installed into the user's list (`user-modules/`; absent → `[]`). */
+  userModules: UserModuleSource[];
+  /** Example user modules offered when creating one (`user-module-templates/`; absent → `[]`). */
+  userModuleTemplates: UserModuleTemplate[];
   /** Build variables, in declaration order. */
   vars: BuildVarDecl[];
   workflows: Workflow[];

@@ -57,7 +57,11 @@ function withMetaDefaults(p: APreset): APreset {
 function withOptionalDefaults(p: APreset): APreset {
   const out = withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p))));
   const withPoints = Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
-  return Array.isArray(withPoints.moduleTemplates) ? withPoints : { ...withPoints, moduleTemplates: [] };
+  return {
+    ...withPoints,
+    userModules: Array.isArray(withPoints.userModules) ? withPoints.userModules : [],
+    userModuleTemplates: Array.isArray(withPoints.userModuleTemplates) ? withPoints.userModuleTemplates : [],
+  };
 }
 
 /** A parsed artifact in the current format, or `null` for anything else. */

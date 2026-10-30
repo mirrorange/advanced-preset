@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  assemble, compileText, defaultVars, presetTemplates, userModuleTemplates, withUserModules,
+  assemble, compileText, defaultVars, presetTemplates, userModulesCode, withUserModules,
   type APreset, type Configuration, type Content, type Module, type UserModule,
 } from '../src';
 
@@ -118,7 +118,7 @@ describe('templates in assembly', () => {
     expect(presetTemplates(p)).toEqual(['<%- 1 %>']);
     expect(presetTemplates(preset)).toEqual([]);
     const um = { id: 'u1', name: 'Mine', enabled: true, trigger: { match: 'all', rules: [] }, entries: [{ id: 'e1', point: 'top', text: 'x <!-- @template --><%- gen.type %><!-- @end -->' }], vars: [] } as unknown as UserModule;
-    expect(userModuleTemplates([um])).toEqual(['<%- gen.type %>']);
+    expect(userModulesCode([um])).toEqual(['<%- gen.type %>']);
     const merged = withUserModules(preset, [um]).preset;
     const a = assemble({ preset: merged, config, vars: defaultVars(merged, config) });
     expect(a.regions.top!.map((m) => m.content)).toEqual(['x normal']);

@@ -19,5 +19,5 @@ export * from './user-modules';
 export * from './build-vars';
 export * from './annotations';
 export * from './template';
-export * from './module-templates';
+export * from './preset-user-modules';
 export * from './params';
