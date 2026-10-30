@@ -1,6 +1,6 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  TRANSPORTS, assemble, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
   type APreset, type ParamValue, type Transport, type UserModule, type UserModuleSource,
 } from '@advanced-preset/protocol';
 
@@ -12,6 +12,8 @@ export interface PreviewOptions {
   modules?: Record<string, boolean>;
   /** Param values set on top of the configuration (`--param id=value`). */
   params?: Record<string, ParamValue>;
+  /** The user's input (`--input`): with input shaping declared, the turn is shaped (`input.shaped`). */
+  input?: string;
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
   json?: boolean;
@@ -87,10 +89,14 @@ export function preview(source: APreset, o: PreviewOptions): string {
   const vars = defaultVars(preset, config, {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === 'mixed', task: null, recent: false },
     gen: { origin: pure ? 'task' : 'story', type: 'normal', callerTools: false, callerSchema: false },
+    input: { shaped: Boolean(preset.inputShaping) && o.input !== undefined },
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === 'task') : undefined;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? '(meta text)' : '' } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? '(meta text)' : '', inputText: o.input ?? '' } }, workflow);
+  // What happens to the last user message of the chat history (ST macros stay unexpanded here).
+  const shaping = preset.inputShaping;
+  const historyInput = o.input === undefined ? undefined : !shaping ? o.input : shaping.mode === 'wrap' ? wrapInput(shaping.template, o.input, a.expand) : null;
   const transport = vars.transport;
   const wf = a.workflow;
 
@@ -104,7 +110,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
     if (transport === 'tool-single') artifacts.tools = [...init, t.submitTool()];
     if (transport === 'tool-multi') artifacts.tools = [...init, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...(skipped.length ? { skipped } : {}), ...(a.warnings.length ? { warnings: a.warnings } : {}), modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ ...(historyInput !== undefined ? { historyInput } : {}), vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...(skipped.length ? { skipped } : {}), ...(a.warnings.length ? { warnings: a.warnings } : {}), modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
 
   const lines: string[] = [];
   const rule = (title: string) => lines.push('', `━━ ${title} ${'━'.repeat(Math.max(4, 60 - title.length))}`);
@@ -115,12 +121,17 @@ export function preview(source: APreset, o: PreviewOptions): string {
   const size = (v: (typeof a.buildVars)[string]) => (typeof v === 'string' ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`);
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(', ')}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);
+  if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === undefined ? ' (not shaped: no --input)' : ''}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   for (const r of preset.regions) {
     if (r.native) { rule(`${r.id} (native)`); continue; }
     const msgs = a.regions[r.id] ?? [];
     rule(`${r.id}${msgs.length ? '' : ' (empty)'}`);
     for (const m of msgs) lines.push(`[${m.role}]`, m.content, '');
+    if (r.id === preset.anchors.historyStart && historyInput !== undefined) {
+      rule('chat history (ST) · last user message');
+      lines.push(historyInput === null ? '(extracted: placed by {{ap::input::text}})' : historyInput, '');
+    }
   }
   for (const [k, v] of Object.entries(artifacts)) {
     rule(k);

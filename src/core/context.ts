@@ -35,6 +35,10 @@ export interface GenerationContext {
   sticky?: { chat: string; entries: StickyEntry[]; omitted: Record<string, string> };
   /** Cache optimization: state to store once the request succeeded (`touch`: only refresh its time). */
   cacheCommit?: { chat: string; next: Omit<CacheState, 'at'>; touch: boolean };
+  /** Input shaping: the user message ending the history was marked; `texts` are the renderings it may carry. */
+  input?: { texts: string[] };
+  /** Input shaping applied at PROMPT_READY (`input.shaped`). */
+  inputShaped?: boolean;
   /** Set once FetchGate took over the request. */
   claimed?: boolean;
   warnings: string[];

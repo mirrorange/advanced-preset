@@ -850,3 +850,67 @@ describe('list params', () => {
     expect(parseParamArg(preset!, 'banned')).toMatch(/expects id=value/);
   });
 });
+
+describe('input shaping (I-128)', () => {
+  const withShaping = (shaping: string, extraModule = '') => {
+    const t = tree({ 'preset.yaml': MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.9.0')
+      .replace('  - { id: task, anchor: historyEnd }', '  - { id: task, anchor: historyEnd }\n  - { id: input, merge: { wrap: input } }')
+      .replace('chatHistory, task, tail]', 'chatHistory, task, input, tail]') + shaping });
+    t.set('modules/input.md', `---
+id: input
+toggle: always
+region: input
+when: input.shaped
+---
+${extraModule || '{{ap::input::text}}'}
+`);
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+
+  it('is absent unless declared (hash unchanged)', () => {
+    const plain = build(tree());
+    expect(plain.preset!.inputShaping).toBeUndefined();
+    expect('inputShaping' in plain.preset!).toBe(false);
+    expect(build(tree()).preset!.hash).toBe(plain.preset!.hash);
+  });
+
+  it('compiles extract and wrap with the default template', () => {
+    const ex = build(withShaping('inputShaping:\n  mode: extract\n'));
+    expect(ex.diag.errors).toEqual([]);
+    expect(messages(ex)).not.toMatch(/input/i);
+    expect(ex.preset!.inputShaping).toEqual({ mode: 'extract', template: '<input>\n{{content}}\n</input>' });
+    const wrap = build(withShaping('inputShaping: { mode: wrap, template: "<{{ap::name::user}}>{{content}}</{{ap::name::user}}>" }\n', 'Answer the input.'));
+    expect(wrap.diag.errors).toEqual([]);
+    expect(wrap.preset!.inputShaping).toEqual({ mode: 'wrap', template: '<{{ap::name::user}}>{{content}}</{{ap::name::user}}>' });
+  });
+
+  it('flags bad declarations, lost input and old AP versions', () => {
+    expect(build(withShaping('inputShaping: { mode: move }\n')).diag.errors.map((e) => e.message).join('\n')).toMatch(/inputShaping\.mode must be one of wrap, extract/);
+    expect(build(withShaping('inputShaping: wrap\n')).diag.errors.map((e) => e.message).join('\n')).toMatch(/must be a mapping/);
+    const w = messages(build(withShaping('inputShaping: { mode: wrap, template: "<input/>", tag: x }\n', 'Hi.')));
+    expect(w).toMatch(/no \{\{content\}\}/);
+    expect(w).toMatch(/unknown key `tag`/);
+    expect(messages(build(withShaping('inputShaping: { mode: extract, template: "x{{content}}" }\n')))).toMatch(/only used by `wrap`/);
+    expect(messages(build(withShaping('inputShaping: { mode: extract }\n', 'Nothing here.')))).toMatch(/no prompt uses \{\{ap::input::text\}\}/);
+    expect(messages(build(withShaping('')))).toMatch(/always empty: the preset declares no inputShaping/);
+    expect(messages(build(withShaping('', '{{ap::input::nope}}')))).toMatch(/expected meta \| text/);
+    const old = withShaping('inputShaping: { mode: extract }\n');
+    old.set('preset.yaml', old.get('preset.yaml')!.replace('minAdvancedPreset: 1.9.0\n', ''));
+    expect(messages(build(old))).toMatch(/input shaping needs Advanced Preset 1\.9\.0/);
+  });
+
+  it('previews a shaped turn with --input', async () => {
+    const { preview } = await import('../src/preview');
+    const ex = build(withShaping('inputShaping: { mode: extract }\n')).preset!;
+    const out = preview(ex, { input: 'Open the door.' });
+    expect(out).toMatch(/input shaping: extract\n/);
+    expect(out).toMatch(/━━ input [^\n]*\n\[system\]\n<input>\nOpen the door\.\n<\/input>/);
+    expect(out).toMatch(/last user message[^\n]*\n\(extracted/);
+    expect(preview(ex, {})).toMatch(/input shaping: extract \(not shaped: no --input\)[\s\S]*━━ input \(empty\)/);
+    const wrap = build(withShaping('inputShaping: { mode: wrap }\n', 'Answer the input.')).preset!;
+    const json = JSON.parse(preview(wrap, { input: 'Hi {{user}}', json: true }));
+    expect(json.historyInput).toBe('<input>\nHi {{user}}\n</input>');
+    expect(json.vars.input).toEqual({ shaped: true });
+  });
+});

@@ -22,6 +22,7 @@ import { debugLog } from './debug';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { applySticky, stripMarkers, type CacheReport } from './sticky';
 import { cacheState, currentChatKey } from '@/store/cache-state';
+import { INPUT_SLOT, applyInput, locateInput, markInput, stripInputMarks } from './input-shaping';
 
 export const ANCHOR_RE = /⟦ap:region:([\w.-]+)⟧/g;
 
@@ -95,6 +96,7 @@ export function buildVarsAndData(ctx: GenerationContext, workflow: Workflow | un
     chat: { group: Boolean(st().groupId) },
     memory: { hasChat: Object.keys(mem).length > 0, hasGlobal: Object.keys(gmem).length > 0 },
     recap: { present: Boolean(recap) },
+    input: { shaped: Boolean(ctx.inputShaped) },
   });
   const data: MacroData = {
     metaText: ctx.meta.segments.join('\n\n'),
@@ -102,6 +104,8 @@ export function buildVarsAndData(ctx: GenerationContext, workflow: Workflow | un
     recap: recap?.text ?? '',
     recentMeta: recent,
     customLast: customLast(preset),
+    // The text is only known once the history is final: a slot, filled in after the cache step.
+    inputText: ctx.inputShaped ? INPUT_SLOT : '',
   };
   return { vars, data };
 }
@@ -135,14 +139,30 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
     annotations: annotationHistory(preset, config),
   };
   const keep = new Map<number, string>();
+  /** Renderings of each kept history item (input shaping looks for one of them). */
+  const renderings = new Map<number, string[]>();
   if (config.cache?.enabled) {
     // Cache optimization: the marked sticky text, resolved below like the interceptor's.
     const chatKey = currentChatKey();
     const rw = stickyRewrite(items, options, cacheState(chatKey)?.modes, (i) => messageKey(items[i]!, real[i] ?? i));
-    for (const r of rw.out) keep.set(items[r.index]!.__h, r.entry === undefined ? r.item.mes : r.item.mes + markerOf(r.entry));
+    for (const r of rw.out) {
+      const h = items[r.index]!.__h;
+      keep.set(h, r.entry === undefined ? r.item.mes : r.item.mes + markerOf(r.entry));
+      const e = r.entry === undefined ? undefined : rw.entries[r.entry];
+      renderings.set(h, e ? [e.given, e.sticky, e.fresh].filter((x): x is string => typeof x === 'string') : [r.item.mes]);
+    }
     ctx.sticky = { chat: chatKey, entries: rw.entries, omitted: rw.omitted };
   } else {
-    for (const r of rewriteHistory(items, options) as (HistoryItem & { __h: number })[]) keep.set(r.__h, r.mes);
+    for (const r of rewriteHistory(items, options) as (HistoryItem & { __h: number })[]) { keep.set(r.__h, r.mes); renderings.set(r.__h, [r.mes]); }
+  }
+  // Input shaping (I-129): the chat ends with a user message that is the last user message handed over.
+  if (preset.inputShaping && C.length && C[C.length - 1]!.m.is_user) {
+    const hi = map.indexOf(C.length - 1);
+    const texts = renderings.get(hi);
+    if (hi >= 0 && keep.has(hi) && texts?.some((x) => x.trim()) && !H.slice(hi + 1).some(({ m }) => m.role === 'user')) {
+      keep.set(hi, markInput(keep.get(hi)!));
+      ctx.input = { texts };
+    }
   }
   const removed = new Set<number>();
   items.forEach((it) => {
@@ -171,6 +191,41 @@ function contextFor(preset: APreset, dryRun: boolean): GenerationContext {
 }
 
 const AP_MESSAGE = Symbol('ap-region');
+
+/** History messages of the isolated list: between the semantic anchors (the whole list without them). */
+function historyRange(preset: APreset, list: (ChatMessage & { __anchor?: string })[]): { from: number; to: number } {
+  const start = list.findIndex((m) => m.__anchor === preset.anchors.historyStart);
+  const end = list.findIndex((m) => m.__anchor === preset.anchors.historyEnd);
+  return { from: start < 0 ? 0 : start + 1, to: end < 0 || end <= start ? list.length : end };
+}
+
+/**
+ * Input shaping on the final list (after the cache step, which may swap the input's rendering):
+ * wraps / takes out the input and fills the `{{ap::input::text}}` slots. Removes every input mark.
+ */
+function shapeInput(ctx: GenerationContext, final: ChatMessage[], from: number, to: number, snapshot: AssemblySnapshot): AssemblySnapshot['input'] {
+  const shaping = ctx.preset.inputShaping;
+  const loc = shaping && ctx.inputShaped && ctx.input ? locateInput(final, from < 0 ? 0 : from, to, ctx.input.texts) : null;
+  stripInputMarks(final);
+  if (!shaping) return undefined;
+  const text = loc?.text ?? '';
+  if (ctx.inputShaped && !loc) ctx.warnings.push('input shaping: the input message changed after the cache step, sent as is');
+  if (loc) {
+    const assembly = ctx.assembly;
+    applyInput(final, loc, shaping, (s) => st().substituteParams(assembly ? assembly.expand(s) : s));
+  }
+  if (ctx.inputShaped) {
+    const fill = (s: string) => (s.includes(INPUT_SLOT) ? s.replaceAll(INPUT_SLOT, () => text) : s);
+    for (const m of final) {
+      if (typeof m.content === 'string') m.content = fill(m.content);
+      else if (Array.isArray(m.content)) for (const p of m.content as any[]) if (p && typeof p === 'object' && typeof p.text === 'string') p.text = fill(p.text);
+    }
+    for (const r of snapshot.regions) for (const m of r.messages) if (m.content.includes(INPUT_SLOT)) { m.content = fill(m.content); m.chars = m.content.length; }
+    const assembly = ctx.assembly;
+    if (assembly) { const expand = assembly.expand; assembly.expand = (s) => fill(expand(s)); }
+  }
+  return { mode: shaping.mode, shaped: Boolean(loc), chars: text.length };
+}
 
 function renderPrefill(ctx: GenerationContext, list: ChatMessage[], historyAt: number): ChatMessage[] {
   const { preset, config } = ctx;
@@ -205,6 +260,8 @@ export interface AssemblySnapshot {
   regions: { id: string; messages: { role: string; chars: number; content: string }[] }[];
   /** Cache optimization (sticky rendering) of this request. */
   cache?: CacheReport | null;
+  /** Input shaping of this request (presets that declare it). */
+  input?: { mode: string; shaped: boolean; chars: number };
   warnings: string[];
 }
 export let lastSnapshot: AssemblySnapshot | null = null;
@@ -225,6 +282,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   const { chat, dryRun } = event;
   if (!settings().enabled || !chat.some((m) => typeof m.content === 'string' && m.content.includes('⟦ap:region:'))) {
     stripMarkers(chat);
+    stripInputMarks(chat);
     if (!dryRun) { registry.setPending(null); registry.takeArmed(); }
     return;
   }
@@ -234,6 +292,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
     // Anchors without a known preset: strip them so they never reach the model.
     const cleaned = isolateAnchors(chat).filter((m) => !m.__anchor);
     stripMarkers(cleaned);
+    stripInputMarks(cleaned);
     chat.splice(0, chat.length, ...cleaned);
     return;
   }
@@ -244,6 +303,12 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   // continue / impersonate keep ST's native flow: regions are assembled, no workflow, no takeover.
   const passthrough = ctx.stType === 'continue' || ctx.stType === 'impersonate';
   const workflow = passthrough ? undefined : pickWorkflow(preset, ctx.config, ctx.origin);
+  // Input shaping (I-130): is the marked input among the history messages? (decides `input.shaped`)
+  const shaping = preset.inputShaping;
+  const range = historyRange(preset, list);
+  const located = shaping && ctx.input ? locateInput(list, range.from, range.to, ctx.input.texts) : null;
+  if (shaping && ctx.input && !located) ctx.warnings.push('input shaping: the input message was not found in the history, sent as is');
+  ctx.inputShaped = Boolean(located);
   const { vars, data } = buildVarsAndData(ctx, workflow);
   const merged = withUserModules(preset, userModules(preset), ctx.keywords);
   for (const x of merged.skipped) ctx.warnings.push(`user module ${x.module}: insertion point \`${x.point}\` is missing, entry ${x.entry} skipped`);
@@ -278,6 +343,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   }
 
   snapshot.cache = applySticky(ctx, final, historyAt, historyEnd < 0 ? final.length : historyEnd);
+  snapshot.input = shapeInput(ctx, final, historyAt, historyEnd < 0 ? final.length : historyEnd, snapshot);
 
   const shaped = ctx.transport === 'prefill' && !passthrough && historyAt >= 0 ? renderPrefill(ctx, final, historyAt) : final;
   chat.splice(0, chat.length, ...shaped.map((m) => {

@@ -17,6 +17,7 @@ AP 宏写作 `{{ap::名称::参数…}}`，参数用 `::` 分隔（两侧空白�
 | `{{ap::workflow::summary}}` | 本轮工作流摘要 `Start -> … -> (End)` |
 | `{{ap::workflow::hint}}` | 工作流的 `hint` |
 | `{{ap::input::meta}}` | 本次输入中的元指令文本（多段用空行连接） |
+| `{{ap::input::text}}` | [用户输入整形](manifest.md#用户输入整形-inputshaping)生效时为本次输入的原文（历史中送出的那份文字，不含名字前缀），否则为空 |
 | `{{ap::memory::chat}}` | 聊天记忆（JSON 对象，缩进 2） |
 | `{{ap::memory::global}}` | 全局记忆（JSON 对象，缩进 2） |
 | `{{ap::recap}}` | 当前生效的总结文本 |
@@ -43,7 +44,8 @@ Known facts about this chat:
 
 - 宏在**组装时**展开，`@if` 片段先按条件取舍再展开宏。
 - [模板](templates.md)先运行，输出里的宏随后展开；模板代码里也可以用 `macro("param", "length")` 直接展开宏。
-- 用户的元指令文本（`{{ap::input::meta}}`）里如果出现 `{{ap::…}}`，同样会被展开。
+- 用户的元指令文本（`{{ap::input::meta}}`）里如果出现 `{{ap::…}}`，同样会被展开。`{{ap::input::text}}` 则不展开：输入原文按用户写的样子送出（ST 在发送消息时已经展开过它的宏）。
+- `{{ap::input::text}}` 在组装时是一个占位符，历史确定之后才换成原文；模板代码读到的也是占位符，不要对它做长度判断或截取，判断有没有输入用 `input.shaped`。
 - 运行期数据（记忆、总结、最近元指令、自定义结构的 `last`）在 `ap preview` 中为空。
 - `{{ap::name::…}}` 是唯一在“组装之前”也会展开的宏：元指令触发词 `meta.trigger` 与 `meta.impersonatePrompt` 只支持它。
 
@@ -51,5 +53,6 @@ Known facts about this chat:
 
 - 未知宏名报错，例如 `{{ap::foo}}`；
 - 参数个数不对报错（如 `{{ap::lang::x}}`）；
-- 参数值无效报错：未知角色、参数、结构、构建变量；`workflow` 只接受 `summary` / `hint`；`input` 只接受 `meta`；`memory` 只接受 `chat` / `global`；只有自定义结构支持 `::last`；
+- 参数值无效报错：未知角色、参数、结构、构建变量；`workflow` 只接受 `summary` / `hint`；`input` 只接受 `meta` / `text`；`memory` 只接受 `chat` / `global`；只有自定义结构支持 `::last`；
 - 构建变量选择器：字符串变量不接受选择器、列表变量只接受整数（报错）；字典变量读取了没有任何模组设置的键给出警告。
+- `{{ap::input::text}}`：预设没有声明 `inputShaping` 时警告（总为空）；`inputShaping.mode: extract` 却没有任何提示词使用它时警告（输入不会被发送）。

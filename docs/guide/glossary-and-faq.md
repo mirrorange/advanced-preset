@@ -32,6 +32,7 @@
 | 总结 | recap | 完整的剧情概要，替代它覆盖的聊天记录 |
 | 事件摘要 | synopsis | 每段故事的时间、地点、事件、概要 |
 | 节省 Token | token saving | 用事件摘要替代较早的回复、截断较早的长用户消息 |
+| 用户输入整形 | input shaping，`inputShaping` | 预设把本次输入在聊天记录中包裹起来（`wrap`），或取出来放到别的区域（`extract`） |
 | 构建变量 | build variable，`vars` | 由多个模组共同填写、在一处读出的值 |
 | 插入点 | insertion point | 预设开放给用户放入“我的模组”的位置 |
 | 用户模组模板 | user module template | 预设附带的示例用户模组（`user-module-templates/`），新建“我的模组”时可以从它开始 |

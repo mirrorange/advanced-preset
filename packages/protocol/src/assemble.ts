@@ -35,6 +35,8 @@ export interface Vars {
   chat: { group: boolean };
   memory: { hasChat: boolean; hasGlobal: boolean };
   recap: { present: boolean };
+  /** `input.shaped`: input shaping applies this turn (the preset declares it and the last chat message is the user's). */
+  input: { shaped: boolean };
 }
 
 export function resolverOf(vars: Vars): Resolver {
@@ -51,6 +53,8 @@ export function resolverOf(vars: Vars): Resolver {
 /** Runtime data available to macros. */
 export interface MacroData {
   metaText?: string;
+  /** `{{ap::input::text}}`: the shaped input (empty when input shaping does not apply). */
+  inputText?: string;
   memory?: { chat: unknown; global: unknown };
   recap?: string;
   recentMeta?: string;
@@ -180,7 +184,7 @@ export function createMacroResolver(input: AssemblyInput, stages: Stage[], workf
       case 'workflow':
         if (a === 'hint') return workflow?.hint ?? '';
         return workflowSummary(stages, (actor) => actorName(preset, config, actor));
-      case 'input': return data.metaText ?? '';
+      case 'input': return a === 'text' ? (vars.input?.shaped ? data.inputText ?? '' : '') : data.metaText ?? '';
       case 'memory': return JSON.stringify((a === 'global' ? data.memory?.global : data.memory?.chat) ?? {}, null, 2);
       case 'recap': return data.recap ?? '';
       case 'recent_meta': return data.recentMeta ?? '';
@@ -326,6 +330,7 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     chat: { group: false },
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },
+    input: { shaped: false },
     ...over,
   };
 }

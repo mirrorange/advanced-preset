@@ -7,6 +7,7 @@
  */
 import type { Expr } from './expr';
 import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
+import type { InputShaping } from './input-shaping';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -468,6 +469,11 @@ export interface APreset {
   anchors: Record<SemanticAnchor, string>;
   /** Region that receives the workflow (CoT / task) prompt. */
   workflowRegion: string;
+  /**
+   * Input shaping (absent = off): wrap the user's input in the history, or take it out for
+   * `{{ap::input::text}}`. Only when the last chat message is the user's.
+   */
+  inputShaping?: InputShaping;
 
   params: Param[];
   groups: Record<string, Group>;

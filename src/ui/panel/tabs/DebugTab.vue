@@ -91,6 +91,7 @@ const orphans = computed(() => {
         <span v-if="snapshot.workflow" class="badge neutral">{{ snapshot.workflow }}</span>
         <span class="badge neutral">{{ snapshot.origin }}</span>
         <span v-if="snapshot.dryRun" class="badge warn">dry run</span>
+        <span v-if="snapshot.input" class="badge neutral" :title="snapshot.input.shaped ? `${snapshot.input.chars} ch` : undefined">{{ t(snapshot.input.shaped ? `debug.input.${snapshot.input.mode}` : 'debug.input.none') }}</span>
         <span class="grow" />{{ time(snapshot.at) }}
       </div>
       <div v-if="cacheReport" class="row wrap xs muted">

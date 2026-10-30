@@ -34,6 +34,7 @@
 | `regex` | list | `[]` | 正则标记，见[正则标记](#正则标记-regex) |
 | `meta` | map | 见下 | 元指令与内置任务，见 [meta-and-tasks.md](meta-and-tasks.md) |
 | `tokenSaving` | map | 见下 | 省 token 的默认参数 |
+| `inputShaping` | map | — | 用户输入整形（包裹或提取本次输入），见[用户输入整形](#用户输入整形-inputshaping) |
 | `syntheticTurns` | list | `[]` | 工具模式的示范轮次，见 [transports.md](transports.md#示范轮次-syntheticturns) |
 | `tools` | map | 见 transports | 模型可见的工具名、字段名与文案，见 [transports.md](transports.md#tools-文案) |
 | `theme` | map | `{}` | 面板与消息 UI 的配色 |
@@ -323,6 +324,38 @@ tokenSaving:
 | `synopsisTemplate` | 如上 | 更早的助手消息替换成事件摘要时的格式 |
 
 是否启用由配置 `tokenSaving.enabled` 决定（默认关闭）；`keepFullTurns` / `truncateUserAfter` / `userInput` 是配置的默认值，用户可在面板中修改。最近几条消息附带事件摘要由 `synopsis` 结构的 `history` / `historyTemplate` 声明（见 [structures.md](structures.md#synopsis)）。规则见 [meta-and-tasks.md](meta-and-tasks.md#省-token)。
+
+## 用户输入整形 `inputShaping`
+
+预设级的提示词结构功能：聊天历史以用户消息结尾时（即本次输入），把这条消息**包裹**起来，或从历史中**提取**出来、由宏放到别的位置。用户没有开关；不声明时不整形。
+
+```yaml
+# 包裹：历史中的本次输入换成模板，后置指令可以说“<input> 中的内容”
+inputShaping:
+  mode: wrap
+  template: "<input>\n{{content}}\n</input>"
+```
+
+```yaml
+# 提取：本次输入离开聊天历史，由 {{ap::input::text}} 放到某个区域
+inputShaping:
+  mode: extract
+```
+
+| 字段 | 默认 | 说明 |
+| --- | --- | --- |
+| `mode` | — | **必填**。`wrap`（原位包裹）或 `extract`（从历史中取出） |
+| `template` | `<input>\n{{content}}\n</input>` | 仅 `wrap`：替换输入的文字。`{{content}}` 为输入原文；模板中的 `{{ap::…}}` 与 ST 宏会展开，输入原文不再展开 |
+
+- 只有**本次生成的聊天历史以用户消息结尾**时整形：普通发送、重新生成、滑动。`continue`、`/trigger` 或其他扩展在助手消息之后发起的生成不整形；
+- 世界书深度 0 注入、作者注释等 ST 插到这条消息之后的非用户消息**不影响**整形；
+- 整形生效时条件变量 `input.shaped` 为真（[expressions.md](expressions.md)），`{{ap::input::text}}` 为输入原文（[macros.md](macros.md)）；未生效时前者为假、后者为空。`extract` 的预设应当在 `input.shaped` 为真时用 `{{ap::input::text}}` 放回输入，否则输入会丢失；
+- 整形发生在缓存优化之后，不参与粘性渲染（输入位于历史末尾，下一轮它回到历史中按普通消息渲染，只影响这一条消息的缓存）；
+- 需要 Advanced Preset 1.9.0 以上（更早的版本忽略这个字段，`ap check` 在 `minAdvancedPreset` 低于 1.9.0 时警告）。
+
+`ap check` 警告：未知字段；`extract` 写了 `template`（不使用）；`wrap` 的模板没有 `{{content}}`（输入会丢失）；`extract` 却没有提示词使用 `{{ap::input::text}}`；`minAdvancedPreset` 低于 1.9.0。
+
+完整流程见 [meta-and-tasks.md](meta-and-tasks.md#用户输入整形)。
 
 ## 主题 `theme`
 
