@@ -3,7 +3,7 @@ import { cloneData, withUserModules, type APreset, type ModuleTemplate } from '@
 import { confirmPresetTemplates } from '@/app/trust';
 import { localTemplate } from '@/i18n';
 import { createUserModuleFromTemplate, userModules } from '@/store/user-modules';
-import { petals } from './helpers';
+import { petals, withoutTemplates } from './helpers';
 
 let lang = 'en';
 const popup = vi.fn(async (..._args: unknown[]) => 1);
@@ -32,9 +32,9 @@ const tpl: ModuleTemplate = {
 };
 
 function preset(id = 'tpl-test'): APreset {
-  const p = cloneData(petals);
+  const p = withoutTemplates(petals);
   p.id = id;
-  p.moduleTemplates = [tpl];
+  p.moduleTemplates = [cloneData(tpl)];
   return p;
 }
 

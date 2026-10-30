@@ -27,7 +27,7 @@ transport in ["structured", "tool-single", "tool-multi"]
 - `==` / `!=` 是宽松相等：数字与字符串按文本比较（`params.n == "3"` 与 `params.n == 3` 等价）；`null` 与“不存在”相等。
 - `<` `<=` `>` `>=` 把两边转成数字（不存在当作 0）。
 - `a in [x, y]`：`a` 宽松等于数组中任一项；`a in "text"`：`a` 是字符串且是 `"text"` 的子串；其他情况为假。
-- `&&` / `||` 结果是布尔值；单独一个变量按真假判断（空字符串、0、`false`、`null`、不存在为假）。
+- `&&` / `||` 结果是布尔值；单独一个变量按真假判断（空字符串、0、`false`、`null`、不存在、空数组为假）。因此列表参数可以直接写 `params.bannedWords`（已填写至少一项），`"x" in params.bannedWords` 判断是否含某项。
 - 未写条件等于恒真。
 
 ## 条件变量
@@ -46,7 +46,7 @@ transport in ["structured", "tool-single", "tool-multi"]
 | `meta.task` | `summary` `impersonate` 或 `null` | 识别出的内置任务 |
 | `meta.recent` | 布尔 | 最近有元指令记录（`{{ap::recent_meta}}` 非空） |
 | `modules.<id>` | 布尔 | 模组开关状态（单选集决出之后，不受模组 `when` 影响） |
-| `params.<id>` | 字符串或数字 | 参数原始值 |
+| `params.<id>` | 字符串或数字；列表参数为字符串数组 | 参数原始值（列表已去重、去空项） |
 | `flags.<id>` | 布尔 | 正则标记结果 |
 | `stages.<id>` | 布尔 | 本轮工作流是否运行该阶段（阶段 `when` 求值之后） |
 | `features.tokenSaving` | 布尔 | 省 token 已开启 |

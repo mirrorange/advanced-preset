@@ -2,10 +2,10 @@
 import { parseArgs } from 'node:util';
 import { basename, resolve } from 'node:path';
 import { readFile, writeFile } from 'node:fs/promises';
-import { parseUserModuleFile } from '@advanced-preset/protocol';
+import { parseUserModuleFile, type ParamValue } from '@advanced-preset/protocol';
 import { buildDir, writeArtifact } from './io';
 import { report } from './diagnostics';
-import { preview, templateModules } from './preview';
+import { parseParamArg, preview, templateModules } from './preview';
 import { dev } from './dev';
 import { init } from './init';
 import { DEFAULT_TARGET, installSkills, listSkills } from './skills';
@@ -21,7 +21,7 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--user-modules file]
+                   [--enable a,b] [--disable c] [--param id=value …] [--user-modules file]
                    [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
                                              scaffold a new preset repository
@@ -48,6 +48,7 @@ async function main(argv: string[]): Promise<number> {
       enable: { type: 'string' },
       disable: { type: 'string' },
       json: { type: 'boolean' },
+      param: { type: 'string', multiple: true },
       'user-modules': { type: 'string' },
       'module-templates': { type: 'string' },
       lang: { type: 'string' },
@@ -83,6 +84,12 @@ async function main(argv: string[]): Promise<number> {
       const toggles: Record<string, boolean> = {};
       for (const id of values.enable?.split(',').filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(',').filter(Boolean) ?? []) toggles[id.trim()] = false;
+      const params: Record<string, ParamValue> = {};
+      for (const arg of values.param ?? []) {
+        const parsed = parseParamArg(preset, arg);
+        if (typeof parsed === 'string') { console.error(parsed); return 1; }
+        params[parsed.id] = parsed.value;
+      }
       const meta = values.meta === 'pure' || values.meta === 'mixed' ? values.meta : undefined;
       let userModules = values['user-modules'] ? parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8'))).modules : undefined;
       if (values['module-templates']) {
@@ -90,7 +97,7 @@ async function main(argv: string[]): Promise<number> {
         if (typeof picked === 'string') { console.error(picked); return 1; }
         userModules = [...(userModules ?? []), ...picked];
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, userModules, json: values.json });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);
       return 0;

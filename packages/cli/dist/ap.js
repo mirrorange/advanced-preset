@@ -7513,6 +7513,9 @@ function looseEq(a, b) {
   if (typeof a === "string" && typeof b === "number") return a === String(b);
   return false;
 }
+function truthy(v) {
+  return Array.isArray(v) ? v.length > 0 : Boolean(v);
+}
 function evaluate(e, resolve2) {
   switch (e.t) {
     case "lit":
@@ -7522,10 +7525,10 @@ function evaluate(e, resolve2) {
     case "var":
       return resolve2(e.path);
     case "not":
-      return !evaluate(e.e, resolve2);
+      return !truthy(evaluate(e.e, resolve2));
     case "bin": {
-      if (e.op === "&&") return Boolean(evaluate(e.l, resolve2)) && Boolean(evaluate(e.r, resolve2));
-      if (e.op === "||") return Boolean(evaluate(e.l, resolve2)) || Boolean(evaluate(e.r, resolve2));
+      if (e.op === "&&") return truthy(evaluate(e.l, resolve2)) && truthy(evaluate(e.r, resolve2));
+      if (e.op === "||") return truthy(evaluate(e.l, resolve2)) || truthy(evaluate(e.r, resolve2));
       const l = evaluate(e.l, resolve2);
       const r = evaluate(e.r, resolve2);
       switch (e.op) {
@@ -7550,7 +7553,7 @@ function evaluate(e, resolve2) {
   }
 }
 function test(e, resolve2) {
-  return e ? Boolean(evaluate(e, resolve2)) : true;
+  return e ? truthy(evaluate(e, resolve2)) : true;
 }
 function variables(e, out = /* @__PURE__ */ new Set()) {
   switch (e.t) {
@@ -8294,6 +8297,47 @@ function resolveConfiguration(preset, base, diff) {
   return deepMerge(preset.configurationDefaults, recommended(preset, base)?.diff, diff);
 }
 
+// ../protocol/src/params.ts
+var PARAM_TYPES = ["text", "number", "select", "list"];
+var LIST_PARAMS_SINCE = "1.9.0";
+var DEFAULT_LIST_SEPARATOR = ", ";
+function normalizeList(items) {
+  const out = [];
+  for (const x of items) {
+    if (typeof x !== "string" && typeof x !== "number") continue;
+    const s = String(x).trim();
+    if (s && !out.includes(s)) out.push(s);
+  }
+  return out;
+}
+function paramValueMatches(param, v) {
+  if (param.type === "list") return Array.isArray(v) && v.every((x) => typeof x === "string");
+  if (param.type === "number") return typeof v === "number" && Number.isFinite(v);
+  return typeof v === "string" || typeof v === "number";
+}
+function emptyParamValue(type) {
+  return type === "list" ? [] : type === "number" ? 0 : "";
+}
+function paramValue(param, raw) {
+  const v = raw === void 0 ? param.default : raw;
+  if (param.type === "list") {
+    if (Array.isArray(v)) return normalizeList(v);
+    return Array.isArray(param.default) ? normalizeList(param.default) : [];
+  }
+  if (param.type === "number") {
+    const n = typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v) : NaN;
+    return Number.isFinite(n) ? n : typeof param.default === "number" ? param.default : 0;
+  }
+  if (typeof v === "string" || typeof v === "number") return v;
+  return typeof param.default === "string" || typeof param.default === "number" ? param.default : "";
+}
+function isParamUnset(v) {
+  return v === void 0 || v === "" || v === 0 || Array.isArray(v) && v.length === 0;
+}
+function paramValues(preset, config) {
+  return Object.fromEntries(preset.params.map((p) => [p.id, paramValue(p, config.params?.[p.id])]));
+}
+
 // ../protocol/src/build-vars.ts
 var VAR_SELECTORS = ["keys", "values"];
 function emptyVarValue(decl) {
@@ -8419,15 +8463,15 @@ function createMacroResolver(input, stages, workflow, buildVars) {
   const paramText = (id, depth = 0) => {
     const p = preset.params.find((x) => x.id === id);
     if (!p) return "";
-    const v = config.params[id] ?? p.default;
-    const unset = v === "" || v === 0 || v === void 0;
-    if (unset) {
+    const v = paramValue(p, config.params[id]);
+    if (isParamUnset(v)) {
       if (p.fallback && depth < 4) {
         const fb = paramText(p.fallback, depth + 1);
         if (fb) return fb;
       }
       return p.unset ?? "";
     }
+    if (Array.isArray(v)) return v.join(p.separator ?? DEFAULT_LIST_SEPARATOR);
     const opt = p.options?.find((o) => String(o.value) === String(v));
     return opt?.text ?? String(v);
   };
@@ -8594,7 +8638,7 @@ function defaultVars(preset, config, over = {}) {
     gen: { origin: "story", type: "normal", callerTools: false, callerSchema: false },
     meta: { present: false, pure: false, mixed: false, task: null, recent: false },
     modules: moduleSwitches(preset, config),
-    params: { ...config.params },
+    params: paramValues(preset, config),
     flags: Object.fromEntries(preset.regex.map((r) => [r.id, false])),
     features: { tokenSaving: config.tokenSaving.enabled },
     stages: {},
@@ -9214,6 +9258,7 @@ function loadManifest(tree, diag) {
 // src/compile.ts
 var SOURCE_FORMAT_VERSION = 1;
 var isObj4 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var paramShape = (type) => type === "list" ? "a list of strings" : type === "number" ? "a number" : "a string or number";
 var str2 = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
 var ROLES4 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
@@ -9425,18 +9470,28 @@ function compile(tree) {
     const o = isObj4(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
     const type = str2(o.type, "text");
-    if (!["text", "number", "select"].includes(type)) diag.error("param type must be text | number | select", where);
+    if (!PARAM_TYPES.includes(type)) diag.error(`param type must be ${PARAM_TYPES.join(" | ")}`, where);
     const options = Array.isArray(o.options) ? o.options.map((x) => isObj4(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
     const param = {
       id: str2(o.id),
       type,
       label: str2(o.label, str2(o.id)),
-      default: o.default ?? (type === "number" ? 0 : "")
+      default: o.default ?? emptyParamValue(type)
     };
+    if (!paramValueMatches(param, param.default)) diag.error(`default of a ${type} param must be ${paramShape(type)}`, { ...where, path: `${where.path}.default` });
+    else if (Array.isArray(param.default)) param.default = normalizeList(param.default);
     for (const k of ["description", "group", "unset", "fallback", "unit"]) if (o[k] !== void 0) param[k] = str2(o[k]);
     for (const k of ["min", "max"]) if (typeof o[k] === "number") param[k] = o[k];
     if (param.unset) text(param.unset, where);
     if (options) param.options = options;
+    if (type === "list") {
+      if (o.separator !== void 0) param.separator = str2(o.separator);
+      for (const k of ["options", "unit", "min", "max"]) if (o[k] !== void 0) diag.warn(`\`${k}\` does not apply to list params and is ignored`, where);
+      delete param.options;
+      delete param.unit;
+      delete param.min;
+      delete param.max;
+    } else if (o.separator !== void 0) diag.warn("`separator` only applies to list params and is ignored", where);
     if (!param.id) diag.error("param id is required", where);
     return param;
   });
@@ -9681,10 +9736,19 @@ function compile(tree) {
     if (!(k in configurationDefaults.modules)) diag.error(`configurationDefaults.modules: unknown user module \`${k}\``, { file: M, path: `configurationDefaults.modules.${k}` });
     else configurationDefaults.modules[k] = Boolean(v);
   }
-  for (const [k, v] of Object.entries(sect("params"))) {
-    if (!(k in configurationDefaults.params)) diag.error(`configurationDefaults.params: unknown param \`${k}\``, { file: M, path: `configurationDefaults.params.${k}` });
-    else configurationDefaults.params[k] = v;
-  }
+  const checkParams = (section, path, apply, reportUnknown = true) => {
+    for (const [k, v] of Object.entries(section)) {
+      const where = { file: M, path: `${path}.${k}` };
+      const decl = params.find((x) => x.id === k);
+      if (!decl) {
+        if (reportUnknown) diag.error(`${path}: unknown param \`${k}\``, where);
+      } else if (!paramValueMatches(decl, v)) diag.error(`${path}.${k}: a ${decl.type} param needs ${paramShape(decl.type)}`, where);
+      else apply(k, Array.isArray(v) ? normalizeList(v) : v);
+    }
+  };
+  checkParams(sect("params"), "configurationDefaults.params", (k, v) => {
+    configurationDefaults.params[k] = v;
+  });
   userInputMode(sect("tokenSaving").userInput, "configurationDefaults.tokenSaving.userInput");
   const checkCache = (c, path) => {
     for (const [k, v] of Object.entries(c)) {
@@ -9707,6 +9771,9 @@ function compile(tree) {
     if (isObj4(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj4(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj4(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj4(rc.diff.params)) checkParams(rc.diff.params, `configurations[${i}].diff.params`, (k, v) => {
+      rc.diff.params[k] = v;
+    }, false);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
@@ -10158,9 +10225,12 @@ function validate(p, map, diag) {
   for (const x of p.params) {
     const where = { file: M, path: `params.${x.id}` };
     if (x.fallback && !paramIds.has(x.fallback)) diag.error(`fallback param \`${x.fallback}\` does not exist`, where);
+    else if (x.fallback && x.type === "list" !== (p.params.find((y) => y.id === x.fallback)?.type === "list")) diag.warn(`fallback param \`${x.fallback}\`: a list param and a scalar param should not fall back to each other`, where);
     if (x.type === "select" && !x.options?.length) diag.error("select params need options", where);
     if (x.group && !p.groups[x.group]) diag.warn(`group \`${x.group}\` is not declared`, where);
   }
+  if (p.params.some((x) => x.type === "list") && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, LIST_PARAMS_SINCE) < 0))
+    diag.warn(`list params need Advanced Preset ${LIST_PARAMS_SINCE}: set minAdvancedPreset to ${LIST_PARAMS_SINCE} or later (older versions cannot edit them)`, { file: M, path: "minAdvancedPreset" });
   const byKind = /* @__PURE__ */ new Map();
   for (const s of Object.values(p.structures)) if (s.kind !== "custom") byKind.set(s.kind, [...byKind.get(s.kind) ?? [], s.id]);
   for (const [k, ids] of byKind) if (ids.length > 1) diag.error(`only one structure of kind ${k} is allowed (${ids.join(", ")})`, { file: M, path: "structures" });
@@ -10327,11 +10397,34 @@ function templateModules(preset, ids, lang) {
   const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.moduleTemplates?.[id] : void 0;
   return picked.map((t) => userModuleFromTemplate(localizeModuleTemplate(t, lang, labels(t.id)), `tpl-${t.id}`));
 }
+function parseParamArg(preset, arg) {
+  const eq = arg.indexOf("=");
+  if (eq <= 0) return `--param expects id=value, got \`${arg}\``;
+  const id = arg.slice(0, eq).trim();
+  const raw = arg.slice(eq + 1);
+  const decl = preset.params.find((p) => p.id === id);
+  if (!decl) return `unknown param \`${id}\` (have: ${preset.params.map((p) => p.id).join(", ") || "none"})`;
+  if (decl.type === "number") {
+    const n = Number(raw);
+    return raw.trim() !== "" && Number.isFinite(n) ? { id, value: n } : `--param ${id}: expected a number, got \`${raw}\``;
+  }
+  if (decl.type !== "list") return { id, value: raw };
+  if (raw.trim().startsWith("[")) {
+    try {
+      const v = JSON.parse(raw);
+      if (Array.isArray(v) && v.every((x) => typeof x === "string")) return { id, value: normalizeList(v) };
+    } catch {
+    }
+    return `--param ${id}: expected a JSON array of strings, got \`${raw}\``;
+  }
+  return { id, value: normalizeList(raw.split(",")) };
+}
 function preview(source, o) {
   const { preset, skipped } = o.userModules ? withUserModules(source, o.userModules) : { preset: source, skipped: [] };
   const config = resolveConfiguration(preset, o.config ?? preset.defaultConfiguration, {
     connection: { ...o.transport ? { transport: o.transport } : {}, ...o.workflow ? { workflow: o.workflow } : {} },
-    modules: o.modules
+    modules: o.modules,
+    params: o.params
   });
   if (!TRANSPORTS.includes(config.connection.transport)) throw new Error(`unknown transport ${config.connection.transport}`);
   const pure = o.meta === "pure";
@@ -10534,7 +10627,7 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--user-modules file]
+                   [--enable a,b] [--disable c] [--param id=value \u2026] [--user-modules file]
                    [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
                                              scaffold a new preset repository
@@ -10560,6 +10653,7 @@ async function main(argv) {
       enable: { type: "string" },
       disable: { type: "string" },
       json: { type: "boolean" },
+      param: { type: "string", multiple: true },
       "user-modules": { type: "string" },
       "module-templates": { type: "string" },
       lang: { type: "string" },
@@ -10598,6 +10692,15 @@ async function main(argv) {
       const toggles = {};
       for (const id of values.enable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = false;
+      const params = {};
+      for (const arg of values.param ?? []) {
+        const parsed = parseParamArg(preset, arg);
+        if (typeof parsed === "string") {
+          console.error(parsed);
+          return 1;
+        }
+        params[parsed.id] = parsed.value;
+      }
       const meta = values.meta === "pure" || values.meta === "mixed" ? values.meta : void 0;
       let userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules : void 0;
       if (values["module-templates"]) {
@@ -10608,7 +10711,7 @@ async function main(argv) {
         }
         userModules = [...userModules ?? [], ...picked];
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

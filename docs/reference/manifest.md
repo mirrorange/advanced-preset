@@ -176,7 +176,7 @@ workflowRegion: task
 
 ## 参数 `params`
 
-参数是用户在面板里填写或选择的值，提示词用 `{{ap::param::<id>}}` 读取，条件用 `params.<id>` 判断。
+参数是用户在面板（写作页）里填写或选择的值，提示词用 `{{ap::param::<id>}}` 读取，条件用 `params.<id>` 判断。
 
 ```yaml
 params:
@@ -200,28 +200,47 @@ params:
     type: text
     label: Point of view
     fallback: language
+  - id: bannedWords
+    type: list
+    label: Banned words
+    description: Words the narrator must not use.
+    default: [闪过]
 ```
 
 | 字段 | 默认 | 说明 |
 | --- | --- | --- |
 | `id` | — | 必填 |
-| `type` | `text` | `text` \| `number` \| `select` |
+| `type` | `text` | `text` \| `number` \| `select` \| `list`（字符串列表，见下） |
 | `label` | `id` | 面板标签 |
 | `description` | — | 面板说明 |
 | `group` | — | 所属分组（`groups` 的键），未声明给出警告 |
-| `default` | `''`（number 为 `0`） | 默认值 |
+| `default` | `''`（number 为 `0`，list 为 `[]`） | 默认值，须与类型相符（list 为字符串数组） |
 | `unset` | — | 未设置时 `{{ap::param}}` 输出的文本 |
+| `separator` | `", "` | 仅 `list`：`{{ap::param}}` 中项与项之间的文本 |
 | `fallback` | — | 未设置时先尝试读取另一个参数（最多 4 层） |
 | `unit` / `min` / `max` | — | 数字参数的单位与范围（面板用） |
-| `options` | — | `select` 必填；`text` 也可提供，作为输入建议。每项是标量，或 `{ value, label?, text? }` |
+| `options` | — | `select` 必填；`text` 也可提供，作为输入建议。每项是标量，或 `{ value, label?, text? }`；`list` 不使用 |
 
 **取值规则**（`{{ap::param::<id>}}`）：
 
-1. 值取当前配置的 `params.<id>`，没有则取 `default`。
-2. 值为 `''` 或 `0` 视为“未设置”：若有 `fallback` 且那个参数有值，用它；否则输出 `unset`（没有则为空）。
-3. 已设置时，若值匹配某个选项的 `value`，输出该选项的 `text`（没有 `text` 则输出值本身）。
+1. 值取当前配置的 `params.<id>`，没有则取 `default`；形状与类型不符的值（如列表参数存了字符串）按 `default` 处理。
+2. 值为 `''`、`0` 或空列表视为“未设置”：若有 `fallback` 且那个参数有值，用它；否则输出 `unset`（没有则为空）。
+3. 已设置时，列表参数输出用 `separator` 连接的各项；其他参数若值匹配某个选项的 `value`，输出该选项的 `text`（没有 `text` 则输出值本身）。
 
-条件里的 `params.<id>` 是原始值（不经过 `unset`/`fallback`/`text`）。诊断：`fallback` 指向不存在的参数报错；`select` 没有 `options` 报错。
+条件里的 `params.<id>` 是原始值（不经过 `unset`/`fallback`/`text`）。诊断：`fallback` 指向不存在的参数报错；`select` 没有 `options` 报错；`default` 与类型不符报错。
+
+### 列表参数 `type: list`
+
+列表参数是一组字符串，适合禁词表、额外关键词这类“用户自己列出若干项”的设置。面板中以标签输入编辑：输入一项后按 Enter 添加（粘贴多行时每行一项），点 × 删除。
+
+- 值总是去掉首尾空白、去掉空项与重复项（保留第一次出现的位置）后的字符串数组；`default`、`configurationDefaults` 与推荐配置中的值同样按此规范化。
+- `{{ap::param::<id>}}`：各项用 `separator`（默认 `", "`）连接；空列表视为未设置。
+- 条件：空列表为假，因此 `params.bannedWords` 可以直接判断“是否填写了”；`"闪过" in params.bannedWords` 判断是否含某项（[expressions.md](expressions.md)）。
+- [模板](templates.md)中 `params.<id>` 是普通数组，可以循环、合并、去重——列表需要逐项排版或与内置项合并时用模板。
+- 配置层合并时列表整体替换（不拼接）；用户配置只在与基础配置不同时保存整个列表。
+- 用户模组的变量规则对列表参数提供“有内容 / 为空”（`on` / `off`）。
+- 诊断：`options` / `unit` / `min` / `max` 对列表参数无效（警告，忽略）；非列表参数写了 `separator` 警告；列表参数与标量参数互为 `fallback` 警告；声明了列表参数而 `minAdvancedPreset` 低于 1.9.0 时警告（旧版本无法编辑列表）。
+- 预设更新时，类型变化导致形状不符的已存值会被丢弃（回到新默认值）。
 
 ## 分组 `groups`
 

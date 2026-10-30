@@ -4,7 +4,7 @@
  * configuration or a saved user configuration. Only sparse diffs are stored (D9).
  */
 import {
-  applyMigrations, compareVersions, deepMerge, diffObjects, migrateUserModules, lostRefs, pruneDiff, recommended,
+  applyMigrations, compareVersions, paramValueMatches, deepMerge, diffObjects, migrateUserModules, lostRefs, pruneDiff, recommended,
   type APreset, type Configuration, type SparseDiff, cloneData,
 } from '@advanced-preset/protocol';
 import { toast } from '@/st/host';
@@ -123,7 +123,11 @@ export function migratePresetState(preset: APreset): string[] {
     const mods = out.modules as Record<string, unknown> | undefined;
     if (mods) for (const k of Object.keys(mods)) if (!preset.modules.some((m) => m.id === k)) { delete mods[k]; removed.push(`modules.${k}`); }
     const params = out.params as Record<string, unknown> | undefined;
-    if (params) for (const k of Object.keys(params)) if (!preset.params.some((p) => p.id === k)) { delete params[k]; removed.push(`params.${k}`); }
+    // …and values whose shape no longer matches the declared type (e.g. a text param became a list)
+    if (params) for (const k of Object.keys(params)) {
+      const decl = preset.params.find((p) => p.id === k);
+      if (!decl || !paramValueMatches(decl, params[k])) { delete params[k]; removed.push(`params.${k}`); }
+    }
     return out as SparseDiff;
   };
   s.active.diff = fix(s.active.diff ?? {});

@@ -3,7 +3,7 @@ import { cloneData, type APreset, type UserModule } from '@advanced-preset/proto
 import { confirmPresetTemplates, confirmUserModuleTemplates, isTrustDeclined, TrustDeclined } from '@/app/trust';
 import { installArtifact } from '@/app/install';
 import { settings } from '@/store/settings';
-import { petals } from './helpers';
+import { petals, withoutTemplates } from './helpers';
 
 const AFFIRMATIVE = 1;
 let answer = AFFIRMATIVE;
@@ -33,7 +33,7 @@ function withTemplate(code = '<%- gen.type %>', id = 'templated'): APreset {
 
 describe('trusting templates (I-110)', () => {
   it('does not ask for presets without templates', async () => {
-    await confirmPresetTemplates(petals);
+    await confirmPresetTemplates(withoutTemplates(petals));
     expect(popup).not.toHaveBeenCalled();
   });
 

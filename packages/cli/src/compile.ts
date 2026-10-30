@@ -22,6 +22,7 @@ import {
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
   DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode,
+  PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
@@ -57,6 +58,7 @@ export interface CompileResult {
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
+const paramShape = (type: string) => (type === 'list' ? 'a list of strings' : type === 'number' ? 'a number' : 'a string or number');
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : v == null ? fallback : String(v));
 const ROLES: Role[] = ['system', 'user', 'assistant'];
 const ANCHORS: SemanticAnchor[] = ['historyStart', 'historyEnd', 'tail'];
@@ -286,7 +288,7 @@ export function compile(tree: SourceTree): CompileResult {
     const o = isObj(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
     const type = str(o.type, 'text') as Param['type'];
-    if (!['text', 'number', 'select'].includes(type)) diag.error('param type must be text | number | select', where);
+    if (!PARAM_TYPES.includes(type)) diag.error(`param type must be ${PARAM_TYPES.join(' | ')}`, where);
     const options: ParamOption[] | undefined = Array.isArray(o.options)
       ? o.options.map((x: unknown) => (isObj(x) ? { value: x.value as string | number, ...(x.label !== undefined ? { label: str(x.label) } : {}), ...(x.text !== undefined ? { text: text(str(x.text), where) } : {}) } : { value: x as string | number }))
       : undefined;
@@ -294,12 +296,22 @@ export function compile(tree: SourceTree): CompileResult {
       id: str(o.id),
       type,
       label: str(o.label, str(o.id)),
-      default: (o.default as string | number | undefined) ?? (type === 'number' ? 0 : ''),
+      default: (o.default as ParamValue | undefined) ?? emptyParamValue(type),
     };
+    if (!paramValueMatches(param, param.default)) diag.error(`default of a ${type} param must be ${paramShape(type)}`, { ...where, path: `${where.path}.default` });
+    else if (Array.isArray(param.default)) param.default = normalizeList(param.default);
     for (const k of ['description', 'group', 'unset', 'fallback', 'unit'] as const) if (o[k] !== undefined) param[k] = str(o[k]);
     for (const k of ['min', 'max'] as const) if (typeof o[k] === 'number') param[k] = o[k] as number;
     if (param.unset) text(param.unset, where);
     if (options) param.options = options;
+    if (type === 'list') {
+      if (o.separator !== undefined) param.separator = str(o.separator);
+      for (const k of ['options', 'unit', 'min', 'max'] as const) if (o[k] !== undefined) diag.warn(`\`${k}\` does not apply to list params and is ignored`, where);
+      delete param.options;
+      delete param.unit;
+      delete param.min;
+      delete param.max;
+    } else if (o.separator !== undefined) diag.warn('`separator` only applies to list params and is ignored', where);
     if (!param.id) diag.error('param id is required', where);
     return param;
   });
@@ -560,10 +572,17 @@ export function compile(tree: SourceTree): CompileResult {
     if (!(k in configurationDefaults.modules)) diag.error(`configurationDefaults.modules: unknown user module \`${k}\``, { file: M, path: `configurationDefaults.modules.${k}` });
     else configurationDefaults.modules[k] = Boolean(v);
   }
-  for (const [k, v] of Object.entries(sect('params'))) {
-    if (!(k in configurationDefaults.params)) diag.error(`configurationDefaults.params: unknown param \`${k}\``, { file: M, path: `configurationDefaults.params.${k}` });
-    else configurationDefaults.params[k] = v as string | number;
-  }
+  /** A `params` map of the defaults or of a recommended configuration: known ids, values of the declared shape. */
+  const checkParams = (section: Obj, path: string, apply: (id: string, v: ParamValue) => void, reportUnknown = true) => {
+    for (const [k, v] of Object.entries(section)) {
+      const where = { file: M, path: `${path}.${k}` };
+      const decl = params.find((x) => x.id === k);
+      if (!decl) { if (reportUnknown) diag.error(`${path}: unknown param \`${k}\``, where); }
+      else if (!paramValueMatches(decl, v)) diag.error(`${path}.${k}: a ${decl.type} param needs ${paramShape(decl.type)}`, where);
+      else apply(k, Array.isArray(v) ? normalizeList(v) : (v as ParamValue));
+    }
+  };
+  checkParams(sect('params'), 'configurationDefaults.params', (k, v) => { configurationDefaults.params[k] = v; });
   userInputMode(sect('tokenSaving').userInput, 'configurationDefaults.tokenSaving.userInput');
   /** `cache` section of the defaults or of a recommended configuration's diff. */
   const checkCache = (c: Obj, path: string) => {
@@ -589,6 +608,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (isObj(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj(rc.diff.params)) checkParams(rc.diff.params as Obj, `configurations[${i}].diff.params`, (k, v) => { rc.diff.params![k] = v; }, false); // unknown keys: validate
     return rc;
   });
   if (!configurations.length) configurations.push({ id: 'default', name: 'Default', diff: {} });

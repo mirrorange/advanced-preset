@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
+  LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -189,9 +189,12 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   for (const x of p.params) {
     const where = { file: M, path: `params.${x.id}` };
     if (x.fallback && !paramIds.has(x.fallback)) diag.error(`fallback param \`${x.fallback}\` does not exist`, where);
+    else if (x.fallback && (x.type === 'list') !== (p.params.find((y) => y.id === x.fallback)?.type === 'list')) diag.warn(`fallback param \`${x.fallback}\`: a list param and a scalar param should not fall back to each other`, where);
     if (x.type === 'select' && !x.options?.length) diag.error('select params need options', where);
     if (x.group && !p.groups[x.group]) diag.warn(`group \`${x.group}\` is not declared`, where);
   }
+  if (p.params.some((x) => x.type === 'list') && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, LIST_PARAMS_SINCE) < 0))
+    diag.warn(`list params need Advanced Preset ${LIST_PARAMS_SINCE}: set minAdvancedPreset to ${LIST_PARAMS_SINCE} or later (older versions cannot edit them)`, { file: M, path: 'minAdvancedPreset' });
 
   // ── structures ──────────────────────────────────────────────────────────────
   const byKind = new Map<string, string[]>();
