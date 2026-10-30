@@ -9845,7 +9845,7 @@ function Bg(e) {
 }
 async function Vg() {
 	let e = await zg();
-	e && e !== "9f85b5ac43f20bdd" && sessionStorage.getItem(Rg) !== e && Bg(e);
+	e && e !== "9c22fd14936c7fce" && sessionStorage.getItem(Rg) !== e && Bg(e);
 }
 async function Hg() {
 	await Vg();
@@ -9854,7 +9854,7 @@ async function Ug() {
 	let e = o().replace(/^third-party\//, ""), t = await Wg(e, !1);
 	if (t.status === 404 && (t = await Wg(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await zg();
-	return r && r !== "9f85b5ac43f20bdd" ? (Bg(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "9c22fd14936c7fce" ? (Bg(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Wg = (t, n) => g("/api/extensions/update", {
 	method: "POST",
@@ -15916,7 +15916,7 @@ var hw = ["aria-label"], gw = { class: "um-picker-head" }, _w = { class: "small 
 				"icon",
 				"help"
 			]),
-			W("div", MD, "Advanced Preset " + M(F("1.9.0")) + " · " + M(F("9f85b5ac43f20bdd")), 1)
+			W("div", MD, "Advanced Preset " + M(F("1.9.0")) + " · " + M(F("9c22fd14936c7fce")), 1)
 		], 64));
 	}
 }), PD = ["aria-label"], FD = { class: "panel-head" }, ID = { class: "panel-logo" }, LD = { class: "grow" }, RD = { class: "panel-title ellipsis" }, zD = { class: "panel-sub ellipsis" }, BD = {
@@ -16087,7 +16087,7 @@ function rO() {
 //#region src/index.ts
 var iO = {
 	version: "1.9.0",
-	buildId: "9f85b5ac43f20bdd",
+	buildId: "9c22fd14936c7fce",
 	nextGeneration: (e) => kf(e),
 	listPresets: () => ld().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -16141,7 +16141,7 @@ async function sO() {
 	};
 	t.on(n.APP_READY, () => void a()), rO(), Jp("init", {
 		version: "1.9.0",
-		build: "9f85b5ac43f20bdd",
+		build: "9c22fd14936c7fce",
 		enabled: J().enabled
 	});
 }
