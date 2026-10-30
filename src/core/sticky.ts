@@ -8,6 +8,7 @@ import { connectionKey } from '@/st/host';
 import { cacheState, saveCacheState, touchCacheState } from '@/store/cache-state';
 import { MARK_RE, hashText, resolveSticky, swapInside, takeMarkers, type CacheFingerprint, type Candidate, type FlushReason } from './cache';
 import type { GenerationContext } from './context';
+import { INPUT_MARK } from './input-shaping';
 import { artifactsOf } from './transports/base';
 
 export interface CacheReport {
@@ -29,7 +30,8 @@ export interface CacheReport {
 
 const textOfContent = (c: ChatMessage['content']): string =>
   typeof c === 'string' ? c : Array.isArray(c) ? c.map((p: any) => (typeof p === 'string' ? p : p?.text ?? '')).join('') : '';
-const reprOf = (c: ChatMessage['content'] | null): string | null => (c === null ? null : typeof c === 'string' ? c : JSON.stringify(c));
+/** Text recorded for a history message (the input mark is not part of what is sent). */
+const reprOf = (c: ChatMessage['content'] | null): string | null => (c === null ? null : (typeof c === 'string' ? c : JSON.stringify(c)).replaceAll(INPUT_MARK, ''));
 
 const hasMarker = (s: unknown) => typeof s === 'string' && s.includes('⟦') && new RegExp(MARK_RE.source).test(s);
 

@@ -15,6 +15,7 @@ import { keywordTexts } from '@/store/user-modules';
 import { detachRegeneratingSidecar } from '@/store/sidecar';
 import { cacheState, currentChatKey } from '@/store/cache-state';
 import { markerOf, messageKey, stickyRewrite } from './cache';
+import { markInput } from './input-shaping';
 
 export async function advancedPresetInterceptor(chat: STMessage[], _contextSize: number, _abort: (immediately: boolean) => void, type?: string): Promise<void> {
   registry.setPending(null);
@@ -53,14 +54,34 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
   };
   // Cache optimization: hand ST the sticky rendering with a marker; PROMPT_READY picks the final one.
   let sticky: GenerationContext['sticky'];
+  let out: STMessage[];
+  /** Position of the current input in `out` and the renderings it may carry (input shaping). */
+  let inputAt = -1;
+  let inputTexts: string[] = [];
   if (config.cache?.enabled) {
     const chatKey = currentChatKey();
     const rw = stickyRewrite(chat, rewriteOptions, cacheState(chatKey)?.modes, (i) => messageKey(chat[i]!, realIndexOf[i] ?? i));
-    chat.splice(0, chat.length, ...rw.out.map(({ item, entry }) => (entry === undefined ? item : { ...item, mes: item.mes + markerOf(entry) }) as STMessage));
+    out = rw.out.map(({ item, entry }) => (entry === undefined ? item : { ...item, mes: item.mes + markerOf(entry) }) as STMessage);
+    inputAt = currentInput >= 0 ? rw.out.findIndex((r) => r.index === currentInput) : -1;
+    if (inputAt >= 0) {
+      const r = rw.out[inputAt]!;
+      const e = r.entry === undefined ? undefined : rw.entries[r.entry];
+      inputTexts = e ? [e.given, e.sticky, e.fresh].filter((x): x is string => typeof x === 'string') : [r.item.mes];
+    }
     sticky = { chat: chatKey, entries: rw.entries, omitted: rw.omitted };
   } else {
-    chat.splice(0, chat.length, ...(rewriteHistory(chat, rewriteOptions) as STMessage[]));
+    out = rewriteHistory(chat, rewriteOptions) as STMessage[];
+    const orig = currentInput >= 0 ? chat[currentInput]! : undefined;
+    inputAt = orig ? out.findLastIndex((m) => m === orig || (m.is_user && m.send_date === orig.send_date && m.name === orig.name)) : -1;
+    if (inputAt >= 0) inputTexts = [out[inputAt]!.mes];
   }
+  // Input shaping (I-130): mark the user message the history ends with; PROMPT_READY finds it again.
+  let shapingInput: GenerationContext['input'];
+  if (preset.inputShaping && inputAt >= 0 && inputTexts.some((x) => x.trim())) {
+    out[inputAt] = { ...out[inputAt]!, mes: markInput(out[inputAt]!.mes) };
+    shapingInput = { texts: inputTexts };
+  }
+  chat.splice(0, chat.length, ...out);
 
   const ctx: GenerationContext = {
     id: newGenId(),
@@ -79,6 +100,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     continueFrom: stType === 'continue' ? chat[last]?.mes : undefined,
     keywords,
     sticky,
+    input: shapingInput,
     createdAt: Date.now(),
     warnings: [],
   };
