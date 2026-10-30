@@ -21,3 +21,4 @@ export * from './annotations';
 export * from './template';
 export * from './preset-user-modules';
 export * from './params';
+export * from './input-shaping';
