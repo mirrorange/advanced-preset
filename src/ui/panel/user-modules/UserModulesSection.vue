@@ -137,7 +137,7 @@ const endDrag = () => { dragging.value = null; };
       </div>
     </div>
     <button v-else-if="hasPoints && !picking" type="button" class="um-new" @click="create"><Plus />{{ t('um.new') }}</button>
-    <div v-else class="faint small">{{ t('um.noPoints') }}</div>
+    <div v-else-if="!hasPoints" class="faint small">{{ t('um.noPoints') }}</div>
     <input ref="fileInput" type="file" accept=".json,application/json" hidden @change="importFile" />
   </Section>
 </template>
