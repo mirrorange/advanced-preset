@@ -10,7 +10,7 @@ AP 宏写作 `{{ap::名称::参数…}}`，参数用 `::` 分隔（两侧空白�
 | --- | --- |
 | `{{ap::name::<actor>}}` | 角色显示名（配置 `identity.names` 覆盖优先） |
 | `{{ap::prefix::<actor>}}` | 角色前缀（配置 `identity.prefixes` → `actors.<id>.prefix` → `名字: `） |
-| `{{ap::param::<id>}}` | 参数文本（未设置时走 `fallback` → `unset`；选项取 `text`），见 [manifest.md](manifest.md#参数-params) |
+| `{{ap::param::<id>}}` | 参数文本（未设置时走 `fallback` → `unset`；选项取 `text`；列表参数为用 `separator` 连接的各项），见 [manifest.md](manifest.md#参数-params) |
 | `{{ap::lang}}` | 语言：有 `language` 参数且有值时为其文本，否则为 `the language used in the story so far` |
 | `{{ap::structure::<id>}}` | 结构的格式说明：对话式为 `formatPrompt.tag`，指令式为 `formatPrompt.field` |
 | `{{ap::structure::<id>::last}}` | 仅自定义结构：聊天中最近一次非空的值（`kv` 形式为 JSON） |

@@ -6,7 +6,7 @@
 ap build   [dir] [--out dist] [--strict]
 ap check   [dir] [--strict]
 ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
-ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
+ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed] [--param id=value …]
                  [--enable a,b] [--disable c] [--user-modules file]
                  [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
 ap init    <dir> [--id x] [--name "My Preset"] [--author me]
@@ -76,6 +76,7 @@ warn  preset.yaml:41 groups: module `x` has no group
 | `--meta pure` | 模拟纯元指令：来源 `task`，使用任务工作流 |
 | `--meta mixed` | 模拟混合元指令：来源 `story` |
 | `--enable a,b` / `--disable c` | 打开 / 关闭模组（逗号分隔的 id） |
+| `--param id=value` | 设置参数值（可重复）。数字参数须为数字；列表参数写逗号分隔的项（`words=闪过,一丝`）、JSON 数组（`'words=["a, b","c"]'`，项中含逗号时使用），或 `words=` 表示空列表 |
 | `--user-modules <file>` | 合并用户模组文件（[user-modules.md](user-modules.md#导入导出格式)） |
 | `--module-templates <ids>` | 把模组模板当作新建的用户模组合并（逗号分隔的 id，`all` 为全部），排在 `--user-modules` 之后（[user-modules.md](user-modules.md#模组模板-module-templates)） |
 | `--lang <lang>` | 与 `--module-templates` 一起使用：按该面板语言选用模板的翻译 |
@@ -90,7 +91,7 @@ warn  preset.yaml:41 groups: module `x` has no group
 - 运行时数据为空：记忆、总结、最近元指令、聊天文本；`memory.*`、`recap.present`、`chat.group`、`meta.recent` 为假；用户模组的关键词规则看到空文本；
 - 元指令文本为占位符 `(meta text)`；`meta.task` 为 `null`。
 
-常用的预览矩阵：每种传输方式各一次；`--meta pure`；每个推荐配置；关键模组开 / 关。
+常用的预览矩阵：每种传输方式各一次；`--meta pure`；每个推荐配置；关键模组开 / 关；关键参数设置 / 未设置（`--param`）。
 
 ## ap init
 

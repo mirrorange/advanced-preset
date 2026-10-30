@@ -91,7 +91,7 @@ insertionPoints:
 
 | `kind` | 字段 | 说明 |
 | --- | --- | --- |
-| `var` | `path`、`op`、`value` | 比较条件变量（[expressions.md](expressions.md)）。`op`：`on`（为真）、`off`（为假）、`==` `!=` `>` `>=` `<` `<=`（与 `value` 比较）、`in` / `notIn`（`value` 为数组） |
+| `var` | `path`、`op`、`value` | 比较条件变量（[expressions.md](expressions.md)）。`op`：`on`（为真）、`off`（为假）、`==` `!=` `>` `>=` `<` `<=`（与 `value` 比较）、`in` / `notIn`（`value` 为数组）。列表参数用 `on`（有内容）/ `off`（为空） |
 | `keyword` | `target`、`depth`、`words`、`regex`、`op` | 在本次输入（`input`）或最近 `depth` 条消息（`recent`，默认 3，含本次输入）中查找词语。默认不区分大小写的子串匹配；`regex: true` 时每个词是正则（不区分大小写）。`op`：`any`（出现任一）或 `none`（都不出现） |
 | `expr` | `source` | 原始条件表达式，语法错误时永不触发 |
 

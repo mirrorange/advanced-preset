@@ -56,7 +56,7 @@ Before writing, answer these <%- qs.length %> questions:
 | 名称 | 内容 |
 | --- | --- |
 | `transport` `style` `workflow` | 当前传输方式、写法、工作流 id |
-| `gen` `meta` `modules` `params` `flags` `features` `stages` `chat` `memory` `recap` | 与[条件变量](expressions.md#条件变量)相同的对象，如 `gen.type`、`params.length`、`modules["mode-preface"]`、`stages.review` |
+| `gen` `meta` `modules` `params` `flags` `features` `stages` `chat` `memory` `recap` | 与[条件变量](expressions.md#条件变量)相同的对象，如 `gen.type`、`params.length`、`modules["mode-preface"]`、`stages.review`；列表参数是字符串数组 |
 | `vars` | 构建变量：字符串变量是字符串，列表是数组，字典是对象（键 → 值），见 [build-variables.md](build-variables.md) |
 | `sampling` | 当前配置的 [`sampling`](configuration.md#sampling)（`temperature`、`top_p` 等；配置中没有的键不存在） |
 | `macro(name, ...args)` | 展开一个 AP 宏，例如 `macro("param", "length")` 等于 `{{ap::param::length}}`；未知宏返回空字符串 |
@@ -116,6 +116,17 @@ Before writing, answer these <%- qs.length %> questions:
 <!-- @template -->
 Aim for <%- Math.round(params.length * 0.9) %>–<%- Math.round(params.length * 1.1) %> words.
 <!-- @end -->
+<!-- @end -->
+```
+
+合并内置项（构建变量）与用户填写的[列表参数](manifest.md#列表参数-type-list)，去重后逐项列出；全部为空时不输出任何内容（空块会被丢弃）：
+
+```markdown
+<!-- @template -->
+<%_ const words = [...new Set([...vars.bannedWords, ...params.bannedWords])]; _%>
+<%_ if (words.length) { _%>
+Never use these words: <%- words.join(", ") %>
+<%_ } _%>
 <!-- @end -->
 ```
 
