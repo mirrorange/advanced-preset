@@ -1,7 +1,7 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, localizeModuleTemplate, moduleTemplates, userModuleFromTemplate, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
-  type APreset, type Transport, type UserModule,
+  TRANSPORTS, assemble, normalizeList, localizeModuleTemplate, moduleTemplates, userModuleFromTemplate, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  type APreset, type ParamValue, type Transport, type UserModule,
 } from '@advanced-preset/protocol';
 
 export interface PreviewOptions {
@@ -10,6 +10,8 @@ export interface PreviewOptions {
   config?: string;
   meta?: 'pure' | 'mixed';
   modules?: Record<string, boolean>;
+  /** Param values set on top of the configuration (`--param id=value`). */
+  params?: Record<string, ParamValue>;
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
   json?: boolean;
@@ -28,11 +30,39 @@ export function templateModules(preset: APreset, ids: string[], lang?: string): 
   return picked.map((t) => userModuleFromTemplate(localizeModuleTemplate(t!, lang, labels(t!.id)), `tpl-${t!.id}`));
 }
 
+/**
+ * `--param id=value`: numbers for number params; for list params a JSON array
+ * (`'words=["a","b"]'`) or comma-separated items (`words=a,b`), `words=` for an empty list.
+ * Returns an error message for unknown params or malformed values.
+ */
+export function parseParamArg(preset: APreset, arg: string): { id: string; value: ParamValue } | string {
+  const eq = arg.indexOf('=');
+  if (eq <= 0) return `--param expects id=value, got \`${arg}\``;
+  const id = arg.slice(0, eq).trim();
+  const raw = arg.slice(eq + 1);
+  const decl = preset.params.find((p) => p.id === id);
+  if (!decl) return `unknown param \`${id}\` (have: ${preset.params.map((p) => p.id).join(', ') || 'none'})`;
+  if (decl.type === 'number') {
+    const n = Number(raw);
+    return raw.trim() !== '' && Number.isFinite(n) ? { id, value: n } : `--param ${id}: expected a number, got \`${raw}\``;
+  }
+  if (decl.type !== 'list') return { id, value: raw };
+  if (raw.trim().startsWith('[')) {
+    try {
+      const v: unknown = JSON.parse(raw);
+      if (Array.isArray(v) && v.every((x) => typeof x === 'string')) return { id, value: normalizeList(v) };
+    } catch { /* reported below */ }
+    return `--param ${id}: expected a JSON array of strings, got \`${raw}\``;
+  }
+  return { id, value: normalizeList(raw.split(',')) };
+}
+
 export function preview(source: APreset, o: PreviewOptions): string {
   const { preset, skipped } = o.userModules ? withUserModules(source, o.userModules) : { preset: source, skipped: [] };
   const config = resolveConfiguration(preset, o.config ?? preset.defaultConfiguration, {
     connection: { ...(o.transport ? { transport: o.transport as Transport } : {}), ...(o.workflow ? { workflow: o.workflow } : {}) },
     modules: o.modules,
+    params: o.params,
   });
   if (!TRANSPORTS.includes(config.connection.transport)) throw new Error(`unknown transport ${config.connection.transport}`);
   const pure = o.meta === 'pure';

@@ -753,3 +753,50 @@ ok
     expect(build(t).diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/never read/);
   });
 });
+
+describe('list params', () => {
+  const withParams = (params: string, extra = '') => tree({
+    'preset.yaml': MANIFEST.replace('params:\n  - { id: language, type: text, label: Language, unset: the story language }', `params:\n  - { id: language, type: text, label: Language, unset: the story language }\n${params}`) + extra,
+  });
+  const LIST = '  - { id: banned, type: list, label: Banned, default: [" a ", a, b], separator: " / " }';
+
+  it('compiles list params, normalizes defaults and checks the AP version', () => {
+    const { preset, diag } = build(withParams(LIST, 'configurationDefaults:\n  params: { banned: [x, y, x] }\n'));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.params.find((p) => p.id === 'banned')).toEqual({ id: 'banned', type: 'list', label: 'Banned', default: ['a', 'b'], separator: ' / ' });
+    expect(preset!.configurationDefaults.params.banned).toEqual(['x', 'y']);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/list params need Advanced Preset 1\.9\.0/);
+    const ok = build(withParams(LIST, 'minAdvancedPreset: 1.9.0\n'));
+    expect(ok.diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/list params need/);
+  });
+
+  it('reports values of the wrong shape and options that do not apply', () => {
+    const patch = (t: SourceTree, from: string, to: string) => t.set('preset.yaml', t.get('preset.yaml')!.replace(from, to));
+    const { diag } = build(patch(withParams(
+      '  - { id: banned, type: list, label: Banned, default: a, options: [x] }\n  - { id: n, type: number, label: N, default: "3", separator: "," }',
+      'configurationDefaults:\n  params: { language: [x] }\n',
+    ), 'diff: { connection: { transport: prefill } }', 'diff: { params: { banned: [1] } }'));
+    const errors = diag.errors.map((e) => e.message).join('\n');
+    expect(errors).toMatch(/default of a list param must be a list of strings/);
+    expect(errors).toMatch(/default of a number param must be a number/);
+    expect(errors).toMatch(/configurationDefaults\.params\.language: a text param needs a string or number/);
+    expect(errors).toMatch(/configurations\[0\]\.diff\.params\.banned: a list param needs a list of strings/);
+    const warnings = diag.warnings.map((w) => w.message).join('\n');
+    expect(warnings).toMatch(/`options` does not apply to list params/);
+    expect(warnings).toMatch(/`separator` only applies to list params/);
+  });
+
+  it('sets params in previews with --param', async () => {
+    const { parseParamArg } = await import('../src/preview');
+    const { preset } = build(withParams(LIST + '\n  - { id: n, type: number, label: N }'));
+    expect(parseParamArg(preset!, 'banned=x, y ,x')).toEqual({ id: 'banned', value: ['x', 'y'] });
+    expect(parseParamArg(preset!, 'banned=["a, b","c"]')).toEqual({ id: 'banned', value: ['a, b', 'c'] });
+    expect(parseParamArg(preset!, 'banned=')).toEqual({ id: 'banned', value: [] });
+    expect(parseParamArg(preset!, 'n=12')).toEqual({ id: 'n', value: 12 });
+    expect(parseParamArg(preset!, 'language=English')).toEqual({ id: 'language', value: 'English' });
+    expect(parseParamArg(preset!, 'n=x')).toMatch(/expected a number/);
+    expect(parseParamArg(preset!, 'banned=[1]')).toMatch(/JSON array of strings/);
+    expect(parseParamArg(preset!, 'nope=1')).toMatch(/unknown param `nope`/);
+    expect(parseParamArg(preset!, 'banned')).toMatch(/expects id=value/);
+  });
+});
