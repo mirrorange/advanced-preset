@@ -210,7 +210,11 @@ function shapeInput(ctx: GenerationContext, final: ChatMessage[], from: number, 
   if (!shaping) return undefined;
   const text = loc?.text ?? '';
   if (ctx.inputShaped && !loc) ctx.warnings.push('input shaping: the input message changed after the cache step, sent as is');
-  if (loc) {
+  const hasSlot = (m: ChatMessage) => (typeof m.content === 'string' ? m.content.includes(INPUT_SLOT) : Array.isArray(m.content) && (m.content as any[]).some((p) => typeof p?.text === 'string' && p.text.includes(INPUT_SLOT)));
+  // extract: only take the input out when something puts it back, so it is never lost.
+  const placed = shaping.mode !== 'extract' || final.some(hasSlot);
+  if (loc && !placed) ctx.warnings.push('input shaping: {{ap::input::text}} is not in the prompt, the input was left in the history');
+  if (loc && placed) {
     const assembly = ctx.assembly;
     applyInput(final, loc, shaping, (s) => st().substituteParams(assembly ? assembly.expand(s) : s));
   }
@@ -224,7 +228,7 @@ function shapeInput(ctx: GenerationContext, final: ChatMessage[], from: number, 
     const assembly = ctx.assembly;
     if (assembly) { const expand = assembly.expand; assembly.expand = (s) => fill(expand(s)); }
   }
-  return { mode: shaping.mode, shaped: Boolean(loc), chars: text.length };
+  return { mode: shaping.mode, shaped: Boolean(loc && placed), chars: text.length };
 }
 
 function renderPrefill(ctx: GenerationContext, list: ChatMessage[], historyAt: number): ChatMessage[] {
@@ -340,6 +344,12 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
     snapshot.regions.push({ id, messages: msgs.map((x) => ({ role: x.role, chars: textOf(x.content).length, content: textOf(x.content) })) });
     final.push(...msgs);
     if (id === preset.anchors.historyStart) historyAt = final.length;
+  }
+
+  // Regions with output whose anchor is not in ST's prompt (outdated Carrier, prompt switched off …).
+  const anchored = new Set(list.map((m) => m.__anchor).filter(Boolean));
+  for (const [id, msgs] of Object.entries(assembly.regions)) {
+    if (!anchored.has(id) && msgs.some((r) => r.content.trim())) ctx.warnings.push(`region ${id}: its anchor is not in the prompt (Carrier outdated or prompt disabled?), content dropped`);
   }
 
   snapshot.cache = applySticky(ctx, final, historyAt, historyEnd < 0 ? final.length : historyEnd);

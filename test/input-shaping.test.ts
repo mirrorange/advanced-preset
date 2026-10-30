@@ -270,4 +270,21 @@ describe('Petals: the input moves to the input region', () => {
     expect(text).toContain('<input>\\ngo north\\n</input>');
     expect(text).not.toContain(INPUT_SLOT);
   });
+
+  it('a Carrier without the input anchor: the input stays in the history (never lost)', async () => {
+    state.preset = petals;
+    state.config = resolveConfiguration(petals, 'other', { connection: { transport: 'structured', workflow: 'linear' } });
+    realChat.splice(0, realChat.length, user(1), ai(1), user(2, 'go north'));
+    const copy = realChat.map((m) => ({ ...m }));
+    await advancedPresetInterceptor(copy, 0, () => {}, 'normal');
+    const prompt = stPrompt(petals, copy).filter((m) => m.content !== '⟦ap:region:input⟧');
+    await onPromptReady({ chat: prompt, dryRun: false });
+    const snap = assembler.lastSnapshot!;
+    expect(prompt.some((m) => m.role === 'user' && m.content === 'go north')).toBe(true);
+    expect(JSON.stringify(prompt)).not.toContain(INPUT_SLOT);
+    expect(JSON.stringify(prompt)).not.toContain(INPUT_MARK);
+    expect(snap.input?.shaped).toBe(false);
+    expect(snap.warnings.some((w) => w.startsWith('region input: its anchor is not in the prompt'))).toBe(true);
+    expect(snap.warnings.some((w) => w.includes('{{ap::input::text}} is not in the prompt'))).toBe(true);
+  });
 });
