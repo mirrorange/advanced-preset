@@ -245,7 +245,7 @@
   "um.bundled.keepAll": "全部保留我的",
   "um.bundled.added": "已添加预设提供的 {n} 个模组：{names}",
   "um.bundled.exportTitle": "导出「{name}」",
-  "um.bundled.exportBody": "选择要随预设一起导出的「我的模组」。对方安装预设时，这些模组会加入他们的「我的模组」。",
+  "um.bundled.exportBody": "选择要随预设一起导出的自定义模组。对方安装预设时，这些模组会加入他们的「我的模组」。",
   "um.bundled.disabled": "（已关闭）",
   "um.bundled.export": "导出",
   "um.content": "插入内容",

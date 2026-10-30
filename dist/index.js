@@ -6493,7 +6493,7 @@ var vd = (e) => od.has(e), yd = {
 		"um.bundled.keepAll": "全部保留我的",
 		"um.bundled.added": "已添加预设提供的 {n} 个模组：{names}",
 		"um.bundled.exportTitle": "导出「{name}」",
-		"um.bundled.exportBody": "选择要随预设一起导出的「我的模组」。对方安装预设时，这些模组会加入他们的「我的模组」。",
+		"um.bundled.exportBody": "选择要随预设一起导出的自定义模组。对方安装预设时，这些模组会加入他们的「我的模组」。",
 		"um.bundled.disabled": "（已关闭）",
 		"um.bundled.export": "导出",
 		"um.content": "插入内容",
@@ -9698,7 +9698,7 @@ function Og(e) {
 }
 async function kg() {
 	let e = await Dg();
-	e && e !== "235d7f351ffd2e26" && sessionStorage.getItem(Eg) !== e && Og(e);
+	e && e !== "11b32a2659a83313" && sessionStorage.getItem(Eg) !== e && Og(e);
 }
 async function Ag() {
 	await kg();
@@ -9707,7 +9707,7 @@ async function jg() {
 	let e = o().replace(/^third-party\//, ""), t = await Mg(e, !1);
 	if (t.status === 404 && (t = await Mg(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Dg();
-	return r && r !== "235d7f351ffd2e26" ? (Og(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "11b32a2659a83313" ? (Og(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Mg = (t, n) => g("/api/extensions/update", {
 	method: "POST",
@@ -15759,7 +15759,7 @@ var rw = ["aria-label"], iw = { class: "um-picker-head" }, aw = { class: "small 
 				"icon",
 				"help"
 			]),
-			H("div", yD, "Advanced Preset " + A(N("1.9.0")) + " · " + A(N("235d7f351ffd2e26")), 1)
+			H("div", yD, "Advanced Preset " + A(N("1.9.0")) + " · " + A(N("11b32a2659a83313")), 1)
 		], 64));
 	}
 }), xD = ["aria-label"], SD = { class: "panel-head" }, CD = { class: "panel-logo" }, wD = { class: "grow" }, TD = { class: "panel-title ellipsis" }, ED = { class: "panel-sub ellipsis" }, DD = {
@@ -15930,7 +15930,7 @@ function WD() {
 //#region src/index.ts
 var GD = {
 	version: "1.9.0",
-	buildId: "235d7f351ffd2e26",
+	buildId: "11b32a2659a83313",
 	nextGeneration: (e) => kf(e),
 	listPresets: () => ud().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -15984,7 +15984,7 @@ async function JD() {
 	};
 	t.on(n.APP_READY, () => void a()), WD(), zp("init", {
 		version: "1.9.0",
-		build: "235d7f351ffd2e26",
+		build: "11b32a2659a83313",
 		enabled: K().enabled
 	});
 }
