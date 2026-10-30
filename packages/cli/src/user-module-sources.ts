@@ -1,30 +1,36 @@
 /**
- * `module-templates/*.md` → ModuleTemplate[]. A template is an example user module: its text is
- * kept *raw* (author comments, directives and macros included) because the user edits it in the
- * panel; it is only compiled here to report errors and to feed `ap check`.
+ * User modules shipped by a preset → UserModuleSource[]:
  *
- *   module-templates/<id>.md          the template
- *   module-templates/<id>.<lang>.md   a whole translation, used when the panel language is <lang>
+ *   user-modules/<id>.md                      bundled user modules (installed into the user's list)
+ *   user-module-templates/<id>.md             templates (offered when creating a module)
+ *   <dir>/<id>.<lang>.md                      a whole translation, used when the panel language is <lang>
  *
- * Frontmatter: `name`, `description`, `point` / `role` (first entry), `vars`, `when` or `trigger`.
- * Further entries start with `<!-- @entry point=<id> role=<role> -->` on a line of its own.
+ * Both are user modules written as files, so their text is kept *raw* (author comments, directives
+ * and macros included) because the user edits it in the panel; it is only compiled here to report
+ * errors and to feed `ap check`.
+ *
+ * Frontmatter: `name`, `point` / `role` (first entry), `vars`, `when` or `trigger`; `enabled`
+ * (bundled modules) and `description` (templates). Further entries start with
+ * `<!-- @entry point=<id> role=<role> -->` on a line of its own.
  */
 import {
   compileTrigger, normalizeUserModule, parseAttributes, ruleError, tokenizeDirectives,
-  type BuildVarUpdate, type Content, type Expr, type InsertionPoint, type ModuleTemplate, type ModuleTemplateBody,
-  type ModuleTemplateEntry, type Role, type Token, type Trigger,
+  type BuildVarUpdate, type Content, type Expr, type InsertionPoint, type Role, type Token, type Trigger,
+  type UserModuleSource, type UserModuleSourceBody, type UserModuleSourceEntry,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
 import { splitFrontmatter } from './markdown';
 import { parse as parseYaml } from 'yaml';
 
-export const MODULE_TEMPLATE_DIR = 'module-templates/';
-const FILE_RE = /^module-templates\/([a-z0-9][a-z0-9-]*)(?:\.([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*))?\.md$/;
+export type SourceKind = 'module' | 'template';
+export const USER_MODULE_DIRS: Record<SourceKind, string> = { module: 'user-modules', template: 'user-module-templates' };
+const NOUN: Record<SourceKind, string> = { module: 'user module', template: 'user module template' };
+const fileRe = (dir: string) => new RegExp(`^${dir}/([a-z0-9][a-z0-9-]*)(?:\\.([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*))?\\.md$`);
 const ROLES: Role[] = ['system', 'user', 'assistant'];
 const ENTRY_RE = /^\s*<!--\s*@entry\b([\s\S]*?)-->\s*$/;
 const FENCE_RE = /^\s*(```|~~~)/;
 
-export interface TemplateContext {
+export interface SourceContext {
   diag: Diagnostics;
   insertionPoints: InsertionPoint[];
   expr: (src: unknown, where: Where) => Expr | undefined;
@@ -98,7 +104,7 @@ export function splitTemplateBody(body: string, firstLine: number): RawPart[] {
   });
 }
 
-function parseTrigger(fm: Record<string, unknown>, ctx: TemplateContext, where: Where): Trigger {
+function parseTrigger(fm: Record<string, unknown>, ctx: SourceContext, where: Where): Trigger {
   const { diag } = ctx;
   if (fm.when !== undefined && fm.trigger !== undefined) diag.error('use either `when` or `trigger`, not both', where);
   let trigger: Trigger = { match: 'all', rules: [] };
@@ -121,8 +127,11 @@ function parseTrigger(fm: Record<string, unknown>, ctx: TemplateContext, where: 
   return trigger;
 }
 
-function compileBody(file: string, src: string, ctx: TemplateContext, id: string): ModuleTemplateBody | undefined {
+interface Compiled extends UserModuleSourceBody { enabled?: boolean }
+
+function compileBody(file: string, src: string, ctx: SourceContext, id: string, kind: SourceKind, translation: boolean): Compiled | undefined {
   const { diag } = ctx;
+  const noun = NOUN[kind];
   const { yaml, body, bodyLine } = splitFrontmatter(src);
   const where = { file, line: 1 };
   let fm: Record<string, unknown> = {};
@@ -136,9 +145,9 @@ function compileBody(file: string, src: string, ctx: TemplateContext, id: string
       return undefined;
     }
   }
-  if (fm.id !== undefined && String(fm.id) !== id) diag.error(`module template id comes from the file name (\`${id}\`)`, { ...where, path: 'id' });
+  if (fm.id !== undefined && String(fm.id) !== id) diag.error(`${noun} id comes from the file name (\`${id}\`)`, { ...where, path: 'id' });
 
-  const entries: ModuleTemplateEntry[] = [];
+  const entries: UserModuleSourceEntry[] = [];
   const parts = splitTemplateBody(body, bodyLine);
   parts.forEach((part, i) => {
     const head = i === 0 ? { point: fm.point, role: fm.role } : part.attrs ?? {};
@@ -151,52 +160,63 @@ function compileBody(file: string, src: string, ctx: TemplateContext, id: string
     const point = String(head.point ?? '');
     if (!point) return diag.error('@entry needs `point=<insertion point>`', at);
     if (!ctx.insertionPoints.some((p) => p.id === point)) diag.error(`unknown insertion point \`${point}\``, at);
-    const entry: ModuleTemplateEntry = { point, text: part.text };
+    const entry: UserModuleSourceEntry = { point, text: part.text };
     if (head.role !== undefined) {
       if (!ROLES.includes(head.role as Role)) diag.error(`role must be ${ROLES.join(' | ')}`, at);
       else entry.role = head.role as Role;
     }
-    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== 'point' && k !== 'role') diag.warn(`unknown @entry attribute \`${k}\` in a module template`, at);
+    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== 'point' && k !== 'role') diag.warn(`unknown @entry attribute \`${k}\` in a ${noun}`, at);
     // Compiled only for diagnostics and `ap check`; the artifact keeps the raw text.
     const [chunk] = tokenizeDirectives(part.text, [], part.line, (message, line) => diag.error(message, { file, ...(line !== undefined ? { line } : {}) }));
     ctx.content(chunk!.tokens, { file, line: part.line });
     entries.push(entry);
   });
-  if (!entries.length) diag.warn('module template has no entries (set `point` in the frontmatter or add `@entry point=…`)', where);
+  if (!entries.length) diag.warn(`${noun} has no entries (set \`point\` in the frontmatter or add \`@entry point=…\`)`, where);
 
   const name = fm.name === undefined ? id : String(fm.name);
-  const out: ModuleTemplateBody = {
+  const out: Compiled = {
     name,
-    ...(fm.description !== undefined ? { description: String(fm.description).trim() } : {}),
+    ...(fm.description !== undefined && kind === 'template' ? { description: String(fm.description).trim() } : {}),
     entries,
     vars: ctx.varUpdates(fm.vars, { ...where, path: 'vars' }),
     trigger: parseTrigger(fm, ctx, { ...where, path: fm.trigger !== undefined ? 'trigger' : 'when' }),
   };
-  const known = new Set(['id', 'name', 'description', 'point', 'role', 'vars', 'when', 'trigger']);
-  for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a module template`, { ...where, path: k });
+  if (fm.description !== undefined && kind === 'module') diag.warn('`description` is only shown for user module templates (use an author comment `<!--# … -->` instead)', { ...where, path: 'description' });
+  if (fm.enabled !== undefined) {
+    if (kind === 'template') diag.warn('`enabled` only applies to bundled user modules (a module made from a template starts enabled)', { ...where, path: 'enabled' });
+    else if (translation) diag.warn('`enabled` comes from the source file; it is ignored in translations', { ...where, path: 'enabled' });
+    else if (typeof fm.enabled !== 'boolean') diag.error('`enabled` must be true or false', { ...where, path: 'enabled' });
+    else out.enabled = fm.enabled;
+  }
+  const known = new Set(['id', 'name', 'description', 'enabled', 'point', 'role', 'vars', 'when', 'trigger']);
+  for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a ${noun}`, { ...where, path: k });
   return out;
 }
 
-/** Compile every module template (sources first, then translations), sorted by file path. */
-export function compileModuleTemplates(tree: Map<string, string>, ctx: TemplateContext): ModuleTemplate[] {
-  const files = [...tree.keys()].filter((p) => p.startsWith(MODULE_TEMPLATE_DIR)).sort();
-  const templates: ModuleTemplate[] = [];
+/** Compile the bundled user modules or the templates (sources first, then translations), sorted by file path. */
+export function compileUserModuleSources(tree: Map<string, string>, ctx: SourceContext, kind: SourceKind): UserModuleSource[] {
+  const dir = USER_MODULE_DIRS[kind];
+  const re = fileRe(dir);
+  const files = [...tree.keys()].filter((p) => p.startsWith(`${dir}/`)).sort();
+  const sources: UserModuleSource[] = [];
   const translations: { file: string; id: string; lang: string }[] = [];
   for (const file of files) {
-    const m = FILE_RE.exec(file);
+    const m = re.exec(file);
     if (!m) {
-      ctx.diag.error('module template files are `module-templates/<id>.md` or `<id>.<lang>.md` (id in lower-case kebab-case)', { file });
+      ctx.diag.error(`${NOUN[kind]} files are \`${dir}/<id>.md\` or \`<id>.<lang>.md\` (id in lower-case kebab-case)`, { file });
       continue;
     }
     if (m[2]) { translations.push({ file, id: m[1]!, lang: m[2].toLowerCase() }); continue; }
-    const body = compileBody(file, tree.get(file)!, ctx, m[1]!);
-    if (body) templates.push({ id: m[1]!, ...body });
+    const body = compileBody(file, tree.get(file)!, ctx, m[1]!, kind, false);
+    if (!body) continue;
+    const { enabled, ...rest } = body;
+    sources.push({ id: m[1]!, ...(enabled === false ? { enabled } : {}), ...rest });
   }
   for (const { file, id, lang } of translations) {
-    const tpl = templates.find((x) => x.id === id);
-    if (!tpl) { ctx.diag.error(`translation of unknown module template \`${id}\` (add module-templates/${id}.md)`, { file }); continue; }
-    const body = compileBody(file, tree.get(file)!, ctx, id);
-    if (body) (tpl.locales ??= {})[lang] = body;
+    const src = sources.find((x) => x.id === id);
+    if (!src) { ctx.diag.error(`translation of unknown ${NOUN[kind]} \`${id}\` (add ${dir}/${id}.md)`, { file }); continue; }
+    const body = compileBody(file, tree.get(file)!, ctx, id, kind, true);
+    if (body) { const { enabled: _ignored, ...rest } = body; (src.locales ??= {})[lang] = rest; }
   }
-  return templates;
+  return sources;
 }

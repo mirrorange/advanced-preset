@@ -5,7 +5,7 @@ import { compile, type CompileResult, type SourceTree } from './compile';
 import { validate } from './validate';
 import { FRAGMENT_RE } from './manifest';
 
-const SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
+const SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 
 export function isSourcePath(rel: string): boolean {
   const p = rel.split(sep).join('/');

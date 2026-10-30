@@ -5,7 +5,8 @@
  *   manifest/**\/*.yaml   manifest fragments, merged into preset.yaml (see manifest.ts)
  *   modules/**\/*.md      one module per file (frontmatter + entries)
  *   workflows/*.md       one workflow per file (frontmatter + sections)
- *   module-templates/*.md  example user modules (raw text; see module-templates.ts)
+ *   user-modules/*.md    user modules installed with the preset (raw text; see user-module-sources.ts)
+ *   user-module-templates/*.md  example user modules offered when creating one (same format)
  *   locales/<lang>.yaml  panel strings
  *
  * Compilation is pure over a `SourceTree` (path → text) so it can be tested without a disk.
@@ -26,7 +27,7 @@ import {
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
-import { compileModuleTemplates } from './module-templates';
+import { compileUserModuleSources, type SourceContext } from './user-module-sources';
 import { MANIFEST_FILE, loadManifest } from './manifest';
 
 export type SourceTree = Map<string, string>;
@@ -516,15 +517,17 @@ export function compile(tree: SourceTree): CompileResult {
   const regionIndex = (rid: string) => regions.findIndex((r) => r.id === rid);
   entries.sort((a, b) => regionIndex(a.region) - regionIndex(b.region) || a.order - b.order || rank(a.module) - rank(b.module));
 
-  // ── module templates (example user modules) ─────────────────────────────────
-  const moduleTemplates = compileModuleTemplates(tree, {
+  // ── user modules shipped with the preset (bundled modules and templates) ─────
+  const sourceCtx: SourceContext = {
     diag,
     insertionPoints,
     expr,
     content,
     varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
     onExpr: (e, where) => map.exprs.push({ expr: e, where }),
-  });
+  };
+  const userModules = compileUserModuleSources(tree, sourceCtx, 'module');
+  const userModuleTemplates = compileUserModuleSources(tree, sourceCtx, 'template');
 
   // ── workflows ───────────────────────────────────────────────────────────────
   const workflows: Workflow[] = [];
@@ -673,7 +676,8 @@ export function compile(tree: SourceTree): CompileResult {
     modules,
     entries,
     insertionPoints,
-    moduleTemplates,
+    userModules,
+    userModuleTemplates,
     vars,
     workflows,
     structures,

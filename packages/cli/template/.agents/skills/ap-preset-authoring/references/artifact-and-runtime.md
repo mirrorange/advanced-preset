@@ -16,7 +16,7 @@
 | `actors` `narrator` `user` | 角色 |
 | `styles` `plaintextFormat` `contentMarker` `prefillGuide` `historyItemTemplate` `stageHeading` `stop` | 写法与输出格式 |
 | `regions` `anchors` `workflowRegion` | 区域 |
-| `params` `groups` `modules` `entries` `insertionPoints` `moduleTemplates` `vars` | 参数、分组、模组、已排序的条目（条件已编译为 AST）、插入点、模组模板（条目文字为源码原文，翻译在各模板的 `locales` 中）、构建变量 |
+| `params` `groups` `modules` `entries` `insertionPoints` `userModules` `userModuleTemplates` `vars` | 参数、分组、模组、已排序的条目（条件已编译为 AST）、插入点、随预设安装的用户模组与用户模组模板（条目文字为源码原文，翻译在各项的 `locales` 中，见 [user-modules.md](user-modules.md#预设中的用户模组)）、构建变量 |
 | `workflows` `structures` `regex` `meta` `tokenSaving` | 工作流、结构、正则标记、元指令、省 token |
 | `syntheticTurns` `tools` | 工具传输的文案 |
 | `theme` | 主题色 |

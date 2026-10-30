@@ -268,8 +268,8 @@ export function withUserModules(preset: APreset, modules: UserModule[], texts?: 
   return { preset: { ...preset, modules: [...preset.modules, ...extraModules], entries }, skipped };
 }
 
-/** Template sources in user modules (`@template` in entry texts), e.g. to ask for trust on import. */
-export function userModuleTemplates(modules: UserModule[]): string[] {
+/** Template code in user modules (`@template` in entry texts), e.g. to ask for trust on import. */
+export function userModulesCode(modules: UserModule[]): string[] {
   return modules.flatMap((m) => m.entries.flatMap((e) => contentTemplates(compileText(e.text, e.role).content)));
 }
 

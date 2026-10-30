@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Check, CodeXml, Link, LoaderCircle, RefreshCw, Trash2, Upload, Download } from 'lucide-vue-next';
+import { Check, CodeXml, FileDown, Link, LoaderCircle, RefreshCw, Trash2, Upload, Download } from 'lucide-vue-next';
 import { presetTemplates } from '@advanced-preset/protocol';
 import { listPresets, type PresetEntry } from '@/store/presets';
 import { activatePreset } from '@/store/carrier';
@@ -9,6 +9,7 @@ import { toast } from '@/st/host';
 import { presetDescription, presetName, t } from '@/i18n';
 import { installFromFile, installFromUrl, removePreset } from '@/app/install';
 import { isTrustDeclined } from '@/app/trust';
+import { exportPreset } from '@/app/bundled-modules';
 import { updateExtension } from '@/app/updater';
 import { activePreset, refreshActivePreset } from '../../state';
 import IconButton from '../../components/IconButton.vue';
@@ -43,6 +44,7 @@ const importFile = (ev: Event) => {
   (ev.target as HTMLInputElement).value = '';
 };
 const updateFromSource = (e: PresetEntry) => run(`update:${e.preset.id}`, () => installFromUrl(settings().sources[e.preset.id]!), t('presets.updated'));
+const exportFile = (e: PresetEntry) => run(`export:${e.preset.id}`, () => exportPreset(e.preset));
 const remove = (e: PresetEntry) => run(`remove:${e.preset.id}`, () => removePreset(e.preset.id));
 const checkUpdates = () => run('ext', async () => toast('info', (await updateExtension()) === 'current' ? t('update.none') : t('update.reloading')));
 </script>
@@ -77,6 +79,7 @@ const checkUpdates = () => run('ext', async () => toast('info', (await updateExt
         <span v-if="presetDescription(e.preset)" class="small muted preset-desc">{{ presetDescription(e.preset) }}</span>
       </div>
       <div class="row preset-actions" @click.stop>
+        <IconButton :icon="FileDown" :label="t('presets.export')" align="end" small @click="exportFile(e)" />
         <IconButton v-if="e.source === 'installed' && settings().sources[e.preset.id]" :icon="RefreshCw" :label="t('presets.update')" align="end" small @click="updateFromSource(e)" />
         <IconButton v-if="e.source === 'installed'" :icon="Trash2" :label="t('common.delete')" align="end" small danger @click="remove(e)" />
       </div>

@@ -20,7 +20,7 @@
 | [transports.md](transports.md) | 五种传输方式、JSON Schema / 工具生成、`tools` 文案、示范轮次 |
 | [meta-and-tasks.md](meta-and-tasks.md) | 元指令、生成来源、任务工作流、历史改写与省 token |
 | [configuration.md](configuration.md) | 配置层、推荐配置、Carrier、迁移 |
-| [user-modules.md](user-modules.md) | 插入点、用户模组（含导入导出格式）与模组模板 |
+| [user-modules.md](user-modules.md) | 插入点、用户模组（含导入导出格式）、预设携带的用户模组与用户模组模板 |
 | [locales.md](locales.md) | 面板文字翻译 |
 | [assembly.md](assembly.md) | 一次生成的完整组装流程 |
 | [cli.md](cli.md) | `ap` 命令行 |
@@ -34,7 +34,8 @@
 preset.yaml              清单：身份、角色、区域、参数、结构、配置……
 modules/**/*.md          模组：每个文件一个模组（可以放在任意深度的子目录里）
 workflows/*.md           工作流：每个文件一个工作流（只认 workflows/ 下一层）
-module-templates/*.md    模组模板：新建用户模组时可选的示例（可选，只认下一层）
+user-modules/*.md        随预设安装的用户模组（可选，只认下一层）
+user-module-templates/*.md 用户模组模板：新建用户模组时可选的示例（可选，只认下一层）
 locales/<lang>.yaml      面板翻译（可选）
 ```
 

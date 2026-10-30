@@ -3,8 +3,8 @@
  * their keyword rules scan. Merging into the preset happens in the assembler (`withUserModules`).
  */
 import {
-  cloneData, compareVersions, emptyTrigger, migrateUserModules, lostRefs, parseUserModuleFile, userModuleFile, userModuleFromTemplate,
-  type APreset, type KeywordTexts, type ModuleTemplateBody, type UserEntry, type UserModule, type UserModuleFile,
+  cloneData, compareVersions, emptyTrigger, migrateUserModules, lostRefs, parseUserModuleFile, userModuleFile, userModuleFromSource,
+  type APreset, type KeywordTexts, type UserModuleSourceBody, type UserEntry, type UserModule, type UserModuleFile,
 } from '@advanced-preset/protocol';
 import { presetState } from './config';
 import { save } from './settings';
@@ -43,15 +43,15 @@ export function createUserModule(preset: APreset, name: string): UserModule {
 }
 
 /**
- * A new module copied from a preset's module template (already localized). The copy is the user's
- * own: later preset updates do not change it. A name already in the list gets a number.
+ * A new module copied from a preset's user module template (already localized). The copy is the
+ * user's own: later preset updates do not change it. A name already in the list gets a number.
  */
-export function createUserModuleFromTemplate(preset: APreset, body: ModuleTemplateBody): UserModule {
+export function createUserModuleFromTemplate(preset: APreset, body: UserModuleSourceBody): UserModule {
   const list = userModules(preset);
   const names = new Set(list.map((m) => m.name));
   let name = body.name;
   for (let n = 2; names.has(name); n++) name = `${body.name} ${n}`;
-  list.push(userModuleFromTemplate(body, uniqueId(list.map((x) => x.id)), name));
+  list.push(userModuleFromSource(body, uniqueId(list.map((x) => x.id)), { name }));
   save();
   return list[list.length - 1]!;
 }

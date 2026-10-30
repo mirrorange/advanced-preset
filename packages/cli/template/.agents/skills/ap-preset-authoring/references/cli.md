@@ -8,7 +8,8 @@ ap check   [dir] [--strict]
 ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
 ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed] [--param id=value …]
                  [--enable a,b] [--disable c] [--user-modules file]
-                 [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
+                 [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
+                 [--lang zh-cn] [--json] [--out file]
 ap init    <dir> [--id x] [--name "My Preset"] [--author me]
 ap skills  list
 ap skills  install [dir] [--target .agents/skills]
@@ -51,7 +52,7 @@ warn  preset.yaml:41 groups: module `x` has no group
 
 ## ap dev
 
-开发服务器：先构建一次，然后监视源码（`preset.yaml`、`manifest/`、`modules/`、`workflows/`、`module-templates/`、`locales/`），变化后约 120 ms 重新构建并写入 `dist/`。构建失败时继续提供上一次成功的产物。
+开发服务器：先构建一次，然后监视源码（`preset.yaml`、`manifest/`、`modules/`、`workflows/`、`user-modules/`、`user-module-templates/`、`locales/`），变化后约 120 ms 重新构建并写入 `dist/`。构建失败时继续提供上一次成功的产物。
 
 | 端点 | 内容 |
 | --- | --- |
@@ -78,8 +79,9 @@ warn  preset.yaml:41 groups: module `x` has no group
 | `--enable a,b` / `--disable c` | 打开 / 关闭模组（逗号分隔的 id） |
 | `--param id=value` | 设置参数值（可重复）。数字参数须为数字；列表参数写逗号分隔的项（`words=闪过,一丝`）、JSON 数组（`'words=["a, b","c"]'`，项中含逗号时使用），或 `words=` 表示空列表 |
 | `--user-modules <file>` | 合并用户模组文件（[user-modules.md](user-modules.md#导入导出格式)） |
-| `--module-templates <ids>` | 把模组模板当作新建的用户模组合并（逗号分隔的 id，`all` 为全部），排在 `--user-modules` 之后（[user-modules.md](user-modules.md#模组模板-module-templates)） |
-| `--lang <lang>` | 与 `--module-templates` 一起使用：按该面板语言选用模板的翻译 |
+| `--bundled-modules <ids>` | 合并哪些[随预设安装的用户模组](user-modules.md#预设携带的用户模组-user-modules)（逗号分隔的 id，`all` 为全部，`none` 为不合并）；默认按全新安装，合并 `enabled` 不为 `false` 的。它们排在最前 |
+| `--user-module-templates <ids>` | 把[用户模组模板](user-modules.md#用户模组模板-user-module-templates)当作新建的用户模组合并（逗号分隔的 id，`all` 为全部），排在 `--user-modules` 之后 |
+| `--lang <lang>` | 按该面板语言选用随预设安装的用户模组与模板的翻译 |
 | `--json` | 输出 JSON：`vars`、`buildVars`、`skipped`、`modules`、`structures`、`stages`、`regions`，以及 `schema`（structured）或 `tools`（工具传输） |
 | `--out <file>` | 写入文件而不是标准输出 |
 

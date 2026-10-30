@@ -1,7 +1,7 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, normalizeList, localizeModuleTemplate, moduleTemplates, userModuleFromTemplate, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
-  type APreset, type ParamValue, type Transport, type UserModule,
+  TRANSPORTS, assemble, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  type APreset, type ParamValue, type Transport, type UserModule, type UserModuleSource,
 } from '@advanced-preset/protocol';
 
 export interface PreviewOptions {
@@ -17,17 +17,35 @@ export interface PreviewOptions {
   json?: boolean;
 }
 
+function pick(all: UserModuleSource[], ids: string[], noun: string): UserModuleSource[] | string {
+  const unknown = ids.filter((id) => id !== 'all' && id !== 'none' && !all.some((t) => t.id === id));
+  if (unknown.length) return `unknown ${noun} ${unknown.join(', ')} (have: ${all.map((t) => t.id).join(', ') || 'none'})`;
+  if (ids.includes('none')) return [];
+  return ids.includes('all') ? all : ids.map((id) => all.find((t) => t.id === id)!);
+}
+
 /**
- * User modules created from module templates (`ids`, or `all`), as the panel would create them for
- * the UI language `lang`. Returns an error message for unknown ids.
+ * User modules created from user module templates (`ids`, or `all`), as the panel would create them
+ * for the UI language `lang`. Returns an error message for unknown ids.
  */
 export function templateModules(preset: APreset, ids: string[], lang?: string): UserModule[] | string {
-  const all = moduleTemplates(preset);
-  const picked = ids.includes('all') ? all : ids.map((id) => all.find((t) => t.id === id));
-  const unknown = ids.filter((id) => id !== 'all' && !all.some((t) => t.id === id));
-  if (unknown.length) return `unknown module template ${unknown.join(', ')} (have: ${all.map((t) => t.id).join(', ') || 'none'})`;
-  const labels = (id: string) => (lang ? preset.locales[lang.toLowerCase()]?.moduleTemplates?.[id] : undefined);
-  return picked.map((t) => userModuleFromTemplate(localizeModuleTemplate(t!, lang, labels(t!.id)), `tpl-${t!.id}`));
+  const picked = pick(presetUserModuleTemplates(preset), ids, 'user module template');
+  if (typeof picked === 'string') return picked;
+  const labels = (id: string) => (lang ? preset.locales[lang.toLowerCase()]?.userModuleTemplates?.[id] : undefined);
+  return picked.map((t) => userModuleFromSource(localizeUserModuleSource(t, lang, labels(t.id)), `tpl-${t.id}`));
+}
+
+/**
+ * The preset's bundled user modules as a fresh install gets them for the UI language `lang`:
+ * by default those that start enabled; `ids` (or `all`) enables exactly those, `none` none.
+ * Returns an error message for unknown ids.
+ */
+export function bundledModules(preset: APreset, ids?: string[], lang?: string): UserModule[] | string {
+  const all = presetUserModules(preset);
+  const picked = ids ? pick(all, ids, 'bundled user module') : all.filter((m) => m.enabled !== false);
+  if (typeof picked === 'string') return picked;
+  const labels = (id: string) => (lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : undefined);
+  return picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id));
 }
 
 /**
