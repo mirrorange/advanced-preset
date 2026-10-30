@@ -21,7 +21,8 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--param id=value …] [--user-modules file]
+                   [--enable a,b] [--disable c] [--param id=value …] [--input text]
+                   [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
@@ -50,6 +51,7 @@ async function main(argv: string[]): Promise<number> {
       disable: { type: 'string' },
       json: { type: 'boolean' },
       param: { type: 'string', multiple: true },
+      input: { type: 'string' },
       'user-modules': { type: 'string' },
       'bundled-modules': { type: 'string' },
       'user-module-templates': { type: 'string' },
@@ -104,7 +106,7 @@ async function main(argv: string[]): Promise<number> {
         if (typeof picked === 'string') { console.error(picked); return 1; }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, userModules, json: values.json });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);
       return 0;

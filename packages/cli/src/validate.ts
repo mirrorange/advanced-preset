@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
+  INPUT_SHAPING_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -26,6 +26,7 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'memory.hasChat': null,
   'memory.hasGlobal': null,
   'recap.present': null,
+  'input.shaped': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
@@ -81,6 +82,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
 
   // ── macros ──────────────────────────────────────────────────────────────────
   const structureIds = new Set(Object.keys(p.structures));
+  let inputTextUses = 0;
   for (const { text, where } of map.texts) {
     for (const args of listMacros(text)) {
       const [head, ...rest] = args;
@@ -106,7 +108,8 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
           if (a !== 'summary' && a !== 'hint') bad('expected summary | hint');
           break;
         case 'input':
-          if (a !== 'meta') bad('expected meta');
+          if (a !== 'meta' && a !== 'text') bad('expected meta | text');
+          else if (a === 'text') inputTextUses++;
           break;
         case 'memory':
           if (a !== 'chat' && a !== 'global') bad('expected chat | global');
@@ -133,6 +136,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   const REF_RE = /(?<![\w$.])(vars|params|modules|flags|stages)\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*(['"`])([^'"`]+)\3\s*\])/g;
   for (const { source, where } of map.templates) {
     const code = templateCode(source).join('\n');
+    if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -145,6 +149,13 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     const wholeVarUses = [...code.matchAll(/(?<![\w$.])vars(?![\w$])/g)].length;
     if (wholeVarUses > staticVarReads) for (const id of varDecls.keys()) usedVars.add(id);
   }
+
+  // ── input shaping ───────────────────────────────────────────────────────────
+  const shaping = p.inputShaping;
+  if (!shaping && inputTextUses) diag.warn('{{ap::input::text}} is always empty: the preset declares no inputShaping', { file: M, path: 'inputShaping' });
+  if (shaping?.mode === 'extract' && !inputTextUses) diag.warn('inputShaping extracts the input from the history but no prompt uses {{ap::input::text}}: the input would not be sent', { file: M, path: 'inputShaping.mode' });
+  if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
+    diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: 'minAdvancedPreset' });
 
   // ── regions / anchors ───────────────────────────────────────────────────────
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} → unknown region \`${rid}\``, { file: M, path: 'anchors' });

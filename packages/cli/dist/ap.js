@@ -8510,7 +8510,7 @@ function createMacroResolver(input, stages, workflow, buildVars) {
         if (a === "hint") return workflow?.hint ?? "";
         return workflowSummary(stages, (actor) => actorName(preset, config, actor));
       case "input":
-        return data.metaText ?? "";
+        return a === "text" ? vars.input?.shaped ? data.inputText ?? "" : "" : data.metaText ?? "";
       case "memory":
         return JSON.stringify((a === "global" ? data.memory?.global : data.memory?.chat) ?? {}, null, 2);
       case "recap":
@@ -8645,6 +8645,7 @@ function defaultVars(preset, config, over = {}) {
     chat: { group: false },
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },
+    input: { shaped: false },
     ...over
   };
 }
@@ -8906,6 +8907,15 @@ function userModuleFromSource(body, id, opts = {}) {
     vars: cloneData(body.vars ?? []),
     trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger()
   };
+}
+
+// ../protocol/src/input-shaping.ts
+var INPUT_SHAPING_MODES = ["wrap", "extract"];
+var DEFAULT_INPUT_TEMPLATE = "<input>\n{{content}}\n</input>";
+var INPUT_SHAPING_SINCE = "1.9.0";
+function wrapInput(template, text, expand = (s) => s) {
+  const SLOT = "\0ap-input\0";
+  return expand(template.replaceAll("{{content}}", SLOT)).replaceAll(SLOT, () => text);
 }
 
 // src/io.ts
@@ -9631,6 +9641,23 @@ function compile(tree) {
     userInput: userInputMode(tsSrc.userInput, "tokenSaving.userInput") ?? "truncate",
     synopsisTemplate: str2(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
   };
+  let inputShaping;
+  if (raw.inputShaping !== void 0 && raw.inputShaping !== null) {
+    const where = { file: M, path: "inputShaping" };
+    const src = isObj4(raw.inputShaping) ? raw.inputShaping : {};
+    if (!isObj4(raw.inputShaping)) diag.error("inputShaping must be a mapping { mode, template? }", where);
+    else {
+      for (const k of Object.keys(src)) if (k !== "mode" && k !== "template") diag.warn(`inputShaping: unknown key \`${k}\``, { file: M, path: `inputShaping.${k}` });
+      const mode = src.mode;
+      if (!INPUT_SHAPING_MODES.includes(mode)) diag.error(`inputShaping.mode must be one of ${INPUT_SHAPING_MODES.join(", ")}`, { file: M, path: "inputShaping.mode" });
+      else {
+        if (mode === "extract" && src.template !== void 0) diag.warn("inputShaping.template is only used by `wrap` (extract places the input with {{ap::input::text}})", { file: M, path: "inputShaping.template" });
+        const template = mode === "wrap" ? text(str2(src.template, DEFAULT_INPUT_TEMPLATE), { file: M, path: "inputShaping.template" }) : DEFAULT_INPUT_TEMPLATE;
+        if (mode === "wrap" && !template.includes("{{content}}")) diag.warn("inputShaping.template has no {{content}}: the input text would be lost", { file: M, path: "inputShaping.template" });
+        inputShaping = { mode, template };
+      }
+    }
+  }
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
     const o = isObj4(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
@@ -9853,6 +9880,7 @@ function compile(tree) {
     regions,
     anchors,
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
+    ...inputShaping ? { inputShaping } : {},
     params,
     groups,
     modules,
@@ -10087,7 +10115,8 @@ var FIXED_VARS = {
   "chat.group": null,
   "memory.hasChat": null,
   "memory.hasGlobal": null,
-  "recap.present": null
+  "recap.present": null,
+  "input.shaped": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -10139,6 +10168,7 @@ function validate(p, map, diag) {
   }
   const usedVars = /* @__PURE__ */ new Set();
   const structureIds = new Set(Object.keys(p.structures));
+  let inputTextUses = 0;
   for (const { text, where } of map.texts) {
     for (const args of listMacros(text)) {
       const [head, ...rest] = args;
@@ -10170,7 +10200,8 @@ function validate(p, map, diag) {
           if (a !== "summary" && a !== "hint") bad("expected summary | hint");
           break;
         case "input":
-          if (a !== "meta") bad("expected meta");
+          if (a !== "meta" && a !== "text") bad("expected meta | text");
+          else if (a === "text") inputTextUses++;
           break;
         case "memory":
           if (a !== "chat" && a !== "global") bad("expected chat | global");
@@ -10195,6 +10226,7 @@ function validate(p, map, diag) {
   const REF_RE = /(?<![\w$.])(vars|params|modules|flags|stages)\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*(['"`])([^'"`]+)\3\s*\])/g;
   for (const { source, where } of map.templates) {
     const code = templateCode(source).join("\n");
+    if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -10209,6 +10241,11 @@ function validate(p, map, diag) {
     const wholeVarUses = [...code.matchAll(/(?<![\w$.])vars(?![\w$])/g)].length;
     if (wholeVarUses > staticVarReads) for (const id of varDecls.keys()) usedVars.add(id);
   }
+  const shaping = p.inputShaping;
+  if (!shaping && inputTextUses) diag.warn("{{ap::input::text}} is always empty: the preset declares no inputShaping", { file: M, path: "inputShaping" });
+  if (shaping?.mode === "extract" && !inputTextUses) diag.warn("inputShaping extracts the input from the history but no prompt uses {{ap::input::text}}: the input would not be sent", { file: M, path: "inputShaping.mode" });
+  if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
+    diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
   if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: "workflowRegion" });
   for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
@@ -10464,11 +10501,14 @@ function preview(source, o) {
   const pure = o.meta === "pure";
   const vars = defaultVars(preset, config, {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
-    gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false }
+    gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
+    input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 }
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "" } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "" } }, workflow);
+  const shaping = preset.inputShaping;
+  const historyInput = o.input === void 0 ? void 0 : !shaping ? o.input : shaping.mode === "wrap" ? wrapInput(shaping.template, o.input, a.expand) : null;
   const transport = vars.transport;
   const wf = a.workflow;
   const artifacts = {};
@@ -10480,7 +10520,7 @@ function preview(source, o) {
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, ...a.warnings.length ? { warnings: a.warnings } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ ...historyInput !== void 0 ? { historyInput } : {}, vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, ...a.warnings.length ? { warnings: a.warnings } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
   const lines = [];
   const rule = (title) => lines.push("", `\u2501\u2501 ${title} ${"\u2501".repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} \xB7 ${transport} (${vars.style}) \xB7 workflow ${wf?.id ?? "\u2014"} \xB7 config ${o.config ?? preset.defaultConfiguration}`);
@@ -10490,6 +10530,7 @@ function preview(source, o) {
   const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
+  if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   for (const r of preset.regions) {
     if (r.native) {
@@ -10499,6 +10540,10 @@ function preview(source, o) {
     const msgs = a.regions[r.id] ?? [];
     rule(`${r.id}${msgs.length ? "" : " (empty)"}`);
     for (const m of msgs) lines.push(`[${m.role}]`, m.content, "");
+    if (r.id === preset.anchors.historyStart && historyInput !== void 0) {
+      rule("chat history (ST) \xB7 last user message");
+      lines.push(historyInput === null ? "(extracted: placed by {{ap::input::text}})" : historyInput, "");
+    }
   }
   for (const [k, v] of Object.entries(artifacts)) {
     rule(k);
@@ -10661,7 +10706,8 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--param id=value \u2026] [--user-modules file]
+                   [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
+                   [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
@@ -10689,6 +10735,7 @@ async function main(argv) {
       disable: { type: "string" },
       json: { type: "boolean" },
       param: { type: "string", multiple: true },
+      input: { type: "string" },
       "user-modules": { type: "string" },
       "bundled-modules": { type: "string" },
       "user-module-templates": { type: "string" },
@@ -10754,7 +10801,7 @@ async function main(argv) {
         }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

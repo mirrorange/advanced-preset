@@ -15,9 +15,9 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
-  isInlineStructure, templateLiterals,
+  isInlineStructure, templateLiterals, DEFAULT_INPUT_TEMPLATE, INPUT_SHAPING_MODES,
   CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
-  type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
+  type APreset, type InputShaping, type InputShapingMode, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
   type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
@@ -436,6 +436,24 @@ export function compile(tree: SourceTree): CompileResult {
     userInput: userInputMode(tsSrc.userInput, 'tokenSaving.userInput') ?? 'truncate',
     synopsisTemplate: str(tsSrc.synopsisTemplate, '[{{time}} · {{location}}] {{event}}: {{summary}}'),
   };
+  // Input shaping (I-128): optional; absent keeps the artifact (and its hash) as before.
+  let inputShaping: InputShaping | undefined;
+  if (raw.inputShaping !== undefined && raw.inputShaping !== null) {
+    const where = { file: M, path: 'inputShaping' };
+    const src = isObj(raw.inputShaping) ? raw.inputShaping : {};
+    if (!isObj(raw.inputShaping)) diag.error('inputShaping must be a mapping { mode, template? }', where);
+    else {
+      for (const k of Object.keys(src)) if (k !== 'mode' && k !== 'template') diag.warn(`inputShaping: unknown key \`${k}\``, { file: M, path: `inputShaping.${k}` });
+      const mode = src.mode as InputShapingMode;
+      if (!INPUT_SHAPING_MODES.includes(mode)) diag.error(`inputShaping.mode must be one of ${INPUT_SHAPING_MODES.join(', ')}`, { file: M, path: 'inputShaping.mode' });
+      else {
+        if (mode === 'extract' && src.template !== undefined) diag.warn('inputShaping.template is only used by `wrap` (extract places the input with {{ap::input::text}})', { file: M, path: 'inputShaping.template' });
+        const template = mode === 'wrap' ? text(str(src.template, DEFAULT_INPUT_TEMPLATE), { file: M, path: 'inputShaping.template' }) : DEFAULT_INPUT_TEMPLATE;
+        if (mode === 'wrap' && !template.includes('{{content}}')) diag.warn('inputShaping.template has no {{content}}: the input text would be lost', { file: M, path: 'inputShaping.template' });
+        inputShaping = { mode, template };
+      }
+    }
+  }
   const syntheticTurns: SyntheticTurn[] = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s: unknown, i: number) => {
     const o = isObj(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
@@ -671,6 +689,7 @@ export function compile(tree: SourceTree): CompileResult {
     regions,
     anchors: anchors as APreset['anchors'],
     workflowRegion: str(raw.workflowRegion, anchors.tail ?? ''),
+    ...(inputShaping ? { inputShaping } : {}),
     params,
     groups,
     modules,
