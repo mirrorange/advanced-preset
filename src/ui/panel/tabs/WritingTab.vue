@@ -2,12 +2,13 @@
 /** Preset parameters. */
 import { computed } from 'vue';
 import { SlidersVertical } from 'lucide-vue-next';
-import type { Param } from '@advanced-preset/protocol';
+import { paramValue, type Param } from '@advanced-preset/protocol';
 import { t, pt, presetLocale } from '@/i18n';
 import { usePreset } from '../use';
 import NoPreset from '../NoPreset.vue';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
+import ChipsInput from '../../components/ChipsInput.vue';
 
 const { preset, config, update } = usePreset();
 
@@ -31,8 +32,10 @@ const help = (x: Param) => pt(preset.value!, 'params', x.id, 'description', x.de
 const optionLabel = (x: Param, value: string | number, fallback?: string) => {
   return presetLocale(preset.value!)?.params?.[x.id]?.options?.[String(value)] ?? fallback ?? String(value);
 };
-const value = (x: Param) => config.value?.params[x.id] ?? x.default;
+const value = (x: Param) => paramValue(x, config.value?.params[x.id]);
 const setParam = (x: Param, raw: string) => update((c) => { c.params[x.id] = x.type === 'number' ? Number(raw) || 0 : raw; });
+const listValue = (x: Param) => value(x) as string[];
+const setList = (x: Param, items: string[]) => update((c) => { c.params[x.id] = [...items]; });
 
 const listId = (x: Param) => `ap-param-${x.id}`;
 </script>
@@ -45,6 +48,10 @@ const listId = (x: Param) => `ap-param-${x.id}`;
         <select v-if="x.type === 'select'" class="input" :value="value(x)" @change="setParam(x, ($event.target as HTMLSelectElement).value)">
           <option v-for="o in x.options" :key="String(o.value)" :value="o.value">{{ optionLabel(x, o.value, o.label) }}</option>
         </select>
+        <ChipsInput
+          v-else-if="x.type === 'list'" literal :model-value="listValue(x)" :remove-label="t('common.delete')"
+          :placeholder="t('writing.listPlaceholder')" @update:model-value="setList(x, $event)"
+        />
         <div v-else-if="x.type === 'number'" class="unit">
           <input class="input" type="number" :min="x.min" :max="x.max" :value="value(x)" :placeholder="x.unset" @change="setParam(x, ($event.target as HTMLInputElement).value)" />
           <span v-if="x.unit" class="small muted">{{ x.unit }}</span>
