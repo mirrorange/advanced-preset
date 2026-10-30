@@ -93,6 +93,9 @@ export async function ensureCarrier(preset: APreset, opts: { select?: boolean; f
   const current = existing ? m.getCompletionPresetByName(existing) : undefined;
   const meta = current?.extensions?.[CARRIER_EXT] as CarrierMeta | undefined;
   const stale = !current || opts.force || meta?.hash !== preset.hash;
+  // ST builds prompts from the applied settings, not from the saved preset: a rebuilt Carrier that
+  // is in use must be applied again, or new region anchors (prompts / prompt_order) are missing.
+  const inUse = Boolean(existing) && m.getSelectedPresetName() === existing;
   if (stale) {
     if (current && s.carrierHash && stablePromptsHash(current) !== s.carrierHash) toast('info', t('carrier.reset', { name }));
     const body = buildCarrier(preset, activeConfiguration(preset));
@@ -100,7 +103,7 @@ export async function ensureCarrier(preset: APreset, opts: { select?: boolean; f
     if (current) for (const k of ['chat_completion_source', 'reverse_proxy', 'proxy_password']) if (current[k] !== undefined) body[k] = current[k];
     s.carrierHash = stablePromptsHash(body);
     save();
-    await writeCarrier(name, body, Boolean(opts.select));
+    await writeCarrier(name, body, Boolean(opts.select) || inUse);
   } else if (opts.select && m.getSelectedPresetName() !== name) {
     const value = m.findPreset(name);
     if (value !== undefined) await m.selectPreset(value);

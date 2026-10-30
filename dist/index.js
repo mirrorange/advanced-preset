@@ -6952,8 +6952,8 @@ async function Sf(e, t, n) {
 	(typeof s == "string" ? document.querySelector(s) : s[0])?.append(new Option(e, String(o)));
 }
 async function Cf(e, t = {}) {
-	let n = gf(), r = Qd(e), i = xf(e.id), a = i ?? _f(e), o = i ? n.getCompletionPresetByName(i) : void 0, s = o?.extensions?.[pf];
-	if (!o || t.force || s?.hash !== e.hash) {
+	let n = gf(), r = Qd(e), i = xf(e.id), a = i ?? _f(e), o = i ? n.getCompletionPresetByName(i) : void 0, s = o?.extensions?.[pf], c = !o || t.force || s?.hash !== e.hash, l = !!i && n.getSelectedPresetName() === i;
+	if (c) {
 		o && r.carrierHash && yf(o) !== r.carrierHash && h("info", Z("carrier.reset", { name: a }));
 		let n = bf(e, tf(e));
 		if (o) for (let e of [
@@ -6961,7 +6961,7 @@ async function Cf(e, t = {}) {
 			"reverse_proxy",
 			"proxy_password"
 		]) o[e] !== void 0 && (n[e] = o[e]);
-		r.carrierHash = yf(n), Y(), await Sf(a, n, !!t.select);
+		r.carrierHash = yf(n), Y(), await Sf(a, n, !!t.select || l);
 	} else if (t.select && n.getSelectedPresetName() !== a) {
 		let e = n.findPreset(a);
 		e !== void 0 && await n.selectPreset(e);
@@ -8135,7 +8135,9 @@ function Am(t, n, r, i, a) {
 	let o = t.preset.inputShaping, s = o && t.inputShaped && t.input ? Hp(n, r < 0 ? 0 : r, i, t.input.texts) : null;
 	if (Vp(n), !o) return;
 	let c = s?.text ?? "";
-	if (t.inputShaped && !s && t.warnings.push("input shaping: the input message changed after the cache step, sent as is"), s) {
+	t.inputShaped && !s && t.warnings.push("input shaping: the input message changed after the cache step, sent as is");
+	let l = o.mode !== "extract" || n.some((e) => typeof e.content == "string" ? e.content.includes(Lp) : Array.isArray(e.content) && e.content.some((e) => typeof e?.text == "string" && e.text.includes("⟦󰀁⟧")));
+	if (s && !l && t.warnings.push("input shaping: {{ap::input::text}} is not in the prompt, the input was left in the history"), s && l) {
 		let r = t.assembly;
 		Wp(n, s, o, (t) => e().substituteParams(r ? r.expand(t) : t));
 	}
@@ -8152,7 +8154,7 @@ function Am(t, n, r, i, a) {
 	}
 	return {
 		mode: o.mode,
-		shaped: !!s,
+		shaped: !!(s && l),
 		chars: c.length
 	};
 }
@@ -8241,9 +8243,11 @@ async function Pm(t) {
 			}))
 		}), v.push(...n), t === a.anchors.historyStart && (y = v.length);
 	}
+	let S = new Set(s.map((e) => e.__anchor).filter(Boolean));
+	for (let [e, t] of Object.entries(g.regions)) !S.has(e) && t.some((e) => e.content.trim()) && o.warnings.push(`region ${e}: its anchor is not in the prompt (Carrier outdated or prompt disabled?), content dropped`);
 	x.cache = vm(o, v, y, b < 0 ? v.length : b), x.input = Am(o, v, y, b < 0 ? v.length : b, x);
-	let S = o.transport === "prefill" && !c && y >= 0 ? jm(o, v, y) : v;
-	n.splice(0, n.length, ...S.map((e) => {
+	let C = o.transport === "prefill" && !c && y >= 0 ? jm(o, v, y) : v;
+	n.splice(0, n.length, ...C.map((e) => {
 		let { __anchor: t, ...n } = e;
 		return n;
 	})), Jp("assembly", x), !r && !c && l && Bf.arm(o);
@@ -9841,7 +9845,7 @@ function Bg(e) {
 }
 async function Vg() {
 	let e = await zg();
-	e && e !== "b1c791b629218eb9" && sessionStorage.getItem(Rg) !== e && Bg(e);
+	e && e !== "9f85b5ac43f20bdd" && sessionStorage.getItem(Rg) !== e && Bg(e);
 }
 async function Hg() {
 	await Vg();
@@ -9850,7 +9854,7 @@ async function Ug() {
 	let e = o().replace(/^third-party\//, ""), t = await Wg(e, !1);
 	if (t.status === 404 && (t = await Wg(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await zg();
-	return r && r !== "b1c791b629218eb9" ? (Bg(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "9f85b5ac43f20bdd" ? (Bg(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Wg = (t, n) => g("/api/extensions/update", {
 	method: "POST",
@@ -15912,7 +15916,7 @@ var hw = ["aria-label"], gw = { class: "um-picker-head" }, _w = { class: "small 
 				"icon",
 				"help"
 			]),
-			W("div", MD, "Advanced Preset " + M(F("1.9.0")) + " · " + M(F("b1c791b629218eb9")), 1)
+			W("div", MD, "Advanced Preset " + M(F("1.9.0")) + " · " + M(F("9f85b5ac43f20bdd")), 1)
 		], 64));
 	}
 }), PD = ["aria-label"], FD = { class: "panel-head" }, ID = { class: "panel-logo" }, LD = { class: "grow" }, RD = { class: "panel-title ellipsis" }, zD = { class: "panel-sub ellipsis" }, BD = {
@@ -16083,7 +16087,7 @@ function rO() {
 //#region src/index.ts
 var iO = {
 	version: "1.9.0",
-	buildId: "b1c791b629218eb9",
+	buildId: "9f85b5ac43f20bdd",
 	nextGeneration: (e) => kf(e),
 	listPresets: () => ld().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -16137,7 +16141,7 @@ async function sO() {
 	};
 	t.on(n.APP_READY, () => void a()), rO(), Jp("init", {
 		version: "1.9.0",
-		build: "b1c791b629218eb9",
+		build: "9f85b5ac43f20bdd",
 		enabled: J().enabled
 	});
 }
