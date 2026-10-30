@@ -200,16 +200,20 @@ export function responseFamily(ctx: StreamContext): WireFamily {
 /** Escape text for HTML popups. */
 export const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-/** Ask for confirmation with ST's popup (`html` is trusted markup); falls back to `window.confirm`. */
-export async function confirmPopup(html: string, okButton: string, cancelButton: string): Promise<boolean> {
+/**
+ * Ask for confirmation with ST's popup (`html` is trusted markup, or an element whose inputs the
+ * caller reads afterwards); falls back to `window.confirm`.
+ */
+export async function confirmPopup(html: string | HTMLElement, okButton: string, cancelButton: string): Promise<boolean> {
   const ctx = st();
   if (ctx.callGenericPopup && ctx.POPUP_TYPE && ctx.POPUP_RESULT) {
     const r = await ctx.callGenericPopup(html, ctx.POPUP_TYPE.CONFIRM, '', { okButton, cancelButton, allowVerticalScrolling: true });
     return r === ctx.POPUP_RESULT.AFFIRMATIVE;
   }
   const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return window.confirm(tmp.innerText);
+  if (typeof html === 'string') tmp.innerHTML = html;
+  else tmp.append(html.cloneNode(true));
+  return window.confirm(tmp.innerText || tmp.textContent || '');
 }
 
 export function toast(kind: 'info' | 'success' | 'warning' | 'error', message: string, title?: string) {

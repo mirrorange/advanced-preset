@@ -10,6 +10,7 @@ import { setDevPreset, toArtifact } from '@/store/presets';
 import { migratePresetState } from '@/store/config';
 import { ensureCarrier } from '@/store/carrier';
 import { debugLog } from '@/core/debug';
+import { syncBundledModules } from './bundled-modules';
 
 export const devSource = reactive({
   status: 'off' as 'off' | 'connecting' | 'online' | 'error',
@@ -40,6 +41,7 @@ async function poll(): Promise<void> {
     devSource.hash = artifact.hash;
     migratePresetState(artifact);
     await ensureCarrier(artifact);
+    void syncBundledModules(artifact, { auto: true });
     debugLog('dev', { id: artifact.id, version: artifact.version, hash: artifact.hash });
   } catch (e) {
     devSource.status = 'error';

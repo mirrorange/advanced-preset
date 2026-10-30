@@ -12,7 +12,7 @@ import { getPreset } from '@/store/presets';
 import { activatePreset, activeCarrierPresetId } from '@/store/carrier';
 import { installArtifact } from './install';
 import { isTrustDeclined } from './trust';
-import { downloadJson, fileSlug } from '@/ui/download';
+import { exportPreset } from './bundled-modules';
 import { openPanel, refreshActivePreset } from '@/ui/state';
 import { presetName, t } from '@/i18n';
 
@@ -48,11 +48,12 @@ async function onImport(input: HTMLInputElement, file: File): Promise<void> {
   }
 }
 
+/** Export the AP preset behind the selected Carrier (asking which user modules to bundle); `false` when none is selected. */
 export function exportActivePreset(): boolean {
   const id = activeCarrierPresetId();
   const preset = id ? getPreset(id) : undefined;
   if (!preset) return false;
-  downloadJson(`${fileSlug(preset.id)}.apreset.json`, preset);
+  void exportPreset(preset).catch((e) => toast('error', e instanceof Error ? e.message : String(e), t('app.name')));
   return true;
 }
 

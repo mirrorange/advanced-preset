@@ -7,6 +7,7 @@ import { migratePresetState } from '@/store/config';
 import { ensureCarrier, findCarrier } from '@/store/carrier';
 import { t } from '@/i18n';
 import { confirmPresetTemplates } from './trust';
+import { syncBundledModules } from './bundled-modules';
 
 /** GitHub page URLs → raw file URLs. */
 export function rawUrl(url: string): string {
@@ -28,6 +29,7 @@ export async function installArtifact(raw: unknown, source?: string): Promise<AP
   const effective = getPreset(data.id) ?? data;
   migratePresetState(effective);
   await ensureCarrier(effective);
+  await syncBundledModules(effective);
   return effective;
 }
 
@@ -47,7 +49,7 @@ export async function removePreset(id: string): Promise<void> {
   save();
   if (isBuiltin(id)) {
     const p = getPreset(id);
-    if (p) { migratePresetState(p); await ensureCarrier(p); }
+    if (p) { migratePresetState(p); await ensureCarrier(p); await syncBundledModules(p); }
     return;
   }
   const carrier = findCarrier(id);

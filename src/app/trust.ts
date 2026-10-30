@@ -3,7 +3,7 @@
  * so a preset or user-module file containing them is only installed after the user confirms.
  * Built-in presets and the `ap dev` source (the author's own build) are trusted as they are.
  */
-import { presetTemplates, userModuleTemplates, type APreset, type UserModule } from '@advanced-preset/protocol';
+import { presetTemplates, userModulesCode, type APreset, type UserModule } from '@advanced-preset/protocol';
 import { confirmPopup, escapeHtml } from '@/st/host';
 import { presetName, t } from '@/i18n';
 
@@ -47,7 +47,7 @@ export async function confirmPresetTemplates(preset: APreset, previous?: APreset
 
 /** Ask before importing user modules with templates. */
 export async function confirmUserModuleTemplates(modules: UserModule[]): Promise<void> {
-  const code = userModuleTemplates(modules);
+  const code = userModulesCode(modules);
   if (!code.length) return;
   const ok = await confirmPopup(dialog(t('trust.modulesTitle'), t('trust.modules', { n: modules.length }), code.length, sampleOf(code)), t('trust.import'), t('common.cancel'));
   if (!ok) throw new TrustDeclined();

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cloneData, withUserModules, type APreset, type ModuleTemplate } from '@advanced-preset/protocol';
+import { cloneData, withUserModules, type APreset, type UserModuleTemplate } from '@advanced-preset/protocol';
 import { confirmPresetTemplates } from '@/app/trust';
-import { localTemplate } from '@/i18n';
+import { localSource } from '@/i18n';
 import { createUserModuleFromTemplate, userModules } from '@/store/user-modules';
 import { petals, withoutTemplates } from './helpers';
 
@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 afterEach(() => { delete (globalThis as any).SillyTavern; vi.unstubAllGlobals(); });
 
-const tpl: ModuleTemplate = {
+const tpl: UserModuleTemplate = {
   id: 'my-style',
   name: 'Custom style',
   entries: [{ point: 'writing-style', text: '<!--# Write your style below. -->\n## Writing Style: Mine\n\nShort sentences.' }],
@@ -34,25 +34,25 @@ const tpl: ModuleTemplate = {
 function preset(id = 'tpl-test'): APreset {
   const p = withoutTemplates(petals);
   p.id = id;
-  p.moduleTemplates = [cloneData(tpl)];
+  p.userModuleTemplates = [cloneData(tpl)];
   return p;
 }
 
-describe('module templates in the panel', () => {
+describe('user module templates in the panel', () => {
   it('localizes templates for the panel language', () => {
     const p = preset();
-    expect(localTemplate(p, tpl).name).toBe('Custom style');
+    expect(localSource(p, tpl, 'userModuleTemplates').name).toBe('Custom style');
     lang = 'zh-CN';
-    expect(localTemplate(p, tpl).name).toBe('自定义文风');
+    expect(localSource(p, tpl, 'userModuleTemplates').name).toBe('自定义文风');
     lang = 'ja';
-    p.locales.ja = { moduleTemplates: { 'my-style': { name: 'カスタム文体' } } };
-    expect(localTemplate(p, tpl).name).toBe('カスタム文体');
+    p.locales.ja = { userModuleTemplates: { 'my-style': { name: 'カスタム文体' } } };
+    expect(localSource(p, tpl, 'userModuleTemplates').name).toBe('カスタム文体');
   });
 
   it('creates an editable copy with a unique name', () => {
     const p = preset('copy-test');
-    const a = createUserModuleFromTemplate(p, localTemplate(p, tpl));
-    const b = createUserModuleFromTemplate(p, localTemplate(p, tpl));
+    const a = createUserModuleFromTemplate(p, localSource(p, tpl, 'userModuleTemplates'));
+    const b = createUserModuleFromTemplate(p, localSource(p, tpl, 'userModuleTemplates'));
     expect(userModules(p).map((m) => m.name)).toEqual(['Custom style', 'Custom style 2']);
     expect(a.id).not.toBe(b.id);
     expect(a.entries[0]).toMatchObject({ id: 'e1', point: 'writing-style' });
@@ -62,7 +62,7 @@ describe('module templates in the panel', () => {
 
   it('a module from the Petals-like template inserts the style and its question, without the comments', () => {
     const p = preset('assemble-test');
-    const m = createUserModuleFromTemplate(p, localTemplate(p, tpl));
+    const m = createUserModuleFromTemplate(p, localSource(p, tpl, 'userModuleTemplates'));
     const { preset: merged, skipped } = withUserModules(p, [m]);
     expect(skipped).toEqual([]);
     const entry = merged.entries.find((e) => e.module === `user-${m.id}`)!;
@@ -71,11 +71,11 @@ describe('module templates in the panel', () => {
     expect(merged.modules.at(-1)!.vars).toEqual(tpl.vars);
   });
 
-  it('asks for trust when a module template contains code', async () => {
+  it('asks for trust when a user module template contains code', async () => {
     const p = preset('trust-test');
     await confirmPresetTemplates(p);
     expect(popup).not.toHaveBeenCalled();
-    p.moduleTemplates[0]!.locales!['zh-cn']!.entries[0]!.text = '<!-- @template --><%- vars.x %><!-- @end -->';
+    p.userModuleTemplates[0]!.locales!['zh-cn']!.entries[0]!.text = '<!-- @template --><%- vars.x %><!-- @end -->';
     await confirmPresetTemplates(p);
     expect(popup).toHaveBeenCalledOnce();
     expect(String(popup.mock.calls[0]![0])).toContain('vars.x');

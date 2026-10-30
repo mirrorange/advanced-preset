@@ -6,6 +6,7 @@ import { reactive } from 'vue';
 import type { APreset, SparseDiff, UserModule } from '@advanced-preset/protocol';
 import { st } from '@/st/host';
 import type { MemoryEvent } from './eventlog';
+import type { BundledRecord } from './bundled-modules';
 
 export type ConfigRef = { kind: 'recommended' | 'saved'; id: string };
 
@@ -27,6 +28,8 @@ export interface PresetState {
   carrierHash?: string;
   /** The user's own modules for this preset, in insertion order. */
   userModules?: UserModule[];
+  /** Bundled user modules last synced, by id (see `bundled-modules.ts`). */
+  bundledModules?: Record<string, BundledRecord>;
 }
 
 export interface APSettings {

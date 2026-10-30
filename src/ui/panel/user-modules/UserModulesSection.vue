@@ -1,13 +1,13 @@
 <script setup lang="ts">
 /**
  * "My modules" list: open, toggle, reorder (drag the grip), import / export, create. When the preset
- * ships module templates, "new" first asks (inline) whether to start blank or from a template.
+ * ships user module templates, "new" first asks (inline) whether to start blank or from a template.
  */
 import { computed, nextTick, ref } from 'vue';
 import { Download, FilePlus, GripVertical, LayoutTemplate, Plus, Upload, TriangleAlert, X, Zap } from 'lucide-vue-next';
-import { lostRefs, moduleTemplates, parseUserModuleFile, ruleComplete, type APreset, type ModuleTemplate, type UserModule } from '@advanced-preset/protocol';
+import { lostRefs, parseUserModuleFile, presetUserModuleTemplates, ruleComplete, type APreset, type UserModule, type UserModuleTemplate } from '@advanced-preset/protocol';
 import { confirmUserModuleTemplates, isTrustDeclined } from '@/app/trust';
-import { localTemplate, t, pt } from '@/i18n';
+import { localSource, t, pt } from '@/i18n';
 import { toast } from '@/st/host';
 import { save } from '@/store/settings';
 import { createUserModule, createUserModuleFromTemplate, exportUserModules, importUserModules, moveUserModule, userModules } from '@/store/user-modules';
@@ -39,7 +39,7 @@ const hasTrigger = (m: UserModule) => m.trigger.rules.some(ruleComplete);
 
 function setEnabled(m: UserModule, v: boolean) { m.enabled = v; save(); }
 
-const templates = computed(() => moduleTemplates(props.preset).map((tpl) => ({ tpl, body: localTemplate(props.preset, tpl) })));
+const templates = computed(() => presetUserModuleTemplates(props.preset).map((tpl) => ({ tpl, body: localSource(props.preset, tpl, 'userModuleTemplates') })));
 const picking = ref(false);
 const pickerEl = ref<HTMLElement | null>(null);
 
@@ -48,9 +48,9 @@ function createBlank() {
   const m = createUserModule(props.preset, t('um.newName', { n: list.value.length + 1 }));
   emit('open', m.id);
 }
-function createFrom(tpl: ModuleTemplate) {
+function createFrom(tpl: UserModuleTemplate) {
   picking.value = false;
-  const m = createUserModuleFromTemplate(props.preset, localTemplate(props.preset, tpl));
+  const m = createUserModuleFromTemplate(props.preset, localSource(props.preset, tpl, 'userModuleTemplates'));
   emit('open', m.id);
 }
 /** "New": straight to a blank module, or the inline picker when there are templates. */
