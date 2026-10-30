@@ -81,8 +81,9 @@ warn  preset.yaml:41 groups: module `x` has no group
 | `--user-modules <file>` | 合并用户模组文件（[user-modules.md](user-modules.md#导入导出格式)） |
 | `--bundled-modules <ids>` | 合并哪些[随预设安装的用户模组](user-modules.md#预设携带的用户模组-user-modules)（逗号分隔的 id，`all` 为全部，`none` 为不合并）；默认按全新安装，合并 `enabled` 不为 `false` 的。它们排在最前 |
 | `--user-module-templates <ids>` | 把[用户模组模板](user-modules.md#用户模组模板-user-module-templates)当作新建的用户模组合并（逗号分隔的 id，`all` 为全部），排在 `--user-modules` 之后 |
+| `--input <text>` | 模拟本次输入（聊天历史以这条用户消息结尾）：预设声明了 `inputShaping` 时 `input.shaped` 为真、`{{ap::input::text}}` 为这段文字，`historyStart` 区域后多出一节 `chat history (ST) · last user message`，显示历史中这条消息的样子（`wrap` 为包裹后的文字，`extract` 为已提取）。摘要中有一行 `input shaping: <mode>` |
 | `--lang <lang>` | 按该面板语言选用随预设安装的用户模组与模板的翻译 |
-| `--json` | 输出 JSON：`vars`、`buildVars`、`skipped`、`modules`、`structures`、`stages`、`regions`，以及 `schema`（structured）或 `tools`（工具传输） |
+| `--json` | 输出 JSON：`vars`、`buildVars`、`skipped`、`modules`、`structures`、`stages`、`regions`、`historyInput`（`--input` 时历史中那条消息的样子，提取时为 `null`），以及 `schema`（structured）或 `tools`（工具传输） |
 | `--out <file>` | 写入文件而不是标准输出 |
 
 文本输出的开头是摘要（预设、传输方式与写法、工作流、配置、生效模组、构建变量、结构、阶段），然后按 `regions` 顺序列出每个区域的消息，最后是 schema / 工具。
@@ -91,7 +92,8 @@ warn  preset.yaml:41 groups: module `x` has no group
 
 - ST 宏（`{{user}}`、`{{char}}`……）不展开；
 - 运行时数据为空：记忆、总结、最近元指令、聊天文本；`memory.*`、`recap.present`、`chat.group`、`meta.recent` 为假；用户模组的关键词规则看到空文本；
-- 元指令文本为占位符 `(meta text)`；`meta.task` 为 `null`。
+- 元指令文本为占位符 `(meta text)`；`meta.task` 为 `null`；
+- 没有 `--input` 时没有本次输入，`input.shaped` 为假。
 
 常用的预览矩阵：每种传输方式各一次；`--meta pure`；每个推荐配置；关键模组开 / 关；关键参数设置 / 未设置（`--param`）。
 

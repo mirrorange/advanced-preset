@@ -52,6 +52,7 @@
 | `gen.type` | 生成类型：`normal`、`regenerate`、`swipe`、`continue`、`impersonate`…… | 代写时去掉写作指南 |
 | `memory.hasChat` / `memory.hasGlobal` | 有没有聊天记忆 / 全局记忆 | 没有记忆时不放空标签 |
 | `recap.present` | 有没有剧情总结 | 同上 |
+| `input.shaped` | 本次输入是否被[整形](09-built-in-features.md#用户输入整形)（包裹或提取） | 只在有本次输入时放 `<input>` 标签 |
 | `chat.group` | 是否是群聊 | 群聊专用规则 |
 
 ## 用 `@if` 控制一小段

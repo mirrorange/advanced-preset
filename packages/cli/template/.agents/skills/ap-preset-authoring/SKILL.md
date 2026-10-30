@@ -37,7 +37,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 | 多个模组共同填写的清单 | [build-variables.md](references/build-variables.md) |
 | 回复、记忆、总结、代写、事件摘要、选项、自定义结构 | [structures.md](references/structures.md) |
 | 传输方式、schema / 工具、`tools` 文案、示范轮次 | [transports.md](references/transports.md) |
-| 元指令、任务工作流、生成来源、省 token | [meta-and-tasks.md](references/meta-and-tasks.md) |
+| 元指令、任务工作流、生成来源、省 token、用户输入整形 | [meta-and-tasks.md](references/meta-and-tasks.md) |
 | `configurationDefaults`、推荐配置、Carrier、迁移 | [configuration.md](references/configuration.md) |
 | 插入点、用户模组、`user-modules/` 与 `user-module-templates/` | [user-modules.md](references/user-modules.md) |
 | 面板翻译 | [locales.md](references/locales.md) |
@@ -104,7 +104,7 @@ Write the story content.
 
 **指令**：`@entry`（模组）、`@section preamble|intro|outro|stage:<id> [style=…]`（工作流）、`@as system|user|assistant`（新消息）、`@style dialogue|imperative … @end`、`@if <expr> … @else … @end`、`@template … @end`（EJS 模板，可执行代码，安装需用户信任，需 `minAdvancedPreset: 1.9.0`；输出用 `<%-`，`<%=` 会 HTML 转义）。`<!--# … -->` 是作者注释（可跨行，内部指令不执行，不发送）；其他 HTML 注释原样留给模型。
 
-**常用条件变量**：`transport`、`style`、`workflow`、`gen.origin`（story/task）、`gen.type`、`meta.present` / `meta.pure` / `meta.mixed` / `meta.task`、`modules.<id>`、`params.<id>`、`flags.<id>`、`stages.<id>`、`memory.hasChat`、`recap.present`、`features.tokenSaving`、`chat.group`。
+**常用条件变量**：`transport`、`style`、`workflow`、`gen.origin`（story/task）、`gen.type`、`meta.present` / `meta.pure` / `meta.mixed` / `meta.task`、`modules.<id>`、`params.<id>`、`flags.<id>`、`stages.<id>`、`memory.hasChat`、`recap.present`、`features.tokenSaving`、`chat.group`、`input.shaped`（预设声明了 `inputShaping` 且本次输入已整形）。
 
 **常用宏**：`{{ap::name::<actor>}}`、`{{ap::prefix::<actor>}}`、`{{ap::param::<id>}}`、`{{ap::lang}}`、`{{ap::structure::<id>}}`、`{{ap::var::<id>}}`（`::keys` / `::values` / `::<key>`）、`{{ap::workflow::summary}}`、`{{ap::input::meta}}`、`{{ap::memory::chat}}`、`{{ap::recap}}`、`{{ap::recent_meta}}`。ST 宏（`{{user}}`、`{{char}}`）在 AP 宏之后展开。
 

@@ -53,12 +53,13 @@ transport in ["structured", "tool-single", "tool-multi"]
 | `chat.group` | 布尔 | 群聊 |
 | `memory.hasChat` / `memory.hasGlobal` | 布尔 | 聊天记忆 / 全局记忆非空 |
 | `recap.present` | 布尔 | 当前有生效的总结 |
+| `input.shaped` | 布尔 | 本次生成做了[用户输入整形](manifest.md#用户输入整形-inputshaping)（预设声明了 `inputShaping`，且聊天历史以用户消息结尾） |
 
 注意：
 
 - 阶段的 `when` 在 `stages.*` 计算之前求值，所以阶段条件里不要引用 `stages.*`。
-- 正则标记的 `requires` 与 `meta.tasks` 在组装之前求值，只能可靠地使用 `meta.*` 与 `flags.*`。
-- `ap preview` 中 `memory.*`、`recap.present`、`chat.group`、`meta.recent` 总为假。
+- 正则标记的 `requires` 与 `meta.tasks` 在组装之前求值，只能可靠地使用 `meta.*` 与 `flags.*`（`input.shaped` 在那里总为假）。
+- `ap preview` 中 `memory.*`、`recap.present`、`chat.group`、`meta.recent` 总为假；`input.shaped` 只在给了 `--input` 且预设声明了 `inputShaping` 时为真。
 - 这些变量同样是[模板](templates.md#作用域)作用域里的对象（`params.length`、`gen.type`……）。
 
 ## 诊断
