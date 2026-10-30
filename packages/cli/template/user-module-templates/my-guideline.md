@@ -1,5 +1,5 @@
 ---
-# A module template: offered when a user creates a module in the panel. The user gets an editable
+# A user module template: offered when a user creates a module in the panel. The user gets an editable
 # copy; the <!--# … --> comments below are shown to them in the editor and never sent to the model.
 name: My guideline
 description: Add your own writing rule to the guidelines, plus a point to weigh while planning.

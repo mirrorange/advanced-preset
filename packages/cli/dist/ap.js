@@ -8438,8 +8438,8 @@ function activeModules(preset, config, resolve2) {
     const set = m.exclusive;
     if (!set || winner.has(set) || exclusiveAllowsNone(preset, set)) continue;
     const members = preset.modules.filter((x) => x.exclusive === set && x.toggle === "user");
-    const pick = members.find((x) => x.default) ?? members[0];
-    if (pick) winner.set(set, pick.id);
+    const pick2 = members.find((x) => x.default) ?? members[0];
+    if (pick2) winner.set(set, pick2.id);
   }
   const out = preset.modules.filter((m) => {
     if (m.toggle === "always") return true;
@@ -8882,23 +8882,26 @@ function parseUserModuleFile(raw) {
   throw new Error("not a user module file");
 }
 
-// ../protocol/src/module-templates.ts
-function moduleTemplates(preset) {
-  return Array.isArray(preset.moduleTemplates) ? preset.moduleTemplates : [];
+// ../protocol/src/preset-user-modules.ts
+function presetUserModules(preset) {
+  return Array.isArray(preset.userModules) ? preset.userModules : [];
 }
-function localizeModuleTemplate(tpl, lang, labels) {
+function presetUserModuleTemplates(preset) {
+  return Array.isArray(preset.userModuleTemplates) ? preset.userModuleTemplates : [];
+}
+function localizeUserModuleSource(src, lang, labels) {
   const l = lang?.toLowerCase();
-  const body = l && (tpl.locales?.[l] ?? tpl.locales?.[l.split("-")[0]]) || void 0;
+  const body = l && (src.locales?.[l] ?? src.locales?.[l.split("-")[0]]) || void 0;
   if (body) return body;
-  const name = typeof labels?.name === "string" && labels.name ? labels.name : tpl.name;
-  const description = typeof labels?.description === "string" && labels.description ? labels.description : tpl.description;
-  return { name, ...description ? { description } : {}, entries: tpl.entries, vars: tpl.vars, trigger: tpl.trigger };
+  const name = typeof labels?.name === "string" && labels.name ? labels.name : src.name;
+  const description = typeof labels?.description === "string" && labels.description ? labels.description : src.description;
+  return { name, ...description ? { description } : {}, entries: src.entries, vars: src.vars, trigger: src.trigger };
 }
-function userModuleFromTemplate(body, id, name = body.name) {
+function userModuleFromSource(body, id, opts = {}) {
   return {
     id,
-    name,
-    enabled: true,
+    name: opts.name ?? body.name,
+    enabled: opts.enabled ?? true,
     entries: body.entries.map((e, i) => ({ id: `e${i + 1}`, ...cloneData(e) })),
     vars: cloneData(body.vars ?? []),
     trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger()
@@ -8984,10 +8987,11 @@ function compileContent(tokens2, diag, where, onExpr) {
   );
 }
 
-// src/module-templates.ts
+// src/user-module-sources.ts
 var import_yaml2 = __toESM(require_dist(), 1);
-var MODULE_TEMPLATE_DIR = "module-templates/";
-var FILE_RE = /^module-templates\/([a-z0-9][a-z0-9-]*)(?:\.([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*))?\.md$/;
+var USER_MODULE_DIRS = { module: "user-modules", template: "user-module-templates" };
+var NOUN = { module: "user module", template: "user module template" };
+var fileRe = (dir) => new RegExp(`^${dir}/([a-z0-9][a-z0-9-]*)(?:\\.([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*))?\\.md$`);
 var ROLES3 = ["system", "user", "assistant"];
 var ENTRY_RE = /^\s*<!--\s*@entry\b([\s\S]*?)-->\s*$/;
 var FENCE_RE2 = /^\s*(```|~~~)/;
@@ -9062,8 +9066,9 @@ function parseTrigger(fm, ctx, where) {
   if (e) ctx.onExpr(e, where);
   return trigger;
 }
-function compileBody(file, src, ctx, id) {
+function compileBody(file, src, ctx, id, kind, translation) {
   const { diag } = ctx;
+  const noun = NOUN[kind];
   const { yaml, body, bodyLine } = splitFrontmatter(src);
   const where = { file, line: 1 };
   let fm = {};
@@ -9077,7 +9082,7 @@ function compileBody(file, src, ctx, id) {
       return void 0;
     }
   }
-  if (fm.id !== void 0 && String(fm.id) !== id) diag.error(`module template id comes from the file name (\`${id}\`)`, { ...where, path: "id" });
+  if (fm.id !== void 0 && String(fm.id) !== id) diag.error(`${noun} id comes from the file name (\`${id}\`)`, { ...where, path: "id" });
   const entries = [];
   const parts = splitTemplateBody(body, bodyLine);
   parts.forEach((part, i) => {
@@ -9096,51 +9101,65 @@ function compileBody(file, src, ctx, id) {
       if (!ROLES3.includes(head.role)) diag.error(`role must be ${ROLES3.join(" | ")}`, at);
       else entry.role = head.role;
     }
-    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== "point" && k !== "role") diag.warn(`unknown @entry attribute \`${k}\` in a module template`, at);
+    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== "point" && k !== "role") diag.warn(`unknown @entry attribute \`${k}\` in a ${noun}`, at);
     const [chunk] = tokenizeDirectives(part.text, [], part.line, (message, line) => diag.error(message, { file, ...line !== void 0 ? { line } : {} }));
     ctx.content(chunk.tokens, { file, line: part.line });
     entries.push(entry);
   });
-  if (!entries.length) diag.warn("module template has no entries (set `point` in the frontmatter or add `@entry point=\u2026`)", where);
+  if (!entries.length) diag.warn(`${noun} has no entries (set \`point\` in the frontmatter or add \`@entry point=\u2026\`)`, where);
   const name = fm.name === void 0 ? id : String(fm.name);
   const out = {
     name,
-    ...fm.description !== void 0 ? { description: String(fm.description).trim() } : {},
+    ...fm.description !== void 0 && kind === "template" ? { description: String(fm.description).trim() } : {},
     entries,
     vars: ctx.varUpdates(fm.vars, { ...where, path: "vars" }),
     trigger: parseTrigger(fm, ctx, { ...where, path: fm.trigger !== void 0 ? "trigger" : "when" })
   };
-  const known = /* @__PURE__ */ new Set(["id", "name", "description", "point", "role", "vars", "when", "trigger"]);
-  for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a module template`, { ...where, path: k });
+  if (fm.description !== void 0 && kind === "module") diag.warn("`description` is only shown for user module templates (use an author comment `<!--# \u2026 -->` instead)", { ...where, path: "description" });
+  if (fm.enabled !== void 0) {
+    if (kind === "template") diag.warn("`enabled` only applies to bundled user modules (a module made from a template starts enabled)", { ...where, path: "enabled" });
+    else if (translation) diag.warn("`enabled` comes from the source file; it is ignored in translations", { ...where, path: "enabled" });
+    else if (typeof fm.enabled !== "boolean") diag.error("`enabled` must be true or false", { ...where, path: "enabled" });
+    else out.enabled = fm.enabled;
+  }
+  const known = /* @__PURE__ */ new Set(["id", "name", "description", "enabled", "point", "role", "vars", "when", "trigger"]);
+  for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a ${noun}`, { ...where, path: k });
   return out;
 }
-function compileModuleTemplates(tree, ctx) {
-  const files2 = [...tree.keys()].filter((p) => p.startsWith(MODULE_TEMPLATE_DIR)).sort();
-  const templates = [];
+function compileUserModuleSources(tree, ctx, kind) {
+  const dir = USER_MODULE_DIRS[kind];
+  const re = fileRe(dir);
+  const files2 = [...tree.keys()].filter((p) => p.startsWith(`${dir}/`)).sort();
+  const sources = [];
   const translations = [];
   for (const file of files2) {
-    const m = FILE_RE.exec(file);
+    const m = re.exec(file);
     if (!m) {
-      ctx.diag.error("module template files are `module-templates/<id>.md` or `<id>.<lang>.md` (id in lower-case kebab-case)", { file });
+      ctx.diag.error(`${NOUN[kind]} files are \`${dir}/<id>.md\` or \`<id>.<lang>.md\` (id in lower-case kebab-case)`, { file });
       continue;
     }
     if (m[2]) {
       translations.push({ file, id: m[1], lang: m[2].toLowerCase() });
       continue;
     }
-    const body = compileBody(file, tree.get(file), ctx, m[1]);
-    if (body) templates.push({ id: m[1], ...body });
+    const body = compileBody(file, tree.get(file), ctx, m[1], kind, false);
+    if (!body) continue;
+    const { enabled, ...rest } = body;
+    sources.push({ id: m[1], ...enabled === false ? { enabled } : {}, ...rest });
   }
   for (const { file, id, lang } of translations) {
-    const tpl = templates.find((x) => x.id === id);
-    if (!tpl) {
-      ctx.diag.error(`translation of unknown module template \`${id}\` (add module-templates/${id}.md)`, { file });
+    const src = sources.find((x) => x.id === id);
+    if (!src) {
+      ctx.diag.error(`translation of unknown ${NOUN[kind]} \`${id}\` (add ${dir}/${id}.md)`, { file });
       continue;
     }
-    const body = compileBody(file, tree.get(file), ctx, id);
-    if (body) (tpl.locales ??= {})[lang] = body;
+    const body = compileBody(file, tree.get(file), ctx, id, kind, true);
+    if (body) {
+      const { enabled: _ignored, ...rest } = body;
+      (src.locales ??= {})[lang] = rest;
+    }
   }
-  return templates;
+  return sources;
 }
 
 // src/manifest.ts
@@ -9299,21 +9318,21 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   const patch = isObj4(o.patch) ? o.patch : {};
   const env = isObj4(o.envelope) ? o.envelope : {};
   const results = isObj4(o.results) ? o.results : {};
-  const pick = (v, fallback) => v === void 0 ? fallback : v;
+  const pick2 = (v, fallback) => v === void 0 ? fallback : v;
   const tools = {
     turn: {
       name: str2(turn.name, D.turn.name),
       field: str2(turn.field, D.turn.field),
       ...(() => {
         const description = opt(turn.description, "turn.description");
-        const fieldDescription = pick(opt(turn.fieldDescription, "turn.fieldDescription"), D.turn.fieldDescription);
+        const fieldDescription = pick2(opt(turn.fieldDescription, "turn.fieldDescription"), D.turn.fieldDescription);
         return { ...description ? { description } : {}, ...fieldDescription ? { fieldDescription } : {} };
       })()
     },
-    submit: { name: str2(submit.name, D.submit.name), description: pick(opt(submit.description, "submit.description"), D.submit.description) },
+    submit: { name: str2(submit.name, D.submit.name), description: pick2(opt(submit.description, "submit.description"), D.submit.description) },
     stage: {
       name: str2(stage.name, typeof o.stagePrefix === "string" ? `${o.stagePrefix}{{stage}}` : D.stage.name),
-      description: pick(opt(stage.description, "stage.description"), D.stage.description),
+      description: pick2(opt(stage.description, "stage.description"), D.stage.description),
       param: field(stage.param, "stage.param", D.stage.param),
       patchParam: field(stage.patchParam, "stage.patchParam", D.stage.patchParam)
     },
@@ -9687,14 +9706,16 @@ function compile(tree) {
   modules.sort((a, b) => rank(a.id) - rank(b.id));
   const regionIndex = (rid) => regions.findIndex((r) => r.id === rid);
   entries.sort((a, b) => regionIndex(a.region) - regionIndex(b.region) || a.order - b.order || rank(a.module) - rank(b.module));
-  const moduleTemplates2 = compileModuleTemplates(tree, {
+  const sourceCtx = {
     diag,
     insertionPoints,
     expr,
     content,
     varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
     onExpr: (e, where) => map.exprs.push({ expr: e, where })
-  });
+  };
+  const userModules = compileUserModuleSources(tree, sourceCtx, "module");
+  const userModuleTemplates = compileUserModuleSources(tree, sourceCtx, "template");
   const workflows = [];
   const workflowFiles = [...tree.keys()].filter((p) => /^workflows\/[^/]+\.md$/.test(p)).sort();
   for (const file of workflowFiles) {
@@ -9837,7 +9858,8 @@ function compile(tree) {
     modules,
     entries,
     insertionPoints,
-    moduleTemplates: moduleTemplates2,
+    userModules,
+    userModuleTemplates,
     vars,
     workflows,
     structures,
@@ -10338,7 +10360,8 @@ function validate(p, map, diag) {
       configurations: new Set(p.configurations.map((x) => x.id)),
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
-      moduleTemplates: new Set((p.moduleTemplates ?? []).map((x) => x.id)),
+      userModules: new Set((p.userModules ?? []).map((x) => x.id)),
+      userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys())
     };
     for (const [section, ids] of Object.entries(known)) {
@@ -10355,7 +10378,7 @@ function validate(p, map, diag) {
 }
 
 // src/io.ts
-var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
+var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 function isSourcePath(rel) {
   const p = rel.split(sep).join("/");
   return SOURCE_RE.test(p) || FRAGMENT_RE.test(p);
@@ -10389,13 +10412,24 @@ async function writeArtifact(preset, outDir) {
 }
 
 // src/preview.ts
+function pick(all, ids, noun) {
+  const unknown = ids.filter((id) => id !== "all" && id !== "none" && !all.some((t) => t.id === id));
+  if (unknown.length) return `unknown ${noun} ${unknown.join(", ")} (have: ${all.map((t) => t.id).join(", ") || "none"})`;
+  if (ids.includes("none")) return [];
+  return ids.includes("all") ? all : ids.map((id) => all.find((t) => t.id === id));
+}
 function templateModules(preset, ids, lang) {
-  const all = moduleTemplates(preset);
-  const picked = ids.includes("all") ? all : ids.map((id) => all.find((t) => t.id === id));
-  const unknown = ids.filter((id) => id !== "all" && !all.some((t) => t.id === id));
-  if (unknown.length) return `unknown module template ${unknown.join(", ")} (have: ${all.map((t) => t.id).join(", ") || "none"})`;
-  const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.moduleTemplates?.[id] : void 0;
-  return picked.map((t) => userModuleFromTemplate(localizeModuleTemplate(t, lang, labels(t.id)), `tpl-${t.id}`));
+  const picked = pick(presetUserModuleTemplates(preset), ids, "user module template");
+  if (typeof picked === "string") return picked;
+  const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.userModuleTemplates?.[id] : void 0;
+  return picked.map((t) => userModuleFromSource(localizeUserModuleSource(t, lang, labels(t.id)), `tpl-${t.id}`));
+}
+function bundledModules(preset, ids, lang) {
+  const all = presetUserModules(preset);
+  const picked = ids ? pick(all, ids, "bundled user module") : all.filter((m) => m.enabled !== false);
+  if (typeof picked === "string") return picked;
+  const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : void 0;
+  return picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id));
 }
 function parseParamArg(preset, arg) {
   const eq = arg.indexOf("=");
@@ -10628,7 +10662,8 @@ Usage
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--user-modules file]
-                   [--module-templates a,b|all] [--lang zh-cn] [--json] [--out file]
+                   [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
+                   [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
                                              scaffold a new preset repository
   ap skills  list                            list the bundled Agent Skills
@@ -10655,7 +10690,8 @@ async function main(argv) {
       json: { type: "boolean" },
       param: { type: "string", multiple: true },
       "user-modules": { type: "string" },
-      "module-templates": { type: "string" },
+      "bundled-modules": { type: "string" },
+      "user-module-templates": { type: "string" },
       lang: { type: "string" },
       id: { type: "string" },
       name: { type: "string" },
@@ -10672,7 +10708,7 @@ async function main(argv) {
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.moduleTemplates.length ? `, ${preset.moduleTemplates.length} module templates` : ""}`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? "dist"));
@@ -10702,14 +10738,21 @@ async function main(argv) {
         params[parsed.id] = parsed.value;
       }
       const meta = values.meta === "pure" || values.meta === "mixed" ? values.meta : void 0;
-      let userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules : void 0;
-      if (values["module-templates"]) {
-        const picked = templateModules(preset, values["module-templates"].split(",").map((x) => x.trim()).filter(Boolean), values.lang);
+      const ids = (v) => v.split(",").map((x) => x.trim()).filter(Boolean);
+      const bundled = bundledModules(preset, values["bundled-modules"] !== void 0 ? ids(values["bundled-modules"]) : void 0, values.lang);
+      if (typeof bundled === "string") {
+        console.error(bundled);
+        return 1;
+      }
+      const userModules = [...bundled];
+      if (values["user-modules"]) userModules.push(...parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules);
+      if (values["user-module-templates"]) {
+        const picked = templateModules(preset, ids(values["user-module-templates"]), values.lang);
         if (typeof picked === "string") {
           console.error(picked);
           return 1;
         }
-        userModules = [...userModules ?? [], ...picked];
+        userModules.push(...picked);
       }
       const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);

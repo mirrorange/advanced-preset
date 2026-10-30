@@ -51,7 +51,8 @@ npm run dev        # 修改后自动重新构建，并在 http://localhost:4747 
 | `manifest/*.yaml` | （可选）清单片段：变长后可把元数据以外的字段拆到这里，构建时合并 |
 | `modules/**/*.md` | 模组，一个文件一个；`<!-- @entry -->` 切分条目 |
 | `workflows/*.md` | 工作流，一个文件一个；`<!-- @section -->` 写出每个阶段 |
-| `module-templates/*.md` | 模组模板：用户新建「我的模组」时可选的示例 |
+| `user-modules/*.md` | （可选）随预设安装进「我的模组」的用户模组，用户可直接编辑 |
+| `user-module-templates/*.md` | 用户模组模板：用户新建「我的模组」时可选的示例 |
 | `locales/*.yaml` | 面板文字翻译（含预设名称与描述） |
 | `dist/` | 构建产物（发布时提交） |
 | `.agents/skills/`、`AGENTS.md` | 给 AI Agent 的说明 |

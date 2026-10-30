@@ -410,7 +410,7 @@ migrations:
   });
 });
 
-describe('module templates', () => {
+describe('user module sources', () => {
   const EXTRA = `
 insertionPoints:
   - { id: intro-end, label: After intro, region: top, order: 1000 }
@@ -453,13 +453,15 @@ point: guide
   it('keeps the raw text, splits entries and compiles translations', () => {
     const { preset, diag } = build(tree({
       'preset.yaml': MANIFEST + EXTRA,
-      'module-templates/style.md': STYLE,
-      'module-templates/style.zh-CN.md': ZH,
-      'locales/zh-cn.yaml': 'moduleTemplates: { style: { name: 文风 }, nope: { name: x } }\n',
+      'user-module-templates/style.md': STYLE,
+      'user-module-templates/style.zh-CN.md': ZH,
+      'locales/zh-cn.yaml': 'userModuleTemplates: { style: { name: 文风 }, nope: { name: x } }\nuserModules: { gone: { name: x } }\n',
     }));
     expect(diag.errors).toEqual([]);
-    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/moduleTemplates\.nope does not exist/);
-    const [tpl] = preset!.moduleTemplates;
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/userModuleTemplates\.nope does not exist/);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/userModules\.gone does not exist/);
+    expect(preset!.userModules).toEqual([]);
+    const [tpl] = preset!.userModuleTemplates;
     expect(tpl).toMatchObject({
       id: 'style',
       name: 'Custom style',
@@ -477,7 +479,7 @@ point: guide
   it('reports bad points, roles, triggers, variables and directives', () => {
     const { diag } = build(tree({
       'preset.yaml': MANIFEST + EXTRA,
-      'module-templates/bad.md': `---
+      'user-module-templates/bad.md': `---
 trigger: { match: any, rules: [{ kind: var, path: params.nope, op: on }, { kind: wat }] }
 vars: { nope: x }
 color: red
@@ -487,10 +489,14 @@ x
 <!-- @entry point=guide role=robot -->
 <!-- @if -->
 `,
-      'module-templates/loose.md': 'Text without a point.\n',
-      'module-templates/Bad_Name.md': '',
-      'module-templates/orphan.zh-cn.md': '',
-      'module-templates/both.md': '---\npoint: guide\nwhen: x\ntrigger: { rules: [] }\n---\nx\n',
+      'user-module-templates/loose.md': 'Text without a point.\n',
+      'user-module-templates/Bad_Name.md': '',
+      'user-module-templates/orphan.zh-cn.md': '',
+      'user-module-templates/both.md': '---\npoint: guide\nwhen: x\ntrigger: { rules: [] }\n---\nx\n',
+      'user-module-templates/on.md': '---\npoint: guide\nenabled: false\n---\nx\n',
+      'user-modules/Bad_Name.md': '',
+      'user-modules/flag.md': '---\npoint: guide\nenabled: maybe\ndescription: x\n---\nx\n',
+      'user-modules/orphan.zh-cn.md': '',
     }));
     const errors = diag.errors.map((e) => `${e.file}: ${e.message}`).join('\n');
     expect(errors).toMatch(/bad\.md: unknown insertion point `gone`/);
@@ -500,16 +506,22 @@ x
     expect(errors).toMatch(/bad\.md: unknown param `nope` in condition/);
     expect(errors).toMatch(/bad\.md: .*@if/);
     expect(errors).toMatch(/loose\.md: text before the first `@entry` needs `point`/);
-    expect(errors).toMatch(/Bad_Name\.md: module template files are/);
-    expect(errors).toMatch(/orphan\.zh-cn\.md: translation of unknown module template `orphan`/);
+    expect(errors).toMatch(/user-module-templates\/Bad_Name\.md: user module template files are/);
+    expect(errors).toMatch(/user-module-templates\/orphan\.zh-cn\.md: translation of unknown user module template `orphan`/);
     expect(errors).toMatch(/both\.md: use either `when` or `trigger`/);
-    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/unknown frontmatter key `color`/);
+    expect(errors).toMatch(/user-modules\/Bad_Name\.md: user module files are `user-modules\/<id>\.md`/);
+    expect(errors).toMatch(/user-modules\/orphan\.zh-cn\.md: translation of unknown user module `orphan`/);
+    expect(errors).toMatch(/flag\.md: `enabled` must be true or false/);
+    const warnings = diag.warnings.map((w) => `${w.file}: ${w.message}`).join('\n');
+    expect(warnings).toMatch(/unknown frontmatter key `color` in a user module template/);
+    expect(warnings).toMatch(/on\.md: `enabled` only applies to bundled user modules/);
+    expect(warnings).toMatch(/flag\.md: `description` is only shown for user module templates/);
   });
 
   it('previews templates as user modules', async () => {
     const { templateModules, preview } = await import('../src/preview');
-    const { preset } = build(tree({ 'preset.yaml': MANIFEST + EXTRA, 'module-templates/style.md': STYLE, 'module-templates/style.zh-cn.md': ZH }));
-    expect(templateModules(preset!, ['nope'])).toMatch(/unknown module template nope \(have: style\)/);
+    const { preset } = build(tree({ 'preset.yaml': MANIFEST + EXTRA, 'user-module-templates/style.md': STYLE, 'user-module-templates/style.zh-cn.md': ZH }));
+    expect(templateModules(preset!, ['nope'])).toMatch(/unknown user module template nope \(have: style\)/);
     const [en] = templateModules(preset!, ['all']) as UserModule[];
     expect(en).toMatchObject({ id: 'tpl-style', name: 'Custom style', enabled: true });
     expect(en!.entries.map((e) => e.id)).toEqual(['e1', 'e2']);
@@ -519,6 +531,44 @@ x
     expect(out).toContain('## My style\n\nShort sentences.');
     expect(out).not.toContain('Replace the text below');
     expect(out).toContain('Remember the style.');
+  });
+
+  it('compiles bundled user modules in the same format', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'user-modules/style.md': STYLE.replace('description: Start your own style.\n', ''),
+      'user-modules/style.zh-cn.md': ZH,
+      'user-modules/quiet.md': '---\nname: Quiet\nenabled: false\npoint: guide\ntrigger: { match: any, rules: [{ kind: keyword, target: recent, depth: 2, words: [hush], op: any }] }\n---\nBe quiet.\n',
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(diag.warnings.filter((w) => w.file?.startsWith('user-modules/'))).toEqual([]);
+    const [quiet, style] = preset!.userModules;
+    expect(quiet).toEqual({
+      id: 'quiet', name: 'Quiet', enabled: false, entries: [{ point: 'guide', text: 'Be quiet.' }], vars: [],
+      trigger: { match: 'any', rules: [{ kind: 'keyword', target: 'recent', depth: 2, words: ['hush'], op: 'any' }] },
+    });
+    expect(style).not.toHaveProperty('enabled');
+    expect(style!.entries).toHaveLength(2);
+    expect(style!.locales?.['zh-cn']?.name).toBe('自定义文风');
+    expect(preset!.userModuleTemplates).toEqual([]);
+  });
+
+  it('previews bundled modules as a fresh install gets them', async () => {
+    const { bundledModules, preview } = await import('../src/preview');
+    const { preset } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'user-modules/style.md': STYLE.replace('description: Start your own style.\n', ''),
+      'user-modules/style.zh-cn.md': ZH,
+      'user-modules/quiet.md': '---\nname: Quiet\nenabled: false\npoint: guide\n---\nBe quiet.\n',
+    }));
+    expect((bundledModules(preset!) as UserModule[]).map((m) => m.id)).toEqual(['style']);
+    expect((bundledModules(preset!, ['all']) as UserModule[]).map((m) => m.id)).toEqual(['quiet', 'style']);
+    expect(bundledModules(preset!, ['none'])).toEqual([]);
+    expect(bundledModules(preset!, ['nope'])).toMatch(/unknown bundled user module nope \(have: quiet, style\)/);
+    expect((bundledModules(preset!, undefined, 'zh-cn') as UserModule[])[0]!.name).toBe('自定义文风');
+    const out = preview(preset!, { config: 'fast', userModules: bundledModules(preset!) as UserModule[] });
+    expect(out).toContain('## My style');
+    expect(out).not.toContain('Be quiet.');
   });
 });
 
