@@ -9,7 +9,8 @@ import {
 } from '@advanced-preset/protocol';
 import { presetLocale, pt, t } from '@/i18n';
 
-export type ValueKind = 'bool' | 'enum' | 'number' | 'text';
+/** `list`: a list param, tested for having items (`on`) or being empty (`off`). */
+export type ValueKind = 'bool' | 'list' | 'enum' | 'number' | 'text';
 export interface Option { value: string | number; label: string }
 export interface VarInfo { kind: ValueKind; label: string; options?: Option[]; suggestions?: string[] }
 
@@ -35,6 +36,8 @@ function fixed(preset: APreset): Record<string, VarInfo> {
     'memory.hasChat': { kind: 'bool', label: t('um.var.hasChat') },
     'memory.hasGlobal': { kind: 'bool', label: t('um.var.hasGlobal') },
     'recap.present': { kind: 'bool', label: t('um.var.recap') },
+    // Only presets that shape the input have the signal worth offering.
+    ...(preset.inputShaping ? { 'input.shaped': { kind: 'bool' as const, label: t('um.var.inputShaped') } } : {}),
   };
 }
 
@@ -48,7 +51,7 @@ export function subjectGroups(preset: APreset): SubjectGroup[] {
   if (preset.params.length) presetSubjects.push({ id: 'param', label: t('um.var.param') });
   return [
     { label: t('um.group.chat'), subjects: [{ id: 'keyword', label: t('um.keyword') }, ...pick(['chat.group', 'memory.hasChat', 'memory.hasGlobal', 'recap.present'])] },
-    { label: t('um.group.generation'), subjects: pick(['gen.type', 'gen.origin', 'meta.present', 'meta.pure']) },
+    { label: t('um.group.generation'), subjects: pick(['gen.type', 'gen.origin', 'meta.present', 'meta.pure', 'input.shaped']) },
     { label: t('um.group.preset'), subjects: [...presetSubjects, ...pick(['transport', 'style', 'workflow', 'features.tokenSaving'])] },
     { label: t('um.group.advanced'), subjects: [...(preset.regex.length ? [{ id: 'flag', label: t('um.var.flag') }] : []), { id: 'expr', label: t('um.expr') }] },
   ].filter((g) => g.subjects.length);
@@ -80,6 +83,7 @@ export function varInfo(preset: APreset, path: string): VarInfo {
     const label = p ? pt(preset, 'params', p.id, 'label', p.label) : id;
     if (!p) return { kind: 'text', label };
     if (p.type === 'number') return { kind: 'number', label };
+    if (p.type === 'list') return { kind: 'list', label };
     const options = (p.options ?? []).map((o) => ({ value: o.value, label: optionLabel(preset, p.id, o.value, o.label) }));
     if (p.type === 'select') return { kind: 'enum', label, options };
     return { kind: 'text', label, suggestions: options.map((o) => String(o.value)) };
@@ -92,6 +96,7 @@ const optionLabel = (preset: APreset, param: string, value: string | number, fal
 
 export const OPS: Record<ValueKind, VarOp[]> = {
   bool: ['on', 'off'],
+  list: ['on', 'off'],
   enum: ['in', 'notIn'],
   number: ['==', '!=', '>', '>=', '<', '<='],
   text: ['==', '!='],
@@ -113,7 +118,7 @@ export function retarget(preset: APreset, rule: VarRule, path: string): VarRule 
   const info = varInfo(preset, path);
   const keep = rule.path && varInfo(preset, rule.path).kind === info.kind && OPS[info.kind].includes(rule.op);
   if (keep && info.kind !== 'enum') return { ...rule, path };
-  if (info.kind === 'bool') return { kind: 'var', path, op: 'on' };
+  if (info.kind === 'bool' || info.kind === 'list') return { kind: 'var', path, op: 'on' };
   if (info.kind === 'enum') return { kind: 'var', path, op: 'in', value: [] };
   if (info.kind === 'number') return { kind: 'var', path, op: '>=', value: 0 };
   return { kind: 'var', path, op: '==', value: '' };
@@ -121,6 +126,7 @@ export function retarget(preset: APreset, rule: VarRule, path: string): VarRule 
 
 export function opLabel(kind: ValueKind, op: VarOp, path = ''): string {
   if (kind === 'bool') return t(path.startsWith('modules.') ? `um.op.module.${op}` : `um.op.${op}`);
+  if (kind === 'list') return t(`um.op.list.${op}`);
   if (kind === 'enum') return t(`um.op.${op}`);
   return op === '==' ? '=' : op === '!=' ? '≠' : op === '>=' ? '≥' : op === '<=' ? '≤' : op;
 }
@@ -138,7 +144,7 @@ export function describeRule(preset: APreset, rule: TriggerRule): string {
     return `${where} ${t(`um.kw.${rule.op}`)} ${rule.words.join(t('um.or'))}`;
   }
   const info = varInfo(preset, rule.path);
-  if (info.kind === 'bool') return t('um.boolDesc', { label: info.label, value: opLabel('bool', rule.op, rule.path) });
+  if (info.kind === 'bool' || info.kind === 'list') return t('um.boolDesc', { label: info.label, value: opLabel(info.kind, rule.op, rule.path) });
   return `${info.label} ${opLabel(info.kind, rule.op)} ${valueText(info, rule.value)}`;
 }
 

@@ -58,6 +58,43 @@ configurations:
 - **少而精**：开放用户真正需要的几个位置，每个写清楚说明；
 - **id 要稳定**：用户的模组记住的是插入点 id。以后调整区域结构时，保留旧 id，或者用[迁移](12-test-and-release.md#改名与迁移)把旧 id 映射到新 id。
 
+### 随预设附带用户模组
+
+面对空白的编辑器，很多用户不知道该写什么、该放在哪个插入点。你可以把用户模组直接写进预设源码，有两种放法：
+
+- **`user-module-templates/`（用户模组模板）**：用户点「新建模组」时，可以选择从空白开始，或者从某个模板开始。选中后 AP 复制一份给用户，之后就是用户自己的模组，随便改。
+- **`user-modules/`（随预设安装的用户模组）**：安装预设时直接放进用户的「我的模组」。适合“推荐使用、但应由用户掌控”的内容，比如一段可按喜好改写的设定补充。用户可以直接改它的提示词；你在新版本里改了它，而用户也改过时，AP 会问用户保留哪一份。
+
+两个目录写法相同，一个文件一个模组，表达力和面板里的编辑器一样。花瓣的「自定义文风」模板（节选）：
+
+```markdown
+---
+name: Custom writing style
+description: Your own style guide in the writing style block, plus questions Freesia asks Petals before writing.
+point: writing-style
+when: '!meta.pure && gen.type != "impersonate"'
+vars:
+  mandatoryQuestions:
+    custom-style: How should this part of the story apply the custom writing style in `<writing_style>`?
+---
+<!--#
+How to use this template: rewrite the style guide below; edit the questions in "Build variables" …
+-->
+## Writing Style: Baimiao
+
+…
+```
+
+- `point` 是插入点，正文就是要插入的内容；需要多个插入点时，用 `<!-- @entry point=… -->` 另起一段；
+- `vars` 更新构建变量（这里给 Freesia 的提问清单加一个问题），`when` 成为用户模组的触发条件；
+- 正文**原样**交给用户：`<!--# … -->` 注释会出现在用户的编辑器里，但不会发给模型——用它写“怎样修改”的说明正合适；
+- `user-modules/` 中的模组还可以写 `enabled: false`，安装后默认关闭；
+- 想给中文用户一份中文版，再写一个 `custom-style.zh-cn.md`（整份翻译）。
+
+给出一份能直接用的完整示例，而不是“在这里填写”的占位符；用 `npx ap preview --user-module-templates all` 看看模板生效后的样子（`user-modules/` 中开启的模组在预览时默认就会合并）。完整规则见参考文档的[预设中的用户模组](../reference/user-modules.md#预设中的用户模组)。
+
+用户自己写的模组也能带走：在面板导出预设时，AP 会问要把「我的模组」中的哪些一起导出，对方安装后就会得到这些模组。
+
 ## 角色名称与前缀
 
 `preset.yaml` 里的**角色**（actors）是参与写作的身份：叙述者、编辑、用户……每个角色有名字、前缀和界面颜色。用户可以在“写作”页改名，所有用到 `{{ap::name::…}}`、`{{ap::prefix::…}}` 的地方都会跟着变。所以提示词里提到角色时，**用宏，不要把名字写死**。

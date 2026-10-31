@@ -3,11 +3,13 @@ import { join, relative, sep } from 'node:path';
 import type { APreset } from '@advanced-preset/protocol';
 import { compile, type CompileResult, type SourceTree } from './compile';
 import { validate } from './validate';
+import { FRAGMENT_RE } from './manifest';
 
-const SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
+const SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 
 export function isSourcePath(rel: string): boolean {
-  return SOURCE_RE.test(rel.split(sep).join('/'));
+  const p = rel.split(sep).join('/');
+  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p);
 }
 
 async function walk(dir: string, root: string, out: SourceTree): Promise<void> {

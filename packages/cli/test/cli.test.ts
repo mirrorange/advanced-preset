@@ -137,6 +137,21 @@ describe('markdown directives', () => {
     expect(c[1]).toMatchObject({ role: 'assistant' });
   });
 
+  it('strips author comments, including commented-out entries', () => {
+    const d = new Diagnostics();
+    const f = parseMarkdown('a <!--# note -->\n<!--#\n<!-- @entry id=old -->\nold text\n-->\n<!-- @entry id=x -->\nb\n', ['entry'], d, {});
+    expect(d.ok).toBe(true);
+    expect(f.chunks).toHaveLength(2);
+    expect(f.chunks[0]!.tokens).toEqual([{ kind: 'text', text: 'a\n' }]);
+    expect(f.chunks[1]!.head).toMatchObject({ name: 'entry', line: 6 });
+  });
+
+  it('reports an unclosed comment with file and line', () => {
+    const d = new Diagnostics();
+    parseMarkdown('---\nid: m\n---\ntext\n<!--# todo\n', [], d, { file: 'modules/m.md' });
+    expect(d.errors[0]).toMatchObject({ message: expect.stringMatching(/unclosed comment/), file: 'modules/m.md', line: 5 });
+  });
+
   it('reports unbalanced blocks', () => {
     const d = new Diagnostics();
     const f = parseMarkdown('<!-- @if modules.x -->\ntext\n', [], d, {});
@@ -395,6 +410,168 @@ migrations:
   });
 });
 
+describe('user module sources', () => {
+  const EXTRA = `
+insertionPoints:
+  - { id: intro-end, label: After intro, region: top, order: 1000 }
+  - { id: guide, label: Guidelines, region: guide, order: 5 }
+vars:
+  questions: { type: dict, label: Questions }
+`;
+  const STYLE = `---
+name: Custom style
+description: Start your own style.
+point: guide
+when: '!meta.pure'
+vars:
+  questions:
+    my-style: How does {{ap::name::narrator}} keep the style?
+---
+<!--# Replace the text below.
+<!-- @entry point=intro-end --> is text inside this comment
+-->
+## My style
+
+Short sentences.
+
+\`\`\`
+<!-- @entry point=nowhere -->
+\`\`\`
+
+<!-- @entry point=intro-end role=user -->
+
+Remember the style.
+`;
+  const ZH = `---
+name: 自定义文风
+point: guide
+---
+<!--# 在下面写文风 -->
+## 我的文风
+`;
+
+  it('keeps the raw text, splits entries and compiles translations', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'user-module-templates/style.md': STYLE,
+      'user-module-templates/style.zh-CN.md': ZH,
+      'locales/zh-cn.yaml': 'userModuleTemplates: { style: { name: 文风 }, nope: { name: x } }\nuserModules: { gone: { name: x } }\n',
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/userModuleTemplates\.nope does not exist/);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/userModules\.gone does not exist/);
+    expect(preset!.userModules).toEqual([]);
+    const [tpl] = preset!.userModuleTemplates;
+    expect(tpl).toMatchObject({
+      id: 'style',
+      name: 'Custom style',
+      description: 'Start your own style.',
+      vars: [{ var: 'questions', type: 'dict', items: [{ key: 'my-style', value: 'How does {{ap::name::narrator}} keep the style?' }] }],
+      trigger: { match: 'all', rules: [{ kind: 'expr', source: '!meta.pure' }] },
+    });
+    expect(tpl!.entries).toEqual([
+      { point: 'guide', text: '<!--# Replace the text below.\n<!-- @entry point=intro-end --> is text inside this comment\n-->\n## My style\n\nShort sentences.\n\n```\n<!-- @entry point=nowhere -->\n```' },
+      { point: 'intro-end', role: 'user', text: 'Remember the style.' },
+    ]);
+    expect(tpl!.locales).toEqual({ 'zh-cn': { name: '自定义文风', entries: [{ point: 'guide', text: '<!--# 在下面写文风 -->\n## 我的文风' }], vars: [], trigger: { match: 'all', rules: [] } } });
+  });
+
+  it('reports bad points, roles, triggers, variables and directives', () => {
+    const { diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'user-module-templates/bad.md': `---
+trigger: { match: any, rules: [{ kind: var, path: params.nope, op: on }, { kind: wat }] }
+vars: { nope: x }
+color: red
+---
+<!-- @entry point=gone -->
+x
+<!-- @entry point=guide role=robot -->
+<!-- @if -->
+`,
+      'user-module-templates/loose.md': 'Text without a point.\n',
+      'user-module-templates/Bad_Name.md': '',
+      'user-module-templates/orphan.zh-cn.md': '',
+      'user-module-templates/both.md': '---\npoint: guide\nwhen: x\ntrigger: { rules: [] }\n---\nx\n',
+      'user-module-templates/on.md': '---\npoint: guide\nenabled: false\n---\nx\n',
+      'user-modules/Bad_Name.md': '',
+      'user-modules/flag.md': '---\npoint: guide\nenabled: maybe\ndescription: x\n---\nx\n',
+      'user-modules/orphan.zh-cn.md': '',
+    }));
+    const errors = diag.errors.map((e) => `${e.file}: ${e.message}`).join('\n');
+    expect(errors).toMatch(/bad\.md: unknown insertion point `gone`/);
+    expect(errors).toMatch(/bad\.md: role must be/);
+    expect(errors).toMatch(/bad\.md: trigger has 1 invalid rule/);
+    expect(errors).toMatch(/bad\.md: unknown variable `nope`/);
+    expect(errors).toMatch(/bad\.md: unknown param `nope` in condition/);
+    expect(errors).toMatch(/bad\.md: .*@if/);
+    expect(errors).toMatch(/loose\.md: text before the first `@entry` needs `point`/);
+    expect(errors).toMatch(/user-module-templates\/Bad_Name\.md: user module template files are/);
+    expect(errors).toMatch(/user-module-templates\/orphan\.zh-cn\.md: translation of unknown user module template `orphan`/);
+    expect(errors).toMatch(/both\.md: use either `when` or `trigger`/);
+    expect(errors).toMatch(/user-modules\/Bad_Name\.md: user module files are `user-modules\/<id>\.md`/);
+    expect(errors).toMatch(/user-modules\/orphan\.zh-cn\.md: translation of unknown user module `orphan`/);
+    expect(errors).toMatch(/flag\.md: `enabled` must be true or false/);
+    const warnings = diag.warnings.map((w) => `${w.file}: ${w.message}`).join('\n');
+    expect(warnings).toMatch(/unknown frontmatter key `color` in a user module template/);
+    expect(warnings).toMatch(/on\.md: `enabled` only applies to bundled user modules/);
+    expect(warnings).toMatch(/flag\.md: `description` is only shown for user module templates/);
+  });
+
+  it('previews templates as user modules', async () => {
+    const { templateModules, preview } = await import('../src/preview');
+    const { preset } = build(tree({ 'preset.yaml': MANIFEST + EXTRA, 'user-module-templates/style.md': STYLE, 'user-module-templates/style.zh-cn.md': ZH }));
+    expect(templateModules(preset!, ['nope'])).toMatch(/unknown user module template nope \(have: style\)/);
+    const [en] = templateModules(preset!, ['all']) as UserModule[];
+    expect(en).toMatchObject({ id: 'tpl-style', name: 'Custom style', enabled: true });
+    expect(en!.entries.map((e) => e.id)).toEqual(['e1', 'e2']);
+    const [zh] = templateModules(preset!, ['style'], 'zh-cn') as UserModule[];
+    expect(zh!.name).toBe('自定义文风');
+    const out = preview(preset!, { config: 'fast', userModules: [en!] });
+    expect(out).toContain('## My style\n\nShort sentences.');
+    expect(out).not.toContain('Replace the text below');
+    expect(out).toContain('Remember the style.');
+  });
+
+  it('compiles bundled user modules in the same format', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'user-modules/style.md': STYLE.replace('description: Start your own style.\n', ''),
+      'user-modules/style.zh-cn.md': ZH,
+      'user-modules/quiet.md': '---\nname: Quiet\nenabled: false\npoint: guide\ntrigger: { match: any, rules: [{ kind: keyword, target: recent, depth: 2, words: [hush], op: any }] }\n---\nBe quiet.\n',
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(diag.warnings.filter((w) => w.file?.startsWith('user-modules/'))).toEqual([]);
+    const [quiet, style] = preset!.userModules;
+    expect(quiet).toEqual({
+      id: 'quiet', name: 'Quiet', enabled: false, entries: [{ point: 'guide', text: 'Be quiet.' }], vars: [],
+      trigger: { match: 'any', rules: [{ kind: 'keyword', target: 'recent', depth: 2, words: ['hush'], op: 'any' }] },
+    });
+    expect(style).not.toHaveProperty('enabled');
+    expect(style!.entries).toHaveLength(2);
+    expect(style!.locales?.['zh-cn']?.name).toBe('自定义文风');
+    expect(preset!.userModuleTemplates).toEqual([]);
+  });
+
+  it('previews bundled modules as a fresh install gets them', async () => {
+    const { bundledModules, preview } = await import('../src/preview');
+    const { preset } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA,
+      'user-modules/style.md': STYLE.replace('description: Start your own style.\n', ''),
+      'user-modules/style.zh-cn.md': ZH,
+      'user-modules/quiet.md': '---\nname: Quiet\nenabled: false\npoint: guide\n---\nBe quiet.\n',
+    }));
+    expect((bundledModules(preset!) as UserModule[]).map((m) => m.id)).toEqual(['style']);
+    expect((bundledModules(preset!, ['all']) as UserModule[]).map((m) => m.id)).toEqual(['quiet', 'style']);
+    expect(bundledModules(preset!, ['none'])).toEqual([]);
+    expect(bundledModules(preset!, ['nope'])).toMatch(/unknown bundled user module nope \(have: quiet, style\)/);
+    expect((bundledModules(preset!, undefined, 'zh-cn') as UserModule[])[0]!.name).toBe('自定义文风');
+    const out = preview(preset!, { config: 'fast', userModules: bundledModules(preset!) as UserModule[] });
+    expect(out).toContain('## My style');
+    expect(out).not.toContain('Be quiet.');
+  });
+});
+
 describe('build variables', () => {
   const VARS = `
 vars:
@@ -562,5 +739,178 @@ describe('cache optimization defaults', () => {
     expect(errors).toMatch(/`maxDeferredTurns` must be a number/);
     expect(errors).toMatch(/`ttlMinutes` must be a number/);
     expect(r.diag.warnings.map((d) => d.message).join('\n')).toMatch(/unknown cache option `ttl`/);
+  });
+});
+
+describe('templates (I-109)', () => {
+  const TPL = `---
+id: tpl
+toggle: always
+region: top
+---
+Before {{ap::name::narrator}}.
+<!-- @template -->
+<% if (params.language) { -%>
+Lang: <%- params.language %> / <%- macro('name', 'narrator') %> {{ap::param::language}}
+<% } -%>
+<%- vars.notes %> <%- '{{ap::' + 'frob}}' %>
+<!-- @end -->
+`;
+
+  it('compiles templates with their file and line and renders them', () => {
+    const manifest = MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.9.0') + 'vars:\n  notes: string\n';
+    const { preset, diag } = build(tree({ 'preset.yaml': manifest, 'modules/tpl.md': TPL }));
+    expect(diag.errors).toEqual([]);
+    const warns = diag.warnings.map((w) => w.message).join('\n');
+    // Macros are checked in the literal text only; template reads count as reads.
+    expect(warns).not.toMatch(/frob|never read|minAdvancedPreset/);
+    const piece = preset!.entries.find((e) => e.id === 'tpl/main')!.content[0]!.pieces[1]!;
+    expect(piece.template).toEqual({ file: 'modules/tpl.md', line: 8 });
+    const config = resolveConfiguration(preset!, 'default', { params: { language: 'French' } });
+    const a = assemble({ preset: preset!, config, vars: defaultVars(preset!, config) });
+    expect(a.warnings).toEqual([]);
+    expect(a.regions.top!.map((m) => m.content).join('\n')).toContain('Before Nia.\nLang: French / Nia French');
+  });
+
+  it('reports template errors at their source line and checks references', () => {
+    const bad = `---
+id: bad
+toggle: always
+region: top
+---
+text
+<!-- @template -->
+ok
+<%= params.language
+<!-- @end -->
+<!-- @template --><%- vars.ghost %> <%- params['nope'] %> <%- modules.core %> <%- stages.x %> <%- {{ap::nope}} %><!-- @end -->
+`;
+    const { diag } = build(tree({ 'modules/bad.md': bad }));
+    expect(diag.errors).toContainEqual(expect.objectContaining({ message: 'template: Could not find matching close tag for "<%=".', file: 'modules/bad.md', line: 9 }));
+    const warns = diag.warnings.map((w) => w.message);
+    expect(warns).toContain('template reads unknown variable `ghost`');
+    expect(warns).toContain('template reads unknown param `nope`');
+    expect(warns).toContain('template reads unknown stage `x`');
+    expect(warns).not.toContain('template reads unknown module `core`');
+    expect(warns.join('\n')).toMatch(/templates need Advanced Preset 1\.9\.0/);
+    // Code is not scanned for macros.
+    expect(diag.errors.map((e) => e.message).join('\n')).not.toMatch(/ap::nope/);
+  });
+
+  it('treats dynamic use of vars as reading every variable', () => {
+    const manifest = MANIFEST + 'vars:\n  notes: string\n  tags: list\n';
+    const t = tree({ 'preset.yaml': manifest, 'modules/tpl.md': '---\nid: tpl\ntoggle: always\nregion: top\n---\n<!-- @template --><%- Object.keys(vars).join() %><!-- @end -->\n' });
+    expect(build(t).diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/never read/);
+  });
+});
+
+describe('list params', () => {
+  const withParams = (params: string, extra = '') => tree({
+    'preset.yaml': MANIFEST.replace('params:\n  - { id: language, type: text, label: Language, unset: the story language }', `params:\n  - { id: language, type: text, label: Language, unset: the story language }\n${params}`) + extra,
+  });
+  const LIST = '  - { id: banned, type: list, label: Banned, default: [" a ", a, b], separator: " / " }';
+
+  it('compiles list params, normalizes defaults and checks the AP version', () => {
+    const { preset, diag } = build(withParams(LIST, 'configurationDefaults:\n  params: { banned: [x, y, x] }\n'));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.params.find((p) => p.id === 'banned')).toEqual({ id: 'banned', type: 'list', label: 'Banned', default: ['a', 'b'], separator: ' / ' });
+    expect(preset!.configurationDefaults.params.banned).toEqual(['x', 'y']);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/list params need Advanced Preset 1\.9\.0/);
+    const ok = build(withParams(LIST, 'minAdvancedPreset: 1.9.0\n'));
+    expect(ok.diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/list params need/);
+  });
+
+  it('reports values of the wrong shape and options that do not apply', () => {
+    const patch = (t: SourceTree, from: string, to: string) => t.set('preset.yaml', t.get('preset.yaml')!.replace(from, to));
+    const { diag } = build(patch(withParams(
+      '  - { id: banned, type: list, label: Banned, default: a, options: [x] }\n  - { id: n, type: number, label: N, default: "3", separator: "," }',
+      'configurationDefaults:\n  params: { language: [x] }\n',
+    ), 'diff: { connection: { transport: prefill } }', 'diff: { params: { banned: [1] } }'));
+    const errors = diag.errors.map((e) => e.message).join('\n');
+    expect(errors).toMatch(/default of a list param must be a list of strings/);
+    expect(errors).toMatch(/default of a number param must be a number/);
+    expect(errors).toMatch(/configurationDefaults\.params\.language: a text param needs a string or number/);
+    expect(errors).toMatch(/configurations\[0\]\.diff\.params\.banned: a list param needs a list of strings/);
+    const warnings = diag.warnings.map((w) => w.message).join('\n');
+    expect(warnings).toMatch(/`options` does not apply to list params/);
+    expect(warnings).toMatch(/`separator` only applies to list params/);
+  });
+
+  it('sets params in previews with --param', async () => {
+    const { parseParamArg } = await import('../src/preview');
+    const { preset } = build(withParams(LIST + '\n  - { id: n, type: number, label: N }'));
+    expect(parseParamArg(preset!, 'banned=x, y ,x')).toEqual({ id: 'banned', value: ['x', 'y'] });
+    expect(parseParamArg(preset!, 'banned=["a, b","c"]')).toEqual({ id: 'banned', value: ['a, b', 'c'] });
+    expect(parseParamArg(preset!, 'banned=')).toEqual({ id: 'banned', value: [] });
+    expect(parseParamArg(preset!, 'n=12')).toEqual({ id: 'n', value: 12 });
+    expect(parseParamArg(preset!, 'language=English')).toEqual({ id: 'language', value: 'English' });
+    expect(parseParamArg(preset!, 'n=x')).toMatch(/expected a number/);
+    expect(parseParamArg(preset!, 'banned=[1]')).toMatch(/JSON array of strings/);
+    expect(parseParamArg(preset!, 'nope=1')).toMatch(/unknown param `nope`/);
+    expect(parseParamArg(preset!, 'banned')).toMatch(/expects id=value/);
+  });
+});
+
+describe('input shaping (I-128)', () => {
+  const withShaping = (shaping: string, extraModule = '') => {
+    const t = tree({ 'preset.yaml': MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.9.0')
+      .replace('  - { id: task, anchor: historyEnd }', '  - { id: task, anchor: historyEnd }\n  - { id: input, merge: { wrap: input } }')
+      .replace('chatHistory, task, tail]', 'chatHistory, task, input, tail]') + shaping });
+    t.set('modules/input.md', `---
+id: input
+toggle: always
+region: input
+when: input.shaped
+---
+${extraModule || '{{ap::input::text}}'}
+`);
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+
+  it('is absent unless declared (hash unchanged)', () => {
+    const plain = build(tree());
+    expect(plain.preset!.inputShaping).toBeUndefined();
+    expect('inputShaping' in plain.preset!).toBe(false);
+    expect(build(tree()).preset!.hash).toBe(plain.preset!.hash);
+  });
+
+  it('compiles extract and wrap with the default template', () => {
+    const ex = build(withShaping('inputShaping:\n  mode: extract\n'));
+    expect(ex.diag.errors).toEqual([]);
+    expect(messages(ex)).not.toMatch(/input/i);
+    expect(ex.preset!.inputShaping).toEqual({ mode: 'extract', template: '<input>\n{{content}}\n</input>' });
+    const wrap = build(withShaping('inputShaping: { mode: wrap, template: "<{{ap::name::user}}>{{content}}</{{ap::name::user}}>" }\n', 'Answer the input.'));
+    expect(wrap.diag.errors).toEqual([]);
+    expect(wrap.preset!.inputShaping).toEqual({ mode: 'wrap', template: '<{{ap::name::user}}>{{content}}</{{ap::name::user}}>' });
+  });
+
+  it('flags bad declarations, lost input and old AP versions', () => {
+    expect(build(withShaping('inputShaping: { mode: move }\n')).diag.errors.map((e) => e.message).join('\n')).toMatch(/inputShaping\.mode must be one of wrap, extract/);
+    expect(build(withShaping('inputShaping: wrap\n')).diag.errors.map((e) => e.message).join('\n')).toMatch(/must be a mapping/);
+    const w = messages(build(withShaping('inputShaping: { mode: wrap, template: "<input/>", tag: x }\n', 'Hi.')));
+    expect(w).toMatch(/no \{\{content\}\}/);
+    expect(w).toMatch(/unknown key `tag`/);
+    expect(messages(build(withShaping('inputShaping: { mode: extract, template: "x{{content}}" }\n')))).toMatch(/only used by `wrap`/);
+    expect(messages(build(withShaping('inputShaping: { mode: extract }\n', 'Nothing here.')))).toMatch(/no prompt uses \{\{ap::input::text\}\}/);
+    expect(messages(build(withShaping('')))).toMatch(/always empty: the preset declares no inputShaping/);
+    expect(messages(build(withShaping('', '{{ap::input::nope}}')))).toMatch(/expected meta \| text/);
+    const old = withShaping('inputShaping: { mode: extract }\n');
+    old.set('preset.yaml', old.get('preset.yaml')!.replace('minAdvancedPreset: 1.9.0\n', ''));
+    expect(messages(build(old))).toMatch(/input shaping needs Advanced Preset 1\.9\.0/);
+  });
+
+  it('previews a shaped turn with --input', async () => {
+    const { preview } = await import('../src/preview');
+    const ex = build(withShaping('inputShaping: { mode: extract }\n')).preset!;
+    const out = preview(ex, { input: 'Open the door.' });
+    expect(out).toMatch(/input shaping: extract\n/);
+    expect(out).toMatch(/━━ input [^\n]*\n\[system\]\n<input>\nOpen the door\.\n<\/input>/);
+    expect(out).toMatch(/last user message[^\n]*\n\(extracted/);
+    expect(preview(ex, {})).toMatch(/input shaping: extract \(not shaped: no --input\)[\s\S]*━━ input \(empty\)/);
+    const wrap = build(withShaping('inputShaping: { mode: wrap }\n', 'Answer the input.')).preset!;
+    const json = JSON.parse(preview(wrap, { input: 'Hi {{user}}', json: true }));
+    expect(json.historyInput).toBe('<input>\nHi {{user}}\n</input>');
+    expect(json.vars.input).toEqual({ shaped: true });
   });
 });

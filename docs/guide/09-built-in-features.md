@@ -140,6 +140,36 @@ configurationDefaults:
 
 所以如果你的预设想支持节省 Token，就提供一个事件摘要模组，并让它默认打开。完整字段见 [structures.md](../reference/structures.md#synopsis) 与 [manifest.md](../reference/manifest.md#省-token-tokensaving)。
 
+## 用户输入整形
+
+后置指令常常要提到“用户这次说了什么”，但本次输入混在聊天记录里，没有一个可以引用的名字。**用户输入整形**是预设级的功能（用户没有开关），在清单里声明一次：
+
+```yaml
+# 包裹：聊天记录里的本次输入换成 <input>…</input>
+inputShaping:
+  mode: wrap
+  template: "<input>\n{{content}}\n</input>"
+```
+
+```yaml
+# 提取：本次输入离开聊天记录，由宏放到你想要的区域
+inputShaping:
+  mode: extract
+```
+
+提取时，用一个条目把它放回来，并用 `input.shaped` 判断这次有没有输入：
+
+```markdown
+<!-- @entry id=input region=input order=100 when="input.shaped" -->
+<input>
+{{ap::input::text}}
+</input>
+```
+
+规则很简单：**聊天记录以用户消息结尾**时才整形——普通发送、重新生成、滑动都会；“继续”、`/trigger`、其他插件在助手消息之后发起的生成不会。世界书的深度 0 注入等插在输入之后的内容不影响判断。花瓣预设用的是提取：输入放在记忆与问题之间的 `input` 区域里（见[案例](13-petals-case-study.md#第二步划分区域)）。
+
+用 `ap preview --input "……"` 可以看到整形后的样子。细节见[参考](../reference/manifest.md#用户输入整形-inputshaping)。
+
 ## 行内批注
 
 行内批注让叙述者在正文里“划一句、写一句”：模型写 `{==原文==}{>>批注<<}`，AP 把标记从正文中去掉，只保存批注本身。读者看到的是带虚线下划线的文字，悬停（手机上轻点）弹出批注气泡，署名为叙述者。

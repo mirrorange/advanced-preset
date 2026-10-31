@@ -1,10 +1,18 @@
 /* Settings panel (§16.5): fills ST's AI Response Configuration drawer (`#left-nav-panel`), on top of
-   its content. The drawer is the containing block, so desktop / mobile sizing come from ST. */
+   its content. The drawer is the containing block, so desktop / mobile sizing come from ST.
+   Inside the drawer the panel is transparent: the drawer's own children are hidden while it is shown
+   (global `.ap-panel-covering`, I-122), so the drawer's theme tint and blur are exactly ST's. Theme tints
+   are often translucent (Azure: 61%), and a second translucent layer let the hidden settings show through. */
 :host(ap-panel) { border-radius: inherit; }
 .panel {
   position: absolute; z-index: 100; inset: 0; overflow: hidden; border-radius: inherit; container: ap-panel / inline-size;
-  display: flex; flex-direction: column; background: var(--ap-panel-bg); color: var(--ap-text);
-  backdrop-filter: blur(var(--SmartThemeBlurStrength, 10px)); -webkit-backdrop-filter: blur(var(--SmartThemeBlurStrength, 10px));
+  display: flex; flex-direction: column; background: transparent; color: var(--ap-text);
+}
+/* Fallback mount on <body> (no drawer): own opaque-ish tint and blur. Blur is set through a custom property
+   so the CSS minifier keeps the unprefixed declaration next to the -webkit- one. */
+:host(ap-panel[data-ap-standalone]) .panel {
+  --ap-blur: blur(var(--SmartThemeBlurStrength, 10px));
+  background: var(--ap-panel-bg-solid); -webkit-backdrop-filter: var(--ap-blur); backdrop-filter: var(--ap-blur);
 }
 .panel-enter-active, .panel-leave-active { transition: transform 0.2s ease, opacity 0.2s ease; }
 .panel-enter-from, .panel-leave-to { transform: translateY(8px); opacity: 0; }
@@ -130,6 +138,14 @@
   border: 1px dashed var(--ap-border); border-radius: var(--ap-radius-md); background: transparent; color: var(--ap-muted); cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
+/* "New module" picker: blank or one of the preset's module templates (inline, above the list). */
+.um-picker { display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--ap-space-2); padding: 4px var(--ap-space-2) var(--ap-space-2); border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md); background: var(--ap-surface-2); }
+.um-picker-head { display: flex; align-items: center; justify-content: space-between; gap: var(--ap-space-2); }
+.um-choice { display: flex; align-items: flex-start; gap: var(--ap-space-2); width: 100%; padding: 6px var(--ap-space-2); border: 0; border-radius: var(--ap-radius-sm); background: transparent; color: inherit; text-align: left; cursor: pointer; transition: background 0.15s; }
+.um-choice:hover, .um-choice:focus-visible { background: var(--ap-tint); }
+.um-choice > svg.lucide { flex: 0 0 auto; width: 1.1em; height: 1.1em; margin-top: 0.15em; color: var(--ap-primary); }
+.um-choice-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.35; }
+.um-choice-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .um-new:hover { color: var(--ap-primary); border-color: color-mix(in srgb, var(--ap-primary) 50%, transparent); background: var(--ap-tint); }
 
 .um-editor { display: flex; flex-direction: column; gap: var(--ap-space-3); }

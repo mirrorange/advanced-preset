@@ -21,3 +21,5 @@ insertionPoints:
   before-task: { label: 任务之前, description: 紧挨在工作流指令之前，适合放每轮提醒。 }
 vars:
   considerations: { label: 规划要点, description: 叙述者规划下一场景时考虑的要点。 }
+userModuleTemplates:
+  my-guideline: { name: 我的写作要求, description: 在写作指南中加入你自己的规则，并添加一个规划要点。 }

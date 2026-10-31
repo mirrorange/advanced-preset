@@ -16,7 +16,7 @@
 | `actors` `narrator` `user` | 角色 |
 | `styles` `plaintextFormat` `contentMarker` `prefillGuide` `historyItemTemplate` `stageHeading` `stop` | 写法与输出格式 |
 | `regions` `anchors` `workflowRegion` | 区域 |
-| `params` `groups` `modules` `entries` `insertionPoints` `vars` | 参数、分组、模组、已排序的条目（条件已编译为 AST）、插入点、构建变量 |
+| `params` `groups` `modules` `entries` `insertionPoints` `userModules` `userModuleTemplates` `vars` | 参数、分组、模组、已排序的条目（条件已编译为 AST）、插入点、随预设安装的用户模组与用户模组模板（条目文字为源码原文，翻译在各项的 `locales` 中，见 [user-modules.md](user-modules.md#预设中的用户模组)）、构建变量 |
 | `workflows` `structures` `regex` `meta` `tokenSaving` | 工作流、结构、正则标记、元指令、省 token |
 | `syntheticTurns` `tools` | 工具传输的文案 |
 | `theme` | 主题色 |
@@ -24,7 +24,7 @@
 | `configurationDefaults` `configurations` `defaultConfiguration` `migrations` | 配置与迁移 |
 | `moduleOrder` `locales` | 面板顺序与翻译 |
 
-产物中的文本是**未展开**的（宏在运行期展开）。除调试外不要手改产物；改源码后重新构建。
+产物中的文本是**未展开**的（宏在运行期展开）。`@template` 片段以模板源码保存，带 `template: { file, line }` 标记（来源位置，用于报错），运行期渲染。除调试外不要手改产物；改源码后重新构建。
 
 ## 安装与更新
 
@@ -38,6 +38,7 @@ AP 面板 → **预设**：
 | 内置 | 扩展自带的预设（目前是花瓣），随扩展更新 |
 
 - 产物声明了 `minAdvancedPreset` 而扩展版本更低时，拒绝安装并提示升级扩展；
+- 产物包含[模板](templates.md)时，安装前显示全部模板代码并请用户确认信任；更新时模板代码与已安装版本相同则不再询问。取消则不安装。内置与开发服务器的预设不询问；
 - 查找顺序：开发服务器 → 已安装 → 内置。已安装副本版本低于内置版本时使用内置版本；
 - 安装 / 更新后：按[迁移](configuration.md#迁移)处理用户配置与用户模组，然后确保 Carrier 存在且与产物一致；
 - 删除已安装的预设会同时删除它的 Carrier（内置预设则回退到内置版本）。

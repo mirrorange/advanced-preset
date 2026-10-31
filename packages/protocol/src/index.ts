@@ -18,3 +18,7 @@ export * from './directives';
 export * from './user-modules';
 export * from './build-vars';
 export * from './annotations';
+export * from './template';
+export * from './preset-user-modules';
+export * from './params';
+export * from './input-shaping';

@@ -33,7 +33,7 @@ const remove = (i: number) => { model.value = model.value.filter((_, j) => j !==
 <template>
   <div class="chips-input input" @click="input?.focus()">
     <span v-for="(w, i) in model" :key="w" class="chip" :class="{ mono }">
-      <span class="ellipsis">{{ w }}</span>
+      <span class="ellipsis" :title="w">{{ w }}</span>
       <button type="button" class="chip-x" :aria-label="removeLabel" @click.stop="remove(i)"><X /></button>
     </span>
     <input

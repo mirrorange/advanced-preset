@@ -16,8 +16,11 @@ This repository is an **Advanced Preset (AP)** for SillyTavern: __PRESET_NAME__.
 
 ```
 preset.yaml          清单：角色、区域、参数、结构、推荐配置……
+manifest/*.yaml      （可选）清单片段，构建时合并进 preset.yaml
 modules/**/*.md      模组（一个文件一个）
 workflows/*.md       工作流
+user-modules/*.md    （可选）随预设安装的用户模组
+user-module-templates/*.md  用户模组模板（新建用户模组时可选的示例）
 locales/*.yaml       面板翻译
 dist/                构建产物（由 ap build 生成，发布时提交）
 DESIGN.md            设计稿（如果有）

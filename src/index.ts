@@ -21,6 +21,7 @@ import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/upd
 import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
 import { installPresetIo } from '@/app/st-preset-io';
+import { syncBundledModules } from '@/app/bundled-modules';
 import { mountUi } from '@/ui';
 import { ui } from '@/ui/state';
 import { registerChatSurface } from '@/ui/annotations';
@@ -93,6 +94,8 @@ async function init(): Promise<void> {
 
   const ready = async () => {
     await syncCarriers();
+    // Bundled user modules may ask which copy to keep: only once ST's UI is up, without holding up the rest.
+    void (async () => { for (const { preset } of listPresets()) await syncBundledModules(preset); })();
     syncGlobalRefs({ reload: true });
     startDevSource();
     void checkStaleBundle();

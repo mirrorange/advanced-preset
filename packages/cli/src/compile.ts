@@ -1,9 +1,12 @@
 /**
  * Source tree → `APreset` artifact.
  *
- *   preset.yaml          manifest
+ *   preset.yaml          manifest (metadata; other keys may live in fragments)
+ *   manifest/**\/*.yaml   manifest fragments, merged into preset.yaml (see manifest.ts)
  *   modules/**\/*.md      one module per file (frontmatter + entries)
  *   workflows/*.md       one workflow per file (frontmatter + sections)
+ *   user-modules/*.md    user modules installed with the preset (raw text; see user-module-sources.ts)
+ *   user-module-templates/*.md  example user modules offered when creating one (same format)
  *   locales/<lang>.yaml  panel strings
  *
  * Compilation is pure over a `SourceTree` (path → text) so it can be tested without a disk.
@@ -12,17 +15,20 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
-  isInlineStructure,
+  isInlineStructure, templateLiterals, DEFAULT_INPUT_TEMPLATE, INPUT_SHAPING_MODES,
   CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
-  type APreset, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
+  type APreset, type InputShaping, type InputShapingMode, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
   type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
   DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode,
+  PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
+import { compileUserModuleSources, type SourceContext } from './user-module-sources';
+import { MANIFEST_FILE, loadManifest } from './manifest';
 
 export type SourceTree = Map<string, string>;
 
@@ -36,6 +42,8 @@ export const SOURCE_FORMAT_VERSION = 1;
 export interface SourceMap {
   exprs: { expr: Expr; where: Where }[];
   texts: { text: string; where: Where }[];
+  /** `@template` sources (checked for references; their literal text is in `texts`). */
+  templates: { source: string; where: Where }[];
   entries: Map<string, Where>;
   modules: Map<string, Where>;
   workflows: Map<string, Where>;
@@ -43,12 +51,15 @@ export interface SourceMap {
 
 export interface CompileResult {
   preset?: APreset;
+  /** Manifest files that were merged: `preset.yaml`, then fragments in merge order. */
+  manifestFiles?: string[];
   diag: Diagnostics;
   map: SourceMap;
 }
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
+const paramShape = (type: string) => (type === 'list' ? 'a list of strings' : type === 'number' ? 'a number' : 'a string or number');
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : v == null ? fallback : String(v));
 const ROLES: Role[] = ['system', 'user', 'assistant'];
 const ANCHORS: SemanticAnchor[] = ['historyStart', 'historyEnd', 'tail'];
@@ -137,22 +148,12 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
 
 export function compile(tree: SourceTree): CompileResult {
   const diag = new Diagnostics();
-  const map: SourceMap = { exprs: [], texts: [], entries: new Map(), modules: new Map(), workflows: new Map() };
-  const manifestSrc = tree.get('preset.yaml');
-  if (manifestSrc === undefined) {
-    diag.error('preset.yaml not found');
-    return { diag, map };
-  }
-  const M = 'preset.yaml';
-  let raw: Obj;
-  try {
-    const parsed = parseYaml(manifestSrc);
-    if (!isObj(parsed)) throw new Error('top level must be a mapping');
-    raw = parsed;
-  } catch (e) {
-    diag.error(`invalid YAML: ${(e as Error).message}`, { file: M });
-    return { diag, map };
-  }
+  const map: SourceMap = { exprs: [], texts: [], templates: [], entries: new Map(), modules: new Map(), workflows: new Map() };
+  const manifest = loadManifest(tree, diag);
+  if (!manifest) return { diag, map };
+  diag.locate = manifest.locate;
+  const M = MANIFEST_FILE;
+  const raw: Obj = manifest.raw;
 
   const expr = (src: unknown, where: Where): Expr | undefined => {
     if (src === undefined || src === null || src === '') return undefined;
@@ -172,7 +173,13 @@ export function compile(tree: SourceTree): CompileResult {
   };
   const content = (tokens: Chunk['tokens'], where: Where): Content => {
     const c = compileContent(tokens, diag, where, (e, w) => map.exprs.push({ expr: e, where: w }));
-    for (const b of c) for (const p of b.pieces) map.texts.push({ text: p.text, where });
+    for (const b of c) for (const p of b.pieces) {
+      if (!p.template) { map.texts.push({ text: p.text, where }); continue; }
+      const at = { ...where, ...(p.template.line !== undefined ? { line: p.template.line } : {}) };
+      map.templates.push({ source: p.text, where: at });
+      // Macros are checked in the literal text only: code may build macro text at runtime.
+      for (const lit of templateLiterals(p.text)) map.texts.push({ text: lit, where: at });
+    }
     return c;
   };
 
@@ -282,7 +289,7 @@ export function compile(tree: SourceTree): CompileResult {
     const o = isObj(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
     const type = str(o.type, 'text') as Param['type'];
-    if (!['text', 'number', 'select'].includes(type)) diag.error('param type must be text | number | select', where);
+    if (!PARAM_TYPES.includes(type)) diag.error(`param type must be ${PARAM_TYPES.join(' | ')}`, where);
     const options: ParamOption[] | undefined = Array.isArray(o.options)
       ? o.options.map((x: unknown) => (isObj(x) ? { value: x.value as string | number, ...(x.label !== undefined ? { label: str(x.label) } : {}), ...(x.text !== undefined ? { text: text(str(x.text), where) } : {}) } : { value: x as string | number }))
       : undefined;
@@ -290,12 +297,22 @@ export function compile(tree: SourceTree): CompileResult {
       id: str(o.id),
       type,
       label: str(o.label, str(o.id)),
-      default: (o.default as string | number | undefined) ?? (type === 'number' ? 0 : ''),
+      default: (o.default as ParamValue | undefined) ?? emptyParamValue(type),
     };
+    if (!paramValueMatches(param, param.default)) diag.error(`default of a ${type} param must be ${paramShape(type)}`, { ...where, path: `${where.path}.default` });
+    else if (Array.isArray(param.default)) param.default = normalizeList(param.default);
     for (const k of ['description', 'group', 'unset', 'fallback', 'unit'] as const) if (o[k] !== undefined) param[k] = str(o[k]);
     for (const k of ['min', 'max'] as const) if (typeof o[k] === 'number') param[k] = o[k] as number;
     if (param.unset) text(param.unset, where);
     if (options) param.options = options;
+    if (type === 'list') {
+      if (o.separator !== undefined) param.separator = str(o.separator);
+      for (const k of ['options', 'unit', 'min', 'max'] as const) if (o[k] !== undefined) diag.warn(`\`${k}\` does not apply to list params and is ignored`, where);
+      delete param.options;
+      delete param.unit;
+      delete param.min;
+      delete param.max;
+    } else if (o.separator !== undefined) diag.warn('`separator` only applies to list params and is ignored', where);
     if (!param.id) diag.error('param id is required', where);
     return param;
   });
@@ -419,6 +436,24 @@ export function compile(tree: SourceTree): CompileResult {
     userInput: userInputMode(tsSrc.userInput, 'tokenSaving.userInput') ?? 'truncate',
     synopsisTemplate: str(tsSrc.synopsisTemplate, '[{{time}} · {{location}}] {{event}}: {{summary}}'),
   };
+  // Input shaping (I-128): optional; absent keeps the artifact (and its hash) as before.
+  let inputShaping: InputShaping | undefined;
+  if (raw.inputShaping !== undefined && raw.inputShaping !== null) {
+    const where = { file: M, path: 'inputShaping' };
+    const src = isObj(raw.inputShaping) ? raw.inputShaping : {};
+    if (!isObj(raw.inputShaping)) diag.error('inputShaping must be a mapping { mode, template? }', where);
+    else {
+      for (const k of Object.keys(src)) if (k !== 'mode' && k !== 'template') diag.warn(`inputShaping: unknown key \`${k}\``, { file: M, path: `inputShaping.${k}` });
+      const mode = src.mode as InputShapingMode;
+      if (!INPUT_SHAPING_MODES.includes(mode)) diag.error(`inputShaping.mode must be one of ${INPUT_SHAPING_MODES.join(', ')}`, { file: M, path: 'inputShaping.mode' });
+      else {
+        if (mode === 'extract' && src.template !== undefined) diag.warn('inputShaping.template is only used by `wrap` (extract places the input with {{ap::input::text}})', { file: M, path: 'inputShaping.template' });
+        const template = mode === 'wrap' ? text(str(src.template, DEFAULT_INPUT_TEMPLATE), { file: M, path: 'inputShaping.template' }) : DEFAULT_INPUT_TEMPLATE;
+        if (mode === 'wrap' && !template.includes('{{content}}')) diag.warn('inputShaping.template has no {{content}}: the input text would be lost', { file: M, path: 'inputShaping.template' });
+        inputShaping = { mode, template };
+      }
+    }
+  }
   const syntheticTurns: SyntheticTurn[] = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s: unknown, i: number) => {
     const o = isObj(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
@@ -500,6 +535,18 @@ export function compile(tree: SourceTree): CompileResult {
   const regionIndex = (rid: string) => regions.findIndex((r) => r.id === rid);
   entries.sort((a, b) => regionIndex(a.region) - regionIndex(b.region) || a.order - b.order || rank(a.module) - rank(b.module));
 
+  // ── user modules shipped with the preset (bundled modules and templates) ─────
+  const sourceCtx: SourceContext = {
+    diag,
+    insertionPoints,
+    expr,
+    content,
+    varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
+    onExpr: (e, where) => map.exprs.push({ expr: e, where }),
+  };
+  const userModules = compileUserModuleSources(tree, sourceCtx, 'module');
+  const userModuleTemplates = compileUserModuleSources(tree, sourceCtx, 'template');
+
   // ── workflows ───────────────────────────────────────────────────────────────
   const workflows: Workflow[] = [];
   const workflowFiles = [...tree.keys()].filter((p) => /^workflows\/[^/]+\.md$/.test(p)).sort();
@@ -546,10 +593,17 @@ export function compile(tree: SourceTree): CompileResult {
     if (!(k in configurationDefaults.modules)) diag.error(`configurationDefaults.modules: unknown user module \`${k}\``, { file: M, path: `configurationDefaults.modules.${k}` });
     else configurationDefaults.modules[k] = Boolean(v);
   }
-  for (const [k, v] of Object.entries(sect('params'))) {
-    if (!(k in configurationDefaults.params)) diag.error(`configurationDefaults.params: unknown param \`${k}\``, { file: M, path: `configurationDefaults.params.${k}` });
-    else configurationDefaults.params[k] = v as string | number;
-  }
+  /** A `params` map of the defaults or of a recommended configuration: known ids, values of the declared shape. */
+  const checkParams = (section: Obj, path: string, apply: (id: string, v: ParamValue) => void, reportUnknown = true) => {
+    for (const [k, v] of Object.entries(section)) {
+      const where = { file: M, path: `${path}.${k}` };
+      const decl = params.find((x) => x.id === k);
+      if (!decl) { if (reportUnknown) diag.error(`${path}: unknown param \`${k}\``, where); }
+      else if (!paramValueMatches(decl, v)) diag.error(`${path}.${k}: a ${decl.type} param needs ${paramShape(decl.type)}`, where);
+      else apply(k, Array.isArray(v) ? normalizeList(v) : (v as ParamValue));
+    }
+  };
+  checkParams(sect('params'), 'configurationDefaults.params', (k, v) => { configurationDefaults.params[k] = v; });
   userInputMode(sect('tokenSaving').userInput, 'configurationDefaults.tokenSaving.userInput');
   /** `cache` section of the defaults or of a recommended configuration's diff. */
   const checkCache = (c: Obj, path: string) => {
@@ -575,6 +629,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (isObj(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj(rc.diff.params)) checkParams(rc.diff.params as Obj, `configurations[${i}].diff.params`, (k, v) => { rc.diff.params![k] = v; }, false); // unknown keys: validate
     return rc;
   });
   if (!configurations.length) configurations.push({ id: 'default', name: 'Default', diff: {} });
@@ -634,11 +689,14 @@ export function compile(tree: SourceTree): CompileResult {
     regions,
     anchors: anchors as APreset['anchors'],
     workflowRegion: str(raw.workflowRegion, anchors.tail ?? ''),
+    ...(inputShaping ? { inputShaping } : {}),
     params,
     groups,
     modules,
     entries,
     insertionPoints,
+    userModules,
+    userModuleTemplates,
     vars,
     workflows,
     structures,
@@ -657,7 +715,7 @@ export function compile(tree: SourceTree): CompileResult {
     locales,
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map };
+  return { preset, diag, map, manifestFiles: manifest.files };
 }
 
 const isScalar = (v: unknown): v is string | number | boolean => ['string', 'number', 'boolean'].includes(typeof v);

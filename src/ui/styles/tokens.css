@@ -27,6 +27,8 @@
   --ap-success: #16a34a;
   --ap-warning: #d97706;
   --ap-panel-bg: var(--SmartThemeBlurTintColor, rgba(250, 245, 252, 0.92));
+  /* Opaque twin of the panel tint for surfaces that cannot be translucent (native <option>, tooltip text). */
+  --ap-panel-bg-solid: #faf5fc;
   --ap-shadow: 0 8px 28px rgba(15, 5, 20, 0.18);
   --ap-ring: 0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);
 
@@ -44,5 +46,10 @@
   --ap-success: #4ade80;
   --ap-warning: #fbbf24;
   --ap-panel-bg: var(--SmartThemeBlurTintColor, rgba(28, 20, 32, 0.92));
+  --ap-panel-bg-solid: #1c1420;
   --ap-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+@supports (color: rgb(from red r g b)) {
+  :host { --ap-panel-bg-solid: rgb(from var(--ap-panel-bg) r g b); }
+  :host([data-ap-theme='dark']) { --ap-panel-bg-solid: rgb(from var(--ap-panel-bg) r g b); }
 }

@@ -11,7 +11,8 @@ import { toast } from '@/st/host';
 import { getPreset } from '@/store/presets';
 import { activatePreset, activeCarrierPresetId } from '@/store/carrier';
 import { installArtifact } from './install';
-import { downloadJson, fileSlug } from '@/ui/download';
+import { isTrustDeclined } from './trust';
+import { exportPreset } from './bundled-modules';
 import { openPanel, refreshActivePreset } from '@/ui/state';
 import { presetName, t } from '@/i18n';
 
@@ -42,15 +43,17 @@ async function onImport(input: HTMLInputElement, file: File): Promise<void> {
     toast('success', t('presets.installed'), presetName(preset));
     openPanel('presets');
   } catch (e) {
-    toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
+    if (isTrustDeclined(e)) toast('info', e.message, t('app.name'));
+    else toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
   }
 }
 
+/** Export the AP preset behind the selected Carrier (asking which user modules to bundle); `false` when none is selected. */
 export function exportActivePreset(): boolean {
   const id = activeCarrierPresetId();
   const preset = id ? getPreset(id) : undefined;
   if (!preset) return false;
-  downloadJson(`${fileSlug(preset.id)}.apreset.json`, preset);
+  void exportPreset(preset).catch((e) => toast('error', e instanceof Error ? e.message : String(e), t('app.name')));
   return true;
 }
 

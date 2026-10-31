@@ -6,6 +6,8 @@
 
 **区域**是请求中的一段固定位置。你在 `preset.yaml` 里从上到下列出区域，它们在请求中的顺序也就是这个顺序。
 
+> 清单变长以后，可以把结构、参数、推荐配置等字段挪到 `manifest/` 目录下的多个 YAML 文件里，构建时会自动合并，写法不变。花瓣就是这样做的，见[拆分清单](../reference/manifest.md#拆分清单-manifest)。
+
 花瓣预设的区域：
 
 | 区域 | 放什么 | 说明 |
@@ -92,6 +94,33 @@ Start the workflow {{ap::workflow::hint}} now. Deliver every stage in order, exa
 ```
 
 `<!-- … -->` 是 HTML 注释的写法，这里被 AP 用作**指令**。不是指令的普通注释会作为文字保留，例如花瓣里的 `<!-- Workflow Indicator -->` 就是写给模型看的标记。
+
+想给自己或协作者留说明、又不想发给模型时，写**注释** `<!--# … -->`（`<!--` 后面紧跟 `#`）。注释可以写在行内，也可以跨多行；里面的指令不会执行，所以也能用来临时停用一段内容：
+
+```markdown
+<!--# 这段是给 Claude 的预填充，改动前先看第 7 章 -->
+<!-- @entry id=bottom-prefill region=bottom order=900 when='transport == "prefill"' -->
+…
+
+<!--#
+旧版写法，暂时停用：
+<!-- @if params.length > 0 -->Aim for about {{ap::param::length}} words.<!-- @end -->
+-->
+```
+
+完整规则见 [指令参考](../reference/directives.md#注释)。
+
+条件和宏不够用时（比如要把一个列表编号、按参数算一个数），可以写**模板**：`<!-- @template -->` 与 `<!-- @end -->` 之间是 [EJS](https://ejs.co/) 模板，每次生成时运行，能读取 `params`、`gen`、`vars` 等变量：
+
+```markdown
+<!-- @template -->
+<% vars.rules.forEach((rule, i) => { -%>
+<%- i + 1 %>. <%- rule %>
+<% }) -%>
+<!-- @end -->
+```
+
+模板是 JavaScript 代码，用户安装含模板的预设时，AP 会显示代码并请他们确认信任。所以只在确有需要时使用，并把 `minAdvancedPreset` 设为 `1.9.0`。详见 [模板参考](../reference/templates.md)。
 
 没有 `@entry` 的模组，整个正文就是一个条目，使用 frontmatter 里的 `region` 和 `order`。
 

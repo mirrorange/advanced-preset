@@ -4,6 +4,7 @@
  * are merged into the preset in memory right before assembly.
  */
 import { compileText, type DirectiveError } from './directives';
+import { contentTemplates } from './content';
 import { parseExpr, type Expr, type Literal } from './expr';
 import { satisfies } from './semver';
 import type { APreset, BuildVarDecl, BuildVarUpdate, Entry, InsertionPoint, Migration, Module, Role } from './types';
@@ -265,6 +266,11 @@ export function withUserModules(preset: APreset, modules: UserModule[], texts?: 
     }
   }
   return { preset: { ...preset, modules: [...preset.modules, ...extraModules], entries }, skipped };
+}
+
+/** Template code in user modules (`@template` in entry texts), e.g. to ask for trust on import. */
+export function userModulesCode(modules: UserModule[]): string[] {
+  return modules.flatMap((m) => m.entries.flatMap((e) => contentTemplates(compileText(e.text, e.role).content)));
 }
 
 // ---------------------------------------------------------------------------------------------

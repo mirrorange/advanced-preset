@@ -50,10 +50,10 @@ var require_identity = __commonJS({
     var NODE_TYPE = /* @__PURE__ */ Symbol.for("yaml.node.type");
     var isAlias = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
     var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
-    var isMap = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
+    var isMap2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
     var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
-    var isScalar2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
-    var isSeq = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
+    var isScalar3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
+    var isSeq2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
     function isCollection(node) {
       if (node && typeof node === "object")
         switch (node[NODE_TYPE]) {
@@ -74,7 +74,7 @@ var require_identity = __commonJS({
         }
       return false;
     }
-    var hasAnchor = (node) => (isScalar2(node) || isCollection(node)) && !!node.anchor;
+    var hasAnchor = (node) => (isScalar3(node) || isCollection(node)) && !!node.anchor;
     exports.ALIAS = ALIAS;
     exports.DOC = DOC;
     exports.MAP = MAP;
@@ -86,11 +86,11 @@ var require_identity = __commonJS({
     exports.isAlias = isAlias;
     exports.isCollection = isCollection;
     exports.isDocument = isDocument;
-    exports.isMap = isMap;
+    exports.isMap = isMap2;
     exports.isNode = isNode;
     exports.isPair = isPair;
-    exports.isScalar = isScalar2;
-    exports.isSeq = isSeq;
+    exports.isScalar = isScalar3;
+    exports.isSeq = isSeq2;
   }
 });
 
@@ -3775,7 +3775,7 @@ ${pointer}
 var require_resolve_props = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/compose/resolve-props.js"(exports) {
     "use strict";
-    function resolveProps(tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
+    function resolveProps(tokens2, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
       let spaceBefore = false;
       let atNewline = startOnNewline;
       let hasSpace = startOnNewline;
@@ -3790,7 +3790,7 @@ var require_resolve_props = __commonJS({
       let comma = null;
       let found = null;
       let start = null;
-      for (const token of tokens) {
+      for (const token of tokens2) {
         if (reqSpace) {
           if (token.type !== "space" && token.type !== "newline" && token.type !== "comma")
             onError(token.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
@@ -3881,7 +3881,7 @@ var require_resolve_props = __commonJS({
             hasSpace = false;
         }
       }
-      const last = tokens[tokens.length - 1];
+      const last = tokens2[tokens2.length - 1];
       const end = last ? last.offset + last.source.length : offset;
       if (reqSpace && next && next.type !== "space" && next.type !== "newline" && next.type !== "comma" && (next.type !== "scalar" || next.source !== "")) {
         onError(next.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
@@ -4198,9 +4198,9 @@ var require_resolve_flow_collection = __commonJS({
     var blockMsg = "Block collections are not allowed within flow collections";
     var isBlock = (token) => token && (token.type === "block-map" || token.type === "block-seq");
     function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
-      const isMap = fc.start.source === "{";
-      const fcName = isMap ? "flow map" : "flow sequence";
-      const NodeClass = tag?.nodeClass ?? (isMap ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
+      const isMap2 = fc.start.source === "{";
+      const fcName = isMap2 ? "flow map" : "flow sequence";
+      const NodeClass = tag?.nodeClass ?? (isMap2 ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
       const coll = new NodeClass(ctx.schema);
       coll.flow = true;
       const atRoot = ctx.atRoot;
@@ -4236,7 +4236,7 @@ var require_resolve_flow_collection = __commonJS({
             offset = props.end;
             continue;
           }
-          if (!isMap && ctx.options.strict && utilContainsNewline.containsNewline(key))
+          if (!isMap2 && ctx.options.strict && utilContainsNewline.containsNewline(key))
             onError(
               key,
               // checked by containsNewline()
@@ -4276,7 +4276,7 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep2 && !props.found) {
+        if (!isMap2 && !sep2 && !props.found) {
           const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep2, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
@@ -4299,7 +4299,7 @@ var require_resolve_flow_collection = __commonJS({
             startOnNewline: false
           });
           if (valueProps.found) {
-            if (!isMap && !props.found && ctx.options.strict) {
+            if (!isMap2 && !props.found && ctx.options.strict) {
               if (sep2)
                 for (const st of sep2) {
                   if (st === valueProps.found)
@@ -4331,7 +4331,7 @@ var require_resolve_flow_collection = __commonJS({
           const pair = new Pair.Pair(keyNode, valueNode);
           if (ctx.options.keepSourceTokens)
             pair.srcToken = collItem;
-          if (isMap) {
+          if (isMap2) {
             const map = coll;
             if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
               onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
@@ -4347,7 +4347,7 @@ var require_resolve_flow_collection = __commonJS({
           offset = valueNode ? valueNode.range[2] : valueProps.end;
         }
       }
-      const expectedEnd = isMap ? "}" : "]";
+      const expectedEnd = isMap2 ? "}" : "]";
       const [ce, ...ee] = fc.end;
       let cePos = offset;
       if (ce?.source === expectedEnd)
@@ -5221,8 +5221,8 @@ ${cb}` : comment;
        * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
        * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
        */
-      *compose(tokens, forceDoc = false, endOffset = -1) {
-        for (const token of tokens)
+      *compose(tokens2, forceDoc = false, endOffset = -1) {
+        for (const token of tokens2)
           yield* this.next(token);
         yield* this.end(forceDoc, endOffset);
       }
@@ -5634,7 +5634,7 @@ var require_cst = __commonJS({
     var FLOW_END = "";
     var SCALAR = "";
     var isCollection = (token) => !!token && "items" in token;
-    var isScalar2 = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
+    var isScalar3 = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
     function prettyToken(token) {
       switch (token) {
         case BOM:
@@ -5718,7 +5718,7 @@ var require_cst = __commonJS({
     exports.FLOW_END = FLOW_END;
     exports.SCALAR = SCALAR;
     exports.isCollection = isCollection;
-    exports.isScalar = isScalar2;
+    exports.isScalar = isScalar3;
     exports.prettyToken = prettyToken;
     exports.tokenType = tokenType;
   }
@@ -6317,7 +6317,7 @@ var require_lexer = __commonJS({
 var require_line_counter = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/parse/line-counter.js"(exports) {
     "use strict";
-    var LineCounter = class {
+    var LineCounter2 = class {
       constructor() {
         this.lineStarts = [];
         this.addNewLine = (offset) => this.lineStarts.push(offset);
@@ -6340,7 +6340,7 @@ var require_line_counter = __commonJS({
         };
       }
     };
-    exports.LineCounter = LineCounter;
+    exports.LineCounter = LineCounter2;
   }
 });
 
@@ -7248,7 +7248,7 @@ var require_public_api = __commonJS({
         return docs;
       return Object.assign([], { empty: true }, composer$1.streamInfo());
     }
-    function parseDocument(source, options = {}) {
+    function parseDocument2(source, options = {}) {
       const { lineCounter: lineCounter2, prettyErrors } = parseOptions(options);
       const parser$1 = new parser.Parser(lineCounter2?.addNewLine);
       const composer$1 = new composer.Composer(options);
@@ -7274,7 +7274,7 @@ var require_public_api = __commonJS({
       } else if (options === void 0 && reviver && typeof reviver === "object") {
         options = reviver;
       }
-      const doc = parseDocument(src, options);
+      const doc = parseDocument2(src, options);
       if (!doc)
         return null;
       doc.warnings.forEach((warning) => log.warn(doc.options.logLevel, warning));
@@ -7310,7 +7310,7 @@ var require_public_api = __commonJS({
     }
     exports.parse = parse;
     exports.parseAllDocuments = parseAllDocuments;
-    exports.parseDocument = parseDocument;
+    exports.parseDocument = parseDocument2;
     exports.stringify = stringify;
   }
 });
@@ -7513,6 +7513,9 @@ function looseEq(a, b) {
   if (typeof a === "string" && typeof b === "number") return a === String(b);
   return false;
 }
+function truthy(v) {
+  return Array.isArray(v) ? v.length > 0 : Boolean(v);
+}
 function evaluate(e, resolve2) {
   switch (e.t) {
     case "lit":
@@ -7522,10 +7525,10 @@ function evaluate(e, resolve2) {
     case "var":
       return resolve2(e.path);
     case "not":
-      return !evaluate(e.e, resolve2);
+      return !truthy(evaluate(e.e, resolve2));
     case "bin": {
-      if (e.op === "&&") return Boolean(evaluate(e.l, resolve2)) && Boolean(evaluate(e.r, resolve2));
-      if (e.op === "||") return Boolean(evaluate(e.l, resolve2)) || Boolean(evaluate(e.r, resolve2));
+      if (e.op === "&&") return truthy(evaluate(e.l, resolve2)) && truthy(evaluate(e.r, resolve2));
+      if (e.op === "||") return truthy(evaluate(e.l, resolve2)) || truthy(evaluate(e.r, resolve2));
       const l = evaluate(e.l, resolve2);
       const r = evaluate(e.r, resolve2);
       switch (e.op) {
@@ -7550,7 +7553,7 @@ function evaluate(e, resolve2) {
   }
 }
 function test(e, resolve2) {
-  return e ? Boolean(evaluate(e, resolve2)) : true;
+  return e ? truthy(evaluate(e, resolve2)) : true;
 }
 function variables(e, out = /* @__PURE__ */ new Set()) {
   switch (e.t) {
@@ -7816,12 +7819,400 @@ function workflowSummary(stages, actorName2, label = (s) => s.label) {
   return ["Start", ...parts, "(End)"].join(" -> ");
 }
 
+// ../protocol/src/template.ts
+var TEMPLATES_SINCE = "1.9.0";
+var TemplateError = class extends Error {
+  line;
+  constructor(message, line) {
+    super(message);
+    this.name = "TemplateError";
+    this.line = line;
+  }
+};
+var TOKEN_RE = /(<%%|%%>|<%=|<%-|<%_|<%#|<%|%>|-%>|_%>)/;
+var CLOSERS = /* @__PURE__ */ new Set(["%>", "-%>", "_%>"]);
+function escapeXML(markup) {
+  if (markup == void 0) return "";
+  return String(markup).replace(/[&<>'"]/g, (c) => ESCAPES[c]);
+}
+var ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&#34;", "'": "&#39;" };
+function tokens(text) {
+  return text.split(TOKEN_RE).filter((s) => s !== "");
+}
+var slurp = (src) => src.replace(/[ \t]*<%_/gm, "<%_").replace(/_%>[ \t]*/gm, "_%>");
+function templateSource(src) {
+  const matches = tokens(slurp(src));
+  let out = "";
+  let mode = null;
+  let truncate = false;
+  let line = 1;
+  const addOutput = (text) => {
+    if (truncate) {
+      text = text.replace(/^(?:\r\n|\r|\n)/, "");
+      truncate = false;
+    }
+    if (text) out += `    ; __append(${JSON.stringify(text)})
+`;
+  };
+  const stripSemi = (s) => s.replace(/;(\s*$)/, "$1");
+  matches.forEach((tok, i) => {
+    if (tok.startsWith("<%") && !tok.startsWith("<%%")) {
+      const closing = matches[i + 2];
+      if (!closing || !CLOSERS.has(closing)) throw new TemplateError(`Could not find matching close tag for "${tok}".`, line);
+    }
+    const newlines = tok.split("\n").length - 1;
+    switch (tok) {
+      case "<%":
+      case "<%_":
+        mode = "eval";
+        break;
+      case "<%=":
+        mode = "escaped";
+        break;
+      case "<%-":
+        mode = "raw";
+        break;
+      case "<%#":
+        mode = "comment";
+        break;
+      case "<%%":
+        mode = "literal";
+        out += `    ; __append("<%")
+`;
+        break;
+      case "%%>":
+        mode = "literal";
+        out += `    ; __append("%>")
+`;
+        break;
+      case "%>":
+      case "-%>":
+      case "_%>":
+        if (mode === "literal") addOutput(tok);
+        mode = null;
+        truncate = tok.startsWith("-") || tok.startsWith("_");
+        break;
+      default: {
+        let code = tok;
+        if ((mode === "eval" || mode === "escaped" || mode === "raw") && code.lastIndexOf("//") > code.lastIndexOf("\n")) code += "\n";
+        switch (mode) {
+          case "eval":
+            out += `    ; ${code}
+`;
+            break;
+          case "escaped":
+            out += `    ; __append(escapeFn(${stripSemi(code)}))
+`;
+            break;
+          case "raw":
+            out += `    ; __append(${stripSemi(code)})
+`;
+            break;
+          case "comment":
+            break;
+          case "literal":
+          case null:
+            addOutput(code);
+            break;
+        }
+      }
+    }
+    if (newlines) {
+      line += newlines;
+      out += `    ; __line = ${line}
+`;
+    }
+  });
+  return [
+    "var __line = 1;",
+    'var __output = "";',
+    "function __append(s) { if (s !== undefined && s !== null) __output += s }",
+    "try {",
+    "  with (locals || {}) {",
+    out,
+    "  }",
+    "  return __output;",
+    "} catch (e) { rethrow(e, __line); }"
+  ].join("\n");
+}
+var include = () => {
+  throw new Error("include() is not supported in Advanced Preset templates");
+};
+var rethrow = (e, line) => {
+  throw new TemplateError(e instanceof Error ? `${e.name === "Error" ? "" : `${e.name}: `}${e.message}` : String(e), line);
+};
+var cache = /* @__PURE__ */ new Map();
+var CACHE_LIMIT = 500;
+function compileTemplate(src) {
+  const hit = cache.get(src);
+  if (hit) return hit;
+  const body = templateSource(src);
+  let fn;
+  try {
+    fn = new Function("locals, escapeFn, include, rethrow", body);
+  } catch (e) {
+    throw new TemplateError(`${e instanceof Error ? e.message : String(e)} (while compiling the template)`);
+  }
+  const render = (data) => fn(data, escapeXML, include, rethrow);
+  if (cache.size >= CACHE_LIMIT) cache.clear();
+  cache.set(src, render);
+  return render;
+}
+function renderTemplate(src, data) {
+  return compileTemplate(src)(data);
+}
+function checkTemplate(src) {
+  try {
+    compileTemplate(src);
+    return null;
+  } catch (e) {
+    return e instanceof TemplateError ? e : new TemplateError(String(e));
+  }
+}
+function templateLiterals(src) {
+  const out = [];
+  let mode = null;
+  for (const tok of tokens(slurp(src))) {
+    if (tok === "<%" || tok === "<%_") mode = "eval";
+    else if (tok === "<%=" || tok === "<%-" || tok === "<%#") mode = "raw";
+    else if (tok === "<%%" || tok === "%%>") {
+      mode = "literal";
+      out.push(tok === "<%%" ? "<%" : "%>");
+    } else if (CLOSERS.has(tok)) {
+      if (mode === "literal") out.push(tok);
+      mode = null;
+    } else if (mode === null || mode === "literal") out.push(tok);
+  }
+  return out;
+}
+function templateCode(src) {
+  const out = [];
+  let mode = null;
+  for (const tok of tokens(slurp(src))) {
+    if (tok === "<%" || tok === "<%_" || tok === "<%=" || tok === "<%-") mode = "eval";
+    else if (tok === "<%#") mode = "comment";
+    else if (tok === "<%%" || tok === "%%>") mode = "literal";
+    else if (CLOSERS.has(tok)) mode = null;
+    else if (mode === "eval") out.push(tok);
+  }
+  return out;
+}
+function deepFreeze(value) {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const v of Object.values(value)) deepFreeze(v);
+  }
+  return value;
+}
+
+// ../protocol/src/directives.ts
+var DIRECTIVE_RE = /<!--\s*@([a-z][\w-]*)\b([\s\S]*?)-->/g;
+var FENCE_RE = /^\s*(```|~~~)/;
+function parseAttributes(src) {
+  const args = [];
+  const attrs = {};
+  const re = /([\w:.-]+)(?:\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"']+)))?/g;
+  for (const m of src.matchAll(re)) {
+    const value = m[2] ?? m[3] ?? m[4];
+    if (value === void 0) args.push(m[1]);
+    else attrs[m[1]] = value.replace(/\\(["'\\])/g, "$1");
+  }
+  return { args, attrs };
+}
+var COMMENT_OPEN_RE = /<!--[ \t]*#/g;
+var COMMENT_SCAN_RE = /<!--|-->/g;
+function scanComment(line, from, state) {
+  COMMENT_SCAN_RE.lastIndex = from;
+  for (let m = COMMENT_SCAN_RE.exec(line); m; m = COMMENT_SCAN_RE.exec(line)) {
+    state.depth += m[0] === "<!--" ? 1 : -1;
+    if (state.depth === 0) return m.index + m[0].length;
+  }
+  return -1;
+}
+function tokenizeDirectives(body, split = [], firstLine = 1, error) {
+  const chunks = [{ tokens: [], line: firstLine }];
+  const push = (t) => {
+    if (t.kind === "text" && !t.text) return;
+    const tokens2 = chunks[chunks.length - 1].tokens;
+    const last = tokens2[tokens2.length - 1];
+    if (t.kind === "text" && last?.kind === "text") last.text += t.text;
+    else tokens2.push(t);
+  };
+  const emit = (line, nl, lineNo, keepNewline = false) => {
+    if (!line.includes("<!--")) return push({ kind: "text", text: line + nl });
+    const matches = [...line.matchAll(DIRECTIVE_RE)];
+    if (!matches.length) return push({ kind: "text", text: line + nl });
+    const alone = line.replace(DIRECTIVE_RE, "").trim() === "";
+    let pos = 0;
+    for (const m of matches) {
+      if (m.index > pos) push({ kind: "text", text: line.slice(pos, m.index) });
+      const raw = m[2].trim();
+      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo, ...alone ? { alone } : {} };
+      if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
+      else push({ kind: "directive", directive });
+      pos = m.index + m[0].length;
+    }
+    if (!alone) push({ kind: "text", text: line.slice(pos) + nl });
+    else if (keepNewline) push({ kind: "text", text: nl });
+  };
+  const lines = body.replace(/\r\n?/g, "\n").split("\n");
+  let fenced = false;
+  let comment;
+  lines.forEach((line, i) => {
+    const nl = i < lines.length - 1 ? "\n" : "";
+    const lineNo = firstLine + i;
+    let pos = 0;
+    let blankBefore = true;
+    let touched = false;
+    if (comment) {
+      const end = scanComment(line, 0, comment);
+      if (end < 0) return;
+      blankBefore = comment.blankBefore;
+      comment = void 0;
+      touched = true;
+      pos = blankBefore ? skipSpace(line, end) : end;
+    } else {
+      if (FENCE_RE.test(line)) fenced = !fenced;
+      if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
+    }
+    let out = "";
+    COMMENT_OPEN_RE.lastIndex = pos;
+    for (let m = COMMENT_OPEN_RE.exec(line); m; m = COMMENT_OPEN_RE.exec(line)) {
+      if (m.index < pos) continue;
+      out += line.slice(pos, m.index);
+      touched = true;
+      const state = { depth: 1, line: lineNo, blankBefore: blankBefore && !out.trim() };
+      const end = scanComment(line, m.index + m[0].length, state);
+      if (end < 0) {
+        comment = state;
+        pos = line.length;
+        break;
+      }
+      pos = !out || /\s$/.test(out) ? skipSpace(line, end) : end;
+      COMMENT_OPEN_RE.lastIndex = pos;
+    }
+    if (!touched) return emit(line, nl, lineNo);
+    out += line.slice(pos);
+    if (comment || !line.slice(pos).trim()) out = out.replace(/[ \t]+$/, "");
+    if (comment) {
+      if (out.trim()) emit(out, "", lineNo);
+      return;
+    }
+    if (!out.trim()) {
+      if (!blankBefore) push({ kind: "text", text: nl });
+      return;
+    }
+    emit(out, nl, lineNo, !blankBefore);
+  });
+  if (comment) error?.(`unclosed comment <!--# (opened at line ${comment.line})`, comment.line);
+  return chunks;
+}
+function skipSpace(line, from) {
+  while (from < line.length && (line[from] === " " || line[from] === "	")) from++;
+  return from;
+}
+var ROLES = ["system", "user", "assistant"];
+var STYLES = ["dialogue", "imperative"];
+function compileTokens(tokens2, error, onExpr, file) {
+  const blocks = [{ pieces: [] }];
+  const stack = [];
+  const current = () => and(...stack.map((f) => f.negated ? { t: "not", e: f.cond } : f.cond));
+  let template;
+  const closeTemplate = () => {
+    const tpl = template;
+    template = void 0;
+    const problem = checkTemplate(tpl.text);
+    if (problem) error(`template: ${problem.message}`, problem.line !== void 0 ? tpl.line + problem.line - 1 : tpl.open);
+    const origin = { ...file ? { file } : {}, line: tpl.line };
+    blocks[blocks.length - 1].pieces.push(tpl.when ? { text: tpl.text, when: tpl.when, template: origin } : { text: tpl.text, template: origin });
+  };
+  for (const token of tokens2) {
+    if (template) {
+      if (token.kind === "text") template.text += token.text;
+      else if (token.directive.name === "end") closeTemplate();
+      else error(`@${token.directive.name} cannot be used inside @template (use EJS tags such as <% if (\u2026) { %>)`, token.directive.line);
+      continue;
+    }
+    if (token.kind === "text") {
+      const when = current();
+      blocks[blocks.length - 1].pieces.push(when ? { text: token.text, when } : { text: token.text });
+      continue;
+    }
+    const d = token.directive;
+    switch (d.name) {
+      case "as": {
+        const role = d.args[0];
+        if (!ROLES.includes(role)) error(`@as expects one of ${ROLES.join(" | ")}`, d.line);
+        if (stack.length) error("@as cannot be used inside @if / @style", d.line);
+        blocks.push({ role: ROLES.includes(role) ? role : void 0, pieces: [] });
+        break;
+      }
+      case "style": {
+        const style = d.args[0];
+        if (style === "end") {
+          stack.pop();
+          break;
+        }
+        if (!style || !STYLES.includes(style)) {
+          error(`@style expects dialogue | imperative`, d.line);
+          break;
+        }
+        if (stack.length && stack[stack.length - 1].style) stack.pop();
+        stack.push({ cond: parseExpr(`style == "${style}"`), style: true, line: d.line });
+        break;
+      }
+      case "if": {
+        try {
+          const cond = parseExpr(d.raw);
+          onExpr?.(cond, d.line);
+          stack.push({ cond, line: d.line });
+        } catch (e) {
+          error(e.message, d.line);
+          stack.push({ cond: { t: "lit", v: false }, line: d.line });
+        }
+        break;
+      }
+      case "else": {
+        const top = stack[stack.length - 1];
+        if (!top || top.negated) error("@else without matching @if", d.line);
+        else top.negated = true;
+        break;
+      }
+      case "end":
+        if (!stack.length) error("@end without matching @if / @style / @template", d.line);
+        stack.pop();
+        break;
+      case "template":
+        if (d.args.length || Object.keys(d.attrs).length) error("@template takes no arguments", d.line);
+        template = { text: "", line: d.alone ? d.line + 1 : d.line, open: d.line, when: current() };
+        break;
+      default:
+        error(`unknown directive @${d.name}`, d.line);
+    }
+  }
+  if (template) {
+    error(`unclosed @template (opened at line ${template.open})`, template.open);
+    template = void 0;
+  }
+  if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1].line})`);
+  return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
+}
+function compileText(text, role) {
+  const errors = [];
+  const sink = (message, line) => errors.push({ message, line });
+  const [chunk] = tokenizeDirectives(text, [], 1, sink);
+  const content = compileTokens(chunk.tokens, sink);
+  if (role && content[0] && !content[0].role) content[0] = { ...content[0], role };
+  return { content, errors };
+}
+
 // ../protocol/src/content.ts
-function renderContent(content, resolve2, post = (s) => s) {
+function renderContent(content, resolve2, post = (s) => s, template) {
   if (!content) return [];
   const out = [];
   for (const block of content) {
-    const text = post(block.pieces.filter((p) => test(p.when, resolve2)).map((p) => p.text).join("")).replace(/\n{3,}/g, "\n\n").trim();
+    const joined = block.pieces.filter((p) => test(p.when, resolve2)).map((p) => p.template ? template?.(p) ?? "" : p.text).join("");
+    const text = post(joined).replace(/\n{3,}/g, "\n\n").trim();
     if (!text) continue;
     out.push(block.role ? { role: block.role, text } : { text });
   }
@@ -7835,6 +8226,23 @@ function cloneData(value) {
   const out = {};
   for (const [k, v] of Object.entries(value)) if (v !== void 0) out[k] = cloneData(v);
   return out;
+}
+
+// ../protocol/src/semver.ts
+function parseVersion(v) {
+  const m = /^v?(\d+)(?:\.(\d+|x|\*))?(?:\.(\d+|x|\*))?(?:-([0-9A-Za-z.-]+))?/.exec(v.trim());
+  if (!m) return [0, 0, 0, ""];
+  const n = (s) => s === void 0 || s === "x" || s === "*" ? 0 : Number(s);
+  return [n(m[1]), n(m[2]), n(m[3]), m[4] ?? ""];
+}
+function compareVersions(a, b) {
+  const x = parseVersion(a);
+  const y = parseVersion(b);
+  for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i];
+  if (x[3] === y[3]) return 0;
+  if (!x[3]) return 1;
+  if (!y[3]) return -1;
+  return x[3] < y[3] ? -1 : 1;
 }
 
 // ../protocol/src/config.ts
@@ -7887,6 +8295,47 @@ function recommended(preset, id) {
 }
 function resolveConfiguration(preset, base, diff) {
   return deepMerge(preset.configurationDefaults, recommended(preset, base)?.diff, diff);
+}
+
+// ../protocol/src/params.ts
+var PARAM_TYPES = ["text", "number", "select", "list"];
+var LIST_PARAMS_SINCE = "1.9.0";
+var DEFAULT_LIST_SEPARATOR = ", ";
+function normalizeList(items) {
+  const out = [];
+  for (const x of items) {
+    if (typeof x !== "string" && typeof x !== "number") continue;
+    const s = String(x).trim();
+    if (s && !out.includes(s)) out.push(s);
+  }
+  return out;
+}
+function paramValueMatches(param, v) {
+  if (param.type === "list") return Array.isArray(v) && v.every((x) => typeof x === "string");
+  if (param.type === "number") return typeof v === "number" && Number.isFinite(v);
+  return typeof v === "string" || typeof v === "number";
+}
+function emptyParamValue(type) {
+  return type === "list" ? [] : type === "number" ? 0 : "";
+}
+function paramValue(param, raw) {
+  const v = raw === void 0 ? param.default : raw;
+  if (param.type === "list") {
+    if (Array.isArray(v)) return normalizeList(v);
+    return Array.isArray(param.default) ? normalizeList(param.default) : [];
+  }
+  if (param.type === "number") {
+    const n = typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v) : NaN;
+    return Number.isFinite(n) ? n : typeof param.default === "number" ? param.default : 0;
+  }
+  if (typeof v === "string" || typeof v === "number") return v;
+  return typeof param.default === "string" || typeof param.default === "number" ? param.default : "";
+}
+function isParamUnset(v) {
+  return v === void 0 || v === "" || v === 0 || Array.isArray(v) && v.length === 0;
+}
+function paramValues(preset, config) {
+  return Object.fromEntries(preset.params.map((p) => [p.id, paramValue(p, config.params?.[p.id])]));
 }
 
 // ../protocol/src/build-vars.ts
@@ -7989,8 +8438,8 @@ function activeModules(preset, config, resolve2) {
     const set = m.exclusive;
     if (!set || winner.has(set) || exclusiveAllowsNone(preset, set)) continue;
     const members = preset.modules.filter((x) => x.exclusive === set && x.toggle === "user");
-    const pick = members.find((x) => x.default) ?? members[0];
-    if (pick) winner.set(set, pick.id);
+    const pick2 = members.find((x) => x.default) ?? members[0];
+    if (pick2) winner.set(set, pick2.id);
   }
   const out = preset.modules.filter((m) => {
     if (m.toggle === "always") return true;
@@ -8009,20 +8458,20 @@ function activeStructures(preset, modules) {
 function actorName(preset, config, actor) {
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
 }
-function createMacroExpander(input, stages, workflow, buildVars) {
+function createMacroResolver(input, stages, workflow, buildVars) {
   const { preset, config, vars, data = {} } = input;
   const paramText = (id, depth = 0) => {
     const p = preset.params.find((x) => x.id === id);
     if (!p) return "";
-    const v = config.params[id] ?? p.default;
-    const unset = v === "" || v === 0 || v === void 0;
-    if (unset) {
+    const v = paramValue(p, config.params[id]);
+    if (isParamUnset(v)) {
       if (p.fallback && depth < 4) {
         const fb = paramText(p.fallback, depth + 1);
         if (fb) return fb;
       }
       return p.unset ?? "";
     }
+    if (Array.isArray(v)) return v.join(p.separator ?? DEFAULT_LIST_SEPARATOR);
     const opt = p.options?.find((o) => String(o.value) === String(v));
     return opt?.text ?? String(v);
   };
@@ -8061,7 +8510,7 @@ function createMacroExpander(input, stages, workflow, buildVars) {
         if (a === "hint") return workflow?.hint ?? "";
         return workflowSummary(stages, (actor) => actorName(preset, config, actor));
       case "input":
-        return data.metaText ?? "";
+        return a === "text" ? vars.input?.shaped ? data.inputText ?? "" : "" : data.metaText ?? "";
       case "memory":
         return JSON.stringify((a === "global" ? data.memory?.global : data.memory?.chat) ?? {}, null, 2);
       case "recap":
@@ -8074,7 +8523,31 @@ function createMacroExpander(input, stages, workflow, buildVars) {
         return void 0;
     }
   };
-  return (text) => expandMacros(text, resolve2);
+  return resolve2;
+}
+function templateScope(vars, buildVars, config, macro, expand) {
+  return deepFreeze({
+    ...cloneData(vars),
+    vars: cloneData(plainBuildVars(buildVars)),
+    sampling: cloneData(config.sampling ?? {}),
+    macro: (...args) => {
+      const v = macro(args.map((x) => String(x).trim()));
+      return v === void 0 ? "" : expand(v);
+    }
+  });
+}
+function templateRenderer(scope, warnings, where) {
+  return (piece) => {
+    try {
+      return renderTemplate(piece.text, scope());
+    } catch (e) {
+      const rel = e instanceof TemplateError ? e.line : void 0;
+      const line = piece.template?.line !== void 0 && rel !== void 0 ? piece.template.line + rel - 1 : piece.template?.line;
+      const loc = [piece.template?.file, line].filter((x) => x !== void 0).join(":");
+      warnings.push(`template in ${where}${loc ? ` (${loc})` : ""}: ${e instanceof Error ? e.message : String(e)}`);
+      return "";
+    }
+  };
 }
 function regionMessages(region, blocks) {
   if (!blocks.length) return [];
@@ -8127,18 +8600,23 @@ function assemble(input, workflowOverride) {
   const modules = activeModules(preset, config, resolve2);
   const structures = activeStructures(preset, modules);
   const buildVars = computeBuildVars(preset.vars, modules);
-  const expand = createMacroExpander({ ...input, vars }, stages, workflow, buildVars);
+  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars);
+  const expand = (text) => expandMacros(text, macro);
   const activeIds = new Set(modules.map((m) => m.id));
+  const warnings = [];
+  let scope;
+  const getScope = () => scope ??= templateScope(vars, buildVars, config, macro, expand);
   const blocksByRegion = /* @__PURE__ */ new Map();
   for (const e of preset.entries) {
     if (!activeIds.has(e.module) || !test(e.when, resolve2)) continue;
     const list = blocksByRegion.get(e.region) ?? [];
-    list.push(...renderContent(e.content, resolve2, expand));
+    list.push(...renderContent(e.content, resolve2, expand, templateRenderer(getScope, warnings, `entry ${e.id}`)));
     blocksByRegion.set(e.region, list);
   }
   if (workflow) {
     const list = blocksByRegion.get(preset.workflowRegion) ?? [];
-    for (const b of renderContent(workflowContent(preset, workflow, stages, vars.style, vars.transport, config), resolve2, expand)) {
+    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config);
+    for (const b of renderContent(content, resolve2, expand, templateRenderer(getScope, warnings, `workflow ${workflow.id}`))) {
       const last = list[list.length - 1];
       if (!b.role && last && !last.role && last.workflow) last.text += `
 
@@ -8149,7 +8627,7 @@ ${b.text}`;
   }
   const regions = {};
   for (const r of preset.regions) if (!r.native) regions[r.id] = regionMessages(r, blocksByRegion.get(r.id) ?? []);
-  return { vars, resolve: resolve2, modules, structures, buildVars, workflow, stages, regions, expand };
+  return { vars, resolve: resolve2, modules, structures, buildVars, workflow, stages, regions, expand, warnings };
 }
 function defaultVars(preset, config, over = {}) {
   const transport = over.transport ?? config.connection.transport;
@@ -8160,131 +8638,16 @@ function defaultVars(preset, config, over = {}) {
     gen: { origin: "story", type: "normal", callerTools: false, callerSchema: false },
     meta: { present: false, pure: false, mixed: false, task: null, recent: false },
     modules: moduleSwitches(preset, config),
-    params: { ...config.params },
+    params: paramValues(preset, config),
     flags: Object.fromEntries(preset.regex.map((r) => [r.id, false])),
     features: { tokenSaving: config.tokenSaving.enabled },
     stages: {},
     chat: { group: false },
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },
+    input: { shaped: false },
     ...over
   };
-}
-
-// ../protocol/src/directives.ts
-var DIRECTIVE_RE = /<!--\s*@([a-z][\w-]*)\b([\s\S]*?)-->/g;
-var FENCE_RE = /^\s*(```|~~~)/;
-function parseAttributes(src) {
-  const args = [];
-  const attrs = {};
-  const re = /([\w:.-]+)(?:\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"']+)))?/g;
-  for (const m of src.matchAll(re)) {
-    const value = m[2] ?? m[3] ?? m[4];
-    if (value === void 0) args.push(m[1]);
-    else attrs[m[1]] = value.replace(/\\(["'\\])/g, "$1");
-  }
-  return { args, attrs };
-}
-function tokenizeDirectives(body, split = [], firstLine = 1) {
-  const chunks = [{ tokens: [], line: firstLine }];
-  const push = (t) => {
-    const tokens = chunks[chunks.length - 1].tokens;
-    const last = tokens[tokens.length - 1];
-    if (t.kind === "text" && last?.kind === "text") last.text += t.text;
-    else tokens.push(t);
-  };
-  const lines = body.replace(/\r\n?/g, "\n").split("\n");
-  let fenced = false;
-  lines.forEach((line, i) => {
-    const nl = i < lines.length - 1 ? "\n" : "";
-    const lineNo = firstLine + i;
-    if (FENCE_RE.test(line)) fenced = !fenced;
-    if (fenced || !line.includes("<!--")) return push({ kind: "text", text: line + nl });
-    const matches = [...line.matchAll(DIRECTIVE_RE)];
-    if (!matches.length) return push({ kind: "text", text: line + nl });
-    const alone = line.replace(DIRECTIVE_RE, "").trim() === "";
-    let pos = 0;
-    for (const m of matches) {
-      if (m.index > pos) push({ kind: "text", text: line.slice(pos, m.index) });
-      const raw = m[2].trim();
-      const directive = { name: m[1], ...parseAttributes(raw), raw, line: lineNo };
-      if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
-      else push({ kind: "directive", directive });
-      pos = m.index + m[0].length;
-    }
-    if (!alone) push({ kind: "text", text: line.slice(pos) + nl });
-  });
-  return chunks;
-}
-var ROLES = ["system", "user", "assistant"];
-var STYLES = ["dialogue", "imperative"];
-function compileTokens(tokens, error, onExpr) {
-  const blocks = [{ pieces: [] }];
-  const stack = [];
-  const current = () => and(...stack.map((f) => f.negated ? { t: "not", e: f.cond } : f.cond));
-  for (const token of tokens) {
-    if (token.kind === "text") {
-      const when = current();
-      blocks[blocks.length - 1].pieces.push(when ? { text: token.text, when } : { text: token.text });
-      continue;
-    }
-    const d = token.directive;
-    switch (d.name) {
-      case "as": {
-        const role = d.args[0];
-        if (!ROLES.includes(role)) error(`@as expects one of ${ROLES.join(" | ")}`, d.line);
-        if (stack.length) error("@as cannot be used inside @if / @style", d.line);
-        blocks.push({ role: ROLES.includes(role) ? role : void 0, pieces: [] });
-        break;
-      }
-      case "style": {
-        const style = d.args[0];
-        if (style === "end") {
-          stack.pop();
-          break;
-        }
-        if (!style || !STYLES.includes(style)) {
-          error(`@style expects dialogue | imperative`, d.line);
-          break;
-        }
-        if (stack.length && stack[stack.length - 1].style) stack.pop();
-        stack.push({ cond: parseExpr(`style == "${style}"`), style: true, line: d.line });
-        break;
-      }
-      case "if": {
-        try {
-          const cond = parseExpr(d.raw);
-          onExpr?.(cond, d.line);
-          stack.push({ cond, line: d.line });
-        } catch (e) {
-          error(e.message, d.line);
-          stack.push({ cond: { t: "lit", v: false }, line: d.line });
-        }
-        break;
-      }
-      case "else": {
-        const top = stack[stack.length - 1];
-        if (!top || top.negated) error("@else without matching @if", d.line);
-        else top.negated = true;
-        break;
-      }
-      case "end":
-        if (!stack.length) error("@end without matching @if / @style", d.line);
-        stack.pop();
-        break;
-      default:
-        error(`unknown directive @${d.name}`, d.line);
-    }
-  }
-  if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1].line})`);
-  return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
-}
-function compileText(text, role) {
-  const errors = [];
-  const [chunk] = tokenizeDirectives(text);
-  const content = compileTokens(chunk.tokens, (message, line) => errors.push({ message, line }));
-  if (role && content[0] && !content[0].role) content[0] = { ...content[0], role };
-  return { content, errors };
 }
 
 // ../protocol/src/user-modules.ts
@@ -8292,6 +8655,9 @@ var USER_MODULE_PREFIX = "user-";
 var DEFAULT_KEYWORD_DEPTH = 3;
 var USER_MODULES_FORMAT = "advanced-preset.user-modules";
 var userModuleId = (id) => `${USER_MODULE_PREFIX}${id}`;
+function emptyTrigger() {
+  return { match: "all", rules: [] };
+}
 var VALUELESS = ["on", "off"];
 function ruleComplete(rule) {
   switch (rule.kind) {
@@ -8362,6 +8728,27 @@ function compileTrigger(trigger, texts = { input: "", recent: [] }) {
   if (!parts.length) return void 0;
   const op = trigger.match === "any" ? "||" : "&&";
   return parts.reduce((l, r) => ({ t: "bin", op, l, r }));
+}
+function ruleError(rule) {
+  if (rule.kind === "expr") {
+    if (!rule.source.trim()) return null;
+    try {
+      parseExpr(rule.source);
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  }
+  if (rule.kind === "keyword" && rule.regex) {
+    for (const w of rule.words) {
+      try {
+        new RegExp(w, "iu");
+      } catch (e) {
+        return e.message;
+      }
+    }
+  }
+  return null;
 }
 function findPoint(preset, id) {
   return (preset.insertionPoints ?? []).find((p) => p.id === id);
@@ -8496,22 +8883,59 @@ function parseUserModuleFile(raw) {
   throw new Error("not a user module file");
 }
 
+// ../protocol/src/preset-user-modules.ts
+function presetUserModules(preset) {
+  return Array.isArray(preset.userModules) ? preset.userModules : [];
+}
+function presetUserModuleTemplates(preset) {
+  return Array.isArray(preset.userModuleTemplates) ? preset.userModuleTemplates : [];
+}
+function localizeUserModuleSource(src, lang, labels) {
+  const l = lang?.toLowerCase();
+  const body = l && (src.locales?.[l] ?? src.locales?.[l.split("-")[0]]) || void 0;
+  if (body) return body;
+  const name = typeof labels?.name === "string" && labels.name ? labels.name : src.name;
+  const description = typeof labels?.description === "string" && labels.description ? labels.description : src.description;
+  return { name, ...description ? { description } : {}, entries: src.entries, vars: src.vars, trigger: src.trigger };
+}
+function userModuleFromSource(body, id, opts = {}) {
+  return {
+    id,
+    name: opts.name ?? body.name,
+    enabled: opts.enabled ?? true,
+    entries: body.entries.map((e, i) => ({ id: `e${i + 1}`, ...cloneData(e) })),
+    vars: cloneData(body.vars ?? []),
+    trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger()
+  };
+}
+
+// ../protocol/src/input-shaping.ts
+var INPUT_SHAPING_MODES = ["wrap", "extract"];
+var DEFAULT_INPUT_TEMPLATE = "<input>\n{{content}}\n</input>";
+var INPUT_SHAPING_SINCE = "1.9.0";
+function wrapInput(template, text, expand = (s) => s) {
+  const SLOT = "\0ap-input\0";
+  return expand(template.replaceAll("{{content}}", SLOT)).replaceAll(SLOT, () => text);
+}
+
 // src/io.ts
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 
 // src/compile.ts
-var import_yaml2 = __toESM(require_dist(), 1);
+var import_yaml4 = __toESM(require_dist(), 1);
 import { createHash } from "node:crypto";
 
 // src/diagnostics.ts
 var Diagnostics = class {
   items = [];
+  /** Rewrites locations as they are reported (the manifest maps `preset.yaml` paths to fragments). */
+  locate;
   error(message, where = {}) {
-    this.items.push({ level: "error", message, ...where });
+    this.items.push({ level: "error", message, ...this.locate ? this.locate(where) : where });
   }
   warn(message, where = {}) {
-    this.items.push({ level: "warn", message, ...where });
+    this.items.push({ level: "warn", message, ...this.locate ? this.locate(where) : where });
   }
   get errors() {
     return this.items.filter((d) => d.level === "error");
@@ -8556,22 +8980,316 @@ function parseMarkdown(src, split, diag, where) {
       diag.error(`invalid frontmatter: ${e.message}`, where);
     }
   }
-  const chunks = tokenizeDirectives(body, split, bodyLine);
+  const chunks = tokenizeDirectives(
+    body,
+    split,
+    bodyLine,
+    (message, line) => diag.error(message, line === void 0 ? where : { ...where, line })
+  );
   return { data, chunks };
 }
-function compileContent(tokens, diag, where, onExpr) {
+function compileContent(tokens2, diag, where, onExpr) {
   return compileTokens(
-    tokens,
+    tokens2,
     (message, line) => diag.error(message, line === void 0 ? where : { ...where, line }),
-    onExpr && ((e, line) => onExpr(e, { ...where, line }))
+    onExpr && ((e, line) => onExpr(e, { ...where, line })),
+    where.file
   );
+}
+
+// src/user-module-sources.ts
+var import_yaml2 = __toESM(require_dist(), 1);
+var USER_MODULE_DIRS = { module: "user-modules", template: "user-module-templates" };
+var NOUN = { module: "user module", template: "user module template" };
+var fileRe = (dir) => new RegExp(`^${dir}/([a-z0-9][a-z0-9-]*)(?:\\.([A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*))?\\.md$`);
+var ROLES3 = ["system", "user", "assistant"];
+var ENTRY_RE = /^\s*<!--\s*@entry\b([\s\S]*?)-->\s*$/;
+var FENCE_RE2 = /^\s*(```|~~~)/;
+function splitTemplateBody(body, firstLine) {
+  const parts = [{ lines: [] }];
+  let fenced = false;
+  let depth = 0;
+  const scan = (line, from) => {
+    const re = /<!--|-->/g;
+    re.lastIndex = from;
+    for (let m = re.exec(line); m; m = re.exec(line)) {
+      depth += m[0] === "<!--" ? 1 : -1;
+      if (depth === 0) return re.lastIndex;
+    }
+    return line.length;
+  };
+  body.split("\n").forEach((line, i) => {
+    const no = firstLine + i;
+    let pos = 0;
+    if (depth > 0) pos = scan(line, 0);
+    else {
+      const m = ENTRY_RE.exec(line);
+      if (!fenced && m) {
+        parts.push({ attrs: parseAttributes(m[1].trim()).attrs, markerLine: no, lines: [] });
+        return;
+      }
+      if (FENCE_RE2.test(line)) fenced = !fenced;
+    }
+    if (!fenced) {
+      const open = /<!--[ \t]*#/g;
+      open.lastIndex = pos;
+      for (let m = depth === 0 ? open.exec(line) : null; m; m = depth === 0 ? open.exec(line) : null) {
+        depth = 1;
+        open.lastIndex = scan(line, m.index + m[0].length);
+      }
+    }
+    parts[parts.length - 1].lines.push({ text: line, no });
+  });
+  return parts.map((p) => {
+    let a = 0;
+    let b = p.lines.length;
+    while (a < b && !p.lines[a].text.trim()) a++;
+    while (b > a && !p.lines[b - 1].text.trim()) b--;
+    const kept = p.lines.slice(a, b);
+    return {
+      ...p.attrs ? { attrs: p.attrs } : {},
+      ...p.markerLine !== void 0 ? { markerLine: p.markerLine } : {},
+      text: kept.map((x) => x.text).join("\n").replace(/[ \t]+$/, ""),
+      line: kept[0]?.no ?? p.markerLine ?? firstLine
+    };
+  });
+}
+function parseTrigger(fm, ctx, where) {
+  const { diag } = ctx;
+  if (fm.when !== void 0 && fm.trigger !== void 0) diag.error("use either `when` or `trigger`, not both", where);
+  let trigger = { match: "all", rules: [] };
+  if (fm.when !== void 0 && fm.when !== null && fm.when !== "") {
+    trigger = { match: "all", rules: [{ kind: "expr", source: String(fm.when) }] };
+  } else if (fm.trigger !== void 0) {
+    const raw = fm.trigger;
+    const n = normalizeUserModule({ entries: [], trigger: fm.trigger });
+    const given = Array.isArray(raw?.rules) ? raw.rules.length : 0;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) diag.error("trigger must be a mapping `{ match, rules }`", where);
+    else if (n.trigger.rules.length !== given) diag.error(`trigger has ${given - n.trigger.rules.length} invalid rule(s) (see the user module format)`, where);
+    trigger = n.trigger;
+  }
+  trigger.rules.forEach((r, i) => {
+    const err = ruleError(r);
+    if (err) diag.error(`trigger rule ${i + 1}: ${err}`, where);
+  });
+  const e = compileTrigger(trigger);
+  if (e) ctx.onExpr(e, where);
+  return trigger;
+}
+function compileBody(file, src, ctx, id, kind, translation) {
+  const { diag } = ctx;
+  const noun = NOUN[kind];
+  const { yaml, body, bodyLine } = splitFrontmatter(src);
+  const where = { file, line: 1 };
+  let fm = {};
+  if (yaml) {
+    try {
+      const parsed = (0, import_yaml2.parse)(yaml);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) fm = parsed;
+      else diag.error("frontmatter must be a mapping", where);
+    } catch (e) {
+      diag.error(`invalid frontmatter: ${e.message}`, where);
+      return void 0;
+    }
+  }
+  if (fm.id !== void 0 && String(fm.id) !== id) diag.error(`${noun} id comes from the file name (\`${id}\`)`, { ...where, path: "id" });
+  const entries = [];
+  const parts = splitTemplateBody(body, bodyLine);
+  parts.forEach((part, i) => {
+    const head = i === 0 ? { point: fm.point, role: fm.role } : part.attrs ?? {};
+    const at = { file, line: part.markerLine ?? part.line };
+    if (i === 0 && head.point === void 0) {
+      if (part.text.trim()) diag.error("text before the first `@entry` needs `point` in the frontmatter", { file, line: part.line });
+      if (fm.role !== void 0) diag.error("`role` needs `point` in the frontmatter", where);
+      return;
+    }
+    const point = String(head.point ?? "");
+    if (!point) return diag.error("@entry needs `point=<insertion point>`", at);
+    if (!ctx.insertionPoints.some((p) => p.id === point)) diag.error(`unknown insertion point \`${point}\``, at);
+    const entry = { point, text: part.text };
+    if (head.role !== void 0) {
+      if (!ROLES3.includes(head.role)) diag.error(`role must be ${ROLES3.join(" | ")}`, at);
+      else entry.role = head.role;
+    }
+    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== "point" && k !== "role") diag.warn(`unknown @entry attribute \`${k}\` in a ${noun}`, at);
+    const [chunk] = tokenizeDirectives(part.text, [], part.line, (message, line) => diag.error(message, { file, ...line !== void 0 ? { line } : {} }));
+    ctx.content(chunk.tokens, { file, line: part.line });
+    entries.push(entry);
+  });
+  if (!entries.length) diag.warn(`${noun} has no entries (set \`point\` in the frontmatter or add \`@entry point=\u2026\`)`, where);
+  const name = fm.name === void 0 ? id : String(fm.name);
+  const out = {
+    name,
+    ...fm.description !== void 0 && kind === "template" ? { description: String(fm.description).trim() } : {},
+    entries,
+    vars: ctx.varUpdates(fm.vars, { ...where, path: "vars" }),
+    trigger: parseTrigger(fm, ctx, { ...where, path: fm.trigger !== void 0 ? "trigger" : "when" })
+  };
+  if (fm.description !== void 0 && kind === "module") diag.warn("`description` is only shown for user module templates (use an author comment `<!--# \u2026 -->` instead)", { ...where, path: "description" });
+  if (fm.enabled !== void 0) {
+    if (kind === "template") diag.warn("`enabled` only applies to bundled user modules (a module made from a template starts enabled)", { ...where, path: "enabled" });
+    else if (translation) diag.warn("`enabled` comes from the source file; it is ignored in translations", { ...where, path: "enabled" });
+    else if (typeof fm.enabled !== "boolean") diag.error("`enabled` must be true or false", { ...where, path: "enabled" });
+    else out.enabled = fm.enabled;
+  }
+  const known = /* @__PURE__ */ new Set(["id", "name", "description", "enabled", "point", "role", "vars", "when", "trigger"]);
+  for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a ${noun}`, { ...where, path: k });
+  return out;
+}
+function compileUserModuleSources(tree, ctx, kind) {
+  const dir = USER_MODULE_DIRS[kind];
+  const re = fileRe(dir);
+  const files2 = [...tree.keys()].filter((p) => p.startsWith(`${dir}/`)).sort();
+  const sources = [];
+  const translations = [];
+  for (const file of files2) {
+    const m = re.exec(file);
+    if (!m) {
+      ctx.diag.error(`${NOUN[kind]} files are \`${dir}/<id>.md\` or \`<id>.<lang>.md\` (id in lower-case kebab-case)`, { file });
+      continue;
+    }
+    if (m[2]) {
+      translations.push({ file, id: m[1], lang: m[2].toLowerCase() });
+      continue;
+    }
+    const body = compileBody(file, tree.get(file), ctx, m[1], kind, false);
+    if (!body) continue;
+    const { enabled, ...rest } = body;
+    sources.push({ id: m[1], ...enabled === false ? { enabled } : {}, ...rest });
+  }
+  for (const { file, id, lang } of translations) {
+    const src = sources.find((x) => x.id === id);
+    if (!src) {
+      ctx.diag.error(`translation of unknown ${NOUN[kind]} \`${id}\` (add ${dir}/${id}.md)`, { file });
+      continue;
+    }
+    const body = compileBody(file, tree.get(file), ctx, id, kind, true);
+    if (body) {
+      const { enabled: _ignored, ...rest } = body;
+      (src.locales ??= {})[lang] = rest;
+    }
+  }
+  return sources;
+}
+
+// src/manifest.ts
+var import_yaml3 = __toESM(require_dist(), 1);
+var MANIFEST_FILE = "preset.yaml";
+var FRAGMENT_RE = /^manifest\/(?:[^/.][^/]*\/)*[^/.][^/]*\.ya?ml$/;
+var ROOT_ONLY_KEYS = ["formatVersion", "id", "name", "version", "author", "description", "minAdvancedPreset"];
+var isObj3 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+function parsePath(path) {
+  const out = [];
+  for (const m of path.matchAll(/([^.[\]]+)|\[(\d+)\]/g)) out.push(m[2] !== void 0 ? Number(m[2]) : m[1]);
+  return out;
+}
+var keyOf = (segs) => segs.join("\0");
+function lineOf(src, segs) {
+  let node = src.doc.contents;
+  let offset;
+  for (const seg of segs) {
+    if ((0, import_yaml3.isMap)(node)) {
+      const pair = node.items.find((p) => (0, import_yaml3.isScalar)(p.key) && String(p.key.value) === String(seg));
+      if (!pair) break;
+      if ((0, import_yaml3.isScalar)(pair.key) && pair.key.range) offset = pair.key.range[0];
+      node = pair.value;
+    } else if ((0, import_yaml3.isSeq)(node) && typeof seg === "number") {
+      const item = node.items[seg];
+      if (!item?.range) break;
+      offset = item.range[0];
+      node = item;
+    } else break;
+  }
+  return offset === void 0 ? void 0 : src.lines.linePos(offset).line;
+}
+function loadManifest(tree, diag) {
+  const rootSrc = tree.get(MANIFEST_FILE);
+  if (rootSrc === void 0) {
+    diag.error(`${MANIFEST_FILE} not found`);
+    return void 0;
+  }
+  const fragments = [...tree.keys()].filter((p) => FRAGMENT_RE.test(p)).sort();
+  const docs = [];
+  let parsedOk = true;
+  for (const file of [MANIFEST_FILE, ...fragments]) {
+    const lines = new import_yaml3.LineCounter();
+    const doc = (0, import_yaml3.parseDocument)(tree.get(file), { lineCounter: lines });
+    if (doc.errors.length) {
+      parsedOk = false;
+      for (const e of doc.errors) diag.error(`invalid YAML: ${e.message}`, { file, ...e.linePos ? { line: e.linePos[0].line } : {} });
+      continue;
+    }
+    docs.push({ file, doc, lines });
+  }
+  if (!parsedOk) return void 0;
+  const origin = /* @__PURE__ */ new Map();
+  const owner = (segs) => {
+    for (let i = segs.length; i > 0; i--) {
+      const src = origin.get(keyOf(segs.slice(0, i)));
+      if (src) return src;
+    }
+    return void 0;
+  };
+  const at = (src, segs) => {
+    const line = lineOf(src, segs);
+    return { file: src.file, ...line !== void 0 ? { line } : {}, path: segs.join(".") };
+  };
+  const merge = (target, from, path, src) => {
+    for (const [k, v] of Object.entries(from)) {
+      const segs = [...path, k];
+      if (!own(target, k)) {
+        target[k] = v;
+        origin.set(keyOf(segs), src);
+      } else if (isObj3(target[k]) && isObj3(v)) merge(target[k], v, segs, src);
+      else {
+        const prev = owner(segs);
+        const prevLine = prev && lineOf(prev, segs);
+        diag.error(`\`${segs.join(".")}\` is already defined in ${prev ? `${prev.file}${prevLine !== void 0 ? `:${prevLine}` : ""}` : "another file"}`, at(src, segs));
+      }
+    }
+  };
+  const raw = {};
+  const files2 = [];
+  for (const src of docs) {
+    const value = src.doc.toJS();
+    if (src.file === MANIFEST_FILE) {
+      if (!isObj3(value)) {
+        diag.error("invalid YAML: top level must be a mapping", { file: src.file });
+        return void 0;
+      }
+    } else {
+      if (value === null || value === void 0) continue;
+      if (!isObj3(value)) {
+        diag.error("a manifest fragment must be a mapping of manifest keys", { file: src.file, line: 1 });
+        continue;
+      }
+      for (const k of ROOT_ONLY_KEYS)
+        if (own(value, k)) {
+          diag.error(`\`${k}\` may only be set in ${MANIFEST_FILE}`, at(src, [k]));
+          delete value[k];
+        }
+    }
+    files2.push(src.file);
+    merge(raw, value, [], src);
+  }
+  const locate = (where) => {
+    if (where.file !== MANIFEST_FILE || where.path === void 0 || where.line !== void 0) return where;
+    const segs = parsePath(where.path);
+    const src = owner(segs);
+    if (!src) return where;
+    const line = lineOf(src, segs);
+    return { ...where, file: src.file, ...line !== void 0 ? { line } : {} };
+  };
+  return { raw, files: files2, locate };
 }
 
 // src/compile.ts
 var SOURCE_FORMAT_VERSION = 1;
-var isObj3 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var isObj4 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var paramShape = (type) => type === "list" ? "a list of strings" : type === "number" ? "a number" : "a string or number";
 var str2 = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
-var ROLES3 = ["system", "user", "assistant"];
+var ROLES4 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
 var STAGE_KINDS = ["text", "content", "patch"];
 var STYLES2 = ["dialogue", "imperative"];
@@ -8592,11 +9310,11 @@ var NATIVE_PROMPTS = {
 var anchorText = (region) => `\u27E6ap:region:${region}\u27E7`;
 var anchorIdentifier = (region) => `ap_${region}`;
 function compileTools(src, diag, text, file = "preset.yaml") {
-  const o = isObj3(src) ? src : {};
+  const o = isObj4(src) ? src : {};
   const at = (path) => ({ file, path: `tools.${path}` });
   const opt = (v, path) => v === void 0 || v === null ? void 0 : text(str2(v), at(path));
   const field = (v, path, fallback) => {
-    const f = typeof v === "string" ? { name: v } : isObj3(v) ? v : {};
+    const f = typeof v === "string" ? { name: v } : isObj4(v) ? v : {};
     const description = f.description !== void 0 ? opt(f.description, `${path}.description`) : fallback.description;
     return { name: str2(f.name, fallback.name), ...description ? { description } : {} };
   };
@@ -8604,27 +9322,27 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   if (legacy.length || typeof o.submit === "string")
     diag.warn(`legacy tools keys (${[...legacy, ...typeof o.submit === "string" ? ["submit: <text>"] : []].join(", ")}); see the README for the tools section`, { file, path: "tools" });
   const D = DEFAULT_TOOLS;
-  const turn = isObj3(o.turn) ? o.turn : {};
-  const submit = isObj3(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
-  const stage = isObj3(o.stage) ? o.stage : {};
-  const patch = isObj3(o.patch) ? o.patch : {};
-  const env = isObj3(o.envelope) ? o.envelope : {};
-  const results = isObj3(o.results) ? o.results : {};
-  const pick = (v, fallback) => v === void 0 ? fallback : v;
+  const turn = isObj4(o.turn) ? o.turn : {};
+  const submit = isObj4(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
+  const stage = isObj4(o.stage) ? o.stage : {};
+  const patch = isObj4(o.patch) ? o.patch : {};
+  const env = isObj4(o.envelope) ? o.envelope : {};
+  const results = isObj4(o.results) ? o.results : {};
+  const pick2 = (v, fallback) => v === void 0 ? fallback : v;
   const tools = {
     turn: {
       name: str2(turn.name, D.turn.name),
       field: str2(turn.field, D.turn.field),
       ...(() => {
         const description = opt(turn.description, "turn.description");
-        const fieldDescription = pick(opt(turn.fieldDescription, "turn.fieldDescription"), D.turn.fieldDescription);
+        const fieldDescription = pick2(opt(turn.fieldDescription, "turn.fieldDescription"), D.turn.fieldDescription);
         return { ...description ? { description } : {}, ...fieldDescription ? { fieldDescription } : {} };
       })()
     },
-    submit: { name: str2(submit.name, D.submit.name), description: pick(opt(submit.description, "submit.description"), D.submit.description) },
+    submit: { name: str2(submit.name, D.submit.name), description: pick2(opt(submit.description, "submit.description"), D.submit.description) },
     stage: {
       name: str2(stage.name, typeof o.stagePrefix === "string" ? `${o.stagePrefix}{{stage}}` : D.stage.name),
-      description: pick(opt(stage.description, "stage.description"), D.stage.description),
+      description: pick2(opt(stage.description, "stage.description"), D.stage.description),
       param: field(stage.param, "stage.param", D.stage.param),
       patchParam: field(stage.patchParam, "stage.patchParam", D.stage.patchParam)
     },
@@ -8648,22 +9366,12 @@ function compileTools(src, diag, text, file = "preset.yaml") {
 }
 function compile(tree) {
   const diag = new Diagnostics();
-  const map = { exprs: [], texts: [], entries: /* @__PURE__ */ new Map(), modules: /* @__PURE__ */ new Map(), workflows: /* @__PURE__ */ new Map() };
-  const manifestSrc = tree.get("preset.yaml");
-  if (manifestSrc === void 0) {
-    diag.error("preset.yaml not found");
-    return { diag, map };
-  }
-  const M = "preset.yaml";
-  let raw;
-  try {
-    const parsed = (0, import_yaml2.parse)(manifestSrc);
-    if (!isObj3(parsed)) throw new Error("top level must be a mapping");
-    raw = parsed;
-  } catch (e) {
-    diag.error(`invalid YAML: ${e.message}`, { file: M });
-    return { diag, map };
-  }
+  const map = { exprs: [], texts: [], templates: [], entries: /* @__PURE__ */ new Map(), modules: /* @__PURE__ */ new Map(), workflows: /* @__PURE__ */ new Map() };
+  const manifest = loadManifest(tree, diag);
+  if (!manifest) return { diag, map };
+  diag.locate = manifest.locate;
+  const M = MANIFEST_FILE;
+  const raw = manifest.raw;
   const expr = (src, where) => {
     if (src === void 0 || src === null || src === "") return void 0;
     if (typeof src === "boolean") return { t: "lit", v: src };
@@ -8680,9 +9388,17 @@ function compile(tree) {
     map.texts.push({ text: s, where });
     return s;
   };
-  const content = (tokens, where) => {
-    const c = compileContent(tokens, diag, where, (e, w) => map.exprs.push({ expr: e, where: w }));
-    for (const b of c) for (const p of b.pieces) map.texts.push({ text: p.text, where });
+  const content = (tokens2, where) => {
+    const c = compileContent(tokens2, diag, where, (e, w) => map.exprs.push({ expr: e, where: w }));
+    for (const b of c) for (const p of b.pieces) {
+      if (!p.template) {
+        map.texts.push({ text: p.text, where });
+        continue;
+      }
+      const at = { ...where, ...p.template.line !== void 0 ? { line: p.template.line } : {} };
+      map.templates.push({ source: p.text, where: at });
+      for (const lit2 of templateLiterals(p.text)) map.texts.push({ text: lit2, where: at });
+    }
     return c;
   };
   if (raw.formatVersion !== void 0 && raw.formatVersion !== SOURCE_FORMAT_VERSION)
@@ -8692,8 +9408,8 @@ function compile(tree) {
   const version = str2(raw.version, "0.0.0");
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error("version must be semver", { file: M, path: "version" });
   const actors = {};
-  for (const [aid, a] of Object.entries(isObj3(raw.actors) ? raw.actors : {})) {
-    const o = isObj3(a) ? a : {};
+  for (const [aid, a] of Object.entries(isObj4(raw.actors) ? raw.actors : {})) {
+    const o = isObj4(a) ? a : {};
     actors[aid] = {
       name: text(str2(o.name, aid), { file: M, path: `actors.${aid}.name` }),
       prefix: text(str2(o.prefix, `{{ap::name::${aid}}}: `), { file: M, path: `actors.${aid}.prefix` }),
@@ -8705,7 +9421,7 @@ function compile(tree) {
   const user = str2(raw.user, "user");
   for (const [k, v] of [["narrator", narrator], ["user", user]])
     if (!actors[v]) diag.error(`${k} actor \`${v}\` is not declared`, { file: M, path: k });
-  const styleSrc = isObj3(raw.styles) ? raw.styles : {};
+  const styleSrc = isObj4(raw.styles) ? raw.styles : {};
   const styles = Object.fromEntries(
     TRANSPORTS.map((t) => {
       const s = str2(styleSrc[t], t === "prefill" || t === "plaintext" ? "dialogue" : "imperative");
@@ -8717,16 +9433,16 @@ function compile(tree) {
   const regions = [];
   const anchors = {};
   (Array.isArray(raw.regions) ? raw.regions : []).forEach((r, i) => {
-    const o = isObj3(r) ? r : {};
+    const o = isObj4(r) ? r : {};
     const where = { file: M, path: `regions[${i}]` };
     const rid = str2(o.id);
     if (!rid) return diag.error("region id is required", where);
     if (regions.some((x) => x.id === rid)) diag.error(`duplicate region \`${rid}\``, where);
     const role = str2(o.role, "system");
-    if (!ROLES3.includes(role)) diag.error(`role must be ${ROLES3.join(" | ")}`, where);
+    if (!ROLES4.includes(role)) diag.error(`role must be ${ROLES4.join(" | ")}`, where);
     let merge = "none";
     if (o.merge === "join" || o.merge === "none") merge = o.merge;
-    else if (isObj3(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
+    else if (isObj4(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
     else if (o.merge !== void 0) diag.error("merge must be none | join | { wrap: <tag> }", where);
     regions.push({ id: rid, role, merge, separator: str2(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
     if (o.anchor !== void 0) {
@@ -8735,14 +9451,14 @@ function compile(tree) {
       else anchors[a] = rid;
     }
   });
-  for (const [a, rid] of Object.entries(isObj3(raw.anchors) ? raw.anchors : {})) {
+  for (const [a, rid] of Object.entries(isObj4(raw.anchors) ? raw.anchors : {})) {
     if (!ANCHORS.includes(a)) diag.error(`unknown semantic anchor \`${a}\``, { file: M, path: `anchors.${a}` });
     else anchors[a] = str2(rid);
   }
   for (const a of ANCHORS) if (!anchors[a]) diag.error(`semantic anchor \`${a}\` is not mapped to a region`, { file: M, path: "anchors" });
   const insertionPoints = [];
   (Array.isArray(raw.insertionPoints) ? raw.insertionPoints : []).forEach((r, i) => {
-    const o = isObj3(r) ? r : {};
+    const o = isObj4(r) ? r : {};
     const where = { file: M, path: `insertionPoints[${i}]` };
     const pid = str2(o.id);
     if (!/^[a-z0-9][a-z0-9-]*$/.test(pid)) return diag.error("insertion point id must be lower-case kebab-case", where);
@@ -8758,10 +9474,10 @@ function compile(tree) {
     insertionPoints.push(point);
   });
   const vars = [];
-  if (raw.vars !== void 0 && !isObj3(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
-  for (const [vid, v] of Object.entries(isObj3(raw.vars) ? raw.vars : {})) {
+  if (raw.vars !== void 0 && !isObj4(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
+  for (const [vid, v] of Object.entries(isObj4(raw.vars) ? raw.vars : {})) {
     const where = { file: M, path: `vars.${vid}` };
-    const o = isObj3(v) ? v : { type: v };
+    const o = isObj4(v) ? v : { type: v };
     if (!/^[A-Za-z][\w-]*$/.test(vid)) {
       diag.error("variable id must start with a letter (letters, digits, _ and -)", where);
       continue;
@@ -8780,28 +9496,38 @@ function compile(tree) {
     vars.push(decl);
   }
   const params = (Array.isArray(raw.params) ? raw.params : []).map((p, i) => {
-    const o = isObj3(p) ? p : {};
+    const o = isObj4(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
     const type = str2(o.type, "text");
-    if (!["text", "number", "select"].includes(type)) diag.error("param type must be text | number | select", where);
-    const options = Array.isArray(o.options) ? o.options.map((x) => isObj3(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
+    if (!PARAM_TYPES.includes(type)) diag.error(`param type must be ${PARAM_TYPES.join(" | ")}`, where);
+    const options = Array.isArray(o.options) ? o.options.map((x) => isObj4(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
     const param = {
       id: str2(o.id),
       type,
       label: str2(o.label, str2(o.id)),
-      default: o.default ?? (type === "number" ? 0 : "")
+      default: o.default ?? emptyParamValue(type)
     };
+    if (!paramValueMatches(param, param.default)) diag.error(`default of a ${type} param must be ${paramShape(type)}`, { ...where, path: `${where.path}.default` });
+    else if (Array.isArray(param.default)) param.default = normalizeList(param.default);
     for (const k of ["description", "group", "unset", "fallback", "unit"]) if (o[k] !== void 0) param[k] = str2(o[k]);
     for (const k of ["min", "max"]) if (typeof o[k] === "number") param[k] = o[k];
     if (param.unset) text(param.unset, where);
     if (options) param.options = options;
+    if (type === "list") {
+      if (o.separator !== void 0) param.separator = str2(o.separator);
+      for (const k of ["options", "unit", "min", "max"]) if (o[k] !== void 0) diag.warn(`\`${k}\` does not apply to list params and is ignored`, where);
+      delete param.options;
+      delete param.unit;
+      delete param.min;
+      delete param.max;
+    } else if (o.separator !== void 0) diag.warn("`separator` only applies to list params and is ignored", where);
     if (!param.id) diag.error("param id is required", where);
     return param;
   });
   const groups = {};
   let groupOrder = 0;
-  for (const [gid, g] of Object.entries(isObj3(raw.groups) ? raw.groups : {})) {
-    const o = isObj3(g) ? g : {};
+  for (const [gid, g] of Object.entries(isObj4(raw.groups) ? raw.groups : {})) {
+    const o = isObj4(g) ? g : {};
     groupOrder += 10;
     groups[gid] = {
       label: str2(o.label, gid),
@@ -8813,12 +9539,12 @@ function compile(tree) {
   }
   const tools = compileTools(raw.tools, diag, text, M);
   const structures = {};
-  for (const [sid, s] of Object.entries(isObj3(raw.structures) ? raw.structures : {})) {
-    const o = isObj3(s) ? s : {};
+  for (const [sid, s] of Object.entries(isObj4(raw.structures) ? raw.structures : {})) {
+    const o = isObj4(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
     const kind = str2(o.kind, sid);
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(", ")}`, where);
-    const fp = isObj3(o.formatPrompt) ? o.formatPrompt : {};
+    const fp = isObj4(o.formatPrompt) ? o.formatPrompt : {};
     const inline = isInlineStructure({ kind });
     const base = str2(o.field, sid);
     const field = inline ? base : `${tools.structurePrefix ?? ""}${base}`;
@@ -8836,7 +9562,7 @@ function compile(tree) {
       formatPrompt: { tag: text(str2(fp.tag), where), field: fieldText(fp.field, "formatPrompt.field") }
     };
     if (o.description !== void 0) decl.description = fieldText(o.description, "description");
-    if (isObj3(o.properties)) {
+    if (isObj4(o.properties)) {
       const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
       const props = {};
       for (const [k, v] of Object.entries(o.properties)) {
@@ -8872,7 +9598,7 @@ function compile(tree) {
     structures[sid] = decl;
   }
   const regex = (Array.isArray(raw.regex) ? raw.regex : []).map((r, i) => {
-    const o = isObj3(r) ? r : {};
+    const o = isObj4(r) ? r : {};
     const where = { file: M, path: `regex[${i}]` };
     const decl = { id: str2(o.id), pattern: str2(o.pattern), flags: str2(o.flags, "i"), target: str2(o.target, "meta") };
     try {
@@ -8885,8 +9611,8 @@ function compile(tree) {
     if (req) decl.requires = req;
     return decl;
   });
-  const metaSrc = isObj3(raw.meta) ? raw.meta : {};
-  const tasksSrc = isObj3(metaSrc.tasks) ? metaSrc.tasks : {};
+  const metaSrc = isObj4(raw.meta) ? raw.meta : {};
+  const tasksSrc = isObj4(metaSrc.tasks) ? metaSrc.tasks : {};
   const meta = {
     trigger: text(str2(metaSrc.trigger, `@{{ap::name::${narrator}}}`), { file: M, path: "meta.trigger" }),
     wrap: metaSrc.wrap !== false,
@@ -8902,7 +9628,7 @@ function compile(tree) {
     const e = expr(cond, { file: M, path: `meta.tasks.${task}` });
     if (e) meta.tasks[task] = e;
   }
-  const tsSrc = isObj3(raw.tokenSaving) ? raw.tokenSaving : {};
+  const tsSrc = isObj4(raw.tokenSaving) ? raw.tokenSaving : {};
   const userInputMode = (v, path) => {
     if (v === void 0) return void 0;
     if (USER_INPUT_MODES.includes(v)) return v;
@@ -8915,11 +9641,28 @@ function compile(tree) {
     userInput: userInputMode(tsSrc.userInput, "tokenSaving.userInput") ?? "truncate",
     synopsisTemplate: str2(tsSrc.synopsisTemplate, "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}")
   };
+  let inputShaping;
+  if (raw.inputShaping !== void 0 && raw.inputShaping !== null) {
+    const where = { file: M, path: "inputShaping" };
+    const src = isObj4(raw.inputShaping) ? raw.inputShaping : {};
+    if (!isObj4(raw.inputShaping)) diag.error("inputShaping must be a mapping { mode, template? }", where);
+    else {
+      for (const k of Object.keys(src)) if (k !== "mode" && k !== "template") diag.warn(`inputShaping: unknown key \`${k}\``, { file: M, path: `inputShaping.${k}` });
+      const mode = src.mode;
+      if (!INPUT_SHAPING_MODES.includes(mode)) diag.error(`inputShaping.mode must be one of ${INPUT_SHAPING_MODES.join(", ")}`, { file: M, path: "inputShaping.mode" });
+      else {
+        if (mode === "extract" && src.template !== void 0) diag.warn("inputShaping.template is only used by `wrap` (extract places the input with {{ap::input::text}})", { file: M, path: "inputShaping.template" });
+        const template = mode === "wrap" ? text(str2(src.template, DEFAULT_INPUT_TEMPLATE), { file: M, path: "inputShaping.template" }) : DEFAULT_INPUT_TEMPLATE;
+        if (mode === "wrap" && !template.includes("{{content}}")) diag.warn("inputShaping.template has no {{content}}: the input text would be lost", { file: M, path: "inputShaping.template" });
+        inputShaping = { mode, template };
+      }
+    }
+  }
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
-    const o = isObj3(s) ? s : {};
+    const o = isObj4(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
-    const toolSrc = isObj3(o.tool) ? o.tool : {};
-    const resp = isObj3(o.response) ? o.response : {};
+    const toolSrc = isObj4(o.tool) ? o.tool : {};
+    const resp = isObj4(o.response) ? o.response : {};
     const turn = {
       id: str2(o.id),
       label: str2(o.label, str2(o.id)),
@@ -8931,7 +9674,7 @@ function compile(tree) {
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error("invalid tool name", where);
     return turn;
   });
-  const theme = isObj3(raw.theme) ? raw.theme : {};
+  const theme = isObj4(raw.theme) ? raw.theme : {};
   const modules = [];
   const entries = [];
   const moduleFiles = [...tree.keys()].filter((p) => p.startsWith("modules/") && p.endsWith(".md")).sort();
@@ -8990,6 +9733,16 @@ function compile(tree) {
   modules.sort((a, b) => rank(a.id) - rank(b.id));
   const regionIndex = (rid) => regions.findIndex((r) => r.id === rid);
   entries.sort((a, b) => regionIndex(a.region) - regionIndex(b.region) || a.order - b.order || rank(a.module) - rank(b.module));
+  const sourceCtx = {
+    diag,
+    insertionPoints,
+    expr,
+    content,
+    varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
+    onExpr: (e, where) => map.exprs.push({ expr: e, where })
+  };
+  const userModules = compileUserModuleSources(tree, sourceCtx, "module");
+  const userModuleTemplates = compileUserModuleSources(tree, sourceCtx, "template");
   const workflows = [];
   const workflowFiles = [...tree.keys()].filter((p) => /^workflows\/[^/]+\.md$/.test(p)).sort();
   for (const file of workflowFiles) {
@@ -9003,9 +9756,9 @@ function compile(tree) {
     const order = raw.workflowOrder.map((x) => str2(x));
     workflows.sort((a, b) => (order.indexOf(a.id) + 1 || 1e6) - (order.indexOf(b.id) + 1 || 1e6));
   }
-  const carrier = compileCarrier(isObj3(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
-  const cd = isObj3(raw.configurationDefaults) ? raw.configurationDefaults : {};
-  const sect = (k) => isObj3(cd[k]) ? cd[k] : {};
+  const carrier = compileCarrier(isObj4(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
+  const cd = isObj4(raw.configurationDefaults) ? raw.configurationDefaults : {};
+  const sect = (k) => isObj4(cd[k]) ? cd[k] : {};
   const storyWorkflow = workflows.find((w) => w.kind === "story")?.id ?? "";
   const identitySrc = sect("identity");
   const configurationDefaults = {
@@ -9026,15 +9779,24 @@ function compile(tree) {
     cache: { ...CACHE_DEFAULTS, ...sect("cache") },
     meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") }
   };
-  for (const k of ["names", "prefixes"]) if (isObj3(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
+  for (const k of ["names", "prefixes"]) if (isObj4(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
     if (!(k in configurationDefaults.modules)) diag.error(`configurationDefaults.modules: unknown user module \`${k}\``, { file: M, path: `configurationDefaults.modules.${k}` });
     else configurationDefaults.modules[k] = Boolean(v);
   }
-  for (const [k, v] of Object.entries(sect("params"))) {
-    if (!(k in configurationDefaults.params)) diag.error(`configurationDefaults.params: unknown param \`${k}\``, { file: M, path: `configurationDefaults.params.${k}` });
-    else configurationDefaults.params[k] = v;
-  }
+  const checkParams = (section, path, apply, reportUnknown = true) => {
+    for (const [k, v] of Object.entries(section)) {
+      const where = { file: M, path: `${path}.${k}` };
+      const decl = params.find((x) => x.id === k);
+      if (!decl) {
+        if (reportUnknown) diag.error(`${path}: unknown param \`${k}\``, where);
+      } else if (!paramValueMatches(decl, v)) diag.error(`${path}.${k}: a ${decl.type} param needs ${paramShape(decl.type)}`, where);
+      else apply(k, Array.isArray(v) ? normalizeList(v) : v);
+    }
+  };
+  checkParams(sect("params"), "configurationDefaults.params", (k, v) => {
+    configurationDefaults.params[k] = v;
+  });
   userInputMode(sect("tokenSaving").userInput, "configurationDefaults.tokenSaving.userInput");
   const checkCache = (c, path) => {
     for (const [k, v] of Object.entries(c)) {
@@ -9050,20 +9812,23 @@ function compile(tree) {
   checkMeta(sect("meta"), "configurationDefaults.meta");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
-    const o = isObj3(c) ? c : {};
-    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj3(o.diff) ? o.diff : {} };
+    const o = isObj4(c) ? c : {};
+    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj4(o.diff) ? o.diff : {} };
     if (o.description !== void 0) rc.description = str2(o.description);
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
-    if (isObj3(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
-    if (isObj3(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
-    if (isObj3(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj4(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
+    if (isObj4(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
+    if (isObj4(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj4(rc.diff.params)) checkParams(rc.diff.params, `configurations[${i}].diff.params`, (k, v) => {
+      rc.diff.params[k] = v;
+    }, false);
     return rc;
   });
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
   const defaultConfiguration = str2(raw.defaultConfiguration, configurations[0].id);
   const migrations = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m, i) => {
-    const o = isObj3(m) ? m : {};
-    const rename2 = isObj3(o.rename) ? o.rename : {};
+    const o = isObj4(m) ? m : {};
+    const rename2 = isObj4(o.rename) ? o.rename : {};
     const known = {
       modules: new Set(modules.map((x) => x.id)),
       params: new Set(params.map((x) => x.id)),
@@ -9076,7 +9841,7 @@ function compile(tree) {
         diag.warn(`unknown rename section \`${section}\``, where);
         continue;
       }
-      for (const [from, to] of Object.entries(isObj3(rename2[section]) ? rename2[section] : {}))
+      for (const [from, to] of Object.entries(isObj4(rename2[section]) ? rename2[section] : {}))
         if (!known[section].has(String(to))) diag.warn(`\`${from}\` is renamed to \`${String(to)}\`, which this version does not declare`, where);
     }
     return { from: str2(o.from), rename: rename2 };
@@ -9086,8 +9851,8 @@ function compile(tree) {
     const m = /^locales\/([\w-]+)\.ya?ml$/.exec(file);
     if (!m) continue;
     try {
-      const parsed = (0, import_yaml2.parse)(src);
-      if (isObj3(parsed)) locales[m[1].toLowerCase()] = parsed;
+      const parsed = (0, import_yaml4.parse)(src);
+      if (isObj4(parsed)) locales[m[1].toLowerCase()] = parsed;
       else diag.error("locale file must be a mapping", { file });
     } catch (e) {
       diag.error(`invalid YAML: ${e.message}`, { file });
@@ -9115,11 +9880,14 @@ function compile(tree) {
     regions,
     anchors,
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
+    ...inputShaping ? { inputShaping } : {},
     params,
     groups,
     modules,
     entries,
     insertionPoints,
+    userModules,
+    userModuleTemplates,
     vars,
     workflows,
     structures,
@@ -9138,12 +9906,12 @@ function compile(tree) {
     locales
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map };
+  return { preset, diag, map, manifestFiles: manifest.files };
 }
-var isScalar = (v) => ["string", "number", "boolean"].includes(typeof v);
+var isScalar2 = (v) => ["string", "number", "boolean"].includes(typeof v);
 function varUpdates(src, decls, diag, where, text) {
   if (src === void 0) return [];
-  if (!isObj3(src)) {
+  if (!isObj4(src)) {
     diag.error("vars must be a mapping of variable id \u2192 value", where);
     return [];
   }
@@ -9158,12 +9926,12 @@ function varUpdates(src, decls, diag, where, text) {
     const scalarText = (x, w) => text(String(x), w);
     switch (decl.type) {
       case "string":
-        if (!isScalar(v)) diag.error(`\`${id}\` is a string variable: expected text`, at);
+        if (!isScalar2(v)) diag.error(`\`${id}\` is a string variable: expected text`, at);
         else out.push({ var: id, type: "string", text: scalarText(v, at) });
         break;
       case "list": {
         const items = Array.isArray(v) ? v : [v];
-        if (!items.every(isScalar)) {
+        if (!items.every(isScalar2)) {
           diag.error(`\`${id}\` is a list variable: expected an item or a list of plain items`, at);
           break;
         }
@@ -9171,11 +9939,11 @@ function varUpdates(src, decls, diag, where, text) {
         break;
       }
       case "dict": {
-        if (!isObj3(v)) {
+        if (!isObj4(v)) {
           diag.error(`\`${id}\` is a dict variable: expected a mapping`, at);
           break;
         }
-        const bad = Object.entries(v).filter(([, x]) => x !== null && !isScalar(x)).map(([k]) => k);
+        const bad = Object.entries(v).filter(([, x]) => x !== null && !isScalar2(x)).map(([k]) => k);
         if (bad.length) {
           diag.error(`\`${id}\` is a dict variable: values must be plain (${bad.join(", ")})`, at);
           break;
@@ -9194,7 +9962,7 @@ function compileWorkflow(file, src, diag, expr, content, text) {
   const kind = fm.kind === "task" ? "task" : "story";
   const stages = [];
   (Array.isArray(fm.stages) ? fm.stages : []).forEach((s, i) => {
-    const o = isObj3(s) ? s : {};
+    const o = isObj4(s) ? s : {};
     const where = { file, path: `stages[${i}]` };
     const stage = { id: str2(o.id), actor: str2(o.actor), kind: str2(o.kind, "text"), label: str2(o.label, str2(o.id)) };
     if (!/^[a-z][\w-]*$/i.test(stage.id)) diag.error("stage id is required (letters, digits, _ and -)", where);
@@ -9203,19 +9971,19 @@ function compileWorkflow(file, src, diag, expr, content, text) {
     if (o.optional) stage.optional = true;
     if (o.tag !== void 0) stage.tag = str2(o.tag);
     if (o.field !== void 0) {
-      const f = isObj3(o.field) ? o.field : { description: o.field };
+      const f = isObj4(o.field) ? o.field : { description: o.field };
       const out = {};
       if (f.name !== void 0) out.name = str2(f.name);
       if (f.description !== void 0) out.description = text(str2(f.description), where);
       stage.field = out;
     }
     if (o.tool !== void 0) {
-      const t = isObj3(o.tool) ? o.tool : { description: o.tool };
+      const t = isObj4(o.tool) ? o.tool : { description: o.tool };
       const out = {};
       if (t.name !== void 0) out.name = str2(t.name);
       if (t.description !== void 0) out.description = text(str2(t.description), where);
       if (t.param !== void 0) {
-        const p = isObj3(t.param) ? t.param : { name: t.param };
+        const p = isObj4(t.param) ? t.param : { name: t.param };
         out.param = {};
         if (p.name !== void 0) out.param.name = str2(p.name);
         if (p.description !== void 0) out.param.description = text(str2(p.description), where);
@@ -9275,7 +10043,7 @@ function compileWorkflow(file, src, diag, expr, content, text) {
   const wf = { id, name: str2(fm.name, id), kind, stages, sections };
   if (fm.description !== void 0) wf.description = str2(fm.description).trim();
   if (fm.hint !== void 0) wf.hint = str2(fm.hint).trim();
-  const after = isObj3(fm.structures) ? fm.structures.after : void 0;
+  const after = isObj4(fm.structures) ? fm.structures.after : void 0;
   if (after !== void 0) {
     wf.structuresAfter = str2(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
@@ -9285,7 +10053,7 @@ function compileWorkflow(file, src, diag, expr, content, text) {
 function compileCarrier(src, regions, presetName, diag) {
   const M = "preset.yaml";
   const label = str2(src.label, presetName);
-  const overrides = isObj3(src.prompts) ? src.prompts : {};
+  const overrides = isObj4(src.prompts) ? src.prompts : {};
   const prompts = [];
   const prompt_order = [];
   const order = Array.isArray(src.order) ? src.order : [];
@@ -9297,12 +10065,12 @@ function compileCarrier(src, regions, presetName, diag) {
     } else if (NATIVE_PROMPTS[identifier]) {
       const n = NATIVE_PROMPTS[identifier];
       p = n.marker ? { identifier, name: n.name, system_prompt: true, marker: true } : { identifier, name: n.name, system_prompt: true, role: "system", content: "", marker: false };
-    } else if (isObj3(overrides[identifier])) {
+    } else if (isObj4(overrides[identifier])) {
       p = { identifier, name: identifier, role: "system", content: "", system_prompt: false, marker: false, injection_position: 0, injection_depth: 4 };
     } else {
       return diag.error(`carrier.order: \`${identifier}\` is neither a region, an ST prompt nor declared in carrier.prompts`, where);
     }
-    if (isObj3(overrides[identifier])) Object.assign(p, overrides[identifier]);
+    if (isObj4(overrides[identifier])) Object.assign(p, overrides[identifier]);
     if (prompts.some((x) => x.identifier === p.identifier)) return diag.error(`carrier.order: duplicate \`${identifier}\``, where);
     prompts.push(p);
     prompt_order.push({ identifier: p.identifier, enabled });
@@ -9310,7 +10078,7 @@ function compileCarrier(src, regions, presetName, diag) {
   order.forEach((item, i) => {
     const where = { file: M, path: `carrier.order[${i}]` };
     if (typeof item === "string") add(item, true, where);
-    else if (isObj3(item) && Object.keys(item).length === 1) {
+    else if (isObj4(item) && Object.keys(item).length === 1) {
       const [k, v] = Object.entries(item)[0];
       add(k, v !== false, where);
     } else diag.error("carrier.order items are `id` or `{ id: false }`", where);
@@ -9347,7 +10115,8 @@ var FIXED_VARS = {
   "chat.group": null,
   "memory.hasChat": null,
   "memory.hasGlobal": null,
-  "recap.present": null
+  "recap.present": null,
+  "input.shaped": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -9399,6 +10168,7 @@ function validate(p, map, diag) {
   }
   const usedVars = /* @__PURE__ */ new Set();
   const structureIds = new Set(Object.keys(p.structures));
+  let inputTextUses = 0;
   for (const { text, where } of map.texts) {
     for (const args of listMacros(text)) {
       const [head, ...rest] = args;
@@ -9430,7 +10200,8 @@ function validate(p, map, diag) {
           if (a !== "summary" && a !== "hint") bad("expected summary | hint");
           break;
         case "input":
-          if (a !== "meta") bad("expected meta");
+          if (a !== "meta" && a !== "text") bad("expected meta | text");
+          else if (a === "text") inputTextUses++;
           break;
         case "memory":
           if (a !== "chat" && a !== "global") bad("expected chat | global");
@@ -9449,6 +10220,32 @@ function validate(p, map, diag) {
       }
     }
   }
+  if (map.templates.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, TEMPLATES_SINCE) < 0))
+    diag.warn(`templates need Advanced Preset ${TEMPLATES_SINCE}: set minAdvancedPreset to ${TEMPLATES_SINCE} or later (older versions send the template source as text)`, { file: M, path: "minAdvancedPreset" });
+  const refSets = { vars: new Set(varDecls.keys()), params: paramIds, modules: moduleIds, flags: flagIds, stages: stageIds };
+  const REF_RE = /(?<![\w$.])(vars|params|modules|flags|stages)\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*(['"`])([^'"`]+)\3\s*\])/g;
+  for (const { source, where } of map.templates) {
+    const code = templateCode(source).join("\n");
+    if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
+    let staticVarReads = 0;
+    for (const m of code.matchAll(REF_RE)) {
+      const [, root, dotted, , quoted] = m;
+      const key = dotted ?? quoted;
+      if (root === "vars") {
+        staticVarReads++;
+        usedVars.add(key);
+      }
+      if (key in Object.prototype) continue;
+      if (!refSets[root].has(key)) diag.warn(`template reads unknown ${root === "vars" ? "variable" : root.slice(0, -1)} \`${key}\``, where);
+    }
+    const wholeVarUses = [...code.matchAll(/(?<![\w$.])vars(?![\w$])/g)].length;
+    if (wholeVarUses > staticVarReads) for (const id of varDecls.keys()) usedVars.add(id);
+  }
+  const shaping = p.inputShaping;
+  if (!shaping && inputTextUses) diag.warn("{{ap::input::text}} is always empty: the preset declares no inputShaping", { file: M, path: "inputShaping" });
+  if (shaping?.mode === "extract" && !inputTextUses) diag.warn("inputShaping extracts the input from the history but no prompt uses {{ap::input::text}}: the input would not be sent", { file: M, path: "inputShaping.mode" });
+  if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
+    diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
   if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: "workflowRegion" });
   for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
@@ -9487,9 +10284,12 @@ function validate(p, map, diag) {
   for (const x of p.params) {
     const where = { file: M, path: `params.${x.id}` };
     if (x.fallback && !paramIds.has(x.fallback)) diag.error(`fallback param \`${x.fallback}\` does not exist`, where);
+    else if (x.fallback && x.type === "list" !== (p.params.find((y) => y.id === x.fallback)?.type === "list")) diag.warn(`fallback param \`${x.fallback}\`: a list param and a scalar param should not fall back to each other`, where);
     if (x.type === "select" && !x.options?.length) diag.error("select params need options", where);
     if (x.group && !p.groups[x.group]) diag.warn(`group \`${x.group}\` is not declared`, where);
   }
+  if (p.params.some((x) => x.type === "list") && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, LIST_PARAMS_SINCE) < 0))
+    diag.warn(`list params need Advanced Preset ${LIST_PARAMS_SINCE}: set minAdvancedPreset to ${LIST_PARAMS_SINCE} or later (older versions cannot edit them)`, { file: M, path: "minAdvancedPreset" });
   const byKind = /* @__PURE__ */ new Map();
   for (const s of Object.values(p.structures)) if (s.kind !== "custom") byKind.set(s.kind, [...byKind.get(s.kind) ?? [], s.id]);
   for (const [k, ids] of byKind) if (ids.length > 1) diag.error(`only one structure of kind ${k} is allowed (${ids.join(", ")})`, { file: M, path: "structures" });
@@ -9597,6 +10397,8 @@ function validate(p, map, diag) {
       configurations: new Set(p.configurations.map((x) => x.id)),
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
+      userModules: new Set((p.userModules ?? []).map((x) => x.id)),
+      userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys())
     };
     for (const [section, ids] of Object.entries(known)) {
@@ -9613,9 +10415,10 @@ function validate(p, map, diag) {
 }
 
 // src/io.ts
-var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
+var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 function isSourcePath(rel) {
-  return SOURCE_RE.test(rel.split(sep).join("/"));
+  const p = rel.split(sep).join("/");
+  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p);
 }
 async function walk(dir, root, out) {
   for (const ent of await readdir(dir, { withFileTypes: true })) {
@@ -9646,21 +10449,66 @@ async function writeArtifact(preset, outDir) {
 }
 
 // src/preview.ts
+function pick(all, ids, noun) {
+  const unknown = ids.filter((id) => id !== "all" && id !== "none" && !all.some((t) => t.id === id));
+  if (unknown.length) return `unknown ${noun} ${unknown.join(", ")} (have: ${all.map((t) => t.id).join(", ") || "none"})`;
+  if (ids.includes("none")) return [];
+  return ids.includes("all") ? all : ids.map((id) => all.find((t) => t.id === id));
+}
+function templateModules(preset, ids, lang) {
+  const picked = pick(presetUserModuleTemplates(preset), ids, "user module template");
+  if (typeof picked === "string") return picked;
+  const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.userModuleTemplates?.[id] : void 0;
+  return picked.map((t) => userModuleFromSource(localizeUserModuleSource(t, lang, labels(t.id)), `tpl-${t.id}`));
+}
+function bundledModules(preset, ids, lang) {
+  const all = presetUserModules(preset);
+  const picked = ids ? pick(all, ids, "bundled user module") : all.filter((m) => m.enabled !== false);
+  if (typeof picked === "string") return picked;
+  const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : void 0;
+  return picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id));
+}
+function parseParamArg(preset, arg) {
+  const eq = arg.indexOf("=");
+  if (eq <= 0) return `--param expects id=value, got \`${arg}\``;
+  const id = arg.slice(0, eq).trim();
+  const raw = arg.slice(eq + 1);
+  const decl = preset.params.find((p) => p.id === id);
+  if (!decl) return `unknown param \`${id}\` (have: ${preset.params.map((p) => p.id).join(", ") || "none"})`;
+  if (decl.type === "number") {
+    const n = Number(raw);
+    return raw.trim() !== "" && Number.isFinite(n) ? { id, value: n } : `--param ${id}: expected a number, got \`${raw}\``;
+  }
+  if (decl.type !== "list") return { id, value: raw };
+  if (raw.trim().startsWith("[")) {
+    try {
+      const v = JSON.parse(raw);
+      if (Array.isArray(v) && v.every((x) => typeof x === "string")) return { id, value: normalizeList(v) };
+    } catch {
+    }
+    return `--param ${id}: expected a JSON array of strings, got \`${raw}\``;
+  }
+  return { id, value: normalizeList(raw.split(",")) };
+}
 function preview(source, o) {
   const { preset, skipped } = o.userModules ? withUserModules(source, o.userModules) : { preset: source, skipped: [] };
   const config = resolveConfiguration(preset, o.config ?? preset.defaultConfiguration, {
     connection: { ...o.transport ? { transport: o.transport } : {}, ...o.workflow ? { workflow: o.workflow } : {} },
-    modules: o.modules
+    modules: o.modules,
+    params: o.params
   });
   if (!TRANSPORTS.includes(config.connection.transport)) throw new Error(`unknown transport ${config.connection.transport}`);
   const pure = o.meta === "pure";
   const vars = defaultVars(preset, config, {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
-    gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false }
+    gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
+    input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 }
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "" } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "" } }, workflow);
+  const shaping = preset.inputShaping;
+  const historyInput = o.input === void 0 ? void 0 : !shaping ? o.input : shaping.mode === "wrap" ? wrapInput(shaping.template, o.input, a.expand) : null;
   const transport = vars.transport;
   const wf = a.workflow;
   const artifacts = {};
@@ -9672,15 +10520,17 @@ function preview(source, o) {
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ ...historyInput !== void 0 ? { historyInput } : {}, vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, ...a.warnings.length ? { warnings: a.warnings } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
   const lines = [];
   const rule = (title) => lines.push("", `\u2501\u2501 ${title} ${"\u2501".repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} \xB7 ${transport} (${vars.style}) \xB7 workflow ${wf?.id ?? "\u2014"} \xB7 config ${o.config ?? preset.defaultConfiguration}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(", ")}`);
   for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
+  for (const w of a.warnings) lines.push(`warning: ${w}`);
   const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
+  if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   for (const r of preset.regions) {
     if (r.native) {
@@ -9690,6 +10540,10 @@ function preview(source, o) {
     const msgs = a.regions[r.id] ?? [];
     rule(`${r.id}${msgs.length ? "" : " (empty)"}`);
     for (const m of msgs) lines.push(`[${m.role}]`, m.content, "");
+    if (r.id === preset.anchors.historyStart && historyInput !== void 0) {
+      rule("chat history (ST) \xB7 last user message");
+      lines.push(historyInput === null ? "(extracted: placed by {{ap::input::text}})" : historyInput, "");
+    }
   }
   for (const [k, v] of Object.entries(artifacts)) {
     rule(k);
@@ -9747,7 +10601,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.8.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.9.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -9772,7 +10626,7 @@ async function init(o) {
 }
 
 // src/skills.ts
-var import_yaml3 = __toESM(require_dist(), 1);
+var import_yaml5 = __toESM(require_dist(), 1);
 import { cp as cp2, mkdir as mkdir3, readdir as readdir3, readFile as readFile3, rm, stat as stat2 } from "node:fs/promises";
 import { join as join3, relative as relative3 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -9782,7 +10636,7 @@ var isDir = (p) => stat2(p).then((s) => s.isDirectory(), () => false);
 function parseSkillFrontmatter(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
   if (!m) return {};
-  const data = (0, import_yaml3.parse)(m[1]);
+  const data = (0, import_yaml5.parse)(m[1]);
   return {
     name: typeof data?.name === "string" ? data.name : void 0,
     description: typeof data?.description === "string" ? data.description : void 0
@@ -9843,7 +10697,7 @@ async function installSkills(target, source = SKILLS_SOURCE) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.8.0" : "0.0.0-dev";
+var VERSION = true ? "1.9.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage
@@ -9852,7 +10706,10 @@ Usage
   ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
-                   [--enable a,b] [--disable c] [--user-modules file] [--json] [--out file]
+                   [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
+                   [--user-modules file]
+                   [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
+                   [--lang zh-cn] [--json] [--out file]
   ap init    <dir> [--id x] [--name "My Preset"] [--author me]
                                              scaffold a new preset repository
   ap skills  list                            list the bundled Agent Skills
@@ -9877,7 +10734,12 @@ async function main(argv) {
       enable: { type: "string" },
       disable: { type: "string" },
       json: { type: "boolean" },
+      param: { type: "string", multiple: true },
+      input: { type: "string" },
       "user-modules": { type: "string" },
+      "bundled-modules": { type: "string" },
+      "user-module-templates": { type: "string" },
+      lang: { type: "string" },
       id: { type: "string" },
       name: { type: "string" },
       author: { type: "string" },
@@ -9888,12 +10750,12 @@ async function main(argv) {
   switch (command) {
     case "build":
     case "check": {
-      const { preset, diag } = await buildDir(dir);
+      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
       report(diag);
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? "dist"));
@@ -9905,7 +10767,7 @@ async function main(argv) {
       return new Promise(() => {
       });
     case "preview": {
-      const { preset, diag } = await buildDir(dir);
+      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
       if (!preset || !diag.ok) {
         report(diag);
         return 1;
@@ -9913,9 +10775,33 @@ async function main(argv) {
       const toggles = {};
       for (const id of values.enable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = true;
       for (const id of values.disable?.split(",").filter(Boolean) ?? []) toggles[id.trim()] = false;
+      const params = {};
+      for (const arg of values.param ?? []) {
+        const parsed = parseParamArg(preset, arg);
+        if (typeof parsed === "string") {
+          console.error(parsed);
+          return 1;
+        }
+        params[parsed.id] = parsed.value;
+      }
       const meta = values.meta === "pure" || values.meta === "mixed" ? values.meta : void 0;
-      const userModules = values["user-modules"] ? parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules : void 0;
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, userModules, json: values.json });
+      const ids = (v) => v.split(",").map((x) => x.trim()).filter(Boolean);
+      const bundled = bundledModules(preset, values["bundled-modules"] !== void 0 ? ids(values["bundled-modules"]) : void 0, values.lang);
+      if (typeof bundled === "string") {
+        console.error(bundled);
+        return 1;
+      }
+      const userModules = [...bundled];
+      if (values["user-modules"]) userModules.push(...parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules);
+      if (values["user-module-templates"]) {
+        const picked = templateModules(preset, ids(values["user-module-templates"]), values.lang);
+        if (typeof picked === "string") {
+          console.error(picked);
+          return 1;
+        }
+        userModules.push(...picked);
+      }
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

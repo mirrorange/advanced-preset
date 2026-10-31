@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | 预设 | preset | 决定模型以什么身份、按什么要求写作的一组提示词和设定 |
 | 产物 | artifact，`*.apreset.json` | 构建后得到的预设文件，用户安装的就是它 |
-| 清单 | manifest，`preset.yaml` | 预设的总设定文件 |
+| 清单 | manifest，`preset.yaml` | 预设的总设定文件；除元数据外可拆到 `manifest/*.yaml` |
 | 区域 | region | 请求中的一段固定位置，模组的内容放在区域里 |
 | 原生区域 | native region | 由 ST 填入内容（角色卡、世界书等）的区域 |
 | 模组 | module | 一个 Markdown 文件，代表一个功能或一组规则 |
@@ -16,6 +16,8 @@
 | 参数 | param | 写作页上的输入项，如语言、长度 |
 | 条件 | `when` / `@if` | 决定内容是否出现的判断式 |
 | 指令 | directive，`<!-- @… -->` | 写在 HTML 注释里、给 AP 看的标记，如 `@entry`、`@if` |
+| 注释 | comment，`<!--# … -->` | 只给作者看的说明，编译时移除、不发送给模型，可跨行 |
+| 模板 | template，`<!-- @template -->` | 每次生成时运行的 EJS 模板（JavaScript），输出成为提示词；安装时需用户确认信任 |
 | 宏 | macro，`{{ap::…}}` | 生成时被替换成实际内容的占位符 |
 | 角色 | actor | 参与写作的身份，如叙述者、编辑、用户 |
 | 前缀 | prefix | 对话式下标识“谁在说话”的开头，如 `Freesia: ` |
@@ -30,8 +32,11 @@
 | 总结 | recap | 完整的剧情概要，替代它覆盖的聊天记录 |
 | 事件摘要 | synopsis | 每段故事的时间、地点、事件、概要 |
 | 节省 Token | token saving | 用事件摘要替代较早的回复、截断较早的长用户消息 |
+| 用户输入整形 | input shaping，`inputShaping` | 预设把本次输入在聊天记录中包裹起来（`wrap`），或取出来放到别的区域（`extract`） |
 | 构建变量 | build variable，`vars` | 由多个模组共同填写、在一处读出的值 |
 | 插入点 | insertion point | 预设开放给用户放入“我的模组”的位置 |
+| 用户模组模板 | user module template | 预设附带的示例用户模组（`user-module-templates/`），新建“我的模组”时可以从它开始 |
+| 随预设安装的用户模组 | bundled user module | 写在预设 `user-modules/` 中、安装预设时放进“我的模组”的用户模组；之后归用户所有 |
 | 我的模组 | user module | 用户在面板上写的模组 |
 | 推荐配置 | recommended configuration | 预设提供的一套设定，如“Gemini” |
 | 示范轮次 | synthetic turn | 工具模式下放在请求末尾的一轮虚拟工具调用，示范工具用法 |

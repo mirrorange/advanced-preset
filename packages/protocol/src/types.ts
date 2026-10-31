@@ -6,6 +6,8 @@
  * every prompt is a list of message blocks made of (optionally conditional) text pieces.
  */
 import type { Expr } from './expr';
+import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
+import type { InputShaping } from './input-shaping';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -36,6 +38,16 @@ export type ActorId = string;
 export interface Piece {
   text: string;
   when?: Expr;
+  /**
+   * `@template` (I-109): `text` is an EJS template, rendered at assembly time; its output then goes
+   * through macro expansion like any other text. The origin is for error messages.
+   */
+  template?: TemplateOrigin;
+}
+/** Where a template was written: source file (preset sources) and 1-based line of its first line. */
+export interface TemplateOrigin {
+  file?: string;
+  line?: number;
 }
 /** One chat message worth of content. `role` overrides the region role (`@as`). */
 export interface Block {
@@ -71,21 +83,28 @@ export interface ParamOption {
   /** Text used by `{{ap::param::id}}`; defaults to `value`. */
   text?: string;
 }
+export type ParamType = 'text' | 'number' | 'select' | 'list';
+/** Value of a param: scalars for text / number / select, a list of strings for `list`. */
+export type ParamValue = string | number | string[];
+
 export interface Param {
   id: string;
-  type: 'text' | 'number' | 'select';
+  type: ParamType;
   label: string;
   description?: string;
   group?: string;
-  /** Text used when the parameter is unset ('' / 0). */
+  /** Text used when the parameter is unset ('' / 0 / empty list). */
   unset?: string;
   /** Another parameter whose value is used when this one is unset. */
   fallback?: string;
   unit?: string;
   min?: number;
   max?: number;
+  /** Text options (suggestions) / select choices; not used by lists. */
   options?: ParamOption[];
-  default: string | number;
+  /** Lists: text between items in `{{ap::param::id}}` (default `", "`). */
+  separator?: string;
+  default: ParamValue;
 }
 
 export interface Group {
@@ -374,7 +393,7 @@ export interface Configuration {
   sampling: Record<string, unknown>;
   identity: { names: Record<ActorId, string>; prefixes: Record<ActorId, string> };
   modules: Record<string, boolean>;
-  params: Record<string, string | number>;
+  params: Record<string, ParamValue>;
   tokenSaving: TokenSavingConfig;
   cache: CacheConfig;
   /** `enabled: false` turns meta-instruction handling off (input is plain story text). */
@@ -415,6 +434,8 @@ export interface LocaleTable {
   configurations?: Record<string, { name?: string; description?: string }>;
   structures?: Record<string, { title?: string }>;
   insertionPoints?: Record<string, { label?: string; description?: string }>;
+  userModules?: Record<string, { name?: string }>;
+  userModuleTemplates?: Record<string, { name?: string; description?: string }>;
   vars?: Record<string, { label?: string; description?: string }>;
   [key: string]: unknown;
 }
@@ -448,6 +469,11 @@ export interface APreset {
   anchors: Record<SemanticAnchor, string>;
   /** Region that receives the workflow (CoT / task) prompt. */
   workflowRegion: string;
+  /**
+   * Input shaping (absent = off): wrap the user's input in the history, or take it out for
+   * `{{ap::input::text}}`. Only when the last chat message is the user's.
+   */
+  inputShaping?: InputShaping;
 
   params: Param[];
   groups: Record<string, Group>;
@@ -455,6 +481,10 @@ export interface APreset {
   entries: Entry[];
   /** Places where user modules may insert content (absent in older artifacts → `[]`). */
   insertionPoints: InsertionPoint[];
+  /** User modules installed into the user's list (`user-modules/`; absent → `[]`). */
+  userModules: UserModuleSource[];
+  /** Example user modules offered when creating one (`user-module-templates/`; absent → `[]`). */
+  userModuleTemplates: UserModuleTemplate[];
   /** Build variables, in declaration order. */
   vars: BuildVarDecl[];
   workflows: Workflow[];

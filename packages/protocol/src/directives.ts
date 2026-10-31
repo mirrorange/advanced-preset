@@ -4,10 +4,20 @@
  *   <!-- @as assistant -->                                       start a new message
  *   <!-- @style dialogue --> … <!-- @end -->                     style-only fragment
  *   <!-- @if params.x != "" --> … <!-- @else --> … <!-- @end -->  conditional fragment
+ *   <!-- @template --> … <!-- @end -->                            EJS template (I-109)
  *
- * Directives inside fenced code blocks are literal text. Ordinary comments are prompt text.
+ * Author comments are removed before directives are read and are never sent to the model:
+ *
+ *   <!--# note -->                                                 single-line / inline comment
+ *   <!--#                                                          multi-line comment; nested
+ *   <!-- @if x --> … <!-- @end -->                                 `<!-- … -->` pairs (directives,
+ *   -->                                                            ordinary comments) stay inert
+ *
+ * Directives and comments inside fenced code blocks are literal text. Ordinary comments are prompt
+ * text.
  */
 import { and, parseExpr, type Expr } from './expr';
+import { checkTemplate } from './template';
 import type { Block, Content, Role } from './types';
 
 export interface Directive {
@@ -18,6 +28,8 @@ export interface Directive {
   /** Raw attribute source, used by `@if` which takes an expression. */
   raw: string;
   line: number;
+  /** Alone on its line (the line, newline included, was consumed). */
+  alone?: boolean;
 }
 
 export type Token = { kind: 'text'; text: string } | { kind: 'directive'; directive: Directive };
@@ -49,27 +61,49 @@ export function parseAttributes(src: string): { args: string[]; attrs: Record<st
   return { args, attrs };
 }
 
+/** Opens an author comment: `<!--#`, optionally with whitespace before the `#`. */
+const COMMENT_OPEN_RE = /<!--[ \t]*#/g;
+const COMMENT_SCAN_RE = /<!--|-->/g;
+
+interface OpenComment {
+  depth: number;
+  line: number;
+  /** Whether the text before the comment on its first line was blank. */
+  blankBefore: boolean;
+}
+
+/**
+ * Scan `line` from `from` inside a comment. Nested `<!--` … `-->` pairs are balanced so commented-out
+ * directives stay inert. Returns the index after the closing `-->`, or -1 when the comment continues
+ * on the next line (`state.depth` is updated).
+ */
+function scanComment(line: string, from: number, state: OpenComment): number {
+  COMMENT_SCAN_RE.lastIndex = from;
+  for (let m = COMMENT_SCAN_RE.exec(line); m; m = COMMENT_SCAN_RE.exec(line)) {
+    state.depth += m[0] === '<!--' ? 1 : -1;
+    if (state.depth === 0) return m.index + m[0].length;
+  }
+  return -1;
+}
+
 /**
  * Tokenise a body. `split` names the directives that start a new chunk.
- * A directive alone on its line consumes the whole line (including the newline).
+ * A directive or comment alone on its line consumes the whole line (including the newline).
+ * Author comments (`<!--# … -->`) are removed first; an unclosed comment is reported to `error`.
  */
-export function tokenizeDirectives(body: string, split: string[] = [], firstLine = 1): Chunk[] {
+export function tokenizeDirectives(body: string, split: string[] = [], firstLine = 1, error?: DirectiveErrorSink): Chunk[] {
   const chunks: Chunk[] = [{ tokens: [], line: firstLine }];
   const push = (t: Token) => {
+    if (t.kind === 'text' && !t.text) return;
     const tokens = chunks[chunks.length - 1]!.tokens;
     const last = tokens[tokens.length - 1];
     if (t.kind === 'text' && last?.kind === 'text') last.text += t.text;
     else tokens.push(t);
   };
 
-  const lines = body.replace(/\r\n?/g, '\n').split('\n');
-  let fenced = false;
-  lines.forEach((line, i) => {
-    const nl = i < lines.length - 1 ? '\n' : '';
-    const lineNo = firstLine + i;
-    if (FENCE_RE.test(line)) fenced = !fenced;
-    if (fenced || !line.includes('<!--')) return push({ kind: 'text', text: line + nl });
-
+  /** Read directives on one (comment-free) line. `keepNewline` keeps `nl` even if the line is only directives. */
+  const emit = (line: string, nl: string, lineNo: number, keepNewline = false) => {
+    if (!line.includes('<!--')) return push({ kind: 'text', text: line + nl });
     const matches = [...line.matchAll(DIRECTIVE_RE)];
     if (!matches.length) return push({ kind: 'text', text: line + nl });
     const alone = line.replace(DIRECTIVE_RE, '').trim() === '';
@@ -77,27 +111,109 @@ export function tokenizeDirectives(body: string, split: string[] = [], firstLine
     for (const m of matches) {
       if (m.index! > pos) push({ kind: 'text', text: line.slice(pos, m.index) });
       const raw = m[2]!.trim();
-      const directive: Directive = { name: m[1]!, ...parseAttributes(raw), raw, line: lineNo };
+      const directive: Directive = { name: m[1]!, ...parseAttributes(raw), raw, line: lineNo, ...(alone ? { alone } : {}) };
       if (split.includes(directive.name)) chunks.push({ head: directive, tokens: [], line: lineNo });
       else push({ kind: 'directive', directive });
       pos = m.index! + m[0].length;
     }
     if (!alone) push({ kind: 'text', text: line.slice(pos) + nl });
+    else if (keepNewline) push({ kind: 'text', text: nl });
+  };
+
+  const lines = body.replace(/\r\n?/g, '\n').split('\n');
+  let fenced = false;
+  let comment: OpenComment | undefined;
+  lines.forEach((line, i) => {
+    const nl = i < lines.length - 1 ? '\n' : '';
+    const lineNo = firstLine + i;
+
+    let pos = 0;
+    let blankBefore = true;
+    let touched = false;
+    if (comment) {
+      const end = scanComment(line, 0, comment);
+      if (end < 0) return; // the whole line is inside the comment
+      blankBefore = comment.blankBefore;
+      comment = undefined;
+      touched = true;
+      pos = blankBefore ? skipSpace(line, end) : end;
+    } else {
+      if (FENCE_RE.test(line)) fenced = !fenced;
+      if (fenced || !line.includes('<!--')) return push({ kind: 'text', text: line + nl });
+    }
+
+    // Remove author comments, keeping the text between them.
+    let out = '';
+    COMMENT_OPEN_RE.lastIndex = pos;
+    for (let m = COMMENT_OPEN_RE.exec(line); m; m = COMMENT_OPEN_RE.exec(line)) {
+      if (m.index < pos) continue;
+      out += line.slice(pos, m.index);
+      touched = true;
+      const state: OpenComment = { depth: 1, line: lineNo, blankBefore: blankBefore && !out.trim() };
+      const end = scanComment(line, m.index + m[0].length, state);
+      if (end < 0) {
+        comment = state;
+        pos = line.length;
+        break;
+      }
+      // Drop the whitespace on one side so `a <!--# x --> b` reads `a b`.
+      pos = !out || /\s$/.test(out) ? skipSpace(line, end) : end;
+      COMMENT_OPEN_RE.lastIndex = pos;
+    }
+    if (!touched) return emit(line, nl, lineNo);
+    out += line.slice(pos);
+    if (comment || !line.slice(pos).trim()) out = out.replace(/[ \t]+$/, '');
+
+    if (comment) {
+      // The newline belongs to the comment; the text before it continues after the comment ends.
+      if (out.trim()) emit(out, '', lineNo);
+      return;
+    }
+    if (!out.trim()) {
+      if (!blankBefore) push({ kind: 'text', text: nl });
+      return;
+    }
+    emit(out, nl, lineNo, !blankBefore);
   });
+  if (comment) error?.(`unclosed comment <!--# (opened at line ${comment.line})`, comment.line);
   return chunks;
+}
+
+function skipSpace(line: string, from: number): number {
+  while (from < line.length && (line[from] === ' ' || line[from] === '\t')) from++;
+  return from;
 }
 
 const ROLES: Role[] = ['system', 'user', 'assistant'];
 const STYLES = ['dialogue', 'imperative'];
 
-/** Compile body tokens into message blocks with conditional pieces. */
-export function compileTokens(tokens: Token[], error: DirectiveErrorSink, onExpr?: (e: Expr, line: number) => void): Content {
+/**
+ * Compile body tokens into message blocks with conditional pieces. `file` is recorded on template
+ * pieces for error messages.
+ */
+export function compileTokens(tokens: Token[], error: DirectiveErrorSink, onExpr?: (e: Expr, line: number) => void, file?: string): Content {
   const blocks: Block[] = [{ pieces: [] }];
   type Frame = { cond: Expr; negated?: boolean; style?: boolean; line: number };
   const stack: Frame[] = [];
   const current = () => and(...stack.map((f) => (f.negated ? ({ t: 'not', e: f.cond } as Expr) : f.cond)));
+  /** Open `@template`: its body is collected verbatim until the matching `@end`. */
+  let template: { text: string; line: number; open: number; when?: Expr } | undefined;
+  const closeTemplate = () => {
+    const tpl = template!;
+    template = undefined;
+    const problem = checkTemplate(tpl.text);
+    if (problem) error(`template: ${problem.message}`, problem.line !== undefined ? tpl.line + problem.line - 1 : tpl.open);
+    const origin = { ...(file ? { file } : {}), line: tpl.line };
+    blocks[blocks.length - 1]!.pieces.push(tpl.when ? { text: tpl.text, when: tpl.when, template: origin } : { text: tpl.text, template: origin });
+  };
 
   for (const token of tokens) {
+    if (template) {
+      if (token.kind === 'text') template.text += token.text;
+      else if (token.directive.name === 'end') closeTemplate();
+      else error(`@${token.directive.name} cannot be used inside @template (use EJS tags such as <% if (…) { %>)`, token.directive.line);
+      continue;
+    }
     if (token.kind === 'text') {
       const when = current();
       blocks[blocks.length - 1]!.pieces.push(when ? { text: token.text, when } : { text: token.text });
@@ -139,12 +255,20 @@ export function compileTokens(tokens: Token[], error: DirectiveErrorSink, onExpr
         break;
       }
       case 'end':
-        if (!stack.length) error('@end without matching @if / @style', d.line);
+        if (!stack.length) error('@end without matching @if / @style / @template', d.line);
         stack.pop();
+        break;
+      case 'template':
+        if (d.args.length || Object.keys(d.attrs).length) error('@template takes no arguments', d.line);
+        template = { text: '', line: d.alone ? d.line + 1 : d.line, open: d.line, when: current() };
         break;
       default:
         error(`unknown directive @${d.name}`, d.line);
     }
+  }
+  if (template) {
+    error(`unclosed @template (opened at line ${template.open})`, template.open);
+    template = undefined;
   }
   if (stack.length) error(`unclosed @if / @style (opened at line ${stack[stack.length - 1]!.line})`);
   return blocks.filter((b) => b.pieces.some((p) => p.text.trim()));
@@ -161,8 +285,9 @@ export interface DirectiveError {
  */
 export function compileText(text: string, role?: Role): { content: Content; errors: DirectiveError[] } {
   const errors: DirectiveError[] = [];
-  const [chunk] = tokenizeDirectives(text);
-  const content = compileTokens(chunk!.tokens, (message, line) => errors.push({ message, line }));
+  const sink: DirectiveErrorSink = (message, line) => errors.push({ message, line });
+  const [chunk] = tokenizeDirectives(text, [], 1, sink);
+  const content = compileTokens(chunk!.tokens, sink);
   if (role && content[0] && !content[0].role) content[0] = { ...content[0], role };
   return { content, errors };
 }

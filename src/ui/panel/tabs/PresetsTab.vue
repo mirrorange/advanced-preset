@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Check, Link, LoaderCircle, RefreshCw, Trash2, Upload, Download } from 'lucide-vue-next';
+import { Check, CodeXml, FileDown, Link, LoaderCircle, RefreshCw, Trash2, Upload, Download } from 'lucide-vue-next';
+import { presetTemplates } from '@advanced-preset/protocol';
 import { listPresets, type PresetEntry } from '@/store/presets';
 import { activatePreset } from '@/store/carrier';
 import { settings } from '@/store/settings';
 import { toast } from '@/st/host';
 import { presetDescription, presetName, t } from '@/i18n';
 import { installFromFile, installFromUrl, removePreset } from '@/app/install';
+import { isTrustDeclined } from '@/app/trust';
+import { exportPreset } from '@/app/bundled-modules';
 import { updateExtension } from '@/app/updater';
 import { activePreset, refreshActivePreset } from '../../state';
 import IconButton from '../../components/IconButton.vue';
+import Tip from '../../components/Tip.vue';
 import Appearance from '../Appearance.vue';
 
 const entries = computed(() => listPresets());
+const hasTemplates = (e: PresetEntry) => presetTemplates(e.preset).length > 0;
 const busy = ref<string | null>(null);
 const urlOpen = ref(false);
 const url = ref('');
@@ -24,7 +29,8 @@ async function run(key: string, f: () => Promise<unknown>, ok?: string) {
     await f();
     if (ok) toast('success', ok);
   } catch (e) {
-    toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
+    if (isTrustDeclined(e)) toast('info', e.message);
+    else toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
   } finally {
     busy.value = null;
   }
@@ -38,6 +44,7 @@ const importFile = (ev: Event) => {
   (ev.target as HTMLInputElement).value = '';
 };
 const updateFromSource = (e: PresetEntry) => run(`update:${e.preset.id}`, () => installFromUrl(settings().sources[e.preset.id]!), t('presets.updated'));
+const exportFile = (e: PresetEntry) => run(`export:${e.preset.id}`, () => exportPreset(e.preset));
 const remove = (e: PresetEntry) => run(`remove:${e.preset.id}`, () => removePreset(e.preset.id));
 const checkUpdates = () => run('ext', async () => toast('info', (await updateExtension()) === 'current' ? t('update.none') : t('update.reloading')));
 </script>
@@ -66,11 +73,13 @@ const checkUpdates = () => run('ext', async () => toast('info', (await updateExt
           <span class="preset-name">{{ presetName(e.preset) }}</span>
           <span class="badge neutral">v{{ e.preset.version }}</span>
           <span v-if="e.source !== 'builtin'" class="badge" :class="{ warn: e.source === 'dev' }">{{ t(`presets.source.${e.source}`) }}</span>
+          <Tip v-if="hasTemplates(e)" :text="t('presets.templates.help')"><span class="badge neutral icon-badge"><CodeXml />{{ t('presets.templates') }}</span></Tip>
         </div>
         <span v-if="e.preset.author" class="xs muted">{{ e.preset.author }}</span>
         <span v-if="presetDescription(e.preset)" class="small muted preset-desc">{{ presetDescription(e.preset) }}</span>
       </div>
       <div class="row preset-actions" @click.stop>
+        <IconButton :icon="FileDown" :label="t('presets.export')" align="end" small @click="exportFile(e)" />
         <IconButton v-if="e.source === 'installed' && settings().sources[e.preset.id]" :icon="RefreshCw" :label="t('presets.update')" align="end" small @click="updateFromSource(e)" />
         <IconButton v-if="e.source === 'installed'" :icon="Trash2" :label="t('common.delete')" align="end" small danger @click="remove(e)" />
       </div>

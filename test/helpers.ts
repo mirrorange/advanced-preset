@@ -1,6 +1,13 @@
 import { readFileSync } from 'node:fs';
-import { assemble, defaultVars, resolveConfiguration, upgradeArtifact, type APreset, type Transport } from '@advanced-preset/protocol';
+import { assemble, cloneData, defaultVars, resolveConfiguration, upgradeArtifact, type APreset, type Transport } from '@advanced-preset/protocol';
 import type { GenerationContext } from '@/core/context';
+
+/** A copy of a preset with every `@template` piece of its entries removed (for "no code" cases). */
+export function withoutTemplates(p: APreset): APreset {
+  const out = cloneData(p);
+  for (const e of out.entries) for (const b of e.content) b.pieces = b.pieces.filter((x) => !x.template);
+  return out;
+}
 
 export const petals = upgradeArtifact(JSON.parse(readFileSync(new URL('../dist/presets/petals.apreset.json', import.meta.url), 'utf8')))!;
 

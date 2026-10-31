@@ -57,7 +57,7 @@ configurationDefaults:
 | `sampling` | 任意键 | `{}` | ST Chat Completion 预设的设置项，见下 |
 | `identity` | `names.<actor>` / `prefixes.<actor>` | `''` | 覆盖角色名字 / 前缀；空字符串表示用清单 `actors` 的值 |
 | `modules` | `<module id>` | 模组的 `default` | 用户可开关模组的状态 |
-| `params` | `<param id>` | 参数的 `default` | 参数值 |
+| `params` | `<param id>` | 参数的 `default` | 参数值（列表参数为字符串数组，合并时整体替换） |
 | `tokenSaving` | `enabled` / `keepFullTurns` / `truncateUserAfter` / `userInput` | `false` / 清单 `tokenSaving` 的值 | 省 token（[meta-and-tasks.md](meta-and-tasks.md#省-token)） |
 | `cache` | `enabled` / `ttlMinutes` / `maxDeferredTurns` | `false` / `5` / `6` | 缓存优化：粘性渲染历史（[meta-and-tasks.md](meta-and-tasks.md#缓存优化粘性渲染)）；`ttlMinutes`、`maxDeferredTurns` 为 0 分别表示不限时、从不推迟 |
 | `meta` | `enabled` | `true` | 元指令总开关；`false` 时不处理元指令（[meta-and-tasks.md](meta-and-tasks.md#元指令)） |
@@ -72,6 +72,7 @@ ST 内部有几项的设置名与预设文件不同，AP 自动换算：`tempera
 ### 诊断
 
 - `configurationDefaults.modules` 中不存在或不是用户可开关的模组、`params` 中不存在的参数：错误；
+- `params` 的值与参数类型不符（如列表参数不是字符串数组、数字参数不是数字）：错误（推荐配置的 diff 同样检查）；
 - 未知的段（如 `configurationDefaults.foo`）：警告；
 - `cache.enabled` 不是布尔值、`ttlMinutes` / `maxDeferredTurns` 不是非负数：错误；`cache` 中未知的键：警告；
 - `connection.transport` / `streamToolArguments` 取值非法、`workflow` 不存在或是任务工作流、`syntheticTurn` 不存在：错误（推荐配置的 diff 同样检查）。
@@ -147,6 +148,7 @@ carrier:
 
 - 组装时 ST 按 Carrier 的顺序拼出提示词，AP 在每个锚点处换入区域内容（[assembly.md](assembly.md)）。锚点永远不会原样发给模型；
 - 安装或更新预设后，如果产物哈希变化，Carrier 被**重建**。用户手动改过 Carrier 的提示词时，重建会覆盖并提示；`chat_completion_source`、`reverse_proxy`、`proxy_password` 这些与连接绑定的字段会保留；
+- 重建的 Carrier 如果正被选中，会立即重新应用到 ST 当前设置（ST 按已应用的设置而不是磁盘上的预设拼提示词），新增的区域锚点马上生效。区域有内容但提示词里没有它的锚点时，组装调试会警告 `region <id>: its anchor is not in the prompt …`；
 - 所以要改提示词内容，请改预设源码，而不是改 Carrier。
 
 ## 迁移

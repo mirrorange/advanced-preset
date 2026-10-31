@@ -44,7 +44,8 @@ function toggleOption(value: string | number) {
   else list.push(value);
   patchVar({ value: list });
 }
-const boolOptions = computed(() => OPS.bool.map((op) => ({ value: op, label: opLabel('bool', op, (rule.value as VarRule).path) })));
+const switchKind = computed(() => (info.value?.kind === 'list' ? 'list' : 'bool'));
+const boolOptions = computed(() => OPS[switchKind.value].map((op) => ({ value: op, label: opLabel(switchKind.value, op, (rule.value as VarRule).path) })));
 const opOptions = computed(() => (info.value ? OPS[info.value.kind] : []).map((op) => ({ value: op, label: opLabel(info.value!.kind, op) })));
 const scope = computed({
   get: () => (rule.value as KeywordRule).target,
@@ -102,7 +103,7 @@ const scopeOptions = computed(() => [
 
     <!-- variable -->
     <div v-else-if="info" class="rule-body">
-      <Segmented v-if="info.kind === 'bool'" :model-value="rule.op" :options="boolOptions" @update:model-value="patchVar({ op: $event as VarOp })" />
+      <Segmented v-if="info.kind === 'bool' || info.kind === 'list'" :model-value="rule.op" :options="boolOptions" @update:model-value="patchVar({ op: $event as VarOp })" />
       <template v-else-if="info.kind === 'enum'">
         <select class="input bare rule-op" :value="rule.op" @change="patchVar({ op: ($event.target as HTMLSelectElement).value as VarOp })">
           <option v-for="o in opOptions" :key="o.value" :value="o.value">{{ o.label }}</option>

@@ -12,11 +12,13 @@ export interface Diagnostic extends Where {
 
 export class Diagnostics {
   readonly items: Diagnostic[] = [];
+  /** Rewrites locations as they are reported (the manifest maps `preset.yaml` paths to fragments). */
+  locate?: (where: Where) => Where;
   error(message: string, where: Where = {}) {
-    this.items.push({ level: 'error', message, ...where });
+    this.items.push({ level: 'error', message, ...(this.locate ? this.locate(where) : where) });
   }
   warn(message: string, where: Where = {}) {
-    this.items.push({ level: 'warn', message, ...where });
+    this.items.push({ level: 'warn', message, ...(this.locate ? this.locate(where) : where) });
   }
   get errors() {
     return this.items.filter((d) => d.level === 'error');
