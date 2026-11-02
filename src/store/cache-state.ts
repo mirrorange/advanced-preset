@@ -42,6 +42,9 @@ export function currentChatKey(): string {
   return String(c.getCurrentChatId?.() || `${c.characterId ?? ''}|${c.groupId ?? ''}`);
 }
 
+/** Key of a storyline's state (storylines keep separate states; the main storyline uses the chat's key). */
+export const storylineCacheKey = (chat: string, storyline: string | undefined): string => (storyline ? `${chat}\u0001${storyline}` : chat);
+
 export function cacheState(chat: string): CacheState | undefined {
   return load()[chat];
 }

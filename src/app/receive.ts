@@ -5,6 +5,7 @@
  */
 import { st } from '@/st/host';
 import { writeSidecar } from '@/store/sidecar';
+import { writeMessageLine } from '@/store/storylines';
 import { handoff } from '@/core/orchestrator';
 import { live } from '@/core/live';
 import { presetState } from '@/store/config';
@@ -27,6 +28,8 @@ export async function onMessageReceived(mesId: number, type?: string): Promise<v
     if (Array.isArray(msg.swipes)) msg.swipes[msg.swipe_id ?? 0] = outcome.content;
   }
   writeSidecar(mesId, outcome.sidecar);
+  // Storylines: the swipe belongs to the storyline it was written for (I-145).
+  if (p.ctx.storylines) writeMessageLine(mesId, p.ctx.storylines.current);
   // Global memory exists once its message does (I-98); the sync also records the new refs as active.
   if (outcome.global?.length) commitGlobalOps(presetState(p.ctx.preset), outcome.global);
   syncGlobalRefs();

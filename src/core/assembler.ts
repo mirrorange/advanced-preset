@@ -4,9 +4,9 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
-  actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, withUserModules, type APreset, type MacroData, type StatusBar, type Vars, type Workflow,
+  actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
-import { st, toast, type ChatMessage } from '@/st/host';
+import { st, toast, type ChatMessage, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
 import { getPreset } from '@/store/presets';
 import { activeConfiguration, presetState } from '@/store/config';
@@ -21,7 +21,9 @@ import { alignHistory, annotationHistory, historyEchoes, rewriteHistory, synopsi
 import { debugLog } from './debug';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { applySticky, stripMarkers, type CacheReport } from './sticky';
-import { cacheState, currentChatKey } from '@/store/cache-state';
+import { cacheState, currentChatKey, storylineCacheKey } from '@/store/cache-state';
+import { chatLineKeys, storylineMeta, storylinesOn } from '@/store/storylines';
+import { arrangeLines, arrangeTurn, inBackground, placeLines, takeLineMarks, type StorylineTurn } from './storylines';
 import { INPUT_SLOT, applyInput, locateInput, markInput, stripInputMarks } from './input-shaping';
 
 export const ANCHOR_RE = /⟦ap:region:([\w.-]+)⟧/g;
@@ -48,10 +50,9 @@ function isolateAnchors(chat: ChatMessage[]): (ChatMessage & { __anchor?: string
   return out;
 }
 
-function recentMeta(preset: APreset, ctxConfig: ReturnType<typeof activeConfiguration>): string {
+function recentMeta(preset: APreset, ctxConfig: ReturnType<typeof activeConfiguration>, chat: readonly STMessage[]): string {
   if (!metaEnabled(ctxConfig)) return '';
   const replyId = Object.values(preset.structures).find((s) => s.kind === 'reply')?.id;
-  const chat = st().chat;
   const lines: string[] = [];
   const user = actorName(preset, ctxConfig, preset.user);
   const narrator = actorName(preset, ctxConfig, preset.narrator);
@@ -65,12 +66,12 @@ function recentMeta(preset: APreset, ctxConfig: ReturnType<typeof activeConfigur
   return st().substituteParams(lines.reverse().join('\n\n'));
 }
 
-function customLast(preset: APreset): Record<string, string> {
+function customLast(preset: APreset, chat: readonly STMessage[]): Record<string, string> {
   const out: Record<string, string> = {};
   // `{{ap::structure::<id>::last}}`: custom structures and the status bar (I-136).
   const custom = Object.values(preset.structures).filter((s) => s.kind === 'custom' || s.kind === 'status');
   if (!custom.length) return out;
-  for (const m of st().chat) {
+  for (const m of chat) {
     const sc = getSidecar(m);
     for (const s of custom) {
       const v = sc?.structures?.[s.id];
@@ -83,15 +84,25 @@ function customLast(preset: APreset): Record<string, string> {
 }
 
 /** What the condition variables of a request depend on (the interceptor has it before the context exists). */
-export type VarsSource = Pick<GenerationContext, 'preset' | 'config' | 'transport' | 'origin' | 'stType' | 'meta' | 'flags' | 'inputShaped'>;
+export type VarsSource = Pick<GenerationContext, 'preset' | 'config' | 'transport' | 'origin' | 'stType' | 'meta' | 'flags' | 'inputShaped' | 'storylines'>;
+
+/** The chat as the current storyline sees it: arranged like its history, invisible if-lines left out. */
+function storylineChat(turn: StorylineTurn | undefined): readonly STMessage[] {
+  const chat = st().chat;
+  if (!turn) return chat;
+  return arrangeLines(chatLineKeys(chat), turn.current, storylineMeta()).order.map((i) => chat[i]!);
+}
 
 export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined): { vars: Vars; data: MacroData } {
   const { preset, config } = ctx;
-  const last = customLast(preset);
+  const chat = storylineChat(ctx.storylines);
+  const last = customLast(preset, chat);
   const mem = chatMemory();
   const gmem = globalMemory(presetState(preset));
   const recap = currentRecap();
-  const recent = recentMeta(preset, config);
+  const recent = recentMeta(preset, config, chat);
+  // Without a storyline turn (preview, storylines off) the main storyline.
+  const mainName = storylinesOn(preset, config) ? storylineMeta().main ?? '' : '';
   const transport = ctx.transport;
   const vars = defaultVars(preset, config, {
     transport,
@@ -105,6 +116,7 @@ export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined
     recap: { present: Boolean(recap) },
     input: { shaped: Boolean(ctx.inputShaped) },
     last: Object.fromEntries(Object.values(preset.structures).filter((x) => x.kind === 'custom' || x.kind === 'status').map((x) => [x.id, x.id in last])),
+    storyline: ctx.storylines?.vars ?? { name: mainName, main: true, if: false, new: false },
   });
   const data: MacroData = {
     metaText: ctx.meta.segments.join('\n\n'),
@@ -114,12 +126,13 @@ export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined
     customLast: last,
     // The text is only known once the history is final: a slot, filled in after the cache step.
     inputText: ctx.inputShaped ? INPUT_SLOT : '',
+    storyline: { name: ctx.storylines?.vars.name ?? mainName, main: ctx.storylines?.mainName ?? mainName },
   };
   return { vars, data };
 }
 
 /** Script path (§9.2): rewrite history messages found between the semantic anchors. */
-function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: string })[]): void {
+function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: string })[], marks: WeakMap<object, number>): void {
   const { preset, config } = ctx;
   const start = list.findIndex((m) => m.__anchor === preset.anchors.historyStart);
   const end = list.findIndex((m) => m.__anchor === preset.anchors.historyEnd);
@@ -129,13 +142,24 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
   const C = chat.map((m, index) => ({ m, index })).filter(({ m }) => !m.is_system);
   const { map, rate } = alignHistory(H.map(({ m }) => ({ role: m.role, text: textOf(m.content) })), C.map(({ m }) => ({ role: m.is_user ? 'user' : 'assistant', text: m.mes })));
   if (rate < 0.9) { ctx.warnings.push(`backfill: alignment ${Math.round(rate * 100)}% < 90%, history left as is`); return; }
-  const items: (HistoryItem & { __h: number })[] = [];
+  let items: (HistoryItem & { __h: number })[] = [];
   map.forEach((ci, hi) => {
     if (ci < 0) return;
     const real = C[ci]!;
     items.push({ is_user: real.m.is_user, mes: textOf(H[hi]!.m.content), extra: real.m.extra, name: real.m.name, send_date: real.m.send_date, __h: hi });
   });
-  const real = items.map((it) => C[map[it.__h]!]!.index);
+  let real = items.map((it) => C[map[it.__h]!]!.index);
+  // Storylines: arranged for the storyline of the last message, like the interceptor does (I-151).
+  let groupOf: number[] = [];
+  if (storylinesOn(preset, config)) {
+    const meta = storylineMeta();
+    const a = arrangeTurn(items, real, chatLineKeys(chat, meta), -1, meta);
+    items = a.items;
+    real = a.realIndex;
+    groupOf = a.groups;
+    ctx.storylines = a.turn;
+  }
+  const turn = ctx.storylines;
   const options = {
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
@@ -146,13 +170,14 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
     realIndex: (i: number) => real[i] ?? -1,
     currentInput: -1,
     annotations: annotationHistory(preset, config),
+    ...(turn ? { background: (i: number) => inBackground(turn, groupOf[i]) } : {}),
   };
   const keep = new Map<number, string>();
   /** Renderings of each kept history item (input shaping looks for one of them). */
   const renderings = new Map<number, string[]>();
   if (config.cache?.enabled) {
     // Cache optimization: the marked sticky text, resolved below like the interceptor's.
-    const chatKey = currentChatKey();
+    const chatKey = storylineCacheKey(currentChatKey(), turn?.current);
     const rw = stickyRewrite(items, options, cacheState(chatKey)?.modes, (i) => messageKey(items[i]!, real[i] ?? i));
     for (const r of rw.out) {
       const h = items[r.index]!.__h;
@@ -174,10 +199,16 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
     }
   }
   const removed = new Set<number>();
-  items.forEach((it) => {
+  // Messages of if-lines this storyline does not see are not among the arranged items.
+  const arranged = new Set(items.map((it) => it.__h));
+  map.forEach((ci, hi) => { if (ci >= 0 && !arranged.has(hi)) removed.add(H[hi]!.i); });
+  items.forEach((it, k) => {
     const target = H[it.__h]!;
     if (!keep.has(it.__h)) removed.add(target.i);
-    else target.m.content = keep.get(it.__h)!;
+    else {
+      target.m.content = keep.get(it.__h)!;
+      if (turn?.grouped && groupOf[k] !== undefined) marks.set(target.m, groupOf[k]!);
+    }
   });
   for (const i of [...removed].sort((a, b) => b - a)) list.splice(i, 1);
 }
@@ -240,6 +271,35 @@ function shapeInput(ctx: GenerationContext, final: ChatMessage[], from: number, 
   return { mode: shaping.mode, shaped: Boolean(loc && placed), chars: text.length };
 }
 
+/**
+ * Storylines (I-146): history grouped by storyline with a separator before each group; injections
+ * placed relative to the main storyline. Returns the new end of the history.
+ */
+function arrangeHistory(ctx: GenerationContext, turn: StorylineTurn, final: ChatMessage[], from: number, to: number): number {
+  const decl = ctx.preset.storylines;
+  const assembly = ctx.assembly;
+  const expand = (s: string) => st().substituteParams(assembly ? assembly.expand(s) : s);
+  const sendIfEmpty = String(st().chatCompletionSettings?.send_if_empty ?? '').trim();
+  const lastInRange = final[to - 1];
+  const groupChat = Boolean(st().groupId);
+  return placeLines(final, from, to, {
+    groupOf: (m) => turn.marks?.get(m) ?? -1,
+    current: turn.currentGroup,
+    main: turn.mainGroup,
+    separator: (g) => {
+      const group = turn.groups[g];
+      if (!decl || !group) return null;
+      const content = storylineSeparator(group.main ? decl.mainSeparator : decl.separator, group.name, expand);
+      if (!content.trim()) return null;
+      const msg: ChatMessage = { role: 'system', content };
+      Object.defineProperty(msg, AP_MESSAGE, { value: true });
+      return msg;
+    },
+    // ST's empty-message replacement and the group nudge come after the history.
+    isNudge: (m) => (m.role === 'user' && sendIfEmpty !== '' && textOf(m.content).trim() === sendIfEmpty) || (groupChat && m.role === 'system' && m === lastInRange),
+  });
+}
+
 function renderPrefill(ctx: GenerationContext, list: ChatMessage[], historyAt: number): ChatMessage[] {
   const { preset, config } = ctx;
   const sub = (s: string) => st().substituteParams(s);
@@ -275,6 +335,8 @@ export interface AssemblySnapshot {
   cache?: CacheReport | null;
   /** Input shaping of this request (presets that declare it). */
   input?: { mode: string; shaped: boolean; chars: number };
+  /** Storylines of this request (presets that declare them): the current storyline and the history groups. */
+  storyline?: { name: string; main: boolean; if: boolean; new: boolean; groups: string[]; hidden: number; grouped: boolean };
   warnings: string[];
 }
 export let lastSnapshot: AssemblySnapshot | null = null;
@@ -296,6 +358,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   if (!settings().enabled || !chat.some((m) => typeof m.content === 'string' && m.content.includes('⟦ap:region:'))) {
     stripMarkers(chat);
     stripInputMarks(chat);
+    takeLineMarks(chat);
     if (!dryRun) { registry.setPending(null); registry.takeArmed(); }
     return;
   }
@@ -306,12 +369,16 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
     const cleaned = isolateAnchors(chat).filter((m) => !m.__anchor);
     stripMarkers(cleaned);
     stripInputMarks(cleaned);
+    takeLineMarks(cleaned);
     chat.splice(0, chat.length, ...cleaned);
     return;
   }
   const ctx = contextFor(preset, dryRun);
   const list = isolateAnchors(chat);
-  if (!ctx.interceptorRan && !dryRun) backfill(ctx, list);
+  // Storyline groups of the history messages (interceptor marks; the backfill records its own).
+  const marks = takeLineMarks(list);
+  if (!ctx.interceptorRan && !dryRun) backfill(ctx, list, marks);
+  if (ctx.storylines) ctx.storylines.marks = marks;
 
   // continue / impersonate keep ST's native flow: regions are assembled, no workflow, no takeover.
   const passthrough = ctx.stType === 'continue' || ctx.stType === 'impersonate';
@@ -361,8 +428,14 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
     if (!anchored.has(id) && msgs.some((r) => r.content.trim())) ctx.warnings.push(`region ${id}: its anchor is not in the prompt (Carrier outdated or prompt disabled?), content dropped`);
   }
 
-  snapshot.cache = applySticky(ctx, final, historyAt, historyEnd < 0 ? final.length : historyEnd);
-  snapshot.input = shapeInput(ctx, final, historyAt, historyEnd < 0 ? final.length : historyEnd, snapshot);
+  let end = historyEnd < 0 ? final.length : historyEnd;
+  const turn = ctx.storylines;
+  if (turn) {
+    snapshot.storyline = { ...turn.vars, groups: turn.groups.map((g) => (g.main ? `(main) ${g.name}` : g.if ? `(if) ${g.name}` : g.name)), hidden: turn.hidden, grouped: turn.grouped };
+    if (turn.grouped && historyAt >= 0) end = arrangeHistory(ctx, turn, final, historyAt, end);
+  }
+  snapshot.cache = applySticky(ctx, final, historyAt, end);
+  snapshot.input = shapeInput(ctx, final, historyAt, end, snapshot);
 
   const shaped = ctx.transport === 'prefill' && !passthrough && historyAt >= 0 ? renderPrefill(ctx, final, historyAt) : final;
   chat.splice(0, chat.length, ...shaped.map((m) => {

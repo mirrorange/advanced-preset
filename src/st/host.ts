@@ -61,7 +61,7 @@ export interface STContext {
   getCurrentLocale?(): string;
   /** ST's popup (`popup.js`); resolves to a `POPUP_RESULT` value. */
   callGenericPopup?(content: string | HTMLElement, type: number, inputValue?: string, options?: { okButton?: string; cancelButton?: string; wide?: boolean; allowVerticalScrolling?: boolean }): Promise<unknown>;
-  POPUP_TYPE?: { CONFIRM: number };
+  POPUP_TYPE?: { CONFIRM: number; INPUT?: number };
   POPUP_RESULT?: { AFFIRMATIVE: number };
   getCurrentChatId?(): string | undefined;
   streamingProcessor: { messageId: number; type: string } | null;
@@ -214,6 +214,18 @@ export async function confirmPopup(html: string | HTMLElement, okButton: string,
   if (typeof html === 'string') tmp.innerHTML = html;
   else tmp.append(html.cloneNode(true));
   return window.confirm(tmp.innerText || tmp.textContent || '');
+}
+
+/** Ask for a line of text with ST's popup (`html` is trusted markup); `null` when cancelled. */
+export async function inputPopup(html: string, value: string, okButton: string, cancelButton: string): Promise<string | null> {
+  const ctx = st();
+  if (ctx.callGenericPopup && ctx.POPUP_TYPE?.INPUT !== undefined) {
+    const r = await ctx.callGenericPopup(html, ctx.POPUP_TYPE.INPUT, value, { okButton, cancelButton });
+    return typeof r === 'string' ? r : null;
+  }
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return window.prompt(tmp.innerText || tmp.textContent || '', value);
 }
 
 export function toast(kind: 'info' | 'success' | 'warning' | 'error', message: string, title?: string) {
