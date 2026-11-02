@@ -10,13 +10,15 @@ import { pt } from '@/i18n';
 import { activeCarrierPresetId } from '@/store/carrier';
 import { getSidecar, type Sidecar } from '@/store/sidecar';
 
-export type PanelTab = 'presets' | 'config' | 'modules' | 'writing' | 'memory' | 'debug';
+export type PanelTab = 'presets' | 'config' | 'modules' | 'writing' | 'memory' | 'storylines' | 'debug';
 
 export const ui = reactive({
   chatRev: 0,
   presetId: null as string | null,
   panelOpen: false,
   tab: 'presets' as PanelTab,
+  /** Storyline expanded in the storylines tab (opened from a message's storyline badge). */
+  storylineFocus: null as string | null,
 });
 
 export const bumpChat = () => { ui.chatRev++; };
@@ -43,6 +45,12 @@ export function messageAt(mesId: number): STMessage | undefined {
 
 export function sidecarAt(mesId: number): Sidecar | undefined {
   return getSidecar(messageAt(mesId));
+}
+
+/** The storylines tab with the storyline `key` expanded. */
+export function openStorylines(key: string): void {
+  ui.storylineFocus = key;
+  openPanel('storylines');
 }
 
 export function openPanel(tab?: PanelTab): void {

@@ -230,3 +230,11 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
 /* Config → Custom UI (I-137): the preset components listed under the switch. */
 .custom-ui-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .custom-ui-list .grow { flex: 1 1 auto; min-width: 0; }
+
+/* Storylines tab (I-152). */
+.storyline-usage { gap: 2px; }
+.storyline-card.current { border-color: color-mix(in srgb, var(--ap-primary) 45%, var(--ap-border)); }
+.storyline-actions { gap: var(--ap-space-2); }
+.storyline-floors { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 22em; overflow-y: auto; }
+.storyline-floors li { padding: 2px 4px; border-radius: var(--ap-radius-sm); }
+.storyline-floors li:hover { background: var(--ap-surface-2); }

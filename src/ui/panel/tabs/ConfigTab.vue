@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
+import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, GitBranch, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
 import { TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
@@ -11,6 +11,7 @@ import { getPresetEntry } from '@/store/presets';
 import { askCustomUi } from '@/app/trust';
 import { t, pt } from '@/i18n';
 import { usePreset } from '../use';
+import { openPanel } from '../../state';
 import NoPreset from '../NoPreset.vue';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
@@ -123,6 +124,10 @@ const metaOn = computed({
   get: () => config.value?.meta?.enabled !== false,
   set: (v: boolean) => update((c) => { c.meta.enabled = v; }),
 });
+const storylinesOn = computed({
+  get: () => config.value?.storylines?.enabled !== false,
+  set: (v: boolean) => update((c) => { c.storylines = { ...(c.storylines ?? { enabled: true }), enabled: v }; }),
+});
 const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const cache = computed({
   get: () => config.value?.cache?.enabled ?? false,
@@ -224,6 +229,11 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
           <input class="input" type="number" min="0" max="20" :value="config.meta.recentCount" @change="setRecent(($event.target as HTMLInputElement).value)" />
         </Field>
       </template>
+    </Section>
+
+    <Section v-if="preset.storylines" :title="t('storylines.enabled')" :icon="GitBranch" :help="t('storylines.config.hint')">
+      <template #actions><Switch v-model="storylinesOn" :label="t('storylines.enabled')" /></template>
+      <button v-if="storylinesOn" type="button" class="btn ghost" @click="openPanel('storylines')">{{ t('storylines.openTab') }}</button>
     </Section>
 
     <Section :title="t('writing.tokenSaving')" :icon="Coins" :help="t('writing.tokenSaving.hint')">

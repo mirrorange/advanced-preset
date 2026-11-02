@@ -92,6 +92,7 @@ const orphans = computed(() => {
         <span class="badge neutral">{{ snapshot.origin }}</span>
         <span v-if="snapshot.dryRun" class="badge warn">dry run</span>
         <span v-if="snapshot.input" class="badge neutral" :title="snapshot.input.shaped ? `${snapshot.input.chars} ch` : undefined">{{ t(snapshot.input.shaped ? `debug.input.${snapshot.input.mode}` : 'debug.input.none') }}</span>
+        <span v-if="snapshot.storyline" class="badge neutral" :title="snapshot.storyline.groups.join(' → ') + (snapshot.storyline.hidden ? ` · −${snapshot.storyline.hidden}` : '')">{{ snapshot.storyline.main ? t('storylines.main') : snapshot.storyline.name }}{{ snapshot.storyline.if ? ' · if' : '' }}{{ snapshot.storyline.new ? ' · new' : '' }}</span>
         <span class="grow" />{{ time(snapshot.at) }}
       </div>
       <div v-if="cacheReport" class="row wrap xs muted">
