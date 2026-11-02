@@ -30,6 +30,11 @@ export interface PresetState {
   userModules?: UserModule[];
   /** Bundled user modules last synced, by id (see `bundled-modules.ts`). */
   bundledModules?: Record<string, BundledRecord>;
+  /**
+   * Custom structure components (I-137): whether the user enabled them, and the code fingerprint
+   * (`structureUiHash`) they trusted. A different fingerprint counts as not enabled.
+   */
+  customUi?: { enabled: boolean; hash: string };
 }
 
 export interface APSettings {

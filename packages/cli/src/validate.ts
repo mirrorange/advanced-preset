@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF,
+  INPUT_SHAPING_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -309,6 +309,11 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     const o = s.order;
     const ref = o === undefined || typeof o === 'number' ? undefined : 'before' in o ? o.before : o.after;
     if (ref !== undefined && ref !== CONTENT_STAGE_REF && !stageIds.has(ref)) diag.warn(`structure ${s.id}: order refers to unknown stage \`${ref}\` (no workflow declares it)`, { file: M, path: `structures.${s.id}.order` });
+  }
+  for (const s of Object.values(p.structures)) {
+    const err = s.ui?.template !== undefined ? checkTemplate(s.ui.template) : null;
+    if (err) diag.error(`structure ${s.id}: ui.template: ${err.message}${err.line ? ` (template line ${err.line})` : ''}`, { file: M, path: `structures.${s.id}.ui.template` });
+    if (s.ui?.module !== undefined && !/\bexport\b/.test(s.ui.module)) diag.warn(`structure ${s.id}: ui.module exports nothing (expected \`export function mount(root, context)\`)`, { file: M, path: `structures.${s.id}.ui.module` });
   }
   for (const w of p.workflows) {
     for (const sid of Object.keys(w.structureOrder ?? {})) {

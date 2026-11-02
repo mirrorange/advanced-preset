@@ -90,6 +90,10 @@
 @media (hover: none) { .synopsis-keys { visibility: hidden; } }
 .row.tight { gap: 4px; white-space: nowrap; }
 
+/* Preset-supplied structure components (I-137): their own shadow root; AP only adds the error line. */
+.structure-component { display: flex; flex-direction: column; gap: 2px; }
+.structure-component .xs { color: var(--ap-danger); }
+
 /* Status bar (I-136): one quiet line above the story. */
 .status-bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); padding: 3px var(--ap-space-3); color: var(--ap-muted);
@@ -103,7 +107,10 @@
   display: flex; flex-direction: column; gap: 6px; padding: var(--ap-space-2) var(--ap-space-3); font-size: var(--ap-font-size-sm);
   border: 1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border)); border-radius: var(--ap-radius-md); background: var(--ap-surface);
 }
-.status-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(8em, 1fr)); gap: 6px; }
+.status-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.status-fields > :nth-child(-n + 3), .status-fields > :nth-child(5) { grid-column: span 2; }
+.status-fields > :nth-child(4) { grid-column: span 4; }
+@media (max-width: 480px) { .status-fields > * { grid-column: span 3 !important; } .status-fields > :nth-child(4) { grid-column: span 6 !important; } }
 .row.end { justify-content: flex-end; }
 .kv-list { display: grid; grid-template-columns: max-content 1fr; gap: 4px var(--ap-space-3); margin: 0; }
 .kv-list dt { color: var(--ap-muted); }

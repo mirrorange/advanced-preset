@@ -406,6 +406,9 @@ describe('structure layout (I-134 – I-137)', () => {
     expect(e).toMatch(/file `ui\/missing.ejs` not found/);
     expect(e).toMatch(/component files live under ui\//);
     expect(e).toMatch(/only custom structures bring their own component/);
+    const broken = layoutTree({ structures: '  card: { kind: custom, ui: { template: "<% if (x) { %>" } }\n  mod: { kind: custom, ui: { module: "function mount() {}" } }\n' });
+    expect(msgs(broken.diag.errors)).toMatch(/structure card: ui.template:/);
+    expect(msgs(broken.diag.warnings)).toMatch(/structure mod: ui.module exports nothing/);
   });
 
   it('warns when layout features need a newer Advanced Preset', () => {
