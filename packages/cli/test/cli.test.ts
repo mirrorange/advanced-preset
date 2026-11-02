@@ -320,10 +320,11 @@ tools:
     expect(diag.errors).toEqual([]);
     expect(preset!.structures.annotations).toMatchObject({ kind: 'annotations', history: 2, formatPrompt: { tag: 'Use {==x==}{>>y<<}.', field: 'Use {==x==}{>>y<<}.' } });
     const bad = tree();
-    bad.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, history: -1 }\n  options: { kind: options, history: 1 }\n'));
-    const msgs = build(bad).diag.errors.map((e) => e.message).join('\n');
-    expect(msgs).toMatch(/history` must be a non-negative integer/);
-    expect(msgs).toMatch(/only annotations and synopsis structures support `history`/);
+    bad.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, history: -1 }\n'));
+    expect(build(bad).diag.errors.map((e) => e.message).join('\n')).toMatch(/annotations take a number/);
+    const obj = tree();
+    obj.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, history: { depth: 2 } }\n'));
+    expect(build(obj).diag.errors.map((e) => e.message).join('\n')).toMatch(/annotations take a number/);
   });
 });
 
@@ -807,13 +808,67 @@ configurationDefaults:
 
   it('flags bad values', () => {
     const r = build(tree({ 'preset.yaml': MANIFEST
-      .replace('structures:\n', 'structures:\n  synopsis: { kind: synopsis, history: -1, historyTemplate: "{{time}}" }\n  options: { kind: options, history: 2 }\n')
+      .replace('structures:\n', 'structures:\n  synopsis: { kind: synopsis, history: -1, historyTemplate: "{{time}}" }\n  options: { kind: options, historyTemplate: "x" }\n')
       .replace('diff: { connection: { transport: prefill } }', 'diff: { tokenSaving: { userInput: nope } }') + 'tokenSaving:\n  userInput: drop\n' }));
     const msgs = [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
     expect(msgs).toMatch(/history` must be a non-negative integer/);
     expect(msgs).toMatch(/no `\{\{content\}\}`/);
-    expect(msgs).toMatch(/only annotations and synopsis structures support `history`/);
+    expect(msgs).toMatch(/`historyTemplate` only applies to synopsis structures/);
     expect(r.diag.errors.filter((d) => /userInput/.test(d.message))).toHaveLength(2);
+  });
+});
+
+describe('structure history (I-139)', () => {
+  const withManifest = (structures: string, rest = '') =>
+    tree({ 'preset.yaml': MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.10.0').replace('structures:\n', `structures:\n${structures}`) + rest });
+
+  it('compiles history objects on any kind, and a number as shorthand', () => {
+    const r = build(withManifest(`  status:
+    kind: status
+    history:
+      depth: 1
+      template: "<status>{{date}} {{time}}</status>"
+      position: before
+      when: 'transport in ["plaintext", "prefill"]'
+  synopsis:
+    kind: synopsis
+    history: { depth: 3, template: "<synopsis>{{event}}</synopsis>", position: 450 }
+  options: { kind: options, history: 2 }
+  notes: { kind: custom, shape: kv, history: { template: "{{mood}}" } }
+`));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/history (key|placeholder)|is not a|minAdvancedPreset/);
+    const s = r.preset!.structures;
+    expect(s.status!.history).toEqual({ depth: 1, template: '<status>{{date}} {{time}}</status>', position: 'before', when: expect.objectContaining({ t: 'bin', op: 'in' }) });
+    expect(s.synopsis!.history).toEqual({ depth: 3, template: '<synopsis>{{event}}</synopsis>', position: 450 });
+    expect(s.synopsis!.historyTemplate).toBeUndefined();
+    expect(s.options!.history).toEqual({ depth: 2, template: '{{value}}' });
+    expect(s.notes!.history).toEqual({ depth: 1, template: '{{mood}}' });
+  });
+
+  it('flags bad values, stray placeholders and old version requirements', () => {
+    const r = build(tree({ 'preset.yaml': MANIFEST.replace('structures:\n', `structures:
+  status: { kind: status, history: { depth: -1, template: "{{content}} {{nope}}", position: middle, when: "unknown.x", extra: 1 } }
+  synopsis: { kind: synopsis, history: { depth: 1 }, historyTemplate: "{{content}}" }
+`) }));
+    const errors = r.diag.errors.map((d) => d.message).join('\n');
+    const warnings = r.diag.warnings.map((d) => d.message).join('\n');
+    expect(errors).toMatch(/history.depth` must be a non-negative integer/);
+    expect(errors).toMatch(/history.position` must be before \| after \| a number/);
+    expect(errors).toMatch(/unknown variable `unknown.x`/);
+    expect(warnings).toMatch(/unknown history key `extra`/);
+    expect(warnings).toMatch(/`\{\{content\}\}` is not a history placeholder/);
+    expect(warnings).toMatch(/`\{\{nope\}\}` is not a status field/);
+    expect(warnings).toMatch(/`historyTemplate` is ignored with a `history` object/);
+    expect(warnings).toMatch(/structure history need Advanced Preset 1.10.0/);
+  });
+
+  it('checks `last.<id>` conditions', () => {
+    const r = build(withManifest('  status: { kind: status }\n  synopsis: { kind: synopsis, history: { when: "last.status && last.synopsis && last.nope" } }\n'));
+    const errors = r.diag.errors.map((d) => d.message).join('\n');
+    expect(errors).toMatch(/`last.synopsis`: only custom and status structures keep a last value/);
+    expect(errors).toMatch(/unknown structure `nope` in condition/);
+    expect(errors).not.toMatch(/last.status/);
   });
 });
 

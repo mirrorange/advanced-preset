@@ -44,6 +44,12 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     if (path in FIXED_VARS) return;
     const [root, ...rest] = path.split('.');
     const key = rest.join('.');
+    if (root === 'last') {
+      const decl = p.structures[key];
+      if (!decl) return diag.error(`unknown structure \`${key}\` in condition`, where);
+      if (decl.kind !== 'custom' && decl.kind !== 'status') diag.error(`\`last.${key}\`: only custom and status structures keep a last value`, where);
+      return;
+    }
     const known = root === 'modules' ? moduleIds : root === 'params' ? paramIds : root === 'flags' ? flagIds : root === 'stages' ? stageIds : undefined;
     if (!known) return diag.error(`unknown variable \`${path}\``, where);
     if (!known.has(key)) diag.error(`unknown ${root.slice(0, -1)} \`${key}\` in condition`, where);
@@ -328,6 +334,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     p.workflows.some((w) => w.structureOrder) || Object.values(p.structures).some((s) => s.order !== undefined) ? 'structure order' : '',
     Object.values(p.structures).some((s) => s.kind === 'status') ? 'status structures' : '',
     Object.values(p.structures).some((s) => s.ui) ? 'structure ui' : '',
+    Object.values(p.structures).some((s) => s.history !== undefined && typeof s.history === 'object') ? 'structure history' : '',
   ].filter(Boolean);
   if (layoutFeatures.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STRUCTURE_LAYOUT_SINCE) < 0))
     diag.warn(`${layoutFeatures.join(', ')} need Advanced Preset ${STRUCTURE_LAYOUT_SINCE}: set minAdvancedPreset to ${STRUCTURE_LAYOUT_SINCE} or later`, { file: M, path: 'minAdvancedPreset' });

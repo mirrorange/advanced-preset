@@ -22,7 +22,7 @@ import {
   type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
-  DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode,
+  DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode, defaultHistoryTemplate, type StructureHistory,
   CARD_POSITIONS, CONTENT_STAGE_REF, DEFAULT_ORDER_PREFIX, type CardPosition, type StructureOrder, type StructureUi,
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
 } from '@advanced-preset/protocol';
@@ -410,6 +410,51 @@ export function compile(tree: SourceTree): CompileResult {
     if (ui.style !== undefined && ui.template === undefined && ui.module === undefined) diag.warn('ui.style only applies to a template or module component', where);
     return Object.keys(ui).length ? ui : undefined;
   };
+  /**
+   * `history` of a structure: a number (annotations: CriticMarkup depth; synopsis: legacy form with
+   * `historyTemplate`; other kinds: shorthand for `{ depth }`) or an object (I-139).
+   */
+  const compileStructureHistory = (o: Obj, kind: StructureDecl['kind'], where: Where): StructureDecl['history'] => {
+    const src = o.history;
+    if (src === undefined || src === null) return undefined;
+    const isDepth = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0;
+    if (kind === 'annotations') {
+      if (isDepth(src)) return src;
+      diag.error('annotations take a number: `history: N` re-injects the last N messages\' annotations', where);
+      return undefined;
+    }
+    if (typeof src === 'number') {
+      if (!isDepth(src)) { diag.error('`history` must be a non-negative integer', where); return undefined; }
+      if (kind === 'synopsis') return src;
+      return src > 0 ? { depth: src, template: defaultHistoryTemplate(kind) } : undefined;
+    }
+    if (!isObj(src)) { diag.error('`history` must be a number or an object with depth / template / position / when', where); return undefined; }
+    const known = new Set(['depth', 'template', 'position', 'when']);
+    for (const k of Object.keys(src)) if (!known.has(k)) diag.warn(`unknown history key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    let depth = 1;
+    if (src.depth !== undefined) {
+      if (isDepth(src.depth)) depth = src.depth;
+      else diag.error('`history.depth` must be a non-negative integer', { ...where, path: `${where.path}.depth` });
+    }
+    const template = src.template === undefined ? defaultHistoryTemplate(kind) : str(src.template);
+    if (!template.trim()) diag.warn('`history.template` is empty: nothing would be inserted', { ...where, path: `${where.path}.template` });
+    if (template.includes('{{content}}')) diag.warn('`{{content}}` is not a history placeholder: the template is inserted next to the message text (set `history.position`)', { ...where, path: `${where.path}.template` });
+    const fields = new Set<string>(['value', ...(STRUCTURE_PROPERTIES[kind] ?? [])]);
+    if (kind !== 'custom') {
+      for (const m of template.matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)) {
+        if (!fields.has(m[1]!) && m[1] !== 'content') diag.warn(`\`{{${m[1]}}}\` is not a ${kind} field (expected ${[...fields].join(' | ')}): it is sent as written`, { ...where, path: `${where.path}.template` });
+      }
+    }
+    const out: StructureHistory = { depth, template };
+    if (src.position !== undefined) {
+      const p = src.position;
+      if (p === 'before' || p === 'after' || (typeof p === 'number' && Number.isFinite(p))) out.position = p;
+      else diag.error('`history.position` must be before | after | a number (sort key)', { ...where, path: `${where.path}.position` });
+    }
+    const when = expr(src.when, { ...where, path: `${where.path}.when` });
+    if (when) out.when = when;
+    return out;
+  };
   for (const [sid, s] of Object.entries(isObj(raw.structures) ? raw.structures : {})) {
     const o = isObj(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
@@ -459,15 +504,15 @@ export function compile(tree: SourceTree): CompileResult {
       if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
       if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
     }
-    if (o.history !== undefined) {
-      if (kind !== 'annotations' && kind !== 'synopsis') diag.error('only annotations and synopsis structures support `history`', { ...where, path: `${where.path}.history` });
-      else if (typeof o.history === 'number' && Number.isInteger(o.history) && o.history >= 0) decl.history = o.history;
-      else diag.error('`history` must be a non-negative integer', { ...where, path: `${where.path}.history` });
-    }
-    if (kind === 'synopsis' && (o.history !== undefined || o.historyTemplate !== undefined)) {
+    const history = compileStructureHistory(o, kind, { ...where, path: `${where.path}.history` });
+    if (history !== undefined) decl.history = history;
+    if (kind === 'synopsis' && !isObj(o.history) && (o.history !== undefined || o.historyTemplate !== undefined)) {
+      // Legacy synopsis history (I-88): kept as written so the artifact stays readable by older versions.
       decl.historyTemplate = str(o.historyTemplate, DEFAULT_SYNOPSIS_HISTORY_TEMPLATE);
       if (!decl.historyTemplate.includes('{{content}}')) diag.warn('`historyTemplate` has no `{{content}}`: kept messages would lose their text', { ...where, path: `${where.path}.historyTemplate` });
-    } else if (o.historyTemplate !== undefined) diag.warn('`historyTemplate` only applies to synopsis structures and is ignored', { ...where, path: `${where.path}.historyTemplate` });
+    } else if (o.historyTemplate !== undefined) {
+      diag.warn(isObj(o.history) ? '`historyTemplate` is ignored with a `history` object: use `history.template`' : '`historyTemplate` only applies to synopsis structures and is ignored', { ...where, path: `${where.path}.historyTemplate` });
+    }
     if (o.title !== undefined) decl.title = text(str(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);

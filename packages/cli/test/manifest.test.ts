@@ -112,7 +112,7 @@ describe('manifest fragments', () => {
   it('locates manifest diagnostics in the defining file and line', () => {
     const { diag } = build(tree({
       'preset.yaml': ROOT + REGIONS,
-      'manifest/structures.yaml': 'structures:\n  reply: { kind: reply }\n  memory:\n    kind: memory\n    history: 2\n',
+      'manifest/structures.yaml': 'structures:\n  reply: { kind: reply }\n  memory:\n    kind: memory\n    history: -2\n',
     }));
     expect(diag.errors).toMatchObject([{ file: 'manifest/structures.yaml', line: 5, path: 'structures.memory.history' }]);
 
