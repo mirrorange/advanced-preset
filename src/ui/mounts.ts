@@ -11,7 +11,8 @@ import { getSidecar, type TurnKind } from '@/store/sidecar';
 import { live } from '@/core/live';
 import { bumpChat } from './state';
 import { pruneViews, syncAnnotationView } from './annotations';
-import { forgetLineKeys, lineKeys, storylinesActive, syncTagView } from './storylines';
+import { forgetLineKeys, lineKeys, storylinesActive } from './storylines';
+import { syncTagView } from './storyline-tag';
 
 const HIDDEN = 'ap-hidden';
 const REPLACED_TURNS: TurnKind[] = ['meta-pure', 'impersonate', 'summary'];
