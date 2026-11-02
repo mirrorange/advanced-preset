@@ -1,5 +1,5 @@
 /* Align with ST's message text so the swipe controls keep their gutter. */
-:host(ap-cards), :host(ap-stages) { padding-right: var(--mes-right-spacing, 30px); }
+:host(ap-cards), :host(ap-top-cards), :host(ap-stages) { padding-right: var(--mes-right-spacing, 30px); }
 
 /* Message mounts: stage panel, cards, dock. Quiet by default; colour comes from the actor. */
 .stages { --actor: var(--ap-primary); display: flex; flex-direction: column; gap: var(--ap-space-2); margin: 2px 0 var(--ap-space-2); }
@@ -29,6 +29,7 @@
 .patch-status { display: inline-flex; align-items: center; gap: 4px; color: var(--ap-muted); }
 
 .cards { display: flex; flex-direction: column; gap: var(--ap-space-2); margin: var(--ap-space-2) 0 2px; }
+.cards.cards-top { gap: 4px; margin: 0 0 var(--ap-space-2); }
 .section-icon { color: var(--ap-primary); }
 .chevron { color: var(--ap-faint); transition: transform 0.18s; }
 .chevron.flipped { transform: rotate(180deg); }
@@ -88,6 +89,21 @@
 .synopsis-actions .btn svg.lucide { width: 1em; height: 1em; }
 @media (hover: none) { .synopsis-keys { visibility: hidden; } }
 .row.tight { gap: 4px; white-space: nowrap; }
+
+/* Status bar (I-136): one quiet line above the story. */
+.status-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); padding: 3px var(--ap-space-3); color: var(--ap-muted);
+  border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface);
+}
+.status-bar > .row { max-width: 100%; }
+.status-location { min-width: 0; overflow: hidden; }
+.status-edit { margin: -2px -6px -2px auto; }
+.status-bar:hover .synopsis-edit { opacity: 1; }
+.status-editor {
+  display: flex; flex-direction: column; gap: 6px; padding: var(--ap-space-2) var(--ap-space-3); font-size: var(--ap-font-size-sm);
+  border: 1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border)); border-radius: var(--ap-radius-md); background: var(--ap-surface);
+}
+.status-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(8em, 1fr)); gap: 6px; }
 .row.end { justify-content: flex-end; }
 .kv-list { display: grid; grid-template-columns: max-content 1fr; gap: 4px var(--ap-space-3); margin: 0; }
 .kv-list dt { color: var(--ap-muted); }

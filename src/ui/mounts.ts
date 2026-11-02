@@ -1,5 +1,6 @@
 /**
- * Message mounts (§16.2): `<ap-stages>` before and `<ap-cards>` after `.mes_text`, never inside it.
+ * Message mounts (§16.2): `<ap-stages>` and the top card area `<ap-top-cards>` (I-137) before, and
+ * `<ap-cards>` after `.mes_text`, never inside it.
  * Hosts are (re)attached on ST events and by a MutationObserver when other code rebuilds messages;
  * the streaming placeholder is located through `streamingProcessor.messageId`.
  */
@@ -30,16 +31,20 @@ function sync(mes: Element): void {
   if (msg && !msg.is_user) syncAnnotationView(text as HTMLElement, Boolean(sc?.annotations?.length || isLive));
   const want = Boolean(msg && !msg.is_user && (sc || isLive));
   let stages = block.querySelector<HTMLElement>(':scope > ap-stages');
+  let top = block.querySelector<HTMLElement>(':scope > ap-top-cards');
   let cards = block.querySelector<HTMLElement>(':scope > ap-cards');
   if (!want) {
     stages?.remove();
+    top?.remove();
     cards?.remove();
     text.classList.remove(HIDDEN);
     return;
   }
-  if (!stages || stages.nextElementSibling !== text) { stages?.remove(); stages = host('ap-stages', id); text.before(stages); }
+  if (!top || top.nextElementSibling !== text) { top?.remove(); top = host('ap-top-cards', id); top.setAttribute('position', 'top'); text.before(top); }
+  if (!stages || stages.nextElementSibling !== top) { stages?.remove(); stages = host('ap-stages', id); top.before(stages); }
   if (!cards || cards.previousElementSibling !== text) { cards?.remove(); cards = host('ap-cards', id); text.after(cards); }
   if (stages.getAttribute('mesid') !== String(id)) stages.setAttribute('mesid', String(id));
+  if (top.getAttribute('mesid') !== String(id)) top.setAttribute('mesid', String(id));
   if (cards.getAttribute('mesid') !== String(id)) cards.setAttribute('mesid', String(id));
   text.classList.toggle(HIDDEN, Boolean(!isLive && sc && REPLACED_TURNS.includes(sc.turn)));
 }

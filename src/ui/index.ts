@@ -29,6 +29,7 @@ function mountSettings(): void {
 export function mountUi(): void {
   defineHost('ap-stages', Stages, ['mesid']);
   defineHost('ap-cards', Cards, ['mesid']);
+  defineHost('ap-top-cards', Cards, ['mesid', 'position']);
   defineHost('ap-dock', Dock);
   defineHost('ap-panel', Panel);
   defineHost('ap-preset-banner', PresetBanner);
