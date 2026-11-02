@@ -10308,7 +10308,7 @@ function b_(e) {
 }
 async function x_() {
 	let e = await y_();
-	e && e !== "2deead37254c61fa" && sessionStorage.getItem(v_) !== e && b_(e);
+	e && e !== "3aec8037ce0cd65a" && sessionStorage.getItem(v_) !== e && b_(e);
 }
 async function S_() {
 	await x_();
@@ -10317,7 +10317,7 @@ async function C_() {
 	let e = o().replace(/^third-party\//, ""), t = await w_(e, !1);
 	if (t.status === 404 && (t = await w_(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await y_();
-	return r && r !== "2deead37254c61fa" ? (b_(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "3aec8037ce0cd65a" ? (b_(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var w_ = (t, n) => g("/api/extensions/update", {
 	method: "POST",
@@ -10736,7 +10736,7 @@ function Dv() {
 }
 //#endregion
 //#region src/ui/styles/tokens.css?inline
-var Ov = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-panel-bg-solid:#faf5fc;--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-panel-bg-solid:#1c1420;--ap-shadow:0 8px 28px #00000073}@supports (color:rgb(from red r g b)){:host,:host([data-ap-theme=dark]){--ap-panel-bg-solid:rgb(from var(--ap-panel-bg) r g b)}}", kv = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg-solid);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.icon-badge{gap:.3em}.badge.icon-badge svg{width:1.1em;height:1.1em}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", Av = ":host(ap-cards),:host(ap-top-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.cards.cards-top{margin:0 0 var(--ap-space-2);gap:4px}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-head{align-items:flex-start;gap:var(--ap-space-2);display:flex}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.synopsis-edit{opacity:0;flex:none;margin:-2px -6px -4px 0;transition:opacity .15s;display:inline-flex}.synopsis:hover .synopsis-edit,.synopsis-edit:focus-within{opacity:1}@media (hover:none){.synopsis-edit{opacity:.7}}.synopsis-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.synopsis-fields{grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:6px;display:grid}.synopsis-field{min-width:0;display:block;position:relative}.synopsis-field svg.lucide{pointer-events:none;width:1em;height:1em;position:absolute;top:50%;left:.6em;transform:translateY(-50%)}.synopsis-field .input{padding-left:2em}.synopsis-event-input{font-weight:600}.synopsis-editor textarea.input{resize:none;min-height:3.4em;max-height:18em;overflow-y:auto}.synopsis-actions{align-items:center;gap:6px;margin-top:2px;display:flex}.synopsis-actions .btn svg.lucide{width:1em;height:1em}@media (hover:none){.synopsis-keys{visibility:hidden}}.row.tight{white-space:nowrap;gap:4px}.structure-component{flex-direction:column;gap:2px;display:flex}.structure-component .xs{color:var(--ap-danger)}.status-bar{align-items:center;gap:2px var(--ap-space-3);padding:3px var(--ap-space-3);color:var(--ap-muted);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-wrap:wrap;display:flex}.status-bar>.row{max-width:100%}.status-location{min-width:0;overflow:hidden}.status-edit{margin:-2px -6px -2px auto}.status-bar:hover .synopsis-edit{opacity:1}.status-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.status-fields{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;display:grid}.status-fields>:nth-child(-n+3),.status-fields>:nth-child(5){grid-column:span 2}.status-fields>:nth-child(4){grid-column:span 4}@media (max-width:480px){.status-fields>*{grid-column:span 3!important}.status-fields>:nth-child(4){grid-column:span 6!important}}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.anno-bubble{--actor:var(--ap-primary);z-index:2147483000;width:max-content;max-width:min(320px,100vw - 16px);max-height:min(50vh,24em);padding:var(--ap-space-2) var(--ap-space-3);border:1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--ap-text);box-shadow:var(--ap-shadow);font-size:var(--ap-font-size-sm);text-align:left;overflow-wrap:anywhere;margin:0;line-height:1.55;position:fixed;inset:0 auto auto 0;overflow:auto}.anno-author{font-weight:700;font-size:var(--ap-font-size-xs);color:var(--actor);letter-spacing:.02em;margin-bottom:2px}", jv = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;color:var(--ap-text);background:0 0;flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden;container:ap-panel/inline-size}:host(ap-panel[data-ap-standalone]) .panel{--ap-blur:blur(var(--SmartThemeBlurStrength,10px));background:var(--ap-panel-bg-solid);-webkit-backdrop-filter:var(--ap-blur);backdrop-filter:var(--ap-blur)}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice-list.nested{padding-left:var(--ap-space-2);border-left:1px solid var(--ap-border);margin-left:.5em}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}.tab-col{gap:var(--ap-space-3)}.input.bare{background-color:#0000;border-color:#0000;width:auto;min-width:0;padding-left:.35em}.input.bare:hover{border-color:var(--ap-border)}.input.bare:focus{border-color:var(--ap-primary)}.chip.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint);color:var(--ap-primary)}.um-list{margin:0 calc(-1 * var(--ap-space-2));flex-direction:column;gap:2px;display:flex}.um-row{min-height:2.6em;padding:0 var(--ap-space-2);border-radius:var(--ap-radius-sm);align-items:center;gap:4px;transition:background .15s,opacity .15s;display:flex}.um-row:hover{background:var(--ap-surface-2)}.um-row.dragging{background:var(--ap-tint)}.um-row.off .um-open{opacity:.55}.um-grip{color:var(--ap-faint);cursor:grab;touch-action:none;margin-left:-4px;display:inline-flex}.um-row.dragging .um-grip{cursor:grabbing;color:var(--ap-primary)}.um-open{text-align:left;cursor:pointer;background:0 0;border:0;flex-direction:column;flex:auto;align-items:flex-start;gap:0;min-width:0;padding:4px 0;display:flex}.um-row-name{max-width:100%}.um-row-meta{max-width:100%;line-height:1.3}.um-flag{width:1em;height:1em;margin:0 2px}.um-zap{color:var(--ap-primary)}.um-new{border:1px dashed var(--ap-border);border-radius:var(--ap-radius-md);width:100%;min-height:2.6em;color:var(--ap-muted);cursor:pointer;background:0 0;justify-content:center;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s;display:flex}.um-picker{margin-bottom:var(--ap-space-2);padding:4px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface-2);flex-direction:column;gap:2px;display:flex}.um-picker-head{justify-content:space-between;align-items:center;gap:var(--ap-space-2);display:flex}.um-choice{align-items:flex-start;gap:var(--ap-space-2);width:100%;padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);color:inherit;text-align:left;cursor:pointer;background:0 0;border:0;transition:background .15s;display:flex}.um-choice:hover,.um-choice:focus-visible{background:var(--ap-tint)}.um-choice>svg.lucide{width:1.1em;height:1.1em;color:var(--ap-primary);flex:none;margin-top:.15em}.um-choice-text{flex-direction:column;min-width:0;line-height:1.35;display:flex}.um-choice-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.um-new:hover{color:var(--ap-primary);border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.um-editor{gap:var(--ap-space-3);flex-direction:column;display:flex}.um-head{align-items:center;gap:var(--ap-space-2);margin-left:-6px;display:flex}.um-name{font-size:var(--ap-font-size-lg);flex:auto;font-weight:600}.um-entry{flex-direction:column;gap:6px;display:flex}.um-entry+.um-entry{padding-top:var(--ap-space-3);border-top:1px solid var(--ap-border)}.um-entry-head{flex-wrap:wrap;align-items:center;gap:2px;min-width:0;display:flex}.um-entry-head>svg.lucide{width:1em;height:1em}.um-entry-head select.grow{text-overflow:ellipsis;flex:8em;min-width:0;font-weight:600}.um-entry.lost .um-entry-head select.grow{color:var(--ap-warning)}.um-role{field-sizing:content;text-overflow:ellipsis;min-width:0;color:var(--ap-muted);font-size:var(--ap-font-size-sm);flex:none}.um-text{field-sizing:content;min-height:5.5em;max-height:24em;font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-sm)}.um-warn{color:var(--ap-warning);align-items:center;gap:6px;display:flex}.um-warn svg.lucide{width:1.1em;height:1.1em}.um-var-label{flex:8em;min-width:0;padding:0 .35em;font-weight:600}.um-entry.lost .um-var-label{color:var(--ap-warning)}.um-var-row{grid-template-columns:minmax(5em,36%) 1fr auto;align-items:start;gap:4px;display:grid}.um-var-row.list{grid-template-columns:1fr auto}.um-var-key{text-overflow:ellipsis;min-width:0;font-weight:600}.um-var-key::-webkit-calendar-picker-indicator{display:none!important}textarea.input.um-var-value{field-sizing:content;resize:none;min-width:0;min-height:0;max-height:12em}.um-var-add{align-self:flex-start}.um-foot{flex-wrap:wrap;align-items:center;gap:2px;margin:0 -.5em;display:flex}.um-foot .btn{color:var(--ap-muted)}.um-foot .btn:hover:not(:disabled){color:var(--ap-text);background:var(--ap-surface-2)}.um-foot .btn.danger:hover:not(:disabled),.um-foot .btn.armed{color:var(--ap-danger)}.um-foot .btn.armed{background:color-mix(in srgb, var(--ap-danger) 10%, transparent)}.trigger{gap:var(--ap-space-2);flex-direction:column;display:flex}.always{padding:2px 0}.rule{padding:6px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.rule-head{align-items:center;gap:2px;min-width:0;margin-left:-.35em;display:flex}.rule-subject{field-sizing:content;text-overflow:ellipsis;flex:none;min-width:0;max-width:60%;font-weight:600}.rule-target{text-overflow:ellipsis;flex:auto;min-width:0}.rule-body{flex-direction:column;gap:6px;display:flex}.rule-op{color:var(--ap-muted);align-self:flex-start;margin-left:-.35em}.rule-cmp{flex:none;width:4.2em}.rule-scope{flex:10em}.rule-join{text-transform:uppercase;letter-spacing:.04em;align-self:center;margin:-4px 0}.rule-error{color:var(--ap-danger)}.option-chips{gap:4px}.option-chips .chip{cursor:pointer}.depth{width:3.6em;padding-right:.2em}.kw-words{align-items:flex-start;gap:4px}.chips-input{cursor:text;flex-wrap:wrap;align-items:center;gap:4px;min-height:2.1em;padding:3px 4px;display:flex}.chips-input .chip{background:var(--ap-tint);color:var(--ap-primary);border-color:#0000;gap:2px;padding-right:2px}.chips-input .chip.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.chip-x{width:1.3em;height:1.3em;color:inherit;cursor:pointer;opacity:.7;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:inline-grid}.chip-x:hover{opacity:1;background:color-mix(in srgb, var(--ap-primary) 16%, transparent)}.chip-x svg.lucide{width:.85em;height:.85em}.chips-draft{background:0 0;border:0;outline:none;flex:5em;min-width:5em;padding:2px 4px}.btn.add.picker{position:relative;overflow:hidden}.btn.add.picker select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}@container ap-panel (width<=340px){.tab span{display:none}.tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tab svg.lucide{width:1.35em;height:1.35em}.panel-head{padding-left:var(--ap-space-3)}.panel-body{padding-left:var(--ap-space-3);padding-right:var(--ap-space-3)}.segmented{grid-template-columns:repeat(auto-fit,minmax(4.6em,1fr));grid-auto-flow:row}.segmented.dense button{padding:0 .4em}.um-foot .btn:not(.armed)>span{display:none}.um-role{order:1;margin-left:1.15em}}.preset-banner{align-items:center;gap:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:var(--ap-tint);border:1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);font-size:var(--ap-font-size-sm);flex-wrap:wrap;margin-top:6px;margin-bottom:4px;padding:5px 5px 5px 10px;line-height:1.35;display:flex}.preset-banner-icon{color:var(--ap-primary)}.preset-banner-text{flex:11em;min-width:0}.preset-banner .btn{min-height:1.8em;margin-left:auto;padding:0 .7em}.custom-ui-list{flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;display:flex}.custom-ui-list .grow{flex:auto;min-width:0}", Mv = /* @__PURE__ */ an({ mode: "light" }), Nv = new CSSStyleSheet();
+var Ov = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-panel-bg-solid:#faf5fc;--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-panel-bg-solid:#1c1420;--ap-shadow:0 8px 28px #00000073}@supports (color:rgb(from red r g b)){:host,:host([data-ap-theme=dark]){--ap-panel-bg-solid:rgb(from var(--ap-panel-bg) r g b)}}", kv = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg-solid);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.icon-badge{gap:.3em}.badge.icon-badge svg{width:1.1em;height:1.1em}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", Av = ":host(ap-cards),:host(ap-top-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.cards.cards-top{margin:0 0 var(--ap-space-2);gap:4px}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-head{align-items:flex-start;gap:var(--ap-space-2);display:flex}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.synopsis-edit{opacity:0;flex:none;margin:-2px -6px -4px 0;transition:opacity .15s;display:inline-flex}.synopsis:hover .synopsis-edit,.synopsis-edit:focus-within{opacity:1}@media (hover:none){.synopsis-edit{opacity:.7}}.synopsis-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.synopsis-fields{grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:6px;display:grid}.synopsis-field{min-width:0;display:block;position:relative}.synopsis-field svg.lucide{pointer-events:none;width:1em;height:1em;position:absolute;top:50%;left:.6em;transform:translateY(-50%)}.synopsis-field .input{padding-left:2em}.synopsis-event-input{font-weight:600}.synopsis-editor textarea.input{resize:none;min-height:3.4em;max-height:18em;overflow-y:auto}.synopsis-actions{align-items:center;gap:6px;margin-top:2px;display:flex}.synopsis-actions .btn svg.lucide{width:1em;height:1em}@media (hover:none){.synopsis-keys{visibility:hidden}}.row.tight{white-space:nowrap;gap:4px}.structure-component{flex-direction:column;gap:2px;display:flex}.structure-component .xs{color:var(--ap-danger)}.status-bar{align-items:flex-start;gap:var(--ap-space-2);padding:3px var(--ap-space-3);color:var(--ap-muted);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);display:flex}.status-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.status-line>.row{max-width:100%}.status-location{min-width:0;overflow:hidden}.status-bar:hover .synopsis-edit{opacity:1}.status-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.status-fields{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;display:grid}.status-fields>:nth-child(-n+3),.status-fields>:nth-child(5){grid-column:span 2}.status-fields>:nth-child(4){grid-column:span 4}@media (max-width:480px){.status-fields>*{grid-column:span 3!important}.status-fields>:nth-child(4){grid-column:span 6!important}}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.anno-bubble{--actor:var(--ap-primary);z-index:2147483000;width:max-content;max-width:min(320px,100vw - 16px);max-height:min(50vh,24em);padding:var(--ap-space-2) var(--ap-space-3);border:1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--ap-text);box-shadow:var(--ap-shadow);font-size:var(--ap-font-size-sm);text-align:left;overflow-wrap:anywhere;margin:0;line-height:1.55;position:fixed;inset:0 auto auto 0;overflow:auto}.anno-author{font-weight:700;font-size:var(--ap-font-size-xs);color:var(--actor);letter-spacing:.02em;margin-bottom:2px}", jv = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;color:var(--ap-text);background:0 0;flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden;container:ap-panel/inline-size}:host(ap-panel[data-ap-standalone]) .panel{--ap-blur:blur(var(--SmartThemeBlurStrength,10px));background:var(--ap-panel-bg-solid);-webkit-backdrop-filter:var(--ap-blur);backdrop-filter:var(--ap-blur)}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice-list.nested{padding-left:var(--ap-space-2);border-left:1px solid var(--ap-border);margin-left:.5em}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}.tab-col{gap:var(--ap-space-3)}.input.bare{background-color:#0000;border-color:#0000;width:auto;min-width:0;padding-left:.35em}.input.bare:hover{border-color:var(--ap-border)}.input.bare:focus{border-color:var(--ap-primary)}.chip.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint);color:var(--ap-primary)}.um-list{margin:0 calc(-1 * var(--ap-space-2));flex-direction:column;gap:2px;display:flex}.um-row{min-height:2.6em;padding:0 var(--ap-space-2);border-radius:var(--ap-radius-sm);align-items:center;gap:4px;transition:background .15s,opacity .15s;display:flex}.um-row:hover{background:var(--ap-surface-2)}.um-row.dragging{background:var(--ap-tint)}.um-row.off .um-open{opacity:.55}.um-grip{color:var(--ap-faint);cursor:grab;touch-action:none;margin-left:-4px;display:inline-flex}.um-row.dragging .um-grip{cursor:grabbing;color:var(--ap-primary)}.um-open{text-align:left;cursor:pointer;background:0 0;border:0;flex-direction:column;flex:auto;align-items:flex-start;gap:0;min-width:0;padding:4px 0;display:flex}.um-row-name{max-width:100%}.um-row-meta{max-width:100%;line-height:1.3}.um-flag{width:1em;height:1em;margin:0 2px}.um-zap{color:var(--ap-primary)}.um-new{border:1px dashed var(--ap-border);border-radius:var(--ap-radius-md);width:100%;min-height:2.6em;color:var(--ap-muted);cursor:pointer;background:0 0;justify-content:center;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s;display:flex}.um-picker{margin-bottom:var(--ap-space-2);padding:4px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface-2);flex-direction:column;gap:2px;display:flex}.um-picker-head{justify-content:space-between;align-items:center;gap:var(--ap-space-2);display:flex}.um-choice{align-items:flex-start;gap:var(--ap-space-2);width:100%;padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);color:inherit;text-align:left;cursor:pointer;background:0 0;border:0;transition:background .15s;display:flex}.um-choice:hover,.um-choice:focus-visible{background:var(--ap-tint)}.um-choice>svg.lucide{width:1.1em;height:1.1em;color:var(--ap-primary);flex:none;margin-top:.15em}.um-choice-text{flex-direction:column;min-width:0;line-height:1.35;display:flex}.um-choice-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.um-new:hover{color:var(--ap-primary);border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.um-editor{gap:var(--ap-space-3);flex-direction:column;display:flex}.um-head{align-items:center;gap:var(--ap-space-2);margin-left:-6px;display:flex}.um-name{font-size:var(--ap-font-size-lg);flex:auto;font-weight:600}.um-entry{flex-direction:column;gap:6px;display:flex}.um-entry+.um-entry{padding-top:var(--ap-space-3);border-top:1px solid var(--ap-border)}.um-entry-head{flex-wrap:wrap;align-items:center;gap:2px;min-width:0;display:flex}.um-entry-head>svg.lucide{width:1em;height:1em}.um-entry-head select.grow{text-overflow:ellipsis;flex:8em;min-width:0;font-weight:600}.um-entry.lost .um-entry-head select.grow{color:var(--ap-warning)}.um-role{field-sizing:content;text-overflow:ellipsis;min-width:0;color:var(--ap-muted);font-size:var(--ap-font-size-sm);flex:none}.um-text{field-sizing:content;min-height:5.5em;max-height:24em;font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-sm)}.um-warn{color:var(--ap-warning);align-items:center;gap:6px;display:flex}.um-warn svg.lucide{width:1.1em;height:1.1em}.um-var-label{flex:8em;min-width:0;padding:0 .35em;font-weight:600}.um-entry.lost .um-var-label{color:var(--ap-warning)}.um-var-row{grid-template-columns:minmax(5em,36%) 1fr auto;align-items:start;gap:4px;display:grid}.um-var-row.list{grid-template-columns:1fr auto}.um-var-key{text-overflow:ellipsis;min-width:0;font-weight:600}.um-var-key::-webkit-calendar-picker-indicator{display:none!important}textarea.input.um-var-value{field-sizing:content;resize:none;min-width:0;min-height:0;max-height:12em}.um-var-add{align-self:flex-start}.um-foot{flex-wrap:wrap;align-items:center;gap:2px;margin:0 -.5em;display:flex}.um-foot .btn{color:var(--ap-muted)}.um-foot .btn:hover:not(:disabled){color:var(--ap-text);background:var(--ap-surface-2)}.um-foot .btn.danger:hover:not(:disabled),.um-foot .btn.armed{color:var(--ap-danger)}.um-foot .btn.armed{background:color-mix(in srgb, var(--ap-danger) 10%, transparent)}.trigger{gap:var(--ap-space-2);flex-direction:column;display:flex}.always{padding:2px 0}.rule{padding:6px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.rule-head{align-items:center;gap:2px;min-width:0;margin-left:-.35em;display:flex}.rule-subject{field-sizing:content;text-overflow:ellipsis;flex:none;min-width:0;max-width:60%;font-weight:600}.rule-target{text-overflow:ellipsis;flex:auto;min-width:0}.rule-body{flex-direction:column;gap:6px;display:flex}.rule-op{color:var(--ap-muted);align-self:flex-start;margin-left:-.35em}.rule-cmp{flex:none;width:4.2em}.rule-scope{flex:10em}.rule-join{text-transform:uppercase;letter-spacing:.04em;align-self:center;margin:-4px 0}.rule-error{color:var(--ap-danger)}.option-chips{gap:4px}.option-chips .chip{cursor:pointer}.depth{width:3.6em;padding-right:.2em}.kw-words{align-items:flex-start;gap:4px}.chips-input{cursor:text;flex-wrap:wrap;align-items:center;gap:4px;min-height:2.1em;padding:3px 4px;display:flex}.chips-input .chip{background:var(--ap-tint);color:var(--ap-primary);border-color:#0000;gap:2px;padding-right:2px}.chips-input .chip.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.chip-x{width:1.3em;height:1.3em;color:inherit;cursor:pointer;opacity:.7;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:inline-grid}.chip-x:hover{opacity:1;background:color-mix(in srgb, var(--ap-primary) 16%, transparent)}.chip-x svg.lucide{width:.85em;height:.85em}.chips-draft{background:0 0;border:0;outline:none;flex:5em;min-width:5em;padding:2px 4px}.btn.add.picker{position:relative;overflow:hidden}.btn.add.picker select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}@container ap-panel (width<=340px){.tab span{display:none}.tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tab svg.lucide{width:1.35em;height:1.35em}.panel-head{padding-left:var(--ap-space-3)}.panel-body{padding-left:var(--ap-space-3);padding-right:var(--ap-space-3)}.segmented{grid-template-columns:repeat(auto-fit,minmax(4.6em,1fr));grid-auto-flow:row}.segmented.dense button{padding:0 .4em}.um-foot .btn:not(.armed)>span{display:none}.um-role{order:1;margin-left:1.15em}}.preset-banner{align-items:center;gap:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:var(--ap-tint);border:1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);font-size:var(--ap-font-size-sm);flex-wrap:wrap;margin-top:6px;margin-bottom:4px;padding:5px 5px 5px 10px;line-height:1.35;display:flex}.preset-banner-icon{color:var(--ap-primary)}.preset-banner-text{flex:11em;min-width:0}.preset-banner .btn{min-height:1.8em;margin-left:auto;padding:0 .7em}.custom-ui-list{flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;display:flex}.custom-ui-list .grow{flex:auto;min-width:0}", Mv = /* @__PURE__ */ an({ mode: "light" }), Nv = new CSSStyleSheet();
 Nv.replaceSync([
 	Ov,
 	kv,
@@ -13588,19 +13588,19 @@ var WS = { class: "reply-name xs" }, GS = ["innerHTML"], KS = /* @__PURE__ */ L(
 	key: 1,
 	class: "status-bar small",
 	role: "status"
-}, RC = {
+}, RC = { class: "status-line" }, zC = {
 	key: 0,
 	class: "row tight"
-}, zC = {
+}, BC = {
 	key: 1,
 	class: "row tight"
-}, BC = {
+}, VC = {
 	key: 2,
 	class: "row tight status-location"
-}, VC = { class: "ellipsis" }, HC = {
+}, HC = { class: "ellipsis" }, UC = {
 	key: 3,
 	class: "row tight"
-}, UC = /* @__PURE__ */ L({
+}, WC = /* @__PURE__ */ L({
 	__name: "StatusCard",
 	props: {
 		status: {},
@@ -13671,28 +13671,27 @@ var WS = { class: "reply-name xs" }, GS = ["innerHTML"], KS = /* @__PURE__ */ L(
 				onClick: m
 			}, j(P(X)("common.cancel")), 1),
 			U("button", IC, [W(P(ux)), G(j(P(X)("common.save")), 1)])
-		])], 544)) : (B(), V("div", LC, [
-			c.value ? (B(), V("span", RC, [W(P(lx), { class: "faint" }), G(j(c.value), 1)])) : K("", !0),
-			s("time") ? (B(), V("span", zC, [W(P(gx), { class: "faint" }), G(j(s("time")), 1)])) : K("", !0),
-			s("location") ? (B(), V("span", BC, [W(P(Ux), { class: "faint" }), U("span", VC, j(s("location")), 1)])) : K("", !0),
-			s("weather") ? (B(), V("span", HC, [(B(), H(Gr(u.value), { class: "faint" })), G(j(s("weather")), 1)])) : K("", !0),
-			e.editable ? (B(), V("span", {
-				key: 4,
-				class: "synopsis-edit status-edit",
-				onClick: n[4] ||= ss(() => {}, ["stop"])
-			}, [W($, {
-				icon: P(Qx),
-				label: P(X)("cards.status.edit"),
-				small: "",
-				align: "end",
-				onClick: p
-			}, null, 8, ["icon", "label"])])) : K("", !0)
-		]));
+		])], 544)) : (B(), V("div", LC, [U("div", RC, [
+			c.value ? (B(), V("span", zC, [W(P(lx), { class: "faint" }), G(j(c.value), 1)])) : K("", !0),
+			s("time") ? (B(), V("span", BC, [W(P(gx), { class: "faint" }), G(j(s("time")), 1)])) : K("", !0),
+			s("location") ? (B(), V("span", VC, [W(P(Ux), { class: "faint" }), U("span", HC, j(s("location")), 1)])) : K("", !0),
+			s("weather") ? (B(), V("span", UC, [(B(), H(Gr(u.value), { class: "faint" })), G(j(s("weather")), 1)])) : K("", !0)
+		]), e.editable ? (B(), V("span", {
+			key: 0,
+			class: "synopsis-edit",
+			onClick: n[4] ||= ss(() => {}, ["stop"])
+		}, [W($, {
+			icon: P(Qx),
+			label: P(X)("cards.status.edit"),
+			small: "",
+			align: "end",
+			onClick: p
+		}, null, 8, ["icon", "label"])])) : K("", !0)]));
 	}
-}), WC = ["innerHTML"], GC = {
+}), GC = ["innerHTML"], KC = {
 	key: 1,
 	class: "kv-list small"
-}, KC = { class: "pre" }, qC = /* @__PURE__ */ L({
+}, qC = { class: "pre" }, JC = /* @__PURE__ */ L({
 	__name: "CustomCard",
 	props: {
 		title: {},
@@ -13710,34 +13709,34 @@ var WS = { class: "reply-name xs" }, GS = ["innerHTML"], KS = /* @__PURE__ */ L(
 				key: 0,
 				class: "rich small",
 				innerHTML: n.value
-			}, null, 8, WC)) : (B(), V("dl", GC, [(B(!0), V(z, null, R(e.value, (e, t) => (B(), V(z, { key: t }, [U("dt", null, j(t), 1), U("dd", KC, j(e), 1)], 64))), 128))]))]),
+			}, null, 8, GC)) : (B(), V("dl", KC, [(B(!0), V(z, null, R(e.value, (e, t) => (B(), V(z, { key: t }, [U("dt", null, j(t), 1), U("dd", qC, j(e), 1)], 64))), 128))]))]),
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), JC = /* @__PURE__ */ new Map();
-function YC(e) {
-	let t = JC.get(e);
+}), YC = /* @__PURE__ */ new Map();
+function XC(e) {
+	let t = YC.get(e);
 	if (!t) {
 		let n = URL.createObjectURL(new Blob([e], { type: "text/javascript" }));
 		t = import(
 			/* @vite-ignore */
 			n
-).finally(() => URL.revokeObjectURL(n)), t.catch(() => JC.delete(e)), JC.set(e, t);
+).finally(() => URL.revokeObjectURL(n)), t.catch(() => YC.delete(e)), YC.set(e, t);
 	}
 	return t;
 }
-function XC(e) {
+function ZC(e) {
 	let t = e.default;
 	if (typeof e.mount == "function") return e.mount;
 	if (typeof t == "function") return t;
 	if (t && typeof t == "object" && typeof t.mount == "function") return t.mount.bind(t);
 }
-function ZC(e) {
+function QC(e) {
 	if (!e) return null;
 	let t = document.createElement("style");
 	return t.textContent = e, t;
 }
-var QC = (e) => ({
+var $C = (e) => ({
 	value: e.value,
 	structure: e.structure,
 	structures: e.structures,
@@ -13745,12 +13744,12 @@ var QC = (e) => ({
 	preset: e.preset,
 	lang: e.lang
 });
-async function $C(e, t, n) {
+async function ew(e, t, n) {
 	let r = n;
 	if (e.mode === "template") {
 		let n = () => {
-			let n = Zc(e.code, QC(r));
-			t.replaceChildren(...[ZC(e.style)].filter((e) => !!e));
+			let n = Zc(e.code, $C(r));
+			t.replaceChildren(...[QC(e.style)].filter((e) => !!e));
 			let i = document.createElement("div");
 			i.className = "ap-component", i.innerHTML = n, t.append(i);
 		}, i = (e) => {
@@ -13768,10 +13767,10 @@ async function $C(e, t, n) {
 			}
 		};
 	}
-	let i = XC(await YC(e.code));
+	let i = ZC(await XC(e.code));
 	if (!i) throw Error("the module exports no mount(root, context)");
 	let a, o = async () => {
-		t.replaceChildren(...[ZC(e.style)].filter((e) => !!e)), a = await i(t, r);
+		t.replaceChildren(...[QC(e.style)].filter((e) => !!e)), a = await i(t, r);
 	}, s = () => {
 		try {
 			typeof a == "function" ? a() : a?.unmount?.();
@@ -13791,10 +13790,10 @@ async function $C(e, t, n) {
 }
 //#endregion
 //#region src/ui/message/cards/ComponentCard.vue?vue&type=script&setup=true&lang.ts
-var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
+var tw = { class: "structure-component" }, nw = ["data-structure"], rw = {
 	key: 0,
 	class: "xs"
-}, rw = /* @__PURE__ */ L({
+}, iw = /* @__PURE__ */ L({
 	__name: "ComponentCard",
 	props: {
 		component: {},
@@ -13815,14 +13814,14 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 			if (!e) return;
 			let r = e.shadowRoot ?? e.attachShadow({ mode: "open" });
 			s(async () => {
-				i = await $C(t.component, r, t.context);
+				i = await ew(t.component, r, t.context);
 			});
 		}), cr(() => t.context, (e) => s(async () => {
 			await i?.update(e);
 		})), cr(() => t.component, (e) => s(async () => {
 			i?.unmount(), i = null;
 			let r = n.value?.shadowRoot;
-			r && (i = await $C(e, r, t.context));
+			r && (i = await ew(e, r, t.context));
 		})), Hr(() => {
 			o = !1;
 			try {
@@ -13831,14 +13830,14 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 				console.error("[Advanced Preset] structure component", t.component.id, e);
 			}
 			i = null;
-		}), (t, i) => (B(), V("div", ew, [U("div", {
+		}), (t, i) => (B(), V("div", tw, [U("div", {
 			ref_key: "host",
 			ref: n,
 			class: "structure-component-host",
 			"data-structure": e.component.id
-		}, null, 8, tw), r.value ? (B(), V("div", nw, j(P(X)("cards.custom.error", { error: r.value })), 1)) : K("", !0)]));
+		}, null, 8, nw), r.value ? (B(), V("div", rw, j(P(X)("cards.custom.error", { error: r.value })), 1)) : K("", !0)]));
 	}
-}), iw = /* @__PURE__ */ L({
+}), aw = /* @__PURE__ */ L({
 	__name: "Cards",
 	props: {
 		mesid: {},
@@ -13993,7 +13992,7 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 			"synopsis",
 			"editable",
 			"onSave"
-		])) : t.type === "status" ? (B(), H(UC, {
+		])) : t.type === "status" ? (B(), H(WC, {
 			key: 4,
 			status: t.status,
 			editable: r.value.editable,
@@ -14010,23 +14009,23 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 			key: 6,
 			text: t.text,
 			"covers-up-to": t.coversUpTo
-		}, null, 8, ["text", "covers-up-to"])) : t.type === "custom" ? (B(), H(qC, {
+		}, null, 8, ["text", "covers-up-to"])) : t.type === "custom" ? (B(), H(JC, {
 			key: 7,
 			title: t.title,
 			value: t.value
-		}, null, 8, ["title", "value"])) : t.type === "component" ? (B(), H(rw, {
+		}, null, 8, ["title", "value"])) : t.type === "component" ? (B(), H(iw, {
 			key: 8,
 			component: t.component,
 			context: t.context
 		}, null, 8, ["component", "context"])) : K("", !0)], 64))), 128))], 2)) : K("", !0);
 	}
-}), aw = {
+}), ow = {
 	key: 0,
 	class: "dock stages live"
-}, ow = { class: "stage-bar" }, sw = { class: "ellipsis" }, cw = {
+}, sw = { class: "stage-bar" }, cw = { class: "ellipsis" }, lw = {
 	key: 0,
 	class: "small muted"
-}, lw = /* @__PURE__ */ L({
+}, uw = /* @__PURE__ */ L({
 	__name: "Dock",
 	setup(e) {
 		let t = q(() => Bg.current && !Bg.current.streaming && Bg.current.status === "running" ? Bg.current : null), n = q(() => {
@@ -14039,21 +14038,21 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 				color: iy(n, t.actor)
 			}));
 		}), r = q(() => n.value.find((e) => e.status === "streaming") ?? [...n.value].reverse().find((e) => e.text));
-		return (e, i) => t.value ? (B(), V("div", aw, [U("div", ow, [
+		return (e, i) => t.value ? (B(), V("div", ow, [U("div", sw, [
 			W(P(Hx), { class: "spin faint" }),
 			(B(!0), V(z, null, R(n.value, (e) => (B(), V("span", {
 				key: e.id,
 				class: A(["chip stage-chip", [e.status, { open: r.value?.id === e.id }]]),
 				style: ke({ "--actor": e.color })
-			}, [U("span", sw, j(e.label), 1)], 6))), 128)),
-			n.value.length ? K("", !0) : (B(), V("span", cw, j(P(X)("stages.waiting")), 1))
+			}, [U("span", cw, j(e.label), 1)], 6))), 128)),
+			n.value.length ? K("", !0) : (B(), V("span", lw, j(P(X)("stages.waiting")), 1))
 		]), r.value ? (B(), H(AS, {
 			key: 0,
 			stage: r.value,
 			follow: ""
 		}, null, 8, ["stage"])) : K("", !0)])) : K("", !0);
 	}
-}), uw = ["aria-label"], dw = ["disabled"], fw = /* @__PURE__ */ L({
+}), dw = ["aria-label"], fw = ["disabled"], pw = /* @__PURE__ */ L({
 	__name: "Switch",
 	props: /*@__PURE__*/ ni({
 		label: {},
@@ -14077,15 +14076,15 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 				type: "checkbox",
 				role: "switch",
 				disabled: e.disabled
-			}, null, 8, dw), [[Qo, t.value]]),
+			}, null, 8, fw), [[Qo, t.value]]),
 			r[1] ||= U("span", { class: "track" }, null, -1),
 			r[2] ||= U("span", { class: "thumb" }, null, -1)
-		], 8, uw));
+		], 8, dw));
 	}
-}), pw = { class: "field-label" }, mw = { class: "ellipsis" }, hw = {
+}), mw = { class: "field-label" }, hw = { class: "ellipsis" }, gw = {
 	key: 0,
 	class: "dot modified"
-}, gw = { class: "field-control" }, _w = /* @__PURE__ */ L({
+}, _w = { class: "field-control" }, vw = /* @__PURE__ */ L({
 	__name: "Field",
 	props: {
 		label: {},
@@ -14094,16 +14093,16 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 		modified: { type: Boolean }
 	},
 	setup(e) {
-		return (t, n) => (B(), V("div", { class: A(["field", { inline: e.inline }]) }, [U("div", pw, [
-			U("span", mw, j(e.label), 1),
-			e.modified ? (B(), V("span", hw)) : K("", !0),
+		return (t, n) => (B(), V("div", { class: A(["field", { inline: e.inline }]) }, [U("div", mw, [
+			U("span", hw, j(e.label), 1),
+			e.modified ? (B(), V("span", gw)) : K("", !0),
 			W(cC, {
 				text: e.help,
 				align: "start"
 			}, null, 8, ["text"])
-		]), U("div", gw, [Yr(t.$slots, "default")])], 2));
+		]), U("div", _w, [Yr(t.$slots, "default")])], 2));
 	}
-}), vw = { class: "swatches" }, yw = ["title"], bw = ["title"], xw = { class: "swatches" }, Sw = ["title"], Cw = /* @__PURE__ */ L({
+}), yw = { class: "swatches" }, bw = ["title"], xw = ["title"], Sw = { class: "swatches" }, Cw = ["title"], ww = /* @__PURE__ */ L({
 	__name: "Appearance",
 	setup(e) {
 		let t = J().ui, n = (e) => q({
@@ -14136,12 +14135,12 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 			open: !1
 		}, {
 			default: F(() => [
-				W(_w, {
+				W(vw, {
 					label: P(X)("appearance.colors"),
 					help: P(X)("appearance.colors.hint"),
 					inline: ""
 				}, {
-					default: F(() => [U("div", vw, [
+					default: F(() => [U("div", yw, [
 						U("label", {
 							class: "swatch",
 							style: ke({ background: P(r) || "var(--ap-primary-500)" }),
@@ -14154,7 +14153,7 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 							P(r),
 							void 0,
 							{ lazy: !0 }
-						]])], 12, yw),
+						]])], 12, bw),
 						U("label", {
 							class: "swatch",
 							style: ke({ background: P(i) || "var(--ap-accent-500)" }),
@@ -14167,7 +14166,7 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 							P(i),
 							void 0,
 							{ lazy: !0 }
-						]])], 12, bw),
+						]])], 12, xw),
 						W($, {
 							icon: P(iS),
 							label: P(X)("common.reset"),
@@ -14183,33 +14182,33 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 					])]),
 					_: 1
 				}, 8, ["label", "help"]),
-				W(_w, {
+				W(vw, {
 					label: P(X)("appearance.collapseStages"),
 					inline: ""
 				}, {
-					default: F(() => [W(fw, {
+					default: F(() => [W(pw, {
 						modelValue: a.value,
 						"onUpdate:modelValue": t[2] ||= (e) => a.value = e
 					}, null, 8, ["modelValue"])]),
 					_: 1
 				}, 8, ["label"]),
-				W(_w, {
+				W(vw, {
 					label: P(X)("appearance.annotations"),
 					help: P(X)("appearance.annotations.hint"),
 					inline: ""
 				}, {
-					default: F(() => [W(fw, {
+					default: F(() => [W(pw, {
 						modelValue: c.value,
 						"onUpdate:modelValue": t[3] ||= (e) => c.value = e
 					}, null, 8, ["modelValue"])]),
 					_: 1
 				}, 8, ["label", "help"]),
-				c.value ? (B(), H(_w, {
+				c.value ? (B(), H(vw, {
 					key: 0,
 					label: P(X)("appearance.annotationColor"),
 					inline: ""
 				}, {
-					default: F(() => [U("div", xw, [U("label", {
+					default: F(() => [U("div", Sw, [U("label", {
 						class: "swatch",
 						style: ke({ background: l.value || "var(--ap-accent)" }),
 						title: P(X)("appearance.annotationColor")
@@ -14221,7 +14220,7 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 						l.value,
 						void 0,
 						{ lazy: !0 }
-					]])], 12, Sw), W($, {
+					]])], 12, Cw), W($, {
 						icon: P(iS),
 						label: P(X)("common.reset"),
 						small: "",
@@ -14239,16 +14238,16 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), ww = { class: "toolbar" }, Tw = ["disabled"], Ew = ["disabled"], Dw = { class: "preset-list" }, Ow = ["onClick", "onKeydown"], kw = { class: "preset-mark" }, Aw = { class: "grow col preset-info" }, jw = { class: "row wrap preset-head" }, Mw = { class: "preset-name" }, Nw = { class: "badge neutral" }, Pw = { class: "badge neutral icon-badge" }, Fw = {
+}), Tw = { class: "toolbar" }, Ew = ["disabled"], Dw = ["disabled"], Ow = { class: "preset-list" }, kw = ["onClick", "onKeydown"], Aw = { class: "preset-mark" }, jw = { class: "grow col preset-info" }, Mw = { class: "row wrap preset-head" }, Nw = { class: "preset-name" }, Pw = { class: "badge neutral" }, Fw = { class: "badge neutral icon-badge" }, Iw = {
 	key: 0,
 	class: "xs muted"
-}, Iw = {
+}, Lw = {
 	key: 1,
 	class: "small muted preset-desc"
-}, Lw = {
+}, Rw = {
 	key: 0,
 	class: "empty"
-}, Rw = /* @__PURE__ */ L({
+}, zw = /* @__PURE__ */ L({
 	__name: "PresetsTab",
 	setup(e) {
 		let t = q(() => Vd()), n = (e) => ml(e.preset).length > 0, r = /* @__PURE__ */ N(null), i = /* @__PURE__ */ N(!1), a = /* @__PURE__ */ N(""), o = /* @__PURE__ */ N(null);
@@ -14272,13 +14271,13 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 			t && s("file", () => dv(t), X("presets.installed")), e.target.value = "";
 		}, d = (e) => s(`update:${e.preset.id}`, () => uv(J().sources[e.preset.id]), X("presets.updated")), f = (e) => s(`export:${e.preset.id}`, () => L_(e.preset)), p = (e) => s(`remove:${e.preset.id}`, () => fv(e.preset.id)), m = () => s("ext", async () => h("info", await C_() === "current" ? X("update.none") : X("update.reloading")));
 		return (e, s) => (B(), V(z, null, [
-			U("div", ww, [
+			U("div", Tw, [
 				U("button", {
 					type: "button",
 					class: "btn",
 					disabled: r.value === "file",
 					onClick: s[0] ||= (e) => o.value?.click()
-				}, [W(P(_S)), G(j(P(X)("presets.importFile")), 1)], 8, Tw),
+				}, [W(P(_S)), G(j(P(X)("presets.importFile")), 1)], 8, Ew),
 				U("button", {
 					type: "button",
 					class: A(["btn", { primary: i.value }]),
@@ -14322,8 +14321,8 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 			}, [r.value === "url" ? (B(), H(P(Hx), {
 				key: 0,
 				class: "spin"
-			})) : (B(), H(P(Ox), { key: 1 })), G(j(P(X)("common.install")), 1)], 8, Ew)], 32)) : K("", !0),
-			U("div", Dw, [(B(!0), V(z, null, R(t.value, (e) => (B(), V("div", {
+			})) : (B(), H(P(Ox), { key: 1 })), G(j(P(X)("common.install")), 1)], 8, Dw)], 32)) : K("", !0),
+			U("div", Ow, [(B(!0), V(z, null, R(t.value, (e) => (B(), V("div", {
 				key: e.preset.id,
 				class: A(["preset-item", { on: P(gv)?.id === e.preset.id }]),
 				role: "button",
@@ -14331,14 +14330,14 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 				onClick: (t) => c(e),
 				onKeydown: ls((t) => c(e), ["enter"])
 			}, [
-				U("span", kw, [r.value === `select:${e.preset.id}` ? (B(), H(P(Hx), {
+				U("span", Aw, [r.value === `select:${e.preset.id}` ? (B(), H(P(Hx), {
 					key: 0,
 					class: "spin"
 				})) : P(gv)?.id === e.preset.id ? (B(), H(P(ux), { key: 1 })) : K("", !0)]),
-				U("div", Aw, [
-					U("div", jw, [
-						U("span", Mw, j(P(ef)(e.preset)), 1),
-						U("span", Nw, "v" + j(e.preset.version), 1),
+				U("div", jw, [
+					U("div", Mw, [
+						U("span", Nw, j(P(ef)(e.preset)), 1),
+						U("span", Pw, "v" + j(e.preset.version), 1),
 						e.source === "builtin" ? K("", !0) : (B(), V("span", {
 							key: 0,
 							class: A(["badge", { warn: e.source === "dev" }])
@@ -14347,12 +14346,12 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 							key: 1,
 							text: P(X)("presets.templates.help")
 						}, {
-							default: F(() => [U("span", Pw, [W(P(Sx)), G(j(P(X)("presets.templates")), 1)])]),
+							default: F(() => [U("span", Fw, [W(P(Sx)), G(j(P(X)("presets.templates")), 1)])]),
 							_: 1
 						}, 8, ["text"])) : K("", !0)
 					]),
-					e.preset.author ? (B(), V("span", Fw, j(e.preset.author), 1)) : K("", !0),
-					P(tf)(e.preset) ? (B(), V("span", Iw, j(P(tf)(e.preset)), 1)) : K("", !0)
+					e.preset.author ? (B(), V("span", Iw, j(e.preset.author), 1)) : K("", !0),
+					P(tf)(e.preset) ? (B(), V("span", Lw, j(P(tf)(e.preset)), 1)) : K("", !0)
 				]),
 				U("div", {
 					class: "row preset-actions",
@@ -14395,16 +14394,16 @@ var ew = { class: "structure-component" }, tw = ["data-structure"], nw = {
 						"onClick"
 					])) : K("", !0)
 				])
-			], 42, Ow))), 128)), t.value.length ? K("", !0) : (B(), V("div", Lw, j(P(X)("presets.none")), 1))]),
-			W(Cw)
+			], 42, kw))), 128)), t.value.length ? K("", !0) : (B(), V("div", Rw, j(P(X)("presets.none")), 1))]),
+			W(ww)
 		], 64));
 	}
-}), zw;
-function Bw() {
+}), Bw;
+function Vw() {
 	let e = gv, t = q(() => e.value ? Nf(e.value) : null);
 	function n(t, n = {}) {
 		let r = e.value;
-		r && (Ff(r, t), n.sampling && (clearTimeout(zw), zw = setTimeout(() => void np(r), 400)));
+		r && (Ff(r, t), n.sampling && (clearTimeout(Bw), Bw = setTimeout(() => void np(r), 400)));
 	}
 	return {
 		preset: e,
@@ -14414,10 +14413,10 @@ function Bw() {
 }
 //#endregion
 //#region src/ui/panel/NoPreset.vue?vue&type=script&setup=true&lang.ts
-var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
+var Hw = { class: "empty" }, Uw = /* @__PURE__ */ L({
 	__name: "NoPreset",
 	setup(e) {
-		return (e, t) => (B(), V("div", Vw, [
+		return (e, t) => (B(), V("div", Hw, [
 			W(P(Yx)),
 			U("span", null, j(P(X)("panel.noPreset")), 1),
 			U("button", {
@@ -14427,11 +14426,11 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 			}, j(P(X)("panel.choosePreset")), 1)
 		]));
 	}
-}), Uw = [
+}), Ww = [
 	"aria-checked",
 	"title",
 	"onClick"
-], Ww = { class: "ellipsis" }, Gw = /* @__PURE__ */ L({
+], Gw = { class: "ellipsis" }, Kw = /* @__PURE__ */ L({
 	__name: "Segmented",
 	props: /*@__PURE__*/ ni({ options: {} }, {
 		modelValue: {},
@@ -14451,38 +14450,38 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 			class: A({ on: t.value === e.value }),
 			title: e.hint,
 			onClick: (n) => t.value = e.value
-		}, [e.icon ? (B(), H(Gr(e.icon), { key: 0 })) : K("", !0), U("span", Ww, j(e.label), 1)], 10, Uw))), 128))], 2));
+		}, [e.icon ? (B(), H(Gr(e.icon), { key: 0 })) : K("", !0), U("span", Gw, j(e.label), 1)], 10, Ww))), 128))], 2));
 	}
-}), Kw = { class: "col" }, qw = { class: "row" }, Jw = ["aria-label"], Yw = ["label"], Xw = ["value"], Zw = ["label"], Qw = ["value"], $w = ["placeholder"], eT = {
+}), qw = { class: "col" }, Jw = { class: "row" }, Yw = ["aria-label"], Xw = ["label"], Zw = ["value"], Qw = ["label"], $w = ["value"], eT = ["placeholder"], tT = {
 	key: 1,
 	class: "xs muted row tight"
-}, tT = { value: "" }, nT = ["value"], rT = ["value"], iT = ["value"], aT = [
+}, nT = { value: "" }, rT = ["value"], iT = ["value"], aT = ["value"], oT = [
 	"value",
 	"placeholder",
 	"onChange"
-], oT = [
+], sT = [
 	"value",
 	"placeholder",
 	"onChange"
-], sT = ["value"], cT = ["value"], lT = ["value"], uT = ["value"], dT = ["value"], fT = {
+], cT = ["value"], lT = ["value"], uT = ["value"], dT = ["value"], fT = ["value"], pT = {
 	key: 0,
 	class: "xs muted"
-}, pT = { class: "custom-ui-list small" }, mT = { class: "grow ellipsis" }, hT = { class: "xs faint" }, gT = { class: "slider" }, _T = [
+}, mT = { class: "custom-ui-list small" }, hT = { class: "grow ellipsis" }, gT = { class: "xs faint" }, _T = { class: "slider" }, vT = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onInput"
-], vT = [
+], yT = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onChange"
-], yT = { class: "field-grid" }, bT = ["value", "onChange"], xT = ["value"], ST = ["value"], CT = /* @__PURE__ */ L({
+], bT = { class: "field-grid" }, xT = ["value", "onChange"], ST = ["value"], CT = ["value"], wT = /* @__PURE__ */ L({
 	__name: "ConfigTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Bw(), i = q(() => t.value ? Af(t.value) : null), a = q({
+		let { preset: t, config: n, update: r } = Vw(), i = q(() => t.value ? Af(t.value) : null), a = q({
 			get: () => i.value ? `${i.value.active.ref.kind}:${i.value.active.ref.id}` : "",
 			set: (e) => {
 				let n = t.value;
@@ -14653,9 +14652,9 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 		], _e = q(() => n.value?.sampling ?? {}), ve = (e) => e in _e.value, ye = (e, t) => r((n) => {
 			n.sampling[e] = t;
 		}, { sampling: !0 }), be = (e) => Number(e.target.value);
-		return (e, r) => !P(t) || !P(n) || !i.value ? (B(), H(Hw, { key: 0 })) : (B(), V(z, { key: 1 }, [
-			U("div", Kw, [
-				U("div", qw, [
+		return (e, r) => !P(t) || !P(n) || !i.value ? (B(), H(Uw, { key: 0 })) : (B(), V(z, { key: 1 }, [
+			U("div", qw, [
+				U("div", Jw, [
 					I(U("select", {
 						"onUpdate:modelValue": r[0] ||= (e) => a.value = e,
 						class: "input grow",
@@ -14663,13 +14662,13 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 					}, [U("optgroup", { label: P(X)("config.recommended") }, [(B(!0), V(z, null, R(P(t).configurations, (e) => (B(), V("option", {
 						key: e.id,
 						value: `recommended:${e.id}`
-					}, j(P(Z)(P(t), "configurations", e.id, "name", e.name)), 9, Xw))), 128))], 8, Yw), i.value.saved.length ? (B(), V("optgroup", {
+					}, j(P(Z)(P(t), "configurations", e.id, "name", e.name)), 9, Zw))), 128))], 8, Xw), i.value.saved.length ? (B(), V("optgroup", {
 						key: 0,
 						label: P(X)("config.saved")
 					}, [(B(!0), V(z, null, R(i.value.saved, (e) => (B(), V("option", {
 						key: e.id,
 						value: `saved:${e.id}`
-					}, j(e.name), 9, Qw))), 128))], 8, Zw)) : K("", !0)], 8, Jw), [[es, a.value]]),
+					}, j(e.name), 9, $w))), 128))], 8, Qw)) : K("", !0)], 8, Yw), [[es, a.value]]),
 					u.value && l.value ? (B(), H($, {
 						key: 0,
 						icon: P(aS),
@@ -14720,7 +14719,7 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 						class: "input grow",
 						placeholder: P(X)("config.name"),
 						autofocus: ""
-					}, null, 8, $w), [[Zo, f.value]]),
+					}, null, 8, eT), [[Zo, f.value]]),
 					W($, {
 						icon: P(xS),
 						label: P(X)("common.cancel"),
@@ -14735,18 +14734,18 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 						onClick: m
 					}, null, 8, ["icon", "label"])
 				], 32)) : K("", !0),
-				l.value ? (B(), V("span", eT, [r[25] ||= U("span", { class: "dot modified" }, null, -1), G(j(P(X)("config.modified")), 1)])) : K("", !0)
+				l.value ? (B(), V("span", tT, [r[25] ||= U("span", { class: "dot modified" }, null, -1), G(j(P(X)("config.modified")), 1)])) : K("", !0)
 			]),
 			W(dC, {
 				title: P(X)("config.connection"),
 				icon: P(cx)
 			}, {
 				default: F(() => [
-					W(_w, {
+					W(vw, {
 						label: P(X)("config.transport"),
 						help: P(X)(`transport.${y.value}.hint`)
 					}, {
-						default: F(() => [W(Gw, {
+						default: F(() => [W(Kw, {
 							modelValue: y.value,
 							"onUpdate:modelValue": r[5] ||= (e) => y.value = e,
 							options: v.value
@@ -14754,29 +14753,29 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 						_: 1
 					}, 8, ["label", "help"]),
 					b.value ? (B(), V(z, { key: 0 }, [
-						W(_w, {
+						W(vw, {
 							label: P(X)("config.forceTool"),
 							help: P(X)("config.forceTool.hint"),
 							inline: ""
 						}, {
-							default: F(() => [W(fw, {
+							default: F(() => [W(pw, {
 								modelValue: P(te),
 								"onUpdate:modelValue": r[6] ||= (e) => /* @__PURE__ */ gn(te) ? te.value = e : null
 							}, null, 8, ["modelValue"])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						W(_w, {
+						W(vw, {
 							label: P(X)("config.parallelTools"),
 							help: P(X)("config.parallelTools.hint"),
 							inline: ""
 						}, {
-							default: F(() => [W(fw, {
+							default: F(() => [W(pw, {
 								modelValue: P(ne),
 								"onUpdate:modelValue": r[7] ||= (e) => /* @__PURE__ */ gn(ne) ? ne.value = e : null
 							}, null, 8, ["modelValue"])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						W(_w, {
+						W(vw, {
 							label: P(X)("config.syntheticTurn"),
 							help: P(X)("config.syntheticTurn.hint"),
 							inline: ""
@@ -14784,24 +14783,24 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 							default: F(() => [I(U("select", {
 								"onUpdate:modelValue": r[8] ||= (e) => ae.value = e,
 								class: "input"
-							}, [U("option", tT, j(P(X)("common.none")), 1), (B(!0), V(z, null, R(P(t).syntheticTurns, (e) => (B(), V("option", {
+							}, [U("option", nT, j(P(X)("common.none")), 1), (B(!0), V(z, null, R(P(t).syntheticTurns, (e) => (B(), V("option", {
 								key: e.id,
 								value: e.id
-							}, j(e.label), 9, nT))), 128))], 512), [[es, ae.value]])]),
+							}, j(e.label), 9, rT))), 128))], 512), [[es, ae.value]])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						W(_w, {
+						W(vw, {
 							label: P(X)("config.thoughtSignature"),
 							help: P(X)("config.thoughtSignature.hint"),
 							inline: ""
 						}, {
-							default: F(() => [W(fw, {
+							default: F(() => [W(pw, {
 								modelValue: P(T),
 								"onUpdate:modelValue": r[9] ||= (e) => /* @__PURE__ */ gn(T) ? T.value = e : null
 							}, null, 8, ["modelValue"])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						W(_w, {
+						W(vw, {
 							label: P(X)("config.streamToolArguments"),
 							help: P(X)("config.streamToolArguments.hint"),
 							inline: ""
@@ -14812,10 +14811,10 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 							}, [(B(!0), V(z, null, R(P(ys), (e) => (B(), V("option", {
 								key: e,
 								value: e
-							}, j(P(X)(`config.streamToolArguments.${e}`)), 9, rT))), 128))], 512), [[es, P(E)]])]),
+							}, j(P(X)(`config.streamToolArguments.${e}`)), 9, iT))), 128))], 512), [[es, P(E)]])]),
 							_: 1
 						}, 8, ["label", "help"]),
-						y.value === "tool-multi" ? (B(), H(_w, {
+						y.value === "tool-multi" ? (B(), H(vw, {
 							key: 0,
 							label: P(X)("config.maxSteps"),
 							inline: ""
@@ -14827,16 +14826,16 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 								max: "20",
 								value: P(ie),
 								onChange: r[11] ||= (e) => ie.value = be(e)
-							}, null, 40, iT)]),
+							}, null, 40, aT)]),
 							_: 1
 						}, 8, ["label"])) : K("", !0)
 					], 64)) : K("", !0),
-					W(_w, {
+					W(vw, {
 						label: P(X)("config.finalFallback"),
 						help: P(X)("config.finalFallback.hint"),
 						inline: ""
 					}, {
-						default: F(() => [W(fw, {
+						default: F(() => [W(pw, {
 							modelValue: P(re),
 							"onUpdate:modelValue": r[12] ||= (e) => /* @__PURE__ */ gn(re) ? re.value = e : null
 						}, null, 8, ["modelValue"])]),
@@ -14851,7 +14850,7 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 				icon: P(bS),
 				help: C.value
 			}, {
-				default: F(() => [W(Gw, {
+				default: F(() => [W(Kw, {
 					modelValue: S.value,
 					"onUpdate:modelValue": r[13] ||= (e) => S.value = e,
 					options: ee.value
@@ -14871,21 +14870,21 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 				default: F(() => [(B(!0), V(z, null, R(oe.value, ([e, t]) => (B(), V("div", {
 					key: e,
 					class: "field-grid"
-				}, [W(_w, { label: P(X)("writing.actorName", { actor: e }) }, {
+				}, [W(vw, { label: P(X)("writing.actorName", { actor: e }) }, {
 					default: F(() => [U("input", {
 						class: "input",
 						value: P(n).identity.names[e] ?? "",
 						placeholder: t.name,
 						onChange: (t) => D("names", e, t.target.value)
-					}, null, 40, aT)]),
+					}, null, 40, oT)]),
 					_: 2
-				}, 1032, ["label"]), W(_w, { label: P(X)("writing.actorPrefix") }, {
+				}, 1032, ["label"]), W(vw, { label: P(X)("writing.actorPrefix") }, {
 					default: F(() => [U("input", {
 						class: "input",
 						value: P(n).identity.prefixes[e] ?? "",
 						placeholder: t.prefix,
 						onChange: (t) => D("prefixes", e, t.target.value)
-					}, null, 40, oT)]),
+					}, null, 40, sT)]),
 					_: 2
 				}, 1032, ["label"])]))), 128))]),
 				_: 1
@@ -14895,12 +14894,12 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 				icon: P(Kx),
 				help: P(X)("writing.meta.hint")
 			}, {
-				actions: F(() => [W(fw, {
+				actions: F(() => [W(pw, {
 					modelValue: le.value,
 					"onUpdate:modelValue": r[14] ||= (e) => le.value = e,
 					label: P(X)("writing.meta")
 				}, null, 8, ["modelValue", "label"])]),
-				default: F(() => [le.value ? (B(), H(_w, {
+				default: F(() => [le.value ? (B(), H(vw, {
 					key: 0,
 					label: P(X)("writing.recentCount"),
 					help: P(X)("writing.recentCount.hint"),
@@ -14913,7 +14912,7 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 						max: "20",
 						value: P(n).meta.recentCount,
 						onChange: r[15] ||= (e) => ue(e.target.value)
-					}, null, 40, sT)]),
+					}, null, 40, cT)]),
 					_: 1
 				}, 8, ["label", "help"])) : K("", !0)]),
 				_: 1
@@ -14927,13 +14926,13 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 				icon: P(wx),
 				help: P(X)("writing.tokenSaving.hint")
 			}, {
-				actions: F(() => [W(fw, {
+				actions: F(() => [W(pw, {
 					modelValue: O.value,
 					"onUpdate:modelValue": r[16] ||= (e) => O.value = e,
 					label: P(X)("writing.tokenSaving")
 				}, null, 8, ["modelValue", "label"])]),
 				default: F(() => [O.value ? (B(), V(z, { key: 0 }, [
-					W(_w, {
+					W(vw, {
 						label: P(X)("writing.keepFullTurns"),
 						help: P(X)("writing.keepFullTurns.hint"),
 						inline: ""
@@ -14944,21 +14943,21 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 							min: "0",
 							value: P(n).tokenSaving.keepFullTurns,
 							onChange: r[17] ||= (e) => se("keepFullTurns", e.target.value)
-						}, null, 40, cT)]),
+						}, null, 40, lT)]),
 						_: 1
 					}, 8, ["label", "help"]),
-					W(_w, {
+					W(vw, {
 						label: P(X)("writing.userInput"),
 						help: P(X)("writing.userInput.hint")
 					}, {
-						default: F(() => [W(Gw, {
+						default: F(() => [W(Kw, {
 							modelValue: ce.value,
 							"onUpdate:modelValue": r[18] ||= (e) => ce.value = e,
 							options: k.value
 						}, null, 8, ["modelValue", "options"])]),
 						_: 1
 					}, 8, ["label", "help"]),
-					ce.value === "truncate" ? (B(), H(_w, {
+					ce.value === "truncate" ? (B(), H(vw, {
 						key: 0,
 						label: P(X)("writing.truncateUserAfter"),
 						help: P(X)("writing.truncateUserAfter.hint"),
@@ -14970,7 +14969,7 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 							min: "0",
 							value: P(n).tokenSaving.truncateUserAfter,
 							onChange: r[19] ||= (e) => se("truncateUserAfter", e.target.value)
-						}, null, 40, lT)]),
+						}, null, 40, uT)]),
 						_: 1
 					}, 8, ["label", "help"])) : K("", !0)
 				], 64)) : K("", !0)]),
@@ -14985,12 +14984,12 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 				icon: P(Dx),
 				help: P(X)("writing.cache.hint")
 			}, {
-				actions: F(() => [W(fw, {
+				actions: F(() => [W(pw, {
 					modelValue: de.value,
 					"onUpdate:modelValue": r[20] ||= (e) => de.value = e,
 					label: P(X)("writing.cache")
 				}, null, 8, ["modelValue", "label"])]),
-				default: F(() => [de.value ? (B(), V(z, { key: 0 }, [W(_w, {
+				default: F(() => [de.value ? (B(), V(z, { key: 0 }, [W(vw, {
 					label: P(X)("writing.cacheTtl"),
 					help: P(X)("writing.cacheTtl.hint"),
 					inline: ""
@@ -15001,9 +15000,9 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 						min: "0",
 						value: P(n).cache.ttlMinutes,
 						onChange: r[21] ||= (e) => fe("ttlMinutes", e.target.value)
-					}, null, 40, uT)]),
+					}, null, 40, dT)]),
 					_: 1
-				}, 8, ["label", "help"]), W(_w, {
+				}, 8, ["label", "help"]), W(vw, {
 					label: P(X)("writing.cacheMaxDeferred"),
 					help: P(X)("writing.cacheMaxDeferred.hint"),
 					inline: ""
@@ -15014,7 +15013,7 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 						min: "0",
 						value: P(n).cache.maxDeferredTurns,
 						onChange: r[22] ||= (e) => fe("maxDeferredTurns", e.target.value)
-					}, null, 40, dT)]),
+					}, null, 40, fT)]),
 					_: 1
 				}, 8, ["label", "help"])], 64)) : K("", !0)]),
 				_: 1
@@ -15029,15 +15028,15 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 				icon: P(eS),
 				help: P(X)("config.customUi.hint")
 			}, {
-				actions: F(() => [W(fw, {
+				actions: F(() => [W(pw, {
 					modelValue: s.value,
 					"onUpdate:modelValue": r[23] ||= (e) => s.value = e,
 					label: P(X)("config.customUi.enable")
 				}, null, 8, ["modelValue", "label"])]),
-				default: F(() => [c.value && !s.value ? (B(), V("p", fT, j(P(X)("config.customUi.changed")), 1)) : K("", !0), U("ul", pT, [(B(!0), V(z, null, R(o.value, (e) => (B(), V("li", {
+				default: F(() => [c.value && !s.value ? (B(), V("p", pT, j(P(X)("config.customUi.changed")), 1)) : K("", !0), U("ul", mT, [(B(!0), V(z, null, R(o.value, (e) => (B(), V("li", {
 					key: e.id,
 					class: "row tight"
-				}, [U("span", mT, j(e.title), 1), U("span", hT, j(P(X)(`config.customUi.${e.mode}`)) + " · " + j(P(X)(`config.customUi.${e.position}`)), 1)]))), 128))])]),
+				}, [U("span", hT, j(e.title), 1), U("span", gT, j(P(X)(`config.customUi.${e.mode}`)) + " · " + j(P(X)(`config.customUi.${e.position}`)), 1)]))), 128))])]),
 				_: 1
 			}, 8, [
 				"title",
@@ -15051,18 +15050,18 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 				open: !1
 			}, {
 				default: F(() => [
-					(B(), V(z, null, R(pe, (e) => (B(), V(z, { key: e.key }, [ve(e.key) ? (B(), H(_w, {
+					(B(), V(z, null, R(pe, (e) => (B(), V(z, { key: e.key }, [ve(e.key) ? (B(), H(vw, {
 						key: 0,
 						label: P(X)(`sampling.${e.key}`)
 					}, {
-						default: F(() => [U("div", gT, [U("input", {
+						default: F(() => [U("div", _T, [U("input", {
 							type: "range",
 							min: e.min,
 							max: e.max,
 							step: e.step,
 							value: _e.value[e.key],
 							onInput: (t) => ye(e.key, be(t))
-						}, null, 40, _T), U("input", {
+						}, null, 40, vT), U("input", {
 							class: "input",
 							type: "number",
 							min: e.min,
@@ -15070,10 +15069,10 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 							step: e.step,
 							value: _e.value[e.key],
 							onChange: (t) => ye(e.key, be(t))
-						}, null, 40, vT)])]),
+						}, null, 40, yT)])]),
 						_: 2
 					}, 1032, ["label"])) : K("", !0)], 64))), 64)),
-					U("div", yT, [(B(), V(z, null, R(me, (e) => (B(), V(z, { key: e }, [ve(e) ? (B(), H(_w, {
+					U("div", bT, [(B(), V(z, null, R(me, (e) => (B(), V(z, { key: e }, [ve(e) ? (B(), H(vw, {
 						key: 0,
 						label: P(X)(`sampling.${e}`)
 					}, {
@@ -15082,9 +15081,9 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 							type: "number",
 							value: _e.value[e],
 							onChange: (t) => ye(e, be(t))
-						}, null, 40, bT)]),
+						}, null, 40, xT)]),
 						_: 2
-					}, 1032, ["label"])) : K("", !0)], 64))), 64)), ve("reasoning_effort") ? (B(), H(_w, {
+					}, 1032, ["label"])) : K("", !0)], 64))), 64)), ve("reasoning_effort") ? (B(), H(vw, {
 						key: 0,
 						label: P(X)("sampling.reasoning_effort")
 					}, {
@@ -15095,15 +15094,15 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 						}, [(B(), V(z, null, R(ge, (e) => U("option", {
 							key: e,
 							value: e
-						}, j(P(X)(`effort.${e}`)), 9, ST)), 64))], 40, xT)]),
+						}, j(P(X)(`effort.${e}`)), 9, CT)), 64))], 40, ST)]),
 						_: 1
 					}, 8, ["label"])) : K("", !0)]),
-					(B(), V(z, null, R(he, (e) => (B(), V(z, { key: e }, [ve(e) ? (B(), H(_w, {
+					(B(), V(z, null, R(he, (e) => (B(), V(z, { key: e }, [ve(e) ? (B(), H(vw, {
 						key: 0,
 						label: P(X)(`sampling.${e}`),
 						inline: ""
 					}, {
-						default: F(() => [W(fw, {
+						default: F(() => [W(pw, {
 							"model-value": !!_e.value[e],
 							"onUpdate:modelValue": (t) => ye(e, t)
 						}, null, 8, ["model-value", "onUpdate:modelValue"])]),
@@ -15114,7 +15113,7 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 			}, 8, ["title", "icon"])
 		], 64));
 	}
-}), wT = [
+}), TT = [
 	"normal",
 	"regenerate",
 	"swipe",
@@ -15122,7 +15121,7 @@ var Vw = { class: "empty" }, Hw = /* @__PURE__ */ L({
 	"quiet",
 	"impersonate"
 ];
-function TT(e) {
+function ET(e) {
 	let t = (e, t) => e.map((e) => ({
 		value: e,
 		label: t(String(e))
@@ -15154,7 +15153,7 @@ function TT(e) {
 		"gen.type": {
 			kind: "enum",
 			label: X("um.var.genType"),
-			options: t(wT, (e) => X(`um.genType.${e}`))
+			options: t(TT, (e) => X(`um.genType.${e}`))
 		},
 		"meta.present": {
 			kind: "bool",
@@ -15190,13 +15189,13 @@ function TT(e) {
 		} } : {}
 	};
 }
-var ET = (e) => e.modules.filter((e) => e.toggle === "user");
-function DT(e) {
-	let t = TT(e), n = (e) => e.filter((e) => t[e]).map((e) => ({
+var DT = (e) => e.modules.filter((e) => e.toggle === "user");
+function OT(e) {
+	let t = ET(e), n = (e) => e.filter((e) => t[e]).map((e) => ({
 		id: e,
 		label: t[e].label
 	})), r = [];
-	return ET(e).length && r.push({
+	return DT(e).length && r.push({
 		id: "module",
 		label: X("um.var.module")
 	}), e.params.length && r.push({
@@ -15246,13 +15245,13 @@ function DT(e) {
 		}
 	].filter((e) => e.subjects.length);
 }
-function OT(e) {
+function kT(e) {
 	if (e.kind !== "var") return e.kind;
 	let t = e.path.split(".")[0];
 	return t === "modules" ? "module" : t === "params" ? "param" : t === "flags" ? "flag" : e.path;
 }
-function kT(e, t) {
-	return t === "module" ? ET(e).map((t) => ({
+function AT(e, t) {
+	return t === "module" ? DT(e).map((t) => ({
 		value: t.id,
 		label: Z(e, "modules", t.id, "name", t.name)
 	})) : t === "param" ? e.params.map((t) => ({
@@ -15263,11 +15262,11 @@ function kT(e, t) {
 		label: e.id
 	})) : [];
 }
-function AT(e, t) {
+function jT(e, t) {
 	let [n, r = ""] = t.split(".", 2);
 	if (n === "modules") return {
 		kind: "bool",
-		label: kT(e, "module").find((e) => e.value === r)?.label ?? r
+		label: AT(e, "module").find((e) => e.value === r)?.label ?? r
 	};
 	if (n === "flags") return {
 		kind: "bool",
@@ -15289,7 +15288,7 @@ function AT(e, t) {
 		};
 		let i = (t.options ?? []).map((n) => ({
 			value: n.value,
-			label: jT(e, t.id, n.value, n.label)
+			label: MT(e, t.id, n.value, n.label)
 		}));
 		return t.type === "select" ? {
 			kind: "enum",
@@ -15301,12 +15300,12 @@ function AT(e, t) {
 			suggestions: i.map((e) => String(e.value))
 		};
 	}
-	return TT(e)[t] ?? {
+	return ET(e)[t] ?? {
 		kind: "text",
 		label: t
 	};
 }
-var jT = (e, t, n, r) => $d(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String(n), MT = {
+var MT = (e, t, n, r) => $d(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String(n), NT = {
 	bool: ["on", "off"],
 	list: ["on", "off"],
 	enum: ["in", "notIn"],
@@ -15320,7 +15319,7 @@ var jT = (e, t, n, r) => $d(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String
 	],
 	text: ["==", "!="]
 };
-function NT(e, t) {
+function PT(e, t) {
 	if (t === "keyword") return {
 		kind: "keyword",
 		target: "input",
@@ -15332,8 +15331,8 @@ function NT(e, t) {
 		source: ""
 	};
 	if (t === "module" || t === "param" || t === "flag") {
-		let n = String(kT(e, t)[0]?.value ?? "");
-		return PT(e, {
+		let n = String(AT(e, t)[0]?.value ?? "");
+		return FT(e, {
 			kind: "var",
 			path: "",
 			op: "on"
@@ -15343,15 +15342,15 @@ function NT(e, t) {
 			flag: "flags"
 		}[t]}.${n}`);
 	}
-	return PT(e, {
+	return FT(e, {
 		kind: "var",
 		path: "",
 		op: "on"
 	}, t);
 }
-function PT(e, t, n) {
-	let r = AT(e, n);
-	return t.path && AT(e, t.path).kind === r.kind && MT[r.kind].includes(t.op) && r.kind !== "enum" ? {
+function FT(e, t, n) {
+	let r = jT(e, n);
+	return t.path && jT(e, t.path).kind === r.kind && NT[r.kind].includes(t.op) && r.kind !== "enum" ? {
 		...t,
 		path: n
 	} : r.kind === "bool" || r.kind === "list" ? {
@@ -15375,35 +15374,35 @@ function PT(e, t, n) {
 		value: ""
 	};
 }
-function FT(e, t, n = "") {
+function IT(e, t, n = "") {
 	return e === "bool" ? X(n.startsWith("modules.") ? `um.op.module.${t}` : `um.op.${t}`) : e === "list" ? X(`um.op.list.${t}`) : e === "enum" ? X(`um.op.${t}`) : t === "==" ? "=" : t === "!=" ? "≠" : t === ">=" ? "≥" : t === "<=" ? "≤" : t;
 }
-var IT = (e, t) => {
+var LT = (e, t) => {
 	let n = (t) => e.options?.find((e) => String(e.value) === String(t))?.label ?? String(t);
 	return Array.isArray(t) ? t.map(n).join(X("um.or")) : t === void 0 ? "" : n(t);
 };
-function LT(e, t) {
+function RT(e, t) {
 	if (t.kind === "expr") return t.source;
 	if (t.kind === "keyword") return `${t.target === "input" ? X("um.kw.input") : X("um.kw.recentN", { n: t.depth ?? 3 })} ${X(`um.kw.${t.op}`)} ${t.words.join(X("um.or"))}`;
-	let n = AT(e, t.path);
+	let n = jT(e, t.path);
 	return n.kind === "bool" || n.kind === "list" ? X("um.boolDesc", {
 		label: n.label,
-		value: FT(n.kind, t.op, t.path)
-	}) : `${n.label} ${FT(n.kind, t.op)} ${IT(n, t.value)}`;
+		value: IT(n.kind, t.op, t.path)
+	}) : `${n.label} ${IT(n.kind, t.op)} ${LT(n, t.value)}`;
 }
-function RT(e, t) {
+function zT(e, t) {
 	let n = t.rules.filter(wu);
-	return n.length ? n.map((t) => LT(e, t)).join(t.match === "any" ? `\n${X("um.match.anyJoin")} ` : `\n${X("um.match.allJoin")} `) : X("um.always");
+	return n.length ? n.map((t) => RT(e, t)).join(t.match === "any" ? `\n${X("um.match.anyJoin")} ` : `\n${X("um.match.allJoin")} `) : X("um.always");
 }
 //#endregion
 //#region src/ui/panel/user-modules/UserModulesSection.vue?vue&type=script&setup=true&lang.ts
-var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small muted" }, HT = { class: "um-choice-text" }, UT = { class: "xs muted" }, WT = ["data-template", "onClick"], GT = { class: "um-choice-text" }, KT = {
+var BT = ["aria-label"], VT = { class: "um-picker-head" }, HT = { class: "small muted" }, UT = { class: "um-choice-text" }, WT = { class: "xs muted" }, GT = ["data-template", "onClick"], KT = { class: "um-choice-text" }, qT = {
 	key: 0,
 	class: "xs muted um-choice-desc"
-}, qT = ["data-id"], JT = ["aria-label", "onPointerdown"], YT = ["onClick"], XT = { class: "um-row-name ellipsis" }, ZT = { class: "um-row-meta xs muted ellipsis" }, QT = {
+}, JT = ["data-id"], YT = ["aria-label", "onPointerdown"], XT = ["onClick"], ZT = { class: "um-row-name ellipsis" }, QT = { class: "um-row-meta xs muted ellipsis" }, $T = {
 	key: 3,
 	class: "faint small"
-}, $T = /* @__PURE__ */ L({
+}, eE = /* @__PURE__ */ L({
 	__name: "UserModulesSection",
 	props: { preset: {} },
 	emits: ["open"],
@@ -15512,7 +15511,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					"aria-label": P(X)("um.startFrom"),
 					onKeydown: n[2] ||= ls(ss((e) => m.value = !1, ["stop"]), ["esc"])
 				}, [
-					U("div", BT, [U("span", VT, j(P(X)("um.startFrom")), 1), W($, {
+					U("div", VT, [U("span", HT, j(P(X)("um.startFrom")), 1), W($, {
 						icon: P(xS),
 						label: P(X)("common.cancel"),
 						small: "",
@@ -15523,15 +15522,15 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						type: "button",
 						class: "um-choice",
 						onClick: _
-					}, [W(P(Mx)), U("span", HT, [U("span", null, j(P(X)("um.blank")), 1), U("span", UT, j(P(X)("um.blank.desc")), 1)])]),
+					}, [W(P(Mx)), U("span", UT, [U("span", null, j(P(X)("um.blank")), 1), U("span", WT, j(P(X)("um.blank.desc")), 1)])]),
 					(B(!0), V(z, null, R(p.value, (e) => (B(), V("button", {
 						key: e.tpl.id,
 						type: "button",
 						class: "um-choice",
 						"data-template": e.tpl.id,
 						onClick: (t) => v(e.tpl)
-					}, [W(P(Bx)), U("span", GT, [U("span", null, j(e.body.name), 1), e.body.description ? (B(), V("span", KT, j(e.body.description), 1)) : K("", !0)])], 8, WT))), 128))
-				], 40, zT)) : K("", !0),
+					}, [W(P(Bx)), U("span", KT, [U("span", null, j(e.body.name), 1), e.body.description ? (B(), V("span", qT, j(e.body.description), 1)) : K("", !0)])], 8, GT))), 128))
+				], 40, BT)) : K("", !0),
 				i.value.length ? (B(), V("div", {
 					key: 1,
 					ref_key: "listEl",
@@ -15553,12 +15552,12 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						onPointermove: te,
 						onPointerup: ne,
 						onPointercancel: ne
-					}, [W(P(Lx))], 40, JT)) : K("", !0),
+					}, [W(P(Lx))], 40, YT)) : K("", !0),
 					U("button", {
 						type: "button",
 						class: "um-open",
 						onClick: (e) => r("open", t.id)
-					}, [U("span", XT, j(t.name || P(X)("um.untitled")), 1), U("span", ZT, j(c(t) || P(X)("um.noEntries")), 1)], 8, YT),
+					}, [U("span", ZT, j(t.name || P(X)("um.untitled")), 1), U("span", QT, j(c(t) || P(X)("um.noEntries")), 1)], 8, XT),
 					l(t).length ? (B(), H(CS, {
 						key: 1,
 						text: u(t),
@@ -15572,7 +15571,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					}, 8, ["text"])) : K("", !0),
 					d(t) ? (B(), H(CS, {
 						key: 2,
-						text: P(RT)(e.preset, t.trigger),
+						text: P(zT)(e.preset, t.trigger),
 						align: "end"
 					}, {
 						default: F(() => [W(P(SS), {
@@ -15581,7 +15580,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						})]),
 						_: 1
 					}, 8, ["text"])) : K("", !0),
-					W(fw, {
+					W(pw, {
 						"model-value": t.enabled,
 						label: t.name,
 						"onUpdate:modelValue": (e) => f(t, e)
@@ -15590,12 +15589,12 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						"label",
 						"onUpdate:modelValue"
 					])
-				], 10, qT))), 128))], 512)) : a.value && !m.value ? (B(), V("button", {
+				], 10, JT))), 128))], 512)) : a.value && !m.value ? (B(), V("button", {
 					key: 2,
 					type: "button",
 					class: "um-new",
 					onClick: y
-				}, [W(P($x)), G(j(P(X)("um.new")), 1)])) : a.value ? K("", !0) : (B(), V("div", QT, j(P(X)("um.noPoints")), 1)),
+				}, [W(P($x)), G(j(P(X)("um.new")), 1)])) : a.value ? K("", !0) : (B(), V("div", $T, j(P(X)("um.noPoints")), 1)),
 				U("input", {
 					ref_key: "fileInput",
 					ref: b,
@@ -15608,7 +15607,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			_: 1
 		}, 8, ["title", "help"]));
 	}
-}), eE = ["title"], tE = ["aria-label", "onClick"], nE = ["placeholder"], rE = /* @__PURE__ */ L({
+}), tE = ["title"], nE = ["aria-label", "onClick"], rE = ["placeholder"], iE = /* @__PURE__ */ L({
 	__name: "ChipsInput",
 	props: /*@__PURE__*/ ni({
 		placeholder: {},
@@ -15651,12 +15650,12 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 		}, [U("span", {
 			class: "ellipsis",
 			title: t
-		}, j(t), 9, eE), U("button", {
+		}, j(t), 9, tE), U("button", {
 			type: "button",
 			class: "chip-x",
 			"aria-label": e.removeLabel,
 			onClick: ss((e) => c(n), ["stop"])
-		}, [W(P(xS))], 8, tE)], 2))), 128)), I(U("input", {
+		}, [W(P(xS))], 8, nE)], 2))), 128)), I(U("input", {
 			ref_key: "input",
 			ref: i,
 			"onUpdate:modelValue": l[0] ||= (e) => r.value = e,
@@ -15665,30 +15664,30 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			onKeydown: o,
 			onBlur: l[1] ||= (e) => a(),
 			onPaste: s
-		}, null, 42, nE), [[Zo, r.value]])]));
+		}, null, 42, rE), [[Zo, r.value]])]));
 	}
-}), iE = { class: "rule" }, aE = { class: "rule-head" }, oE = ["value", "aria-label"], sE = ["label"], cE = ["value"], lE = ["value"], uE = ["value"], dE = ["value"], fE = ["value"], pE = {
+}), aE = { class: "rule" }, oE = { class: "rule-head" }, sE = ["value", "aria-label"], cE = ["label"], lE = ["value"], uE = ["value"], dE = ["value"], fE = ["value"], pE = ["value"], mE = {
 	key: 1,
 	class: "grow"
-}, mE = {
+}, hE = {
 	key: 0,
 	class: "rule-body"
-}, hE = { class: "row wrap" }, gE = {
+}, gE = { class: "row wrap" }, _E = {
 	key: 0,
 	class: "unit small muted"
-}, _E = ["value"], vE = ["value"], yE = { value: "any" }, bE = { value: "none" }, xE = { class: "row kw-words" }, SE = {
+}, vE = ["value"], yE = ["value"], bE = { value: "any" }, xE = { value: "none" }, SE = { class: "row kw-words" }, CE = {
 	key: 1,
 	class: "rule-body"
-}, CE = ["value"], wE = {
+}, wE = ["value"], TE = {
 	key: 2,
 	class: "rule-body"
-}, TE = ["value"], EE = ["value"], DE = { class: "row wrap option-chips" }, OE = ["aria-pressed", "onClick"], kE = {
+}, EE = ["value"], DE = ["value"], OE = { class: "row wrap option-chips" }, kE = ["aria-pressed", "onClick"], AE = {
 	key: 2,
 	class: "row"
-}, AE = ["value"], jE = ["value"], ME = ["value"], NE = ["list", "value"], PE = ["value"], FE = {
+}, jE = ["value"], ME = ["value"], NE = ["value"], PE = ["list", "value"], FE = ["value"], IE = {
 	key: 3,
 	class: "rule-error xs"
-}, IE = /* @__PURE__ */ L({
+}, LE = /* @__PURE__ */ L({
 	__name: "RuleRow",
 	props: /*@__PURE__*/ ni({ preset: {} }, {
 		modelValue: { required: !0 },
@@ -15696,13 +15695,13 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 	}),
 	emits: /*@__PURE__*/ ni(["remove"], ["update:modelValue"]),
 	setup(e) {
-		let t = e, n = si(e, "modelValue"), r = q(() => DT(t.preset)), i = q(() => OT(n.value)), a = q(() => kT(t.preset, i.value)), o = q(() => n.value.kind === "var" ? n.value.path.split(".").slice(1).join(".") : ""), s = q(() => n.value.kind === "var" ? AT(t.preset, n.value.path) : null), c = q(() => Au(n.value)), l = `ap-um-${Math.random().toString(36).slice(2, 8)}`;
+		let t = e, n = si(e, "modelValue"), r = q(() => OT(t.preset)), i = q(() => kT(n.value)), a = q(() => AT(t.preset, i.value)), o = q(() => n.value.kind === "var" ? n.value.path.split(".").slice(1).join(".") : ""), s = q(() => n.value.kind === "var" ? jT(t.preset, n.value.path) : null), c = q(() => Au(n.value)), l = `ap-um-${Math.random().toString(36).slice(2, 8)}`;
 		function u(e) {
-			e !== i.value && (n.value = NT(t.preset, e));
+			e !== i.value && (n.value = PT(t.preset, e));
 		}
 		function d(e) {
 			let r = n.value, i = r.path.split(".")[0];
-			n.value = PT(t.preset, r, `${i}.${e}`);
+			n.value = FT(t.preset, r, `${i}.${e}`);
 		}
 		let f = (e) => {
 			n.value = {
@@ -15722,12 +15721,12 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			let t = n.value.value, r = Array.isArray(t) ? [...t] : [], i = r.findIndex((t) => String(t) === String(e));
 			i >= 0 ? r.splice(i, 1) : r.push(e), f({ value: r });
 		}
-		let g = q(() => s.value?.kind === "list" ? "list" : "bool"), _ = q(() => MT[g.value].map((e) => ({
+		let g = q(() => s.value?.kind === "list" ? "list" : "bool"), _ = q(() => NT[g.value].map((e) => ({
 			value: e,
-			label: FT(g.value, e, n.value.path)
-		}))), v = q(() => (s.value ? MT[s.value.kind] : []).map((e) => ({
+			label: IT(g.value, e, n.value.path)
+		}))), v = q(() => (s.value ? NT[s.value.kind] : []).map((e) => ({
 			value: e,
-			label: FT(s.value.kind, e)
+			label: IT(s.value.kind, e)
 		}))), y = q({
 			get: () => n.value.target,
 			set: (e) => p(e === "recent" ? {
@@ -15744,8 +15743,8 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			value: "recent",
 			label: X("um.kw.recent")
 		}]);
-		return (e, t) => (B(), V("div", iE, [
-			U("div", aE, [
+		return (e, t) => (B(), V("div", aE, [
+			U("div", oE, [
 				U("select", {
 					class: "input bare rule-subject",
 					value: i.value,
@@ -15757,10 +15756,10 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				}, [(B(!0), V(z, null, R(e.subjects, (e) => (B(), V("option", {
 					key: e.id,
 					value: e.id
-				}, j(e.label), 9, cE))), 128))], 8, sE))), 128)), n.value.kind === "var" && !r.value.some((e) => e.subjects.some((e) => e.id === i.value)) ? (B(), V("option", {
+				}, j(e.label), 9, lE))), 128))], 8, cE))), 128)), n.value.kind === "var" && !r.value.some((e) => e.subjects.some((e) => e.id === i.value)) ? (B(), V("option", {
 					key: 0,
 					value: i.value
-				}, j(n.value.path), 9, lE)) : K("", !0)], 40, oE),
+				}, j(n.value.path), 9, uE)) : K("", !0)], 40, sE),
 				a.value.length ? (B(), V("select", {
 					key: 0,
 					class: "input bare rule-target grow",
@@ -15769,11 +15768,11 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				}, [(B(!0), V(z, null, R(a.value, (e) => (B(), V("option", {
 					key: String(e.value),
 					value: e.value
-				}, j(e.label), 9, dE))), 128)), a.value.some((e) => String(e.value) === o.value) ? K("", !0) : (B(), V("option", {
+				}, j(e.label), 9, fE))), 128)), a.value.some((e) => String(e.value) === o.value) ? K("", !0) : (B(), V("option", {
 					key: 0,
 					value: o.value,
 					disabled: ""
-				}, j(o.value), 9, fE))], 40, uE)) : (B(), V("span", pE)),
+				}, j(o.value), 9, pE))], 40, dE)) : (B(), V("span", mE)),
 				W($, {
 					icon: P(xS),
 					label: P(X)("um.removeRule"),
@@ -15782,27 +15781,27 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					onClick: t[2] ||= (t) => e.$emit("remove")
 				}, null, 8, ["icon", "label"])
 			]),
-			n.value.kind === "keyword" ? (B(), V("div", mE, [U("div", hE, [
-				W(Gw, {
+			n.value.kind === "keyword" ? (B(), V("div", hE, [U("div", gE, [
+				W(Kw, {
 					modelValue: y.value,
 					"onUpdate:modelValue": t[3] ||= (e) => y.value = e,
 					class: "rule-scope",
 					options: b.value
 				}, null, 8, ["modelValue", "options"]),
-				n.value.target === "recent" ? (B(), V("label", gE, [U("input", {
+				n.value.target === "recent" ? (B(), V("label", _E, [U("input", {
 					class: "input depth",
 					type: "number",
 					min: "1",
 					max: "50",
 					value: n.value.depth ?? P(3),
 					onChange: t[4] ||= (e) => p({ depth: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })
-				}, null, 40, _E), G(" " + j(P(X)("um.kw.messages")), 1)])) : K("", !0),
+				}, null, 40, vE), G(" " + j(P(X)("um.kw.messages")), 1)])) : K("", !0),
 				U("select", {
 					class: "input bare rule-op",
 					value: n.value.op,
 					onChange: t[5] ||= (e) => p({ op: e.target.value })
-				}, [U("option", yE, j(P(X)("um.kw.any")), 1), U("option", bE, j(P(X)("um.kw.none")), 1)], 40, vE)
-			]), U("div", xE, [W(rE, {
+				}, [U("option", bE, j(P(X)("um.kw.any")), 1), U("option", xE, j(P(X)("um.kw.none")), 1)], 40, yE)
+			]), U("div", SE, [W(iE, {
 				class: "grow",
 				"model-value": n.value.words,
 				literal: n.value.regex,
@@ -15826,7 +15825,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				"icon",
 				"label",
 				"active"
-			])])])) : n.value.kind === "expr" ? (B(), V("div", SE, [U("input", {
+			])])])) : n.value.kind === "expr" ? (B(), V("div", CE, [U("input", {
 				class: "input mono",
 				value: n.value.source,
 				spellcheck: "false",
@@ -15835,7 +15834,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					kind: "expr",
 					source: e.target.value
 				}
-			}, null, 40, CE)])) : s.value ? (B(), V("div", wE, [s.value.kind === "bool" || s.value.kind === "list" ? (B(), H(Gw, {
+			}, null, 40, wE)])) : s.value ? (B(), V("div", TE, [s.value.kind === "bool" || s.value.kind === "list" ? (B(), H(Kw, {
 				key: 0,
 				"model-value": n.value.op,
 				options: _.value,
@@ -15847,47 +15846,47 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			}, [(B(!0), V(z, null, R(v.value, (e) => (B(), V("option", {
 				key: e.value,
 				value: e.value
-			}, j(e.label), 9, EE))), 128))], 40, TE), U("div", DE, [(B(!0), V(z, null, R(s.value.options, (e) => (B(), V("button", {
+			}, j(e.label), 9, DE))), 128))], 40, EE), U("div", OE, [(B(!0), V(z, null, R(s.value.options, (e) => (B(), V("button", {
 				key: String(e.value),
 				type: "button",
 				class: A(["chip", { on: m.value.includes(String(e.value)) }]),
 				"aria-pressed": m.value.includes(String(e.value)),
 				onClick: (t) => h(e.value)
-			}, j(e.label), 11, OE))), 128))])], 64)) : (B(), V("div", kE, [U("select", {
+			}, j(e.label), 11, kE))), 128))])], 64)) : (B(), V("div", AE, [U("select", {
 				class: "input rule-cmp",
 				value: n.value.op,
 				onChange: t[11] ||= (e) => f({ op: e.target.value })
 			}, [(B(!0), V(z, null, R(v.value, (e) => (B(), V("option", {
 				key: e.value,
 				value: e.value
-			}, j(e.label), 9, jE))), 128))], 40, AE), s.value.kind === "number" ? (B(), V("input", {
+			}, j(e.label), 9, ME))), 128))], 40, jE), s.value.kind === "number" ? (B(), V("input", {
 				key: 0,
 				class: "input grow",
 				type: "number",
 				value: n.value.value,
 				onChange: t[12] ||= (e) => f({ value: Number(e.target.value) })
-			}, null, 40, ME)) : (B(), V(z, { key: 1 }, [U("input", {
+			}, null, 40, NE)) : (B(), V(z, { key: 1 }, [U("input", {
 				class: "input grow",
 				list: s.value.suggestions?.length ? l : void 0,
 				value: n.value.value,
 				onInput: t[13] ||= (e) => f({ value: e.target.value })
-			}, null, 40, NE), s.value.suggestions?.length ? (B(), V("datalist", {
+			}, null, 40, PE), s.value.suggestions?.length ? (B(), V("datalist", {
 				key: 0,
 				id: l
 			}, [(B(!0), V(z, null, R(s.value.suggestions, (e) => (B(), V("option", {
 				key: e,
 				value: e
-			}, null, 8, PE))), 128))])) : K("", !0)], 64))]))])) : K("", !0),
-			c.value ? (B(), V("div", FE, j(c.value), 1)) : K("", !0)
+			}, null, 8, FE))), 128))])) : K("", !0)], 64))]))])) : K("", !0),
+			c.value ? (B(), V("div", IE, j(c.value), 1)) : K("", !0)
 		]));
 	}
-}), LE = { class: "trigger" }, RE = {
+}), RE = { class: "trigger" }, zE = {
 	key: 1,
 	class: "always faint small"
-}, zE = {
+}, BE = {
 	key: 0,
 	class: "rule-join xs faint"
-}, BE = { class: "btn ghost add picker" }, VE = ["aria-label"], HE = ["label"], UE = ["value"], WE = /* @__PURE__ */ L({
+}, VE = { class: "btn ghost add picker" }, HE = ["aria-label"], UE = ["label"], WE = ["value"], GE = /* @__PURE__ */ L({
 	__name: "TriggerEditor",
 	props: /*@__PURE__*/ ni({ preset: {} }, {
 		modelValue: { required: !0 },
@@ -15895,7 +15894,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 	}),
 	emits: ["update:modelValue"],
 	setup(e) {
-		let t = e, n = si(e, "modelValue"), r = q(() => DT(t.preset)), i = /* @__PURE__ */ N(null), a = q(() => [{
+		let t = e, n = si(e, "modelValue"), r = q(() => OT(t.preset)), i = /* @__PURE__ */ N(null), a = q(() => [{
 			value: "all",
 			label: X("um.match.all")
 		}, {
@@ -15903,22 +15902,22 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			label: X("um.match.any")
 		}]);
 		function o(e) {
-			e && (n.value.rules.push(NT(t.preset, e)), i.value && (i.value.value = ""));
+			e && (n.value.rules.push(PT(t.preset, e)), i.value && (i.value.value = ""));
 		}
 		let s = (e, t) => {
 			n.value.rules.splice(e, 1, t);
 		}, c = (e) => {
 			n.value.rules.splice(e, 1);
 		};
-		return (t, l) => (B(), V("div", LE, [
-			n.value.rules.length > 1 ? (B(), H(Gw, {
+		return (t, l) => (B(), V("div", RE, [
+			n.value.rules.length > 1 ? (B(), H(Kw, {
 				key: 0,
 				modelValue: n.value.match,
 				"onUpdate:modelValue": l[0] ||= (e) => n.value.match = e,
 				options: a.value
 			}, null, 8, ["modelValue", "options"])) : K("", !0),
-			n.value.rules.length ? K("", !0) : (B(), V("div", RE, j(P(X)("um.always")), 1)),
-			(B(!0), V(z, null, R(n.value.rules, (t, r) => (B(), V(z, { key: r }, [r > 0 ? (B(), V("div", zE, j(n.value.match === "any" ? P(X)("um.match.anyJoin") : P(X)("um.match.allJoin")), 1)) : K("", !0), W(IE, {
+			n.value.rules.length ? K("", !0) : (B(), V("div", zE, j(P(X)("um.always")), 1)),
+			(B(!0), V(z, null, R(n.value.rules, (t, r) => (B(), V(z, { key: r }, [r > 0 ? (B(), V("div", BE, j(n.value.match === "any" ? P(X)("um.match.anyJoin") : P(X)("um.match.allJoin")), 1)) : K("", !0), W(LE, {
 				"model-value": t,
 				preset: e.preset,
 				"onUpdate:modelValue": (e) => s(r, e),
@@ -15929,7 +15928,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				"onUpdate:modelValue",
 				"onRemove"
 			])], 64))), 128)),
-			U("label", BE, [
+			U("label", VE, [
 				W(P($x)),
 				G(j(P(X)("um.addRule")) + " ", 1),
 				U("select", {
@@ -15948,23 +15947,23 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				}, [(B(!0), V(z, null, R(e.subjects, (e) => (B(), V("option", {
 					key: e.id,
 					value: e.id
-				}, j(e.label), 9, UE))), 128))], 8, HE))), 128))], 40, VE)
+				}, j(e.label), 9, WE))), 128))], 8, UE))), 128))], 40, HE)
 			])
 		]));
 	}
-}), GE = { class: "um-entry-head" }, KE = { class: "um-var-label grow ellipsis" }, qE = {
+}), KE = { class: "um-entry-head" }, qE = { class: "um-var-label grow ellipsis" }, JE = {
 	key: 0,
 	class: "um-warn xs"
-}, JE = ["placeholder"], YE = ["onUpdate:modelValue", "placeholder"], XE = [
+}, YE = ["placeholder"], XE = ["onUpdate:modelValue", "placeholder"], ZE = [
 	"onUpdate:modelValue",
 	"list",
 	"placeholder",
 	"onChange"
-], ZE = [
+], QE = [
 	"value",
 	"placeholder",
 	"onInput"
-], QE = ["id"], $E = ["value"], eD = /* @__PURE__ */ L({
+], $E = ["id"], eD = ["value"], tD = /* @__PURE__ */ L({
 	__name: "VarUpdateEditor",
 	props: {
 		preset: {},
@@ -15990,9 +15989,9 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			});
 		}
 		return (t, n) => (B(), V("div", { class: A(["um-entry", { lost: a.value }]) }, [
-			U("div", GE, [
+			U("div", KE, [
 				W(P(ax), { class: "faint" }),
-				U("span", KE, j(o.value), 1),
+				U("span", qE, j(o.value), 1),
 				W(cC, {
 					text: s.value,
 					align: "end"
@@ -16005,7 +16004,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					onClick: n[0] ||= (e) => r("remove")
 				}, null, 8, ["icon", "label"])
 			]),
-			a.value ? (B(), V("div", qE, [W(P(hS)), G(j(P(X)("um.bv.lost")), 1)])) : K("", !0),
+			a.value ? (B(), V("div", JE, [W(P(hS)), G(j(P(X)("um.bv.lost")), 1)])) : K("", !0),
 			e.update.type === "string" ? I((B(), V("textarea", {
 				key: 1,
 				"onUpdate:modelValue": n[1] ||= (t) => e.update.text = t,
@@ -16013,7 +16012,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				rows: "3",
 				spellcheck: "false",
 				placeholder: P(X)("um.bv.append")
-			}, null, 8, JE)), [[Zo, e.update.text]]) : e.update.type === "list" ? (B(!0), V(z, { key: 2 }, R(e.update.items, (t, n) => (B(), V("div", {
+			}, null, 8, YE)), [[Zo, e.update.text]]) : e.update.type === "list" ? (B(!0), V(z, { key: 2 }, R(e.update.items, (t, n) => (B(), V("div", {
 				key: n,
 				class: "um-var-row list"
 			}, [I(U("textarea", {
@@ -16022,7 +16021,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				rows: "1",
 				spellcheck: "false",
 				placeholder: P(X)("um.bv.item")
-			}, null, 8, YE), [[Zo, e.update.items[n]]]), W($, {
+			}, null, 8, XE), [[Zo, e.update.items[n]]]), W($, {
 				icon: P(xS),
 				label: P(X)("um.removeEntry"),
 				small: "",
@@ -16043,7 +16042,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					spellcheck: "false",
 					placeholder: P(X)("um.bv.key"),
 					onChange: (e) => u(t)
-				}, null, 40, XE), [[Zo, t.key]]),
+				}, null, 40, ZE), [[Zo, t.key]]),
 				U("textarea", {
 					value: t.value ?? "",
 					class: "input um-var-value",
@@ -16051,7 +16050,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					spellcheck: "false",
 					placeholder: c.value.has(t.key.trim()) ? P(X)("um.bv.removes") : P(X)("um.bv.value"),
 					onInput: (e) => t.value = e.target.value
-				}, null, 40, ZE),
+				}, null, 40, QE),
 				W($, {
 					icon: P(xS),
 					label: P(X)("um.removeEntry"),
@@ -16066,7 +16065,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			]))), 128)), U("datalist", { id: l.value }, [(B(!0), V(z, null, R(c.value, ([e]) => (B(), V("option", {
 				key: e,
 				value: e
-			}, null, 8, $E))), 128))], 8, QE)], 64)),
+			}, null, 8, eD))), 128))], 8, $E)], 64)),
 			e.update.type === "string" ? K("", !0) : (B(), V("button", {
 				key: 4,
 				type: "button",
@@ -16075,20 +16074,20 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			}, [W(P($x)), G(j(e.update.type === "dict" ? P(X)("um.bv.addKey") : P(X)("um.bv.addItem")), 1)]))
 		], 2));
 	}
-}), tD = { class: "um-editor" }, nD = { class: "um-head" }, rD = ["placeholder", "aria-label"], iD = { class: "um-entry-head" }, aD = ["onUpdate:modelValue", "aria-label"], oD = ["value"], sD = ["value"], cD = [
+}), nD = { class: "um-editor" }, rD = { class: "um-head" }, iD = ["placeholder", "aria-label"], aD = { class: "um-entry-head" }, oD = ["onUpdate:modelValue", "aria-label"], sD = ["value"], cD = ["value"], lD = [
 	"value",
 	"aria-label",
 	"onChange"
-], lD = ["value"], uD = {
+], uD = ["value"], dD = {
 	key: 0,
 	class: "um-warn xs"
-}, dD = ["onUpdate:modelValue", "placeholder"], fD = {
+}, fD = ["onUpdate:modelValue", "placeholder"], pD = {
 	key: 1,
 	class: "rule-error xs pre"
-}, pD = {
+}, mD = {
 	key: 0,
 	class: "btn ghost add picker"
-}, mD = ["aria-label"], hD = ["value"], gD = { class: "um-foot" }, _D = ["title"], vD = ["title"], yD = ["title"], bD = /* @__PURE__ */ L({
+}, hD = ["aria-label"], gD = ["value"], _D = { class: "um-foot" }, vD = ["title"], yD = ["title"], bD = ["title"], xD = /* @__PURE__ */ L({
 	__name: "UserModuleEditor",
 	props: {
 		preset: {},
@@ -16157,8 +16156,8 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			e && r("open", e.id);
 		}
 		let x = () => A_(`${n.preset.id}.${j_(n.module.name)}.ap-modules.json`, Kp(n.preset, [n.module.id]));
-		return (t, n) => (B(), V("div", tD, [
-			U("header", nD, [
+		return (t, n) => (B(), V("div", nD, [
+			U("header", rD, [
 				W($, {
 					icon: P(nx),
 					label: P(X)("um.back"),
@@ -16172,8 +16171,8 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					class: "input bare um-name grow",
 					placeholder: P(X)("um.untitled"),
 					"aria-label": P(X)("um.name")
-				}, null, 8, rD), [[Zo, e.module.name]]),
-				W(fw, {
+				}, null, 8, iD), [[Zo, e.module.name]]),
+				W(pw, {
 					modelValue: e.module.enabled,
 					"onUpdate:modelValue": n[2] ||= (t) => e.module.enabled = t,
 					label: P(X)("panel.enabled")
@@ -16187,7 +16186,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					key: t.id,
 					class: A(["um-entry", { lost: s(t) }])
 				}, [
-					U("div", iD, [
+					U("div", aD, [
 						W(P(Ux), { class: "faint" }),
 						I(U("select", {
 							"onUpdate:modelValue": (e) => t.point = e,
@@ -16196,11 +16195,11 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						}, [(B(!0), V(z, null, R(a.value, (e) => (B(), V("option", {
 							key: e.id,
 							value: e.id
-						}, j(e.label), 9, oD))), 128)), s(t) ? (B(), V("option", {
+						}, j(e.label), 9, sD))), 128)), s(t) ? (B(), V("option", {
 							key: 0,
 							value: t.point,
 							disabled: ""
-						}, j(P(X)("um.pointMissing", { id: t.point })), 9, sD)) : K("", !0)], 8, aD), [[es, t.point]]),
+						}, j(P(X)("um.pointMissing", { id: t.point })), 9, cD)) : K("", !0)], 8, oD), [[es, t.point]]),
 						W(cC, {
 							text: o(t)?.description,
 							align: "end"
@@ -16213,7 +16212,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						}, [(B(), V(z, null, R(c, (e) => U("option", {
 							key: e,
 							value: e
-						}, j(P(X)(`um.role.${e || "merge"}`)), 9, lD)), 64))], 40, cD),
+						}, j(P(X)(`um.role.${e || "merge"}`)), 9, uD)), 64))], 40, lD),
 						e.module.entries.length > 1 || e.module.vars.length ? (B(), H($, {
 							key: 0,
 							icon: P(xS),
@@ -16227,15 +16226,15 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 							"onClick"
 						])) : K("", !0)
 					]),
-					s(t) ? (B(), V("div", uD, [W(P(hS)), G(j(P(X)("um.pointLost")), 1)])) : K("", !0),
+					s(t) ? (B(), V("div", dD, [W(P(hS)), G(j(P(X)("um.pointLost")), 1)])) : K("", !0),
 					I(U("textarea", {
 						"onUpdate:modelValue": (e) => t.text = e,
 						class: "input um-text",
 						rows: "4",
 						spellcheck: "false",
 						placeholder: P(X)("um.text.placeholder")
-					}, null, 8, dD), [[Zo, t.text]]),
-					u(t).length ? (B(), V("div", fD, j(d(t)), 1)) : K("", !0)
+					}, null, 8, fD), [[Zo, t.text]]),
+					u(t).length ? (B(), V("div", pD, j(d(t)), 1)) : K("", !0)
 				], 2))), 128)), a.value.length ? (B(), V("button", {
 					key: 0,
 					type: "button",
@@ -16249,7 +16248,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				title: P(X)("um.bv"),
 				help: P(X)("um.bv.help")
 			}, {
-				default: F(() => [(B(!0), V(z, null, R(e.module.vars, (t, n) => (B(), H(eD, {
+				default: F(() => [(B(!0), V(z, null, R(e.module.vars, (t, n) => (B(), H(tD, {
 					key: t.var,
 					preset: e.preset,
 					update: t,
@@ -16258,7 +16257,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					"preset",
 					"update",
 					"onRemove"
-				]))), 128)), h.value.length ? (B(), V("label", pD, [
+				]))), 128)), h.value.length ? (B(), V("label", mD, [
 					W(P($x)),
 					G(j(P(X)("um.bv.add")) + " ", 1),
 					U("select", {
@@ -16274,7 +16273,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					}, null, -1), (B(!0), V(z, null, R(h.value, (e) => (B(), V("option", {
 						key: e.id,
 						value: e.id
-					}, j(e.label), 9, hD))), 128))], 40, mD)
+					}, j(e.label), 9, gD))), 128))], 40, hD)
 				])) : K("", !0)]),
 				_: 1
 			}, 8, ["title", "help"])) : K("", !0),
@@ -16282,46 +16281,46 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				title: P(X)("um.trigger"),
 				help: P(X)("um.trigger.help")
 			}, {
-				default: F(() => [W(WE, {
+				default: F(() => [W(GE, {
 					modelValue: e.module.trigger,
 					"onUpdate:modelValue": n[4] ||= (t) => e.module.trigger = t,
 					preset: e.preset
 				}, null, 8, ["modelValue", "preset"])]),
 				_: 1
 			}, 8, ["title", "help"]),
-			U("footer", gD, [
+			U("footer", _D, [
 				U("button", {
 					type: "button",
 					class: "btn ghost",
 					title: P(X)("um.export"),
 					onClick: x
-				}, [W(P(Ox)), U("span", null, j(P(X)("um.export")), 1)], 8, _D),
+				}, [W(P(Ox)), U("span", null, j(P(X)("um.export")), 1)], 8, vD),
 				U("button", {
 					type: "button",
 					class: "btn ghost",
 					title: P(X)("um.duplicate"),
 					onClick: b
-				}, [W(P(Tx)), U("span", null, j(P(X)("um.duplicate")), 1)], 8, vD),
+				}, [W(P(Tx)), U("span", null, j(P(X)("um.duplicate")), 1)], 8, yD),
 				n[6] ||= U("span", { class: "grow" }, null, -1),
 				U("button", {
 					type: "button",
 					class: A(["btn ghost danger", { armed: v.value }]),
 					title: P(X)("common.delete"),
 					onClick: y
-				}, [W(P(mS)), U("span", null, j(v.value ? P(X)("um.confirmDelete") : P(X)("common.delete")), 1)], 10, yD)
+				}, [W(P(mS)), U("span", null, j(v.value ? P(X)("um.confirmDelete") : P(X)("common.delete")), 1)], 10, bD)
 			])
 		]));
 	}
-}), xD = {
+}), SD = {
 	key: 0,
 	class: "module-row"
-}, SD = { class: "grow" }, CD = { class: "ellipsis" }, wD = ["aria-label"], TD = ["aria-checked", "onClick"], ED = { class: "grow" }, DD = { class: "grow" }, OD = { class: "ellipsis" }, kD = {
+}, CD = { class: "grow" }, wD = { class: "ellipsis" }, TD = ["aria-label"], ED = ["aria-checked", "onClick"], DD = { class: "grow" }, OD = { class: "grow" }, kD = { class: "ellipsis" }, AD = {
 	key: 0,
 	class: "empty"
-}, AD = /* @__PURE__ */ L({
+}, jD = /* @__PURE__ */ L({
 	__name: "ModulesTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Bw(), i = q(() => t.value && n.value ? Jl(t.value, n.value) : {}), a = q(() => {
+		let { preset: t, config: n, update: r } = Vw(), i = q(() => t.value && n.value ? Jl(t.value, n.value) : {}), a = q(() => {
 			let e = t.value;
 			if (!e) return [];
 			let n = e.modules.filter((e) => e.toggle === "user");
@@ -16379,12 +16378,12 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 		}
 		return cr(() => t.value?.id, () => {
 			h.value = null;
-		}), (e, r) => !P(t) || !P(n) ? (B(), H(Hw, { key: 0 })) : _.value ? (B(), V("div", {
+		}), (e, r) => !P(t) || !P(n) ? (B(), H(Uw, { key: 0 })) : _.value ? (B(), V("div", {
 			key: 1,
 			ref_key: "root",
 			ref: g,
 			class: "col tab-col"
-		}, [(B(), H(bD, {
+		}, [(B(), H(xD, {
 			key: _.value.id,
 			preset: P(t),
 			module: _.value,
@@ -16396,7 +16395,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			ref: g,
 			class: "col tab-col"
 		}, [
-			W($T, {
+			W(eE, {
 				preset: P(t),
 				onOpen: b
 			}, null, 8, ["preset"]),
@@ -16405,10 +16404,10 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				title: e.label,
 				help: e.help
 			}, Jr({
-				default: F(() => [(B(!0), V(z, null, R(e.sets, (t) => (B(), V(z, { key: t.key }, [t.label ? (B(), V("div", xD, [U("span", SD, [U("span", CD, j(t.label), 1), W(cC, {
+				default: F(() => [(B(!0), V(z, null, R(e.sets, (t) => (B(), V(z, { key: t.key }, [t.label ? (B(), V("div", SD, [U("span", CD, [U("span", wD, j(t.label), 1), W(cC, {
 					text: t.help,
 					align: "start"
-				}, null, 8, ["text"])]), t.optional ? (B(), H(fw, {
+				}, null, 8, ["text"])]), t.optional ? (B(), H(pw, {
 					key: 0,
 					"model-value": c(t) !== null,
 					label: t.label,
@@ -16431,18 +16430,18 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					onClick: (n) => p(t, e.id)
 				}, [
 					r[0] ||= U("span", { class: "radio" }, null, -1),
-					U("span", ED, j(o(e)), 1),
+					U("span", DD, j(o(e)), 1),
 					W(cC, {
 						text: s(e),
 						align: "end"
 					}, null, 8, ["text"])
-				], 10, TD))), 128))], 10, wD)) : K("", !0)], 64))), 128)), (B(!0), V(z, null, R(e.toggles, (e) => (B(), V("div", {
+				], 10, ED))), 128))], 10, TD)) : K("", !0)], 64))), 128)), (B(!0), V(z, null, R(e.toggles, (e) => (B(), V("div", {
 					key: e.id,
 					class: "module-row"
-				}, [U("span", DD, [U("span", OD, j(o(e)), 1), W(cC, {
+				}, [U("span", OD, [U("span", kD, j(o(e)), 1), W(cC, {
 					text: s(e),
 					align: "start"
-				}, null, 8, ["text"])]), W(fw, {
+				}, null, 8, ["text"])]), W(pw, {
 					"model-value": i.value[e.id],
 					label: o(e),
 					"onUpdate:modelValue": (t) => u(e, t)
@@ -16454,7 +16453,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				_: 2
 			}, [e.header ? {
 				name: "actions",
-				fn: F(() => [W(fw, {
+				fn: F(() => [W(pw, {
 					"model-value": c(e.header) !== null,
 					label: e.label,
 					"onUpdate:modelValue": (t) => m(e.header, t)
@@ -16465,30 +16464,30 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				])]),
 				key: "0"
 			} : void 0]), 1032, ["title", "help"]))), 128)),
-			a.value.length ? K("", !0) : (B(), V("div", kD, j(P(X)("modules.none")), 1))
+			a.value.length ? K("", !0) : (B(), V("div", AD, j(P(X)("modules.none")), 1))
 		], 512));
 	}
-}), jD = ["value", "onChange"], MD = ["value"], ND = {
+}), MD = ["value", "onChange"], ND = ["value"], PD = {
 	key: 2,
 	class: "unit"
-}, PD = [
+}, FD = [
 	"min",
 	"max",
 	"value",
 	"placeholder",
 	"onChange"
-], FD = {
+], ID = {
 	key: 0,
 	class: "small muted"
-}, ID = [
+}, LD = [
 	"list",
 	"value",
 	"placeholder",
 	"onChange"
-], LD = ["id"], RD = ["value"], zD = /* @__PURE__ */ L({
+], RD = ["id"], zD = ["value"], BD = /* @__PURE__ */ L({
 	__name: "WritingTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Bw(), i = q(() => {
+		let { preset: t, config: n, update: r } = Vw(), i = q(() => {
 			let e = t.value;
 			return e ? [...new Set(e.params.map((e) => e.group ?? ""))].map((t) => ({
 				id: t,
@@ -16502,13 +16501,13 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 		}), u = (e) => c(e), d = (e, t) => r((n) => {
 			n.params[e.id] = [...t];
 		}), f = (e) => `ap-param-${e.id}`;
-		return (e, r) => !P(t) || !P(n) ? (B(), H(Hw, { key: 0 })) : (B(!0), V(z, { key: 1 }, R(i.value, (e) => (B(), H(dC, {
+		return (e, r) => !P(t) || !P(n) ? (B(), H(Uw, { key: 0 })) : (B(!0), V(z, { key: 1 }, R(i.value, (e) => (B(), H(dC, {
 			key: e.id,
 			title: e.label,
 			help: e.help,
 			icon: P(uS)
 		}, {
-			default: F(() => [(B(!0), V(z, null, R(e.params, (e) => (B(), H(_w, {
+			default: F(() => [(B(!0), V(z, null, R(e.params, (e) => (B(), H(vw, {
 				key: e.id,
 				label: a(e),
 				help: o(e)
@@ -16521,7 +16520,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				}, [(B(!0), V(z, null, R(e.options, (t) => (B(), V("option", {
 					key: String(t.value),
 					value: t.value
-				}, j(s(e, t.value, t.label)), 9, MD))), 128))], 40, jD)) : e.type === "list" ? (B(), H(rE, {
+				}, j(s(e, t.value, t.label)), 9, ND))), 128))], 40, MD)) : e.type === "list" ? (B(), H(iE, {
 					key: 1,
 					literal: "",
 					"model-value": u(e),
@@ -16533,7 +16532,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					"remove-label",
 					"placeholder",
 					"onUpdate:modelValue"
-				])) : e.type === "number" ? (B(), V("div", ND, [U("input", {
+				])) : e.type === "number" ? (B(), V("div", PD, [U("input", {
 					class: "input",
 					type: "number",
 					min: e.min,
@@ -16541,19 +16540,19 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					value: c(e),
 					placeholder: e.unset,
 					onChange: (t) => l(e, t.target.value)
-				}, null, 40, PD), e.unit ? (B(), V("span", FD, j(e.unit), 1)) : K("", !0)])) : (B(), V(z, { key: 3 }, [U("input", {
+				}, null, 40, FD), e.unit ? (B(), V("span", ID, j(e.unit), 1)) : K("", !0)])) : (B(), V(z, { key: 3 }, [U("input", {
 					class: "input",
 					list: e.options?.length ? f(e) : void 0,
 					value: c(e),
 					placeholder: e.unset,
 					onChange: (t) => l(e, t.target.value)
-				}, null, 40, ID), e.options?.length ? (B(), V("datalist", {
+				}, null, 40, LD), e.options?.length ? (B(), V("datalist", {
 					key: 0,
 					id: f(e)
 				}, [(B(!0), V(z, null, R(e.options, (t) => (B(), V("option", {
 					key: String(t.value),
 					value: t.value
-				}, j(s(e, t.value, t.label)), 9, RD))), 128))], 8, LD)) : K("", !0)], 64))]),
+				}, j(s(e, t.value, t.label)), 9, zD))), 128))], 8, RD)) : K("", !0)], 64))]),
 				_: 2
 			}, 1032, ["label", "help"]))), 128))]),
 			_: 2
@@ -16563,22 +16562,22 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			"icon"
 		]))), 128));
 	}
-}), BD = { class: "kv" }, VD = {
+}), VD = { class: "kv" }, HD = {
 	key: 0,
 	class: "kv-row"
-}, HD = { class: "kv-key ellipsis" }, UD = { class: "kv-value pre small" }, WD = {
+}, UD = { class: "kv-key ellipsis" }, WD = { class: "kv-value pre small" }, GD = {
 	key: 0,
 	class: "kv-actions"
-}, GD = {
+}, KD = {
 	key: 1,
 	class: "kv-edit col"
-}, KD = ["placeholder"], qD = ["placeholder"], JD = { class: "row end" }, YD = {
+}, qD = ["placeholder"], JD = ["placeholder"], YD = { class: "row end" }, XD = {
 	key: 0,
 	class: "kv-edit col"
-}, XD = ["placeholder"], ZD = ["placeholder"], QD = { class: "row end" }, $D = {
+}, ZD = ["placeholder"], QD = ["placeholder"], $D = { class: "row end" }, eO = {
 	key: 1,
 	class: "faint small kv-empty"
-}, eO = /* @__PURE__ */ L({
+}, tO = /* @__PURE__ */ L({
 	__name: "KvEditor",
 	props: {
 		entries: {},
@@ -16594,20 +16593,20 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			let e = a.value.trim();
 			e && (i.value && i.value !== e && r("remove", i.value), r("set", e, o.value), i.value = null);
 		}
-		return (t, n) => (B(), V("div", BD, [
-			(B(!0), V(z, null, R(e.entries, (t, l) => (B(), V(z, { key: l }, [i.value === l ? (B(), V("div", GD, [
+		return (t, n) => (B(), V("div", VD, [
+			(B(!0), V(z, null, R(e.entries, (t, l) => (B(), V(z, { key: l }, [i.value === l ? (B(), V("div", KD, [
 				I(U("input", {
 					"onUpdate:modelValue": n[0] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: P(X)("memory.key")
-				}, null, 8, KD), [[Zo, a.value]]),
+				}, null, 8, qD), [[Zo, a.value]]),
 				I(U("textarea", {
 					"onUpdate:modelValue": n[1] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: P(X)("memory.content")
-				}, null, 8, qD), [[Zo, o.value]]),
-				U("div", JD, [W($, {
+				}, null, 8, JD), [[Zo, o.value]]),
+				U("div", YD, [W($, {
 					icon: P(xS),
 					label: P(X)("common.cancel"),
 					onClick: n[2] ||= (e) => i.value = null
@@ -16617,10 +16616,10 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					active: "",
 					onClick: c
 				}, null, 8, ["icon", "label"])])
-			])) : (B(), V("div", VD, [
-				U("div", HD, j(l), 1),
-				U("div", UD, j(t), 1),
-				e.readonly ? K("", !0) : (B(), V("div", WD, [W($, {
+			])) : (B(), V("div", HD, [
+				U("div", UD, j(l), 1),
+				U("div", WD, j(t), 1),
+				e.readonly ? K("", !0) : (B(), V("div", GD, [W($, {
 					icon: P(Qx),
 					label: P(X)("common.edit"),
 					small: "",
@@ -16643,19 +16642,19 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					"onClick"
 				])]))
 			]))], 64))), 128)),
-			i.value === "" ? (B(), V("div", YD, [
+			i.value === "" ? (B(), V("div", XD, [
 				I(U("input", {
 					"onUpdate:modelValue": n[3] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: P(X)("memory.key")
-				}, null, 8, XD), [[Zo, a.value]]),
+				}, null, 8, ZD), [[Zo, a.value]]),
 				I(U("textarea", {
 					"onUpdate:modelValue": n[4] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: P(X)("memory.content")
-				}, null, 8, ZD), [[Zo, o.value]]),
-				U("div", QD, [W($, {
+				}, null, 8, QD), [[Zo, o.value]]),
+				U("div", $D, [W($, {
 					icon: P(xS),
 					label: P(X)("common.cancel"),
 					onClick: n[5] ||= (e) => i.value = null
@@ -16666,7 +16665,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					onClick: c
 				}, null, 8, ["icon", "label"])])
 			])) : K("", !0),
-			!Object.keys(e.entries).length && i.value === null ? (B(), V("div", $D, j(P(X)("memory.empty")), 1)) : K("", !0),
+			!Object.keys(e.entries).length && i.value === null ? (B(), V("div", eO, j(P(X)("memory.empty")), 1)) : K("", !0),
 			!e.readonly && i.value === null ? (B(), V("button", {
 				key: 2,
 				type: "button",
@@ -16675,19 +16674,19 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			}, [W(P($x)), G(j(P(X)("common.add")), 1)])) : K("", !0)
 		]));
 	}
-}), tO = {
+}), nO = {
 	key: 1,
 	class: "faint small"
-}, nO = {
+}, rO = {
 	key: 0,
 	class: "badge neutral"
-}, rO = ["placeholder"], iO = {
+}, iO = ["placeholder"], aO = {
 	key: 1,
 	class: "faint small"
-}, aO = /* @__PURE__ */ L({
+}, oO = /* @__PURE__ */ L({
 	__name: "MemoryTab",
 	setup(t) {
-		let { preset: n } = Bw(), r = q(() => n.value ? Af(n.value) : null), i = q(() => (pv.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = q(() => (pv.chatRev, i.value ? _f() : {})), o = q(() => r.value ? bf(r.value) : {}), s = q(() => (pv.chatRev, i.value ? vf() : null));
+		let { preset: n } = Vw(), r = q(() => n.value ? Af(n.value) : null), i = q(() => (pv.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = q(() => (pv.chatRev, i.value ? _f() : {})), o = q(() => r.value ? bf(r.value) : {}), s = q(() => (pv.chatRev, i.value ? vf() : null));
 		async function c(e, t) {
 			await yf({
 				type: "memory.replace",
@@ -16716,18 +16715,18 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				source: "user"
 			}), mv();
 		}
-		return (e, t) => !P(n) || !r.value ? (B(), H(Hw, { key: 0 })) : (B(), V(z, { key: 1 }, [
+		return (e, t) => !P(n) || !r.value ? (B(), H(Uw, { key: 0 })) : (B(), V(z, { key: 1 }, [
 			W(dC, {
 				title: P(X)("memory.chat"),
 				icon: P(Wx),
 				help: P(X)("memory.chat.hint")
 			}, {
-				default: F(() => [i.value ? (B(), H(eO, {
+				default: F(() => [i.value ? (B(), H(tO, {
 					key: 0,
 					entries: a.value,
 					onSet: c,
 					onRemove: l
-				}, null, 8, ["entries"])) : (B(), V("div", tO, j(P(X)("memory.noChat")), 1))]),
+				}, null, 8, ["entries"])) : (B(), V("div", nO, j(P(X)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
@@ -16762,7 +16761,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					"label",
 					"disabled"
 				])]),
-				default: F(() => [W(eO, {
+				default: F(() => [W(tO, {
 					entries: o.value,
 					onSet: u,
 					onRemove: d
@@ -16778,7 +16777,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				icon: P(oS),
 				help: P(X)("memory.recap.hint")
 			}, {
-				actions: F(() => [s.value ? (B(), V("span", nO, "#0–" + j(s.value.coversUpTo), 1)) : K("", !0), i.value ? (B(), H($, {
+				actions: F(() => [s.value ? (B(), V("span", rO, "#0–" + j(s.value.coversUpTo), 1)) : K("", !0), i.value ? (B(), H($, {
 					key: 1,
 					icon: P(ux),
 					label: P(X)("common.save"),
@@ -16798,7 +16797,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					class: "input",
 					rows: "6",
 					placeholder: P(X)("memory.recap.empty")
-				}, null, 8, rO)), [[Zo, f.value]]) : (B(), V("div", iO, j(P(X)("memory.noChat")), 1))]),
+				}, null, 8, iO)), [[Zo, f.value]]) : (B(), V("div", aO, j(P(X)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
@@ -16807,46 +16806,46 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			])
 		], 64));
 	}
-}), oO = { class: "row tight xs muted" }, sO = { class: "row" }, cO = {
+}), sO = { class: "row tight xs muted" }, cO = { class: "row" }, lO = {
 	key: 0,
 	class: "xs text-danger"
-}, lO = { class: "row wrap xs muted" }, uO = { class: "badge neutral" }, dO = {
+}, uO = { class: "row wrap xs muted" }, dO = { class: "badge neutral" }, fO = {
 	key: 0,
 	class: "badge neutral"
-}, fO = { class: "badge neutral" }, pO = {
+}, pO = { class: "badge neutral" }, mO = {
 	key: 1,
 	class: "badge warn"
-}, mO = ["title"], hO = {
+}, hO = ["title"], gO = {
 	key: 0,
 	class: "row wrap xs muted"
-}, gO = { class: "grow" }, _O = { key: 0 }, vO = ["onClick"], yO = { class: "grow mono" }, bO = { class: "xs muted" }, xO = { class: "row xs muted" }, SO = { class: "badge neutral" }, CO = { class: "pre mono scroll" }, wO = {
+}, _O = { class: "grow" }, vO = { key: 0 }, yO = ["onClick"], bO = { class: "grow mono" }, xO = { class: "xs muted" }, SO = { class: "row xs muted" }, CO = { class: "badge neutral" }, wO = { class: "pre mono scroll" }, TO = {
 	key: 0,
 	class: "xs faint region-msg"
-}, TO = { key: 1 }, EO = ["onClick"], DO = { class: "grow mono" }, OO = { class: "xs muted" }, kO = {
+}, EO = { key: 1 }, DO = ["onClick"], OO = { class: "grow mono" }, kO = { class: "xs muted" }, AO = {
 	key: 0,
 	class: "region-msg"
-}, AO = { class: "pre mono scroll" }, jO = {
+}, jO = { class: "pre mono scroll" }, MO = {
 	key: 0,
 	class: "xs faint"
-}, MO = {
+}, NO = {
 	key: 2,
 	class: "xs text-warning"
-}, NO = {
+}, PO = {
 	key: 1,
 	class: "faint small"
-}, PO = ["onClick"], FO = { class: "mono grow ellipsis" }, IO = {
+}, FO = ["onClick"], IO = { class: "mono grow ellipsis" }, LO = {
 	key: 0,
 	class: "badge warn"
-}, LO = { class: "xs muted" }, RO = { class: "xs muted" }, zO = { class: "row xs muted" }, BO = { class: "grow" }, VO = { class: "mono scroll" }, HO = { class: "row xs muted" }, UO = { class: "grow" }, WO = { class: "mono scroll" }, GO = {
+}, RO = { class: "xs muted" }, zO = { class: "xs muted" }, BO = { class: "row xs muted" }, VO = { class: "grow" }, HO = { class: "mono scroll" }, UO = { class: "row xs muted" }, WO = { class: "grow" }, GO = { class: "mono scroll" }, KO = {
 	key: 0,
 	class: "faint small"
-}, KO = { class: "row xs" }, qO = { class: "badge neutral" }, JO = { class: "muted" }, YO = { class: "mono scroll" }, XO = {
+}, qO = { class: "row xs" }, JO = { class: "badge neutral" }, YO = { class: "muted" }, XO = { class: "mono scroll" }, ZO = {
 	key: 0,
 	class: "faint small"
-}, ZO = { class: "row xs" }, QO = { class: "badge neutral" }, $O = { class: "grow muted" }, ek = { class: "small" }, tk = {
+}, QO = { class: "row xs" }, $O = { class: "badge neutral" }, ek = { class: "grow muted" }, tk = { class: "small" }, nk = {
 	key: 0,
 	class: "faint small"
-}, nk = { class: "xs faint mono build" }, rk = /* @__PURE__ */ L({
+}, rk = { class: "xs faint mono build" }, ik = /* @__PURE__ */ L({
 	__name: "DebugTab",
 	setup(t) {
 		let n = q(() => Yp.log.find((e) => e.kind === "assembly")?.data), r = q(() => Yp.log.find((e) => e.kind === "assembly" && e.data.cache)?.data?.cache ?? void 0), i = /* @__PURE__ */ an(/* @__PURE__ */ new Set()), a = (e) => i.has(e) ? i.delete(e) : i.add(e), o = /* @__PURE__ */ an({});
@@ -16910,9 +16909,9 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				icon: P(sS),
 				help: P(X)("debug.dev.hint")
 			}, {
-				actions: F(() => [U("span", oO, [U("span", { class: A(["dot status-dot", P(R_).status]) }, null, 2), G(j(P(X)(`debug.dev.${P(R_).status}`)), 1)])]),
-				default: F(() => [W(_w, { label: P(X)("debug.dev.url") }, {
-					default: F(() => [U("div", sO, [I(U("input", {
+				actions: F(() => [U("span", sO, [U("span", { class: A(["dot status-dot", P(R_).status]) }, null, 2), G(j(P(X)(`debug.dev.${P(R_).status}`)), 1)])]),
+				default: F(() => [W(vw, { label: P(X)("debug.dev.url") }, {
+					default: F(() => [U("div", cO, [I(U("input", {
 						"onUpdate:modelValue": t[0] ||= (e) => h.value = e,
 						class: "input grow",
 						type: "url",
@@ -16922,13 +16921,13 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						h.value,
 						void 0,
 						{ lazy: !0 }
-					]]), W(fw, {
+					]]), W(pw, {
 						modelValue: m.value,
 						"onUpdate:modelValue": t[1] ||= (e) => m.value = e,
 						label: P(X)("debug.dev")
 					}, null, 8, ["modelValue", "label"])])]),
 					_: 1
-				}, 8, ["label"]), P(R_).error ? (B(), V("span", cO, j(P(R_).error), 1)) : K("", !0)]),
+				}, 8, ["label"]), P(R_).error ? (B(), V("span", lO, j(P(R_).error), 1)) : K("", !0)]),
 				_: 1
 			}, 8, [
 				"title",
@@ -16941,23 +16940,23 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				collapsible: ""
 			}, {
 				default: F(() => [n.value ? (B(), V(z, { key: 0 }, [
-					U("div", lO, [
-						U("span", uO, j(P(X)(`transport.${n.value.transport}`)), 1),
-						n.value.workflow ? (B(), V("span", dO, j(n.value.workflow), 1)) : K("", !0),
-						U("span", fO, j(n.value.origin), 1),
-						n.value.dryRun ? (B(), V("span", pO, "dry run")) : K("", !0),
+					U("div", uO, [
+						U("span", dO, j(P(X)(`transport.${n.value.transport}`)), 1),
+						n.value.workflow ? (B(), V("span", fO, j(n.value.workflow), 1)) : K("", !0),
+						U("span", pO, j(n.value.origin), 1),
+						n.value.dryRun ? (B(), V("span", mO, "dry run")) : K("", !0),
 						n.value.input ? (B(), V("span", {
 							key: 2,
 							class: "badge neutral",
 							title: n.value.input.shaped ? `${n.value.input.chars} ch` : void 0
-						}, j(P(X)(n.value.input.shaped ? `debug.input.${n.value.input.mode}` : "debug.input.none")), 9, mO)) : K("", !0),
+						}, j(P(X)(n.value.input.shaped ? `debug.input.${n.value.input.mode}` : "debug.input.none")), 9, hO)) : K("", !0),
 						t[3] ||= U("span", { class: "grow" }, null, -1),
 						G(j(u(n.value.at)), 1)
 					]),
-					r.value ? (B(), V("div", hO, [
+					r.value ? (B(), V("div", gO, [
 						U("span", { class: A(["badge", r.value.reason ? "warn" : "neutral"]) }, j(r.value.reason ? P(X)(`debug.cache.flush.${r.value.reason}`) : P(X)("debug.cache.kept")), 3),
-						U("span", gO, j(p(r.value)), 1),
-						r.value === n.value.cache ? K("", !0) : (B(), V("span", _O, j(u(r.value.at)), 1))
+						U("span", _O, j(p(r.value)), 1),
+						r.value === n.value.cache ? K("", !0) : (B(), V("span", vO, j(u(r.value.at)), 1))
 					])) : K("", !0),
 					U("div", null, [(B(!0), V(z, null, R(n.value.regions, (e) => (B(), V("div", {
 						key: e.id,
@@ -16967,13 +16966,13 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						onClick: (t) => a(e.id)
 					}, [
 						W(P(fx), { class: A(["faint caret", { open: i.has(e.id) }]) }, null, 8, ["class"]),
-						U("span", yO, j(e.id), 1),
-						U("span", bO, j(e.messages.length) + " · " + j(o[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + j(o[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
-					], 8, vO), i.has(e.id) ? (B(), V(z, { key: 0 }, [(B(!0), V(z, null, R(e.messages, (e, t) => (B(), V("div", {
+						U("span", bO, j(e.id), 1),
+						U("span", xO, j(e.messages.length) + " · " + j(o[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + j(o[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
+					], 8, yO), i.has(e.id) ? (B(), V(z, { key: 0 }, [(B(!0), V(z, null, R(e.messages, (e, t) => (B(), V("div", {
 						key: t,
 						class: "region-msg"
-					}, [U("div", xO, [U("span", SO, j(e.role), 1), G(j(e.chars) + " ch", 1)]), U("div", CO, j(e.content), 1)]))), 128)), e.messages.length ? K("", !0) : (B(), V("div", wO, j(P(X)("debug.emptyRegion")), 1))], 64)) : K("", !0)]))), 128))]),
-					n.value.vars?.length ? (B(), V("div", TO, [(B(!0), V(z, null, R(n.value.vars, (e) => (B(), V("div", {
+					}, [U("div", SO, [U("span", CO, j(e.role), 1), G(j(e.chars) + " ch", 1)]), U("div", wO, j(e.content), 1)]))), 128)), e.messages.length ? K("", !0) : (B(), V("div", TO, j(P(X)("debug.emptyRegion")), 1))], 64)) : K("", !0)]))), 128))]),
+					n.value.vars?.length ? (B(), V("div", EO, [(B(!0), V(z, null, R(n.value.vars, (e) => (B(), V("div", {
 						key: e.id,
 						class: "region"
 					}, [U("div", {
@@ -16981,11 +16980,11 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						onClick: (t) => a(`var:${e.id}`)
 					}, [
 						W(P(fx), { class: A(["faint caret", { open: i.has(`var:${e.id}`) }]) }, null, 8, ["class"]),
-						U("span", DO, j(e.id), 1),
-						U("span", OO, j(e.text.length) + " ch", 1)
-					], 8, EO), i.has(`var:${e.id}`) ? (B(), V("div", kO, [U("div", AO, j(e.text), 1), e.text ? K("", !0) : (B(), V("div", jO, j(P(X)("debug.emptyRegion")), 1))])) : K("", !0)]))), 128))])) : K("", !0),
-					n.value.warnings.length ? (B(), V("div", MO, j(n.value.warnings.join(" · ")), 1)) : K("", !0)
-				], 64)) : (B(), V("div", NO, j(P(X)("debug.noAssembly")), 1))]),
+						U("span", OO, j(e.id), 1),
+						U("span", kO, j(e.text.length) + " ch", 1)
+					], 8, DO), i.has(`var:${e.id}`) ? (B(), V("div", AO, [U("div", jO, j(e.text), 1), e.text ? K("", !0) : (B(), V("div", MO, j(P(X)("debug.emptyRegion")), 1))])) : K("", !0)]))), 128))])) : K("", !0),
+					n.value.warnings.length ? (B(), V("div", NO, j(n.value.warnings.join(" · ")), 1)) : K("", !0)
+				], 64)) : (B(), V("div", PO, j(P(X)("debug.noAssembly")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			W(dC, {
@@ -17000,12 +16999,12 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					class: "row small clickable",
 					onClick: (e) => s.value = s.value === t ? null : t
 				}, [
-					U("span", FO, j(e.genId) + " · #" + j(e.step), 1),
-					e.error ? (B(), V("span", IO, j(P(X)("debug.error")), 1)) : K("", !0),
-					U("span", LO, j(f(e.usage)), 1),
-					U("span", RO, j(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
-				], 8, PO), s.value === t ? (B(), V(z, { key: 0 }, [
-					U("div", zO, [U("span", BO, j(P(X)("debug.request")), 1), W($, {
+					U("span", IO, j(e.genId) + " · #" + j(e.step), 1),
+					e.error ? (B(), V("span", LO, j(P(X)("debug.error")), 1)) : K("", !0),
+					U("span", RO, j(f(e.usage)), 1),
+					U("span", zO, j(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
+				], 8, FO), s.value === t ? (B(), V(z, { key: 0 }, [
+					U("div", BO, [U("span", VO, j(P(X)("debug.request")), 1), W($, {
 						icon: P(Ex),
 						label: P(X)("common.copy"),
 						small: "",
@@ -17016,8 +17015,8 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						"label",
 						"onClick"
 					])]),
-					U("pre", VO, j(c(e.request)), 1),
-					U("div", HO, [U("span", UO, j(P(X)("debug.response")), 1), W($, {
+					U("pre", HO, j(c(e.request)), 1),
+					U("div", UO, [U("span", WO, j(P(X)("debug.response")), 1), W($, {
 						icon: P(Ex),
 						label: P(X)("common.copy"),
 						small: "",
@@ -17028,8 +17027,8 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						"label",
 						"onClick"
 					])]),
-					U("pre", WO, j(e.error ?? c(e.response ?? "")), 1)
-				], 64)) : K("", !0)]))), 128)), P(Yp).requests.length ? K("", !0) : (B(), V("div", GO, j(P(X)("debug.noRequests")), 1))]),
+					U("pre", GO, j(e.error ?? c(e.response ?? "")), 1)
+				], 64)) : K("", !0)]))), 128)), P(Yp).requests.length ? K("", !0) : (B(), V("div", KO, j(P(X)("debug.noRequests")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			W(dC, {
@@ -17048,11 +17047,11 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				default: F(() => [(B(!0), V(z, null, R(g.value, (e, n) => (B(), V("div", {
 					key: n,
 					class: "req"
-				}, [U("div", KO, [
-					U("span", qO, j(e.kind), 1),
+				}, [U("div", qO, [
+					U("span", JO, j(e.kind), 1),
 					t[4] ||= U("span", { class: "grow" }, null, -1),
-					U("span", JO, j(u(e.at)), 1)
-				]), U("pre", YO, j(c(e.data)), 1)]))), 128)), g.value.length ? K("", !0) : (B(), V("div", XO, j(P(X)("debug.noLog")), 1))]),
+					U("span", YO, j(u(e.at)), 1)
+				]), U("pre", XO, j(c(e.data)), 1)]))), 128)), g.value.length ? K("", !0) : (B(), V("div", ZO, j(P(X)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
 			W(dC, {
@@ -17065,56 +17064,56 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				default: F(() => [(B(!0), V(z, null, R(_.value, (e, t) => (B(), V("div", {
 					key: t,
 					class: "req"
-				}, [U("div", ZO, [U("span", QO, "#" + j(e.mesId), 1), U("span", $O, "“" + j(e.quote) + "”", 1)]), U("div", ek, j(e.comment), 1)]))), 128)), _.value.length ? K("", !0) : (B(), V("div", tk, j(P(X)("debug.noOrphans")), 1))]),
+				}, [U("div", QO, [U("span", $O, "#" + j(e.mesId), 1), U("span", ek, "“" + j(e.quote) + "”", 1)]), U("div", tk, j(e.comment), 1)]))), 128)), _.value.length ? K("", !0) : (B(), V("div", nk, j(P(X)("debug.noOrphans")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
 				"icon",
 				"help"
 			]),
-			U("div", nk, "Advanced Preset " + j(P("1.10.0")) + " · " + j(P("2deead37254c61fa")), 1)
+			U("div", rk, "Advanced Preset " + j(P("1.10.0")) + " · " + j(P("3aec8037ce0cd65a")), 1)
 		], 64));
 	}
-}), ik = ["aria-label"], ak = { class: "panel-head" }, ok = { class: "panel-logo" }, sk = { class: "grow" }, ck = { class: "panel-title ellipsis" }, lk = { class: "panel-sub ellipsis" }, uk = {
+}), ak = ["aria-label"], ok = { class: "panel-head" }, sk = { class: "panel-logo" }, ck = { class: "grow" }, lk = { class: "panel-title ellipsis" }, uk = { class: "panel-sub ellipsis" }, dk = {
 	class: "tabs",
 	role: "tablist"
-}, dk = [
+}, fk = [
 	"title",
 	"aria-selected",
 	"onClick"
-], fk = { class: "panel-body scroll" }, pk = /* @__PURE__ */ L({
+], pk = { class: "panel-body scroll" }, mk = /* @__PURE__ */ L({
 	__name: "Panel",
 	setup(e) {
 		let t = [
 			{
 				id: "presets",
 				icon: Yx,
-				view: Rw
+				view: zw
 			},
 			{
 				id: "config",
 				icon: lS,
-				view: CT
+				view: wT
 			},
 			{
 				id: "modules",
 				icon: ix,
-				view: AD
+				view: jD
 			},
 			{
 				id: "writing",
 				icon: Zx,
-				view: zD
+				view: BD
 			},
 			{
 				id: "memory",
 				icon: ox,
-				view: aO
+				view: oO
 			},
 			{
 				id: "debug",
 				icon: sx,
-				view: rk
+				view: ik
 			}
 		], n = q(() => t.find((e) => e.id === pv.tab) ?? t[0]), r = q({
 			get: () => J().enabled,
@@ -17141,10 +17140,10 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				role: "dialog",
 				"aria-label": P(X)("app.name")
 			}, [
-				U("header", ak, [
-					U("div", ok, [W(P(zx))]),
-					U("div", sk, [U("div", ck, j(P(gv) ? P(ef)(P(gv)) : P(X)("app.name")), 1), U("div", lk, j(i.value), 1)]),
-					W(fw, {
+				U("header", ok, [
+					U("div", sk, [W(P(zx))]),
+					U("div", ck, [U("div", lk, j(P(gv) ? P(ef)(P(gv)) : P(X)("app.name")), 1), U("div", uk, j(i.value), 1)]),
+					W(pw, {
 						modelValue: r.value,
 						"onUpdate:modelValue": a[0] ||= (e) => r.value = e,
 						label: P(X)("panel.enabled")
@@ -17157,7 +17156,7 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 						onClick: a[1] ||= (e) => P(pv).panelOpen = !1
 					}, null, 8, ["icon", "label"])
 				]),
-				U("nav", uk, [(B(), V(z, null, R(t, (e) => U("button", {
+				U("nav", dk, [(B(), V(z, null, R(t, (e) => U("button", {
 					key: e.id,
 					type: "button",
 					role: "tab",
@@ -17165,19 +17164,19 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 					title: P(X)(`tab.${e.id}`),
 					"aria-selected": e.id === P(pv).tab,
 					onClick: (t) => P(pv).tab = e.id
-				}, [(B(), H(Gr(e.icon))), U("span", null, j(P(X)(`tab.${e.id}`)), 1)], 10, dk)), 64))]),
-				U("main", fk, [(B(), H(Pr, null, [(B(), H(Gr(n.value.view), { key: n.value.id }))], 1024))])
-			], 8, ik)) : K("", !0)]),
+				}, [(B(), H(Gr(e.icon))), U("span", null, j(P(X)(`tab.${e.id}`)), 1)], 10, fk)), 64))]),
+				U("main", pk, [(B(), H(Pr, null, [(B(), H(Gr(n.value.view), { key: n.value.id }))], 1024))])
+			], 8, ak)) : K("", !0)]),
 			_: 1
 		}));
 	}
-}), mk = { class: "inline-drawer" }, hk = { class: "inline-drawer-toggle inline-drawer-header" }, gk = { class: "inline-drawer-content" }, _k = { class: "flex-container alignItemsCenter spaceBetween" }, vk = {
+}), hk = { class: "inline-drawer" }, gk = { class: "inline-drawer-toggle inline-drawer-header" }, _k = { class: "inline-drawer-content" }, vk = { class: "flex-container alignItemsCenter spaceBetween" }, yk = {
 	class: "checkbox_label flex1",
 	for: "ap_settings_enabled"
-}, yk = { key: 0 }, bk = { class: "text_muted" }, xk = {
+}, bk = { key: 0 }, xk = { class: "text_muted" }, Sk = {
 	key: 1,
 	class: "text_muted"
-}, Sk = /* @__PURE__ */ L({
+}, Ck = /* @__PURE__ */ L({
 	__name: "SettingsDrawer",
 	setup(e) {
 		let t = q({
@@ -17186,8 +17185,8 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 				J().enabled = e, Y();
 			}
 		});
-		return (e, n) => (B(), V("div", mk, [U("div", hk, [U("b", null, j(P(X)("app.name")), 1), n[3] ||= U("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), U("div", gk, [
-			U("div", _k, [U("label", vk, [I(U("input", {
+		return (e, n) => (B(), V("div", hk, [U("div", gk, [U("b", null, j(P(X)("app.name")), 1), n[3] ||= U("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), U("div", _k, [
+			U("div", vk, [U("label", yk, [I(U("input", {
 				id: "ap_settings_enabled",
 				"onUpdate:modelValue": n[0] ||= (e) => t.value = e,
 				type: "checkbox"
@@ -17200,18 +17199,18 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 			}, [n[4] ||= U("i", { class: "fa-solid fa-layer-group" }, null, -1), U("span", null, j(P(X)("panel.open")), 1)], 32)]),
 			n[5] ||= U("hr", null, null, -1),
 			U("h4", null, j(P(X)("settings.preset")), 1),
-			P(gv) ? (B(), V("div", yk, [G(j(P(ef)(P(gv))) + " ", 1), U("span", bk, "v" + j(P(gv).version) + " · " + j(P(_v).config), 1)])) : (B(), V("i", xk, j(P(X)("settings.inactive")), 1))
+			P(gv) ? (B(), V("div", bk, [G(j(P(ef)(P(gv))) + " ", 1), U("span", xk, "v" + j(P(gv).version) + " · " + j(P(_v).config), 1)])) : (B(), V("i", Sk, j(P(X)("settings.inactive")), 1))
 		])]));
 	}
-}), Ck = {
+}), wk = {
 	key: 0,
 	class: "preset-banner"
-}, wk = { class: "preset-banner-text" }, Tk = /* @__PURE__ */ L({
+}, Tk = { class: "preset-banner-text" }, Ek = /* @__PURE__ */ L({
 	__name: "PresetBanner",
 	setup(e) {
-		return (e, t) => P(gv) ? (B(), V("div", Ck, [
+		return (e, t) => P(gv) ? (B(), V("div", wk, [
 			W(P(zx), { class: "preset-banner-icon" }),
-			U("span", wk, j(P(X)("banner.usesAp")), 1),
+			U("span", Tk, j(P(X)("banner.usesAp")), 1),
 			U("button", {
 				type: "button",
 				class: "btn primary",
@@ -17222,14 +17221,14 @@ var zT = ["aria-label"], BT = { class: "um-picker-head" }, VT = { class: "small 
 });
 //#endregion
 //#region src/ui/index.ts
-function Ek() {
+function Dk() {
 	let e = document.getElementById("extensions_settings2") ?? document.getElementById("extensions_settings");
 	if (!e || e.querySelector("#advanced_preset_settings")) return;
 	let t = document.createElement("div");
-	t.id = "advanced_preset_settings", e.append(t), ps(Sk).mount(t);
+	t.id = "advanced_preset_settings", e.append(t), ps(Ck).mount(t);
 }
-function Dk() {
-	Gv("ap-stages", BS, ["mesid"]), Gv("ap-cards", iw, ["mesid"]), Gv("ap-top-cards", iw, ["mesid", "position"]), Gv("ap-dock", lw), Gv("ap-panel", pk), Gv("ap-preset-banner", Tk), Uv(), hv();
+function Ok() {
+	Gv("ap-stages", BS, ["mesid"]), Gv("ap-cards", aw, ["mesid"]), Gv("ap-top-cards", aw, ["mesid", "position"]), Gv("ap-dock", uw), Gv("ap-panel", mk), Gv("ap-preset-banner", Ek), Uv(), hv();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.OAI_PRESET_CHANGED_AFTER,
@@ -17237,13 +17236,13 @@ function Dk() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, hv);
-	Kb(), Ek(), Ib(), wb();
+	Kb(), Dk(), Ib(), wb();
 }
 //#endregion
 //#region src/index.ts
-var Ok = {
+var kk = {
 	version: "1.10.0",
-	buildId: "2deead37254c61fa",
+	buildId: "3aec8037ce0cd65a",
 	nextGeneration: (e) => op(e),
 	listPresets: () => Vd().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -17258,21 +17257,21 @@ var Ok = {
 	},
 	annotations: __
 };
-globalThis.advancedPresetInterceptor = mh, window.AdvancedPreset = Ok;
-function kk(e, t) {
+globalThis.advancedPresetInterceptor = mh, window.AdvancedPreset = kk;
+function Ak(e, t) {
 	let n;
 	return (...r) => {
 		clearTimeout(n), n = setTimeout(() => e(...r), t);
 	};
 }
-async function Ak() {
+async function jk() {
 	for (let { preset: e } of Vd()) try {
 		await ep(e);
 	} catch (t) {
 		console.error("[AP] carrier sync failed", e.id, t);
 	}
 }
-async function jk() {
+async function Mk() {
 	let { eventSource: t, eventTypes: n } = e();
 	J(), e_(), Y_(), Dv(), g_(), await i(), await zd();
 	for (let { preset: e } of Vd()) {
@@ -17285,23 +17284,23 @@ async function jk() {
 	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => ph(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => t_(e)), c_(), t.on(n.MESSAGE_RECEIVED, (e, t) => d_(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		_p.setPending(null), _p.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => _p.sweep());
-	let r = kk(() => {
+	let r = Ak(() => {
 		let e = Yf(), t = e ? Gd(e) : void 0;
 		t && ip(t);
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, r), t.on(n.OAI_PRESET_CHANGED_AFTER, r);
 	let a = async () => {
-		await Ak(), (async () => {
+		await jk(), (async () => {
 			for (let { preset: e } of Vd()) await I_(e);
 		})(), o_({ reload: !0 }), U_(), x_();
 	};
-	t.on(n.APP_READY, () => void a()), Dk(), Zp("init", {
+	t.on(n.APP_READY, () => void a()), Ok(), Zp("init", {
 		version: "1.10.0",
-		build: "2deead37254c61fa",
+		build: "3aec8037ce0cd65a",
 		enabled: J().enabled
 	});
 }
-var Mk = S_, Nk = bb;
-jk().catch((e) => console.error("[AP] init failed", e));
+var Nk = S_, Pk = bb;
+Mk().catch((e) => console.error("[AP] init failed", e));
 //#endregion
-export { Mk as advancedPresetOnUpdate, Nk as advancedPresetRegisterChatSurface };
+export { Nk as advancedPresetOnUpdate, Pk as advancedPresetRegisterChatSurface };

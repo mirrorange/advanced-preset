@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Status bar (I-136) above the story: date · weekday · time, location, weather in one quiet line; the pencil edits it. */
+/** Status bar (I-136) above the story: date · weekday · time, location, weather in one quiet line; the pencil, pinned top-right like the synopsis card, edits it. */
 import { computed, nextTick, reactive, ref, type Component } from 'vue';
 import { STATUS_FIELDS, type StatusBar } from '@advanced-preset/protocol';
 import { CalendarDays, Check, Clock, Cloud, CloudFog, CloudLightning, CloudRain, CloudSun, MapPin, Moon, Pencil, Snowflake, Sun, Wind } from 'lucide-vue-next';
@@ -68,11 +68,13 @@ const ICONS: Record<keyof StatusBar, Component> = { date: CalendarDays, weekday:
     </div>
   </form>
   <div v-else class="status-bar small" role="status">
-    <span v-if="when" class="row tight"><CalendarDays class="faint" />{{ when }}</span>
-    <span v-if="value('time')" class="row tight"><Clock class="faint" />{{ value('time') }}</span>
-    <span v-if="value('location')" class="row tight status-location"><MapPin class="faint" /><span class="ellipsis">{{ value('location') }}</span></span>
-    <span v-if="value('weather')" class="row tight"><component :is="weatherIcon" class="faint" />{{ value('weather') }}</span>
-    <span v-if="editable" class="synopsis-edit status-edit" @click.stop>
+    <div class="status-line">
+      <span v-if="when" class="row tight"><CalendarDays class="faint" />{{ when }}</span>
+      <span v-if="value('time')" class="row tight"><Clock class="faint" />{{ value('time') }}</span>
+      <span v-if="value('location')" class="row tight status-location"><MapPin class="faint" /><span class="ellipsis">{{ value('location') }}</span></span>
+      <span v-if="value('weather')" class="row tight"><component :is="weatherIcon" class="faint" />{{ value('weather') }}</span>
+    </div>
+    <span v-if="editable" class="synopsis-edit" @click.stop>
       <IconButton :icon="Pencil" :label="t('cards.status.edit')" small align="end" @click="startEdit" />
     </span>
   </div>

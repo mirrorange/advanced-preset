@@ -96,12 +96,13 @@
 
 /* Status bar (I-136): one quiet line above the story. */
 .status-bar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); padding: 3px var(--ap-space-3); color: var(--ap-muted);
+  display: flex; align-items: flex-start; gap: var(--ap-space-2); padding: 3px var(--ap-space-3); color: var(--ap-muted);
   border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface);
 }
-.status-bar > .row { max-width: 100%; }
+/* Fields wrap on their own line box; the pencil stays pinned top-right (same as .synopsis-head). */
+.status-line { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); min-width: 0; }
+.status-line > .row { max-width: 100%; }
 .status-location { min-width: 0; overflow: hidden; }
-.status-edit { margin: -2px -6px -2px auto; }
 .status-bar:hover .synopsis-edit { opacity: 1; }
 .status-editor {
   display: flex; flex-direction: column; gap: 6px; padding: var(--ap-space-2) var(--ap-space-3); font-size: var(--ap-font-size-sm);
