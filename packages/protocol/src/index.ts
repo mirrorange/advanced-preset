@@ -4,6 +4,7 @@ export * from './macros';
 export * from './tags';
 export * from './structures';
 export * from './workflow';
+export * from './layout';
 export * from './turn';
 export * from './patch';
 export * from './meta';
