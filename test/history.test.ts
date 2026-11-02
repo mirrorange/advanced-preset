@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultVars, resolveConfiguration } from '@advanced-preset/protocol';
+import { assemble, defaultVars, resolveConfiguration, type Transport } from '@advanced-preset/protocol';
 import { formatSynopsis, historyEchoes, rewriteHistory, type HistoryItem, type RewriteOptions } from '@/core/history';
 import { petals, synopsisEchoes } from './helpers';
 
@@ -101,14 +101,43 @@ describe('history: token saving user input', () => {
   });
 });
 
-describe('history: Petals synopsis options', () => {
-  it('keeps the last 3 synopses while event synopsis is on, and removes older input by default', () => {
-    const config = resolveConfiguration(petals, petals.defaultConfiguration, {});
+describe('history: Petals structure history', () => {
+  const config = resolveConfiguration(petals, petals.defaultConfiguration, {});
+  const rules = (c: typeof config, transport: Transport) =>
+    Object.fromEntries((historyEchoes(petals, c, defaultVars(petals, c, { transport }), petals.workflows[0])?.rules ?? []).map((r) => [r.id, r]));
+
+  it('removes older input by default; synopsis (3) and status (1) are carried in plaintext / prefill', () => {
     expect(config.tokenSaving.userInput).toBe('remove');
-    const rule = (c: typeof config) => historyEchoes(petals, c, defaultVars(petals, c), petals.workflows[0])?.rules.find((r) => r.id === 'synopsis');
-    expect(rule(config)?.depth).toBe(3);
-    expect(rule(config)?.active).toBe(true);
-    const off = { ...config, modules: { ...config.modules, 'event-synopsis': false } };
-    expect(rule(off)?.active).toBe(false);
+    expect(config.modules['status-bar']).toBe(true);
+    for (const t of ['plaintext', 'prefill'] as const) {
+      const r = rules(config, t);
+      expect([r.synopsis?.active, r.synopsis?.depth, r.status?.active, r.status?.depth]).toEqual([true, 3, true, 1]);
+      expect(r.status!.pieces[0]!.rank).toBe(-1);
+      expect(r.synopsis!.pieces[0]!.rank).toBe(1);
+    }
+  });
+
+  it('other transports carry the synopsis only while the status bar is off, and never the status', () => {
+    for (const t of ['structured', 'tool-single', 'tool-multi'] as const) {
+      expect([rules(config, t).synopsis?.active, rules(config, t).status?.active]).toEqual([false, false]);
+      const off = { ...config, modules: { ...config.modules, 'status-bar': false } };
+      expect([rules(off, t).synopsis?.active, rules(off, t).status?.active]).toEqual([true, false]);
+    }
+    const noSynopsis = { ...config, modules: { ...config.modules, 'event-synopsis': false } };
+    expect(rules(noSynopsis, 'plaintext').synopsis?.active).toBe(false);
+  });
+
+  it('sends the previous status as an input-region message before the input, outside plaintext / prefill', () => {
+    const workflow = petals.workflows.find((w) => w.id === 'linear')!;
+    const data = { customLast: { status: 'Day2 Mon 08:00 | Home | Rain' }, inputText: 'hello' };
+    const input = (transport: Transport, last: boolean) =>
+      assemble({ preset: petals, config, vars: defaultVars(petals, config, { transport, input: { shaped: true }, last: { status: last } }), data }, workflow).regions.input!.map((m) => m.content);
+    expect(input('structured', true)).toEqual(['<previous_status>\nDay2 Mon 08:00 | Home | Rain\n</previous_status>', '<input>\nhello\n</input>']);
+    expect(input('tool-multi', true)[0]).toMatch(/^<previous_status>/);
+    expect(input('structured', false)).toEqual(['<input>\nhello\n</input>']);
+    expect(input('plaintext', true)).toEqual(['<input>\nhello\n</input>']);
+    const guidelines = assemble({ preset: petals, config, vars: defaultVars(petals, config, { transport: 'structured' }), data }, workflow).regions.guidelines!.map((m) => m.content).join('\n');
+    expect(guidelines).toMatch(/## Status Bar/);
+    expect(guidelines).not.toMatch(/Previous status/);
   });
 });

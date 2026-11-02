@@ -132,6 +132,7 @@ describe('structure history: rewriting', () => {
 
   it('keeps legacy synopsis history output byte for byte', () => {
     const p = cloneData(petals);
+    delete p.structures.status!.history;
     p.structures.synopsis!.history = 1;
     p.structures.synopsis!.historyTemplate = '{{content}} | {{time}}';
     const items = chat(2);
