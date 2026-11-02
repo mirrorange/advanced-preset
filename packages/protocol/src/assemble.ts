@@ -13,6 +13,7 @@ import { activeStages, stageFieldName, stageToolName, workflowSummary } from './
 import { turnLayout, type TurnLayout } from './layout';
 import { DEFAULT_LIST_SEPARATOR, isParamUnset, paramValue, paramValues } from './params';
 import { computeBuildVars, formatVar, plainBuildVars, type BuildVars } from './build-vars';
+import { MAIN_STORYLINE_VARS, type StorylineVars } from './storylines';
 
 export interface Message {
   role: Role;
@@ -40,6 +41,8 @@ export interface Vars {
   input: { shaped: boolean };
   /** `last.<id>`: a custom / status structure has an earlier value in the chat (what `{{ap::structure::<id>::last}}` shows, I-139). */
   last: Record<string, boolean>;
+  /** `storyline.*`: the storyline this turn continues (presets with `storylines`; otherwise the main storyline). */
+  storyline: StorylineVars;
 }
 
 export function resolverOf(vars: Vars): Resolver {
@@ -62,6 +65,8 @@ export interface MacroData {
   recap?: string;
   recentMeta?: string;
   customLast?: Record<string, string>;
+  /** `{{ap::storyline}}` (current storyline) and `{{ap::storyline::main}}` (main storyline) names. */
+  storyline?: { name: string; main: string };
 }
 
 /** Whether an exclusive set may be left with no module selected (`groups[set].allowNone`). */
@@ -202,6 +207,7 @@ export function createMacroResolver(input: AssemblyInput, stages: Stage[], workf
       case 'recap': return data.recap ?? '';
       case 'recent_meta': return data.recentMeta ?? '';
       case 'var': return readVar(a!, b);
+      case 'storyline': return a === 'main' ? data.storyline?.main ?? '' : data.storyline?.name ?? vars.storyline?.name ?? '';
       default: return undefined;
     }
   };
@@ -346,6 +352,7 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     recap: { present: false },
     input: { shaped: false },
     last: {},
+    storyline: { ...MAIN_STORYLINE_VARS },
     ...over,
   };
 }

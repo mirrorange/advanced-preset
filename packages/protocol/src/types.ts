@@ -8,6 +8,7 @@
 import type { Expr } from './expr';
 import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
 import type { InputShaping } from './input-shaping';
+import type { StorylineConfig, StorylinesDecl } from './storylines';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -469,6 +470,8 @@ export interface Configuration {
   cache: CacheConfig;
   /** `enabled: false` turns meta-instruction handling off (input is plain story text). */
   meta: { enabled: boolean; recentCount: number };
+  /** Storylines switch; only present when the preset declares `storylines`. */
+  storylines?: StorylineConfig;
 }
 
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
@@ -545,6 +548,8 @@ export interface APreset {
    * `{{ap::input::text}}`. Only when the last chat message is the user's.
    */
   inputShaping?: InputShaping;
+  /** Storylines (absent = the preset does not support them): separators of the storyline groups in the history. */
+  storylines?: StorylinesDecl;
 
   params: Param[];
   groups: Record<string, Group>;
