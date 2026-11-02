@@ -10651,6 +10651,11 @@ function validate(p, map, diag) {
     const ref = o === void 0 || typeof o === "number" ? void 0 : "before" in o ? o.before : o.after;
     if (ref !== void 0 && ref !== CONTENT_STAGE_REF && !stageIds.has(ref)) diag.warn(`structure ${s.id}: order refers to unknown stage \`${ref}\` (no workflow declares it)`, { file: M, path: `structures.${s.id}.order` });
   }
+  for (const s of Object.values(p.structures)) {
+    const err = s.ui?.template !== void 0 ? checkTemplate(s.ui.template) : null;
+    if (err) diag.error(`structure ${s.id}: ui.template: ${err.message}${err.line ? ` (template line ${err.line})` : ""}`, { file: M, path: `structures.${s.id}.ui.template` });
+    if (s.ui?.module !== void 0 && !/\bexport\b/.test(s.ui.module)) diag.warn(`structure ${s.id}: ui.module exports nothing (expected \`export function mount(root, context)\`)`, { file: M, path: `structures.${s.id}.ui.module` });
+  }
   for (const w of p.workflows) {
     for (const sid of Object.keys(w.structureOrder ?? {})) {
       const where = map.workflows.get(w.id) ?? {};

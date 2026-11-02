@@ -114,12 +114,12 @@ describe('preset-defined tool texts', () => {
     expect(names).toEqual(['start_workflow', 'ask_questions', 'give_creative_input', 'write_story', 'review_story', 'edit_story']);
     expect(names.some((n: string) => n.startsWith('ap_'))).toBe(false);
     const write = (multi.driver.body(0) as any).tools.find((t: any) => t.function.name === 'write_story').function;
-    expect(Object.keys(write.parameters.properties)).toEqual(['story', 'z_synopsis', 'z_options']);
+    expect(Object.keys(write.parameters.properties)).toEqual(['4_story', '5_synopsis', '6_options']);
     expect(write.description).toContain('Freesia');
     const st = driverFor('structured', 'linear');
     const js = (st.driver.body(0) as any).json_schema;
     expect(js.name).toBe('petals_workflow');
-    expect(Object.keys(js.value.properties).slice(0, 3)).toEqual(['step1_questions', 'step2_creative_input', 'step3_story']);
+    expect(Object.keys(js.value.properties).slice(0, 4)).toEqual(['1_questions', '2_creative_input', '3_status', '4_story']);
   });
 
   it('structured: schema name, description and field names come from the preset', () => {
@@ -128,7 +128,10 @@ describe('preset-defined tool texts', () => {
     expect(js.name).toBe('demo_turn');
     expect(js.description).toBe('Turn of Freesia');
     const keys = Object.keys(js.value.properties);
-    expect(keys.slice(0, ctx.stages.length)).toEqual(ctx.stages.map((s, i) => `${s.id}_${i + 1}`));
+    const stageKeys = ctx.stages.map((s, i) => `${s.id}_${i + 1}`);
+    expect(keys.filter((k) => stageKeys.includes(k))).toEqual(stageKeys);
+    // Petals' status structure sits right before the content stage (I-136).
+    expect(keys.indexOf('status')).toBe(keys.indexOf(stageKeys.at(-1)!) - 1);
     expect(js.value.properties[keys[0]!].description).toBe(`${ctx.stages[0]!.label}!`);
     const r = read({ text: JSON.stringify(turnObject(ctx)) });
     driver.progress(r, true);
