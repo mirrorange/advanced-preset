@@ -8,9 +8,10 @@ import { activeCarrierPresetId } from '@/store/carrier';
 import { currentRecap } from '@/store/eventlog';
 import { settings } from '@/store/settings';
 import { st, type STMessage } from '@/st/host';
-import { classify, metaTrigger } from './classify';
+import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
-import { annotationHistory, rewriteHistory, synopsisOptions } from './history';
+import { annotationHistory, historyEchoes, rewriteHistory, synopsisOptions } from './history';
+import { buildVarsAndData } from './assembler';
 import { keywordTexts } from '@/store/user-modules';
 import { detachRegeneratingSidecar } from '@/store/sidecar';
 import { cacheState, currentChatKey } from '@/store/cache-state';
@@ -42,15 +43,20 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     const i = real.findIndex((r) => r.send_date === m.send_date && r.is_user === m.is_user && r.name === m.name);
     return i;
   });
+  // Condition variables as far as they are known before assembly (structure history conditions, I-139).
+  const transport = config.connection.transport;
+  const { vars } = buildVarsAndData({ preset, config, transport, origin, stType, meta, flags }, pickWorkflow(preset, config, origin));
   const rewriteOptions = {
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
     tokenSaving: config.tokenSaving,
-    ...synopsisOptions(preset, config),
+    ...synopsisOptions(preset),
+    echoes: historyEchoes(preset, config, vars, pickWorkflow(preset, config, 'story')),
     recap: currentRecap(),
     realIndex: (i: number) => realIndexOf[i] ?? -1,
     currentInput,
     annotations: annotationHistory(preset, config),
+    continuing: stType === 'continue' && chat[last] && !chat[last]!.is_user ? last : undefined,
   };
   // Cache optimization: hand ST the sticky rendering with a marker; PROMPT_READY picks the final one.
   let sticky: GenerationContext['sticky'];
@@ -93,7 +99,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     dryRun: false,
     meta,
     flags,
-    transport: config.connection.transport,
+    transport,
     stages: [],
     structures: [],
     inputIndex: currentInput >= 0 ? (realIndexOf[currentInput] ?? real.length - 1) : -1,

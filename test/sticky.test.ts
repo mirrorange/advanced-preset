@@ -5,7 +5,7 @@ import type { HistoryItem, RewriteOptions } from '@/core/history';
 import { applySticky, commitCache, stripMarkers } from '@/core/sticky';
 import { cacheState, clearCacheState, resetCacheStateMemory } from '@/store/cache-state';
 import type { ChatMessage } from '@/st/host';
-import { ctxFor } from './helpers';
+import { ctxFor, synopsisEchoes } from './helpers';
 
 let settings: Record<string, unknown>;
 beforeEach(() => {
@@ -24,7 +24,7 @@ const chat = (n: number) => { const out: HistoryItem[] = []; for (let i = 1; i <
 const options = (items: HistoryItem[]): RewriteOptions => ({
   trigger: '', wrap: true,
   tokenSaving: { enabled: false, keepFullTurns: 2, truncateUserAfter: 0, userInput: 'keep' },
-  synopsisTemplate: '[{{time}}] {{event}}', synopsisId: 'synopsis', synopsisHistory: { depth: 2, template: '{{content}} <{{time}}>' },
+  synopsisTemplate: '[{{time}}] {{event}}', synopsisId: 'synopsis', echoes: synopsisEchoes(2, '{{content}} <{{time}}>'),
   recap: null, realIndex: (i) => i, currentInput: items.length - 1,
 });
 

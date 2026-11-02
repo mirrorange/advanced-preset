@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { assemble, cloneData, defaultVars, resolveConfiguration, upgradeArtifact, type APreset, type Transport } from '@advanced-preset/protocol';
+import { assemble, cloneData, defaultVars, historyEchoOf, historyPlacement, resolveConfiguration, upgradeArtifact, type APreset, type StructureDecl, type Transport } from '@advanced-preset/protocol';
+import type { HistoryEchoes } from '@/core/history';
 import type { GenerationContext } from '@/core/context';
 
 /** A copy of a preset with every `@template` piece of its entries removed (for "no code" cases). */
@@ -37,4 +38,14 @@ export function sseResponse(body: string): Response {
     start(c) { for (let i = 0; i < bytes.length; i += 7) c.enqueue(bytes.slice(i, i + 7)); c.close(); },
   });
   return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
+}
+
+/** Structure history of a legacy synopsis declaration (`history: depth` + `historyTemplate` with `{{content}}`). */
+export function synopsisEchoes(depth: number, template: string, id = 'synopsis'): HistoryEchoes {
+  const decl = { id, kind: 'synopsis', tag: id, field: id, formatPrompt: { tag: '', field: '' }, history: depth, historyTemplate: template } as StructureDecl;
+  const e = historyEchoOf(decl)!;
+  return {
+    rules: [{ id, kind: 'synopsis', depth, active: true, pieces: e.pieces.map((p) => ({ template: p.template, ...historyPlacement(undefined, decl, p.position), ...(p.raw ? { raw: true } : {}) })) }],
+    contentKey: 0,
+  };
 }

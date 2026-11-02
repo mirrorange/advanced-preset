@@ -3,6 +3,7 @@ import type { Synopsis } from '@advanced-preset/protocol';
 import { getSidecar, withStructure, type Sidecar } from '@/store/sidecar';
 import { setStructure } from '@/ui/actions';
 import { rewriteHistory, type HistoryItem } from '@/core/history';
+import { synopsisEchoes } from './helpers';
 
 const synopsis: Synopsis = { time: 'Dusk', location: 'Harbor', event: 'Arrival', summary: 'The ship docks.' };
 const sidecar = (): Sidecar => ({
@@ -59,7 +60,7 @@ describe('setStructure', () => {
     const items = [msg, { is_user: true, mes: 'next' }] as HistoryItem[];
     const out = rewriteHistory(items, {
       trigger: '', wrap: true, tokenSaving: { enabled: false, keepFullTurns: 2, truncateUserAfter: 5, userInput: 'truncate' },
-      synopsisTemplate: '{{event}}', synopsisId: 'synopsis', synopsisHistory: { depth: 1, template: '{{content}} [{{time}}] {{event}}' },
+      synopsisTemplate: '{{event}}', synopsisId: 'synopsis', echoes: synopsisEchoes(1, '{{content}} [{{time}}] {{event}}'),
       recap: null, realIndex: (i) => i, currentInput: 1,
     });
     expect(out[0]!.mes).toBe('Story [Dusk] Edited event');

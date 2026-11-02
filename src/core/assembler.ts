@@ -17,7 +17,7 @@ import { settings } from '@/store/settings';
 import { keywordTexts, userModules } from '@/store/user-modules';
 import { classify, metaEnabled, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
-import { alignHistory, annotationHistory, rewriteHistory, synopsisOptions, type HistoryItem } from './history';
+import { alignHistory, annotationHistory, historyEchoes, rewriteHistory, synopsisOptions, type HistoryItem } from './history';
 import { debugLog } from './debug';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { applySticky, stripMarkers, type CacheReport } from './sticky';
@@ -82,8 +82,12 @@ function customLast(preset: APreset): Record<string, string> {
   return out;
 }
 
-export function buildVarsAndData(ctx: GenerationContext, workflow: Workflow | undefined): { vars: Vars; data: MacroData } {
+/** What the condition variables of a request depend on (the interceptor has it before the context exists). */
+export type VarsSource = Pick<GenerationContext, 'preset' | 'config' | 'transport' | 'origin' | 'stType' | 'meta' | 'flags' | 'inputShaped'>;
+
+export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined): { vars: Vars; data: MacroData } {
   const { preset, config } = ctx;
+  const last = customLast(preset);
   const mem = chatMemory();
   const gmem = globalMemory(presetState(preset));
   const recap = currentRecap();
@@ -100,13 +104,14 @@ export function buildVarsAndData(ctx: GenerationContext, workflow: Workflow | un
     memory: { hasChat: Object.keys(mem).length > 0, hasGlobal: Object.keys(gmem).length > 0 },
     recap: { present: Boolean(recap) },
     input: { shaped: Boolean(ctx.inputShaped) },
+    last: Object.fromEntries(Object.values(preset.structures).filter((x) => x.kind === 'custom' || x.kind === 'status').map((x) => [x.id, x.id in last])),
   });
   const data: MacroData = {
     metaText: ctx.meta.segments.join('\n\n'),
     memory: { chat: mem, global: gmem },
     recap: recap?.text ?? '',
     recentMeta: recent,
-    customLast: customLast(preset),
+    customLast: last,
     // The text is only known once the history is final: a slot, filled in after the cache step.
     inputText: ctx.inputShaped ? INPUT_SLOT : '',
   };
@@ -135,7 +140,8 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
     tokenSaving: config.tokenSaving,
-    ...synopsisOptions(preset, config),
+    ...synopsisOptions(preset),
+    echoes: historyEchoes(preset, config, buildVarsAndData(ctx, pickWorkflow(preset, config, ctx.origin)).vars, pickWorkflow(preset, config, 'story')),
     recap: currentRecap(),
     realIndex: (i: number) => real[i] ?? -1,
     currentInput: -1,

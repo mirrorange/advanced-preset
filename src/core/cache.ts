@@ -85,7 +85,7 @@ export function stickyRewrite(items: HistoryItem[], o: RewriteOptions, prev: Rec
   for (const p of planHistory(items, o)) {
     if (!p.fresh) { out.push({ item: p.item, index: p.index }); continue; }
     const key = keyOf(p.index);
-    const kept = p.forced ? undefined : decodeMode(prev?.[key]);
+    const kept = p.forced ? undefined : decodeMode(prev?.[key], o.synopsisId);
     const stickyMode = kept ?? p.fresh;
     const fresh = renderItem(p, p.fresh, o);
     const sticky = kept ? renderItem(p, stickyMode, o) : fresh;
