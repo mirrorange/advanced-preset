@@ -66,6 +66,6 @@ describe('storyline vars and macros', () => {
     const plain = upgradeArtifact(JSON.parse(JSON.stringify(base)))!;
     expect('storylines' in plain.configurationDefaults).toBe(false);
     const decl = upgradeArtifact(JSON.parse(JSON.stringify({ ...base, storylines: { separator: 's {{storyline}}', mainSeparator: 'm' } })))!;
-    expect(decl.configurationDefaults.storylines).toEqual({ enabled: true });
+    expect(decl.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: true });
   });
 });

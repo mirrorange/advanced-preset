@@ -1085,11 +1085,11 @@ describe('storylines', () => {
     expect(on.diag.errors).toEqual([]);
     expect(messages(on)).not.toMatch(/storyline/i);
     expect(on.preset!.storylines).toEqual({ separator: '<!-- Start of Storyline {{storyline}} -->', mainSeparator: '<!-- Start of the main storyline -->' });
-    expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true });
+    expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: true });
     const custom = build(withStorylines('storylines: { separator: "[{{storyline}}]" }\nconfigurationDefaults: { storylines: { enabled: false } }\n'));
     expect(custom.diag.errors).toEqual([]);
     expect(custom.preset!.storylines).toEqual({ separator: '[{{storyline}}]', mainSeparator: '<!-- Start of the main storyline -->' });
-    expect(custom.preset!.configurationDefaults.storylines).toEqual({ enabled: false });
+    expect(custom.preset!.configurationDefaults.storylines).toEqual({ enabled: false, freezeVariables: true });
   });
 
   it('flags bad declarations, undeclared use and old AP versions', () => {

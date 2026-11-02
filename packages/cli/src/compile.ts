@@ -772,7 +772,7 @@ export function compile(tree: SourceTree): CompileResult {
     for (const [k, v] of Object.entries(c)) {
       const where = { file: M, path: `${path}.${k}` };
       if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
-      else if (typeof v !== 'boolean') diag.error('`enabled` must be a boolean', where);
+      else if (typeof v !== 'boolean') diag.error(`\`${k}\` must be a boolean`, where);
     }
   };
   if (isObj(cd.storylines)) checkStorylines(cd.storylines, 'configurationDefaults.storylines');

@@ -6,6 +6,8 @@
  *
  * A preset opts in with `storylines` (separators placed before each storyline's group of history
  * messages); users have a switch in the configuration (`Configuration.storylines.enabled`).
+ * `freezeVariables`: turns on storylines other than the main one leave the variables of variable
+ * systems (MVU, Tavern Helper chat / message variables) as they were.
  */
 
 export interface StorylinesDecl {
@@ -23,9 +25,11 @@ export const DEFAULT_STORYLINES: StorylinesDecl = {
 /** User switch (configuration layer). */
 export interface StorylineConfig {
   enabled: boolean;
+  /** Turns on other storylines do not update MVU / Tavern Helper variables (I-154). */
+  freezeVariables: boolean;
 }
 
-export const STORYLINE_CONFIG_DEFAULTS: StorylineConfig = { enabled: true };
+export const STORYLINE_CONFIG_DEFAULTS: StorylineConfig = { enabled: true, freezeVariables: true };
 
 /** First Advanced Preset version with storylines (older versions ignore `storylines` and leave the tags in the text). */
 export const STORYLINES_SINCE = '1.10.0';

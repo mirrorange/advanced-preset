@@ -8548,7 +8548,7 @@ var DEFAULT_STORYLINES = {
   separator: "<!-- Start of Storyline {{storyline}} -->",
   mainSeparator: "<!-- Start of the main storyline -->"
 };
-var STORYLINE_CONFIG_DEFAULTS = { enabled: true };
+var STORYLINE_CONFIG_DEFAULTS = { enabled: true, freezeVariables: true };
 var STORYLINES_SINCE = "1.10.0";
 var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false };
 var isIfName = (name) => /^if/i.test(name);
@@ -10123,7 +10123,7 @@ function compile(tree) {
     for (const [k, v] of Object.entries(c)) {
       const where = { file: M, path: `${path}.${k}` };
       if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
-      else if (typeof v !== "boolean") diag.error("`enabled` must be a boolean", where);
+      else if (typeof v !== "boolean") diag.error(`\`${k}\` must be a boolean`, where);
     }
   };
   if (isObj4(cd.storylines)) checkStorylines(cd.storylines, "configurationDefaults.storylines");
