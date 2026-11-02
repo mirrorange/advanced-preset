@@ -6,7 +6,7 @@
   "author": "mirrorange",
   "description": "Write stories with Freesia! Freesia writes, Petals gives suggestions — a dual-character driven workflow.",
   "minAdvancedPreset": "1.10.0",
-  "hash": "f65fbcd69b820ba9",
+  "hash": "3c546f1ff3cba65a",
   "actors": {
     "narrator": {
       "name": "Freesia",
@@ -126,6 +126,10 @@
   "inputShaping": {
     "mode": "extract",
     "template": "<input>\n{{content}}\n</input>"
+  },
+  "storylines": {
+    "separator": "<!-- Start of Storyline {{storyline}} -->",
+    "mainSeparator": "<!-- Start of the main storyline -->"
   },
   "params": [
     {
@@ -404,7 +408,7 @@
       "structures": [],
       "vars": [],
       "source": "modules/core/context.md",
-      "description": "Story recap, recent meta conversations, memories and the latest input supplied by Advanced Preset."
+      "description": "Story recap, recent meta conversations, the current storyline, memories and the latest input supplied by Advanced Preset."
     },
     {
       "id": "role-freesia",
@@ -2106,7 +2110,7 @@
         {
           "pieces": [
             {
-              "text": "## Status Bar\n\nBefore writing the story content, {{ap::name::narrator}} records where and when this story segment begins. It is shown to the reader as a status bar above the story:\n\n- **Date:** The story date as `MM-dd` (or the story's own calendar). If no specific dates are given, use relative day notation: `Day1`, `Day2`…\n- **Weekday:** The day of the week; leave it empty when the setting has no weeks.\n- **Time:** `HH:mm`, or a period of the day (dawn, dusk…) when no clock fits.\n- **Location:** The current scene or setting, in a few words.\n- **Weather:** The current weather in a few words (or the indoor atmosphere).\n\nContinue from the previous status and the story so far: time only moves forward, and the date, weekday and weather stay consistent unless the story changes them.\n\n### Format\n\n{{ap::structure::status}}\n\n"
+              "text": "## Status Bar\n\nBefore writing the story content, {{ap::name::narrator}} records where and when this story segment begins. It is shown to the reader as a status bar above the story:\n\n- **Date:** The story date as `MM-dd` (or the story's own calendar). If no specific dates are given, use relative day notation: `Day1`, `Day2`…\n- **Weekday:** Day of the week.\n- **Time:** Time as `HH:mm`.\n- **Location:** The current scene or setting, in a few words.\n- **Weather:** The current weather in a few words (or the indoor atmosphere).\n\n### Format\n\n{{ap::structure::status}}\n\n"
             }
           ]
         }
@@ -2246,6 +2250,55 @@
           ]
         }
       ]
+    },
+    {
+      "id": "context/storyline",
+      "module": "context",
+      "region": "history",
+      "order": 50,
+      "content": [
+        {
+          "pieces": [
+            {
+              "text": "<storyline>\nThis chat has more than one storyline. The chat history is grouped by storyline: each group opens with a `Start of Storyline …` marker, and the main storyline's group with `Start of the main storyline`. The other storylines come first; the storyline being written comes last.\n\n"
+            },
+            {
+              "text": "Current storyline: \"{{ap::storyline}}\", an if-line — an alternate \"what if\" branching off the main storyline. Its events never happen in the main storyline or in any other storyline, and they may contradict them.\n",
+              "when": {
+                "t": "var",
+                "path": "storyline.if"
+              }
+            },
+            {
+              "text": "Current storyline: \"{{ap::storyline}}\", a side story set in the same world as the main storyline. Its events are real for the main storyline as well, so keep them consistent with it.\n",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "var",
+                  "path": "storyline.if"
+                }
+              }
+            },
+            {
+              "text": "This storyline starts now: open it from {{ap::name::user}}'s input and make clear when and where it takes place relative to the main storyline.\n",
+              "when": {
+                "t": "var",
+                "path": "storyline.new"
+              }
+            },
+            {
+              "text": "Write only the current storyline. Do not advance the main storyline or other storylines, and do not carry their scenes into this one.\n</storyline>\n\n"
+            }
+          ]
+        }
+      ],
+      "when": {
+        "t": "not",
+        "e": {
+          "t": "var",
+          "path": "storyline.main"
+        }
+      }
     },
     {
       "id": "context/recap",
@@ -3992,8 +4045,8 @@
       "description": "Where and when this story segment begins, shown as a status bar above the story.",
       "properties": {
         "date": "Story date as `MM-dd` (or the story's own calendar); `DayN` when the story gives no dates.",
-        "weekday": "Day of the week; empty when the setting has no weeks.",
-        "time": "Time as `HH:mm`, or a period of the day (dawn, dusk) when no clock fits.",
+        "weekday": "Day of the week.",
+        "time": "Time as `HH:mm`.",
         "location": "Current scene or setting, a few words.",
         "weather": "Current weather in a few words (or the indoor atmosphere)."
       },
@@ -4648,6 +4701,9 @@
     "meta": {
       "enabled": true,
       "recentCount": 3
+    },
+    "storylines": {
+      "enabled": true
     }
   },
   "configurations": [
