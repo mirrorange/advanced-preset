@@ -54,6 +54,7 @@
 | `recap.present` | 有没有剧情总结 | 同上 |
 | `input.shaped` | 本次输入是否被[整形](09-built-in-features.md#用户输入整形)（包裹或提取） | 只在有本次输入时放 `<input>` 标签 |
 | `chat.group` | 是否是群聊 | 群聊专用规则 |
+| `storyline.main` / `storyline.if` / `storyline.new` / `storyline.name` | 当前是主线 / 是 if 线 / 新开的线 / 故事线名称（需声明[故事线](09-built-in-features.md#故事线)） | 告诉模型正在写哪条线 |
 
 ## 用 `@if` 控制一小段
 
