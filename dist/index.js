@@ -9845,7 +9845,7 @@ function Bg(e) {
 }
 async function Vg() {
 	let e = await zg();
-	e && e !== "13d23d3684ef7bcd" && sessionStorage.getItem(Rg) !== e && Bg(e);
+	e && e !== "c7e6d3582a7dff70" && sessionStorage.getItem(Rg) !== e && Bg(e);
 }
 async function Hg() {
 	await Vg();
@@ -9854,7 +9854,7 @@ async function Ug() {
 	let e = o().replace(/^third-party\//, ""), t = await Wg(e, !1);
 	if (t.status === 404 && (t = await Wg(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await zg();
-	return r && r !== "13d23d3684ef7bcd" ? (Bg(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "c7e6d3582a7dff70" ? (Bg(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Wg = (t, n) => g("/api/extensions/update", {
 	method: "POST",
@@ -10146,7 +10146,7 @@ function C_(e) {
 async function w_(e, t) {
 	let n = cd(e);
 	if (!n) throw Error(Z("presets.invalid"));
-	if (n.minAdvancedPreset && tl("1.9.0", n.minAdvancedPreset) < 0) throw Error(Z("presets.tooNew", { version: n.minAdvancedPreset }));
+	if (n.minAdvancedPreset && tl("1.10.0", n.minAdvancedPreset) < 0) throw Error(Z("presets.tooNew", { version: n.minAdvancedPreset }));
 	await x_(n, pd(n.id)), md(n), t && (J().sources[n.id] = t), Y();
 	let r = pd(n.id) ?? n;
 	return ff(r), await Cf(r), await n_(r), r;
@@ -15916,7 +15916,7 @@ var hw = ["aria-label"], gw = { class: "um-picker-head" }, _w = { class: "small 
 				"icon",
 				"help"
 			]),
-			W("div", MD, "Advanced Preset " + M(F("1.9.0")) + " · " + M(F("13d23d3684ef7bcd")), 1)
+			W("div", MD, "Advanced Preset " + M(F("1.10.0")) + " · " + M(F("c7e6d3582a7dff70")), 1)
 		], 64));
 	}
 }), PD = ["aria-label"], FD = { class: "panel-head" }, ID = { class: "panel-logo" }, LD = { class: "grow" }, RD = { class: "panel-title ellipsis" }, zD = { class: "panel-sub ellipsis" }, BD = {
@@ -16086,8 +16086,8 @@ function rO() {
 //#endregion
 //#region src/index.ts
 var iO = {
-	version: "1.9.0",
-	buildId: "13d23d3684ef7bcd",
+	version: "1.10.0",
+	buildId: "c7e6d3582a7dff70",
 	nextGeneration: (e) => kf(e),
 	listPresets: () => ld().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -16140,8 +16140,8 @@ async function sO() {
 		})(), Eg({ reload: !0 }), l_(), Vg();
 	};
 	t.on(n.APP_READY, () => void a()), rO(), Jp("init", {
-		version: "1.9.0",
-		build: "13d23d3684ef7bcd",
+		version: "1.10.0",
+		build: "c7e6d3582a7dff70",
 		enabled: J().enabled
 	});
 }
