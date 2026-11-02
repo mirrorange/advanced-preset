@@ -13,7 +13,7 @@ import { parseStorylineTag } from '@advanced-preset/protocol';
 import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { annotationHistory, historyEchoes, rewriteHistoryIndexed, synopsisOptions } from './history';
-import { buildVarsAndData } from './assembler';
+import { buildVarsAndData, storylineViewOf } from './assembler';
 import { keywordTexts } from '@/store/user-modules';
 import { detachRegeneratingSidecar } from '@/store/sidecar';
 import { cacheState, currentChatKey, storylineCacheKey } from '@/store/cache-state';
@@ -82,7 +82,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     tokenSaving: config.tokenSaving,
     ...synopsisOptions(preset),
     echoes: historyEchoes(preset, config, vars, pickWorkflow(preset, config, 'story')),
-    recap: currentRecap(),
+    recap: currentRecap(Infinity, storylineViewOf(storylines)),
     realIndex: (i: number) => realIndexOf[i] ?? -1,
     currentInput,
     annotations: annotationHistory(preset, config),

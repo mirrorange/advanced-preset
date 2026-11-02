@@ -96,7 +96,7 @@ vi.mock('@/store/settings', async (orig) => ({ ...(await orig<object>()), settin
 vi.mock('@/store/carrier', () => ({ activeCarrierPresetId: () => state.preset.id }));
 vi.mock('@/store/presets', () => ({ getPreset: () => state.preset }));
 vi.mock('@/store/config', async (orig) => ({ ...(await orig<object>()), activeConfiguration: () => state.config, presetState: () => ({ userModules: [], globalMemory: { log: [], cursor: 0 } }) }));
-vi.mock('@/store/eventlog', async (orig) => ({ ...(await orig<object>()), chatMemory: () => ({}), globalMemory: () => ({}), currentRecap: () => null }));
+vi.mock('@/store/eventlog', async (orig) => ({ ...(await orig<object>()), globalMemory: () => ({}) }));
 vi.mock('@/store/user-modules', async (orig) => ({ ...(await orig<object>()), userModules: () => [] }));
 vi.mock('@/i18n', async (orig) => ({ ...(await orig<object>()), t: (k: string) => k }));
 
@@ -146,10 +146,10 @@ function stPrompt(preset: APreset, history: STMessage[], o: { depth0?: boolean }
   return out;
 }
 
-async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean } = {}) {
+async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean; transport?: string } = {}) {
   const preset = withStorylines(o.shaping);
   state.preset = preset;
-  state.config = resolveConfiguration(preset, 'other', { connection: { transport: 'structured', workflow: 'linear' } });
+  state.config = resolveConfiguration(preset, 'other', { connection: { transport: (o.transport ?? 'structured') as any, workflow: 'linear' } });
   if (o.cache) state.config.cache = { ...CACHE_DEFAULTS, enabled: true };
   if (o.tokenSaving) state.config.tokenSaving = { ...state.config.tokenSaving, enabled: true, keepFullTurns: 99 };
   realChat.splice(0, realChat.length, ...chat);
@@ -235,6 +235,39 @@ describe('storylines in a generation', () => {
     expect(realChat[0]!.mes).toBe('m1 #Old');
     expect(realChat[1]!.extra![STORYLINE_KEY]).toBe('Old');
     expect(pick(contents!, ['m1', 'M1', 'c1', 'C1', 'go', SEP_MAIN, sep('Old')])).toEqual([sep('Old'), 'm1', 'M1', SEP_MAIN, 'c1', 'C1', 'go']);
+  });
+
+  it('structures, memory and recap follow the storyline order (I-153)', async () => {
+    const sc = (structures: Record<string, unknown>, events: unknown[] = []) => ({ v: 1, turn: 'story', structures, events });
+    const st = (loc: string, line: string, events: unknown[] = []) => ({
+      is_user: false, name: 'Bot', mes: `story ${loc}`, send_date: `s${++n}`,
+      extra: { [STORYLINE_KEY]: line, advanced_preset: sc({ status: { date: 'D1', weekday: 'Mon', time: '9', location: loc, weather: 'sun' } }, events) },
+    } as STMessage);
+    const mem = (key: string, content: string) => ({ type: 'memory.replace', key, content, source: 'model' });
+    const chat = [
+      user('m1'), st('Home', '', [mem('where', 'home')]),
+      user('c1 #cellar'), st('Cellar', 'cellar', [mem('cellar', 'dusty')]),
+      user('x1 #ifDream'), st('Dream', 'ifDream', [mem('where', 'dream'), { type: 'recap.set', text: 'it was a dream', coversUpTo: 1, source: 'model' }]),
+    ];
+    const memory = (r: { contents?: string[] }) => JSON.parse(r.contents!.find((c) => c.startsWith('<memory>'))!.slice(8, -9));
+    const prev = (text: string) => text.match(/<previous_status>\\n(.*?)\\n<\/previous_status>/)?.[1];
+    // back on the main storyline: its own last status; the side story's memory, not the if-line's
+    const main = await generate([...chat, user('m2')]);
+    expect(prev(main.text!)).toBe('D1 Mon 9 | Home | sun');
+    expect(memory(main)).toEqual({ where: 'home', cellar: 'dusty' });
+    expect(main.text).not.toContain('it was a dream');
+    // on the side story after the main storyline went on: the side story's last status
+    const side = await generate([...chat, user('m2'), st('Road', ''), user('c2 #cellar')]);
+    expect(prev(side.text!)).toBe('D1 Mon 9 | Cellar | sun');
+    // plaintext: the status echoed in the history is the side story's
+    const plain = await generate([...chat, user('m2'), st('Road', ''), user('c2 #cellar')], { transport: 'plaintext' });
+    expect(plain.text).toContain('Cellar');
+    expect(plain.text).not.toMatch(/\| Road \|/);
+    // the if-line sees its own memory last
+    const dream = await generate([...chat, user('x2 #ifDream')]);
+    expect(memory(dream)).toEqual({ where: 'dream', cellar: 'dusty' });
+    expect(dream.text).toContain('it was a dream');
+    expect(prev(dream.text!)).toBe('D1 Mon 9 | Dream | sun');
   });
 
   it('cancelling the name aborts the generation and changes nothing', async () => {

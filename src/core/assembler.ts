@@ -22,8 +22,8 @@ import { debugLog } from './debug';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { applySticky, stripMarkers, type CacheReport } from './sticky';
 import { cacheState, currentChatKey, storylineCacheKey } from '@/store/cache-state';
-import { chatLineKeys, storylineMeta, storylinesOn } from '@/store/storylines';
-import { arrangeLines, arrangeTurn, inBackground, placeLines, takeLineMarks, type StorylineTurn } from './storylines';
+import { chatLineKeys, storylineMeta, storylineView, storylinesOn } from '@/store/storylines';
+import { arrangeTurn, inBackground, placeLines, takeLineMarks, type StorylineTurn } from './storylines';
 import { INPUT_SLOT, applyInput, locateInput, markInput, stripInputMarks } from './input-shaping';
 
 export const ANCHOR_RE = /⟦ap:region:([\w.-]+)⟧/g;
@@ -86,20 +86,19 @@ function customLast(preset: APreset, chat: readonly STMessage[]): Record<string,
 /** What the condition variables of a request depend on (the interceptor has it before the context exists). */
 export type VarsSource = Pick<GenerationContext, 'preset' | 'config' | 'transport' | 'origin' | 'stType' | 'meta' | 'flags' | 'inputShaped' | 'storylines'>;
 
-/** The chat as the current storyline sees it: arranged like its history, invisible if-lines left out. */
-function storylineChat(turn: StorylineTurn | undefined): readonly STMessage[] {
-  const chat = st().chat;
-  if (!turn) return chat;
-  return arrangeLines(chatLineKeys(chat), turn.current, storylineMeta()).order.map((i) => chat[i]!);
-}
+/** Chat indices the current storyline sees, in its order (I-153); `undefined`: the whole chat. */
+export const storylineViewOf = (turn: StorylineTurn | undefined): number[] | undefined => (turn ? storylineView(turn.current) : undefined);
 
 export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined): { vars: Vars; data: MacroData } {
   const { preset, config } = ctx;
-  const chat = storylineChat(ctx.storylines);
+  // Structures, memory and recap as the current storyline sees the chat: arranged like its history.
+  const view = storylineViewOf(ctx.storylines);
+  const all = st().chat;
+  const chat = view ? view.map((i) => all[i]!) : all;
   const last = customLast(preset, chat);
-  const mem = chatMemory();
+  const mem = chatMemory(Infinity, view);
   const gmem = globalMemory(presetState(preset));
-  const recap = currentRecap();
+  const recap = currentRecap(Infinity, view);
   const recent = recentMeta(preset, config, chat);
   // Without a storyline turn (preview, storylines off) the main storyline.
   const mainName = storylinesOn(preset, config) ? storylineMeta().main ?? '' : '';
@@ -166,7 +165,7 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
     tokenSaving: config.tokenSaving,
     ...synopsisOptions(preset),
     echoes: historyEchoes(preset, config, buildVarsAndData(ctx, pickWorkflow(preset, config, ctx.origin)).vars, pickWorkflow(preset, config, 'story')),
-    recap: currentRecap(),
+    recap: currentRecap(Infinity, storylineViewOf(turn)),
     realIndex: (i: number) => real[i] ?? -1,
     currentInput: -1,
     annotations: annotationHistory(preset, config),

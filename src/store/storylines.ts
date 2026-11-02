@@ -5,7 +5,7 @@
  */
 import { MAX_STORYLINE_NAME, withStorylineTag, type APreset, type Configuration } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
-import { STORYLINE_KEY, isIfLine, lineKey, messageLines, type StorylineMeta } from '@/core/storylines';
+import { STORYLINE_KEY, arrangeLines, isIfLine, lineKey, messageLines, type StorylineMeta } from '@/core/storylines';
 
 const META_KEY = 'advanced_preset';
 
@@ -31,6 +31,16 @@ export const validStorylineName = (name: string): boolean => /^[^\s#]+$/u.test(n
 /** Storyline key of every chat message under the current metadata. */
 export function chatLineKeys(chat: readonly STMessage[] = st().chat, meta = storylineMeta()): string[] {
   return messageLines(chat).map((l) => lineKey(l, meta));
+}
+
+/**
+ * Chat indices as the storyline `current` sees them: other storylines first, then the main storyline,
+ * then `current`; invisible if-lines left out. What it reads from the chat (structures, memory,
+ * recap) follows this order (I-153). `current` defaults to the storyline of the last message.
+ */
+export function storylineView(current?: string, chat: readonly STMessage[] = st().chat, meta = storylineMeta()): number[] {
+  const keys = chatLineKeys(chat, meta);
+  return arrangeLines(keys, current ?? keys.at(-1) ?? '', meta).order;
 }
 
 /** Records the storyline of an assistant message's current swipe (`''`: main). */

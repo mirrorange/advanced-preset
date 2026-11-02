@@ -7,7 +7,9 @@ import { presetState } from '@/store/config';
 import {
   appendGlobal, appendUserChatEvent, canRedoGlobal, canUndoGlobal, chatMemory, currentRecap, globalMemory, redoGlobal, undoGlobal,
 } from '@/store/eventlog';
+import { storylineView } from '@/store/storylines';
 import { t } from '@/i18n';
+import { storylinesActive } from '../../storylines';
 import { bumpChat, ui } from '../../state';
 import { usePreset } from '../use';
 import NoPreset from '../NoPreset.vue';
@@ -19,9 +21,11 @@ const { preset } = usePreset();
 const state = computed(() => (preset.value ? presetState(preset.value) : null));
 const hasChat = computed(() => { void ui.chatRev; return Boolean(st().chatMetadata && (st().characterId !== undefined || st().groupId)); });
 
-const chat = computed(() => { void ui.chatRev; return hasChat.value ? chatMemory() : {}; });
+// With storylines: as the storyline of the last message sees the chat (edits go to that message).
+const view = () => (storylinesActive.value ? storylineView() : undefined);
+const chat = computed(() => { void ui.chatRev; return hasChat.value ? chatMemory(Infinity, view()) : {}; });
 const global = computed(() => (state.value ? globalMemory(state.value) : {}));
-const recap = computed(() => { void ui.chatRev; return hasChat.value ? currentRecap() : null; });
+const recap = computed(() => { void ui.chatRev; return hasChat.value ? currentRecap(Infinity, view()) : null; });
 
 async function setChat(key: string, content: string) { await appendUserChatEvent({ type: 'memory.replace', key, content, source: 'user' }); bumpChat(); }
 async function removeChat(key: string) { await appendUserChatEvent({ type: 'memory.delete', key, source: 'user' }); bumpChat(); }

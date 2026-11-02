@@ -68,19 +68,23 @@ function seedEvents(): ChatEvent[] {
   return (st().chatMetadata?.[META_KEY]?.seedEvents as ChatEvent[] | undefined) ?? [];
 }
 
-/** Every chat event in order, with the message index it belongs to (-1 = seed). */
-export function chatEvents(upTo = Infinity): { at: number; event: ChatEvent }[] {
+/**
+ * Every chat event in order, with the message index it belongs to (-1 = seed). `view`: the message
+ * indices to read, in their order (a storyline's view of the chat, I-153); default: every message.
+ */
+export function chatEvents(upTo = Infinity, view?: readonly number[]): { at: number; event: ChatEvent }[] {
   const out = seedEvents().map((event) => ({ at: -1, event }));
-  st().chat.forEach((m, i) => {
-    if (i > upTo) return;
-    for (const event of getSidecar(m)?.events ?? []) out.push({ at: i, event });
-  });
+  const chat = st().chat;
+  for (const i of view ?? chat.keys()) {
+    if (i > upTo) continue;
+    for (const event of getSidecar(chat[i])?.events ?? []) out.push({ at: i, event });
+  }
   return out;
 }
 
-export function chatMemory(upTo = Infinity): MemoryMap {
+export function chatMemory(upTo = Infinity, view?: readonly number[]): MemoryMap {
   const mem: MemoryMap = {};
-  for (const { event: e } of chatEvents(upTo)) {
+  for (const { event: e } of chatEvents(upTo, view)) {
     if (e.type === 'memory.replace') mem[e.key] = e.content;
     else if (e.type === 'memory.delete') delete mem[e.key];
   }
@@ -89,9 +93,9 @@ export function chatMemory(upTo = Infinity): MemoryMap {
 
 export interface RecapState { text: string; coversUpTo: number; at: number }
 
-export function currentRecap(upTo = Infinity): RecapState | null {
+export function currentRecap(upTo = Infinity, view?: readonly number[]): RecapState | null {
   let r: RecapState | null = null;
-  for (const { at, event: e } of chatEvents(upTo)) if (e.type === 'recap.set') r = e.text ? { text: e.text, coversUpTo: e.coversUpTo, at } : null;
+  for (const { at, event: e } of chatEvents(upTo, view)) if (e.type === 'recap.set') r = e.text ? { text: e.text, coversUpTo: e.coversUpTo, at } : null;
   return r;
 }
 
