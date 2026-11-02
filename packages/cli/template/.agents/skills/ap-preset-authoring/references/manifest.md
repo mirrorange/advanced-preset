@@ -323,7 +323,7 @@ tokenSaving:
 | `userInput` | `truncate` | 更早的用户消息：`keep`（原样）/ `truncate`（截断）/ `remove`（不发送） |
 | `synopsisTemplate` | 如上 | 更早的助手消息替换成事件摘要时的格式 |
 
-是否启用由配置 `tokenSaving.enabled` 决定（默认关闭）；`keepFullTurns` / `truncateUserAfter` / `userInput` 是配置的默认值，用户可在面板中修改。最近几条消息附带事件摘要由 `synopsis` 结构的 `history` / `historyTemplate` 声明（见 [structures.md](structures.md#synopsis)）。规则见 [meta-and-tasks.md](meta-and-tasks.md#省-token)。
+是否启用由配置 `tokenSaving.enabled` 决定（默认关闭）；`keepFullTurns` / `truncateUserAfter` / `userInput` 是配置的默认值，用户可在面板中修改。最近几条消息附带事件摘要（及其他结构）由结构的 `history` 声明（见 [structures.md](structures.md#历史回传)）。规则见 [meta-and-tasks.md](meta-and-tasks.md#省-token)。
 
 ## 用户输入整形 `inputShaping`
 
