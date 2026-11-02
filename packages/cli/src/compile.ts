@@ -25,6 +25,7 @@ import {
   DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode, defaultHistoryTemplate, type StructureHistory,
   CARD_POSITIONS, CONTENT_STAGE_REF, DEFAULT_ORDER_PREFIX, type CardPosition, type StructureOrder, type StructureUi,
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
+  DEFAULT_STORYLINES, STORYLINE_CONFIG_DEFAULTS, type StorylinesDecl,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
@@ -581,6 +582,23 @@ export function compile(tree: SourceTree): CompileResult {
       }
     }
   }
+  // Storylines: optional, `true` for the default separators; absent keeps the artifact (and its hash) as before.
+  let storylines: StorylinesDecl | undefined;
+  if (raw.storylines !== undefined && raw.storylines !== null && raw.storylines !== false) {
+    const where = { file: M, path: 'storylines' };
+    if (raw.storylines === true) storylines = { ...DEFAULT_STORYLINES };
+    else if (!isObj(raw.storylines)) diag.error('storylines must be `true` or a mapping { separator?, mainSeparator? }', where);
+    else {
+      const src = raw.storylines;
+      for (const k of Object.keys(src)) if (k !== 'separator' && k !== 'mainSeparator') diag.warn(`storylines: unknown key \`${k}\``, { file: M, path: `storylines.${k}` });
+      const sep = (k: 'separator' | 'mainSeparator') => {
+        if (src[k] !== undefined && typeof src[k] !== 'string') diag.error(`storylines.${k} must be a string`, { file: M, path: `storylines.${k}` });
+        return text(typeof src[k] === 'string' ? src[k] : DEFAULT_STORYLINES[k], { file: M, path: `storylines.${k}` });
+      };
+      storylines = { separator: sep('separator'), mainSeparator: sep('mainSeparator') };
+      if (!storylines.separator.includes('{{storyline}}')) diag.warn('storylines.separator has no {{storyline}}: storylines cannot be told apart in the history', { file: M, path: 'storylines.separator' });
+    }
+  }
   const syntheticTurns: SyntheticTurn[] = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s: unknown, i: number) => {
     const o = isObj(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
@@ -714,6 +732,8 @@ export function compile(tree: SourceTree): CompileResult {
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...(sect('tokenSaving') as object) },
     cache: { ...CACHE_DEFAULTS, ...(sect('cache') as Partial<Configuration['cache']>) },
     meta: { enabled: true, recentCount: meta.recentCount, ...(sect('meta') as object) },
+    // Only for presets with storylines, so that other artifacts keep their hash.
+    ...(storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...(sect('storylines') as Partial<Configuration['storylines']>) } } : {}),
   };
   for (const k of ['names', 'prefixes'] as const) if (isObj(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect('modules'))) {
@@ -746,6 +766,16 @@ export function compile(tree: SourceTree): CompileResult {
     if ('enabled' in c && typeof c.enabled !== 'boolean') diag.error('`enabled` must be a boolean', { file: M, path: `${path}.enabled` });
   };
   checkMeta(sect('meta'), 'configurationDefaults.meta');
+  /** `storylines` section of the defaults or of a recommended configuration's diff. */
+  const checkStorylines = (c: Obj, path: string) => {
+    if (!storylines) return void (path.startsWith('configurations') && diag.warn(`${path}: the preset declares no storylines (ignored)`, { file: M, path }));
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
+      else if (typeof v !== 'boolean') diag.error('`enabled` must be a boolean', where);
+    }
+  };
+  if (isObj(cd.storylines)) checkStorylines(cd.storylines, 'configurationDefaults.storylines');
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
 
   const configurations: RecommendedConfiguration[] = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c: unknown, i: number) => {
@@ -756,6 +786,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (isObj(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj(rc.diff.storylines)) checkStorylines(rc.diff.storylines as Obj, `configurations[${i}].diff.storylines`);
     if (isObj(rc.diff.params)) checkParams(rc.diff.params as Obj, `configurations[${i}].diff.params`, (k, v) => { rc.diff.params![k] = v; }, false); // unknown keys: validate
     return rc;
   });
@@ -817,6 +848,7 @@ export function compile(tree: SourceTree): CompileResult {
     anchors: anchors as APreset['anchors'],
     workflowRegion: str(raw.workflowRegion, anchors.tail ?? ''),
     ...(inputShaping ? { inputShaping } : {}),
+    ...(storylines ? { storylines } : {}),
     params,
     groups,
     modules,

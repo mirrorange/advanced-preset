@@ -1,6 +1,6 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  TRANSPORTS, assemble, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
   type APreset, type ParamValue, type Transport, type UserModule, type UserModuleSource,
 } from '@advanced-preset/protocol';
 
@@ -14,6 +14,9 @@ export interface PreviewOptions {
   params?: Record<string, ParamValue>;
   /** The user's input (`--input`): with input shaping declared, the turn is shaped (`input.shaped`). */
   input?: string;
+  /** The current storyline (`--storyline name`; presets with `storylines`): `if` by the name rule, `new` with `--storyline-new`. */
+  storyline?: string;
+  storylineNew?: boolean;
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
   json?: boolean;
@@ -90,10 +93,13 @@ export function preview(source: APreset, o: PreviewOptions): string {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === 'mixed', task: null, recent: false },
     gen: { origin: pure ? 'task' : 'story', type: 'normal', callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== undefined },
+    storyline: preset.storylines && o.storyline
+      ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew) }
+      : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew) },
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === 'task') : undefined;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? '(meta text)' : '', inputText: o.input ?? '' } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? '(meta text)' : '', inputText: o.input ?? '', storyline: { name: vars.storyline.name, main: '' } } }, workflow);
   // What happens to the last user message of the chat history (ST macros stay unexpanded here).
   const shaping = preset.inputShaping;
   const historyInput = o.input === undefined ? undefined : !shaping ? o.input : shaping.mode === 'wrap' ? wrapInput(shaping.template, o.input, a.expand) : null;
@@ -124,6 +130,8 @@ export function preview(source: APreset, o: PreviewOptions): string {
   const size = (v: (typeof a.buildVars)[string]) => (typeof v === 'string' ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`);
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(', ')}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);
+  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? 'main' : `${vars.storyline.name}${vars.storyline.if ? ' (if-line)' : ''}`}${vars.storyline.new ? ' (new)' : ''}`);
+  else if (o.storyline) lines.push('storyline: main (the preset declares no storylines)');
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === undefined ? ' (not shaped: no --input)' : ''}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   if (fields.length) lines.push(`fields: ${fields.join(' → ')}`);

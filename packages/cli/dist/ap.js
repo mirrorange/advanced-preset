@@ -7608,7 +7608,8 @@ var MACRO_HEADS = {
   memory: { min: 1, max: 1 },
   recap: { min: 0, max: 0 },
   recent_meta: { min: 0, max: 0 },
-  var: { min: 1, max: 2 }
+  var: { min: 1, max: 2 },
+  storyline: { min: 0, max: 1 }
 };
 
 // ../protocol/src/structures.ts
@@ -8542,6 +8543,16 @@ function plainBuildVars(vars) {
   return Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, v instanceof Map ? Object.fromEntries(v) : v]));
 }
 
+// ../protocol/src/storylines.ts
+var DEFAULT_STORYLINES = {
+  separator: "<!-- Start of Storyline {{storyline}} -->",
+  mainSeparator: "<!-- Start of the main storyline -->"
+};
+var STORYLINE_CONFIG_DEFAULTS = { enabled: true };
+var STORYLINES_SINCE = "1.10.0";
+var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false };
+var isIfName = (name) => /^if/i.test(name);
+
 // ../protocol/src/assemble.ts
 function resolverOf(vars) {
   return (path) => {
@@ -8654,6 +8665,8 @@ function createMacroResolver(input, stages, workflow, buildVars, structures) {
         return data.recentMeta ?? "";
       case "var":
         return readVar(a, b);
+      case "storyline":
+        return a === "main" ? data.storyline?.main ?? "" : data.storyline?.name ?? vars.storyline?.name ?? "";
       default:
         return void 0;
     }
@@ -8783,6 +8796,7 @@ function defaultVars(preset, config, over = {}) {
     recap: { present: false },
     input: { shaped: false },
     last: {},
+    storyline: { ...MAIN_STORYLINE_VARS },
     ...over
   };
 }
@@ -9934,6 +9948,22 @@ function compile(tree) {
       }
     }
   }
+  let storylines;
+  if (raw.storylines !== void 0 && raw.storylines !== null && raw.storylines !== false) {
+    const where = { file: M, path: "storylines" };
+    if (raw.storylines === true) storylines = { ...DEFAULT_STORYLINES };
+    else if (!isObj4(raw.storylines)) diag.error("storylines must be `true` or a mapping { separator?, mainSeparator? }", where);
+    else {
+      const src = raw.storylines;
+      for (const k of Object.keys(src)) if (k !== "separator" && k !== "mainSeparator") diag.warn(`storylines: unknown key \`${k}\``, { file: M, path: `storylines.${k}` });
+      const sep2 = (k) => {
+        if (src[k] !== void 0 && typeof src[k] !== "string") diag.error(`storylines.${k} must be a string`, { file: M, path: `storylines.${k}` });
+        return text(typeof src[k] === "string" ? src[k] : DEFAULT_STORYLINES[k], { file: M, path: `storylines.${k}` });
+      };
+      storylines = { separator: sep2("separator"), mainSeparator: sep2("mainSeparator") };
+      if (!storylines.separator.includes("{{storyline}}")) diag.warn("storylines.separator has no {{storyline}}: storylines cannot be told apart in the history", { file: M, path: "storylines.separator" });
+    }
+  }
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
     const o = isObj4(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
@@ -10053,7 +10083,9 @@ function compile(tree) {
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...sect("tokenSaving") },
     cache: { ...CACHE_DEFAULTS, ...sect("cache") },
-    meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") }
+    meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") },
+    // Only for presets with storylines, so that other artifacts keep their hash.
+    ...storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...sect("storylines") } } : {}
   };
   for (const k of ["names", "prefixes"]) if (isObj4(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
@@ -10086,6 +10118,15 @@ function compile(tree) {
     if ("enabled" in c && typeof c.enabled !== "boolean") diag.error("`enabled` must be a boolean", { file: M, path: `${path}.enabled` });
   };
   checkMeta(sect("meta"), "configurationDefaults.meta");
+  const checkStorylines = (c, path) => {
+    if (!storylines) return void (path.startsWith("configurations") && diag.warn(`${path}: the preset declares no storylines (ignored)`, { file: M, path }));
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
+      else if (typeof v !== "boolean") diag.error("`enabled` must be a boolean", where);
+    }
+  };
+  if (isObj4(cd.storylines)) checkStorylines(cd.storylines, "configurationDefaults.storylines");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
     const o = isObj4(c) ? c : {};
@@ -10095,6 +10136,7 @@ function compile(tree) {
     if (isObj4(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj4(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj4(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj4(rc.diff.storylines)) checkStorylines(rc.diff.storylines, `configurations[${i}].diff.storylines`);
     if (isObj4(rc.diff.params)) checkParams(rc.diff.params, `configurations[${i}].diff.params`, (k, v) => {
       rc.diff.params[k] = v;
     }, false);
@@ -10157,6 +10199,7 @@ function compile(tree) {
     anchors,
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
     ...inputShaping ? { inputShaping } : {},
+    ...storylines ? { storylines } : {},
     params,
     groups,
     modules,
@@ -10423,7 +10466,11 @@ var FIXED_VARS = {
   "memory.hasChat": null,
   "memory.hasGlobal": null,
   "recap.present": null,
-  "input.shaped": null
+  "input.shaped": null,
+  "storyline.name": null,
+  "storyline.main": null,
+  "storyline.if": null,
+  "storyline.new": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -10461,8 +10508,12 @@ function validate(p, map, diag) {
     checkLiterals(e.l, where);
     checkLiterals(e.r, where);
   };
+  let storylineUses = 0;
   for (const { expr, where } of map.exprs) {
-    for (const v of variables(expr)) checkVar(v, where);
+    for (const v of variables(expr)) {
+      checkVar(v, where);
+      if (v.startsWith("storyline.")) storylineUses++;
+    }
     checkLiterals(expr, where);
   }
   const dictKeys = (id) => new Set(p.modules.flatMap((m) => m.vars.flatMap((u) => u.var === id && u.type === "dict" ? u.items.map((x) => x.key) : [])));
@@ -10519,6 +10570,10 @@ function validate(p, map, diag) {
         case "memory":
           if (a !== "chat" && a !== "global") bad("expected chat | global");
           break;
+        case "storyline":
+          storylineUses++;
+          if (a !== void 0 && a !== "main") bad("expected no argument (current storyline) or `main`");
+          break;
         case "var": {
           const decl = varDecls.get(a);
           const sel = rest[1];
@@ -10540,6 +10595,7 @@ function validate(p, map, diag) {
   for (const { source, where } of map.templates) {
     const code = templateCode(source).join("\n");
     if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
+    if (/(?<![\w$.])storyline\s*\.|\bmacro\(\s*(['"`])storyline\1/.test(code)) storylineUses++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -10559,6 +10615,9 @@ function validate(p, map, diag) {
   if (shaping?.mode === "extract" && !inputTextUses) diag.warn("inputShaping extracts the input from the history but no prompt uses {{ap::input::text}}: the input would not be sent", { file: M, path: "inputShaping.mode" });
   if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
     diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: "minAdvancedPreset" });
+  if (!p.storylines && storylineUses) diag.warn("storyline variables and {{ap::storyline}} always describe the main storyline: the preset declares no storylines", { file: M, path: "storylines" });
+  if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
+    diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
   if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: "workflowRegion" });
   for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
@@ -10880,11 +10939,12 @@ function preview(source, o) {
   const vars = defaultVars(preset, config, {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
     gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
-    input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 }
+    input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 },
+    storyline: preset.storylines && o.storyline ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew) } : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew) }
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "" } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "", storyline: { name: vars.storyline.name, main: "" } } }, workflow);
   const shaping = preset.inputShaping;
   const historyInput = o.input === void 0 ? void 0 : !shaping ? o.input : shaping.mode === "wrap" ? wrapInput(shaping.template, o.input, a.expand) : null;
   const transport = vars.transport;
@@ -10910,6 +10970,8 @@ function preview(source, o) {
   const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
+  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? "main" : `${vars.storyline.name}${vars.storyline.if ? " (if-line)" : ""}`}${vars.storyline.new ? " (new)" : ""}`);
+  else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   if (fields.length) lines.push(`fields: ${fields.join(" \u2192 ")}`);
@@ -11088,6 +11150,7 @@ Usage
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
+                   [--storyline name] [--storyline-new]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -11117,6 +11180,8 @@ async function main(argv) {
       json: { type: "boolean" },
       param: { type: "string", multiple: true },
       input: { type: "string" },
+      storyline: { type: "string" },
+      "storyline-new": { type: "boolean" },
       "user-modules": { type: "string" },
       "bundled-modules": { type: "string" },
       "user-module-templates": { type: "string" },
@@ -11182,7 +11247,7 @@ async function main(argv) {
         }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

@@ -1064,3 +1064,53 @@ ${extraModule || '{{ap::input::text}}'}
     expect(json.vars.input).toEqual({ shaped: true });
   });
 });
+
+describe('storylines', () => {
+  const withStorylines = (decl: string, min = 'minAdvancedPreset: 1.10.0\n', body = 'Side: {{ap::storyline}}') => {
+    const t = tree({ 'preset.yaml': MANIFEST.replace('version: 1.0.0', `version: 1.0.0\n${min}`) + decl });
+    t.set('modules/side.md', `---\nid: side\ntoggle: always\nregion: task\nwhen: "!storyline.main"\n---\n${body}\n`);
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+
+  it('is absent unless declared (hash unchanged)', () => {
+    const plain = build(tree());
+    expect('storylines' in plain.preset!).toBe(false);
+    expect('storylines' in plain.preset!.configurationDefaults).toBe(false);
+    expect(build(tree()).preset!.hash).toBe(plain.preset!.hash);
+  });
+
+  it('compiles `true` and custom separators with the user switch', () => {
+    const on = build(withStorylines('storylines: true\n'));
+    expect(on.diag.errors).toEqual([]);
+    expect(messages(on)).not.toMatch(/storyline/i);
+    expect(on.preset!.storylines).toEqual({ separator: '<!-- Start of Storyline {{storyline}} -->', mainSeparator: '<!-- Start of the main storyline -->' });
+    expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true });
+    const custom = build(withStorylines('storylines: { separator: "[{{storyline}}]" }\nconfigurationDefaults: { storylines: { enabled: false } }\n'));
+    expect(custom.diag.errors).toEqual([]);
+    expect(custom.preset!.storylines).toEqual({ separator: '[{{storyline}}]', mainSeparator: '<!-- Start of the main storyline -->' });
+    expect(custom.preset!.configurationDefaults.storylines).toEqual({ enabled: false });
+  });
+
+  it('flags bad declarations, undeclared use and old AP versions', () => {
+    expect(build(withStorylines('storylines: yes please\n')).diag.errors.map((e) => e.message).join('\n')).toMatch(/storylines must be `true` or a mapping/);
+    const w = messages(build(withStorylines('storylines: { separator: "---", tag: x }\n')));
+    expect(w).toMatch(/has no \{\{storyline\}\}/);
+    expect(w).toMatch(/unknown key `tag`/);
+    expect(messages(build(withStorylines('')))).toMatch(/always describe the main storyline/);
+    expect(messages(build(withStorylines('storylines: true\n', '', 'x')))).toMatch(/storylines need Advanced Preset 1\.10\.0/);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, '{{ap::storyline::nope}}')))).toMatch(/expected no argument/);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, 'x')))).not.toMatch(/unknown variable/);
+  });
+
+  it('previews a storyline with --storyline', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withStorylines('storylines: true\n')).preset!;
+    expect(preview(p, {})).toMatch(/storyline: main\n/);
+    const out = preview(p, { storyline: 'ifRain', storylineNew: true });
+    expect(out).toMatch(/storyline: ifRain \(if-line\) \(new\)/);
+    expect(out).toMatch(/Side: ifRain/);
+    const json = JSON.parse(preview(p, { storyline: 'cellar', json: true }));
+    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false });
+  });
+});

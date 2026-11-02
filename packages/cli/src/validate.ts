@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate,
+  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -27,6 +27,10 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'memory.hasGlobal': null,
   'recap.present': null,
   'input.shaped': null,
+  'storyline.name': null,
+  'storyline.main': null,
+  'storyline.if': null,
+  'storyline.new': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
@@ -65,8 +69,9 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     checkLiterals(e.l, where);
     checkLiterals(e.r, where);
   };
+  let storylineUses = 0;
   for (const { expr, where } of map.exprs) {
-    for (const v of variables(expr)) checkVar(v, where);
+    for (const v of variables(expr)) { checkVar(v, where); if (v.startsWith('storyline.')) storylineUses++; }
     checkLiterals(expr, where);
   }
 
@@ -120,6 +125,10 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
         case 'memory':
           if (a !== 'chat' && a !== 'global') bad('expected chat | global');
           break;
+        case 'storyline':
+          storylineUses++;
+          if (a !== undefined && a !== 'main') bad('expected no argument (current storyline) or `main`');
+          break;
         case 'var': {
           const decl = varDecls.get(a!);
           const sel = rest[1];
@@ -143,6 +152,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   for (const { source, where } of map.templates) {
     const code = templateCode(source).join('\n');
     if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
+    if (/(?<![\w$.])storyline\s*\.|\bmacro\(\s*(['"`])storyline\1/.test(code)) storylineUses++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -162,6 +172,11 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   if (shaping?.mode === 'extract' && !inputTextUses) diag.warn('inputShaping extracts the input from the history but no prompt uses {{ap::input::text}}: the input would not be sent', { file: M, path: 'inputShaping.mode' });
   if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
     diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: 'minAdvancedPreset' });
+
+  // ── storylines ──────────────────────────────────────────────────────────────
+  if (!p.storylines && storylineUses) diag.warn('storyline variables and {{ap::storyline}} always describe the main storyline: the preset declares no storylines', { file: M, path: 'storylines' });
+  if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
+    diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: 'minAdvancedPreset' });
 
   // ── regions / anchors ───────────────────────────────────────────────────────
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} → unknown region \`${rid}\``, { file: M, path: 'anchors' });
