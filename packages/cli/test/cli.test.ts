@@ -327,6 +327,101 @@ tools:
   });
 });
 
+describe('structure layout (I-134 – I-137)', () => {
+  const STATUS = '  status: { kind: status, ui: { position: top }, order: { before: "@content" }, properties: { weather: Sky }, formatPrompt: { tag: "<status/>", field: "Fill `{{field}}`." } }\n';
+  const layoutTree = (opts: { tools?: string; structures?: string; stages?: string; front?: string; min?: string; extra?: Record<string, string> } = {}) => {
+    const t = tree(opts.extra);
+    let m = MANIFEST.replace('structures:\n', `structures:\n${opts.structures ?? ''}`);
+    m += `minAdvancedPreset: ${opts.min ?? '1.10.0'}\n${opts.tools ?? ''}`;
+    t.set('preset.yaml', m);
+    let wf = t.get('workflows/linear.md')!;
+    if (opts.stages) wf = wf.replace(/stages:\n(  - .*\n)+/, `stages:\n${opts.stages}`);
+    if (opts.front) wf = wf.replace('---\n<!--', `${opts.front}---\n<!--`);
+    t.set('workflows/linear.md', wf);
+    return build(t);
+  };
+  const msgs = (xs: { message: string }[]) => xs.map((x) => x.message).join('\n');
+
+  it('compiles tools.orderPrefix and keeps {{field}} for the runtime', () => {
+    const { preset, diag } = layoutTree({ tools: 'tools:\n  orderPrefix: true\n  turn: { field: "{{stage}}" }\n', structures: STATUS });
+    expect(msgs(diag.errors)).toBe('');
+    expect(msgs(diag.warnings)).not.toMatch(/sorts before/);
+    const p = preset!;
+    expect(p.tools.orderPrefix).toBe('{{n}}_');
+    expect(p.tools.structurePrefix).toBe('');
+    expect(p.structures.status).toMatchObject({ kind: 'status', field: 'status', order: { before: '@content' }, ui: { position: 'top' }, formatPrompt: { field: 'Fill `{{field}}`.' } });
+    expect(p.structures.reply!.field).toBe('reply');
+  });
+
+  it('validates orderPrefix templates and ignores structurePrefix with a warning', () => {
+    expect(msgs(layoutTree({ tools: 'tools:\n  orderPrefix: "step_"\n' }).diag.errors)).toMatch(/must contain `\{\{n\}\}`/);
+    expect(msgs(layoutTree({ tools: 'tools:\n  orderPrefix: "{{n}}-"\n' }).diag.errors)).toMatch(/may only hold/);
+    const r = layoutTree({ tools: 'tools:\n  orderPrefix: "s{{n}}_"\n  structurePrefix: z_\n  turn: { field: "{{stage}}" }\n' });
+    expect(msgs(r.diag.warnings)).toMatch(/structurePrefix is ignored/);
+    expect(r.preset!.tools.orderPrefix).toBe('s{{n}}_');
+  });
+
+  it('compiles stage order and workflow structures.order, checking references', () => {
+    const ok = layoutTree({
+      tools: 'tools:\n  orderPrefix: true\n',
+      structures: STATUS,
+      stages: '  - { id: plan, actor: narrator, kind: text, label: Plan, order: 10 }\n  - { id: final, actor: narrator, kind: content, label: Write, order: 20 }\n',
+      front: 'structures:\n  order: { status: { after: plan }, reply: 15 }\n',
+    });
+    expect(msgs(ok.diag.errors)).toBe('');
+    const wf = ok.preset!.workflows.find((w) => w.id === 'linear')!;
+    expect(wf.stages.map((s) => s.order)).toEqual([10, 20]);
+    expect(wf.structureOrder).toEqual({ status: { after: 'plan' }, reply: 15 });
+    const bad = layoutTree({
+      structures: STATUS,
+      stages: '  - { id: plan, actor: narrator, kind: text, label: Plan, order: 200 }\n  - { id: final, actor: narrator, kind: content, label: Write }\n',
+      front: 'structures:\n  order: { status: { after: nowhere }, reply: "sideways", ghost: 5 }\n',
+    });
+    const e = msgs(bad.diag.errors);
+    expect(e).toMatch(/stage final: order 200 must be greater/);
+    expect(e).toMatch(/unknown stage `nowhere`/);
+    expect(e).toMatch(/order must be a number or/);
+    expect(msgs(bad.diag.warnings)).toMatch(/structures.order: unknown structure `ghost`/);
+  });
+
+  it('allows a single status structure with ::last and its sub-fields', () => {
+    const r = layoutTree({ tools: 'tools:\n  orderPrefix: true\n', structures: STATUS + '  status2: { kind: status, properties: { mood: x } }\n', extra: { 'modules/s.md': '---\nid: s\nregion: top\nstructures: [status]\n---\n{{ap::structure::status}} {{ap::structure::status::last}}\n' } });
+    const e = msgs(r.diag.errors);
+    expect(e).toMatch(/only one structure of kind status/);
+    expect(e).toMatch(/status has no sub-field `mood`/);
+    expect(e).not.toMatch(/::last/);
+  });
+
+  it('compiles custom structure components from inline text and ui/ files', () => {
+    const r = layoutTree({
+      structures: '  card: { kind: custom, ui: { position: bottom, order: 50, template: ./ui/card.ejs, style: "b { color: red }" } }\n  mod: { kind: custom, ui: { module: "export function mount() {}" } }\n',
+      extra: { 'ui/card.ejs': '<b><%= value %></b>\n' },
+    });
+    expect(msgs(r.diag.errors)).toBe('');
+    expect(r.preset!.structures.card!.ui).toEqual({ position: 'bottom', order: 50, template: '<b><%= value %></b>\n', style: 'b { color: red }' });
+    expect(r.preset!.structures.mod!.ui!.module).toMatch(/mount/);
+    const bad = layoutTree({ structures: '  card: { kind: custom, ui: { position: left, template: ./ui/missing.ejs, module: ./other.js } }\n  options: { kind: options, ui: { template: x } }\n' });
+    const e = msgs(bad.diag.errors);
+    expect(e).toMatch(/ui.position must be top \| bottom/);
+    expect(e).toMatch(/file `ui\/missing.ejs` not found/);
+    expect(e).toMatch(/component files live under ui\//);
+    expect(e).toMatch(/only custom structures bring their own component/);
+    const broken = layoutTree({ structures: '  card: { kind: custom, ui: { template: "<% if (x) { %>" } }\n  mod: { kind: custom, ui: { module: "function mount() {}" } }\n' });
+    expect(msgs(broken.diag.errors)).toMatch(/structure card: ui.template:/);
+    expect(msgs(broken.diag.warnings)).toMatch(/structure mod: ui.module exports nothing/);
+  });
+
+  it('warns when layout features need a newer Advanced Preset', () => {
+    const r = layoutTree({ min: '1.9.0', tools: 'tools:\n  orderPrefix: true\n', structures: STATUS });
+    expect(msgs(r.diag.warnings)).toMatch(/tools.orderPrefix, structure order, status structures, structure ui need Advanced Preset 1.10.0/);
+  });
+
+  it('checks the alphabetical order of explicitly placed legacy structures', () => {
+    const r = layoutTree({ structures: STATUS, tools: 'tools:\n  turn: { field: "{{stage}}" }\n  structurePrefix: ""\n', stages: '  - { id: a_plan, actor: narrator, kind: text, label: Plan }\n  - { id: b_final, actor: narrator, kind: content, label: Write }\n' });
+    expect(msgs(r.diag.warnings)).toMatch(/structure field `status` sorts after stage field `b_final`/);
+  });
+});
+
 describe('assemble', () => {
   it('renders regions per style with exclusive winners and macros', () => {
     const { preset } = build(tree());

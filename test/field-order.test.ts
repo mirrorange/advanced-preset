@@ -6,11 +6,21 @@ import { petals } from './helpers';
 describe('bundled Petals: alphabetical field order', () => {
   const structures = Object.values(petals.structures).filter((s) => !isInlineStructure(s));
   for (const w of petals.workflows) {
-    it(`${w.id}: stages sort in order, structures after the content`, () => {
+    it(`${w.id}: fields sort in turn order`, () => {
       const a = turnArtifacts(petals.tools, w, w.stages, structures);
       const fields = w.stages.map((s) => a.fieldOf(s));
       expect([...fields].sort()).toEqual(fields);
-      const sorted = Object.keys(a.turnSchema().properties as object).sort();
+      const keys = Object.keys(a.turnSchema().properties as object);
+      if (a.layout.prefixed) {
+        // Unified ordering prefix (I-135): the schema order is the alphabetical order, stage tools too.
+        expect([...keys].sort()).toEqual(keys);
+        for (const t of a.stageTools()) {
+          const params = Object.keys(t.function.parameters.properties as object);
+          expect([...params].sort()).toEqual(params);
+        }
+        return;
+      }
+      const sorted = [...keys].sort();
       const content = sorted.indexOf(fields[terminalContentIndex(w.stages)]!);
       for (const s of structures) {
         expect(s.field.startsWith(petals.tools.structurePrefix!)).toBe(true);

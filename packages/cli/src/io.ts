@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import type { APreset } from '@advanced-preset/protocol';
-import { compile, type CompileResult, type SourceTree } from './compile';
+import { compile, UI_FILE_RE, type CompileResult, type SourceTree } from './compile';
 import { validate } from './validate';
 import { FRAGMENT_RE } from './manifest';
 
@@ -9,7 +9,7 @@ const SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-mod
 
 export function isSourcePath(rel: string): boolean {
   const p = rel.split(sep).join('/');
-  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p);
+  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p) || UI_FILE_RE.test(p);
 }
 
 async function walk(dir: string, root: string, out: SourceTree): Promise<void> {

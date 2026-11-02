@@ -101,11 +101,14 @@ export function preview(source: APreset, o: PreviewOptions): string {
   const wf = a.workflow;
 
   const artifacts: Record<string, unknown> = {};
+  let fields: string[] = [];
   if (wf) {
     // Same builder as the extension; ST macros ({{user}}, …) stay unexpanded here.
     const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
     const synthetic = preset.syntheticTurns.find((s) => s.id === config.connection.syntheticTurn);
     const init = synthetic && transport.startsWith('tool-') ? [{ type: 'function', function: { name: synthetic.tool.name, description: a.expand(synthetic.tool.description), parameters: { type: 'object', properties: {} } } }] : [];
+    // Turn layout (I-134): stage and structure fields in generation order (object-style transports).
+    if (transport === 'structured' || transport.startsWith('tool-')) fields = t.layout.items.map((it) => `${it.name}${it.type === 'structure' ? ` (${it.structure.id})` : ''}`);
     if (transport === 'structured') artifacts.schema = t.schema();
     if (transport === 'tool-single') artifacts.tools = [...init, t.submitTool()];
     if (transport === 'tool-multi') artifacts.tools = [...init, ...t.stageTools()];
@@ -123,6 +126,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === undefined ? ' (not shaped: no --input)' : ''}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
+  if (fields.length) lines.push(`fields: ${fields.join(' → ')}`);
   for (const r of preset.regions) {
     if (r.native) { rule(`${r.id} (native)`); continue; }
     const msgs = a.regions[r.id] ?? [];

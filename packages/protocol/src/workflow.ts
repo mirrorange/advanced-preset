@@ -8,6 +8,7 @@
 import { isInlineStructure, type FieldText, type Stage, type StructureDecl, type ToolsDecl, type Workflow } from './types';
 import { test, type Resolver } from './expr';
 import { isStructureOptional, structureFieldSchema, type JsonSchema } from './structures';
+import { turnLayout, withFieldName, type TurnLayout } from './layout';
 
 export interface Patch {
   old_string: string;
@@ -122,7 +123,11 @@ export function tool(name: string, description: string | undefined, parameters: 
  * `expand` runs macro expansion over descriptions (not over names).
  */
 export interface TurnArtifacts {
+  /** Stages and structures of this turn in order, with their field names (I-134). */
+  layout: TurnLayout;
   fieldOf(stage: Stage): string;
+  /** Field (structured / single tool) or stage-tool parameter (multi-step) of a structure. */
+  structureFieldOf(decl: StructureDecl): string;
   toolOf(stage: Stage): string;
   paramOf(stage: Stage): string;
   stageOfTool(name: string): Stage | undefined;
@@ -149,40 +154,53 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
     const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();
     return t || undefined;
   };
-  const anchor = structuresAnchorIndex(workflow, stages);
-  const fieldOf = (s: Stage) => stageFieldName(stages, s, tools);
+  const layout = turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const fieldOf = (s: Stage) => layout.stageField(s);
+  const structureFieldOf = (d: StructureDecl) => layout.structureField(d);
   const toolOf = (s: Stage) => stageToolName(stages, s, tools);
-  const paramOf = (s: Stage) => stageParam(s, tools).name;
-  const structureProps = (properties: Record<string, JsonSchema>, required: string[]) => {
-    for (const s of structures) {
-      properties[s.field] = structureFieldSchema(s, expand);
-      if (!isStructureOptional(s.kind)) required.push(s.field);
-    }
+  const paramOf = (s: Stage) => layout.stageParam(s, stageParam(s, tools).name);
+  const addStructure = (properties: Record<string, JsonSchema>, required: string[], d: StructureDecl) => {
+    const name = structureFieldOf(d);
+    properties[name] = structureFieldSchema(withFieldName(d, name), expand);
+    if (!isStructureOptional(d.kind)) required.push(name);
   };
   const turnSchema = (): JsonSchema => {
     const properties: Record<string, JsonSchema> = {};
     const required: string[] = [];
-    stages.forEach((stage, i) => {
-      const name = fieldOf(stage);
-      properties[name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
-      if (!stage.optional) required.push(name);
-      if (i === anchor) structureProps(properties, required);
-    });
-    if (anchor < 0) structureProps(properties, required);
+    for (const it of layout.items) {
+      if (it.type === 'structure') { addStructure(properties, required, it.structure); continue; }
+      const stage = it.stage;
+      properties[it.name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
+      if (!stage.optional) required.push(it.name);
+    }
     return { type: 'object', properties, required, additionalProperties: false };
   };
-  const stageTools = (): ToolDef[] => stages.map((stage, i) => {
+  const stageTools = (): ToolDef[] => stages.map((stage) => {
     const properties: Record<string, JsonSchema> = {};
     const required: string[] = [];
     const param = stageParam(stage, tools);
-    properties[param.name] = stageSchema(stage, desc(param.description, stage), tools, expand);
-    required.push(param.name);
-    if (i === anchor) structureProps(properties, required);
+    const carried = layout.carriedBy(stage);
+    const own = layout.items.find((it) => it.type === 'stage' && it.stage === stage)!;
+    const addOwn = () => {
+      const name = paramOf(stage);
+      properties[name] = stageSchema(stage, desc(param.description, stage), tools, expand);
+      required.push(name);
+    };
+    // The stage's own parameter and the structures it carries, in turn order.
+    let ownAdded = false;
+    for (const d of carried) {
+      const at = layout.items.findIndex((it) => it.type === 'structure' && it.structure === d);
+      if (!ownAdded && at > own.position - 1) { addOwn(); ownAdded = true; }
+      addStructure(properties, required, d);
+    }
+    if (!ownAdded) addOwn();
     return tool(toolOf(stage), desc(stage.tool?.description ?? tools.stage.description, stage), { type: 'object', properties, required, additionalProperties: false });
   });
   const keys = { thinking: tools.envelope.thinking.name, result: tools.envelope.result.name };
   return {
+    layout,
     fieldOf,
+    structureFieldOf,
     toolOf,
     paramOf,
     stageOfTool: (name) => stages.find((s) => toolOf(s) === name),

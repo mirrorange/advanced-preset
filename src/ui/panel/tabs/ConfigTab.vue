@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, MessagesSquare, Pencil, Plus, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
-import { TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, type Transport, type UserInputMode } from '@advanced-preset/protocol';
+import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
+import { TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
 } from '@/store/config';
 import { pushSampling } from '@/store/carrier';
+import { customUiEnabled, setCustomUi } from '@/store/custom-ui';
+import { getPresetEntry } from '@/store/presets';
+import { askCustomUi } from '@/app/trust';
 import { t, pt } from '@/i18n';
 import { usePreset } from '../use';
 import NoPreset from '../NoPreset.vue';
@@ -26,6 +29,31 @@ const refKey = computed({
     selectConfiguration(p, { kind: kind as 'recommended' | 'saved', id: rest.join(':') });
     void pushSampling(p);
   },
+});
+// Custom structure components (I-137): enable / disable; enabling an installed preset asks for trust.
+const components = computed(() => {
+  const p = preset.value;
+  if (!p) return [];
+  return structureComponents(p).map((c) => ({
+    id: c.id,
+    title: pt(p, 'structures', c.id, 'title', p.structures[c.id]?.title || c.id),
+    mode: c.mode,
+    position: p.structures[c.id]?.ui?.position ?? 'bottom',
+  }));
+});
+const customUi = computed({
+  get: () => (preset.value ? customUiEnabled(preset.value) : false),
+  set: (on: boolean) => {
+    const p = preset.value;
+    if (!p) return;
+    const source = getPresetEntry(p.id)?.source;
+    if (!on || source === 'builtin' || source === 'dev') setCustomUi(p, on);
+    else void askCustomUi(p);
+  },
+});
+const customUiChanged = computed(() => {
+  const s = state.value?.customUi;
+  return Boolean(preset.value && s?.enabled && s.hash !== structureUiHash(preset.value));
 });
 const modified = computed(() => (preset.value ? isModified(preset.value) : false));
 const savedRef = computed(() => (state.value?.active.ref.kind === 'saved' ? state.value.active.ref.id : null));
@@ -223,6 +251,17 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
           <input class="input" type="number" min="0" :value="config.cache.maxDeferredTurns" @change="setCache('maxDeferredTurns', ($event.target as HTMLInputElement).value)" />
         </Field>
       </template>
+    </Section>
+
+    <Section v-if="components.length" :title="t('config.customUi')" :icon="Puzzle" :help="t('config.customUi.hint')">
+      <template #actions><Switch v-model="customUi" :label="t('config.customUi.enable')" /></template>
+      <p v-if="customUiChanged && !customUi" class="xs muted">{{ t('config.customUi.changed') }}</p>
+      <ul class="custom-ui-list small">
+        <li v-for="c in components" :key="c.id" class="row tight">
+          <span class="grow ellipsis">{{ c.title }}</span>
+          <span class="xs faint">{{ t(`config.customUi.${c.mode}`) }} · {{ t(`config.customUi.${c.position}`) }}</span>
+        </li>
+      </ul>
     </Section>
 
     <Section :title="t('config.sampling')" :icon="Gauge" collapsible :open="false">

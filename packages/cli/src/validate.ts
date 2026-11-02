@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
+  INPUT_SHAPING_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -102,7 +102,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
           break;
         case 'structure':
           if (!structureIds.has(a!)) bad(`unknown structure \`${a}\``);
-          else if (rest[1] !== undefined && (rest[1] !== 'last' || p.structures[a!]!.kind !== 'custom')) bad('only custom structures support `::last`');
+          else if (rest[1] !== undefined && (rest[1] !== 'last' || !['custom', 'status'].includes(p.structures[a!]!.kind))) bad('only custom and status structures support `::last`');
           break;
         case 'workflow':
           if (a !== 'summary' && a !== 'hint') bad('expected summary | hint');
@@ -229,48 +229,108 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   if (env.thinking.name === env.result.name) diag.error('envelope thinking and result fields must differ', T);
   const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
   if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
-  const structureFields = new Set(Object.values(p.structures).filter((s) => !isInlineStructure(s)).map((s) => s.field));
+  // Ordering-prefixed names (I-135) may start with a digit (`1_thinking`).
+  const PREFIXED_FIELD_NAME = /^[A-Za-z0-9_]{1,64}$/;
   function checkNames(w: APreset['workflows'][number], where: Where) {
     const structs = Object.values(p.structures);
     const a = turnArtifacts(p.tools, w, w.stages, structs);
+    const L = a.layout;
+    const fieldRe = L.prefixed ? PREFIXED_FIELD_NAME : FIELD_NAME;
     const seenFields = new Map<string, string>();
+    for (const it of L.items) {
+      const label = it.type === 'stage' ? `stage ${it.stage.id}` : `structure ${it.structure.id}`;
+      const at = `workflow ${w.id}: ${label}`;
+      if (it.type === 'stage' && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      if (it.type === 'structure' && L.prefixed && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      const prev = seenFields.get(it.name);
+      if (prev) {
+        const mixed = prev.startsWith('structure') !== (it.type === 'structure');
+        // A stage and a structure sharing a name: reported from the stage's side.
+        const stageLabel = it.type === 'stage' ? label : prev;
+        diag.error(mixed ? `workflow ${w.id}: ${stageLabel}: field \`${it.name}\` collides with a structure field` : `${at}: field \`${it.name}\` is also used by ${prev}`, where);
+      }
+      seenFields.set(it.name, label);
+    }
     const seenTools = new Map<string, string>();
-    const anchor = structuresAnchorIndex(w, w.stages);
-    w.stages.forEach((s, i) => {
-      const field = a.fieldOf(s);
+    for (const s of w.stages) {
       const tool = a.toolOf(s);
       const param = a.paramOf(s);
       const at = `workflow ${w.id}: stage ${s.id}`;
-      if (!FIELD_NAME.test(field)) diag.error(`${at}: field name \`${field}\` must match ${FIELD_NAME}`, where);
-      if (structureFields.has(field)) diag.error(`${at}: field \`${field}\` collides with a structure field`, where);
-      if (seenFields.has(field)) diag.error(`${at}: field \`${field}\` is also used by stage ${seenFields.get(field)}`, where);
-      seenFields.set(field, s.id);
       if (!TOOL_NAME.test(tool)) diag.error(`${at}: tool name \`${tool}\` must match ${TOOL_NAME}`, where);
       if (seenTools.has(tool)) diag.error(`${at}: tool \`${tool}\` is also used by stage ${seenTools.get(tool)}`, where);
       if (tool === p.tools.submit.name || synthetic.has(tool)) diag.error(`${at}: tool \`${tool}\` collides with the submit / synthetic turn tool`, where);
       seenTools.set(tool, s.id);
-      if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
-      if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
-    });
-    checkOrder(w, a, anchor, where);
+      if (!fieldRe.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${fieldRe}`, where);
+      if (L.carriedBy(s).some((d) => a.structureFieldOf(d) === param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
+    }
+    checkOrder(w, a, where);
   }
   // Some APIs (Gemini) generate object fields in alphabetical order regardless of the schema order (I-94):
-  // stages must sort in order, and structures after the content they describe.
-  function checkOrder(w: APreset['workflows'][number], a: ReturnType<typeof turnArtifacts>, anchor: number, where: Where) {
+  // fields must sort in turn order. Ordering-prefixed names (I-135) do by construction.
+  function checkOrder(w: APreset['workflows'][number], a: ReturnType<typeof turnArtifacts>, where: Where) {
     const hint = 'APIs that generate fields alphabetically (Gemini) would write them out of order';
-    const fields = w.stages.map((s) => a.fieldOf(s));
-    for (let i = 1; i < fields.length; i++) {
-      if (fields[i]! < fields[i - 1]!) { diag.warn(`workflow ${w.id}: stage field \`${fields[i]}\` sorts before \`${fields[i - 1]}\`; ${hint}`, where); break; }
+    const L = a.layout;
+    if (L.prefixed) {
+      const names = L.items.map((it) => it.name);
+      for (let i = 1; i < names.length; i++)
+        if (names[i]! <= names[i - 1]!) { diag.warn(`workflow ${w.id}: field \`${names[i]}\` sorts before \`${names[i - 1]}\`; ${hint} (check tools.orderPrefix)`, where); break; }
+      return;
     }
-    if (anchor < 0) return;
-    const structs = [...structureFields].sort();
-    const first = structs[0];
-    if (first === undefined) return;
-    const last = fields.slice(0, anchor + 1).sort().at(-1)!;
-    if (first < last) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before stage field \`${last}\`; ${hint} (set tools.structurePrefix)`, where);
-    const param = a.paramOf(w.stages[anchor]!);
-    if (first < param) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before \`${param}\` of tool \`${a.toolOf(w.stages[anchor]!)}\`; ${hint} (set tools.structurePrefix)`, where);
+    const stageItems = L.items.flatMap((it, i) => (it.type === 'stage' ? [{ name: it.name, i }] : []));
+    for (let k = 1; k < stageItems.length; k++) {
+      if (stageItems[k]!.name < stageItems[k - 1]!.name) { diag.warn(`workflow ${w.id}: stage field \`${stageItems[k]!.name}\` sorts before \`${stageItems[k - 1]!.name}\`; ${hint}`, where); break; }
+    }
+    const explicit = (id: string) => w.structureOrder?.[id] !== undefined || p.structures[id]?.order !== undefined;
+    let warned = false;
+    L.items.forEach((it, i) => {
+      if (warned || it.type !== 'structure') return;
+      const before = stageItems.filter((x) => x.i < i).map((x) => x.name).sort().at(-1);
+      if (before !== undefined && it.name < before) { warned = true; return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts before stage field \`${before}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where); }
+      const after = explicit(it.structure.id) ? stageItems.filter((x) => x.i > i).map((x) => x.name).sort()[0] : undefined;
+      if (after !== undefined && it.name > after) { warned = true; return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts after stage field \`${after}\`; ${hint} (set tools.orderPrefix)`, where); }
+    });
+    // Multi-step: a stage tool's own parameter and the structures it carries.
+    for (const s of w.stages) {
+      const param = a.paramOf(s);
+      const own = L.items.findIndex((it) => it.type === 'stage' && it.stage === s);
+      for (const d of L.carriedBy(s)) {
+        const name = a.structureFieldOf(d);
+        const at = L.items.findIndex((it) => it.type === 'structure' && it.structure === d);
+        if (at > own ? name < param : name > param) {
+          diag.warn(`workflow ${w.id}: structure field \`${name}\` sorts ${at > own ? 'before' : 'after'} \`${param}\` of tool \`${a.toolOf(s)}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where);
+          return;
+        }
+      }
+    }
   }
+
+  // ── structure layout (I-134 / I-137) ──────────────────────────────────────
+  for (const s of Object.values(p.structures)) {
+    const o = s.order;
+    const ref = o === undefined || typeof o === 'number' ? undefined : 'before' in o ? o.before : o.after;
+    if (ref !== undefined && ref !== CONTENT_STAGE_REF && !stageIds.has(ref)) diag.warn(`structure ${s.id}: order refers to unknown stage \`${ref}\` (no workflow declares it)`, { file: M, path: `structures.${s.id}.order` });
+  }
+  for (const s of Object.values(p.structures)) {
+    const err = s.ui?.template !== undefined ? checkTemplate(s.ui.template) : null;
+    if (err) diag.error(`structure ${s.id}: ui.template: ${err.message}${err.line ? ` (template line ${err.line})` : ''}`, { file: M, path: `structures.${s.id}.ui.template` });
+    if (s.ui?.module !== undefined && !/\bexport\b/.test(s.ui.module)) diag.warn(`structure ${s.id}: ui.module exports nothing (expected \`export function mount(root, context)\`)`, { file: M, path: `structures.${s.id}.ui.module` });
+  }
+  for (const w of p.workflows) {
+    for (const sid of Object.keys(w.structureOrder ?? {})) {
+      const where = map.workflows.get(w.id) ?? {};
+      if (!structureIds.has(sid)) diag.warn(`workflow ${w.id}: structures.order: unknown structure \`${sid}\``, where);
+      else if (isInlineStructure(p.structures[sid]!)) diag.warn(`workflow ${w.id}: structures.order: ${sid} is inline and has no field`, where);
+    }
+  }
+  const layoutFeatures = [
+    p.tools.orderPrefix ? 'tools.orderPrefix' : '',
+    p.workflows.some((w) => w.stages.some((s) => s.order !== undefined)) ? 'stage order' : '',
+    p.workflows.some((w) => w.structureOrder) || Object.values(p.structures).some((s) => s.order !== undefined) ? 'structure order' : '',
+    Object.values(p.structures).some((s) => s.kind === 'status') ? 'status structures' : '',
+    Object.values(p.structures).some((s) => s.ui) ? 'structure ui' : '',
+  ].filter(Boolean);
+  if (layoutFeatures.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STRUCTURE_LAYOUT_SINCE) < 0))
+    diag.warn(`${layoutFeatures.join(', ')} need Advanced Preset ${STRUCTURE_LAYOUT_SINCE}: set minAdvancedPreset to ${STRUCTURE_LAYOUT_SINCE} or later`, { file: M, path: 'minAdvancedPreset' });
 
   // ── workflows ───────────────────────────────────────────────────────────────
   const usedStyles = new Set(Object.values(p.styles));

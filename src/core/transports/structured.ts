@@ -28,7 +28,7 @@ export function structuredDriver(input: DriverInput): Driver {
     const po = parsePartialObject(source(r), final);
     value = po.value;
     if (caller.schema) return envelopeTurn(ctx, art, po.value, final);
-    return parseTurnObject(po.value, { stages: ctx.stages, structures: ctx.structures, final, openKey: po.openKey, fieldOf: art.fieldOf });
+    return parseTurnObject(po.value, { stages: ctx.stages, structures: ctx.structures, final, openKey: po.openKey, fieldOf: art.fieldOf, structureFieldOf: art.structureFieldOf });
   };
   const jsonSchema = caller.schema
     ? { name: caller.schema.name ?? turn.name, value: schema, strict: false }

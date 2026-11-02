@@ -7377,9 +7377,11 @@ var FORMAT_VERSION = 3;
 var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-multi"];
 var TOOL_ARG_STREAMING = ["auto", "on", "off"];
 var BUILD_VAR_TYPES = ["string", "list", "dict"];
-var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom", "annotations"];
+var CONTENT_STAGE_REF = "@content";
+var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "custom", "annotations"];
 var INLINE_STRUCTURE_KINDS = ["annotations"];
 var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
+var CARD_POSITIONS = ["top", "bottom"];
 var USER_INPUT_MODES = ["keep", "truncate", "remove"];
 var DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = "{{content}}\n\n[{{time}} \xB7 {{location}}] {{event}}: {{summary}}";
 
@@ -7610,6 +7612,7 @@ var MACRO_HEADS = {
 };
 
 // ../protocol/src/structures.ts
+var STATUS_FIELDS = ["date", "weekday", "time", "location", "weather"];
 var STRUCTURE_PROPERTIES = {
   reply: [],
   impersonate: [],
@@ -7617,6 +7620,7 @@ var STRUCTURE_PROPERTIES = {
   memory: ["scope", "operation", "key", "content"],
   synopsis: ["time", "location", "event", "summary"],
   options: ["label", "content"],
+  status: STATUS_FIELDS,
   custom: [],
   annotations: []
 };
@@ -7667,6 +7671,13 @@ function structureFieldSchema(decl, expand = (t) => t) {
         },
         ...decl.count ? { minItems: decl.count, maxItems: decl.count } : {}
       });
+    case "status":
+      return withDesc({
+        type: "object",
+        properties: Object.fromEntries(STATUS_FIELDS.map((k) => [k, sub(k)])),
+        required: [...STATUS_FIELDS],
+        additionalProperties: false
+      });
     case "annotations":
       return withDesc({ type: "string" });
     case "custom":
@@ -7675,6 +7686,116 @@ function structureFieldSchema(decl, expand = (t) => t) {
 }
 function isStructureOptional(kind) {
   return kind === "memory" || kind === "recap";
+}
+
+// ../protocol/src/layout.ts
+var STRUCTURE_LAYOUT_SINCE = "1.10.0";
+var DEFAULT_ORDER_PREFIX = "{{n}}_";
+var STAGE_ORDER_STEP = 100;
+var fill = (text, vars) => {
+  let out = text;
+  for (const [k, v] of Object.entries(vars)) out = out.replaceAll(`{{${k}}}`, String(v));
+  return out;
+};
+function stageOrderKey(workflow, stage) {
+  if (typeof stage.order === "number") return stage.order;
+  const i = workflow.stages.findIndex((s) => s.id === stage.id);
+  return (i >= 0 ? i + 1 : workflow.stages.length + 1) * STAGE_ORDER_STEP;
+}
+function structureOrderOf(workflow, decl) {
+  return workflow.structureOrder?.[decl.id] ?? decl.order ?? { after: workflow.structuresAfter ?? CONTENT_STAGE_REF };
+}
+function anchorIndex(workflow, stages) {
+  if (workflow.structuresAfter) {
+    const i = stages.findIndex((s) => s.id === workflow.structuresAfter);
+    if (i >= 0) return i;
+  }
+  for (let i = stages.length - 1; i >= 0; i--) if (stages[i].kind === "content") return i;
+  return stages.length - 1;
+}
+function orderPrefixed(prefix, position, total, base) {
+  const digits = String(Math.max(total, 1)).length;
+  return fill(prefix, { n: String(position).padStart(digits, "0") }) + base;
+}
+function turnLayout(workflow, stages, allStructures, tools, stageBase) {
+  const structures = allStructures.filter((s) => !isInlineStructure(s));
+  const list = stages.map((stage, index) => ({ item: { type: "stage", stage, key: stageOrderKey(workflow, stage) }, rank: 0, index }));
+  const anchor = anchorIndex(workflow, stages);
+  const anchorKey = anchor >= 0 ? list[anchor].item.key : Number.POSITIVE_INFINITY;
+  const stageKey = (ref) => {
+    if (ref === CONTENT_STAGE_REF) {
+      for (let i2 = stages.length - 1; i2 >= 0; i2--) if (stages[i2].kind === "content") return list[i2].item.key;
+      return void 0;
+    }
+    const i = stages.findIndex((s) => s.id === ref);
+    return i >= 0 ? list[i].item.key : void 0;
+  };
+  structures.forEach((structure, index) => {
+    const o = structureOrderOf(workflow, structure);
+    let key;
+    let rank = 1;
+    if (typeof o === "number") key = o;
+    else if ("before" in o) {
+      const k = stageKey(o.before);
+      if (k === void 0) key = anchorKey;
+      else {
+        key = k;
+        rank = -1;
+      }
+    } else key = stageKey(o.after) ?? anchorKey;
+    list.push({ item: { type: "structure", structure, key }, rank, index });
+  });
+  list.sort((a, b) => a.item.key - b.item.key || a.rank - b.rank || a.index - b.index);
+  const prefix = tools.orderPrefix || "";
+  const total = list.length;
+  const items = list.map(({ item }, i) => {
+    const base = item.type === "stage" ? stageBase(item.stage) : item.structure.field;
+    const name = prefix ? orderPrefixed(prefix, i + 1, total, base) : base;
+    return { ...item, position: i + 1, name };
+  });
+  const stageItem = /* @__PURE__ */ new Map();
+  const structureItem = /* @__PURE__ */ new Map();
+  for (const it of items) {
+    if (it.type === "stage") stageItem.set(it.stage, it);
+    else structureItem.set(it.structure, it);
+  }
+  const hosts = /* @__PURE__ */ new Map();
+  items.forEach((it, i) => {
+    if (it.type !== "structure") return;
+    let host;
+    for (let j = i - 1; j >= 0 && !host; j--) {
+      const x = items[j];
+      if (x.type === "stage") host = x.stage;
+    }
+    for (let j = i + 1; j < items.length && !host; j++) {
+      const x = items[j];
+      if (x.type === "stage") host = x.stage;
+    }
+    if (host) hosts.set(it.structure, host);
+  });
+  const carriedBy = (stage) => items.flatMap((it) => it.type === "structure" && hosts.get(it.structure) === stage ? [it.structure] : []);
+  return {
+    items,
+    prefixed: Boolean(prefix),
+    stageField: (stage) => stageItem.get(stage)?.name ?? stageBase(stage),
+    structureField: (decl) => structureItem.get(decl)?.name ?? decl.field,
+    hostOf: (decl) => hosts.get(decl),
+    carriedBy,
+    stageParam: (stage, base) => {
+      const it = stageItem.get(stage);
+      return prefix && it && carriedBy(stage).length ? orderPrefixed(prefix, it.position, total, base) : base;
+    }
+  };
+}
+function withFieldName(decl, name) {
+  const r = (t) => t.replaceAll("{{field}}", name);
+  if (![decl.description, decl.formatPrompt.field, ...Object.values(decl.properties ?? {})].some((t) => t?.includes("{{field}}"))) return decl;
+  return {
+    ...decl,
+    ...decl.description !== void 0 ? { description: r(decl.description) } : {},
+    ...decl.properties ? { properties: Object.fromEntries(Object.entries(decl.properties).map(([k, v]) => [k, r(v)])) } : {},
+    formatPrompt: { ...decl.formatPrompt, field: r(decl.formatPrompt.field) }
+  };
 }
 
 // ../protocol/src/workflow.ts
@@ -7702,18 +7823,6 @@ function fillTemplate(text, vars) {
 }
 function activeStages(workflow, resolve2) {
   return workflow.stages.filter((s) => test(s.when, resolve2));
-}
-function terminalContentIndex(stages) {
-  for (let i = stages.length - 1; i >= 0; i--) if (stages[i].kind === "content") return i;
-  return -1;
-}
-function structuresAnchorIndex(workflow, stages) {
-  if (workflow.structuresAfter) {
-    const i = stages.findIndex((s) => s.id === workflow.structuresAfter);
-    if (i >= 0) return i;
-  }
-  const t = terminalContentIndex(stages);
-  return t >= 0 ? t : stages.length - 1;
 }
 function stageVars(stages, stage) {
   return { n: stages.indexOf(stage) + 1, stage: stage.id, actor: stage.actor, label: stage.label };
@@ -7757,40 +7866,58 @@ function turnArtifacts(tools, workflow, stages, allStructures, expand = same) {
     const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();
     return t || void 0;
   };
-  const anchor = structuresAnchorIndex(workflow, stages);
-  const fieldOf = (s) => stageFieldName(stages, s, tools);
+  const layout = turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const fieldOf = (s) => layout.stageField(s);
+  const structureFieldOf = (d) => layout.structureField(d);
   const toolOf = (s) => stageToolName(stages, s, tools);
-  const paramOf = (s) => stageParam(s, tools).name;
-  const structureProps = (properties, required) => {
-    for (const s of structures) {
-      properties[s.field] = structureFieldSchema(s, expand);
-      if (!isStructureOptional(s.kind)) required.push(s.field);
-    }
+  const paramOf = (s) => layout.stageParam(s, stageParam(s, tools).name);
+  const addStructure = (properties, required, d) => {
+    const name = structureFieldOf(d);
+    properties[name] = structureFieldSchema(withFieldName(d, name), expand);
+    if (!isStructureOptional(d.kind)) required.push(name);
   };
   const turnSchema = () => {
     const properties = {};
     const required = [];
-    stages.forEach((stage, i) => {
-      const name = fieldOf(stage);
-      properties[name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
-      if (!stage.optional) required.push(name);
-      if (i === anchor) structureProps(properties, required);
-    });
-    if (anchor < 0) structureProps(properties, required);
+    for (const it of layout.items) {
+      if (it.type === "structure") {
+        addStructure(properties, required, it.structure);
+        continue;
+      }
+      const stage = it.stage;
+      properties[it.name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
+      if (!stage.optional) required.push(it.name);
+    }
     return { type: "object", properties, required, additionalProperties: false };
   };
-  const stageTools = () => stages.map((stage, i) => {
+  const stageTools = () => stages.map((stage) => {
     const properties = {};
     const required = [];
     const param = stageParam(stage, tools);
-    properties[param.name] = stageSchema(stage, desc(param.description, stage), tools, expand);
-    required.push(param.name);
-    if (i === anchor) structureProps(properties, required);
+    const carried = layout.carriedBy(stage);
+    const own2 = layout.items.find((it) => it.type === "stage" && it.stage === stage);
+    const addOwn = () => {
+      const name = paramOf(stage);
+      properties[name] = stageSchema(stage, desc(param.description, stage), tools, expand);
+      required.push(name);
+    };
+    let ownAdded = false;
+    for (const d of carried) {
+      const at = layout.items.findIndex((it) => it.type === "structure" && it.structure === d);
+      if (!ownAdded && at > own2.position - 1) {
+        addOwn();
+        ownAdded = true;
+      }
+      addStructure(properties, required, d);
+    }
+    if (!ownAdded) addOwn();
     return tool(toolOf(stage), desc(stage.tool?.description ?? tools.stage.description, stage), { type: "object", properties, required, additionalProperties: false });
   });
   const keys = { thinking: tools.envelope.thinking.name, result: tools.envelope.result.name };
   return {
+    layout,
     fieldOf,
+    structureFieldOf,
     toolOf,
     paramOf,
     stageOfTool: (name) => stages.find((s) => toolOf(s) === name),
@@ -8458,8 +8585,16 @@ function activeStructures(preset, modules) {
 function actorName(preset, config, actor) {
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
 }
-function createMacroResolver(input, stages, workflow, buildVars) {
+function layoutOf(preset, workflow, stages, structures) {
+  return workflow && preset.tools ? turnLayout(workflow, stages, structures, preset.tools, (s) => stageFieldName(stages, s, preset.tools)) : void 0;
+}
+function createMacroResolver(input, stages, workflow, buildVars, structures) {
   const { preset, config, vars, data = {} } = input;
+  let layout = null;
+  const fieldName = (s) => {
+    if (layout === null) layout = structures ? layoutOf(preset, workflow, stages, structures) : void 0;
+    return layout?.structureField(s) ?? s.field;
+  };
   const paramText = (id, depth = 0) => {
     const p = preset.params.find((x) => x.id === id);
     if (!p) return "";
@@ -8504,7 +8639,7 @@ function createMacroResolver(input, stages, workflow, buildVars) {
         const s = preset.structures[a];
         if (!s) return "";
         if (b === "last") return data.customLast?.[a] ?? "";
-        return style === "dialogue" ? s.formatPrompt.tag : s.formatPrompt.field;
+        return style === "dialogue" ? s.formatPrompt.tag : s.formatPrompt.field.replaceAll("{{field}}", fieldName(s));
       }
       case "workflow":
         if (a === "hint") return workflow?.hint ?? "";
@@ -8571,14 +8706,15 @@ ${joined}
   flush();
   return out;
 }
-function workflowContent(preset, workflow, stages, style, transport, config) {
+function workflowContent(preset, workflow, stages, style, transport, config, structures = []) {
   const s = workflow.sections;
+  const layout = preset.tools?.orderPrefix ? layoutOf(preset, workflow, stages, structures) : void 0;
   const out = [...s.preamble ?? [], ...s.intro[style] ?? []];
   stages.forEach((stage, i) => {
     const body = s.stages[stage.id]?.[style];
     if (!body?.length) return;
     if (style === "imperative" && preset.stageHeading) {
-      const target = transport === "tool-multi" ? stageToolName(stages, stage, preset.tools) : stageFieldName(stages, stage, preset.tools);
+      const target = transport === "tool-multi" ? stageToolName(stages, stage, preset.tools) : layout?.stageField(stage) ?? stageFieldName(stages, stage, preset.tools);
       const heading = preset.stageHeading.replaceAll("{{n}}", String(i + 1)).replaceAll("{{label}}", stage.label).replaceAll("{{actor}}", actorName(preset, config, stage.actor)).replaceAll("{{target}}", target).replaceAll("{{optional}}", stage.optional ? " (optional)" : "");
       const [first, ...rest] = body;
       out.push({ ...first, pieces: [{ text: `${heading}
@@ -8600,7 +8736,7 @@ function assemble(input, workflowOverride) {
   const modules = activeModules(preset, config, resolve2);
   const structures = activeStructures(preset, modules);
   const buildVars = computeBuildVars(preset.vars, modules);
-  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars);
+  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars, structures);
   const expand = (text) => expandMacros(text, macro);
   const activeIds = new Set(modules.map((m) => m.id));
   const warnings = [];
@@ -8615,7 +8751,7 @@ function assemble(input, workflowOverride) {
   }
   if (workflow) {
     const list = blocksByRegion.get(preset.workflowRegion) ?? [];
-    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config);
+    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config, structures);
     for (const b of renderContent(content, resolve2, expand, templateRenderer(getScope, warnings, `workflow ${workflow.id}`))) {
       const last = list[list.length - 1];
       if (!b.role && last && !last.role && last.workflow) last.text += `
@@ -9293,6 +9429,24 @@ var ROLES4 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
 var STAGE_KINDS = ["text", "content", "patch"];
 var STYLES2 = ["dialogue", "imperative"];
+function compileStructureOrder(v, diag, where) {
+  if (v === void 0 || v === null) return void 0;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string") {
+    const m = /^(before|after)\s*:\s*(\S+)$/.exec(v.trim());
+    if (m) return m[1] === "before" ? { before: m[2] } : { after: m[2] };
+  }
+  if (isObj4(v)) {
+    const keys = Object.keys(v);
+    if (keys.length === 1 && (keys[0] === "before" || keys[0] === "after") && typeof v[keys[0]] === "string" && v[keys[0]]) {
+      const ref = v[keys[0]];
+      return keys[0] === "before" ? { before: ref } : { after: ref };
+    }
+  }
+  diag.error(`order must be a number or { before | after: <stage id | ${CONTENT_STAGE_REF}> }`, where);
+  return void 0;
+}
+var UI_FILE_RE = /^ui\/.+/;
 var NATIVE_PROMPTS = {
   main: { name: "Main Prompt", marker: false },
   worldInfoBefore: { name: "World Info (before)", marker: true },
@@ -9360,7 +9514,17 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   if (hint) tools.jsonStringHint = hint;
   tools.structurePrefix = o.structurePrefix === void 0 || o.structurePrefix === null ? D.structurePrefix : str2(o.structurePrefix);
   if (tools.structurePrefix && !/^[A-Za-z_]\w*$/.test(tools.structurePrefix)) diag.error(`tools.structurePrefix \`${tools.structurePrefix}\` must be letters, digits and underscores, not starting with a digit`, at("structurePrefix"));
-  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "structurePrefix", "jsonStringHint", "callerSchemaHint", ...legacy]);
+  if (o.orderPrefix !== void 0 && o.orderPrefix !== null && o.orderPrefix !== false) {
+    const prefix = o.orderPrefix === true ? DEFAULT_ORDER_PREFIX : str2(o.orderPrefix);
+    if (!prefix.includes("{{n}}")) diag.error("tools.orderPrefix must contain `{{n}}` (the position in the turn)", at("orderPrefix"));
+    else if (!/^\w*$/.test(prefix.replaceAll("{{n}}", "1"))) diag.error(`tools.orderPrefix \`${prefix}\` may only hold letters, digits, underscores and {{n}}`, at("orderPrefix"));
+    else {
+      tools.orderPrefix = prefix;
+      if (o.structurePrefix !== void 0 && o.structurePrefix !== null && o.structurePrefix !== "") diag.warn("tools.structurePrefix is ignored when tools.orderPrefix is set", at("structurePrefix"));
+      tools.structurePrefix = "";
+    }
+  }
+  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "structurePrefix", "orderPrefix", "jsonStringHint", "callerSchemaHint", ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }
@@ -9539,6 +9703,60 @@ function compile(tree) {
   }
   const tools = compileTools(raw.tools, diag, text, M);
   const structures = {};
+  const ordered = Boolean(tools.orderPrefix);
+  const compileStructureUi = (src, kind, where) => {
+    if (src === void 0 || src === null) return void 0;
+    if (!isObj4(src)) {
+      diag.error("ui must be a mapping (position, order, template, module, style)", where);
+      return void 0;
+    }
+    const ui = {};
+    if (src.position !== void 0) {
+      if (CARD_POSITIONS.includes(src.position)) ui.position = src.position;
+      else diag.error(`ui.position must be ${CARD_POSITIONS.join(" | ")}`, { ...where, path: `${where.path}.position` });
+    }
+    if (src.order !== void 0) {
+      if (typeof src.order === "number" && Number.isFinite(src.order)) ui.order = src.order;
+      else diag.error("ui.order must be a number", { ...where, path: `${where.path}.order` });
+    }
+    for (const k of ["template", "module", "style"]) {
+      if (src[k] === void 0 || src[k] === null) continue;
+      const at = { ...where, path: `${where.path}.${k}` };
+      if (kind !== "custom") {
+        diag.error(`ui.${k}: only custom structures bring their own component`, at);
+        continue;
+      }
+      if (typeof src[k] !== "string") {
+        diag.error(`ui.${k} must be a string (source text or a ./ui/\u2026 file path)`, at);
+        continue;
+      }
+      let code = src[k];
+      const path = /^\.\/(\S+)$/.exec(code.trim())?.[1];
+      if (path) {
+        const file = path.replace(/^\.\//, "");
+        if (!UI_FILE_RE.test(file)) {
+          diag.error(`ui.${k}: component files live under ui/ (got \`${code.trim()}\`)`, at);
+          continue;
+        }
+        const got = tree.get(file);
+        if (got === void 0) {
+          diag.error(`ui.${k}: file \`${file}\` not found`, at);
+          continue;
+        }
+        code = got;
+      }
+      if (!code.trim()) {
+        diag.warn(`ui.${k} is empty`, at);
+        continue;
+      }
+      ui[k] = code;
+    }
+    if (ui.template !== void 0 && ui.module !== void 0) diag.error("ui: use either template or module, not both", where);
+    const known = /* @__PURE__ */ new Set(["position", "order", "template", "module", "style"]);
+    for (const k of Object.keys(src)) if (!known.has(k)) diag.warn(`unknown ui key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    if (ui.style !== void 0 && ui.template === void 0 && ui.module === void 0) diag.warn("ui.style only applies to a template or module component", where);
+    return Object.keys(ui).length ? ui : void 0;
+  };
   for (const [sid, s] of Object.entries(isObj4(raw.structures) ? raw.structures : {})) {
     const o = isObj4(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
@@ -9549,9 +9767,9 @@ function compile(tree) {
     const base = str2(o.field, sid);
     const field = inline ? base : `${tools.structurePrefix ?? ""}${base}`;
     const fieldText = (v, path, check = true) => {
-      const t = str2(v).replaceAll("{{field}}", field);
-      if (check && !inline && field !== base && t.includes(`\`${base}\``))
-        diag.warn(`mentions \`${base}\`, but the field is \`${field}\` (tools.structurePrefix); write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
+      const t = ordered ? str2(v) : str2(v).replaceAll("{{field}}", field);
+      if (check && !inline && (ordered || field !== base) && t.includes(`\`${base}\``))
+        diag.warn(`mentions \`${base}\`, but the field is ${ordered ? "ordering-prefixed (tools.orderPrefix)" : `\`${field}\` (tools.structurePrefix)`}; write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
       return text(t, where);
     };
     const decl = {
@@ -9575,6 +9793,13 @@ function compile(tree) {
       if (Object.keys(props).length) decl.properties = props;
     }
     if (typeof o.count === "number") decl.count = o.count;
+    const order = compileStructureOrder(o.order, diag, { ...where, path: `${where.path}.order` });
+    if (order !== void 0) {
+      if (inline) diag.warn("inline structures have no field: `order` is ignored", { ...where, path: `${where.path}.order` });
+      else decl.order = order;
+    }
+    const ui = compileStructureUi(o.ui, kind, { ...where, path: `${where.path}.ui` });
+    if (ui) decl.ui = ui;
     if (kind === "custom") {
       decl.shape = o.shape === "kv" ? "kv" : "text";
       decl.display = o.display === "hidden" ? "hidden" : "card";
@@ -9990,6 +10215,10 @@ function compileWorkflow(file, src, diag, expr, content, text) {
       }
       stage.tool = out;
     }
+    if (o.order !== void 0) {
+      if (typeof o.order === "number" && Number.isFinite(o.order)) stage.order = o.order;
+      else diag.error("stage order must be a number", { ...where, path: `${where.path}.order` });
+    }
     if (o.executor !== void 0 && o.executor !== "default") diag.error("only `executor: default` is supported in v1", where);
     const w = expr(o.when, where);
     if (w) stage.when = w;
@@ -10043,11 +10272,38 @@ function compileWorkflow(file, src, diag, expr, content, text) {
   const wf = { id, name: str2(fm.name, id), kind, stages, sections };
   if (fm.description !== void 0) wf.description = str2(fm.description).trim();
   if (fm.hint !== void 0) wf.hint = str2(fm.hint).trim();
+  let prevKey = Number.NEGATIVE_INFINITY;
+  stages.forEach((s, i) => {
+    const key = typeof s.order === "number" ? s.order : (i + 1) * 100;
+    if (key <= prevKey) diag.error(`stage ${s.id}: order ${key} must be greater than the previous stage's (${prevKey}); stages keep their declared order`, { file, path: `stages[${i}].order` });
+    prevKey = key;
+  });
   const after = isObj4(fm.structures) ? fm.structures.after : void 0;
   if (after !== void 0) {
     wf.structuresAfter = str2(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
   }
+  const orderSrc = isObj4(fm.structures) ? fm.structures.order : void 0;
+  if (orderSrc !== void 0) {
+    if (!isObj4(orderSrc)) diag.error("structures.order must map structure ids to positions", { file, path: "structures.order" });
+    else {
+      const out = {};
+      for (const [sid, v] of Object.entries(orderSrc)) {
+        const where = { file, path: `structures.order.${sid}` };
+        const o = compileStructureOrder(v, diag, where);
+        if (o === void 0) continue;
+        const ref = typeof o === "number" ? void 0 : "before" in o ? o.before : o.after;
+        if (ref !== void 0 && ref !== CONTENT_STAGE_REF && !stages.some((s) => s.id === ref)) {
+          diag.error(`unknown stage \`${ref}\` (expected a stage of this workflow or ${CONTENT_STAGE_REF})`, where);
+          continue;
+        }
+        if (ref === CONTENT_STAGE_REF && !stages.some((s) => s.kind === "content")) diag.warn(`${CONTENT_STAGE_REF}: this workflow has no content stage`, where);
+        out[sid] = o;
+      }
+      if (Object.keys(out).length) wf.structureOrder = out;
+    }
+  }
+  for (const k of Object.keys(isObj4(fm.structures) ? fm.structures : {})) if (k !== "after" && k !== "order") diag.warn(`unknown structures key \`${k}\` (expected after | order)`, { file, path: `structures.${k}` });
   return wf;
 }
 function compileCarrier(src, regions, presetName, diag) {
@@ -10194,7 +10450,7 @@ function validate(p, map, diag) {
           break;
         case "structure":
           if (!structureIds.has(a)) bad(`unknown structure \`${a}\``);
-          else if (rest[1] !== void 0 && (rest[1] !== "last" || p.structures[a].kind !== "custom")) bad("only custom structures support `::last`");
+          else if (rest[1] !== void 0 && (rest[1] !== "last" || !["custom", "status"].includes(p.structures[a].kind))) bad("only custom and status structures support `::last`");
           break;
         case "workflow":
           if (a !== "summary" && a !== "hint") bad("expected summary | hint");
@@ -10309,49 +10565,113 @@ function validate(p, map, diag) {
   if (env.thinking.name === env.result.name) diag.error("envelope thinking and result fields must differ", T);
   const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
   if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
-  const structureFields = new Set(Object.values(p.structures).filter((s) => !isInlineStructure(s)).map((s) => s.field));
+  const PREFIXED_FIELD_NAME = /^[A-Za-z0-9_]{1,64}$/;
   function checkNames(w, where) {
     const structs = Object.values(p.structures);
     const a = turnArtifacts(p.tools, w, w.stages, structs);
+    const L = a.layout;
+    const fieldRe = L.prefixed ? PREFIXED_FIELD_NAME : FIELD_NAME;
     const seenFields = /* @__PURE__ */ new Map();
+    for (const it of L.items) {
+      const label = it.type === "stage" ? `stage ${it.stage.id}` : `structure ${it.structure.id}`;
+      const at = `workflow ${w.id}: ${label}`;
+      if (it.type === "stage" && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      if (it.type === "structure" && L.prefixed && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      const prev = seenFields.get(it.name);
+      if (prev) {
+        const mixed = prev.startsWith("structure") !== (it.type === "structure");
+        const stageLabel = it.type === "stage" ? label : prev;
+        diag.error(mixed ? `workflow ${w.id}: ${stageLabel}: field \`${it.name}\` collides with a structure field` : `${at}: field \`${it.name}\` is also used by ${prev}`, where);
+      }
+      seenFields.set(it.name, label);
+    }
     const seenTools = /* @__PURE__ */ new Map();
-    const anchor = structuresAnchorIndex(w, w.stages);
-    w.stages.forEach((s, i) => {
-      const field = a.fieldOf(s);
+    for (const s of w.stages) {
       const tool2 = a.toolOf(s);
       const param = a.paramOf(s);
       const at = `workflow ${w.id}: stage ${s.id}`;
-      if (!FIELD_NAME.test(field)) diag.error(`${at}: field name \`${field}\` must match ${FIELD_NAME}`, where);
-      if (structureFields.has(field)) diag.error(`${at}: field \`${field}\` collides with a structure field`, where);
-      if (seenFields.has(field)) diag.error(`${at}: field \`${field}\` is also used by stage ${seenFields.get(field)}`, where);
-      seenFields.set(field, s.id);
       if (!TOOL_NAME.test(tool2)) diag.error(`${at}: tool name \`${tool2}\` must match ${TOOL_NAME}`, where);
       if (seenTools.has(tool2)) diag.error(`${at}: tool \`${tool2}\` is also used by stage ${seenTools.get(tool2)}`, where);
       if (tool2 === p.tools.submit.name || synthetic.has(tool2)) diag.error(`${at}: tool \`${tool2}\` collides with the submit / synthetic turn tool`, where);
       seenTools.set(tool2, s.id);
-      if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
-      if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
-    });
-    checkOrder(w, a, anchor, where);
+      if (!fieldRe.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${fieldRe}`, where);
+      if (L.carriedBy(s).some((d) => a.structureFieldOf(d) === param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
+    }
+    checkOrder(w, a, where);
   }
-  function checkOrder(w, a, anchor, where) {
+  function checkOrder(w, a, where) {
     const hint = "APIs that generate fields alphabetically (Gemini) would write them out of order";
-    const fields2 = w.stages.map((s) => a.fieldOf(s));
-    for (let i = 1; i < fields2.length; i++) {
-      if (fields2[i] < fields2[i - 1]) {
-        diag.warn(`workflow ${w.id}: stage field \`${fields2[i]}\` sorts before \`${fields2[i - 1]}\`; ${hint}`, where);
+    const L = a.layout;
+    if (L.prefixed) {
+      const names = L.items.map((it) => it.name);
+      for (let i = 1; i < names.length; i++)
+        if (names[i] <= names[i - 1]) {
+          diag.warn(`workflow ${w.id}: field \`${names[i]}\` sorts before \`${names[i - 1]}\`; ${hint} (check tools.orderPrefix)`, where);
+          break;
+        }
+      return;
+    }
+    const stageItems = L.items.flatMap((it, i) => it.type === "stage" ? [{ name: it.name, i }] : []);
+    for (let k = 1; k < stageItems.length; k++) {
+      if (stageItems[k].name < stageItems[k - 1].name) {
+        diag.warn(`workflow ${w.id}: stage field \`${stageItems[k].name}\` sorts before \`${stageItems[k - 1].name}\`; ${hint}`, where);
         break;
       }
     }
-    if (anchor < 0) return;
-    const structs = [...structureFields].sort();
-    const first = structs[0];
-    if (first === void 0) return;
-    const last = fields2.slice(0, anchor + 1).sort().at(-1);
-    if (first < last) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before stage field \`${last}\`; ${hint} (set tools.structurePrefix)`, where);
-    const param = a.paramOf(w.stages[anchor]);
-    if (first < param) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before \`${param}\` of tool \`${a.toolOf(w.stages[anchor])}\`; ${hint} (set tools.structurePrefix)`, where);
+    const explicit = (id) => w.structureOrder?.[id] !== void 0 || p.structures[id]?.order !== void 0;
+    let warned = false;
+    L.items.forEach((it, i) => {
+      if (warned || it.type !== "structure") return;
+      const before = stageItems.filter((x) => x.i < i).map((x) => x.name).sort().at(-1);
+      if (before !== void 0 && it.name < before) {
+        warned = true;
+        return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts before stage field \`${before}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where);
+      }
+      const after = explicit(it.structure.id) ? stageItems.filter((x) => x.i > i).map((x) => x.name).sort()[0] : void 0;
+      if (after !== void 0 && it.name > after) {
+        warned = true;
+        return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts after stage field \`${after}\`; ${hint} (set tools.orderPrefix)`, where);
+      }
+    });
+    for (const s of w.stages) {
+      const param = a.paramOf(s);
+      const own2 = L.items.findIndex((it) => it.type === "stage" && it.stage === s);
+      for (const d of L.carriedBy(s)) {
+        const name = a.structureFieldOf(d);
+        const at = L.items.findIndex((it) => it.type === "structure" && it.structure === d);
+        if (at > own2 ? name < param : name > param) {
+          diag.warn(`workflow ${w.id}: structure field \`${name}\` sorts ${at > own2 ? "before" : "after"} \`${param}\` of tool \`${a.toolOf(s)}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where);
+          return;
+        }
+      }
+    }
   }
+  for (const s of Object.values(p.structures)) {
+    const o = s.order;
+    const ref = o === void 0 || typeof o === "number" ? void 0 : "before" in o ? o.before : o.after;
+    if (ref !== void 0 && ref !== CONTENT_STAGE_REF && !stageIds.has(ref)) diag.warn(`structure ${s.id}: order refers to unknown stage \`${ref}\` (no workflow declares it)`, { file: M, path: `structures.${s.id}.order` });
+  }
+  for (const s of Object.values(p.structures)) {
+    const err = s.ui?.template !== void 0 ? checkTemplate(s.ui.template) : null;
+    if (err) diag.error(`structure ${s.id}: ui.template: ${err.message}${err.line ? ` (template line ${err.line})` : ""}`, { file: M, path: `structures.${s.id}.ui.template` });
+    if (s.ui?.module !== void 0 && !/\bexport\b/.test(s.ui.module)) diag.warn(`structure ${s.id}: ui.module exports nothing (expected \`export function mount(root, context)\`)`, { file: M, path: `structures.${s.id}.ui.module` });
+  }
+  for (const w of p.workflows) {
+    for (const sid of Object.keys(w.structureOrder ?? {})) {
+      const where = map.workflows.get(w.id) ?? {};
+      if (!structureIds.has(sid)) diag.warn(`workflow ${w.id}: structures.order: unknown structure \`${sid}\``, where);
+      else if (isInlineStructure(p.structures[sid])) diag.warn(`workflow ${w.id}: structures.order: ${sid} is inline and has no field`, where);
+    }
+  }
+  const layoutFeatures = [
+    p.tools.orderPrefix ? "tools.orderPrefix" : "",
+    p.workflows.some((w) => w.stages.some((s) => s.order !== void 0)) ? "stage order" : "",
+    p.workflows.some((w) => w.structureOrder) || Object.values(p.structures).some((s) => s.order !== void 0) ? "structure order" : "",
+    Object.values(p.structures).some((s) => s.kind === "status") ? "status structures" : "",
+    Object.values(p.structures).some((s) => s.ui) ? "structure ui" : ""
+  ].filter(Boolean);
+  if (layoutFeatures.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STRUCTURE_LAYOUT_SINCE) < 0))
+    diag.warn(`${layoutFeatures.join(", ")} need Advanced Preset ${STRUCTURE_LAYOUT_SINCE}: set minAdvancedPreset to ${STRUCTURE_LAYOUT_SINCE} or later`, { file: M, path: "minAdvancedPreset" });
   const usedStyles = new Set(Object.values(p.styles));
   for (const w of p.workflows) {
     const where = map.workflows.get(w.id) ?? {};
@@ -10418,7 +10738,7 @@ function validate(p, map, diag) {
 var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
 function isSourcePath(rel) {
   const p = rel.split(sep).join("/");
-  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p);
+  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p) || UI_FILE_RE.test(p);
 }
 async function walk(dir, root, out) {
   for (const ent of await readdir(dir, { withFileTypes: true })) {
@@ -10512,10 +10832,12 @@ function preview(source, o) {
   const transport = vars.transport;
   const wf = a.workflow;
   const artifacts = {};
+  let fields = [];
   if (wf) {
     const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
     const synthetic = preset.syntheticTurns.find((s) => s.id === config.connection.syntheticTurn);
     const init2 = synthetic && transport.startsWith("tool-") ? [{ type: "function", function: { name: synthetic.tool.name, description: a.expand(synthetic.tool.description), parameters: { type: "object", properties: {} } } }] : [];
+    if (transport === "structured" || transport.startsWith("tool-")) fields = t.layout.items.map((it) => `${it.name}${it.type === "structure" ? ` (${it.structure.id})` : ""}`);
     if (transport === "structured") artifacts.schema = t.schema();
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
@@ -10532,6 +10854,7 @@ function preview(source, o) {
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
+  if (fields.length) lines.push(`fields: ${fields.join(" \u2192 ")}`);
   for (const r of preset.regions) {
     if (r.native) {
       rule(`${r.id} (native)`);

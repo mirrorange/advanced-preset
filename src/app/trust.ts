@@ -3,9 +3,10 @@
  * so a preset or user-module file containing them is only installed after the user confirms.
  * Built-in presets and the `ap dev` source (the author's own build) are trusted as they are.
  */
-import { presetTemplates, userModulesCode, type APreset, type UserModule } from '@advanced-preset/protocol';
+import { presetTemplates, structureComponents, userModulesCode, type APreset, type UserModule } from '@advanced-preset/protocol';
 import { confirmPopup, escapeHtml } from '@/st/host';
-import { presetName, t } from '@/i18n';
+import { presetName, pt, t } from '@/i18n';
+import { customUiDecided, setCustomUi } from '@/store/custom-ui';
 
 /** Thrown when the user declines; callers stop quietly (no error toast). */
 export class TrustDeclined extends Error {
@@ -51,4 +52,30 @@ export async function confirmUserModuleTemplates(modules: UserModule[]): Promise
   if (!code.length) return;
   const ok = await confirmPopup(dialog(t('trust.modulesTitle'), t('trust.modules', { n: modules.length }), code.length, sampleOf(code)), t('trust.import'), t('common.cancel'));
   if (!ok) throw new TrustDeclined();
+}
+
+/**
+ * Custom structure components (I-137): ask whether to trust and enable them. Declining installs the
+ * preset anyway, with the components hidden (they can be enabled later under Config → Custom UI).
+ * Returns the decision.
+ */
+export async function askCustomUi(preset: APreset): Promise<boolean> {
+  const list = structureComponents(preset);
+  if (!list.length) return false;
+  const names = list.map((c) => pt(preset, 'structures', c.id, 'title', preset.structures[c.id]?.title || c.id)).join(t('common.listSeparator'));
+  const html = [
+    `<h3>${escapeHtml(t('trust.uiTitle'))}</h3>`,
+    `<p>${escapeHtml(t('trust.uiBody', { name: presetName(preset), n: list.length, list: names }))}</p>`,
+    `<p>${escapeHtml(t('trust.uiRisk'))}</p>`,
+    `<pre style="text-align:start;max-height:12em;overflow:auto;white-space:pre-wrap;font-size:0.85em">${escapeHtml(sampleOf(list.map((c) => [c.code, c.style ?? ''].filter(Boolean).join('\n\n'))))}</pre>`,
+  ].join('');
+  const ok = await confirmPopup(html, t('trust.enableUi'), t('trust.notNow'));
+  setCustomUi(preset, ok);
+  return ok;
+}
+
+/** On install / update: ask unless the user already decided about this exact component code. */
+export async function confirmCustomUi(preset: APreset): Promise<void> {
+  if (!structureComponents(preset).length || customUiDecided(preset)) return;
+  await askCustomUi(preset);
 }

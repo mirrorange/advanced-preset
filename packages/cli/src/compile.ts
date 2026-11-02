@@ -23,6 +23,7 @@ import {
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
   DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode,
+  CARD_POSITIONS, CONTENT_STAGE_REF, DEFAULT_ORDER_PREFIX, type CardPosition, type StructureOrder, type StructureUi,
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
@@ -65,6 +66,31 @@ const ROLES: Role[] = ['system', 'user', 'assistant'];
 const ANCHORS: SemanticAnchor[] = ['historyStart', 'historyEnd', 'tail'];
 const STAGE_KINDS: StageKind[] = ['text', 'content', 'patch'];
 const STYLES: Style[] = ['dialogue', 'imperative'];
+
+/**
+ * Structure position (I-134): a sort key, or `{ before | after: <stage id | @content> }`.
+ * The shorthand strings `before:<ref>` / `after:<ref>` are accepted too.
+ */
+function compileStructureOrder(v: unknown, diag: Diagnostics, where: Where): StructureOrder | undefined {
+  if (v === undefined || v === null) return undefined;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === 'string') {
+    const m = /^(before|after)\s*:\s*(\S+)$/.exec(v.trim());
+    if (m) return m[1] === 'before' ? { before: m[2]! } : { after: m[2]! };
+  }
+  if (isObj(v)) {
+    const keys = Object.keys(v);
+    if (keys.length === 1 && (keys[0] === 'before' || keys[0] === 'after') && typeof v[keys[0]] === 'string' && v[keys[0]]) {
+      const ref = v[keys[0]] as string;
+      return keys[0] === 'before' ? { before: ref } : { after: ref };
+    }
+  }
+  diag.error(`order must be a number or { before | after: <stage id | ${CONTENT_STAGE_REF}> }`, where);
+  return undefined;
+}
+
+/** Files a structure UI field may point at (`./ui/card.ejs`): kept in the source tree by io.ts. */
+export const UI_FILE_RE = /^ui\/.+/;
 
 /** ST native prompts the Carrier may reference by identifier. */
 export const NATIVE_PROMPTS: Record<string, { name: string; marker: boolean }> = {
@@ -141,7 +167,18 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
   if (hint) tools.jsonStringHint = hint;
   tools.structurePrefix = o.structurePrefix === undefined || o.structurePrefix === null ? D.structurePrefix! : str(o.structurePrefix);
   if (tools.structurePrefix && !/^[A-Za-z_]\w*$/.test(tools.structurePrefix)) diag.error(`tools.structurePrefix \`${tools.structurePrefix}\` must be letters, digits and underscores, not starting with a digit`, at('structurePrefix'));
-  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'structurePrefix', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
+  // Unified ordering prefix (I-135): replaces structurePrefix and the stage-number prefixes.
+  if (o.orderPrefix !== undefined && o.orderPrefix !== null && o.orderPrefix !== false) {
+    const prefix = o.orderPrefix === true ? DEFAULT_ORDER_PREFIX : str(o.orderPrefix);
+    if (!prefix.includes('{{n}}')) diag.error('tools.orderPrefix must contain `{{n}}` (the position in the turn)', at('orderPrefix'));
+    else if (!/^\w*$/.test(prefix.replaceAll('{{n}}', '1'))) diag.error(`tools.orderPrefix \`${prefix}\` may only hold letters, digits, underscores and {{n}}`, at('orderPrefix'));
+    else {
+      tools.orderPrefix = prefix;
+      if (o.structurePrefix !== undefined && o.structurePrefix !== null && o.structurePrefix !== '') diag.warn('tools.structurePrefix is ignored when tools.orderPrefix is set', at('structurePrefix'));
+      tools.structurePrefix = '';
+    }
+  }
+  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'structurePrefix', 'orderPrefix', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }
@@ -334,7 +371,45 @@ export function compile(tree: SourceTree): CompileResult {
 
   // ── structures ──────────────────────────────────────────────────────────────
   // Field names get `tools.structurePrefix` (I-94); `{{field}}` in the field-style texts is the final name.
+  // With `tools.orderPrefix` (I-135) the final name depends on the turn: `{{field}}` stays for the runtime.
   const structures: Record<string, StructureDecl> = {};
+  const ordered = Boolean(tools.orderPrefix);
+  /** `ui:` of a structure: card position / order; custom structures may bring a template or module (I-137). */
+  const compileStructureUi = (src: unknown, kind: string, where: Where): StructureUi | undefined => {
+    if (src === undefined || src === null) return undefined;
+    if (!isObj(src)) { diag.error('ui must be a mapping (position, order, template, module, style)', where); return undefined; }
+    const ui: StructureUi = {};
+    if (src.position !== undefined) {
+      if (CARD_POSITIONS.includes(src.position as CardPosition)) ui.position = src.position as CardPosition;
+      else diag.error(`ui.position must be ${CARD_POSITIONS.join(' | ')}`, { ...where, path: `${where.path}.position` });
+    }
+    if (src.order !== undefined) {
+      if (typeof src.order === 'number' && Number.isFinite(src.order)) ui.order = src.order;
+      else diag.error('ui.order must be a number', { ...where, path: `${where.path}.order` });
+    }
+    for (const k of ['template', 'module', 'style'] as const) {
+      if (src[k] === undefined || src[k] === null) continue;
+      const at = { ...where, path: `${where.path}.${k}` };
+      if (kind !== 'custom') { diag.error(`ui.${k}: only custom structures bring their own component`, at); continue; }
+      if (typeof src[k] !== 'string') { diag.error(`ui.${k} must be a string (source text or a ./ui/… file path)`, at); continue; }
+      let code = src[k] as string;
+      const path = /^\.\/(\S+)$/.exec(code.trim())?.[1];
+      if (path) {
+        const file = path.replace(/^\.\//, '');
+        if (!UI_FILE_RE.test(file)) { diag.error(`ui.${k}: component files live under ui/ (got \`${code.trim()}\`)`, at); continue; }
+        const got = tree.get(file);
+        if (got === undefined) { diag.error(`ui.${k}: file \`${file}\` not found`, at); continue; }
+        code = got;
+      }
+      if (!code.trim()) { diag.warn(`ui.${k} is empty`, at); continue; }
+      ui[k] = code;
+    }
+    if (ui.template !== undefined && ui.module !== undefined) diag.error('ui: use either template or module, not both', where);
+    const known = new Set(['position', 'order', 'template', 'module', 'style']);
+    for (const k of Object.keys(src)) if (!known.has(k)) diag.warn(`unknown ui key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    if (ui.style !== undefined && ui.template === undefined && ui.module === undefined) diag.warn('ui.style only applies to a template or module component', where);
+    return Object.keys(ui).length ? ui : undefined;
+  };
   for (const [sid, s] of Object.entries(isObj(raw.structures) ? raw.structures : {})) {
     const o = isObj(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
@@ -345,9 +420,9 @@ export function compile(tree: SourceTree): CompileResult {
     const base = str(o.field, sid);
     const field = inline ? base : `${tools.structurePrefix ?? ''}${base}`;
     const fieldText = (v: unknown, path: string, check = true) => {
-      const t = str(v).replaceAll('{{field}}', field);
-      if (check && !inline && field !== base && t.includes(`\`${base}\``))
-        diag.warn(`mentions \`${base}\`, but the field is \`${field}\` (tools.structurePrefix); write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
+      const t = ordered ? str(v) : str(v).replaceAll('{{field}}', field);
+      if (check && !inline && (ordered || field !== base) && t.includes(`\`${base}\``))
+        diag.warn(`mentions \`${base}\`, but the field is ${ordered ? 'ordering-prefixed (tools.orderPrefix)' : `\`${field}\` (tools.structurePrefix)`}; write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
       return text(t, where);
     };
     const decl: StructureDecl = {
@@ -368,6 +443,13 @@ export function compile(tree: SourceTree): CompileResult {
       if (Object.keys(props).length) decl.properties = props;
     }
     if (typeof o.count === 'number') decl.count = o.count;
+    const order = compileStructureOrder(o.order, diag, { ...where, path: `${where.path}.order` });
+    if (order !== undefined) {
+      if (inline) diag.warn('inline structures have no field: `order` is ignored', { ...where, path: `${where.path}.order` });
+      else decl.order = order;
+    }
+    const ui = compileStructureUi(o.ui, kind, { ...where, path: `${where.path}.ui` });
+    if (ui) decl.ui = ui;
     if (kind === 'custom') {
       decl.shape = o.shape === 'kv' ? 'kv' : 'text';
       decl.display = o.display === 'hidden' ? 'hidden' : 'card';
@@ -798,6 +880,10 @@ function compileWorkflow(
       }
       stage.tool = out;
     }
+    if (o.order !== undefined) {
+      if (typeof o.order === 'number' && Number.isFinite(o.order)) stage.order = o.order;
+      else diag.error('stage order must be a number', { ...where, path: `${where.path}.order` });
+    }
     if (o.executor !== undefined && o.executor !== 'default') diag.error('only `executor: default` is supported in v1', where);
     const w = expr(o.when, where);
     if (w) stage.when = w;
@@ -847,11 +933,36 @@ function compileWorkflow(
   const wf: Workflow = { id, name: str(fm.name, id), kind, stages, sections };
   if (fm.description !== undefined) wf.description = str(fm.description).trim();
   if (fm.hint !== undefined) wf.hint = str(fm.hint).trim();
+  // Stage sort keys (I-134): stages keep their declaration order, so explicit keys must increase.
+  let prevKey = Number.NEGATIVE_INFINITY;
+  stages.forEach((s, i) => {
+    const key = typeof s.order === 'number' ? s.order : (i + 1) * 100;
+    if (key <= prevKey) diag.error(`stage ${s.id}: order ${key} must be greater than the previous stage's (${prevKey}); stages keep their declared order`, { file, path: `stages[${i}].order` });
+    prevKey = key;
+  });
   const after = isObj(fm.structures) ? fm.structures.after : undefined;
   if (after !== undefined) {
     wf.structuresAfter = str(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
   }
+  const orderSrc = isObj(fm.structures) ? fm.structures.order : undefined;
+  if (orderSrc !== undefined) {
+    if (!isObj(orderSrc)) diag.error('structures.order must map structure ids to positions', { file, path: 'structures.order' });
+    else {
+      const out: Record<string, StructureOrder> = {};
+      for (const [sid, v] of Object.entries(orderSrc)) {
+        const where = { file, path: `structures.order.${sid}` };
+        const o = compileStructureOrder(v, diag, where);
+        if (o === undefined) continue;
+        const ref = typeof o === 'number' ? undefined : 'before' in o ? o.before : o.after;
+        if (ref !== undefined && ref !== CONTENT_STAGE_REF && !stages.some((s) => s.id === ref)) { diag.error(`unknown stage \`${ref}\` (expected a stage of this workflow or ${CONTENT_STAGE_REF})`, where); continue; }
+        if (ref === CONTENT_STAGE_REF && !stages.some((s) => s.kind === 'content')) diag.warn(`${CONTENT_STAGE_REF}: this workflow has no content stage`, where);
+        out[sid] = o;
+      }
+      if (Object.keys(out).length) wf.structureOrder = out;
+    }
+  }
+  for (const k of Object.keys(isObj(fm.structures) ? fm.structures : {})) if (k !== 'after' && k !== 'order') diag.warn(`unknown structures key \`${k}\` (expected after | order)`, { file, path: `structures.${k}` });
   return wf;
 }
 

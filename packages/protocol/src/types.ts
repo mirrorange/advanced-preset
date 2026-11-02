@@ -204,6 +204,11 @@ export interface Stage {
   field?: Partial<FieldText>;
   /** Multi-step tools: this stage's tool. Unset parts fall back to `tools.stage`. */
   tool?: { name?: string; description?: string; param?: Partial<FieldText> };
+  /**
+   * Sort key shared with structures (I-134). Defaults to 100 × the stage's position in the workflow;
+   * keys must increase in declaration order (stages are never reordered).
+   */
+  order?: number;
 }
 
 export interface WorkflowSections {
@@ -223,11 +228,22 @@ export interface Workflow {
   stages: Stage[];
   /** Stage after which structures are emitted (defaults to the last content stage). */
   structuresAfter?: string;
+  /** Per-workflow structure positions (`structures.order` in the frontmatter), overriding `StructureDecl.order`. */
+  structureOrder?: Record<string, StructureOrder>;
   sections: WorkflowSections;
 }
 
-export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'custom' | 'annotations';
-export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'custom', 'annotations'];
+/**
+ * Where a structure sits among the stages of a turn (I-134): an absolute sort key (stages default to
+ * 100, 200, …) or relative to a stage. `@content` is the terminal content stage. A reference to a
+ * stage that is not active falls back to the structures anchor (`structures.after` / content).
+ */
+export type StructureOrder = number | { before: string } | { after: string };
+/** Reference to the terminal content stage in {@link StructureOrder}. */
+export const CONTENT_STAGE_REF = '@content';
+
+export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'custom' | 'annotations';
+export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'custom', 'annotations'];
 /** Kinds written inside the story content rather than as a tag block / field (I-77). */
 export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations'];
 export const isInlineStructure = (s: { kind: StructureKind }): boolean => INLINE_STRUCTURE_KINDS.includes(s.kind);
@@ -255,6 +271,32 @@ export interface StructureDecl {
   historyTemplate?: string;
   title?: string;
   formatPrompt: { tag: string; field: string };
+  /** Position among the stages of a turn (structured output / tools), see {@link StructureOrder}. */
+  order?: StructureOrder;
+  /** Chat card placement and, for custom structures, a preset-supplied front-end component (I-137). */
+  ui?: StructureUi;
+}
+
+/** Message areas that hold structure cards: above the message text or below it. */
+export type CardPosition = 'top' | 'bottom';
+export const CARD_POSITIONS: readonly CardPosition[] = ['top', 'bottom'];
+
+/**
+ * Card of a structure in the chat (I-137). `position` / `order` place AP's built-in card (or the
+ * custom component) among the other cards of the same area; without `order` the kind's built-in
+ * key applies. Custom structures may bring their own component — an EJS `template` rendering HTML,
+ * or a JavaScript `module` mounted into a shadow root — which only shows once the user trusts and
+ * enables the preset's custom UI.
+ */
+export interface StructureUi {
+  position?: CardPosition;
+  order?: number;
+  /** EJS template (custom only): renders the card's HTML from the structure value. */
+  template?: string;
+  /** ES module source (custom only): `mount(root, context)` renders into a shadow root. */
+  module?: string;
+  /** CSS placed in the component's shadow root (template or module). */
+  style?: string;
 }
 
 export interface RegexDecl {
@@ -352,6 +394,14 @@ export interface ToolsDecl {
    * content. `''` = no prefix.
    */
   structurePrefix?: string;
+  /**
+   * Ordering prefix (I-135): when set, every stage field and structure field of a turn gets this
+   * prefix, `{{n}}` being its zero-padded position among the turn's fields (stages and structures
+   * sorted together), e.g. `{{n}}_` → `1_questions`, `2_status`, `3_story`. Replaces the
+   * `{{n}}` numbering of stage field templates and `structurePrefix`; structure `field`s stay bare
+   * and their `{{field}}` placeholders are filled in per turn.
+   */
+  orderPrefix?: string;
   /** Appended to the description of free-form maps sent as JSON-encoded strings (Gemini). */
   jsonStringHint?: string;
   /** Prefill / plaintext task turns with a caller JSON schema: system hint asking for a JSON block (`{{schema}}`). */

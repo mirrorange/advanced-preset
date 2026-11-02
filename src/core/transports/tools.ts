@@ -3,7 +3,7 @@
  * Tool names, parameters and descriptions all come from the preset (`turnArtifacts`).
  * Multi step: one tool per stage, looped inside the Orchestrator (never written to chat).
  */
-import { parseTurnObject, structuresAnchorIndex, type TurnResult } from '@advanced-preset/protocol';
+import { parseTurnObject, type TurnResult } from '@advanced-preset/protocol';
 import type { ChatMessage } from '@/st/host';
 import type { ReadState, ToolCallAcc } from '../reader';
 import { parsePartialObject } from '../partial-json';
@@ -39,7 +39,7 @@ export function toolSingleDriver(input: DriverInput): Driver {
     const po = parsePartialObject(call?.arguments ?? '', final);
     value = po.value;
     if (caller.schema) return envelopeTurn(ctx, art, po.value, final);
-    return parseTurnObject(po.value, { stages: ctx.stages, structures: ctx.structures, final, openKey: po.openKey, fieldOf: art.fieldOf });
+    return parseTurnObject(po.value, { stages: ctx.stages, structures: ctx.structures, final, openKey: po.openKey, fieldOf: art.fieldOf, structureFieldOf: art.structureFieldOf });
   };
   return {
     body: () => baseBody(input, { messages, tools, tool_choice: force ? { type: 'function', function: { name: submitName } } : 'auto' }),
@@ -64,7 +64,6 @@ export function toolMultiDriver(input: DriverInput): Driver {
   const syn = syntheticTurn(input, parallel ? 'parallel' : 'multi', first);
   const tools = [...(syn ? [syn.tool] : []), ...stageTools, ...caller.tools];
   const convo: ChatMessage[] = [...input.messages, ...(syn?.messages ?? [])];
-  const anchor = structuresAnchorIndex(ctx.workflow!, stages);
   const byTool = new Map(stages.map((s) => [art.toolOf(s), s]));
   /** Turn object keyed like the structured schema, so the shared object parser does the rest. */
   const record: Record<string, unknown> = {};
@@ -82,12 +81,16 @@ export function toolMultiDriver(input: DriverInput): Driver {
     const field = art.fieldOf(stage);
     const v = args[art.paramOf(stage)];
     if (v !== undefined) target[field] = v;
-    if (stages.indexOf(stage) === anchor) for (const d of structures) if (args[d.field] !== undefined) target[d.field] = args[d.field];
+    // Structures ride on the stage tool the turn layout assigns them to (I-134), under their turn field name.
+    for (const d of art.layout.carriedBy(stage)) {
+      const name = art.structureFieldOf(d);
+      if (args[name] !== undefined) target[name] = args[name];
+    }
     return field;
   };
 
   const turnOf = (obj: Record<string, unknown>, final: boolean, openKey?: string) =>
-    caller.schema ? envelopeTurn(ctx, art, obj, final) : parseTurnObject(obj, { stages, structures, final, openKey, fieldOf: art.fieldOf });
+    caller.schema ? envelopeTurn(ctx, art, obj, final) : parseTurnObject(obj, { stages, structures, final, openKey, fieldOf: art.fieldOf, structureFieldOf: art.structureFieldOf });
 
   return {
     body: () => {

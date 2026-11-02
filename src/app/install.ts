@@ -2,11 +2,11 @@
 import { compareVersions, type APreset } from '@advanced-preset/protocol';
 import { nativeFetch, st } from '@/st/host';
 import { settings, save } from '@/store/settings';
-import { getPreset, installPreset, isBuiltin, removeInstalled, toArtifact } from '@/store/presets';
+import { getPreset, getPresetEntry, installPreset, isBuiltin, removeInstalled, toArtifact } from '@/store/presets';
 import { migratePresetState } from '@/store/config';
 import { ensureCarrier, findCarrier } from '@/store/carrier';
 import { t } from '@/i18n';
-import { confirmPresetTemplates } from './trust';
+import { confirmCustomUi, confirmPresetTemplates } from './trust';
 import { syncBundledModules } from './bundled-modules';
 
 /** GitHub page URLs → raw file URLs. */
@@ -28,6 +28,8 @@ export async function installArtifact(raw: unknown, source?: string): Promise<AP
   save();
   const effective = getPreset(data.id) ?? data;
   migratePresetState(effective);
+  // Custom structure components (I-137): trust and enable, or install with them hidden.
+  if (getPresetEntry(effective.id)?.source === 'installed') await confirmCustomUi(effective);
   await ensureCarrier(effective);
   await syncBundledModules(effective);
   return effective;
