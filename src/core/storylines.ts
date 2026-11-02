@@ -110,8 +110,8 @@ export function arrangeLines(keys: readonly string[], current: string, meta: Sto
 }
 
 /** `storyline.*` of a generation on `current`. */
-export function storylineVars(current: string, meta: StorylineMeta, isNew: boolean): StorylineVars {
-  return { name: lineName(current, meta), main: current === '', if: isIfLine(current, meta), new: isNew };
+export function storylineVars(current: string, meta: StorylineMeta, isNew: boolean, grouped = false): StorylineVars {
+  return { name: lineName(current, meta), main: current === '', if: isIfLine(current, meta), new: isNew, grouped };
 }
 
 /** Text without the storyline tag (user messages only; what the model and the classifier see). */
@@ -253,7 +253,7 @@ export function arrangeTurn<T extends LineMessage>(items: readonly T[], realInde
   });
   const turn: StorylineTurn = {
     current,
-    vars: storylineVars(current, meta, a.isNew),
+    vars: storylineVars(current, meta, a.isNew, a.grouped),
     mainName: meta.main ?? '',
     groups: a.groups,
     currentGroup: a.groups.findIndex((g) => g.key === current),

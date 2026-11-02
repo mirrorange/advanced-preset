@@ -17,6 +17,8 @@ export interface PreviewOptions {
   /** The current storyline (`--storyline name`; presets with `storylines`): `if` by the name rule, `new` with `--storyline-new`. */
   storyline?: string;
   storylineNew?: boolean;
+  /** `storyline.grouped` on the main storyline (a side storyline is always grouped in the preview). */
+  storylineGrouped?: boolean;
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
   json?: boolean;
@@ -94,8 +96,8 @@ export function preview(source: APreset, o: PreviewOptions): string {
     gen: { origin: pure ? 'task' : 'story', type: 'normal', callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== undefined },
     storyline: preset.storylines && o.storyline
-      ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew) }
-      : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew) },
+      ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew), grouped: true }
+      : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew), grouped: Boolean(preset.storylines && o.storylineGrouped) },
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === 'task') : undefined;
   if (workflow) vars.workflow = workflow.id;
@@ -130,7 +132,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
   const size = (v: (typeof a.buildVars)[string]) => (typeof v === 'string' ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`);
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(', ')}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);
-  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? 'main' : `${vars.storyline.name}${vars.storyline.if ? ' (if-line)' : ''}`}${vars.storyline.new ? ' (new)' : ''}`);
+  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? 'main' : `${vars.storyline.name}${vars.storyline.if ? ' (if-line)' : ''}`}${vars.storyline.new ? ' (new)' : ''}${vars.storyline.grouped ? ' (grouped)' : ''}`);
   else if (o.storyline) lines.push('storyline: main (the preset declares no storylines)');
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === undefined ? ' (not shaped: no --input)' : ''}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);

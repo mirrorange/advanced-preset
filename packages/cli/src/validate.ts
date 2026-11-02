@@ -31,6 +31,7 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'storyline.main': null,
   'storyline.if': null,
   'storyline.new': null,
+  'storyline.grouped': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {

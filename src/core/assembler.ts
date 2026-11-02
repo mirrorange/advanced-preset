@@ -4,7 +4,7 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
-  actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type Vars, type Workflow,
+  MAIN_STORYLINE_VARS, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, toast, type ChatMessage, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
@@ -115,7 +115,7 @@ export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined
     recap: { present: Boolean(recap) },
     input: { shaped: Boolean(ctx.inputShaped) },
     last: Object.fromEntries(Object.values(preset.structures).filter((x) => x.kind === 'custom' || x.kind === 'status').map((x) => [x.id, x.id in last])),
-    storyline: ctx.storylines?.vars ?? { name: mainName, main: true, if: false, new: false },
+    storyline: ctx.storylines?.vars ?? { ...MAIN_STORYLINE_VARS, name: mainName },
   });
   const data: MacroData = {
     metaText: ctx.meta.segments.join('\n\n'),

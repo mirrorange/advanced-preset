@@ -8550,7 +8550,7 @@ var DEFAULT_STORYLINES = {
 };
 var STORYLINE_CONFIG_DEFAULTS = { enabled: true, freezeVariables: true };
 var STORYLINES_SINCE = "1.10.0";
-var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false };
+var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false, grouped: false };
 var isIfName = (name) => /^if/i.test(name);
 
 // ../protocol/src/assemble.ts
@@ -10470,7 +10470,8 @@ var FIXED_VARS = {
   "storyline.name": null,
   "storyline.main": null,
   "storyline.if": null,
-  "storyline.new": null
+  "storyline.new": null,
+  "storyline.grouped": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -10940,7 +10941,7 @@ function preview(source, o) {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
     gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 },
-    storyline: preset.storylines && o.storyline ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew) } : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew) }
+    storyline: preset.storylines && o.storyline ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew), grouped: true } : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew), grouped: Boolean(preset.storylines && o.storylineGrouped) }
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
@@ -10970,7 +10971,7 @@ function preview(source, o) {
   const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
-  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? "main" : `${vars.storyline.name}${vars.storyline.if ? " (if-line)" : ""}`}${vars.storyline.new ? " (new)" : ""}`);
+  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? "main" : `${vars.storyline.name}${vars.storyline.if ? " (if-line)" : ""}`}${vars.storyline.new ? " (new)" : ""}${vars.storyline.grouped ? " (grouped)" : ""}`);
   else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
@@ -11150,7 +11151,7 @@ Usage
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
-                   [--storyline name] [--storyline-new]
+                   [--storyline name] [--storyline-new] [--storyline-grouped]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -11182,6 +11183,7 @@ async function main(argv) {
       input: { type: "string" },
       storyline: { type: "string" },
       "storyline-new": { type: "boolean" },
+      "storyline-grouped": { type: "boolean" },
       "user-modules": { type: "string" },
       "bundled-modules": { type: "string" },
       "user-module-templates": { type: "string" },
@@ -11247,7 +11249,7 @@ async function main(argv) {
         }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

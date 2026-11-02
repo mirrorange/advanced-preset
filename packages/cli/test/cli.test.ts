@@ -1108,9 +1108,10 @@ describe('storylines', () => {
     const p = build(withStorylines('storylines: true\n')).preset!;
     expect(preview(p, {})).toMatch(/storyline: main\n/);
     const out = preview(p, { storyline: 'ifRain', storylineNew: true });
-    expect(out).toMatch(/storyline: ifRain \(if-line\) \(new\)/);
+    expect(out).toMatch(/storyline: ifRain \(if-line\) \(new\) \(grouped\)/);
+    expect(preview(p, { storylineGrouped: true })).toMatch(/storyline: main \(grouped\)\n/);
     expect(out).toMatch(/Side: ifRain/);
     const json = JSON.parse(preview(p, { storyline: 'cellar', json: true }));
-    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false });
+    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false, grouped: true });
   });
 });

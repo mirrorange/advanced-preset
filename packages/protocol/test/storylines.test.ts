@@ -50,12 +50,12 @@ const config = { modules: {}, params: {}, identity: { names: {}, prefixes: {} },
 describe('storyline vars and macros', () => {
   it('default to the main storyline', () => {
     const vars = defaultVars(preset, config);
-    expect(vars.storyline).toEqual({ name: '', main: true, if: false, new: false });
+    expect(vars.storyline).toEqual({ name: '', main: true, if: false, new: false, grouped: false });
     expect(assemble({ preset, config, vars, data: {} }).regions.sys).toEqual([]);
   });
 
   it('render the current and the main storyline names', () => {
-    const vars = defaultVars(preset, config, { storyline: { name: 'ifRain', main: false, if: true, new: true } });
+    const vars = defaultVars(preset, config, { storyline: { name: 'ifRain', main: false, if: true, new: true, grouped: true } });
     const a = assemble({ preset, config, vars, data: { storyline: { name: 'ifRain', main: 'Road' } } });
     expect(a.regions.sys).toEqual([{ role: 'system', content: 'Side story ifRain (main: Road)\n\nA new if-line.' }]);
     expect(testExpr(parseExpr('storyline.name == "ifRain"'), resolverOf(a.vars))).toBe(true);

@@ -47,9 +47,11 @@ export interface StorylineVars {
   if: boolean;
   /** The current storyline has no earlier message (this turn starts it). */
   new: boolean;
+  /** The history holds more than one storyline: it is grouped by storyline, with separators. */
+  grouped: boolean;
 }
 
-export const MAIN_STORYLINE_VARS: StorylineVars = { name: '', main: true, if: false, new: false };
+export const MAIN_STORYLINE_VARS: StorylineVars = { name: '', main: true, if: false, new: false, grouped: false };
 
 export interface StorylineTag {
   /** Storyline name as written. */

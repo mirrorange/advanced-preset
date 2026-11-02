@@ -39,10 +39,10 @@ describe('message storylines', () => {
     const items = [u('one'), a(), u('two #A'), a(), u('three #A')];
     const r = arrangeTurn(items, [0, 1, 2, 3, 4], ['', '', 'A', 'A', 'A'], 4, { main: 'Road' });
     expect(r.items.map((x) => x.mes)).toEqual(['one', 'story', 'two', 'story', 'three']);
-    expect(r.turn).toMatchObject({ current: 'A', mainName: 'Road', grouped: true, currentGroup: 1, mainGroup: 0, vars: { name: 'A', main: false, if: false, new: false } });
+    expect(r.turn).toMatchObject({ current: 'A', mainName: 'Road', grouped: true, currentGroup: 1, mainGroup: 0, vars: { name: 'A', main: false, if: false, new: false, grouped: true } });
     expect(r.currentInput).toBe(4);
     const tagMain = arrangeTurn([u('x #Road')], [0], ['', ''], 0, { main: 'Road' });
-    expect(tagMain.turn.vars).toEqual({ name: 'Road', main: true, if: false, new: true });
+    expect(tagMain.turn.vars).toEqual({ name: 'Road', main: true, if: false, new: true, grouped: false });
   });
 
   it('group marks are distinct from cache and input marks', () => {
