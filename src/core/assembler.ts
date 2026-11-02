@@ -4,7 +4,7 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
-  actorName, assemble, defaultVars, formatVar, replyToPlainText, withUserModules, type APreset, type MacroData, type Vars, type Workflow,
+  actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, withUserModules, type APreset, type MacroData, type StatusBar, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, toast, type ChatMessage } from '@/st/host';
 import { t } from '@/i18n';
@@ -67,13 +67,16 @@ function recentMeta(preset: APreset, ctxConfig: ReturnType<typeof activeConfigur
 
 function customLast(preset: APreset): Record<string, string> {
   const out: Record<string, string> = {};
-  const custom = Object.values(preset.structures).filter((s) => s.kind === 'custom');
+  // `{{ap::structure::<id>::last}}`: custom structures and the status bar (I-136).
+  const custom = Object.values(preset.structures).filter((s) => s.kind === 'custom' || s.kind === 'status');
   if (!custom.length) return out;
   for (const m of st().chat) {
     const sc = getSidecar(m);
     for (const s of custom) {
       const v = sc?.structures?.[s.id];
-      if (v !== undefined && v !== null && v !== '') out[s.id] = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+      if (v === undefined || v === null || v === '') continue;
+      if (s.kind === 'status') { const t = typeof v === 'string' ? v : statusText(v as StatusBar); if (t) out[s.id] = t; continue; }
+      out[s.id] = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
     }
   }
   return out;

@@ -131,6 +131,13 @@ function statusOf(read: (key: string) => unknown): StatusBar {
   return out;
 }
 
+/** One-line status text: `date weekday time | location | weather` (empty parts skipped). */
+export function statusText(s: Partial<StatusBar> | null | undefined): string {
+  if (!s) return '';
+  const when = [s.date, s.weekday, s.time].map((x) => (x ?? '').trim()).filter(Boolean).join(' ');
+  return [when, s.location?.trim(), s.weather?.trim()].filter(Boolean).join(' | ');
+}
+
 const asString = (v: unknown): string => (typeof v === 'string' ? v : v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
 
 /** Coerce a field value (JSON mode) into the kind's data shape. Returns `undefined` when absent/invalid. */
