@@ -263,11 +263,14 @@ export interface StructureDecl {
   shape?: 'text' | 'kv';
   display?: 'card' | 'hidden';
   /**
-   * Recent history (I-80 / I-88): the last N assistant messages carry this structure again —
-   * annotations are re-injected as CriticMarkup, a synopsis is appended via `historyTemplate`. 0 = off.
+   * Recent history: the last N assistant messages carry this structure again.
+   * - A number: annotations re-injected as CriticMarkup (I-80); legacy synopsis history (I-88,
+   *   artifacts before 1.10) appended via `historyTemplate`. 0 = off.
+   * - An object (I-139, any non-inline kind): text rendered from `template` and inserted before /
+   *   after the message text or at a sort key, when `when` holds.
    */
-  history?: number;
-  /** synopsis only: how a kept message carries its synopsis; `{{content}}` + `{{time}}` `{{location}}` `{{event}}` `{{summary}}`. */
+  history?: number | StructureHistory;
+  /** Legacy synopsis history (with a numeric `history`): `{{content}}` + `{{time}}` `{{location}}` `{{event}}` `{{summary}}`. */
   historyTemplate?: string;
   title?: string;
   formatPrompt: { tag: string; field: string };
@@ -275,6 +278,24 @@ export interface StructureDecl {
   order?: StructureOrder;
   /** Chat card placement and, for custom structures, a preset-supplied front-end component (I-137). */
   ui?: StructureUi;
+}
+
+/**
+ * Where structure history goes in a history message (I-139): right before / after the message
+ * text, or a sort key on the turn axis (stages default to 100, 200, …; the message text sits at the
+ * terminal content stage's key). Unset: the structure's own position relative to the content stage.
+ */
+export type HistoryPosition = 'before' | 'after' | number;
+
+/** Structure history (I-139): how recent assistant messages carry a structure again. */
+export interface StructureHistory {
+  /** Number of recent assistant messages (messages replaced by their synopsis count too). 0 = off. */
+  depth: number;
+  /** Inserted text: `{{value}}` (the whole value as text) and the kind's sub-fields (`{{time}}`, `{{date}}`, a kv key …). */
+  template: string;
+  position?: HistoryPosition;
+  /** Condition for carrying the structure this turn (condition variables of the request). */
+  when?: Expr;
 }
 
 /** Message areas that hold structure cards: above the message text or below it. */
@@ -321,7 +342,7 @@ export interface MetaDecl {
 /** What token saving does with older user messages. */
 export type UserInputMode = 'keep' | 'truncate' | 'remove';
 export const USER_INPUT_MODES: readonly UserInputMode[] = ['keep', 'truncate', 'remove'];
-/** Default `historyTemplate` of a synopsis structure. */
+/** Default legacy `historyTemplate` of a synopsis structure (numeric `history`, before 1.10). */
 export const DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = '{{content}}\n\n[{{time}} · {{location}}] {{event}}: {{summary}}';
 
 export interface TokenSavingDecl {

@@ -38,6 +38,8 @@ export interface Vars {
   recap: { present: boolean };
   /** `input.shaped`: input shaping applies this turn (the preset declares it and the last chat message is the user's). */
   input: { shaped: boolean };
+  /** `last.<id>`: a custom / status structure has an earlier value in the chat (what `{{ap::structure::<id>::last}}` shows, I-139). */
+  last: Record<string, boolean>;
 }
 
 export function resolverOf(vars: Vars): Resolver {
@@ -343,6 +345,7 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },
     input: { shaped: false },
+    last: {},
     ...over,
   };
 }
