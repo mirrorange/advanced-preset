@@ -2,6 +2,7 @@
 /** Storylines of the chat (I-152): their messages, the if-line switch and the main storyline. */
 import { computed, ref, watch } from 'vue';
 import { ChevronDown, Crown, GitBranch, PenLine } from 'lucide-vue-next';
+import { STORYLINE_CONFIG_DEFAULTS } from '@advanced-preset/protocol';
 import { escapeHtml, inputPopup, st, toast } from '@/st/host';
 import { t } from '@/i18n';
 import { nameMainStoryline, setIfLine, storylineMeta, validStorylineName } from '@/store/storylines';
@@ -19,7 +20,7 @@ const { preset, config, update } = usePreset();
 const declared = computed(() => Boolean(preset.value?.storylines));
 const enabled = computed({
   get: () => config.value?.storylines?.enabled !== false,
-  set: (v: boolean) => update((c) => { c.storylines = { ...(c.storylines ?? { enabled: true }), enabled: v }; }),
+  set: (v: boolean) => update((c) => { c.storylines = { ...STORYLINE_CONFIG_DEFAULTS, ...c.storylines, enabled: v }; }),
 });
 const hasChat = computed(() => { void ui.chatRev; return Boolean(st().chatMetadata && (st().characterId !== undefined || st().groupId)); });
 const synopsisId = computed(() => Object.values(preset.value?.structures ?? {}).find((s) => s.kind === 'synopsis')?.id);

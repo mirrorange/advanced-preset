@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, GitBranch, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
-import { TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
+import { STORYLINE_CONFIG_DEFAULTS, TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
 } from '@/store/config';
@@ -126,7 +126,11 @@ const metaOn = computed({
 });
 const storylinesOn = computed({
   get: () => config.value?.storylines?.enabled !== false,
-  set: (v: boolean) => update((c) => { c.storylines = { ...(c.storylines ?? { enabled: true }), enabled: v }; }),
+  set: (v: boolean) => update((c) => { c.storylines = { ...STORYLINE_CONFIG_DEFAULTS, ...c.storylines, enabled: v }; }),
+});
+const freezeVariables = computed({
+  get: () => config.value?.storylines?.freezeVariables !== false,
+  set: (v: boolean) => update((c) => { c.storylines = { ...STORYLINE_CONFIG_DEFAULTS, ...c.storylines, freezeVariables: v }; }),
 });
 const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const cache = computed({
@@ -233,7 +237,10 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
 
     <Section v-if="preset.storylines" :title="t('storylines.enabled')" :icon="GitBranch" :help="t('storylines.config.hint')">
       <template #actions><Switch v-model="storylinesOn" :label="t('storylines.enabled')" /></template>
-      <button v-if="storylinesOn" type="button" class="btn ghost" @click="openPanel('storylines')">{{ t('storylines.openTab') }}</button>
+      <template v-if="storylinesOn">
+        <Field :label="t('storylines.freezeVariables')" :help="t('storylines.freezeVariables.hint')" inline><Switch v-model="freezeVariables" /></Field>
+        <button type="button" class="btn ghost" @click="openPanel('storylines')">{{ t('storylines.openTab') }}</button>
+      </template>
     </Section>
 
     <Section :title="t('writing.tokenSaving')" :icon="Coins" :help="t('writing.tokenSaving.hint')">

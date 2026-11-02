@@ -370,6 +370,8 @@
   "storylines.hint": "在输入末尾加上 #名称 来写支线故事。AP 会按故事线整理聊天历史：其他支线在前，主线居中，当前支线在最后；不同故事线之间插入预设定义的分隔消息。",
   "storylines.enabled": "故事线",
   "storylines.config.hint": "关闭后 #标签 按普通文字发送，历史按原顺序发送。",
+  "storylines.freezeVariables": "支线轮次不更新变量",
+  "storylines.freezeVariables.hint": "在主线以外的故事线上生成时，MVU 不执行变量更新命令；酒馆助手的聊天变量与本轮消息变量恢复为本轮开始时的状态，支线的状态不会带回主线。",
   "storylines.unsupported": "当前预设没有声明故事线功能。",
   "storylines.off": "故事线已在配置中关闭。",
   "storylines.usage.side": "#名称：这条输入属于支线「名称」（不加标签即为主线）。",

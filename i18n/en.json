@@ -370,6 +370,8 @@
   "storylines.hint": "End your input with #name to write a side story. AP arranges the chat history by storyline: other side stories first, then the main storyline, the current side story last, with the preset's separator before each storyline.",
   "storylines.enabled": "Storylines",
   "storylines.config.hint": "When off, #tags are sent as plain text and the history keeps its order.",
+  "storylines.freezeVariables": "Freeze variables on side storylines",
+  "storylines.freezeVariables.hint": "Turns on storylines other than the main one do not run MVU update commands; Tavern Helper chat variables and the variables of the turn's messages are restored to the state the turn started from, so side stories never change the main storyline's state.",
   "storylines.unsupported": "The current preset does not declare storylines.",
   "storylines.off": "Storylines are switched off in the configuration.",
   "storylines.usage.side": "#name: this input belongs to the side story “name” (no tag: the main storyline).",

@@ -22,6 +22,7 @@ import { switchMainInteractive } from '@/app/storylines';
 import { arrangeTurn, inBackground, lineKey, lineMark, type StorylineTurn } from './storylines';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { markInput } from './input-shaping';
+import { beginTurn } from '@/app/variable-guard';
 
 export async function advancedPresetInterceptor(chat: STMessage[], _contextSize: number, _abort: (immediately: boolean) => void, type?: string): Promise<void> {
   registry.setPending(null);
@@ -145,5 +146,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     createdAt: Date.now(),
     warnings: [],
   };
+  // Variables stay as they were on other storylines (I-154).
+  beginTurn({ preset, config, line: storylines?.current, from: ctx.inputIndex >= 0 ? ctx.inputIndex : real.length - 1 });
   registry.setPending(ctx);
 }

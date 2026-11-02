@@ -104,6 +104,7 @@ const { advancedPresetInterceptor } = await import('@/core/interceptor');
 const assembler = await import('@/core/assembler');
 const { registry } = await import('@/core/context');
 const { switchMainStoryline, writeMessageLine } = await import('@/store/storylines');
+const { settleTurn } = await import('@/app/variable-guard');
 
 let realChat: STMessage[];
 let metadata: Record<string, any>;
@@ -268,6 +269,17 @@ describe('storylines in a generation', () => {
     expect(memory(dream)).toEqual({ where: 'dream', cellar: 'dusty' });
     expect(dream.text).toContain('it was a dream');
     expect(prev(dream.text!)).toBe('D1 Mon 9 | Dream | sun');
+  });
+
+  it('a turn on a side story leaves the chat variables as they were (I-154)', async () => {
+    metadata.variables = { stat_data: { hp: 10 } };
+    await generate([user('m1'), ai('M1'), user('c1 #cellar')]);
+    metadata.variables = { stat_data: { hp: 1 } };
+    expect(await settleTurn()).toBe(true);
+    expect(metadata.variables).toEqual({ stat_data: { hp: 10 } });
+    await generate([user('m1'), ai('M1'), user('m2')]);
+    metadata.variables = { stat_data: { hp: 1 } };
+    expect(await settleTurn()).toBe(false);
   });
 
   it('cancelling the name aborts the generation and changes nothing', async () => {
