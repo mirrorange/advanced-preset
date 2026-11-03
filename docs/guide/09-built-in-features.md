@@ -186,10 +186,40 @@ storylines:
 
 用户怎么用：
 
-- 在故事输入的末尾写 `#支线名称`，这条消息和之后的回复就属于这条支线；没有标签的消息属于主线。标签在显示和发送给模型时都会隐藏，只在编辑时可见；
+- 在故事输入的末尾写 `#支线名称`，这条消息和之后的回复就属于这条支线；没有标签的消息属于主线。`#` 前不必加空格（`好的#地下室`），紧跟英文字母或数字时除外（`C#` 仍是文字）。标签在显示和发送给模型时都会隐藏，只在编辑时可见；
+- 只写 `#`：回到最近的一条支线（发送时 AP 把它补成 `#支线名称`），方便在主线和支线之间来回；
+- 写 `#?`：开始一条新支线，名字交给 AI 起；`#!?`：开始一条新的主线，同样由 AI 起名；
 - 名字以 `if` 开头的支线是 **if 线**（另一种可能）。主线和其他线都看得到普通支线的内容，但看不到 if 线的内容；是否为 if 线可以在故事线面板里切换；
 - 每条助手消息按滑动（swipe）记录自己属于哪条线；用户改了标签，之后的回复要重新滑动才会换线；
-- `#!新主线名称` 把某条支线设为新主线；如果旧主线还没有名字，AP 会弹窗请用户先起名。
+- `#!新主线名称` 把某条支线设为新主线（`#!` 则是最近的那条支线）；收到回复后才真正切换。旧主线还没有名字时，由 AI 在同一轮回复里给它起名；
+- 选项卡片和代写结果填入输入框时，如果这条消息在支线上，会自动带上 `#支线名称`，代写按钮发出的指令也一样。
+
+让 AI 起名需要预设声明一个 `storyline` 结构，并用一个模组在需要时请求它（AP 只在需要命名的轮次请求，Schema 也只含这一轮要起的名字）：
+
+```yaml
+# manifest/structures.yaml
+storyline:
+  kind: storyline
+  properties:
+    name: A short name for the new storyline.
+    previous_main: A short name for the previous main storyline.
+  formatPrompt:
+    tag: "<storyline><name>…</name></storyline>"
+    field: "Fill `{{field}}` with the storyline name(s) asked for."
+```
+
+```markdown
+---
+id: storyline-naming
+toggle: always
+region: task
+when: storyline.naming || storyline.namingMain
+structures: [storyline]
+---
+<!-- @if storyline.naming -->这一轮开始一条新的故事线，请为它起一个简短的名字。<!-- @end -->
+<!-- @if storyline.namingMain -->原来的主线还没有名字，它将成为一条支线，也请为它起名。<!-- @end -->
+{{ap::structure::storyline}}
+```
 
 AP 怎么排历史：在主线上，所有支线的内容挪到前面，主线在后；在支线上，其他线在前，当前支线放在最后。每组前面有一条系统消息作为分隔。**世界书和其他按深度插入的内容始终按“相对主线”的位置插入**——世界书通常是为主线故事写的。非当前的支线在有事件摘要时总是只保留事件摘要（并截断长输入），非当前的主线按节省 Token 的深度处理；每条线有各自的缓存状态，切换回来时缓存仍然有效。
 
@@ -206,6 +236,8 @@ AP 怎么排历史：在主线上，所有支线的内容挪到前面，主线�
 | `storyline.if` | 当前是 if 线 |
 | `storyline.new` | 当前故事线还没有消息（这一轮开始它） |
 | `storyline.grouped` | 历史按故事线分组（可见的线不止一条，带分隔消息）；在主线上也可能为真 |
+| `storyline.naming` / `storyline.namingMain` | AI 这一轮要为当前故事线 / 没有名字的原主线起名 |
+| `storyline.switching` | 这一轮把当前故事线设为主线（`#!`） |
 | `{{ap::storyline}}` / `{{ap::storyline::main}}` | 当前故事线名称 / 主线名称 |
 
 推荐拆成两个条目：结构介绍放在历史区域，只在历史真的分组时出现；当前线的说明和操作指南放在输入区域、用户输入之前，离模型要写的内容最近。支线上的状态是独立的，最好明确告诉模型不要更新变量、写数据库或产生其他副作用：
@@ -222,7 +254,9 @@ AP 怎么排历史：在主线上，所有支线的内容挪到前面，主线�
 这一轮写的是支线「{{ap::storyline}}」，它与主线发生在同一个世界里。
 <!-- @end -->
 只写这条线的内容。支线的状态是独立的：不要更新变量、写入数据库或产生其他副作用，即使设定要求这么做；只输出故事正文和这个流程要求的内容。
-用 `ap preview --storyline 名称`（或再加 `--storyline-new`）可以检查支线上的提示词；`--storyline-grouped` 检查分组历史下的主线。故事线面板（消息顶部的小卡片或配置页按钮打开）列出所有故事线和它们的楼层，可以跳转、切换 if 线、设为主线。细节见[参考](../reference/meta-and-tasks.md#故事线)与[清单](../reference/manifest.md#故事线-storylines)。
+```
+
+用 `ap preview --storyline 名称`（或再加 `--storyline-new`）可以检查支线上的提示词；`--storyline ?` 检查新支线（AI 起名），再加 `--storyline-switch`（与 `--storyline-naming-main`）检查新主线；`--storyline-grouped` 检查分组历史下的主线。故事线面板（消息顶部的小卡片或配置页按钮打开）列出所有故事线和它们的楼层，可以跳转、切换 if 线、设为主线。细节见[参考](../reference/meta-and-tasks.md#故事线)与[清单](../reference/manifest.md#故事线-storylines)。
 
 ## 行内批注
 
