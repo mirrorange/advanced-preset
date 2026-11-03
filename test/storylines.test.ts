@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CACHE_DEFAULTS, DEFAULT_STORYLINES, cloneData, resolveConfiguration, type APreset, type Configuration } from '@advanced-preset/protocol';
-import { STORYLINE_KEY, arrangeLines, arrangeTurn, lineMark, messageLines, placeLines, takeLineMark, takeLineMarks, type PromptMessage } from '@/core/storylines';
+import { NEW_LINE, OLD_MAIN_LINE, STORYLINE_KEY, SWITCHED_KEY, arrangeLines, arrangeTurn, lineMark, messageLines, placeLines, planTurn, takeLineMark, takeLineMarks, type PromptMessage } from '@/core/storylines';
 import type { ChatMessage, STMessage } from '@/st/host';
+import type { GenerationContext } from '@/core/context';
 import { petals } from './helpers';
 
 // ---- pure parts --------------------------------------------------------------------------------
@@ -37,12 +38,58 @@ describe('message storylines', () => {
 
   it('arranges a generation from the real chat and strips the tags', () => {
     const items = [u('one'), a(), u('two #A'), a(), u('three #A')];
-    const r = arrangeTurn(items, [0, 1, 2, 3, 4], ['', '', 'A', 'A', 'A'], 4, { main: 'Road' });
+    const meta = { main: 'Road' };
+    const r = arrangeTurn(items, [0, 1, 2, 3, 4], planTurn(items, 4, meta), 4);
     expect(r.items.map((x) => x.mes)).toEqual(['one', 'story', 'two', 'story', 'three']);
-    expect(r.turn).toMatchObject({ current: 'A', mainName: 'Road', grouped: true, currentGroup: 1, mainGroup: 0, vars: { name: 'A', main: false, if: false, new: false, grouped: true } });
+    expect(r.turn).toMatchObject({ current: 'A', mainName: 'Road', grouped: true, currentGroup: 1, mainGroup: 0, view: [0, 1, 2, 3, 4], vars: { name: 'A', main: false, if: false, new: false, grouped: true, naming: false } });
     expect(r.currentInput).toBe(4);
-    const tagMain = arrangeTurn([u('x #Road')], [0], ['', ''], 0, { main: 'Road' });
-    expect(tagMain.turn.vars).toEqual({ name: 'Road', main: true, if: false, new: true, grouped: false });
+    const one = [u('x #Road')];
+    const tagMain = arrangeTurn(one, [0], planTurn(one, 0, meta), 0);
+    expect(tagMain.turn.vars).toEqual({ name: 'Road', main: true, if: false, new: true, grouped: false, naming: false, namingMain: false, switching: false });
+  });
+
+  it('#? / #!? follow the reply after them; # without a name is the most recent other storyline', () => {
+    expect(messageLines([u('a #A'), a('A'), u('b #?'), a('Sea'), a(), u('c #?'), u('d #'), u('e #!'), u('f')]))
+      .toEqual(['A', 'A', 'Sea', 'Sea', 'Sea', '?', 'Sea', 'Sea', '']);
+    // the main storyline's name is skipped by `#`
+    expect(messageLines([u('a #A'), u('b #Road'), u('c #')], { main: 'Road' })).toEqual(['A', 'Road', 'A']);
+  });
+});
+
+describe('planning a turn (I-159)', () => {
+  it('resolves a nameless # to the most recent other storyline (or the main storyline)', () => {
+    const chat = [u('m1'), a(''), u('c1 #cellar'), a('cellar'), u('m2'), a(''), u('接着#')];
+    const p = planTurn(chat, 6, {});
+    expect(p).toMatchObject({ current: 'cellar', rewrite: '接着#cellar', naming: false, switching: false });
+    expect(p.noRecent).toBeFalsy();
+    const none = planTurn([u('m1'), a(''), u('x #')], 2, {});
+    expect(none).toMatchObject({ current: '', rewrite: 'x', noRecent: true });
+    expect(planTurn([...chat.slice(0, 6), u('go #!')], 6, {})).toMatchObject({ rewrite: 'go #!cellar', switching: true, target: 'cellar', namingMain: true });
+  });
+
+  it('#? is a new storyline the AI names', () => {
+    const p = planTurn([u('m1'), a(''), u('x #?')], 2, {});
+    expect(p).toMatchObject({ current: NEW_LINE, naming: true, switching: false });
+    expect(p.keys).toEqual(['', '', NEW_LINE]);
+  });
+
+  it('#! sees the history as after the switch', () => {
+    const chat = [u('m1'), a(''), u('c1 #cellar'), a('cellar'), u('go #!cellar')];
+    const p = planTurn(chat, 4, {});
+    expect(p).toMatchObject({ current: '', switching: true, target: 'cellar', namingMain: true, naming: false });
+    expect(p.keys).toEqual([OLD_MAIN_LINE, OLD_MAIN_LINE, '', '', '']);
+    expect(p.meta).toEqual({ main: 'cellar', if: { [OLD_MAIN_LINE]: false } });
+    const named = planTurn(chat, 4, { main: 'Road' });
+    expect(named).toMatchObject({ oldName: 'Road', namingMain: false });
+    expect(named.keys).toEqual(['Road', 'Road', '', '', '']);
+    // already the main storyline: nothing to do
+    expect(planTurn([u('x #!Road')], 0, { main: 'Road' })).toMatchObject({ switching: false, current: '' });
+    // a new main storyline; after its switch a swipe renames it
+    const fresh = planTurn([u('m1'), a(''), u('new #!?')], 2, {});
+    expect(fresh).toMatchObject({ naming: true, namingMain: true, switching: true });
+    expect(fresh.target).toBeUndefined();
+    const swipe = planTurn([u('m1'), a('Road'), u('new #!?', { [SWITCHED_KEY]: true }), a()], 2, { main: 'Sea' });
+    expect(swipe).toMatchObject({ naming: true, renameMain: true, switching: false, current: '' });
   });
 
   it('group marks are distinct from cache and input marks', () => {
@@ -103,7 +150,8 @@ vi.mock('@/i18n', async (orig) => ({ ...(await orig<object>()), t: (k: string) =
 const { advancedPresetInterceptor } = await import('@/core/interceptor');
 const assembler = await import('@/core/assembler');
 const { registry } = await import('@/core/context');
-const { switchMainStoryline, writeMessageLine } = await import('@/store/storylines');
+const { chatLineKeys, switchMainStoryline, writeMessageLine } = await import('@/store/storylines');
+const { commitStoryline } = await import('@/app/storylines');
 const { settleTurn } = await import('@/app/variable-guard');
 
 let realChat: STMessage[];
@@ -123,12 +171,24 @@ beforeEach(() => {
 });
 afterEach(() => { delete (globalThis as any).SillyTavern; registry.setPending(null); registry.takeArmed(); });
 
-/** Petals with storylines; without input shaping unless asked (the input then stays in the history). */
-const withStorylines = (shaping = false): APreset => {
+/** Petals with storylines; without input shaping unless asked (the input then stays in the history); `naming`: a storyline structure. */
+const withStorylines = (shaping = false, naming = false): APreset => {
   const p: APreset = { ...cloneData(petals), storylines: { ...DEFAULT_STORYLINES } };
   if (!shaping) delete p.inputShaping;
+  for (const [id, d] of Object.entries(p.structures)) if (d.kind === 'storyline') delete p.structures[id];
+  p.modules = p.modules.map((m) => ({ ...m, structures: m.structures.filter((x) => x in p.structures) }));
+  if (naming) {
+    p.structures.storyline = { id: 'storyline', kind: 'storyline', tag: 'storyline', field: 'storyline', formatPrompt: { tag: '<storyline>', field: 'storyline' } };
+    p.modules = [...p.modules, { id: 'naming', name: 'naming', toggle: 'always', default: true, structures: ['storyline'], vars: [] } as APreset['modules'][number]];
+  }
   return p;
 };
+
+/** The reply of a generation arrives (MESSAGE_RECEIVED): its storyline is committed. */
+async function receive(ctx: GenerationContext, value: unknown) {
+  realChat.push({ is_user: false, name: 'Bot', mes: 'reply', send_date: `r${++n}`, extra: {} } as STMessage);
+  await commitStoryline(realChat.length - 1, ctx.storylines!, value);
+}
 let n = 0;
 const user = (mes: string): STMessage => ({ is_user: true, name: 'Me', mes, send_date: `u${++n}` } as STMessage);
 const ai = (mes: string, line?: string, synopsis?: string): STMessage => ({
@@ -147,13 +207,14 @@ function stPrompt(preset: APreset, history: STMessage[], o: { depth0?: boolean }
   return out;
 }
 
-async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean; transport?: string } = {}) {
-  const preset = withStorylines(o.shaping);
+async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean; transport?: string; naming?: boolean; keepChat?: boolean } = {}) {
+  const preset = withStorylines(o.shaping, o.naming);
   state.preset = preset;
   state.config = resolveConfiguration(preset, 'other', { connection: { transport: (o.transport ?? 'structured') as any, workflow: 'linear' } });
   if (o.cache) state.config.cache = { ...CACHE_DEFAULTS, enabled: true };
   if (o.tokenSaving) state.config.tokenSaving = { ...state.config.tokenSaving, enabled: true, keepFullTurns: 99 };
-  realChat.splice(0, realChat.length, ...chat);
+  if (!o.keepChat) realChat.splice(0, realChat.length, ...chat);
+  else realChat.splice(chat.length);
   const copy = chat.map((m) => ({ ...m }));
   let aborted = false;
   await advancedPresetInterceptor(copy, 0, () => { aborted = true; }, o.type ?? 'normal');
@@ -229,13 +290,84 @@ describe('storylines in a generation', () => {
     expect(main.ctx!.cacheCommit!.chat).toBe('chat-1');
   });
 
-  it('`#!name` switches the main storyline first, asking for the old one\'s name', async () => {
+  it('`#!name` switches the main storyline when the reply is received; the AI names the old one (I-159)', async () => {
     const chat = [user('m1'), ai('M1'), user('c1 #cellar'), ai('C1', 'cellar'), user('go #!cellar')];
-    const { contents } = await generate(chat);
+    const { contents, snapshot, ctx } = await generate(chat, { naming: true });
+    // nothing switched yet, but the turn already sees the history that way
+    expect(metadata.advanced_preset?.storylines?.main).toBeUndefined();
+    expect(realChat[0]!.mes).toBe('m1');
+    expect(pick(contents!, ['m1', 'M1', 'c1', 'C1', 'go', SEP_MAIN, sep('?')])).toEqual([sep('?'), 'm1', 'M1', SEP_MAIN, 'c1', 'C1', 'go']);
+    expect(snapshot!.storyline).toMatchObject({ name: 'cellar', main: true, switching: true, namingMain: true, naming: false });
+    const decl = ctx!.structures.find((x) => x.kind === 'storyline');
+    expect(decl?.requested).toEqual(['previous_main']);
+    await receive(ctx!, { previous_main: 'The Road' });
     expect(metadata.advanced_preset.storylines.main).toBe('cellar');
-    expect(realChat[0]!.mes).toBe('m1 #Old');
-    expect(realChat[1]!.extra![STORYLINE_KEY]).toBe('Old');
-    expect(pick(contents!, ['m1', 'M1', 'c1', 'C1', 'go', SEP_MAIN, sep('Old')])).toEqual([sep('Old'), 'm1', 'M1', SEP_MAIN, 'c1', 'C1', 'go']);
+    expect(realChat[0]!.mes).toBe('m1 #The_Road');
+    expect(realChat[1]!.extra![STORYLINE_KEY]).toBe('The_Road');
+    expect(realChat.at(-1)!.extra![STORYLINE_KEY]).toBe('');
+    expect(realChat.at(-2)!.mes).toBe('go #!cellar');
+  });
+
+  it('`#!?` starts a new main storyline; a swipe renames it, not the old one', async () => {
+    const chat = [user('m1'), ai('M1'), user('a fresh start #!?')];
+    const first = await generate(chat, { naming: true });
+    expect(first.snapshot!.storyline).toMatchObject({ name: '', main: true, new: true, switching: true, naming: true, namingMain: true });
+    expect(first.ctx!.structures.find((x) => x.kind === 'storyline')?.requested).toEqual(['name', 'previous_main']);
+    await receive(first.ctx!, { name: 'Sea', previous_main: 'Road' });
+    expect(metadata.advanced_preset.storylines.main).toBe('Sea');
+    expect(realChat.map((m) => m.mes)).toEqual(['m1 #Road', 'M1', 'a fresh start #!?', 'reply']);
+    expect(realChat[2]!.extra![SWITCHED_KEY]).toBe(true);
+    // swipe: the reply is generated again
+    const swiped = realChat.slice(0, 3).map((m) => ({ ...m })) as STMessage[];
+    const again = await generate(swiped, { naming: true, keepChat: true });
+    expect(again.snapshot!.storyline).toMatchObject({ main: true, naming: true, switching: false, namingMain: false });
+    expect(again.ctx!.structures.find((x) => x.kind === 'storyline')?.requested).toEqual(['name']);
+    await receive(again.ctx!, { name: 'Ocean', previous_main: 'Ignored' });
+    expect(metadata.advanced_preset.storylines.main).toBe('Ocean');
+    expect(realChat[0]!.mes).toBe('m1 #Road');
+  });
+
+  it('`#?` names a new storyline from the reply (unique, kept a normal storyline, generic when not given)', async () => {
+    const chat = [user('m1'), ai('M1'), user('c1 #cellar'), ai('C1', 'cellar'), user('somewhere else #?')];
+    const { contents, snapshot, ctx } = await generate(chat, { naming: true });
+    expect(snapshot!.storyline).toMatchObject({ name: '', main: false, new: true, naming: true, switching: false });
+    expect(pick(contents!, ['c1', 'somewhere else', sep('?'), sep('cellar'), SEP_MAIN])).toEqual([sep('cellar'), 'c1', SEP_MAIN, sep('?'), 'somewhere else']);
+    expect(ctx!.storylines!.current).toBe(NEW_LINE);
+    await receive(ctx!, { name: 'cellar' });
+    expect(realChat.at(-1)!.extra![STORYLINE_KEY]).toBe('cellar-2');
+    // the input follows the reply
+    expect(chatLineKeys(realChat).at(-2)).toBe('cellar-2');
+    // a name looking like an if-line stays a normal storyline
+    const r2 = await generate([...chat.slice(0, 4), user('x #?')], { naming: true });
+    await receive(r2.ctx!, { name: 'ifOnly' });
+    expect(metadata.advanced_preset.storylines.if).toEqual({ ifOnly: false });
+    // without the structure: a generic name
+    const r3 = await generate([user('y #?')]);
+    expect(r3.ctx!.structures.some((x) => x.kind === 'storyline')).toBe(false);
+    await receive(r3.ctx!, undefined);
+    expect(realChat.at(-1)!.extra![STORYLINE_KEY]).toBe('storylines.fallback.side');
+  });
+
+  it('a nameless `#` continues the most recent other storyline and names it in the input', async () => {
+    const chat = [user('m1'), ai('M1'), user('c1 #cellar'), ai('C1', 'cellar'), user('m2'), ai('M2', ''), user('接着写#')];
+    const { snapshot, text } = await generate(chat);
+    expect(snapshot!.storyline).toMatchObject({ name: 'cellar', main: false });
+    expect(realChat.at(-1)!.mes).toBe('接着写#cellar');
+    expect(text).toContain('接着写');
+    expect(text).not.toContain('#cellar');
+  });
+
+  it('on a switching turn variables are not frozen; on a #? turn they are', async () => {
+    metadata.variables = { stat_data: { hp: 10 } };
+    await generate([user('m1'), ai('M1'), user('x #!?')], { naming: true });
+    metadata.variables = { stat_data: { hp: 1 } };
+    expect(await settleTurn()).toBe(false);
+    expect(metadata.variables).toEqual({ stat_data: { hp: 1 } });
+    metadata.variables = { stat_data: { hp: 10 } };
+    await generate([user('m1'), ai('M1'), user('x #?')], { naming: true });
+    metadata.variables = { stat_data: { hp: 1 } };
+    expect(await settleTurn()).toBe(true);
+    expect(metadata.variables).toEqual({ stat_data: { hp: 10 } });
   });
 
   it('structures, memory and recap follow the storyline order (I-153)', async () => {
@@ -282,14 +414,6 @@ describe('storylines in a generation', () => {
     expect(await settleTurn()).toBe(false);
   });
 
-  it('cancelling the name aborts the generation and changes nothing', async () => {
-    popupAnswer = null;
-    const chat = [user('m1'), ai('M1'), user('go #!B')];
-    const r = await generate(chat);
-    expect(r.aborted).toBe(true);
-    expect(realChat[0]!.mes).toBe('m1');
-    expect(metadata.advanced_preset?.storylines?.main).toBeUndefined();
-  });
 });
 
 describe('storyline data', () => {

@@ -14,6 +14,8 @@ export const BUILTIN_CARDS: Record<StructureKind, { position: CardPosition; orde
   memory: { position: 'bottom', order: 500 },
   recap: { position: 'bottom', order: 600 },
   custom: { position: 'bottom', order: 700 },
+  // The storyline badge shows the storyline (I-151); the names are applied when the reply is received.
+  storyline: null,
   annotations: null,
 };
 

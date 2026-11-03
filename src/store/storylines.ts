@@ -3,9 +3,11 @@
  * metadata, the storyline of each assistant swipe in its `extra`, and switching the main storyline
  * (I-147): messages of the old main storyline get its name (user `#tag`, assistant swipe data).
  */
-import { MAX_STORYLINE_NAME, withStorylineTag, type APreset, type Configuration } from '@advanced-preset/protocol';
+import { isIfName, validStorylineName, withStorylineTag, type APreset, type Configuration } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
-import { STORYLINE_KEY, arrangeLines, isIfLine, lineKey, messageLines, type StorylineMeta } from '@/core/storylines';
+import { STORYLINE_KEY, SWITCHED_KEY, arrangeLines, isIfLine, isPendingLine, lineKey, messageLines, type StorylineMeta } from '@/core/storylines';
+
+export { validStorylineName };
 
 const META_KEY = 'advanced_preset';
 
@@ -25,12 +27,17 @@ function writeMeta(next: StorylineMeta): void {
   ap.storylines = next;
 }
 
-/** A name usable in a `#tag`: no whitespace or `#`, at most {@link MAX_STORYLINE_NAME} characters. */
-export const validStorylineName = (name: string): boolean => /^[^\s#]+$/u.test(name) && [...name].length <= MAX_STORYLINE_NAME && !name.startsWith('!');
-
 /** Storyline key of every chat message under the current metadata. */
 export function chatLineKeys(chat: readonly STMessage[] = st().chat, meta = storylineMeta()): string[] {
-  return messageLines(chat).map((l) => lineKey(l, meta));
+  return messageLines(chat, meta).map((l) => lineKey(l, meta));
+}
+
+/** Names in use in the chat (storylines with messages, the main storyline, if-line switches): new names avoid them. */
+export function takenStorylineNames(chat: readonly STMessage[] = st().chat, meta = storylineMeta()): Set<string> {
+  const out = new Set(chatLineKeys(chat, meta).filter((k) => k !== '' && !isPendingLine(k)));
+  if (meta.main) out.add(meta.main);
+  for (const k of Object.keys(meta.if ?? {})) out.add(k);
+  return out;
 }
 
 /**
@@ -41,6 +48,14 @@ export function chatLineKeys(chat: readonly STMessage[] = st().chat, meta = stor
 export function storylineView(current?: string, chat: readonly STMessage[] = st().chat, meta = storylineMeta()): number[] {
   const keys = chatLineKeys(chat, meta);
   return arrangeLines(keys, current ?? keys.at(-1) ?? '', meta).order;
+}
+
+/** A nameless `#` / `#!` input resolved when it is sent: its text now names the storyline (shown and saved). */
+export function rewriteInputTag(mesId: number, text: string): void {
+  const msg = st().chat[mesId];
+  if (!msg?.is_user || msg.mes === text) return;
+  msg.mes = text;
+  st().updateMessageBlock(mesId, msg);
 }
 
 /** Records the storyline of an assistant message's current swipe (`''`: main). */
@@ -60,7 +75,7 @@ export async function setIfLine(key: string, value: boolean): Promise<void> {
   await st().saveMetadata();
 }
 
-/** Names the (unnamed) main storyline; `false` when the name is taken by another storyline. */
+/** Names (or renames) the main storyline; `false` when the name is invalid or taken by another storyline. */
 export async function nameMainStoryline(name: string): Promise<boolean> {
   const meta = storylineMeta();
   if (!validStorylineName(name)) return false;
@@ -68,6 +83,21 @@ export async function nameMainStoryline(name: string): Promise<boolean> {
   writeMeta({ ...meta, main: name });
   await st().saveMetadata();
   return true;
+}
+
+/** A storyline named by the AI on a `#?` turn stays a normal storyline, whatever its name (the turn saw it as one). */
+export function keepNormalLine(name: string): void {
+  if (!isIfName(name)) return;
+  const meta = storylineMeta();
+  writeMeta({ ...meta, if: { ...(meta.if ?? {}), [name]: false } });
+}
+
+/** Marks a `#!?` input whose new main storyline exists: its swipes rename it instead of switching again. */
+export function markSwitched(mesId: number): void {
+  const msg = st().chat[mesId];
+  if (!msg?.is_user) return;
+  msg.extra ??= {};
+  msg.extra[SWITCHED_KEY] = true;
 }
 
 export type SwitchResult = 'switched' | 'unchanged' | 'needs-name' | 'invalid' | 'taken';
@@ -81,7 +111,7 @@ export async function switchMainStoryline(target: string, oldName?: string): Pro
   if (!validStorylineName(target)) return 'invalid';
   if (lineKey(target, meta) === '') return 'unchanged';
   const chat = st().chat;
-  const raw = messageLines(chat);
+  const raw = messageLines(chat, meta);
   const keys = raw.map((l) => lineKey(l, meta));
   const old = oldName ?? meta.main ?? '';
   const mainUsed = keys.some((k, i) => k === '' && !chat[i]!.is_system);

@@ -1,12 +1,15 @@
 /**
- * Switching the main storyline (I-147) from a `#!name` input or the storyline panel. An unnamed main
- * storyline with messages needs a name first: the user is asked; cancelling keeps everything as is.
+ * Storyline changes of the app: switching the main storyline from the storyline panel (I-147; an
+ * unnamed main storyline with messages needs a name first: the user is asked, cancelling keeps
+ * everything as is), and what a received reply does to the storylines (I-159).
  */
-import { escapeHtml, inputPopup, toast } from '@/st/host';
+import { storylineNameFrom, uniqueStorylineName, type StorylineNaming } from '@advanced-preset/protocol';
+import { escapeHtml, inputPopup, st, toast } from '@/st/host';
 import { t } from '@/i18n';
-import { switchMainStoryline, validStorylineName } from '@/store/storylines';
+import { keepNormalLine, markSwitched, nameMainStoryline, storylineMeta, switchMainStoryline, takenStorylineNames, validStorylineName, writeMessageLine } from '@/store/storylines';
+import type { StorylineTurn } from '@/core/storylines';
 
-/** Makes `target` the main storyline, asking for the old main storyline's name when needed. `false`: not switched. */
+/** Makes `target` the main storyline (panel), asking for the old main storyline's name when needed. `false`: not switched. */
 export async function switchMainInteractive(target: string): Promise<boolean> {
   let res = await switchMainStoryline(target);
   if (res === 'invalid') { toast('warning', t('storylines.invalidName'), t('app.name')); return false; }
@@ -24,4 +27,46 @@ export async function switchMainInteractive(target: string): Promise<boolean> {
   }
   if (res === 'switched') toast('success', t('storylines.switched', { name: target }), t('app.name'));
   return true;
+}
+
+/**
+ * The storyline of a received reply (I-145, I-159): written on its swipe, after naming the storylines
+ * the AI named (`#?`, `#!?`; the unnamed previous main storyline of a `#!` switch) and switching the
+ * main storyline (`#!name`, `#!?`). Names the AI did not give (or gave unusable ones) fall back to
+ * generic names. `value`: the storyline structure of the reply, if the preset requested it.
+ */
+export async function commitStoryline(mesId: number, turn: StorylineTurn, value: unknown): Promise<void> {
+  const n = turn.naming;
+  if (!n.naming && !n.switching) return writeMessageLine(mesId, turn.current);
+  const got = (value && typeof value === 'object' ? value : {}) as Partial<StorylineNaming>;
+  const taken = takenStorylineNames();
+  const pick = (raw: unknown, fallback: string) => {
+    const name = uniqueStorylineName(storylineNameFrom(raw) || fallback, taken);
+    taken.add(name);
+    return name;
+  };
+  if (n.renameMain) {
+    taken.delete(storylineMeta().main ?? '');
+    const name = pick(got.name, t('storylines.fallback.side'));
+    if (name !== storylineMeta().main && !(await nameMainStoryline(name))) console.warn('[AP] storylines: could not rename the main storyline to', name);
+    return writeMessageLine(mesId, '');
+  }
+  if (!n.switching) {
+    const name = pick(got.name, t('storylines.fallback.side'));
+    keepNormalLine(name);
+    writeMessageLine(mesId, name);
+    return void (await st().saveMetadata());
+  }
+  const target = n.target ?? pick(got.name, t('storylines.fallback.side'));
+  const old = n.oldName ?? (n.namingMain ? pick(got.previous_main, t('storylines.fallback.main')) : undefined);
+  const res = await switchMainStoryline(target, old);
+  if (res !== 'switched' && res !== 'unchanged') {
+    // Should not happen (names are checked above): keep the reply on its storyline as a side story.
+    console.warn('[AP] storylines: main storyline not switched', res, { target, old });
+    toast('warning', t('storylines.switchFailed', { name: target }), t('app.name'));
+    return writeMessageLine(mesId, target);
+  }
+  if (n.naming && turn.input >= 0) markSwitched(turn.input);
+  writeMessageLine(mesId, '');
+  if (res === 'switched') toast('success', t('storylines.switched', { name: target }), t('app.name'));
 }

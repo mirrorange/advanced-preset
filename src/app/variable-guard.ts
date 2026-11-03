@@ -50,9 +50,12 @@ function activeFreeze(): boolean {
 export function lineOfText(content: unknown, chat: readonly STMessage[] = st().chat): string | null {
   if (typeof content !== 'string' || !content) return null;
   const keys = chatLineKeys(chat);
-  for (let i = chat.length - 1; i >= 0; i--) if (chat[i]!.mes === content) return keys[i]!;
+  // Messages of the running turn belong to its storyline, whatever their stored data says yet
+  // (a `#!` switch or a `#?` name is only written once AP received the reply, I-159).
+  const lineAt = (i: number) => (turn?.open && i >= turn.from ? turn.line : keys[i]!);
+  for (let i = chat.length - 1; i >= 0; i--) if (chat[i]!.mes === content) return lineAt(i);
   // A part of a message (MVU's repair passes): only when long enough to be unambiguous.
-  if (content.length >= 40) for (let i = chat.length - 1; i >= 0; i--) if (chat[i]!.mes.includes(content)) return keys[i]!;
+  if (content.length >= 40) for (let i = chat.length - 1; i >= 0; i--) if (chat[i]!.mes.includes(content)) return lineAt(i);
   return null;
 }
 
@@ -80,7 +83,7 @@ export function onMvuUpdateEnded(variables: unknown, before: unknown): void {
 
 interface FrozenTurn {
   chatId: string;
-  /** Storyline key of the turn (never the main storyline). */
+  /** Storyline key of the turn (`''`: the main storyline, nothing is frozen). */
   line: string;
   /** First message of the turn (its user input, or the message being continued / swiped). */
   from: number;
@@ -107,11 +110,11 @@ const sameState = (a: Vars | undefined, b: Vars | undefined): boolean => {
   return strip(a) === strip(b);
 };
 
-/** Called by the interceptor for every generation: remembers a turn on another storyline. */
+/** Called by the interceptor for every generation: remembers its storyline (turns on another storyline are frozen). */
 export function beginTurn(o: { preset: APreset; config: Configuration; line: string | undefined; from: number }): void {
   turn = null;
-  if (!o.line || !freezesVariables(o.preset, o.config)) return;
-  turn = { chatId: String(st().getCurrentChatId?.() ?? ''), line: o.line, from: Math.max(0, o.from), chatVars: cloneData(st().chatMetadata?.variables), open: true };
+  if (o.line === undefined || !freezesVariables(o.preset, o.config)) return;
+  turn = { chatId: String(st().getCurrentChatId?.() ?? ''), line: o.line, from: Math.max(0, o.from), chatVars: o.line ? cloneData(st().chatMetadata?.variables) : undefined, open: true };
 }
 
 /**
@@ -121,7 +124,7 @@ export function beginTurn(o: { preset: APreset; config: Configuration; line: str
  */
 export async function settleTurn(): Promise<boolean> {
   const t = turn;
-  if (!t) return false;
+  if (!t?.line) return false;
   const ctx = st();
   if (String(ctx.getCurrentChatId?.() ?? '') !== t.chatId) { turn = null; return false; }
   let meta = false;

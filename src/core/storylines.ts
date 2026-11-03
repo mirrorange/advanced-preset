@@ -2,19 +2,36 @@
  * Storylines (I-144 – I-152): which storyline each chat message belongs to, how the history of a
  * generation is arranged, and the group marks that carry the arrangement to PROMPT_READY.
  *
- * - A user message belongs to the storyline of its trailing `#tag` (none: the main storyline).
+ * - A user message belongs to the storyline of its trailing `#tag` (none: the main storyline). `#?` /
+ *   `#!?` follow the reply after them (the AI named the storyline there); `#` / `#!` without a name
+ *   (normally rewritten to the name when sent) mean the most recent other storyline before them.
  * - An assistant message belongs to the storyline stored on its swipe (`extra.advanced_preset_storyline`,
  *   written when AP generated it or when the main storyline was switched); otherwise, like system
  *   messages, to the storyline of the message before it.
  * - The main storyline may have a name (chat metadata); a tag with that name is the main storyline.
+ * - A turn may see the chat differently from the stored data (I-159): a `#?` input is a new storyline
+ *   still without a name; a `#!` input makes its storyline the main one once the reply is received,
+ *   but the turn already sees the history that way ({@link planTurn}).
  *
  * Arranged history: [other normal storylines, by first appearance][main][current, if not main].
  * If-lines are only visible to themselves. Pure functions; the chat is never touched here.
  */
-import { isIfName, parseStorylineTag, stripStorylineTag, type StorylineVars } from '@advanced-preset/protocol';
+import { isIfName, parseStorylineTag, replaceStorylineTag, stripStorylineTag, type StorylineVars } from '@advanced-preset/protocol';
 
 /** Per-swipe storyline of an assistant message (`''`: the main storyline). */
 export const STORYLINE_KEY = 'advanced_preset_storyline';
+/** On a `#!?` user message: its new main storyline exists (a swipe only renames it). */
+export const SWITCHED_KEY = 'advanced_preset_storyline_switched';
+
+/**
+ * Keys of storylines without a name yet (never valid names, which cannot start with `?`):
+ * a `#?` / `#!?` input whose reply is missing, the new storyline of this turn, and the unnamed
+ * previous main storyline of a `#!` turn.
+ */
+export const PENDING_LINE = '?';
+export const NEW_LINE = '?new';
+export const OLD_MAIN_LINE = '?main';
+export const isPendingLine = (key: string): boolean => key.startsWith('?');
 
 /** `chatMetadata.advanced_preset.storylines`. */
 export interface StorylineMeta {
@@ -31,20 +48,33 @@ export interface LineMessage {
   extra?: Record<string, any>;
 }
 
-/** Storyline name of each message as written (`''`: untagged). Not resolved against the main storyline's name. */
-export function messageLines(chat: readonly LineMessage[]): string[] {
+/** The storyline stored on an assistant message's current swipe, if any. */
+const storedLine = (m: LineMessage | undefined): string | undefined => {
+  const v = m && !m.is_user ? m.extra?.[STORYLINE_KEY] : undefined;
+  return typeof v === 'string' ? v : undefined;
+};
+
+/**
+ * Storyline name of each message as written (`''`: untagged). Not resolved against the main
+ * storyline's name, except that `meta` tells which names a nameless `#` skips (the main storyline).
+ */
+export function messageLines(chat: readonly LineMessage[], meta: StorylineMeta = {}): string[] {
   const out: string[] = [];
   let prev = '';
-  for (const m of chat) {
+  let recent = '';
+  chat.forEach((m, i) => {
     let line = prev;
-    if (m.is_user) line = parseStorylineTag(m.mes)?.name ?? '';
-    else {
-      const v = m.extra?.[STORYLINE_KEY];
-      if (typeof v === 'string') line = v;
+    if (m.is_user) {
+      const tag = parseStorylineTag(m.mes);
+      line = !tag ? '' : tag.form === 'name' ? tag.name : tag.form === 'recent' ? recent : storedLine(chat[i + 1]) ?? PENDING_LINE;
+    } else {
+      const v = storedLine(m);
+      if (v !== undefined) line = v;
     }
     out.push(line);
     prev = line;
-  }
+    if (line !== '' && line !== meta.main && !isPendingLine(line)) recent = line;
+  });
   return out;
 }
 
@@ -56,8 +86,8 @@ export function isIfLine(key: string, meta: StorylineMeta): boolean {
   return meta.if?.[key] ?? isIfName(key);
 }
 
-/** Display name of a storyline key (`''` → the main storyline's name, possibly empty). */
-export const lineName = (key: string, meta: StorylineMeta): string => (key === '' ? meta.main ?? '' : key);
+/** Display name of a storyline key (`''` → the main storyline's name, possibly empty; storylines without a name yet: `''`). */
+export const lineName = (key: string, meta: StorylineMeta): string => (key === '' ? meta.main ?? '' : isPendingLine(key) ? '' : key);
 
 export interface StorylineGroup {
   key: string;
@@ -109,9 +139,98 @@ export function arrangeLines(keys: readonly string[], current: string, meta: Sto
   return { current, groups, order, groupOf, hidden, grouped, isNew };
 }
 
+/** What a turn does to the storylines (I-159). */
+export interface TurnNaming {
+  /** The AI names the current storyline (`#?`, `#!?`; renames the main storyline on a swipe of a `#!?` turn). */
+  naming: boolean;
+  /** The AI names the unnamed previous main storyline (a `#!` switch). */
+  namingMain: boolean;
+  /** The current storyline becomes the main one when the reply is received (`#!name`, `#!?`). */
+  switching: boolean;
+  /** `#!name`: the storyline that becomes the main one. */
+  target?: string;
+  /** The previous main storyline's name when it has one (a switch). */
+  oldName?: string;
+  /** A swipe of a `#!?` turn: the main storyline it created gets the new name. */
+  renameMain?: boolean;
+}
+
+export const NO_NAMING: TurnNaming = { naming: false, namingMain: false, switching: false };
+
 /** `storyline.*` of a generation on `current`. */
-export function storylineVars(current: string, meta: StorylineMeta, isNew: boolean, grouped = false): StorylineVars {
-  return { name: lineName(current, meta), main: current === '', if: isIfLine(current, meta), new: isNew, grouped };
+export function storylineVars(current: string, meta: StorylineMeta, isNew: boolean, grouped = false, naming: TurnNaming = NO_NAMING): StorylineVars {
+  return {
+    name: naming.naming ? '' : lineName(current, meta), main: current === '', if: isIfLine(current, meta), new: isNew, grouped,
+    naming: naming.naming, namingMain: naming.namingMain, switching: naming.switching,
+  };
+}
+
+/** How one generation sees the storylines of the chat (I-159). */
+export interface TurnPlan extends TurnNaming {
+  /** Storyline key of every chat message as this turn sees it. */
+  keys: string[];
+  /** Storyline metadata as this turn sees it (the main storyline after a `#!` switch). */
+  meta: StorylineMeta;
+  /** Key of the current storyline. */
+  current: string;
+  /** Index of the input in the chat (-1: none). */
+  input: number;
+  /** A nameless `#` / `#!` resolved to the most recent other storyline: the input's new text. */
+  rewrite?: string;
+  /** A nameless `#` / `#!` with no other storyline before it: back to the main storyline. */
+  noRecent?: boolean;
+}
+
+/**
+ * Plans a generation whose input is chat message `input` (-1: none, the storyline of the last
+ * message). Pure: the chat is not touched (the caller applies `rewrite`).
+ * - `#` / `#!`: the most recent storyline other than the main one before the input.
+ * - `#?`: a new storyline the AI names when replying.
+ * - `#!name` / `#!?`: the storyline becomes the main one when the reply is received; the turn sees the
+ *   history as if it already were (the previous main storyline is a normal storyline, unnamed ones
+ *   named by the AI). A `#!?` input whose switch happened (a swipe) renames the main storyline.
+ */
+export function planTurn(chat: readonly LineMessage[], input: number, meta: StorylineMeta): TurnPlan {
+  const keys = messageLines(chat, meta).map((l) => lineKey(l, meta));
+  const plain = (current: string): TurnPlan => ({ keys, meta, current, input, ...NO_NAMING });
+  const msg = input >= 0 ? chat[input] : undefined;
+  if (!msg) return plain(keys.at(-1) ?? '');
+  let tag = msg.is_user ? parseStorylineTag(msg.mes) : null;
+  if (!tag) return plain(keys[input] ?? '');
+  // Everything after the input (a swipe's message being generated again) belongs to the turn.
+  const own = (key: string) => { for (let i = input; i < keys.length; i++) keys[i] = key; };
+  let rewrite: string | undefined;
+  let noRecent = false;
+  if (tag.form === 'recent') {
+    let name = '';
+    for (let i = input - 1; i >= 0 && !name; i--) if (keys[i] !== '' && !isPendingLine(keys[i]!)) name = keys[i]!;
+    rewrite = replaceStorylineTag(msg.mes, tag, name);
+    noRecent = !name;
+    own(name);
+    if (!name) return { ...plain(''), rewrite, noRecent };
+    tag = { ...tag, form: 'name', name };
+  }
+  const extra = rewrite !== undefined ? { rewrite } : {};
+  if (!tag.switchMain) {
+    if (tag.form === 'new') { own(NEW_LINE); return { ...plain(NEW_LINE), naming: true }; }
+    return { ...plain(keys[input]!), ...extra };
+  }
+  // `#!…`
+  if (tag.form === 'name' && lineKey(tag.name, meta) === '') { own(''); return { ...plain(''), ...extra }; }
+  if (tag.form === 'new' && msg.extra?.[SWITCHED_KEY]) { own(''); return { ...plain(''), naming: true, renameMain: true }; }
+  const target = tag.form === 'name' ? tag.name : '';
+  const oldName = meta.main ?? '';
+  const mainUsed = keys.some((k, i) => k === '' && i < input && !chat[i]!.is_system);
+  const old = oldName || OLD_MAIN_LINE;
+  for (let i = 0; i < keys.length; i++) keys[i] = i >= input ? '' : keys[i] === '' ? old : keys[i] === target ? '' : keys[i]!;
+  const ifs = { ...(meta.if ?? {}), [old]: false };
+  delete ifs[target];
+  const seen: StorylineMeta = { ...(target ? { main: target } : {}), if: ifs };
+  return {
+    keys, meta: seen, current: '', input, ...extra,
+    naming: tag.form === 'new', namingMain: !oldName && mainUsed, switching: true,
+    ...(target ? { target } : {}), ...(oldName ? { oldName } : {}),
+  };
 }
 
 /** Text without the storyline tag (user messages only; what the model and the classifier see). */
@@ -217,6 +336,12 @@ export function placeLines<M extends PromptMessage>(list: M[], from: number, to:
 export interface StorylineTurn {
   /** Key of the current storyline (`''`: main). */
   current: string;
+  /** What the turn does to the storylines (naming, switching the main storyline). */
+  naming: TurnNaming;
+  /** Index of the input in the chat (-1: none). */
+  input: number;
+  /** Chat indices as this storyline sees the chat (structures, memory and recap read them, I-153). */
+  view: number[];
   vars: StorylineVars;
   /** Name of the main storyline (may be empty). */
   mainName: string;
@@ -231,21 +356,21 @@ export interface StorylineTurn {
 }
 
 /**
- * Arranges history items (copies of chat messages, `realIndex` into the chat whose storyline keys
- * are `realKeys`) for the storyline of `currentInput` (or of the last item). Returns new item
- * copies without storyline tags, in arranged order, with their real indices and groups.
+ * Arranges history items (copies of chat messages, `realIndex` into the chat planned in `plan`) for
+ * the plan's current storyline. Returns new item copies without storyline tags, in arranged order,
+ * with their real indices and groups.
  */
-export function arrangeTurn<T extends LineMessage>(items: readonly T[], realIndex: readonly number[], realKeys: readonly string[], currentInput: number, meta: StorylineMeta): {
+export function arrangeTurn<T extends LineMessage>(items: readonly T[], realIndex: readonly number[], plan: TurnPlan, currentInput: number): {
   items: T[]; realIndex: number[]; groups: number[]; currentInput: number; turn: StorylineTurn;
 } {
-  const own = messageLines(items).map((l) => lineKey(l, meta));
+  const { meta, current } = plan;
+  const own = messageLines(items, meta).map((l) => lineKey(l, meta));
   const keys = items.map((_, i) => {
     const r = realIndex[i] ?? -1;
-    return r >= 0 && r < realKeys.length ? realKeys[r]! : own[i]!;
+    return r >= 0 && r < plan.keys.length ? plan.keys[r]! : i === currentInput ? current : own[i]!;
   });
-  const at = currentInput >= 0 ? currentInput : items.length - 1;
-  const current = at >= 0 ? keys[at]! : '';
   const a = arrangeLines(keys, current, meta, currentInput);
+  const naming: TurnNaming = { naming: plan.naming, namingMain: plan.namingMain, switching: plan.switching, ...(plan.target ? { target: plan.target } : {}), ...(plan.oldName ? { oldName: plan.oldName } : {}), ...(plan.renameMain ? { renameMain: true } : {}) };
   const outItems = a.order.map((i) => {
     const it = items[i]!;
     const mes = untagged(it);
@@ -253,7 +378,10 @@ export function arrangeTurn<T extends LineMessage>(items: readonly T[], realInde
   });
   const turn: StorylineTurn = {
     current,
-    vars: storylineVars(current, meta, a.isNew, a.grouped),
+    naming,
+    input: plan.input,
+    view: arrangeLines(plan.keys, current, meta).order,
+    vars: storylineVars(current, meta, a.isNew, a.grouped, naming),
     mainName: meta.main ?? '',
     groups: a.groups,
     currentGroup: a.groups.findIndex((g) => g.key === current),

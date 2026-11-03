@@ -374,9 +374,11 @@
   "storylines.freezeVariables.hint": "Turns on storylines other than the main one do not run MVU update commands; Tavern Helper chat variables and the variables of the turn's messages are restored to the state the turn started from, so side stories never change the main storyline's state.",
   "storylines.unsupported": "The current preset does not declare storylines.",
   "storylines.off": "Storylines are switched off in the configuration.",
-  "storylines.usage.side": "#name: this input belongs to the side story “name” (no tag: the main storyline).",
+  "storylines.usage.side": "#name: this input belongs to the side story “name” (no tag: the main storyline). No space is needed before #, except after a Latin letter or digit.",
+  "storylines.usage.recent": "#: continue the most recent other storyline (#! makes it the main storyline).",
+  "storylines.usage.new": "#?: start a new side story the AI names; #!?: start a new main storyline (the AI also names the old main storyline if it has no name).",
   "storylines.usage.if": "#ifName: an if-line, only it sees its own messages.",
-  "storylines.usage.main": "#!name: make “name” the main storyline; the old main storyline becomes a side story.",
+  "storylines.usage.main": "#!name: make “name” the main storyline once the reply arrives; the old main storyline becomes a side story (the AI names it if it has no name).",
   "storylines.main": "Main storyline",
   "storylines.mainNamed": "Main · {name}",
   "storylines.current": "Current",
@@ -395,7 +397,11 @@
   "storylines.switchTitle": "Make “{name}” the main storyline",
   "storylines.askOldMain": "The current main storyline has no name yet. Name it; it stays as a side story with this name:",
   "storylines.switched": "The main storyline is now “{name}”.",
-  "storylines.switchCancelled": "The main storyline was not switched; generation cancelled.",
   "storylines.nameTaken": "A storyline named “{name}” already exists.",
-  "storylines.invalidName": "Storyline names can't be empty, contain spaces or #, start with !, or be longer than 64 characters."
+  "storylines.invalidName": "Storyline names can't be empty, contain spaces or #, start with ! or ?, or be longer than 64 characters.",
+  "storylines.noRecent": "There is no other storyline before this input: it continues the main storyline.",
+  "storylines.fallback.side": "Side-story",
+  "storylines.fallback.main": "Previous-main",
+  "storylines.switchFailed": "Could not make “{name}” the main storyline; the reply stays on that storyline.",
+  "storylines.unnamed": "Unnamed"
 }

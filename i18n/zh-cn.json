@@ -374,9 +374,11 @@
   "storylines.freezeVariables.hint": "在主线以外的故事线上生成时，MVU 不执行变量更新命令；酒馆助手的聊天变量与本轮消息变量恢复为本轮开始时的状态，支线的状态不会带回主线。",
   "storylines.unsupported": "当前预设没有声明故事线功能。",
   "storylines.off": "故事线已在配置中关闭。",
-  "storylines.usage.side": "#名称：这条输入属于支线「名称」（不加标签即为主线）。",
+  "storylines.usage.side": "#名称：这条输入属于支线「名称」（不加标签即为主线）。# 前可以不加空格（紧跟英文字母或数字时除外）。",
+  "storylines.usage.recent": "#：继续最近的一条其他故事线（#! 则把它设为主线）。",
+  "storylines.usage.new": "#?：开始一条由 AI 命名的新支线；#!?：开始一条新主线（原主线没有名称时也由 AI 命名）。",
   "storylines.usage.if": "#if名称：if 线，只有它自己能看到自己的记录。",
-  "storylines.usage.main": "#!名称：把「名称」设为主线，原主线成为一条支线。",
+  "storylines.usage.main": "#!名称：收到回复后把「名称」设为主线，原主线成为一条支线（原主线没有名称时由 AI 命名）。",
   "storylines.main": "主线",
   "storylines.mainNamed": "主线 · {name}",
   "storylines.current": "当前",
@@ -395,7 +397,11 @@
   "storylines.switchTitle": "将「{name}」设为主线",
   "storylines.askOldMain": "当前主线还没有名称。请为它命名，切换后它将以这个名称保留为一条支线：",
   "storylines.switched": "主线已切换为「{name}」。",
-  "storylines.switchCancelled": "未切换主线，本次生成已取消。",
   "storylines.nameTaken": "已有名为「{name}」的故事线。",
-  "storylines.invalidName": "故事线名称不能为空，不能包含空格或 #，不能以 ! 开头，且不超过 64 个字符。"
+  "storylines.invalidName": "故事线名称不能为空，不能包含空格或 #，不能以 ! 或 ? 开头，且不超过 64 个字符。",
+  "storylines.noRecent": "这条输入之前没有其他故事线，按主线继续。",
+  "storylines.fallback.side": "支线",
+  "storylines.fallback.main": "原主线",
+  "storylines.switchFailed": "未能将「{name}」设为主线，这条回复保留在该故事线上。",
+  "storylines.unnamed": "未命名"
 }

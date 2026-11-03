@@ -4,7 +4,7 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
-  MAIN_STORYLINE_VARS, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type Vars, type Workflow,
+  MAIN_STORYLINE_VARS, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type StorylineVars, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, toast, type ChatMessage, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
@@ -22,8 +22,8 @@ import { debugLog } from './debug';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { applySticky, stripMarkers, type CacheReport } from './sticky';
 import { cacheState, currentChatKey, storylineCacheKey } from '@/store/cache-state';
-import { chatLineKeys, storylineMeta, storylineView, storylinesOn } from '@/store/storylines';
-import { arrangeTurn, inBackground, placeLines, takeLineMarks, type StorylineTurn } from './storylines';
+import { storylineMeta, storylinesOn } from '@/store/storylines';
+import { arrangeTurn, inBackground, placeLines, planTurn, takeLineMarks, type StorylineTurn } from './storylines';
 import { INPUT_SLOT, applyInput, locateInput, markInput, stripInputMarks } from './input-shaping';
 
 export const ANCHOR_RE = /⟦ap:region:([\w.-]+)⟧/g;
@@ -87,7 +87,7 @@ function customLast(preset: APreset, chat: readonly STMessage[]): Record<string,
 export type VarsSource = Pick<GenerationContext, 'preset' | 'config' | 'transport' | 'origin' | 'stType' | 'meta' | 'flags' | 'inputShaped' | 'storylines'>;
 
 /** Chat indices the current storyline sees, in its order (I-153); `undefined`: the whole chat. */
-export const storylineViewOf = (turn: StorylineTurn | undefined): number[] | undefined => (turn ? storylineView(turn.current) : undefined);
+export const storylineViewOf = (turn: StorylineTurn | undefined): number[] | undefined => turn?.view;
 
 export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined): { vars: Vars; data: MacroData } {
   const { preset, config } = ctx;
@@ -151,8 +151,7 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
   // Storylines: arranged for the storyline of the last message, like the interceptor does (I-151).
   let groupOf: number[] = [];
   if (storylinesOn(preset, config)) {
-    const meta = storylineMeta();
-    const a = arrangeTurn(items, real, chatLineKeys(chat, meta), -1, meta);
+    const a = arrangeTurn(items, real, planTurn(chat, -1, storylineMeta()), -1);
     items = a.items;
     real = a.realIndex;
     groupOf = a.groups;
@@ -288,7 +287,8 @@ function arrangeHistory(ctx: GenerationContext, turn: StorylineTurn, final: Chat
     separator: (g) => {
       const group = turn.groups[g];
       if (!decl || !group) return null;
-      const content = storylineSeparator(group.main ? decl.mainSeparator : decl.separator, group.name, expand);
+      // A storyline the AI names this turn (or the unnamed previous main storyline of a switch): `?`.
+      const content = storylineSeparator(group.main ? decl.mainSeparator : decl.separator, group.name || (group.main ? '' : '?'), expand);
       if (!content.trim()) return null;
       const msg: ChatMessage = { role: 'system', content };
       Object.defineProperty(msg, AP_MESSAGE, { value: true });
@@ -335,7 +335,7 @@ export interface AssemblySnapshot {
   /** Input shaping of this request (presets that declare it). */
   input?: { mode: string; shaped: boolean; chars: number };
   /** Storylines of this request (presets that declare them): the current storyline and the history groups. */
-  storyline?: { name: string; main: boolean; if: boolean; new: boolean; groups: string[]; hidden: number; grouped: boolean };
+  storyline?: StorylineVars & { groups: string[]; hidden: number };
   warnings: string[];
 }
 export let lastSnapshot: AssemblySnapshot | null = null;
@@ -430,7 +430,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   let end = historyEnd < 0 ? final.length : historyEnd;
   const turn = ctx.storylines;
   if (turn) {
-    snapshot.storyline = { ...turn.vars, groups: turn.groups.map((g) => (g.main ? `(main) ${g.name}` : g.if ? `(if) ${g.name}` : g.name)), hidden: turn.hidden, grouped: turn.grouped };
+    snapshot.storyline = { ...turn.vars, groups: turn.groups.map((g) => (g.main ? `(main) ${g.name}` : g.if ? `(if) ${g.name}` : g.name || '?')), hidden: turn.hidden, grouped: turn.grouped };
     if (turn.grouped && historyAt >= 0) end = arrangeHistory(ctx, turn, final, historyAt, end);
   }
   snapshot.cache = applySticky(ctx, final, historyAt, end);

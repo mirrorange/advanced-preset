@@ -50,6 +50,17 @@ describe('MVU on other storylines', () => {
     expect(lineOfText('something else')).toBeNull();
   });
 
+  it('messages of the running turn belong to its storyline before their data is written (I-159)', () => {
+    // `#!?`: the reply has no storyline yet (it follows the input), but the turn makes it the main storyline
+    chat = [user('m1'), ai('M1 x', ''), user('new #!?'), { is_user: false, name: 'Bot', mes: 'N1 hp=5', extra: {} } as Msg];
+    expect(lineOfText('N1 hp=5')).toBe('?');
+    beginTurn({ preset, config: state.config, line: '', from: 2 });
+    expect(lineOfText('N1 hp=5')).toBe('');
+    expect(mvuUpdate('N1 hp=5', stat(10), [{ hp: 5 }]).stat_data).toEqual({ hp: 5 });
+    beginTurn({ preset, config: state.config, line: '?new', from: 2 });
+    expect(mvuUpdate('N1 hp=5', stat(10), [{ hp: 5 }]).stat_data).toEqual({ hp: 10 });
+  });
+
   it('drops the commands of a side story message and keeps the state', () => {
     chat = [user('m1'), ai('M1', ''), user('c1 #cellar'), ai('C1 hp=5', 'cellar')];
     const v = mvuUpdate('C1 hp=5', stat(10), [{ hp: 5 }]);

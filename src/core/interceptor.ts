@@ -9,7 +9,6 @@ import { currentRecap } from '@/store/eventlog';
 import { settings } from '@/store/settings';
 import { st, toast, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
-import { parseStorylineTag } from '@advanced-preset/protocol';
 import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { annotationHistory, historyEchoes, rewriteHistoryIndexed, synopsisOptions } from './history';
@@ -17,9 +16,8 @@ import { buildVarsAndData, storylineViewOf } from './assembler';
 import { keywordTexts } from '@/store/user-modules';
 import { detachRegeneratingSidecar } from '@/store/sidecar';
 import { cacheState, currentChatKey, storylineCacheKey } from '@/store/cache-state';
-import { chatLineKeys, storylineMeta, storylinesOn } from '@/store/storylines';
-import { switchMainInteractive } from '@/app/storylines';
-import { arrangeTurn, inBackground, lineKey, lineMark, type StorylineTurn } from './storylines';
+import { rewriteInputTag, storylineMeta, storylinesOn } from '@/store/storylines';
+import { arrangeTurn, inBackground, lineMark, planTurn, type StorylineTurn } from './storylines';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { markInput } from './input-shaping';
 import { beginTurn } from '@/app/variable-guard';
@@ -45,23 +43,28 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     return i;
   });
 
-  // Storylines (I-145 – I-150): `#!name` switches the main storyline first; the copy is then arranged
-  // by storyline (invisible if-lines left out) and loses its tags before anything reads it.
+  // Storylines (I-145 – I-150, I-159): the turn is planned on the real chat (a nameless `#` becomes the
+  // most recent other storyline, `#?` a new one, `#!` sees the history as after the switch, which
+  // happens when the reply is received); the copy is then arranged by storyline (invisible if-lines
+  // left out) and loses its tags before anything reads it.
   let storylines: StorylineTurn | undefined;
   let groupOf: number[] = [];
   if (storylinesOn(preset, config)) {
-    const tag = currentInput >= 0 ? parseStorylineTag(chat[currentInput]!.mes) : null;
-    if (tag?.switchMain && lineKey(tag.name, storylineMeta()) !== '') {
-      if (!(await switchMainInteractive(tag.name))) {
-        toast('info', t('storylines.switchCancelled'), t('app.name'));
-        _abort(true);
-        return;
-      }
-    }
     const meta = storylineMeta();
-    const a = arrangeTurn(chat, realIndexOf, chatLineKeys(st().chat, meta), currentInput, meta);
+    const realInput = currentInput >= 0 ? realIndexOf[currentInput] ?? -1 : -1;
+    // An input not found in the chat: planned on the copy.
+    const onCopy = currentInput >= 0 && realInput < 0;
+    const plan = planTurn(onCopy ? chat : real, onCopy ? currentInput : realInput, meta);
+    if (plan.rewrite !== undefined && currentInput >= 0) {
+      chat[currentInput] = { ...chat[currentInput]!, mes: plan.rewrite };
+      if (!onCopy) rewriteInputTag(realInput, plan.rewrite);
+      if (plan.noRecent) toast('info', t('storylines.noRecent'), t('app.name'));
+    }
+    const a = arrangeTurn(chat, onCopy ? chat.map((_, i) => i) : realIndexOf, plan, currentInput);
     chat.splice(0, chat.length, ...(a.items as STMessage[]));
-    realIndexOf = a.realIndex;
+    const before = realIndexOf;
+    realIndexOf = onCopy ? a.realIndex.map((ci) => before[ci] ?? -1) : a.realIndex;
+    if (onCopy) a.turn.input = -1;
     groupOf = a.groups;
     currentInput = a.currentInput;
     last = chat.length - 1;
