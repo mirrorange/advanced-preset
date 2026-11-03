@@ -1,7 +1,7 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
   TRANSPORTS, assemble, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
-  type APreset, type ParamValue, type Transport, type UserModule, type UserModuleSource,
+  type APreset, type StorylineVars, type ParamValue, type Transport, type UserModule, type UserModuleSource,
 } from '@advanced-preset/protocol';
 
 export interface PreviewOptions {
@@ -14,14 +14,33 @@ export interface PreviewOptions {
   params?: Record<string, ParamValue>;
   /** The user's input (`--input`): with input shaping declared, the turn is shaped (`input.shaped`). */
   input?: string;
-  /** The current storyline (`--storyline name`; presets with `storylines`): `if` by the name rule, `new` with `--storyline-new`. */
+  /**
+   * The current storyline (`--storyline name`; presets with `storylines`): `if` by the name rule, `new`
+   * with `--storyline-new`. `?`: a new storyline the AI names (`storyline.naming`).
+   */
   storyline?: string;
   storylineNew?: boolean;
+  /** `--storyline-switch`: the turn makes the storyline the main one (`storyline.switching`). */
+  storylineSwitch?: boolean;
+  /** `--storyline-naming-main`: the AI names the previous main storyline (`storyline.namingMain`, with a switch). */
+  storylineNamingMain?: boolean;
   /** `storyline.grouped` on the main storyline (a side storyline is always grouped in the preview). */
   storylineGrouped?: boolean;
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
   json?: boolean;
+}
+
+function previewStoryline(preset: APreset, o: PreviewOptions): StorylineVars {
+  if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
+  const naming = o.storyline === '?';
+  const name = naming ? '' : o.storyline ?? '';
+  const switching = Boolean(o.storylineSwitch);
+  if (!o.storyline && !switching) return { ...MAIN_STORYLINE_VARS, new: Boolean(o.storylineNew), grouped: Boolean(o.storylineGrouped) };
+  return {
+    name, main: switching, if: !switching && isIfName(name), new: naming || Boolean(o.storylineNew), grouped: true,
+    naming, namingMain: switching && Boolean(o.storylineNamingMain), switching,
+  };
 }
 
 function pick(all: UserModuleSource[], ids: string[], noun: string): UserModuleSource[] | string {
@@ -95,9 +114,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === 'mixed', task: null, recent: false },
     gen: { origin: pure ? 'task' : 'story', type: 'normal', callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== undefined },
-    storyline: preset.storylines && o.storyline
-      ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew), grouped: true }
-      : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew), grouped: Boolean(preset.storylines && o.storylineGrouped) },
+    storyline: previewStoryline(preset, o),
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === 'task') : undefined;
   if (workflow) vars.workflow = workflow.id;
@@ -132,7 +149,11 @@ export function preview(source: APreset, o: PreviewOptions): string {
   const size = (v: (typeof a.buildVars)[string]) => (typeof v === 'string' ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`);
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(', ')}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);
-  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? 'main' : `${vars.storyline.name}${vars.storyline.if ? ' (if-line)' : ''}`}${vars.storyline.new ? ' (new)' : ''}${vars.storyline.grouped ? ' (grouped)' : ''}`);
+  if (preset.storylines) {
+    const v = vars.storyline;
+    const flags = [v.if ? 'if-line' : '', v.new ? 'new' : '', v.grouped ? 'grouped' : '', v.switching ? 'switching' : '', v.naming ? 'AI names it' : '', v.namingMain ? 'AI names the previous main' : ''].filter(Boolean);
+    lines.push(`storyline: ${v.main ? `main${v.name ? ` ${v.name}` : ''}` : v.name || '?'}${flags.map((f) => ` (${f})`).join('')}`);
+  }
   else if (o.storyline) lines.push('storyline: main (the preset declares no storylines)');
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === undefined ? ' (not shaped: no --input)' : ''}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);

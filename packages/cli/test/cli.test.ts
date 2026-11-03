@@ -1083,7 +1083,7 @@ describe('storylines', () => {
   it('compiles `true` and custom separators with the user switch', () => {
     const on = build(withStorylines('storylines: true\n'));
     expect(on.diag.errors).toEqual([]);
-    expect(messages(on)).not.toMatch(/storyline/i);
+    expect(messages(on)).toMatch(/no module requests a storyline structure/);
     expect(on.preset!.storylines).toEqual({ separator: '<!-- Start of Storyline {{storyline}} -->', mainSeparator: '<!-- Start of the main storyline -->' });
     expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: true });
     const custom = build(withStorylines('storylines: { separator: "[{{storyline}}]" }\nconfigurationDefaults: { storylines: { enabled: false } }\n'));
@@ -1112,6 +1112,43 @@ describe('storylines', () => {
     expect(preview(p, { storylineGrouped: true })).toMatch(/storyline: main \(grouped\)\n/);
     expect(out).toMatch(/Side: ifRain/);
     const json = JSON.parse(preview(p, { storyline: 'cellar', json: true }));
-    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false, grouped: true });
+    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false, grouped: true, naming: false, namingMain: false, switching: false });
+  });
+
+  const withNaming = (decl = 'storylines: true\n') => {
+    const t = withStorylines(decl);
+    t.set('manifest/naming.yaml', 'structures:\n  storyline:\n    kind: storyline\n    properties: { name: The new name, previous_main: The old name }\n    formatPrompt: { tag: "<storyline>", field: "{{field}}" }\n');
+    t.set('modules/naming.md', '---\nid: naming\ntoggle: always\nregion: task\nwhen: storyline.naming || storyline.namingMain\nstructures: [storyline]\n---\nName it.<!-- @if storyline.namingMain --> Name the old one too.<!-- @end -->\n');
+    return t;
+  };
+
+  it('compiles the storyline structure and checks its use (I-158)', () => {
+    const r = build(withNaming());
+    expect(r.diag.errors).toEqual([]);
+    expect(messages(r)).not.toMatch(/storyline/i);
+    expect(r.preset!.structures.storyline).toMatchObject({ kind: 'storyline', properties: { name: 'The new name', previous_main: 'The old name' } });
+    expect(messages(build(withNaming('')))).toMatch(/storyline structures are only requested when a storyline is named/);
+    const bad = withNaming();
+    bad.set('manifest/naming.yaml', bad.get('manifest/naming.yaml')!.replace('previous_main: The old name', 'old: x'));
+    expect(build(bad).diag.errors.map((e) => e.message).join('\n')).toMatch(/storyline has no sub-field `old` \(expected name \| previous_main\)/);
+  });
+
+  it('previews naming turns: --storyline ?, --storyline-switch, --storyline-naming-main', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withNaming()).preset!;
+    expect(preview(p, { storyline: 'cellar' })).not.toMatch(/Name it/);
+    const side = preview(p, { storyline: '?' });
+    expect(side).toMatch(/storyline: \? \(new\) \(grouped\) \(AI names it\)/);
+    expect(side).toMatch(/structures: storyline/);
+    expect(side).toMatch(/Name it\./);
+    expect(side).not.toMatch(/Name the old one/);
+    const sw = preview(p, { storyline: '?', storylineSwitch: true, storylineNamingMain: true, transport: 'structured', json: true });
+    const json = JSON.parse(sw);
+    expect(json.vars.storyline).toMatchObject({ main: true, naming: true, namingMain: true, switching: true });
+    const schema = JSON.stringify(json.schema);
+    expect(schema).toContain('previous_main');
+    const only = JSON.parse(preview(p, { storyline: 'B', storylineSwitch: true, storylineNamingMain: true, transport: 'structured', json: true }));
+    expect(only.vars.storyline).toMatchObject({ name: 'B', main: true, naming: false, namingMain: true });
+    expect(JSON.stringify(only.schema)).toMatch(/"required":\["previous_main"\]/);
   });
 });

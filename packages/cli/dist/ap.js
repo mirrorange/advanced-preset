@@ -7378,7 +7378,7 @@ var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-mul
 var TOOL_ARG_STREAMING = ["auto", "on", "off"];
 var BUILD_VAR_TYPES = ["string", "list", "dict"];
 var CONTENT_STAGE_REF = "@content";
-var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "custom", "annotations"];
+var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "storyline", "custom", "annotations"];
 var INLINE_STRUCTURE_KINDS = ["annotations"];
 var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
 var CARD_POSITIONS = ["top", "bottom"];
@@ -7614,6 +7614,7 @@ var MACRO_HEADS = {
 
 // ../protocol/src/structures.ts
 var STATUS_FIELDS = ["date", "weekday", "time", "location", "weather"];
+var STORYLINE_NAMING_FIELDS = ["name", "previous_main"];
 var STRUCTURE_PROPERTIES = {
   reply: [],
   impersonate: [],
@@ -7622,6 +7623,7 @@ var STRUCTURE_PROPERTIES = {
   synopsis: ["time", "location", "event", "summary"],
   options: ["label", "content"],
   status: STATUS_FIELDS,
+  storyline: STORYLINE_NAMING_FIELDS,
   custom: [],
   annotations: []
 };
@@ -7679,6 +7681,15 @@ function structureFieldSchema(decl, expand = (t) => t) {
         required: [...STATUS_FIELDS],
         additionalProperties: false
       });
+    case "storyline": {
+      const fields = (decl.requested ?? STORYLINE_NAMING_FIELDS).filter((k) => STORYLINE_NAMING_FIELDS.includes(k));
+      return withDesc({
+        type: "object",
+        properties: Object.fromEntries(fields.map((k) => [k, sub(k)])),
+        required: fields,
+        additionalProperties: false
+      });
+    }
     case "annotations":
       return withDesc({ type: "string" });
     case "custom":
@@ -8550,7 +8561,11 @@ var DEFAULT_STORYLINES = {
 };
 var STORYLINE_CONFIG_DEFAULTS = { enabled: true, freezeVariables: true };
 var STORYLINES_SINCE = "1.10.0";
-var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false, grouped: false };
+var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false };
+function storylineNamingFields(v) {
+  if (!v) return [];
+  return [...v.naming ? ["name"] : [], ...v.namingMain ? ["previous_main"] : []];
+}
 var isIfName = (name) => /^if/i.test(name);
 
 // ../protocol/src/assemble.ts
@@ -8589,9 +8604,13 @@ function moduleSwitches(preset, config) {
   const on = new Set(activeModules(preset, config).map((m) => m.id));
   return Object.fromEntries(preset.modules.map((m) => [m.id, on.has(m.id)]));
 }
-function activeStructures(preset, modules) {
+function activeStructures(preset, modules, vars) {
   const ids = new Set(modules.flatMap((m) => m.structures));
-  return Object.values(preset.structures).filter((s) => ids.has(s.id));
+  const naming = storylineNamingFields(vars?.storyline);
+  return Object.values(preset.structures).filter((s) => ids.has(s.id)).flatMap((s) => {
+    if (s.kind !== "storyline") return [s];
+    return naming.length ? [{ ...s, requested: naming }] : [];
+  });
 }
 function actorName(preset, config, actor) {
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
@@ -8747,7 +8766,7 @@ function assemble(input, workflowOverride) {
   vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
   const resolve2 = resolverOf(vars);
   const modules = activeModules(preset, config, resolve2);
-  const structures = activeStructures(preset, modules);
+  const structures = activeStructures(preset, modules, vars);
   const buildVars = computeBuildVars(preset.vars, modules);
   const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars, structures);
   const expand = (text) => expandMacros(text, macro);
@@ -10471,7 +10490,10 @@ var FIXED_VARS = {
   "storyline.main": null,
   "storyline.if": null,
   "storyline.new": null,
-  "storyline.grouped": null
+  "storyline.grouped": null,
+  "storyline.naming": null,
+  "storyline.namingMain": null,
+  "storyline.switching": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -10617,6 +10639,11 @@ function validate(p, map, diag) {
   if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
     diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: "minAdvancedPreset" });
   if (!p.storylines && storylineUses) diag.warn("storyline variables and {{ap::storyline}} always describe the main storyline: the preset declares no storylines", { file: M, path: "storylines" });
+  const namingStructures = Object.values(p.structures).filter((s) => s.kind === "storyline");
+  if (!p.storylines && namingStructures.length) diag.warn(`structure ${namingStructures[0].id}: storyline structures are only requested when a storyline is named, and the preset declares no storylines`, { file: M, path: `structures.${namingStructures[0].id}` });
+  if (namingStructures.length > 1) diag.warn(`structures ${namingStructures.map((s) => s.id).join(", ")}: only one storyline structure is read (${namingStructures[0].id})`, { file: M, path: `structures.${namingStructures[1].id}` });
+  if (p.storylines && !namingStructures.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
+    diag.warn("no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names", { file: M, path: "storylines" });
   if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
     diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
@@ -10887,6 +10914,23 @@ async function writeArtifact(preset, outDir) {
 }
 
 // src/preview.ts
+function previewStoryline(preset, o) {
+  if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
+  const naming = o.storyline === "?";
+  const name = naming ? "" : o.storyline ?? "";
+  const switching = Boolean(o.storylineSwitch);
+  if (!o.storyline && !switching) return { ...MAIN_STORYLINE_VARS, new: Boolean(o.storylineNew), grouped: Boolean(o.storylineGrouped) };
+  return {
+    name,
+    main: switching,
+    if: !switching && isIfName(name),
+    new: naming || Boolean(o.storylineNew),
+    grouped: true,
+    naming,
+    namingMain: switching && Boolean(o.storylineNamingMain),
+    switching
+  };
+}
 function pick(all, ids, noun) {
   const unknown = ids.filter((id) => id !== "all" && id !== "none" && !all.some((t) => t.id === id));
   if (unknown.length) return `unknown ${noun} ${unknown.join(", ")} (have: ${all.map((t) => t.id).join(", ") || "none"})`;
@@ -10941,7 +10985,7 @@ function preview(source, o) {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
     gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 },
-    storyline: preset.storylines && o.storyline ? { name: o.storyline, main: false, if: isIfName(o.storyline), new: Boolean(o.storylineNew), grouped: true } : { ...MAIN_STORYLINE_VARS, new: Boolean(preset.storylines && o.storylineNew), grouped: Boolean(preset.storylines && o.storylineGrouped) }
+    storyline: previewStoryline(preset, o)
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
@@ -10971,8 +11015,11 @@ function preview(source, o) {
   const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
-  if (preset.storylines) lines.push(`storyline: ${vars.storyline.main ? "main" : `${vars.storyline.name}${vars.storyline.if ? " (if-line)" : ""}`}${vars.storyline.new ? " (new)" : ""}${vars.storyline.grouped ? " (grouped)" : ""}`);
-  else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
+  if (preset.storylines) {
+    const v = vars.storyline;
+    const flags = [v.if ? "if-line" : "", v.new ? "new" : "", v.grouped ? "grouped" : "", v.switching ? "switching" : "", v.naming ? "AI names it" : "", v.namingMain ? "AI names the previous main" : ""].filter(Boolean);
+    lines.push(`storyline: ${v.main ? `main${v.name ? ` ${v.name}` : ""}` : v.name || "?"}${flags.map((f) => ` (${f})`).join("")}`);
+  } else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   if (fields.length) lines.push(`fields: ${fields.join(" \u2192 ")}`);
@@ -11151,7 +11198,8 @@ Usage
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
-                   [--storyline name] [--storyline-new] [--storyline-grouped]
+                   [--storyline name|?] [--storyline-new] [--storyline-grouped]
+                   [--storyline-switch] [--storyline-naming-main]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -11184,6 +11232,8 @@ async function main(argv) {
       storyline: { type: "string" },
       "storyline-new": { type: "boolean" },
       "storyline-grouped": { type: "boolean" },
+      "storyline-switch": { type: "boolean" },
+      "storyline-naming-main": { type: "boolean" },
       "user-modules": { type: "string" },
       "bundled-modules": { type: "string" },
       "user-module-templates": { type: "string" },
@@ -11249,7 +11299,7 @@ async function main(argv) {
         }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], storylineSwitch: values["storyline-switch"], storylineNamingMain: values["storyline-naming-main"], userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;
