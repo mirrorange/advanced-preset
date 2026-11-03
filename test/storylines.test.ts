@@ -550,7 +550,10 @@ describe('storyline data', () => {
     saveCacheState(k(''), st(1));
     saveCacheState(k('cellar'), st(2));
     saveCacheState(k('attic'), st(9)); // stale state of a storyline gone long ago
+    metadata.advanced_preset.storylines.hidden = { attic: true }; // leftover switch: replaced, not taken
     expect(await renameStoryline('cellar', 'attic')).toBe('renamed');
+    expect(metadata.advanced_preset.storylines.hidden).toBeUndefined();
+    expect(await renameStoryline('attic', 'Road')).toBe('taken');
     expect([cacheState(k('cellar')), (cacheState(k('attic')) as any)?.n]).toEqual([undefined, 2]);
     expect(await switchMainStoryline('attic')).toBe('switched');
     expect([(cacheState(k('')) as any)?.n, (cacheState(k('Road')) as any)?.n, cacheState(k('attic'))]).toEqual([2, 1, undefined]);

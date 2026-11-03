@@ -98,9 +98,8 @@ export async function renameStoryline(key: string, name: string): Promise<Rename
   if (!validStorylineName(name)) return 'invalid';
   if (name === key) return 'unchanged';
   const meta = storylineMeta();
-  const taken = takenStorylineNames(st().chat, meta);
-  taken.delete(key);
-  if (taken.has(name)) return 'taken';
+  // Storylines with messages and the main storyline; leftover switches of a name without messages are replaced.
+  if (name === meta.main || chatLineKeys(st().chat, meta).includes(name)) return 'taken';
   const chat = st().chat;
   const changed: number[] = [];
   chat.forEach((m, i) => {
