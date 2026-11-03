@@ -60,6 +60,21 @@ export function touchCacheState(chat: string, at: number): void {
   if (s) saveCacheState(chat, { ...s, at });
 }
 
+/**
+ * Storylines renamed or swapped (rename, switching the main storyline): their states follow them.
+ * `moves` maps old storyline keys to new ones (`''`: the main storyline); applied at once, so a swap works.
+ */
+export function moveStorylineCacheStates(chat: string, moves: ReadonlyArray<readonly [string, string]>): void {
+  const store = load();
+  const key = (line: string) => storylineCacheKey(chat, line);
+  if (!moves.some(([from, to]) => key(from) in store || key(to) in store)) return;
+  const next: Store = { ...store };
+  // Targets lose whatever they had (a stale state of an earlier storyline with that name), sources move.
+  for (const [from, to] of moves) { delete next[key(from)]; delete next[key(to)]; }
+  for (const [from, to] of moves) if (store[key(from)]) next[key(to)] = store[key(from)]!;
+  persist(next, Date.now());
+}
+
 export function clearCacheState(chat?: string): void {
   const store = { ...load() };
   if (chat) delete store[chat]; else for (const k of Object.keys(store)) delete store[k];

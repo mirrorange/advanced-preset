@@ -5,6 +5,7 @@
  */
 import { isIfName, parseStorylineTag, replaceStorylineTag, validStorylineName, withStorylineTag, type APreset, type Configuration } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
+import { currentChatKey, moveStorylineCacheStates } from './cache-state';
 import { STORYLINE_KEY, SWITCHED_KEY, arrangeLines, isHiddenLine, isIfLine, isPendingLine, lineKey, messageLines, type StorylineMeta } from '@/core/storylines';
 
 export { validStorylineName };
@@ -127,6 +128,7 @@ export async function renameStoryline(key: string, name: string): Promise<Rename
   if (!Object.keys(ifs).length) delete next.if;
   if (!Object.keys(hidden).length) delete next.hidden;
   writeMeta(next);
+  moveStorylineCacheStates(currentChatKey(), [[key, name]]);
   for (const i of changed) st().updateMessageBlock(i, chat[i]!);
   await st().saveChat();
   return 'renamed';
@@ -215,6 +217,8 @@ export async function switchMainStoryline(target: string, oldName?: string): Pro
   if (old) delete hidden[old];
   delete hidden[target];
   writeMeta({ ...meta, main: target, if: ifs, ...(Object.keys(hidden).length || meta.hidden ? { hidden } : {}) });
+  // The cache state of the main storyline goes with its messages to `old`; the new main storyline brings its own.
+  moveStorylineCacheStates(currentChatKey(), old ? [['', old], [target, '']] : [[target, '']]);
   for (const i of changed) if (chat[i]!.is_user) st().updateMessageBlock(i, chat[i]!);
   await st().saveChat();
   return 'switched';

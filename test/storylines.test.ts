@@ -541,6 +541,21 @@ describe('storyline data', () => {
     expect(metadata.advanced_preset.storylines.main).toBe('Road');
   });
 
+  it('cache states follow renamed and swapped storylines', async () => {
+    const { cacheState, saveCacheState, storylineCacheKey } = await import('@/store/cache-state');
+    const st = (n: number) => ({ at: Date.now(), n }) as never;
+    const k = (line: string) => storylineCacheKey('chat-1', line);
+    realChat.splice(0, realChat.length, user('m1'), ai('M1', ''), user('c1 #cellar'), ai('C1', 'cellar'));
+    metadata.advanced_preset = { storylines: { main: 'Road' } };
+    saveCacheState(k(''), st(1));
+    saveCacheState(k('cellar'), st(2));
+    saveCacheState(k('attic'), st(9)); // stale state of a storyline gone long ago
+    expect(await renameStoryline('cellar', 'attic')).toBe('renamed');
+    expect([cacheState(k('cellar')), (cacheState(k('attic')) as any)?.n]).toEqual([undefined, 2]);
+    expect(await switchMainStoryline('attic')).toBe('switched');
+    expect([(cacheState(k('')) as any)?.n, (cacheState(k('Road')) as any)?.n, cacheState(k('attic'))]).toEqual([2, 1, undefined]);
+  });
+
   it('an old main storyline named like an if-line stays visible', async () => {
     realChat.splice(0, realChat.length, user('m1'));
     expect(await switchMainStoryline('B', 'ifOld')).toBe('switched');
