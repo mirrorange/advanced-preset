@@ -243,8 +243,8 @@ export type StructureOrder = number | { before: string } | { after: string };
 /** Reference to the terminal content stage in {@link StructureOrder}. */
 export const CONTENT_STAGE_REF = '@content';
 
-export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'custom' | 'annotations';
-export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'custom', 'annotations'];
+export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'storyline' | 'custom' | 'annotations';
+export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'storyline', 'custom', 'annotations'];
 /** Kinds written inside the story content rather than as a tag block / field (I-77). */
 export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations'];
 export const isInlineStructure = (s: { kind: StructureKind }): boolean => INLINE_STRUCTURE_KINDS.includes(s.kind);
@@ -279,6 +279,11 @@ export interface StructureDecl {
   order?: StructureOrder;
   /** Chat card placement and, for custom structures, a preset-supplied front-end component (I-137). */
   ui?: StructureUi;
+  /**
+   * Runtime only (not in artifacts): the sub-fields requested this turn. A `storyline` structure is
+   * only requested when the AI names a storyline, with the names it has to give (I-158).
+   */
+  requested?: string[];
 }
 
 /**

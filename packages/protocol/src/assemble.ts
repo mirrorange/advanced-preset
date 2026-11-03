@@ -13,7 +13,7 @@ import { activeStages, stageFieldName, stageToolName, workflowSummary } from './
 import { turnLayout, type TurnLayout } from './layout';
 import { DEFAULT_LIST_SEPARATOR, isParamUnset, paramValue, paramValues } from './params';
 import { computeBuildVars, formatVar, plainBuildVars, type BuildVars } from './build-vars';
-import { MAIN_STORYLINE_VARS, type StorylineVars } from './storylines';
+import { MAIN_STORYLINE_VARS, storylineNamingFields, type StorylineVars } from './storylines';
 
 export interface Message {
   role: Role;
@@ -104,10 +104,18 @@ export function moduleSwitches(preset: APreset, config: Configuration): Record<s
   return Object.fromEntries(preset.modules.map((m) => [m.id, on.has(m.id)]));
 }
 
-/** Structures requested this turn (declared by active modules), in declaration order. */
-export function activeStructures(preset: APreset, modules: Module[]): StructureDecl[] {
+/**
+ * Structures requested this turn (declared by active modules), in declaration order. A `storyline`
+ * structure is only requested when this turn names a storyline (`vars.storyline`), with the names
+ * it has to give (I-158).
+ */
+export function activeStructures(preset: APreset, modules: Module[], vars?: Pick<Vars, 'storyline'>): StructureDecl[] {
   const ids = new Set(modules.flatMap((m) => m.structures));
-  return Object.values(preset.structures).filter((s) => ids.has(s.id));
+  const naming = storylineNamingFields(vars?.storyline);
+  return Object.values(preset.structures).filter((s) => ids.has(s.id)).flatMap((s) => {
+    if (s.kind !== 'storyline') return [s];
+    return naming.length ? [{ ...s, requested: naming }] : [];
+  });
 }
 
 export interface AssemblyInput {
@@ -301,7 +309,7 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
   const resolve = resolverOf(vars);
   const modules = activeModules(preset, config, resolve);
-  const structures = activeStructures(preset, modules);
+  const structures = activeStructures(preset, modules, vars);
   const buildVars = computeBuildVars(preset.vars, modules);
   const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars, structures);
   const expand = (text: string) => expandMacros(text, macro);

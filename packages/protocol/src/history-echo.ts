@@ -130,6 +130,7 @@ export function structureValueText(kind: StructureKind, value: unknown): string 
   switch (kind) {
     case 'synopsis': return fillHistoryTemplate(DEFAULT_SYNOPSIS_LINE, kind, value, false);
     case 'status': return statusText(value as StatusBar);
+    case 'storyline': return (value as { name?: string })?.name ?? '';
     case 'options': return Array.isArray(value) ? (value as UserOption[]).map((o) => `- ${o?.label ? `${o.label}: ` : ''}${o?.content ?? ''}`).join('\n') : str(value);
     default:
       if (!Array.isArray(value) && typeof value === 'object') return Object.entries(value as Record<string, unknown>).map(([k, v]) => `${k}: ${str(v)}`).join('\n');
