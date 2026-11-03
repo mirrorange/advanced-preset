@@ -25,7 +25,7 @@ import {
   DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode, defaultHistoryTemplate, type StructureHistory,
   CARD_POSITIONS, CONTENT_STAGE_REF, DEFAULT_ORDER_PREFIX, type CardPosition, type StructureOrder, type StructureUi,
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
-  DEFAULT_STORYLINES, STORYLINE_CONFIG_DEFAULTS, type StorylinesDecl,
+  DEFAULT_STORYLINES, STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, type StorylineFreeze, type StorylinesDecl,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
@@ -772,6 +772,7 @@ export function compile(tree: SourceTree): CompileResult {
     for (const [k, v] of Object.entries(c)) {
       const where = { file: M, path: `${path}.${k}` };
       if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
+      else if (k === 'freezeVariables') { if (!STORYLINE_FREEZE_MODES.includes(v as StorylineFreeze)) diag.error(`\`freezeVariables\` must be one of ${STORYLINE_FREEZE_MODES.join(' / ')}`, where); }
       else if (typeof v !== 'boolean') diag.error(`\`${k}\` must be a boolean`, where);
     }
   };

@@ -1,7 +1,7 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
-  type APreset, type StorylineVars, type ParamValue, type Transport, type UserModule, type UserModuleSource,
+  TRANSPORTS, assemble, freezeMode, freezesStoryline, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  type APreset, type Configuration, type StorylineVars, type ParamValue, type Transport, type UserModule, type UserModuleSource,
 } from '@advanced-preset/protocol';
 
 export interface PreviewOptions {
@@ -31,16 +31,19 @@ export interface PreviewOptions {
   json?: boolean;
 }
 
-function previewStoryline(preset: APreset, o: PreviewOptions): StorylineVars {
+function previewStoryline(preset: APreset, config: Configuration, o: PreviewOptions): StorylineVars {
   if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
   const ifNew = /^if\?$/i.test(o.storyline ?? '');
   const naming = o.storyline === '?' || ifNew;
   const name = naming ? '' : o.storyline ?? '';
   const switching = Boolean(o.storylineSwitch);
   if (!o.storyline && !switching) return { ...MAIN_STORYLINE_VARS, new: Boolean(o.storylineNew), grouped: Boolean(o.storylineGrouped) };
+  const line = { main: switching, if: !switching && (ifNew || isIfName(name)) };
   return {
-    name, main: switching, if: !switching && (ifNew || isIfName(name)), new: naming || Boolean(o.storylineNew), grouped: true,
+    name, ...line, new: naming || Boolean(o.storylineNew), grouped: true,
     naming, namingMain: switching && Boolean(o.storylineNamingMain), switching,
+    // The configuration's freeze mode (I-163); storylines switched off: nothing is frozen.
+    frozen: config.storylines?.enabled !== false && freezesStoryline(freezeMode(config.storylines), line),
   };
 }
 
@@ -115,7 +118,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === 'mixed', task: null, recent: false },
     gen: { origin: pure ? 'task' : 'story', type: 'normal', callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== undefined },
-    storyline: previewStoryline(preset, o),
+    storyline: previewStoryline(preset, config, o),
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === 'task') : undefined;
   if (workflow) vars.workflow = workflow.id;
@@ -152,7 +155,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
   lines.push(`structures: ${a.structures.map((s) => s.id).join(', ') || '—'}`);
   if (preset.storylines) {
     const v = vars.storyline;
-    const flags = [v.if ? 'if-line' : '', v.new ? 'new' : '', v.grouped ? 'grouped' : '', v.switching ? 'switching' : '', v.naming ? 'AI names it' : '', v.namingMain ? 'AI names the previous main' : ''].filter(Boolean);
+    const flags = [v.if ? 'if-line' : '', v.new ? 'new' : '', v.grouped ? 'grouped' : '', v.switching ? 'switching' : '', v.naming ? 'AI names it' : '', v.namingMain ? 'AI names the previous main' : '', v.frozen ? 'variables frozen' : ''].filter(Boolean);
     lines.push(`storyline: ${v.main ? `main${v.name ? ` ${v.name}` : ''}` : v.name || '?'}${flags.map((f) => ` (${f})`).join('')}`);
   }
   else if (o.storyline) lines.push('storyline: main (the preset declares no storylines)');

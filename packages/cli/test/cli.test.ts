@@ -1085,11 +1085,11 @@ describe('storylines', () => {
     expect(on.diag.errors).toEqual([]);
     expect(messages(on)).toMatch(/no module requests a storyline structure/);
     expect(on.preset!.storylines).toEqual({ separator: '<!-- Start of Storyline {{storyline}} -->', mainSeparator: '<!-- Start of the main storyline -->' });
-    expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: true });
+    expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: 'all' });
     const custom = build(withStorylines('storylines: { separator: "[{{storyline}}]" }\nconfigurationDefaults: { storylines: { enabled: false } }\n'));
     expect(custom.diag.errors).toEqual([]);
     expect(custom.preset!.storylines).toEqual({ separator: '[{{storyline}}]', mainSeparator: '<!-- Start of the main storyline -->' });
-    expect(custom.preset!.configurationDefaults.storylines).toEqual({ enabled: false, freezeVariables: true });
+    expect(custom.preset!.configurationDefaults.storylines).toEqual({ enabled: false, freezeVariables: 'all' });
   });
 
   it('flags bad declarations, undeclared use and old AP versions', () => {
@@ -1112,7 +1112,20 @@ describe('storylines', () => {
     expect(preview(p, { storylineGrouped: true })).toMatch(/storyline: main \(grouped\)\n/);
     expect(out).toMatch(/Side: ifRain/);
     const json = JSON.parse(preview(p, { storyline: 'cellar', json: true }));
-    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false, grouped: true, naming: false, namingMain: false, switching: false });
+    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false, grouped: true, naming: false, namingMain: false, switching: false, frozen: true });
+    expect(preview(p, { storyline: 'cellar' })).toMatch(/storyline: cellar \(grouped\) \(variables frozen\)/);
+    expect(preview(p, {})).not.toMatch(/variables frozen/);
+  });
+
+  it('checks the freeze mode and previews it (I-163)', async () => {
+    const { preview } = await import('../src/preview');
+    const bad = build(withStorylines('storylines: true\nconfigurationDefaults: { storylines: { freezeVariables: true } }\n'));
+    expect(bad.diag.errors.map((e) => e.message).join('\n')).toMatch(/freezeVariables` must be one of all \/ if \/ off/);
+    const p = build(withStorylines('storylines: true\nconfigurationDefaults: { storylines: { freezeVariables: if } }\n')).preset!;
+    expect(p.configurationDefaults.storylines!.freezeVariables).toBe('if');
+    expect(JSON.parse(preview(p, { storyline: 'cellar', json: true })).vars.storyline.frozen).toBe(false);
+    expect(JSON.parse(preview(p, { storyline: 'ifRain', json: true })).vars.storyline.frozen).toBe(true);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, '<!-- @if storyline.frozen -->x<!-- @end -->')))).not.toMatch(/unknown variable/);
   });
 
   const withNaming = (decl = 'storylines: true\n') => {

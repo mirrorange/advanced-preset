@@ -35,6 +35,7 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'storyline.naming': null,
   'storyline.namingMain': null,
   'storyline.switching': null,
+  'storyline.frozen': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {

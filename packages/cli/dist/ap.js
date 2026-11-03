@@ -8559,9 +8559,12 @@ var DEFAULT_STORYLINES = {
   separator: "<!-- Start of Storyline {{storyline}} -->",
   mainSeparator: "<!-- Start of the main storyline -->"
 };
-var STORYLINE_CONFIG_DEFAULTS = { enabled: true, freezeVariables: true };
+var STORYLINE_FREEZE_MODES = ["all", "if", "off"];
+var STORYLINE_CONFIG_DEFAULTS = { enabled: true, freezeVariables: "all" };
+var freezeMode = (c) => STORYLINE_FREEZE_MODES.includes(c?.freezeVariables) ? c.freezeVariables : STORYLINE_CONFIG_DEFAULTS.freezeVariables;
+var freezesStoryline = (mode, line) => mode === "all" ? !line.main : mode === "if" ? line.if : false;
 var STORYLINES_SINCE = "1.10.0";
-var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false };
+var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false, frozen: false };
 function storylineNamingFields(v) {
   if (!v) return [];
   return [...v.naming ? ["name"] : [], ...v.namingMain ? ["previous_main"] : []];
@@ -10142,7 +10145,9 @@ function compile(tree) {
     for (const [k, v] of Object.entries(c)) {
       const where = { file: M, path: `${path}.${k}` };
       if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
-      else if (typeof v !== "boolean") diag.error(`\`${k}\` must be a boolean`, where);
+      else if (k === "freezeVariables") {
+        if (!STORYLINE_FREEZE_MODES.includes(v)) diag.error(`\`freezeVariables\` must be one of ${STORYLINE_FREEZE_MODES.join(" / ")}`, where);
+      } else if (typeof v !== "boolean") diag.error(`\`${k}\` must be a boolean`, where);
     }
   };
   if (isObj4(cd.storylines)) checkStorylines(cd.storylines, "configurationDefaults.storylines");
@@ -10493,7 +10498,8 @@ var FIXED_VARS = {
   "storyline.grouped": null,
   "storyline.naming": null,
   "storyline.namingMain": null,
-  "storyline.switching": null
+  "storyline.switching": null,
+  "storyline.frozen": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -10914,22 +10920,24 @@ async function writeArtifact(preset, outDir) {
 }
 
 // src/preview.ts
-function previewStoryline(preset, o) {
+function previewStoryline(preset, config, o) {
   if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
   const ifNew = /^if\?$/i.test(o.storyline ?? "");
   const naming = o.storyline === "?" || ifNew;
   const name = naming ? "" : o.storyline ?? "";
   const switching = Boolean(o.storylineSwitch);
   if (!o.storyline && !switching) return { ...MAIN_STORYLINE_VARS, new: Boolean(o.storylineNew), grouped: Boolean(o.storylineGrouped) };
+  const line = { main: switching, if: !switching && (ifNew || isIfName(name)) };
   return {
     name,
-    main: switching,
-    if: !switching && (ifNew || isIfName(name)),
+    ...line,
     new: naming || Boolean(o.storylineNew),
     grouped: true,
     naming,
     namingMain: switching && Boolean(o.storylineNamingMain),
-    switching
+    switching,
+    // The configuration's freeze mode (I-163); storylines switched off: nothing is frozen.
+    frozen: config.storylines?.enabled !== false && freezesStoryline(freezeMode(config.storylines), line)
   };
 }
 function pick(all, ids, noun) {
@@ -10986,7 +10994,7 @@ function preview(source, o) {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
     gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 },
-    storyline: previewStoryline(preset, o)
+    storyline: previewStoryline(preset, config, o)
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
@@ -11018,7 +11026,7 @@ function preview(source, o) {
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
   if (preset.storylines) {
     const v = vars.storyline;
-    const flags = [v.if ? "if-line" : "", v.new ? "new" : "", v.grouped ? "grouped" : "", v.switching ? "switching" : "", v.naming ? "AI names it" : "", v.namingMain ? "AI names the previous main" : ""].filter(Boolean);
+    const flags = [v.if ? "if-line" : "", v.new ? "new" : "", v.grouped ? "grouped" : "", v.switching ? "switching" : "", v.naming ? "AI names it" : "", v.namingMain ? "AI names the previous main" : "", v.frozen ? "variables frozen" : ""].filter(Boolean);
     lines.push(`storyline: ${v.main ? `main${v.name ? ` ${v.name}` : ""}` : v.name || "?"}${flags.map((f) => ` (${f})`).join("")}`);
   } else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
