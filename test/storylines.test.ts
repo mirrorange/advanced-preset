@@ -382,6 +382,15 @@ describe('storylines in a generation', () => {
     expect(sw.ctx!.structures.find((x) => x.kind === 'storyline')?.requested).toEqual(['previous_main']);
   });
 
+  it('bundled Petals tells the AI not to update state only when the turn is frozen (I-163)', async () => {
+    const STATE = 'The state of this storyline is independent';
+    const side = [user('m1'), ai('M1'), user('c #cellar')];
+    expect((await generate(side, { naming: 'petals' })).text).toContain(STATE);
+    expect((await generate(side, { naming: 'petals', freeze: 'if' })).text).not.toContain(STATE);
+    expect((await generate([user('m1'), ai('M1'), user('d #ifRain')], { naming: 'petals', freeze: 'if' })).text).toContain(STATE);
+    expect((await generate(side, { naming: 'petals', freeze: 'off' })).text).not.toContain(STATE);
+  });
+
   it('`#if?` / `#@?` / `#@name`: the switches are written when the reply arrives; visibility is not in the prompt', async () => {
     const chat = [user('m1'), ai('M1'), user('c1 #cellar'), ai('C1', 'cellar')];
     const dream = await generate([...chat, user('dream #if?')], { naming: true });
