@@ -10916,14 +10916,15 @@ async function writeArtifact(preset, outDir) {
 // src/preview.ts
 function previewStoryline(preset, o) {
   if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
-  const naming = o.storyline === "?";
+  const ifNew = /^if\?$/i.test(o.storyline ?? "");
+  const naming = o.storyline === "?" || ifNew;
   const name = naming ? "" : o.storyline ?? "";
   const switching = Boolean(o.storylineSwitch);
   if (!o.storyline && !switching) return { ...MAIN_STORYLINE_VARS, new: Boolean(o.storylineNew), grouped: Boolean(o.storylineGrouped) };
   return {
     name,
     main: switching,
-    if: !switching && isIfName(name),
+    if: !switching && (ifNew || isIfName(name)),
     new: naming || Boolean(o.storylineNew),
     grouped: true,
     naming,

@@ -16,7 +16,7 @@ export interface PreviewOptions {
   input?: string;
   /**
    * The current storyline (`--storyline name`; presets with `storylines`): `if` by the name rule, `new`
-   * with `--storyline-new`. `?`: a new storyline the AI names (`storyline.naming`).
+   * with `--storyline-new`. `?`: a new storyline the AI names (`storyline.naming`); `if?`: a new if-line the AI names.
    */
   storyline?: string;
   storylineNew?: boolean;
@@ -33,12 +33,13 @@ export interface PreviewOptions {
 
 function previewStoryline(preset: APreset, o: PreviewOptions): StorylineVars {
   if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
-  const naming = o.storyline === '?';
+  const ifNew = /^if\?$/i.test(o.storyline ?? '');
+  const naming = o.storyline === '?' || ifNew;
   const name = naming ? '' : o.storyline ?? '';
   const switching = Boolean(o.storylineSwitch);
   if (!o.storyline && !switching) return { ...MAIN_STORYLINE_VARS, new: Boolean(o.storylineNew), grouped: Boolean(o.storylineGrouped) };
   return {
-    name, main: switching, if: !switching && isIfName(name), new: naming || Boolean(o.storylineNew), grouped: true,
+    name, main: switching, if: !switching && (ifNew || isIfName(name)), new: naming || Boolean(o.storylineNew), grouped: true,
     naming, namingMain: switching && Boolean(o.storylineNamingMain), switching,
   };
 }

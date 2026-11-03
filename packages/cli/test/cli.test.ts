@@ -1142,6 +1142,7 @@ describe('storylines', () => {
     expect(side).toMatch(/structures: storyline/);
     expect(side).toMatch(/Name it\./);
     expect(side).not.toMatch(/Name the old one/);
+    expect(preview(p, { storyline: 'if?' })).toMatch(/storyline: \? \(if-line\) \(new\) \(grouped\) \(AI names it\)/);
     const sw = preview(p, { storyline: '?', storylineSwitch: true, storylineNamingMain: true, transport: 'structured', json: true });
     const json = JSON.parse(sw);
     expect(json.vars.storyline).toMatchObject({ main: true, naming: true, namingMain: true, switching: true });
