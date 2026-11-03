@@ -31,6 +31,10 @@ describe('message storylines', () => {
     expect(onIf.hidden).toBe(0);
     // switched off as if-line: visible to everyone
     expect(arrangeLines(keys, '', { if: { ifX: false } }).groups.map((g) => g.key)).toEqual(['A', 'ifX', 'B', '']);
+    // visibility is its own switch (I-161): a visible if-line, a hidden normal storyline; never the main one
+    const vis = arrangeLines(keys, '', { hidden: { ifX: false, B: true, '': true } });
+    expect(vis.groups.map((g) => [g.key, g.if, g.hidden])).toEqual([['A', false, false], ['ifX', true, false], ['', false, false]]);
+    expect(arrangeLines(keys, 'B', { hidden: { B: true } }).groups.map((g) => g.key)).toEqual(['A', '', 'B']);
     expect(arrangeLines(['', ''], '', {}).grouped).toBe(false);
     expect(arrangeLines(['', 'N'], 'N', {}, 1).isNew).toBe(true);
     expect(arrangeLines(['N', 'N'], 'N', {}, 1).isNew).toBe(false);
@@ -67,6 +71,21 @@ describe('planning a turn (I-159)', () => {
     expect(planTurn([...chat.slice(0, 6), u('go #!')], 6, {})).toMatchObject({ rewrite: 'go #!cellar', switching: true, target: 'cellar', namingMain: true });
   });
 
+  it('#if? is a new if-line, #@… hides the storyline once the reply arrives (I-161, I-162)', () => {
+    const chat = [u('m1'), a(''), u('c1 #cellar'), a('cellar')];
+    const ifNew = planTurn([...chat, u('dream #if?')], 4, {});
+    expect(ifNew).toMatchObject({ current: NEW_LINE, naming: true, ifLine: true });
+    const r = arrangeTurn([...chat, u('dream #if?')], [0, 1, 2, 3, 4], ifNew, 4);
+    expect(r.turn.vars).toMatchObject({ if: true, naming: true, name: '' });
+    expect(planTurn([...chat, u('x #@?')], 4, {})).toMatchObject({ naming: true, hide: true });
+    expect(planTurn([...chat, u('x #@cellar')], 4, {})).toMatchObject({ current: 'cellar', hide: true });
+    expect(planTurn([...chat, u('x #@')], 4, {})).toMatchObject({ current: 'cellar', hide: true, rewrite: 'x #@cellar' });
+    // the main storyline is never hidden
+    expect(planTurn([u('x #@Road')], 0, { main: 'Road' }).hide).toBeUndefined();
+    // a hidden storyline that becomes the main one is visible
+    expect(planTurn([...chat, u('go #!cellar')], 4, { hidden: { cellar: true } }).meta.hidden).toEqual({});
+  });
+
   it('#? is a new storyline the AI names', () => {
     const p = planTurn([u('m1'), a(''), u('x #?')], 2, {});
     expect(p).toMatchObject({ current: NEW_LINE, naming: true, switching: false });
@@ -78,7 +97,7 @@ describe('planning a turn (I-159)', () => {
     const p = planTurn(chat, 4, {});
     expect(p).toMatchObject({ current: '', switching: true, target: 'cellar', namingMain: true, naming: false });
     expect(p.keys).toEqual([OLD_MAIN_LINE, OLD_MAIN_LINE, '', '', '']);
-    expect(p.meta).toEqual({ main: 'cellar', if: { [OLD_MAIN_LINE]: false } });
+    expect(p.meta).toEqual({ main: 'cellar', if: { [OLD_MAIN_LINE]: false }, hidden: {} });
     const named = planTurn(chat, 4, { main: 'Road' });
     expect(named).toMatchObject({ oldName: 'Road', namingMain: false });
     expect(named.keys).toEqual(['Road', 'Road', '', '', '']);
@@ -360,6 +379,28 @@ describe('storylines in a generation', () => {
     const sw = await generate([user('m1'), ai('M1'), user('c1 #cellar'), ai('C1', 'cellar'), user('go #!cellar')], { naming: 'petals' });
     expect(sw.text).toContain('This turn makes \\"cellar\\" the main storyline');
     expect(sw.ctx!.structures.find((x) => x.kind === 'storyline')?.requested).toEqual(['previous_main']);
+  });
+
+  it('`#if?` / `#@?` / `#@name`: the switches are written when the reply arrives; visibility is not in the prompt', async () => {
+    const chat = [user('m1'), ai('M1'), user('c1 #cellar'), ai('C1', 'cellar')];
+    const dream = await generate([...chat, user('dream #if?')], { naming: true });
+    expect(dream.snapshot!.storyline).toMatchObject({ if: true, naming: true });
+    await receive(dream.ctx!, { name: 'Dream' });
+    expect(metadata.advanced_preset.storylines.if).toEqual({ Dream: true });
+    const secret = await generate([...chat, user('psst #@?')], { naming: true });
+    expect(secret.snapshot!.storyline).toMatchObject({ if: false, naming: true });
+    await receive(secret.ctx!, { name: 'Secret' });
+    expect(metadata.advanced_preset.storylines.hidden).toEqual({ Secret: true });
+    // `#@cellar` hides an existing storyline
+    const again = await generate([...chat, user('c2 #@cellar')]);
+    expect(again.text).toContain('c1');
+    await receive(again.ctx!, undefined);
+    expect(metadata.advanced_preset.storylines.hidden).toEqual({ Secret: true, cellar: true });
+    // the main storyline no longer sees it
+    const main = await generate([...realChat, user('m2')]);
+    expect(main.text).not.toContain('"c1"');
+    expect(main.text).not.toContain('"C1"');
+    expect(main.snapshot!.storyline).toMatchObject({ main: true, hidden: 4 });
   });
 
   it('a nameless `#` continues the most recent other storyline and names it in the input', async () => {

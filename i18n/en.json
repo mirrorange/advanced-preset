@@ -401,6 +401,7 @@
   "storylines.invalidName": "Storyline names can't be empty, contain spaces or #, start with ! or ?, or be longer than 64 characters.",
   "storylines.noRecent": "There is no other storyline before this input: it continues the main storyline.",
   "storylines.fallback.side": "Side-story",
+  "storylines.fallback.if": "If-line",
   "storylines.fallback.main": "Previous-main",
   "storylines.switchFailed": "Could not make “{name}” the main storyline; the reply stays on that storyline.",
   "storylines.unnamed": "Unnamed"

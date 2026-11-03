@@ -430,7 +430,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   let end = historyEnd < 0 ? final.length : historyEnd;
   const turn = ctx.storylines;
   if (turn) {
-    snapshot.storyline = { ...turn.vars, groups: turn.groups.map((g) => (g.main ? `(main) ${g.name}` : g.if ? `(if) ${g.name}` : g.name || '?')), hidden: turn.hidden, grouped: turn.grouped };
+    snapshot.storyline = { ...turn.vars, groups: turn.groups.map((g) => (g.main ? `(main) ${g.name}` : `${g.if ? '(if) ' : ''}${g.hidden ? '(hidden) ' : ''}${g.name || '?'}`)), hidden: turn.hidden, grouped: turn.grouped };
     if (turn.grouped && historyAt >= 0) end = arrangeHistory(ctx, turn, final, historyAt, end);
   }
   snapshot.cache = applySticky(ctx, final, historyAt, end);

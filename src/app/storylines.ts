@@ -12,7 +12,7 @@ import { getPreset } from '@/store/presets';
 import { activeConfiguration } from '@/store/config';
 import { activeCarrierPresetId } from '@/store/carrier';
 import {
-  chatLineKeys, keepNormalLine, markSwitched, nameMainStoryline, storylineMeta, storylinesOn, switchMainStoryline, takenStorylineNames, validStorylineName, writeMessageLine,
+  applyLineFlags, chatLineKeys, markSwitched, nameMainStoryline, storylineMeta, storylinesOn, switchMainStoryline, takenStorylineNames, validStorylineName, writeMessageLine,
 } from '@/store/storylines';
 import { isPendingLine, type StorylineTurn } from '@/core/storylines';
 
@@ -44,7 +44,11 @@ export async function switchMainInteractive(target: string): Promise<boolean> {
  */
 export async function commitStoryline(mesId: number, turn: StorylineTurn, value: unknown): Promise<void> {
   const n = turn.naming;
-  if (!n.naming && !n.switching) return writeMessageLine(mesId, turn.current);
+  if (!n.naming && !n.switching) {
+    writeMessageLine(mesId, turn.current);
+    if (n.hide) { applyLineFlags(turn.current, { hide: true }); await st().saveMetadata(); }
+    return;
+  }
   const got = (value && typeof value === 'object' ? value : {}) as Partial<StorylineNaming>;
   const taken = takenStorylineNames();
   const pick = (raw: unknown, fallback: string) => {
@@ -59,8 +63,8 @@ export async function commitStoryline(mesId: number, turn: StorylineTurn, value:
     return writeMessageLine(mesId, '');
   }
   if (!n.switching) {
-    const name = pick(got.name, t('storylines.fallback.side'));
-    keepNormalLine(name);
+    const name = pick(got.name, t(n.ifLine ? 'storylines.fallback.if' : 'storylines.fallback.side'));
+    applyLineFlags(name, { ifLine: Boolean(n.ifLine), hide: n.hide });
     writeMessageLine(mesId, name);
     return void (await st().saveMetadata());
   }

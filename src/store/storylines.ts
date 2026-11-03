@@ -36,7 +36,7 @@ export function chatLineKeys(chat: readonly STMessage[] = st().chat, meta = stor
 export function takenStorylineNames(chat: readonly STMessage[] = st().chat, meta = storylineMeta()): Set<string> {
   const out = new Set(chatLineKeys(chat, meta).filter((k) => k !== '' && !isPendingLine(k)));
   if (meta.main) out.add(meta.main);
-  for (const k of Object.keys(meta.if ?? {})) out.add(k);
+  for (const k of [...Object.keys(meta.if ?? {}), ...Object.keys(meta.hidden ?? {})]) out.add(k);
   return out;
 }
 
@@ -85,11 +85,25 @@ export async function nameMainStoryline(name: string): Promise<boolean> {
   return true;
 }
 
-/** A storyline named by the AI on a `#?` turn stays a normal storyline, whatever its name (the turn saw it as one). */
-export function keepNormalLine(name: string): void {
-  if (!isIfName(name)) return;
+/** Visibility switch of a storyline (I-161; the main storyline is always visible). */
+export async function setHiddenLine(key: string, value: boolean): Promise<void> {
+  if (!key) return;
   const meta = storylineMeta();
-  writeMeta({ ...meta, if: { ...(meta.if ?? {}), [name]: false } });
+  writeMeta({ ...meta, hidden: { ...(meta.hidden ?? {}), [key]: value } });
+  await st().saveMetadata();
+}
+
+/**
+ * Switches a storyline gets from the tag of its turn (not saved): a `#?` storyline is an if-line only
+ * with `#if?` (the turn saw it that way, whatever name the AI gave), `#@…` hides it.
+ */
+export function applyLineFlags(key: string, o: { ifLine?: boolean; hide?: boolean }): void {
+  if (!key) return;
+  const meta = storylineMeta();
+  const next: StorylineMeta = { ...meta };
+  if (o.ifLine !== undefined && (o.ifLine || isIfName(key))) next.if = { ...(meta.if ?? {}), [key]: o.ifLine };
+  if (o.hide) next.hidden = { ...(meta.hidden ?? {}), [key]: true };
+  writeMeta(next);
 }
 
 /** Marks a `#!?` input whose new main storyline exists: its swipes rename it instead of switching again. */
@@ -147,10 +161,13 @@ export async function switchMainStoryline(target: string, oldName?: string): Pro
     if (touched) changed.push(i);
   });
   const ifs = { ...(meta.if ?? {}) };
-  // The old main storyline stays visible to the others, whatever its name.
+  // The old main storyline stays a normal storyline, visible to the others, whatever its name.
   if (old && isIfLine(old, { ...meta, if: ifs })) ifs[old] = false;
   delete ifs[target];
-  writeMeta({ ...meta, main: target, if: ifs });
+  const hidden = { ...(meta.hidden ?? {}) };
+  if (old) delete hidden[old];
+  delete hidden[target];
+  writeMeta({ ...meta, main: target, if: ifs, ...(Object.keys(hidden).length || meta.hidden ? { hidden } : {}) });
   for (const i of changed) if (chat[i]!.is_user) st().updateMessageBlock(i, chat[i]!);
   await st().saveChat();
   return 'switched';

@@ -37,8 +37,13 @@ export const isPendingLine = (key: string): boolean => key.startsWith('?');
 export interface StorylineMeta {
   /** Name of the main storyline (unset: unnamed). */
   main?: string;
-  /** If-line switches set by the user (otherwise names starting with `if`). */
+  /** If-line switches set by the user (otherwise names starting with `if`). What the storyline is about (`storyline.if`). */
   if?: Record<string, boolean>;
+  /**
+   * Visibility switches (I-161): `true` hides the storyline from the other storylines. Otherwise
+   * if-lines are hidden and normal storylines visible. The main storyline is always visible.
+   */
+  hidden?: Record<string, boolean>;
 }
 
 export interface LineMessage {
@@ -86,6 +91,12 @@ export function isIfLine(key: string, meta: StorylineMeta): boolean {
   return meta.if?.[key] ?? isIfName(key);
 }
 
+/** The storyline is invisible to the other storylines (never the main storyline). Not shown to the AI. */
+export function isHiddenLine(key: string, meta: StorylineMeta): boolean {
+  if (key === '') return false;
+  return meta.hidden?.[key] ?? isIfLine(key, meta);
+}
+
 /** Display name of a storyline key (`''` → the main storyline's name, possibly empty; storylines without a name yet: `''`). */
 export const lineName = (key: string, meta: StorylineMeta): string => (key === '' ? meta.main ?? '' : isPendingLine(key) ? '' : key);
 
@@ -94,6 +105,7 @@ export interface StorylineGroup {
   name: string;
   main: boolean;
   if: boolean;
+  hidden: boolean;
 }
 
 export interface Arrangement {
@@ -101,11 +113,11 @@ export interface Arrangement {
   current: string;
   /** Visible storylines in history order (group index = position). */
   groups: StorylineGroup[];
-  /** Input indices in arranged order (messages of invisible if-lines left out). */
+  /** Input indices in arranged order (messages of invisible storylines left out). */
   order: number[];
   /** Group index of each entry of `order`. */
   groupOf: number[];
-  /** Messages of if-lines that this storyline does not see. */
+  /** Messages of invisible storylines that this storyline does not see. */
   hidden: number;
   /** More than one storyline is visible: the history is grouped and gets separators. */
   grouped: boolean;
@@ -120,9 +132,9 @@ export interface Arrangement {
 export function arrangeLines(keys: readonly string[], current: string, meta: StorylineMeta, exclude = -1): Arrangement {
   const seen: string[] = [];
   for (const k of keys) if (k !== '' && k !== current && !seen.includes(k)) seen.push(k);
-  const visible = (k: string) => k === '' || k === current || !isIfLine(k, meta);
+  const visible = (k: string) => k === '' || k === current || !isHiddenLine(k, meta);
   const groupKeys = [...seen.filter(visible), '', ...(current !== '' ? [current] : [])];
-  const groups: StorylineGroup[] = groupKeys.map((key) => ({ key, name: lineName(key, meta), main: key === '', if: isIfLine(key, meta) }));
+  const groups: StorylineGroup[] = groupKeys.map((key) => ({ key, name: lineName(key, meta), main: key === '', if: isIfLine(key, meta), hidden: isHiddenLine(key, meta) }));
   const index = new Map(groupKeys.map((k, i) => [k, i]));
   const order: number[] = [];
   const groupOf: number[] = [];
@@ -153,6 +165,10 @@ export interface TurnNaming {
   oldName?: string;
   /** A swipe of a `#!?` turn: the main storyline it created gets the new name. */
   renameMain?: boolean;
+  /** `#@…`: the storyline becomes invisible to the others when the reply is received (I-161). */
+  hide?: boolean;
+  /** `#if?`: the new storyline is an if-line (I-162). */
+  ifLine?: boolean;
 }
 
 export const NO_NAMING: TurnNaming = { naming: false, namingMain: false, switching: false };
@@ -185,14 +201,14 @@ export interface TurnPlan extends TurnNaming {
  * Plans a generation whose input is chat message `input` (-1: none, the storyline of the last
  * message). Pure: the chat is not touched (the caller applies `rewrite`).
  * - `#` / `#!`: the most recent storyline other than the main one before the input.
- * - `#?`: a new storyline the AI names when replying.
+ * - `#?`: a new storyline the AI names when replying (`#if?`: an if-line; `#@…`: hidden from the others).
  * - `#!name` / `#!?`: the storyline becomes the main one when the reply is received; the turn sees the
  *   history as if it already were (the previous main storyline is a normal storyline, unnamed ones
  *   named by the AI). A `#!?` input whose switch happened (a swipe) renames the main storyline.
  */
 export function planTurn(chat: readonly LineMessage[], input: number, meta: StorylineMeta): TurnPlan {
   const keys = messageLines(chat, meta).map((l) => lineKey(l, meta));
-  const plain = (current: string): TurnPlan => ({ keys, meta, current, input, ...NO_NAMING });
+  const plain = (current: string, seen = meta): TurnPlan => ({ keys, meta: seen, current, input, ...NO_NAMING });
   const msg = input >= 0 ? chat[input] : undefined;
   if (!msg) return plain(keys.at(-1) ?? '');
   let tag = msg.is_user ? parseStorylineTag(msg.mes) : null;
@@ -212,8 +228,16 @@ export function planTurn(chat: readonly LineMessage[], input: number, meta: Stor
   }
   const extra = rewrite !== undefined ? { rewrite } : {};
   if (!tag.switchMain) {
-    if (tag.form === 'new') { own(NEW_LINE); return { ...plain(NEW_LINE), naming: true }; }
-    return { ...plain(keys[input]!), ...extra };
+    // `#@`: applied once the reply is received (visibility never changes what this turn sees).
+    const hide = tag.hide ? { hide: true } : {};
+    if (tag.form === 'new') {
+      own(NEW_LINE);
+      // `#if?`: an if-line already (`storyline.if`) before it has a name.
+      if (tag.ifLine) return { ...plain(NEW_LINE, { ...meta, if: { ...(meta.if ?? {}), [NEW_LINE]: true } }), naming: true, ifLine: true, ...hide };
+      return { ...plain(NEW_LINE), naming: true, ...hide };
+    }
+    const current = keys[input]!;
+    return { ...plain(current), ...extra, ...(current !== '' ? hide : {}) };
   }
   // `#!…`
   if (tag.form === 'name' && lineKey(tag.name, meta) === '') { own(''); return { ...plain(''), ...extra }; }
@@ -223,9 +247,13 @@ export function planTurn(chat: readonly LineMessage[], input: number, meta: Stor
   const mainUsed = keys.some((k, i) => k === '' && i < input && !chat[i]!.is_system);
   const old = oldName || OLD_MAIN_LINE;
   for (let i = 0; i < keys.length; i++) keys[i] = i >= input ? '' : keys[i] === '' ? old : keys[i] === target ? '' : keys[i]!;
+  // The previous main storyline stays a visible, normal storyline; the new one is the main storyline.
   const ifs = { ...(meta.if ?? {}), [old]: false };
   delete ifs[target];
-  const seen: StorylineMeta = { ...(target ? { main: target } : {}), if: ifs };
+  const hidden = { ...(meta.hidden ?? {}) };
+  delete hidden[old];
+  delete hidden[target];
+  const seen: StorylineMeta = { ...(target ? { main: target } : {}), if: ifs, hidden };
   return {
     keys, meta: seen, current: '', input, ...extra,
     naming: tag.form === 'new', namingMain: !oldName && mainUsed, switching: true,
@@ -370,7 +398,7 @@ export function arrangeTurn<T extends LineMessage>(items: readonly T[], realInde
     return r >= 0 && r < plan.keys.length ? plan.keys[r]! : i === currentInput ? current : own[i]!;
   });
   const a = arrangeLines(keys, current, meta, currentInput);
-  const naming: TurnNaming = { naming: plan.naming, namingMain: plan.namingMain, switching: plan.switching, ...(plan.target ? { target: plan.target } : {}), ...(plan.oldName ? { oldName: plan.oldName } : {}), ...(plan.renameMain ? { renameMain: true } : {}) };
+  const naming: TurnNaming = { naming: plan.naming, namingMain: plan.namingMain, switching: plan.switching, ...(plan.target ? { target: plan.target } : {}), ...(plan.oldName ? { oldName: plan.oldName } : {}), ...(plan.renameMain ? { renameMain: true } : {}), ...(plan.hide ? { hide: true } : {}), ...(plan.ifLine ? { ifLine: true } : {}) };
   const outItems = a.order.map((i) => {
     const it = items[i]!;
     const mes = untagged(it);

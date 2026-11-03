@@ -401,6 +401,7 @@
   "storylines.invalidName": "故事线名称不能为空，不能包含空格或 #，不能以 ! 或 ? 开头，且不超过 64 个字符。",
   "storylines.noRecent": "这条输入之前没有其他故事线，按主线继续。",
   "storylines.fallback.side": "支线",
+  "storylines.fallback.if": "if线",
   "storylines.fallback.main": "原主线",
   "storylines.switchFailed": "未能将「{name}」设为主线，这条回复保留在该故事线上。",
   "storylines.unnamed": "未命名"
