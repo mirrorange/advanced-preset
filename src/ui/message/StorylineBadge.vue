@@ -1,10 +1,10 @@
 <script setup lang="ts">
 /** Storyline badge (I-152): on messages outside the main storyline; opens the storylines tab. */
 import { computed } from 'vue';
-import { GitBranch } from 'lucide-vue-next';
+import { EyeOff, GitBranch } from 'lucide-vue-next';
 import { t } from '@/i18n';
 import { storylineMeta } from '@/store/storylines';
-import { isIfLine, lineName } from '@/core/storylines';
+import { isHiddenLine, isIfLine, lineName } from '@/core/storylines';
 import { openStorylines, ui } from '../state';
 import { lineKeys, storylinesActive } from '../storylines';
 
@@ -15,7 +15,7 @@ const info = computed(() => {
   const key = lineKeys()[props.mesid];
   if (!key) return null;
   const meta = storylineMeta();
-  return { key, name: lineName(key, meta) || t('storylines.unnamed'), if: isIfLine(key, meta) };
+  return { key, name: lineName(key, meta) || t('storylines.unnamed'), if: isIfLine(key, meta), hidden: isHiddenLine(key, meta) };
 });
 </script>
 
@@ -24,5 +24,6 @@ const info = computed(() => {
     <GitBranch class="lucide" aria-hidden="true" />
     <span class="storyline-name">{{ info.name }}</span>
     <span v-if="info.if" class="storyline-if">{{ t('storylines.ifLine') }}</span>
+    <EyeOff v-if="info.hidden" class="lucide storyline-hidden" :aria-label="t('storylines.hidden')" />
   </button>
 </template>

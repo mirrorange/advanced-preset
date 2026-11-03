@@ -1,11 +1,11 @@
 <script setup lang="ts">
-/** Storylines of the chat (I-152): their messages, the if-line switch and the main storyline. */
+/** Storylines of the chat (I-152): their messages, the if-line and visibility switches (I-161) and the main storyline. */
 import { computed, ref, watch } from 'vue';
-import { ChevronDown, Crown, GitBranch, PenLine } from 'lucide-vue-next';
+import { ChevronDown, Crown, EyeOff, GitBranch, PenLine } from 'lucide-vue-next';
 import { STORYLINE_CONFIG_DEFAULTS } from '@advanced-preset/protocol';
 import { escapeHtml, inputPopup, st, toast } from '@/st/host';
 import { t } from '@/i18n';
-import { nameMainStoryline, setIfLine, storylineMeta, validStorylineName } from '@/store/storylines';
+import { nameMainStoryline, setHiddenLine, setIfLine, storylineMeta, validStorylineName } from '@/store/storylines';
 import { switchMainInteractive } from '@/app/storylines';
 import { bumpChat, ui } from '../../state';
 import { usePreset } from '../use';
@@ -33,6 +33,7 @@ watch(() => ui.storylineFocus, (key) => { if (key !== null) { open.value = new S
 
 const changed = () => { bumpChat(); refreshMessages(); };
 async function setIf(key: string, v: boolean) { await setIfLine(key, v); changed(); }
+async function setVisible(key: string, v: boolean) { await setHiddenLine(key, !v); changed(); }
 async function makeMain(key: string) { if (await switchMainInteractive(key)) changed(); }
 async function nameMain() {
   const html = `<h3>${escapeHtml(t('storylines.nameMain'))}</h3><p>${escapeHtml(t('storylines.nameMain.hint'))}</p>`;
@@ -57,6 +58,7 @@ async function nameMain() {
         <span>{{ t('storylines.usage.side') }}</span>
         <span>{{ t('storylines.usage.recent') }}</span>
         <span>{{ t('storylines.usage.new') }}</span>
+        <span>{{ t('storylines.usage.hide') }}</span>
         <span>{{ t('storylines.usage.if') }}</span>
         <span>{{ t('storylines.usage.main') }}</span>
       </div>
@@ -69,6 +71,7 @@ async function nameMain() {
           <span class="card-title grow ellipsis">{{ e.main ? (e.name ? t('storylines.mainNamed', { name: e.name }) : t('storylines.main')) : e.name || t('storylines.unnamed') }}</span>
           <span v-if="e.current" class="badge">{{ t('storylines.current') }}</span>
           <span v-if="e.if" class="badge warn">{{ t('storylines.ifLine') }}</span>
+          <span v-if="e.hidden" class="badge neutral" :title="t('storylines.hidden.hint')"><EyeOff class="lucide" aria-hidden="true" />{{ t('storylines.hidden') }}</span>
           <span class="badge neutral">{{ t('storylines.floors', { n: e.floors.length }) }}</span>
           <ChevronDown class="chevron" :class="{ flipped: open.has(e.key) }" aria-hidden="true" />
         </header>
@@ -78,7 +81,10 @@ async function nameMain() {
               <button type="button" class="btn ghost" @click="nameMain"><PenLine aria-hidden="true" />{{ e.name ? t('common.rename') : t('storylines.nameMain') }}</button>
             </template>
             <template v-else-if="!e.pending">
-              <label class="row tight small"><Switch :model-value="e.if" :label="t('storylines.ifLine')" @update:model-value="(v: boolean) => setIf(e.key, v)" />{{ t('storylines.ifLine.toggle') }}</label>
+              <div class="col tight">
+                <label class="row tight small"><Switch :model-value="e.if" :label="t('storylines.ifLine')" @update:model-value="(v: boolean) => setIf(e.key, v)" />{{ t('storylines.ifLine.toggle') }}</label>
+                <label class="row tight small"><Switch :model-value="!e.hidden" :label="t('storylines.visible')" @update:model-value="(v: boolean) => setVisible(e.key, v)" />{{ t('storylines.visible.toggle') }}</label>
+              </div>
               <span class="grow" />
               <button type="button" class="btn ghost" @click="makeMain(e.key)"><Crown aria-hidden="true" />{{ t('storylines.makeMain') }}</button>
             </template>
