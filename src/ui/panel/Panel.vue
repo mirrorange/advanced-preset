@@ -15,6 +15,7 @@ import WritingTab from './tabs/WritingTab.vue';
 import MemoryTab from './tabs/MemoryTab.vue';
 import DebugTab from './tabs/DebugTab.vue';
 import StorylinesTab from './tabs/StorylinesTab.vue';
+import { storylinesActive } from '../storylines';
 
 const tabs: { id: PanelTab; icon: Component; view: Component }[] = [
   { id: 'presets', icon: Package, view: PresetsTab },
@@ -25,8 +26,8 @@ const tabs: { id: PanelTab; icon: Component; view: Component }[] = [
   { id: 'storylines', icon: GitBranch, view: StorylinesTab },
   { id: 'debug', icon: Bug, view: DebugTab },
 ];
-/** The storylines tab only for presets that declare storylines. */
-const shown = computed(() => tabs.filter((x) => x.id !== 'storylines' || Boolean(activePreset.value?.storylines)));
+/** The storylines tab only while the preset declares storylines and they are switched on. */
+const shown = computed(() => tabs.filter((x) => x.id !== 'storylines' || storylinesActive.value));
 const current = computed(() => shown.value.find((x) => x.id === ui.tab) ?? shown.value[0]!);
 
 const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => { settings().enabled = v; save(); } });
