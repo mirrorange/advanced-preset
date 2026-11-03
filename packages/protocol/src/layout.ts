@@ -118,27 +118,28 @@ export function turnLayout(
   });
 
   const stageItem = new Map<Stage, LayoutItem>();
-  const structureItem = new Map<StructureDecl, LayoutItem>();
+  // By id: a turn may request a copy of the declaration (a storyline structure with its requested sub-fields).
+  const structureItem = new Map<string, LayoutItem>();
   for (const it of items) {
     if (it.type === 'stage') stageItem.set(it.stage, it);
-    else structureItem.set(it.structure, it);
+    else structureItem.set(it.structure.id, it);
   }
-  const hosts = new Map<StructureDecl, Stage>();
+  const hosts = new Map<string, Stage>();
   items.forEach((it, i) => {
     if (it.type !== 'structure') return;
     let host: Stage | undefined;
     for (let j = i - 1; j >= 0 && !host; j--) { const x = items[j]!; if (x.type === 'stage') host = x.stage; }
     for (let j = i + 1; j < items.length && !host; j++) { const x = items[j]!; if (x.type === 'stage') host = x.stage; }
-    if (host) hosts.set(it.structure, host);
+    if (host) hosts.set(it.structure.id, host);
   });
-  const carriedBy = (stage: Stage) => items.flatMap((it) => (it.type === 'structure' && hosts.get(it.structure) === stage ? [it.structure] : []));
+  const carriedBy = (stage: Stage) => items.flatMap((it) => (it.type === 'structure' && hosts.get(it.structure.id) === stage ? [it.structure] : []));
 
   return {
     items,
     prefixed: Boolean(prefix),
     stageField: (stage) => stageItem.get(stage)?.name ?? stageBase(stage),
-    structureField: (decl) => structureItem.get(decl)?.name ?? decl.field,
-    hostOf: (decl) => hosts.get(decl),
+    structureField: (decl) => structureItem.get(decl.id)?.name ?? decl.field,
+    hostOf: (decl) => hosts.get(decl.id),
     carriedBy,
     stageParam: (stage, base) => {
       const it = stageItem.get(stage);

@@ -7769,7 +7769,7 @@ function turnLayout(workflow, stages, allStructures, tools, stageBase) {
   const structureItem = /* @__PURE__ */ new Map();
   for (const it of items) {
     if (it.type === "stage") stageItem.set(it.stage, it);
-    else structureItem.set(it.structure, it);
+    else structureItem.set(it.structure.id, it);
   }
   const hosts = /* @__PURE__ */ new Map();
   items.forEach((it, i) => {
@@ -7783,15 +7783,15 @@ function turnLayout(workflow, stages, allStructures, tools, stageBase) {
       const x = items[j];
       if (x.type === "stage") host = x.stage;
     }
-    if (host) hosts.set(it.structure, host);
+    if (host) hosts.set(it.structure.id, host);
   });
-  const carriedBy = (stage) => items.flatMap((it) => it.type === "structure" && hosts.get(it.structure) === stage ? [it.structure] : []);
+  const carriedBy = (stage) => items.flatMap((it) => it.type === "structure" && hosts.get(it.structure.id) === stage ? [it.structure] : []);
   return {
     items,
     prefixed: Boolean(prefix),
     stageField: (stage) => stageItem.get(stage)?.name ?? stageBase(stage),
-    structureField: (decl) => structureItem.get(decl)?.name ?? decl.field,
-    hostOf: (decl) => hosts.get(decl),
+    structureField: (decl) => structureItem.get(decl.id)?.name ?? decl.field,
+    hostOf: (decl) => hosts.get(decl.id),
     carriedBy,
     stageParam: (stage, base) => {
       const it = stageItem.get(stage);
