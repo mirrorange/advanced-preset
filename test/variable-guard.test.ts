@@ -54,10 +54,10 @@ describe('MVU on other storylines', () => {
     // `#!?`: the reply has no storyline yet (it follows the input), but the turn makes it the main storyline
     chat = [user('m1'), ai('M1 x', ''), user('new #!?'), { is_user: false, name: 'Bot', mes: 'N1 hp=5', extra: {} } as Msg];
     expect(lineOfText('N1 hp=5')).toBe('?');
-    beginTurn({ preset, config: state.config, line: '', from: 2 });
+    beginTurn({ line: '', frozen: false, from: 2 });
     expect(lineOfText('N1 hp=5')).toBe('');
     expect(mvuUpdate('N1 hp=5', stat(10), [{ hp: 5 }]).stat_data).toEqual({ hp: 5 });
-    beginTurn({ preset, config: state.config, line: '?new', from: 2 });
+    beginTurn({ line: '?new', frozen: true, from: 2 });
     expect(mvuUpdate('N1 hp=5', stat(10), [{ hp: 5 }]).stat_data).toEqual({ hp: 10 });
   });
 
@@ -81,16 +81,27 @@ describe('MVU on other storylines', () => {
   it('main storyline messages, and the switch off, update as usual', () => {
     chat = [user('m1'), ai('M1 hp=5', ''), user('c1 #cellar'), ai('C1 hp=7', 'cellar')];
     expect(mvuUpdate('M1 hp=5', stat(10), [{ hp: 5 }]).stat_data).toEqual({ hp: 5 });
-    state.config = { ...state.config, storylines: { enabled: true, freezeVariables: false } };
+    state.config = { ...state.config, storylines: { enabled: true, freezeVariables: 'off' } };
     expect(mvuUpdate('C1 hp=7', stat(10), [{ hp: 7 }]).stat_data).toEqual({ hp: 7 });
-    state.config = { ...state.config, storylines: { enabled: false, freezeVariables: true } };
+    state.config = { ...state.config, storylines: { enabled: false, freezeVariables: 'all' } };
     expect(mvuUpdate('C1 hp=7', stat(10), [{ hp: 7 }]).stat_data).toEqual({ hp: 7 });
+  });
+
+  it('`if` mode freezes if-lines only (I-163)', () => {
+    chat = [user('m1'), ai('M1', ''), user('c1 #cellar'), ai('C1 hp=7', 'cellar'), user('d #ifRain'), ai('R1 hp=8', 'ifRain')];
+    state.config = { ...state.config, storylines: { enabled: true, freezeVariables: 'if' } };
+    expect(mvuUpdate('C1 hp=7', stat(10), [{ hp: 7 }]).stat_data).toEqual({ hp: 7 });
+    expect(mvuUpdate('R1 hp=8', stat(10), [{ hp: 8 }]).stat_data).toEqual({ hp: 10 });
+    // the running turn decides for its own messages (a `#if?` reply before it has a name)
+    chat.push(user('x #if?'), { is_user: false, name: 'Bot', mes: 'N hp=1', extra: {} } as Msg);
+    beginTurn({ line: '?new', frozen: true, from: 6 });
+    expect(mvuUpdate('N hp=1', stat(10), [{ hp: 1 }]).stat_data).toEqual({ hp: 10 });
   });
 
   it('text that is no chat message is frozen only while a side turn generates', () => {
     chat = [user('c1 #cellar')];
     expect(mvuUpdate('repair block', stat(1), [{ hp: 2 }]).stat_data).toEqual({ hp: 2 });
-    beginTurn({ preset, config: state.config, line: 'cellar', from: 0 });
+    beginTurn({ line: 'cellar', frozen: true, from: 0 });
     expect(mvuUpdate('repair block', stat(1), [{ hp: 2 }]).stat_data).toEqual({ hp: 1 });
   });
 });
@@ -99,7 +110,7 @@ describe('Tavern Helper variables on other storylines', () => {
   it('restores the chat variables and gives the turn\'s messages the state before them', async () => {
     chat = [user('m1'), ai('M1', '', stat(10, { delta_data: { hp: '9->10' } })), user('c1 #cellar', stat(10))];
     metadata.variables = { stat_data: { hp: 10 }, ui: 'a' };
-    beginTurn({ preset, config: state.config, line: 'cellar', from: 2 });
+    beginTurn({ line: 'cellar', frozen: true, from: 2 });
     // what scripts wrote during the turn
     metadata.variables = { stat_data: { hp: 3 }, ui: 'b' };
     chat[2]!.variables = [stat(4)];
@@ -115,12 +126,12 @@ describe('Tavern Helper variables on other storylines', () => {
 
   it('keeps what MVU stored unchanged (only its display data differs) and leaves main turns alone', async () => {
     chat = [user('m1'), ai('M1', '', stat(10, { delta_data: { hp: '9->10' } })), user('c1 #cellar')];
-    beginTurn({ preset, config: state.config, line: 'cellar', from: 2 });
+    beginTurn({ line: 'cellar', frozen: true, from: 2 });
     chat.push(ai('C1', 'cellar', stat(10, { delta_data: {} })));
     expect(await settleTurn()).toBe(false);
     expect(chat[3]!.variables![0]).toEqual(stat(10, { delta_data: {} }));
     // main storyline: nothing remembered
-    beginTurn({ preset, config: state.config, line: '', from: 3 });
+    beginTurn({ line: '', frozen: false, from: 3 });
     metadata.variables = { x: 1 };
     expect(await settleTurn()).toBe(false);
     expect(metadata.variables).toEqual({ x: 1 });
@@ -128,7 +139,7 @@ describe('Tavern Helper variables on other storylines', () => {
 
   it('another chat: the turn is dropped', async () => {
     chat = [user('c1 #cellar')];
-    beginTurn({ preset, config: state.config, line: 'cellar', from: 0 });
+    beginTurn({ line: 'cellar', frozen: true, from: 0 });
     metadata.variables = { x: 1 };
     (globalThis as any).SillyTavern.getContext().getCurrentChatId = () => 'c2';
     const ctx = (globalThis as any).SillyTavern.getContext();

@@ -16,7 +16,7 @@
  * Arranged history: [other normal storylines, by first appearance][main][current, if not main].
  * If-lines are only visible to themselves. Pure functions; the chat is never touched here.
  */
-import { isIfName, parseStorylineTag, replaceStorylineTag, stripStorylineTag, type StorylineVars } from '@advanced-preset/protocol';
+import { freezesStoryline, isIfName, parseStorylineTag, replaceStorylineTag, stripStorylineTag, type StorylineFreeze, type StorylineVars } from '@advanced-preset/protocol';
 
 /** Per-swipe storyline of an assistant message (`''`: the main storyline). */
 export const STORYLINE_KEY = 'advanced_preset_storyline';
@@ -173,11 +173,13 @@ export interface TurnNaming {
 
 export const NO_NAMING: TurnNaming = { naming: false, namingMain: false, switching: false };
 
-/** `storyline.*` of a generation on `current`. */
-export function storylineVars(current: string, meta: StorylineMeta, isNew: boolean, grouped = false, naming: TurnNaming = NO_NAMING): StorylineVars {
+/** `storyline.*` of a generation on `current`; `freeze`: the configuration's freeze mode (I-163). */
+export function storylineVars(current: string, meta: StorylineMeta, isNew: boolean, grouped = false, naming: TurnNaming = NO_NAMING, freeze: StorylineFreeze = 'off'): StorylineVars {
+  const line = { main: current === '', if: isIfLine(current, meta) };
   return {
-    name: naming.naming ? '' : lineName(current, meta), main: current === '', if: isIfLine(current, meta), new: isNew, grouped,
+    name: naming.naming ? '' : lineName(current, meta), ...line, new: isNew, grouped,
     naming: naming.naming, namingMain: naming.namingMain, switching: naming.switching,
+    frozen: freezesStoryline(freeze, line),
   };
 }
 
@@ -386,9 +388,9 @@ export interface StorylineTurn {
 /**
  * Arranges history items (copies of chat messages, `realIndex` into the chat planned in `plan`) for
  * the plan's current storyline. Returns new item copies without storyline tags, in arranged order,
- * with their real indices and groups.
+ * with their real indices and groups. `freeze`: the configuration's freeze mode (`storyline.frozen`).
  */
-export function arrangeTurn<T extends LineMessage>(items: readonly T[], realIndex: readonly number[], plan: TurnPlan, currentInput: number): {
+export function arrangeTurn<T extends LineMessage>(items: readonly T[], realIndex: readonly number[], plan: TurnPlan, currentInput: number, freeze: StorylineFreeze = 'off'): {
   items: T[]; realIndex: number[]; groups: number[]; currentInput: number; turn: StorylineTurn;
 } {
   const { meta, current } = plan;
@@ -409,7 +411,7 @@ export function arrangeTurn<T extends LineMessage>(items: readonly T[], realInde
     naming,
     input: plan.input,
     view: arrangeLines(plan.keys, current, meta).order,
-    vars: storylineVars(current, meta, a.isNew, a.grouped, naming),
+    vars: storylineVars(current, meta, a.isNew, a.grouped, naming, freeze),
     mainName: meta.main ?? '',
     groups: a.groups,
     currentGroup: a.groups.findIndex((g) => g.key === current),

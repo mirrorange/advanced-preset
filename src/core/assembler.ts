@@ -4,7 +4,7 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
-  MAIN_STORYLINE_VARS, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type StorylineVars, type Vars, type Workflow,
+  MAIN_STORYLINE_VARS, freezeMode, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type StorylineVars, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, toast, type ChatMessage, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
@@ -151,7 +151,7 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
   // Storylines: arranged for the storyline of the last message, like the interceptor does (I-151).
   let groupOf: number[] = [];
   if (storylinesOn(preset, config)) {
-    const a = arrangeTurn(items, real, planTurn(chat, -1, storylineMeta()), -1);
+    const a = arrangeTurn(items, real, planTurn(chat, -1, storylineMeta()), -1, freezeMode(config.storylines));
     items = a.items;
     real = a.realIndex;
     groupOf = a.groups;

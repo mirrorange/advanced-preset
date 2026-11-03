@@ -2,6 +2,7 @@
  * `generate_interceptor` (manifest): runs for native `Generate` before prompt building. Classifies
  * the turn, rewrites the history copy (§9.1) and leaves a pending GenerationContext for PROMPT_READY.
  */
+import { freezeMode } from '@advanced-preset/protocol';
 import { getPreset } from '@/store/presets';
 import { activeConfiguration } from '@/store/config';
 import { activeCarrierPresetId } from '@/store/carrier';
@@ -60,7 +61,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
       if (!onCopy) rewriteInputTag(realInput, plan.rewrite);
       if (plan.noRecent) toast('info', t('storylines.noRecent'), t('app.name'));
     }
-    const a = arrangeTurn(chat, onCopy ? chat.map((_, i) => i) : realIndexOf, plan, currentInput);
+    const a = arrangeTurn(chat, onCopy ? chat.map((_, i) => i) : realIndexOf, plan, currentInput, freezeMode(config.storylines));
     chat.splice(0, chat.length, ...(a.items as STMessage[]));
     const before = realIndexOf;
     realIndexOf = onCopy ? a.realIndex.map((ci) => before[ci] ?? -1) : a.realIndex;
@@ -149,7 +150,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     createdAt: Date.now(),
     warnings: [],
   };
-  // Variables stay as they were on other storylines (I-154).
-  beginTurn({ preset, config, line: storylines?.current, from: ctx.inputIndex >= 0 ? ctx.inputIndex : real.length - 1 });
+  // Variables stay as they were on frozen storylines (I-154, I-163).
+  beginTurn({ line: storylines?.current, frozen: Boolean(storylines?.vars.frozen), from: ctx.inputIndex >= 0 ? ctx.inputIndex : real.length - 1 });
   registry.setPending(ctx);
 }

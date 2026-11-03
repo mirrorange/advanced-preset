@@ -49,7 +49,7 @@ describe('message storylines', () => {
     expect(r.currentInput).toBe(4);
     const one = [u('x #Road')];
     const tagMain = arrangeTurn(one, [0], planTurn(one, 0, meta), 0);
-    expect(tagMain.turn.vars).toEqual({ name: 'Road', main: true, if: false, new: true, grouped: false, naming: false, namingMain: false, switching: false });
+    expect(tagMain.turn.vars).toEqual({ name: 'Road', main: true, if: false, new: true, grouped: false, naming: false, namingMain: false, switching: false, frozen: false });
   });
 
   it('#? / #!? follow the reply after them; # without a name is the most recent other storyline', () => {
@@ -227,11 +227,12 @@ function stPrompt(preset: APreset, history: STMessage[], o: { depth0?: boolean }
   return out;
 }
 
-async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean; transport?: string; naming?: boolean | 'petals'; keepChat?: boolean } = {}) {
+async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean; transport?: string; naming?: boolean | 'petals'; keepChat?: boolean; freeze?: 'all' | 'if' | 'off' } = {}) {
   const preset = withStorylines(o.shaping, o.naming);
   state.preset = preset;
   state.config = resolveConfiguration(preset, 'other', { connection: { transport: (o.transport ?? 'structured') as any, workflow: 'linear' } });
   if (o.cache) state.config.cache = { ...CACHE_DEFAULTS, enabled: true };
+  if (o.freeze) state.config.storylines = { enabled: true, freezeVariables: o.freeze };
   if (o.tokenSaving) state.config.tokenSaving = { ...state.config.tokenSaving, enabled: true, keepFullTurns: 99 };
   if (!o.keepChat) realChat.splice(0, realChat.length, ...chat);
   else realChat.splice(chat.length);
@@ -469,6 +470,18 @@ describe('storylines in a generation', () => {
     expect(await settleTurn()).toBe(false);
   });
 
+  it('`storyline.frozen` follows the freeze mode; `if` freezes if-lines only (I-163)', async () => {
+    const side = [user('m1'), ai('M1'), user('c1 #cellar')];
+    expect((await generate(side)).snapshot!.storyline).toMatchObject({ main: false, frozen: true });
+    expect((await generate([user('m1'), ai('M1'), user('m2')])).snapshot!.storyline).toMatchObject({ main: true, frozen: false });
+    metadata.variables = { stat_data: { hp: 10 } };
+    expect((await generate(side, { freeze: 'if' })).snapshot!.storyline).toMatchObject({ frozen: false });
+    metadata.variables = { stat_data: { hp: 1 } };
+    expect(await settleTurn()).toBe(false);
+    expect((await generate([user('m1'), ai('M1'), user('x #if?')], { naming: true, freeze: 'if' })).snapshot!.storyline).toMatchObject({ if: true, frozen: true });
+    expect((await generate([user('m1'), ai('M1'), user('x1 #ifDream')], { freeze: 'off' })).snapshot!.storyline).toMatchObject({ if: true, frozen: false });
+  });
+
 });
 
 describe('storyline data', () => {
@@ -511,7 +524,7 @@ describe('storyline data', () => {
     expect(withStorylineOf('Go')).toBe('Go');
     realChat.pop();
     expect(withStorylineOf('Go')).toBe('Go #cellar');
-    state.config.storylines = { enabled: false, freezeVariables: true };
+    state.config.storylines = { enabled: false, freezeVariables: 'all' };
     expect(withStorylineOf('Go')).toBe('Go');
   });
 
