@@ -65,6 +65,10 @@ export const MAIN_STORYLINE_VARS: StorylineVars = { name: '', main: true, if: fa
  * - `name`: `#name` / `#!name`;
  * - `new`: `#?` / `#!?`, a new storyline the AI names;
  * - `recent`: `#` / `#!` without a name, the most recent storyline other than the main one.
+ *
+ * `#@…` (`#@name`, `#@`, `#@?`, `#@if?`) also makes the storyline invisible to the other storylines
+ * (I-161); `#if?` is a new storyline that is an if-line (I-162). `!` and `@` exclude each other, and a
+ * main storyline is never an if-line (`#!if?` is not a tag).
  */
 export type StorylineTagForm = 'name' | 'new' | 'recent';
 
@@ -74,6 +78,10 @@ export interface StorylineTag {
   name: string;
   /** `#!…`: make this storyline the main one. */
   switchMain: boolean;
+  /** `#@…`: the storyline is invisible to the other storylines. */
+  hide: boolean;
+  /** `#if?` / `#@if?`: the new storyline is an if-line. */
+  ifLine: boolean;
   /** Offset of the `#` in the text. */
   at: number;
   /** The text without the tag (trailing whitespace removed). */
@@ -84,20 +92,23 @@ export interface StorylineTag {
  * A trailing `#…`. Whitespace before the `#` is optional (`好的#地下室`), but a `#` right after an
  * ASCII letter, digit or `_ # & / =` is text (`C#`, `issue#42`, `page#anchor`, `&#39`).
  */
-const TAG_RE = /(?<![A-Za-z0-9_#&/=])#(!?)([^\s#]*)\s*$/u;
+const TAG_RE = /(?<![A-Za-z0-9_#&/=])#([!@]?)([^\s#]*)\s*$/u;
 
-/** A name usable in a `#tag`: no whitespace or `#`, not starting with `!` / `?`, at most {@link MAX_STORYLINE_NAME} characters. */
-export const validStorylineName = (name: string): boolean => /^[^\s#!?][^\s#]*$/u.test(name) && [...name].length <= MAX_STORYLINE_NAME;
+/** A name usable in a `#tag`: no whitespace or `#`, not starting with `!` / `?` / `@`, not `if?`, at most {@link MAX_STORYLINE_NAME} characters. */
+export const validStorylineName = (name: string): boolean => /^[^\s#!?@][^\s#]*$/u.test(name) && !/^if\?$/iu.test(name) && [...name].length <= MAX_STORYLINE_NAME;
 
 /** The storyline tag at the end of a message, if any. */
 export function parseStorylineTag(text: string): StorylineTag | null {
   const m = TAG_RE.exec(text);
   if (!m) return null;
   const raw = m[2]!;
-  const form: StorylineTagForm = raw === '' ? 'recent' : raw === '?' ? 'new' : 'name';
+  const ifLine = /^if\?$/iu.test(raw);
+  const form: StorylineTagForm = raw === '' ? 'recent' : raw === '?' || ifLine ? 'new' : 'name';
   if (form === 'name' && !validStorylineName(raw)) return null;
+  const switchMain = m[1] === '!';
+  if (switchMain && ifLine) return null;
   const at = m.index;
-  return { form, name: form === 'name' ? raw : '', switchMain: m[1] === '!', at, text: text.slice(0, at).trimEnd() };
+  return { form, name: form === 'name' ? raw : '', switchMain, hide: m[1] === '@', ifLine, at, text: text.slice(0, at).trimEnd() };
 }
 
 /** Text without its trailing storyline tag. */
@@ -112,10 +123,10 @@ export function withStorylineTag(text: string, name: string, switchMain = false)
   return `${base}${base ? ' ' : ''}#${switchMain ? '!' : ''}${name}`;
 }
 
-/** Replaces the written tag in place (`#` → `#name`, keeping the text and spacing before it); `''` removes it. */
-export function replaceStorylineTag(text: string, tag: StorylineTag, name: string, switchMain = tag.switchMain): string {
+/** Replaces the written tag in place (`#` → `#name`, `#@` → `#@name`, keeping the text and spacing before it); `''` removes it. */
+export function replaceStorylineTag(text: string, tag: StorylineTag, name: string): string {
   if (!name) return tag.text;
-  return `${text.slice(0, tag.at)}#${switchMain ? '!' : ''}${name}`;
+  return `${text.slice(0, tag.at)}#${tag.switchMain ? '!' : tag.hide ? '@' : ''}${name}`;
 }
 
 /**
@@ -125,7 +136,7 @@ export function replaceStorylineTag(text: string, tag: StorylineTag, name: strin
 export function storylineNameFrom(raw: unknown): string {
   if (typeof raw !== 'string') return '';
   let s = raw.trim().replace(/^["'`“”‘’「」『』《》]+|["'`“”‘’「」『』《》]+$/gu, '').trim();
-  s = s.replace(/^[#!?\s]+/u, '').replace(/#/g, '').replace(/\s+/gu, '_').replace(/_+$/u, '');
+  s = s.replace(/^[#!?@\s]+/u, '').replace(/#/g, '').replace(/\s+/gu, '_').replace(/_+$/u, '');
   const out = [...s].slice(0, MAX_STORYLINE_NAME).join('');
   return validStorylineName(out) ? out : '';
 }

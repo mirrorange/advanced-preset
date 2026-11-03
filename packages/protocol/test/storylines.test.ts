@@ -6,7 +6,7 @@ import {
 
 describe('storyline tags', () => {
   it('parses a trailing #name and #!name', () => {
-    expect(parseStorylineTag('Open the door. #cellar')).toEqual({ form: 'name', name: 'cellar', switchMain: false, at: 15, text: 'Open the door.' });
+    expect(parseStorylineTag('Open the door. #cellar')).toEqual({ form: 'name', name: 'cellar', switchMain: false, hide: false, ifLine: false, at: 15, text: 'Open the door.' });
     expect(parseStorylineTag('Go on.\n#!新主线  ')).toMatchObject({ form: 'name', name: '新主线', switchMain: true, text: 'Go on.' });
     expect(parseStorylineTag('#ifRain')).toMatchObject({ name: 'ifRain', text: '' });
     expect(parseStorylineTag('#a b')).toBeNull();
@@ -36,6 +36,24 @@ describe('storyline tags', () => {
     expect(parseStorylineTag('x #?a')).toBeNull();
     expect(parseStorylineTag('x #!!a')).toBeNull();
     expect(stripStorylineTag('x #?')).toBe('x');
+  });
+
+  it('#@ hides the storyline, #if? is a new if-line (I-161, I-162)', () => {
+    expect(parseStorylineTag('x #@cellar')).toMatchObject({ form: 'name', name: 'cellar', hide: true, switchMain: false });
+    expect(parseStorylineTag('x #@')).toMatchObject({ form: 'recent', hide: true });
+    expect(parseStorylineTag('x #@?')).toMatchObject({ form: 'new', hide: true, ifLine: false });
+    expect(parseStorylineTag('x #if?')).toMatchObject({ form: 'new', name: '', hide: false, ifLine: true });
+    expect(parseStorylineTag('梦#IF?')).toMatchObject({ form: 'new', ifLine: true });
+    expect(parseStorylineTag('x #@if?')).toMatchObject({ form: 'new', hide: true, ifLine: true });
+    expect(parseStorylineTag('x #ifRain')).toMatchObject({ form: 'name', name: 'ifRain', ifLine: false });
+    expect(parseStorylineTag('x #!if?')).toBeNull();
+    expect(parseStorylineTag('x #!@a')).toBeNull();
+    expect(parseStorylineTag('x #@!a')).toBeNull();
+    expect(parseStorylineTag('x #@@a')).toBeNull();
+    expect(validStorylineName('@a')).toBe(false);
+    expect(validStorylineName('if?')).toBe(false);
+    expect(replaceStorylineTag('x #@', parseStorylineTag('x #@')!, 'B')).toBe('x #@B');
+    expect(storylineNameFrom('@Dream')).toBe('Dream');
   });
 
   it('cleans names chosen by the AI', () => {
