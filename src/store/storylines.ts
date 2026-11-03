@@ -3,9 +3,9 @@
  * metadata, the storyline of each assistant swipe in its `extra`, and switching the main storyline
  * (I-147): messages of the old main storyline get its name (user `#tag`, assistant swipe data).
  */
-import { isIfName, validStorylineName, withStorylineTag, type APreset, type Configuration } from '@advanced-preset/protocol';
+import { isIfName, parseStorylineTag, replaceStorylineTag, validStorylineName, withStorylineTag, type APreset, type Configuration } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
-import { STORYLINE_KEY, SWITCHED_KEY, arrangeLines, isIfLine, isPendingLine, lineKey, messageLines, type StorylineMeta } from '@/core/storylines';
+import { STORYLINE_KEY, SWITCHED_KEY, arrangeLines, isHiddenLine, isIfLine, isPendingLine, lineKey, messageLines, type StorylineMeta } from '@/core/storylines';
 
 export { validStorylineName };
 
@@ -83,6 +83,53 @@ export async function nameMainStoryline(name: string): Promise<boolean> {
   writeMeta({ ...meta, main: name });
   await st().saveMetadata();
   return true;
+}
+
+export type RenameResult = 'renamed' | 'unchanged' | 'invalid' | 'taken';
+
+/**
+ * Renames the storyline `key` (the main storyline: {@link nameMainStoryline}): user tags `#key` keep
+ * their form (`#!`, `#@`), assistant swipes stored on it move to `name`, and so do its if-line and
+ * visibility switches. Saves the chat.
+ */
+export async function renameStoryline(key: string, name: string): Promise<RenameResult> {
+  if (!key) return (await nameMainStoryline(name)) ? 'renamed' : validStorylineName(name) ? 'taken' : 'invalid';
+  if (!validStorylineName(name)) return 'invalid';
+  if (name === key) return 'unchanged';
+  const meta = storylineMeta();
+  const taken = takenStorylineNames(st().chat, meta);
+  taken.delete(key);
+  if (taken.has(name)) return 'taken';
+  const chat = st().chat;
+  const changed: number[] = [];
+  chat.forEach((m, i) => {
+    if (m.is_user) {
+      const tag = parseStorylineTag(m.mes);
+      if (tag?.form !== 'name' || tag.name !== key) return;
+      m.mes = replaceStorylineTag(m.mes, tag, name);
+      changed.push(i);
+      return;
+    }
+    // Every swipe stored on the storyline, the current one or not.
+    m.swipe_info?.forEach((info) => { if (info?.extra?.[STORYLINE_KEY] === key) info.extra[STORYLINE_KEY] = name; });
+    if (m.extra?.[STORYLINE_KEY] === key) m.extra[STORYLINE_KEY] = name;
+  });
+  // The storyline stays what it was (if-line, visibility); switches only where the new name's default differs.
+  const wasIf = isIfLine(key, meta);
+  const wasHidden = isHiddenLine(key, meta);
+  const ifs = { ...(meta.if ?? {}) };
+  const hidden = { ...(meta.hidden ?? {}) };
+  delete ifs[key];
+  delete hidden[key];
+  if (wasIf !== isIfName(name)) ifs[name] = wasIf; else delete ifs[name];
+  if (wasHidden !== wasIf) hidden[name] = wasHidden; else delete hidden[name];
+  const next: StorylineMeta = { ...meta, if: ifs, hidden };
+  if (!Object.keys(ifs).length) delete next.if;
+  if (!Object.keys(hidden).length) delete next.hidden;
+  writeMeta(next);
+  for (const i of changed) st().updateMessageBlock(i, chat[i]!);
+  await st().saveChat();
+  return 'renamed';
 }
 
 /** Visibility switch of a storyline (I-161; the main storyline is always visible). */

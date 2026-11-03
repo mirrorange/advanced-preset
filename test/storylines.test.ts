@@ -169,7 +169,7 @@ vi.mock('@/i18n', async (orig) => ({ ...(await orig<object>()), t: (k: string) =
 const { advancedPresetInterceptor } = await import('@/core/interceptor');
 const assembler = await import('@/core/assembler');
 const { registry } = await import('@/core/context');
-const { chatLineKeys, switchMainStoryline, writeMessageLine } = await import('@/store/storylines');
+const { chatLineKeys, renameStoryline, switchMainStoryline, writeMessageLine } = await import('@/store/storylines');
 const { commitStoryline, withStorylineOf } = await import('@/app/storylines');
 const { settleTurn } = await import('@/app/variable-guard');
 
@@ -504,6 +504,31 @@ describe('storyline data', () => {
     // Back again: the named main storyline needs no question; `Road` messages become main.
     expect(await switchMainStoryline('Road')).toBe('switched');
     expect(realChat.map((m) => m.mes)).toEqual(['greeting', 'm1 #Road', 'M1', 'c1 #B', 'C1']);
+    expect(metadata.advanced_preset.storylines.main).toBe('Road');
+  });
+
+  it('renaming a storyline moves its tags, swipes and switches', async () => {
+    realChat.splice(0, realChat.length,
+      user('m1'), ai('M1', ''),
+      user('好#cellar'),
+      { ...ai('C1', 'cellar'), swipe_id: 1, swipes: ['C0', 'C1'], swipe_info: [{ extra: { [STORYLINE_KEY]: 'cellar' } }, { extra: { [STORYLINE_KEY]: 'cellar' } }] } as STMessage,
+      user('c2 #@cellar'), ai('C2', 'cellar'),
+      user('x #?'), ai('X1', 'attic'),
+    );
+    metadata.advanced_preset = { storylines: { hidden: { cellar: true } } };
+    expect(await renameStoryline('cellar', 'attic')).toBe('taken');
+    expect(await renameStoryline('cellar', 'bad name')).toBe('invalid');
+    expect(await renameStoryline('cellar', 'cellar')).toBe('unchanged');
+    expect(await renameStoryline('cellar', 'ifCellar')).toBe('renamed');
+    expect(realChat.map((m) => m.mes)).toEqual(['m1', 'M1', '好#ifCellar', 'C1', 'c2 #@ifCellar', 'C2', 'x #?', 'X1']);
+    expect(realChat[3]!.swipe_info!.map((s) => s.extra![STORYLINE_KEY])).toEqual(['ifCellar', 'ifCellar']);
+    // still a normal, hidden storyline under a name that looks like an if-line
+    expect(metadata.advanced_preset.storylines).toEqual({ if: { ifCellar: false }, hidden: { ifCellar: true } });
+    // a #? storyline is renamed through its reply
+    expect(await renameStoryline('attic', 'loft')).toBe('renamed');
+    expect(realChat[7]!.extra![STORYLINE_KEY]).toBe('loft');
+    // the main storyline
+    expect(await renameStoryline('', 'Road')).toBe('renamed');
     expect(metadata.advanced_preset.storylines.main).toBe('Road');
   });
 
