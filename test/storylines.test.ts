@@ -172,9 +172,10 @@ beforeEach(() => {
 afterEach(() => { delete (globalThis as any).SillyTavern; registry.setPending(null); registry.takeArmed(); });
 
 /** Petals with storylines; without input shaping unless asked (the input then stays in the history); `naming`: a storyline structure. */
-const withStorylines = (shaping = false, naming = false): APreset => {
+const withStorylines = (shaping = false, naming: boolean | 'petals' = false): APreset => {
   const p: APreset = { ...cloneData(petals), storylines: { ...DEFAULT_STORYLINES } };
   if (!shaping) delete p.inputShaping;
+  if (naming === 'petals') return p;
   for (const [id, d] of Object.entries(p.structures)) if (d.kind === 'storyline') delete p.structures[id];
   p.modules = p.modules.map((m) => ({ ...m, structures: m.structures.filter((x) => x in p.structures) }));
   if (naming) {
@@ -207,7 +208,7 @@ function stPrompt(preset: APreset, history: STMessage[], o: { depth0?: boolean }
   return out;
 }
 
-async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean; transport?: string; naming?: boolean; keepChat?: boolean } = {}) {
+async function generate(chat: STMessage[], o: { depth0?: boolean; cache?: boolean; tokenSaving?: boolean; type?: string; shaping?: boolean; transport?: string; naming?: boolean | 'petals'; keepChat?: boolean } = {}) {
   const preset = withStorylines(o.shaping, o.naming);
   state.preset = preset;
   state.config = resolveConfiguration(preset, 'other', { connection: { transport: (o.transport ?? 'structured') as any, workflow: 'linear' } });
@@ -346,6 +347,19 @@ describe('storylines in a generation', () => {
     expect(r3.ctx!.structures.some((x) => x.kind === 'storyline')).toBe(false);
     await receive(r3.ctx!, undefined);
     expect(realChat.at(-1)!.extra![STORYLINE_KEY]).toBe('storylines.fallback.side');
+  });
+
+  it('bundled Petals asks Freesia to name the new storyline, and only on naming turns', async () => {
+    const side = await generate([user('m1'), ai('M1'), user('x #?')], { naming: 'petals' });
+    expect(side.ctx!.structures.find((x) => x.kind === 'storyline')?.requested).toEqual(['name']);
+    expect(side.text).toContain('Name the new storyline');
+    expect(side.text).toContain('This turn starts a new side story.');
+    const plain = await generate([user('m1'), ai('M1'), user('c #cellar')], { naming: 'petals' });
+    expect(plain.ctx!.structures.some((x) => x.kind === 'storyline')).toBe(false);
+    expect(plain.text).not.toContain('Name the new storyline');
+    const sw = await generate([user('m1'), ai('M1'), user('c1 #cellar'), ai('C1', 'cellar'), user('go #!cellar')], { naming: 'petals' });
+    expect(sw.text).toContain('This turn makes \\"cellar\\" the main storyline');
+    expect(sw.ctx!.structures.find((x) => x.kind === 'storyline')?.requested).toEqual(['previous_main']);
   });
 
   it('a nameless `#` continues the most recent other storyline and names it in the input', async () => {
