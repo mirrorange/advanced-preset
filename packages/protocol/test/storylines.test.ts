@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  assemble, defaultVars, FORMAT_VERSION, isIfName, replaceStorylineTag, storylineNameFrom, uniqueStorylineName, validStorylineName, activeStructures, normalizeStructure, extractStructureTags, structureFieldSchema, upgradeArtifact, parseExpr, parseStorylineTag, resolverOf, storylineSeparator, stripStorylineTag, test as testExpr, withStorylineTag,
+  assemble, defaultVars, freezeMode, freezesStoryline, FORMAT_VERSION, isIfName, replaceStorylineTag, storylineNameFrom, uniqueStorylineName, validStorylineName, activeStructures, normalizeStructure, extractStructureTags, structureFieldSchema, upgradeArtifact, parseExpr, parseStorylineTag, resolverOf, storylineSeparator, stripStorylineTag, test as testExpr, withStorylineTag,
   type APreset, type Configuration,
 } from '../src';
 
@@ -106,12 +106,12 @@ const config = { modules: {}, params: {}, identity: { names: {}, prefixes: {} },
 describe('storyline vars and macros', () => {
   it('default to the main storyline', () => {
     const vars = defaultVars(preset, config);
-    expect(vars.storyline).toEqual({ name: '', main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false });
+    expect(vars.storyline).toEqual({ name: '', main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false, frozen: false });
     expect(assemble({ preset, config, vars, data: {} }).regions.sys).toEqual([]);
   });
 
   it('render the current and the main storyline names', () => {
-    const vars = defaultVars(preset, config, { storyline: { name: 'ifRain', main: false, if: true, new: true, grouped: true, naming: false, namingMain: false, switching: false } });
+    const vars = defaultVars(preset, config, { storyline: { name: 'ifRain', main: false, if: true, new: true, grouped: true, naming: false, namingMain: false, switching: false, frozen: true } });
     const a = assemble({ preset, config, vars, data: { storyline: { name: 'ifRain', main: 'Road' } } });
     expect(a.regions.sys).toEqual([{ role: 'system', content: 'Side story ifRain (main: Road)\n\nA new if-line.' }]);
     expect(testExpr(parseExpr('storyline.name == "ifRain"'), resolverOf(a.vars))).toBe(true);
@@ -122,14 +122,28 @@ describe('storyline vars and macros', () => {
     const plain = upgradeArtifact(JSON.parse(JSON.stringify(base)))!;
     expect('storylines' in plain.configurationDefaults).toBe(false);
     const decl = upgradeArtifact(JSON.parse(JSON.stringify({ ...base, storylines: { separator: 's {{storyline}}', mainSeparator: 'm' } })))!;
-    expect(decl.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: true });
+    expect(decl.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: 'all' });
+  });
+});
+
+describe('frozen variables (I-163)', () => {
+  it('follow the mode', () => {
+    const main = { main: true, if: false }, side = { main: false, if: false }, ifl = { main: false, if: true };
+    expect([main, side, ifl].map((l) => freezesStoryline('all', l))).toEqual([false, true, true]);
+    expect([main, side, ifl].map((l) => freezesStoryline('if', l))).toEqual([false, false, true]);
+    expect([main, side, ifl].map((l) => freezesStoryline('off', l))).toEqual([false, false, false]);
+  });
+  it('default to all', () => {
+    expect(freezeMode(undefined)).toBe('all');
+    expect(freezeMode({ freezeVariables: 'if' })).toBe('if');
+    expect(freezeMode({ freezeVariables: true as never })).toBe('all');
   });
 });
 
 describe('storyline structure (I-158)', () => {
   const decl = { id: 'storyline', kind: 'storyline', tag: 'storyline', field: 'storyline', formatPrompt: { tag: '', field: '' }, properties: { name: 'Name it' } } as const;
   const p = { ...preset, structures: { storyline: decl }, modules: [{ ...preset.modules[0]!, structures: ['storyline'] }] } as unknown as APreset;
-  const sv = (naming: boolean, namingMain: boolean) => ({ storyline: { name: '', main: false, if: false, new: true, grouped: true, naming, namingMain, switching: false } });
+  const sv = (naming: boolean, namingMain: boolean) => ({ storyline: { name: '', main: false, if: false, new: true, grouped: true, naming, namingMain, switching: false, frozen: true } });
 
   it('is only requested when a storyline is named, with the names to give', () => {
     expect(activeStructures(p, p.modules)).toEqual([]);

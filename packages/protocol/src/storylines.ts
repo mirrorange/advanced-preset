@@ -7,8 +7,8 @@
  *
  * A preset opts in with `storylines` (separators placed before each storyline's group of history
  * messages); users have a switch in the configuration (`Configuration.storylines.enabled`).
- * `freezeVariables`: turns on storylines other than the main one leave the variables of variable
- * systems (MVU, Tavern Helper chat / message variables) as they were.
+ * `freezeVariables`: which turns leave the variables of variable systems (MVU, Tavern Helper chat /
+ * message variables) as they were — every storyline other than the main one, only if-lines, or none.
  */
 
 export interface StorylinesDecl {
@@ -23,14 +23,29 @@ export const DEFAULT_STORYLINES: StorylinesDecl = {
   mainSeparator: '<!-- Start of the main storyline -->',
 };
 
-/** User switch (configuration layer). */
+/**
+ * Turns that do not update variables (I-154, I-163): `all` — every storyline other than the main one;
+ * `if` — only if-lines; `off` — none.
+ */
+export type StorylineFreeze = 'all' | 'if' | 'off';
+export const STORYLINE_FREEZE_MODES: readonly StorylineFreeze[] = ['all', 'if', 'off'];
+
+/** User switches (configuration layer). */
 export interface StorylineConfig {
   enabled: boolean;
-  /** Turns on other storylines do not update MVU / Tavern Helper variables (I-154). */
-  freezeVariables: boolean;
+  /** Which turns do not update MVU / Tavern Helper variables. */
+  freezeVariables: StorylineFreeze;
 }
 
-export const STORYLINE_CONFIG_DEFAULTS: StorylineConfig = { enabled: true, freezeVariables: true };
+export const STORYLINE_CONFIG_DEFAULTS: StorylineConfig = { enabled: true, freezeVariables: 'all' };
+
+/** The freeze mode of a configuration (unknown values: the default). */
+export const freezeMode = (c: Partial<StorylineConfig> | undefined): StorylineFreeze =>
+  STORYLINE_FREEZE_MODES.includes(c?.freezeVariables as StorylineFreeze) ? c!.freezeVariables! : STORYLINE_CONFIG_DEFAULTS.freezeVariables;
+
+/** A turn on a storyline (`main` / `if` as in {@link StorylineVars}) leaves the variables as they were under `mode`. */
+export const freezesStoryline = (mode: StorylineFreeze, line: { main: boolean; if: boolean }): boolean =>
+  mode === 'all' ? !line.main : mode === 'if' ? line.if : false;
 
 /** First Advanced Preset version with storylines (older versions ignore `storylines` and leave the tags in the text). */
 export const STORYLINES_SINCE = '1.10.0';
@@ -56,9 +71,11 @@ export interface StorylineVars {
   namingMain: boolean;
   /** This turn makes the current storyline the main one (`#!name`, `#!?`); the previous main storyline is history. */
   switching: boolean;
+  /** Variable updates of this turn are blocked (`storylines.freezeVariables`, I-163): the preset can tell the AI not to update state. */
+  frozen: boolean;
 }
 
-export const MAIN_STORYLINE_VARS: StorylineVars = { name: '', main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false };
+export const MAIN_STORYLINE_VARS: StorylineVars = { name: '', main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false, frozen: false };
 
 /**
  * What a tag asks for (I-157):
