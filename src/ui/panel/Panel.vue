@@ -55,7 +55,7 @@ watch(() => ui.panelOpen, (open) => { if (open) coverDrawer(true); }, { immediat
         <Switch v-model="enabled" :label="t('panel.enabled')" />
         <IconButton :icon="X" :label="t('common.close')" align="end" below @click="ui.panelOpen = false" />
       </header>
-      <nav class="tabs" role="tablist">
+      <nav class="tabs" :class="{ many: shown.length > 6 }" role="tablist">
         <button v-for="x in shown" :key="x.id" type="button" role="tab" class="tab" :class="{ on: x.id === ui.tab }" :title="t(`tab.${x.id}`)" :aria-selected="x.id === ui.tab" @click="ui.tab = x.id">
           <component :is="x.icon" />
           <span>{{ t(`tab.${x.id}`) }}</span>

@@ -32,6 +32,7 @@
 .tab.on { color: var(--ap-primary); font-weight: 600; }
 .tab.on::after { content: ''; position: absolute; left: 20%; right: 20%; bottom: -1px; height: 2px; border-radius: 2px; background: var(--ap-primary); }
 .tab svg.lucide { width: 1.25em; height: 1.25em; }
+.tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .panel-body { flex: 1 1 auto; min-height: 0; padding: var(--ap-space-3) var(--ap-space-4) var(--ap-space-5); display: flex; flex-direction: column; gap: var(--ap-space-3); }
 .section .card-body { display: flex; flex-direction: column; gap: var(--ap-space-3); }
@@ -203,6 +204,12 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
 
 /* ST's drawer can be quite narrow (e.g. ~250px on a 1024px desktop): drop tab labels, let segmented
    controls wrap onto rows and tighten the body padding instead of clipping. */
+/* Seven tabs (with storylines) need more room for their labels. */
+@container ap-panel (max-width: 420px) {
+  .tabs.many .tab span { display: none; }
+  .tabs.many .tab { min-width: 2.4em; padding: var(--ap-space-2) 2px; }
+  .tabs.many .tab svg.lucide { width: 1.35em; height: 1.35em; }
+}
 @container ap-panel (max-width: 340px) {
   .tab span { display: none; }
   .tab { min-width: 2.4em; padding: var(--ap-space-2) 2px; }

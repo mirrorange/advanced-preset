@@ -126,6 +126,8 @@ export function installMounts(): void {
     schedule();
   };
   observe();
+  // Storylines switched on / off (configuration, preset): tags and badges follow.
+  watch(() => storylinesActive.value, () => refreshMessages());
 
   // Streaming placeholder: bind the live generation to its message as soon as ST creates it.
   let timer: ReturnType<typeof setInterval> | undefined;
