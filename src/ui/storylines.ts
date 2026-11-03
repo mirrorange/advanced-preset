@@ -8,7 +8,7 @@ import { st, type STMessage } from '@/st/host';
 import { activeConfiguration } from '@/store/config';
 import { getSidecar } from '@/store/sidecar';
 import { chatLineKeys, storylineMeta, storylinesOn } from '@/store/storylines';
-import { isIfLine, lineName, untagged } from '@/core/storylines';
+import { isIfLine, isPendingLine, lineName, untagged } from '@/core/storylines';
 import { activePreset, ui } from './state';
 
 /** The active preset declares storylines and they are switched on. */
@@ -29,7 +29,8 @@ export function lineKeys(): string[] {
 export const forgetLineKeys = () => { memo = null; };
 
 export interface StorylineFloor { index: number; user: boolean; title: string }
-export interface StorylineEntry { key: string; name: string; main: boolean; if: boolean; current: boolean; floors: StorylineFloor[] }
+/** `pending`: a `#?` input whose reply is missing (no name yet). */
+export interface StorylineEntry { key: string; name: string; main: boolean; if: boolean; pending: boolean; current: boolean; floors: StorylineFloor[] }
 
 const TITLE_MAX = 60;
 const clip = (s: string) => {
@@ -53,7 +54,7 @@ export function storylineEntries(synopsisId?: string): StorylineEntry[] {
       const syn = synopsisId && !m.is_user ? (getSidecar(m)?.structures?.[synopsisId] as Synopsis | undefined) : undefined;
       floors.push({ index: i, user: m.is_user, title: clip(syn?.event || untagged(m)) });
     });
-    return { key, name: lineName(key, meta), main: key === '', if: isIfLine(key, meta), current: key === current, floors };
+    return { key, name: lineName(key, meta), main: key === '', if: isIfLine(key, meta), pending: isPendingLine(key), current: key === current, floors };
   }).filter((e) => e.main || e.floors.length);
 }
 

@@ -55,6 +55,8 @@ async function nameMain() {
       <div v-else-if="!hasChat" class="faint small">{{ t('memory.noChat') }}</div>
       <div v-else class="col storyline-usage xs muted">
         <span>{{ t('storylines.usage.side') }}</span>
+        <span>{{ t('storylines.usage.recent') }}</span>
+        <span>{{ t('storylines.usage.new') }}</span>
         <span>{{ t('storylines.usage.if') }}</span>
         <span>{{ t('storylines.usage.main') }}</span>
       </div>
@@ -64,7 +66,7 @@ async function nameMain() {
       <section v-for="e in entries" :key="e.key" class="card storyline-card" :class="{ current: e.current }">
         <header class="card-head clickable" @click="toggle(e.key)">
           <component :is="e.main ? Crown : GitBranch" class="section-icon" aria-hidden="true" />
-          <span class="card-title grow ellipsis">{{ e.main ? (e.name ? t('storylines.mainNamed', { name: e.name }) : t('storylines.main')) : e.name }}</span>
+          <span class="card-title grow ellipsis">{{ e.main ? (e.name ? t('storylines.mainNamed', { name: e.name }) : t('storylines.main')) : e.name || t('storylines.unnamed') }}</span>
           <span v-if="e.current" class="badge">{{ t('storylines.current') }}</span>
           <span v-if="e.if" class="badge warn">{{ t('storylines.ifLine') }}</span>
           <span class="badge neutral">{{ t('storylines.floors', { n: e.floors.length }) }}</span>
@@ -75,7 +77,7 @@ async function nameMain() {
             <template v-if="e.main">
               <button type="button" class="btn ghost" @click="nameMain"><PenLine aria-hidden="true" />{{ e.name ? t('common.rename') : t('storylines.nameMain') }}</button>
             </template>
-            <template v-else>
+            <template v-else-if="!e.pending">
               <label class="row tight small"><Switch :model-value="e.if" :label="t('storylines.ifLine')" @update:model-value="(v: boolean) => setIf(e.key, v)" />{{ t('storylines.ifLine.toggle') }}</label>
               <span class="grow" />
               <button type="button" class="btn ghost" @click="makeMain(e.key)"><Crown aria-hidden="true" />{{ t('storylines.makeMain') }}</button>

@@ -3,7 +3,7 @@ import { TextCursorInput, UserPen } from 'lucide-vue-next';
 import { fillInput } from '@/app/impersonate';
 import { t } from '@/i18n';
 
-defineProps<{ text: string }>();
+defineProps<{ text: string; mesid?: number }>();
 </script>
 
 <template>
@@ -11,7 +11,7 @@ defineProps<{ text: string }>();
     <header class="card-head">
       <UserPen class="section-icon" />
       <span class="card-title">{{ t('cards.impersonate') }}</span>
-      <button type="button" class="btn primary sm-btn" @click="fillInput(text)"><TextCursorInput />{{ t('cards.fillInput') }}</button>
+      <button type="button" class="btn primary sm-btn" @click="fillInput(text, false, mesid)"><TextCursorInput />{{ t('cards.fillInput') }}</button>
     </header>
     <div class="card-body pre">{{ text }}</div>
   </div>

@@ -15,7 +15,7 @@ const info = computed(() => {
   const key = lineKeys()[props.mesid];
   if (!key) return null;
   const meta = storylineMeta();
-  return { key, name: lineName(key, meta), if: isIfLine(key, meta) };
+  return { key, name: lineName(key, meta) || t('storylines.unnamed'), if: isIfLine(key, meta) };
 });
 </script>
 

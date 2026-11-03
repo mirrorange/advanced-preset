@@ -3,8 +3,9 @@ import type { UserOption } from '@advanced-preset/protocol';
 import { fillInput } from '@/app/impersonate';
 import { t } from '@/i18n';
 
-defineProps<{ options: UserOption[] }>();
-const choose = (o: UserOption, e: MouseEvent) => fillInput(o.content, e.ctrlKey || e.metaKey || e.shiftKey || e.altKey);
+const props = defineProps<{ options: UserOption[]; mesid?: number }>();
+// On a side storyline the option gets the message's #tag (I-160).
+const choose = (o: UserOption, e: MouseEvent) => fillInput(o.content, e.ctrlKey || e.metaKey || e.shiftKey || e.altKey, props.mesid);
 </script>
 
 <template>

@@ -151,7 +151,7 @@ const { advancedPresetInterceptor } = await import('@/core/interceptor');
 const assembler = await import('@/core/assembler');
 const { registry } = await import('@/core/context');
 const { chatLineKeys, switchMainStoryline, writeMessageLine } = await import('@/store/storylines');
-const { commitStoryline } = await import('@/app/storylines');
+const { commitStoryline, withStorylineOf } = await import('@/app/storylines');
 const { settleTurn } = await import('@/app/variable-guard');
 
 let realChat: STMessage[];
@@ -443,6 +443,21 @@ describe('storyline data', () => {
     realChat.splice(0, realChat.length, user('m1'));
     expect(await switchMainStoryline('B', 'ifOld')).toBe('switched');
     expect(metadata.advanced_preset.storylines.if).toEqual({ ifOld: false });
+  });
+
+  it('user options / impersonated replies get the #tag of a side storyline (I-160)', () => {
+    state.preset = withStorylines();
+    state.config = resolveConfiguration(state.preset, 'other', {});
+    realChat.splice(0, realChat.length, user('m1'), ai('M1', ''), user('c1 #cellar'), ai('C1', 'cellar'), user('x #?'));
+    expect(withStorylineOf('Open the door. ', 3)).toBe('Open the door. #cellar');
+    expect(withStorylineOf('Open the door.', 1)).toBe('Open the door.');
+    expect(withStorylineOf('Go #elsewhere', 3)).toBe('Go #elsewhere');
+    // a #? input still without a reply has no name to give
+    expect(withStorylineOf('Go')).toBe('Go');
+    realChat.pop();
+    expect(withStorylineOf('Go')).toBe('Go #cellar');
+    state.config.storylines = { enabled: false, freezeVariables: true };
+    expect(withStorylineOf('Go')).toBe('Go');
   });
 
   it('writes the storyline of the current swipe', () => {

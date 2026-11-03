@@ -99,7 +99,7 @@ const data = computed(() => {
             message: { id: mesId, streaming: v.running, editable },
             preset: { id: preset.id, name: presetName(preset), version: preset.version }, lang: locale(),
             setValue: async (next) => (editable ? setStructure(mesId, id, next) : false),
-            fillInput: (text, send) => fillInput(String(text ?? ''), Boolean(send)),
+            fillInput: (text, send) => fillInput(String(text ?? ''), Boolean(send), mesId),
           },
         });
         break;
@@ -120,8 +120,8 @@ const data = computed(() => {
   <div v-if="data?.items.length" class="cards" :class="`cards-${position}`">
     <template v-for="c in data.items" :key="c.id">
       <ReplyCard v-if="c.type === 'reply'" :text="c.text" :name="data.narrator" :color="data.color" />
-      <ImpersonateCard v-else-if="c.type === 'impersonate'" :text="c.text" />
-      <OptionsCard v-else-if="c.type === 'options'" :options="c.options" />
+      <ImpersonateCard v-else-if="c.type === 'impersonate'" :text="c.text" :mesid="mesid" />
+      <OptionsCard v-else-if="c.type === 'options'" :options="c.options" :mesid="mesid" />
       <SynopsisCard v-else-if="c.type === 'synopsis'" :synopsis="c.synopsis" :editable="data.editable" @save="(v) => setStructure(mesid, c.id, v)" />
       <StatusCard v-else-if="c.type === 'status'" :status="c.status" :editable="data.editable" @save="(v) => setStructure(mesid, c.id, v)" />
       <MemoryCard v-else-if="c.type === 'memory'" :events="c.events" :preset="data.preset" />

@@ -1,13 +1,20 @@
 /**
  * Storyline changes of the app: switching the main storyline from the storyline panel (I-147; an
  * unnamed main storyline with messages needs a name first: the user is asked, cancelling keeps
- * everything as is), and what a received reply does to the storylines (I-159).
+ * everything as is), what a received reply does to the storylines (I-159), and the storyline tag of
+ * text put into the input box (I-160).
  */
-import { storylineNameFrom, uniqueStorylineName, type StorylineNaming } from '@advanced-preset/protocol';
+import { parseStorylineTag, storylineNameFrom, uniqueStorylineName, withStorylineTag, type StorylineNaming } from '@advanced-preset/protocol';
 import { escapeHtml, inputPopup, st, toast } from '@/st/host';
 import { t } from '@/i18n';
-import { keepNormalLine, markSwitched, nameMainStoryline, storylineMeta, switchMainStoryline, takenStorylineNames, validStorylineName, writeMessageLine } from '@/store/storylines';
-import type { StorylineTurn } from '@/core/storylines';
+import { settings } from '@/store/settings';
+import { getPreset } from '@/store/presets';
+import { activeConfiguration } from '@/store/config';
+import { activeCarrierPresetId } from '@/store/carrier';
+import {
+  chatLineKeys, keepNormalLine, markSwitched, nameMainStoryline, storylineMeta, storylinesOn, switchMainStoryline, takenStorylineNames, validStorylineName, writeMessageLine,
+} from '@/store/storylines';
+import { isPendingLine, type StorylineTurn } from '@/core/storylines';
 
 /** Makes `target` the main storyline (panel), asking for the old main storyline's name when needed. `false`: not switched. */
 export async function switchMainInteractive(target: string): Promise<boolean> {
@@ -69,4 +76,21 @@ export async function commitStoryline(mesId: number, turn: StorylineTurn, value:
   if (n.naming && turn.input >= 0) markSwitched(turn.input);
   writeMessageLine(mesId, '');
   if (res === 'switched') toast('success', t('storylines.switched', { name: target }), t('app.name'));
+}
+
+/**
+ * `text` tagged with the storyline of message `mesId` (default: the last message) when that is a
+ * storyline other than the main one and `text` has no tag of its own (I-160): what user options and
+ * impersonated replies put into the input box stays on the storyline they were written for.
+ */
+export function withStorylineOf(text: string, mesId?: number): string {
+  if (!settings().enabled) return text;
+  const id = activeCarrierPresetId();
+  const preset = id ? getPreset(id) : undefined;
+  if (!preset || !storylinesOn(preset, activeConfiguration(preset))) return text;
+  if (parseStorylineTag(text)) return text;
+  const keys = chatLineKeys();
+  const key = keys[mesId ?? keys.length - 1];
+  if (!key || isPendingLine(key)) return text;
+  return withStorylineTag(text.trimEnd(), key);
 }
