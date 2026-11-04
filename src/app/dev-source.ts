@@ -49,19 +49,23 @@ async function poll(): Promise<void> {
   }
 }
 
-function schedule(): void {
+/** Resolves after the first poll. */
+function schedule(): Promise<void> {
   if (timer) clearTimeout(timer);
   timer = null;
   if (!settings().dev.enabled) {
     if (devSource.presetId) setDevPreset(null, devSource.presetId);
     Object.assign(devSource, { status: 'off', presetId: '', hash: '', error: '' });
-    return;
+    return Promise.resolve();
   }
   if (devSource.status === 'off') devSource.status = 'connecting';
   const loop = async () => { await poll(); if (settings().dev.enabled) timer = setTimeout(loop, INTERVAL_MS); };
-  void loop();
+  return loop();
 }
 
-export function startDevSource(): void {
-  watch(() => [settings().dev.enabled, settings().dev.url], () => { devSource.hash = ''; schedule(); }, { immediate: true });
+/** Starts polling; resolves after the first poll (at once when the dev source is off). */
+export function startDevSource(): Promise<void> {
+  let first = Promise.resolve();
+  watch(() => [settings().dev.enabled, settings().dev.url], () => { devSource.hash = ''; first = schedule(); }, { immediate: true });
+  return first;
 }
