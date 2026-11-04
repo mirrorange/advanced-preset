@@ -64,3 +64,20 @@ describe('Carrier rebuild', () => {
     expect(pm.saves).toHaveLength(1);
   });
 });
+
+describe('Carrier regex scripts', () => {
+  const script = { id: '00000000-0000-4000-8000-000000000000', scriptName: 'Hide', findRegex: '/x/g', replaceString: '', trimStrings: [], placement: [2], disabled: false, markdownOnly: true, promptOnly: false, runOnEdit: true, substituteRegex: 0, minDepth: null, maxDepth: null };
+
+  it('writes the preset regex scripts as ST preset-scoped scripts', () => {
+    const p = { ...cloneData(petals), regexScripts: [script] };
+    const body = buildCarrier(p, resolveConfiguration(p, 'other', {}));
+    expect((body.extensions as any).regex_scripts).toEqual([script]);
+    (body.extensions as any).regex_scripts[0].disabled = true;
+    expect(p.regexScripts[0]!.disabled).toBe(false);
+  });
+
+  it('adds no regex_scripts field without scripts', () => {
+    const p = { ...cloneData(petals), regexScripts: undefined };
+    expect('regex_scripts' in (buildCarrier(p, resolveConfiguration(p, 'other', {})).extensions as object)).toBe(false);
+  });
+});

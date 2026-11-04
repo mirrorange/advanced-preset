@@ -9,6 +9,8 @@ import type { Expr } from './expr';
 import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
 import type { InputShaping } from './input-shaping';
 import type { StorylineConfig, StorylinesDecl } from './storylines';
+import type { RegexScript } from './regex-scripts';
+import type { QuickReplySetDecl, QuickReplySetLocale } from './quick-replies';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -516,6 +518,8 @@ export interface LocaleTable {
   userModules?: Record<string, { name?: string }>;
   userModuleTemplates?: Record<string, { name?: string; description?: string }>;
   vars?: Record<string, { label?: string; description?: string }>;
+  /** Quick Reply sets by set id: `qrList.<reply id>` → `label` `title` `message`. */
+  quickReplySets?: Record<string, QuickReplySetLocale>;
   [key: string]: unknown;
 }
 
@@ -571,6 +575,10 @@ export interface APreset {
   workflows: Workflow[];
   structures: Record<string, StructureDecl>;
   regex: RegexDecl[];
+  /** SillyTavern regex scripts written into the Carrier (`regex-scripts/`; absent → none). */
+  regexScripts?: RegexScript[];
+  /** SillyTavern Quick Reply sets installed while the preset is active (`quick-replies/`; absent → none). */
+  quickReplySets?: QuickReplySetDecl[];
   meta: MetaDecl;
   tokenSaving: TokenSavingDecl;
   syntheticTurns: SyntheticTurn[];

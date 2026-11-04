@@ -54,6 +54,8 @@ export interface APSettings {
   };
   dev: { url: string; enabled: boolean };
   debug: { keepRequests: number };
+  /** Quick Reply sets AP wrote, by ST set name: the preset they belong to and the fingerprint of what was written. */
+  quickReplies?: Record<string, { presetId: string; hash: string }>;
 }
 
 const defaults = (): APSettings => ({

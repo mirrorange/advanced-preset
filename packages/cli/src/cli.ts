@@ -79,7 +79,7 @@ async function main(argv: string[]): Promise<number> {
       const failed = !diag.ok || (values.strict && diag.warnings.length > 0);
       if (failed || !preset) return 1;
       if (command === 'check') {
-        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}`);
+        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ''}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ''}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? 'dist'));

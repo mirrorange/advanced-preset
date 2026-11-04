@@ -40,6 +40,8 @@
 | 用户模组模板 | user module template | 预设附带的示例用户模组（`user-module-templates/`），新建“我的模组”时可以从它开始 |
 | 随预设安装的用户模组 | bundled user module | 写在预设 `user-modules/` 中、安装预设时放进“我的模组”的用户模组；之后归用户所有 |
 | 我的模组 | user module | 用户在面板上写的模组 |
+| 正则脚本 | regex script，`regex-scripts/` | 预设携带的 ST 正则脚本，写入 Carrier，选中预设时由 ST 执行；与只做判断的正则标记 `regex` 不同 |
+| 快速回复集 | Quick Reply set，`quick-replies/` | 预设携带的 ST 快速回复集，选中预设时加入全局列表，换预设时移除 |
 | 推荐配置 | recommended configuration | 预设提供的一套设定，如“Gemini” |
 | 示范轮次 | synthetic turn | 工具模式下放在请求末尾的一轮虚拟工具调用，示范工具用法 |
 | Carrier | carrier | AP 为每个预设生成的 ST 预设（`AP · <预设名>`），负责放置原生内容与区域 |

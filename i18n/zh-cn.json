@@ -1,6 +1,7 @@
 {
   "app.name": "Advanced Preset",
   "carrier.reset": "预设已更新，「{name}」中的手动修改已被重置。",
+  "quickReplies.conflict": "已存在名为「{name}」的快速回复集且不是由 Advanced Preset 创建的，因此未安装预设中的同名快速回复集。将你的快速回复集改名后即可使用。",
   "error.toolsUnsupported": "当前 API 源或设置不支持工具调用。请切换传输模式或选择其他推荐配置。",
   "error.emptyTurn": "模型没有返回正文。",
   "update.reloading": "Advanced Preset 已更新，正在重新加载…",
@@ -353,6 +354,8 @@
   "trust.declined": "已取消：未信任其中的代码。",
   "warn.template": "模板运行出错，已从提示词中略去：{error}",
   "common.listSeparator": "、",
+  "trust.qrTitle": "此预设包含自动执行的快速回复",
+  "trust.qrBody": "「{name}」带有 {n} 个无需点击即会执行的快速回复（启动时、收到消息时、由世界书触发……）。其中的命令（STscript）与任何快速回复一样，可以发送消息、修改你的聊天与设置。",
   "trust.uiTitle": "此预设包含自定义界面组件",
   "trust.uiBody": "「{name}」为 {n} 个结构提供了自己的卡片组件（{list}），会显示在聊天消息中。组件是预设附带的代码（EJS 模板或 JavaScript 模块），在浏览器中运行，拥有与扩展相同的权限（可以访问你的聊天、设置与 API 连接）。",
   "trust.uiRisk": "仅在信任该预设的来源时启用。不启用时这些组件不会显示，之后可在「配置 → 自定义 UI」中开启。代码如下：",

@@ -197,6 +197,36 @@ export function responseFamily(ctx: StreamContext): WireFamily {
   return ordered.find((f) => reads(PROBES.find(([x]) => x === f)![1])) ?? guess;
 }
 
+/** A Quick Reply set object of ST's Quick Reply extension (`QuickReplySet`), as far as AP uses it. */
+export interface QrSet {
+  name: string;
+  disableSend: boolean;
+  placeBeforeInput: boolean;
+  injectInput: boolean;
+  color: string;
+  onlyBorderColor: boolean;
+  qrList: { unrender?(): void; unrenderSettings?(): void }[];
+  /** Adds a reply from its JSON (ST numbers it and saves the set). */
+  addQuickReply(data: Record<string, unknown>): unknown;
+  save(): Promise<void> | void;
+  rerender?(): void;
+  updateColor?(): void;
+}
+
+/** ST's `globalThis.quickReplyApi` (Quick Reply extension), as far as AP uses it. */
+export interface QuickReplyApi {
+  getSetByName(name: string): QrSet | undefined;
+  createSet(name: string, props?: { disableSend?: boolean; placeBeforeInput?: boolean; injectInput?: boolean }): Promise<QrSet>;
+  deleteSet(name: string): Promise<void>;
+  addGlobalSet(name: string, isVisible?: boolean): void;
+  removeGlobalSet(name: string): void;
+  listGlobalSets(): string[];
+  settingsUi?: { rerender?(): void };
+}
+
+/** The Quick Reply extension's API, when the extension is loaded. */
+export const quickReplyApi = (): QuickReplyApi | undefined => (globalThis as any).quickReplyApi ?? undefined;
+
 /** Escape text for HTML popups. */
 export const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
