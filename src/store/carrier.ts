@@ -8,7 +8,7 @@
 import { cloneData, TAVERN_HELPER_FIELD } from '@advanced-preset/protocol';
 import type { APreset, Configuration } from '@advanced-preset/protocol';
 import { confirmPopup, escapeHtml, st, toast, type PresetManager } from '@/st/host';
-import { carrierTavernHelper, tavernHelperScriptsChanged } from './tavern-helper';
+import { carrierTavernHelper, tavernHelperCode, tavernHelperScriptsChanged } from './tavern-helper';
 import { presetState, activeConfiguration, updateConfiguration } from './config';
 import { save } from './settings';
 import { t } from '@/i18n';
@@ -20,6 +20,21 @@ export interface CarrierMeta {
   hash: string;
   /** Ids of the Tavern Helper scripts and folders written from the preset (absent: none). */
   tavernHelperScripts?: string[];
+  /** Fingerprints of their code as written now, and as written by the previous rebuild that changed it. */
+  tavernHelperCode?: string;
+  tavernHelperPrevious?: string;
+}
+
+/**
+ * Tavern Helper keeps the scripts it loaded and saves them back with its variables; after a rebuild
+ * of the Carrier in use (until the page is reloaded) that restores the previous code. Exactly the
+ * previous code means such a write-back (the user's own edits are left alone).
+ */
+function tavernHelperReverted(current: Record<string, any> | undefined): boolean {
+  const meta = current?.extensions?.[CARRIER_EXT] as CarrierMeta | undefined;
+  if (!meta?.tavernHelperPrevious || !meta.tavernHelperScripts) return false;
+  const code = tavernHelperCode(current!.extensions[TAVERN_HELPER_FIELD], meta.tavernHelperScripts);
+  return code === meta.tavernHelperPrevious && code !== meta.tavernHelperCode;
 }
 
 /** Preset keys whose `oai_settings` name differs (ST `settingsToUpdate`). */
@@ -58,7 +73,13 @@ export function buildCarrier(preset: APreset, config: Configuration, current?: R
   const order = preset.carrier.prompt_order.map((o) => ({ ...o }));
   const prevMeta = current?.extensions?.[CARRIER_EXT] as CarrierMeta | undefined;
   const th = carrierTavernHelper(preset.tavernHelperScripts, current?.extensions?.[TAVERN_HELPER_FIELD], prevMeta?.presetId === preset.id ? prevMeta.tavernHelperScripts : undefined);
-  const meta: CarrierMeta = { presetId: preset.id, version: preset.version, hash: preset.hash, ...(th.owned.length ? { tavernHelperScripts: th.owned } : {}) };
+  const meta: CarrierMeta = { presetId: preset.id, version: preset.version, hash: preset.hash };
+  if (th.owned.length) {
+    const code = tavernHelperCode(th.data, th.owned);
+    const before = prevMeta?.presetId === preset.id ? prevMeta : undefined;
+    const previous = before?.tavernHelperCode !== undefined && before.tavernHelperCode !== code ? before.tavernHelperCode : before?.tavernHelperPrevious;
+    Object.assign(meta, { tavernHelperScripts: th.owned, tavernHelperCode: code }, previous ? { tavernHelperPrevious: previous } : {});
+  }
   return {
     ...cloneData(config.sampling),
     prompts: cloneData(preset.carrier.prompts),
@@ -111,7 +132,7 @@ export async function ensureCarrier(preset: APreset, opts: { select?: boolean; f
   const name = existing ?? carrierName(preset);
   const current = existing ? m.getCompletionPresetByName(existing) : undefined;
   const meta = current?.extensions?.[CARRIER_EXT] as CarrierMeta | undefined;
-  const stale = !current || opts.force || meta?.hash !== preset.hash;
+  const stale = !current || opts.force || meta?.hash !== preset.hash || tavernHelperReverted(current);
   // ST builds prompts from the applied settings, not from the saved preset: a rebuilt Carrier that
   // is in use must be applied again, or new region anchors (prompts / prompt_order) are missing.
   const inUse = Boolean(existing) && m.getSelectedPresetName() === existing;
@@ -137,10 +158,12 @@ export async function ensureCarrier(preset: APreset, opts: { select?: boolean; f
  * is saved again: after rewriting the scripts of the Carrier in use, offer to reload the page (until
  * then Tavern Helper runs, and may save back, the old scripts).
  */
+let reloadOffered = false;
 function askReloadForTavernHelper(name: string): void {
-  if (!('TavernHelper' in globalThis)) return;
+  if (!('TavernHelper' in globalThis) || reloadOffered) return;
+  reloadOffered = true;
   void confirmPopup(`<p>${escapeHtml(t('carrier.tavernHelper.reload', { name }))}</p>`, t('carrier.tavernHelper.reloadNow'), t('common.later'))
-    .then((ok) => { if (ok) location.reload(); });
+    .then((ok) => { reloadOffered = false; if (ok) location.reload(); });
 }
 
 export async function activatePreset(preset: APreset): Promise<void> {

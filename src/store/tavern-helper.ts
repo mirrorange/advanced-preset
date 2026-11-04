@@ -64,3 +64,20 @@ export function tavernHelperScriptsChanged(before: unknown, after: unknown): boo
     : []);
   return scripts(before) !== scripts(after);
 }
+
+/**
+ * Fingerprint of the code of the given scripts in `data` (by id, in order; missing → null). Used to
+ * tell Tavern Helper's write-back of a stale copy (exactly the code AP wrote last time) from the
+ * user's own edits.
+ */
+export function tavernHelperCode(data: unknown, ids: readonly string[]): string {
+  const content = new Map<string, unknown>();
+  for (const t of isObj(data) && Array.isArray(data.scripts) ? data.scripts.filter(isObj) : []) {
+    content.set(String(t.id), t.content ?? null);
+    for (const s of Array.isArray(t.scripts) ? t.scripts.filter(isObj) : []) content.set(String(s.id), s.content ?? null);
+  }
+  const s = JSON.stringify(ids.map((id) => content.get(id) ?? null));
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193) >>> 0;
+  return h.toString(16);
+}

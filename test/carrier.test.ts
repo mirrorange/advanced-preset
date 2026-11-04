@@ -132,6 +132,42 @@ describe('Carrier Tavern Helper scripts', () => {
     expect(th(buildCarrier(petals, resolveConfiguration(petals, 'other', {}), current))).toEqual({ scripts: [script('user')], variables: { x: 1 } });
   });
 
+  describe('Tavern Helper write-back of stale scripts', () => {
+    const name = carrierName(petals);
+    const listed = () => pm.m.getCompletionPresetByName(name)!;
+    const setup = async () => {
+      pm = manager('Default');
+      const v1 = withScripts([script('a', { content: 'v1()' })], 'v1');
+      await pm.m.savePreset(name, buildCarrier(v1, resolveConfiguration(v1, 'other', {})), { skipUpdate: true });
+      await ensureCarrier(withScripts([script('a', { content: 'v2()' })]));
+      expect(th(listed()).scripts[0].content).toBe('v2()');
+    };
+    // As Tavern Helper saves its copy: into the listed preset object (the metadata stays).
+    const writeBack = (content: string) => { th(listed()).scripts[0] = script('a', { content, data: { saved: 1 } }); };
+
+    it('restores the code when the previous code was written back, keeping the data', async () => {
+      await setup();
+      writeBack('v1()');
+      const saves = pm.saves.length;
+      await ensureCarrier(withScripts([script('a', { content: 'v2()' })]));
+      expect(pm.saves.length).toBe(saves + 1);
+      expect(th(listed()).scripts[0]).toMatchObject({ content: 'v2()', data: { saved: 1 } });
+      // And again, should it happen twice in a session.
+      writeBack('v1()');
+      await ensureCarrier(withScripts([script('a', { content: 'v2()' })]));
+      expect(th(listed()).scripts[0].content).toBe('v2()');
+    });
+
+    it('leaves the user\'s own edits alone', async () => {
+      await setup();
+      writeBack('mine()');
+      const saves = pm.saves.length;
+      await ensureCarrier(withScripts([script('a', { content: 'v2()' })]));
+      expect(pm.saves.length).toBe(saves);
+      expect(th(listed()).scripts[0].content).toBe('mine()');
+    });
+  });
+
   describe('reload offer', () => {
     let asked: string[];
     const reload = vi.fn();
@@ -157,6 +193,19 @@ describe('Carrier Tavern Helper scripts', () => {
       await install(carrierName(petals), [script('a')], [script('a', { content: 'v2()' })]);
       expect(asked).toHaveLength(1);
       expect(asked[0]).toContain(carrierName(petals));
+    });
+
+    it('asks once while an offer is open', async () => {
+      let answer!: (r: number) => void;
+      const ctx = (globalThis as any).SillyTavern.getContext();
+      ctx.callGenericPopup = (html: string) => { asked.push(html); return new Promise<number>((r) => { answer = r; }); };
+      await install(carrierName(petals), [script('a')], [script('a', { content: 'v2()' })]);
+      await ensureCarrier(withScripts([script('a', { content: 'v3()' })], 'v3'));
+      expect(asked).toHaveLength(1);
+      answer(0);
+      await new Promise((r) => setTimeout(r));
+      await ensureCarrier(withScripts([script('a', { content: 'v4()' })], 'v4'));
+      expect(asked).toHaveLength(2);
     });
 
     it('does not ask when the Carrier is not in use, or only the preset changed', async () => {
