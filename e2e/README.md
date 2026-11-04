@@ -15,6 +15,7 @@ node e2e/run.mjs memory                              # memory follows message ve
 node e2e/run.mjs storylines-gen                      # side-story turns under each freeze mode: Petals' independent-state instruction only when frozen (after carrier)
 node e2e/run.mjs storylines                          # storylines tab toolbar (visibility, rename), freeze mode, tab gone when off (after carrier)
 node e2e/run.mjs quick-replies                      # Petals' Quick Reply set: in the global list with the Carrier, gone with another preset; buttons append / send (fresh ST)
+node e2e/run.mjs tavern-helper-scripts               # needs Tavern Helper in ST and `ap dev --port 4747` on a Petals copy with tavern-helper-scripts/ (see the step): Tavern Helper asks, runs; rebuild keeps data and offers a reload; write-back repaired
 node e2e/run.mjs regex-scripts                      # needs `ap dev --port 4747` on a Petals copy with regex-scripts/: scripts reach the Carrier, ST asks, then runs them
 AP_THEMES=Azure,Cappuccino node e2e/run.mjs theme        # panel over ST themes: drawer content hidden, panel transparent (I-122)
 ```
