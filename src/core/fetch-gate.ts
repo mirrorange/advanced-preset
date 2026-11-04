@@ -1,11 +1,13 @@
 /**
  * FetchGate (§5.3): wraps `window.fetch` and only takes over POSTs to the chat-completions generate
  * endpoint whose body carries `__ap_gen_id` (set at CHAT_COMPLETION_SETTINGS_READY). Everything
- * else — including AP's own internal requests, which use the saved original — passes through.
+ * else — including AP's own internal requests, which use the saved original — passes through
+ * (ST's extension branch switch is observed on the way, see `onExtensionFetch`).
  */
 import { registry } from './context';
 import { GENERATE_URL, orchestrate } from './orchestrator';
 import { setNativeFetch } from '@/st/host';
+import { onExtensionFetch } from '@/app/updater';
 
 export const MARKER = '__ap_gen_id';
 
@@ -36,7 +38,9 @@ export function installFetchGate(): void {
       }
       if (body) { delete body[MARKER]; init = { ...init, body: JSON.stringify(body) }; }
     }
-    return original.call(globalThis, input, init);
+    const response = await original.call(globalThis, input, init);
+    if (init?.method === 'POST') onExtensionFetch(urlOf(input), init, response);
+    return response;
   };
   (gated as { __apGate?: boolean }).__apGate = true;
   globalThis.fetch = gated as typeof fetch;
