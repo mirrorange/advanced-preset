@@ -5,6 +5,7 @@
 import type { APreset, Assembly, Configuration, Stage, StructureDecl, Transport, Workflow } from '@advanced-preset/protocol';
 import type { KeywordTexts, MetaParse } from '@advanced-preset/protocol';
 import type { CacheState, StickyEntry } from './cache';
+import type { StorylineTurn } from './storylines';
 
 export type Origin = 'story' | 'task';
 
@@ -39,6 +40,8 @@ export interface GenerationContext {
   input?: { texts: string[] };
   /** Input shaping applied at PROMPT_READY (`input.shaped`). */
   inputShaped?: boolean;
+  /** Storylines (presets that declare them, switched on): the current storyline and the history groups. */
+  storylines?: StorylineTurn;
   /** Set once FetchGate took over the request. */
   claimed?: boolean;
   warnings: string[];

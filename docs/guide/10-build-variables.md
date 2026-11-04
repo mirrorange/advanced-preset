@@ -110,4 +110,4 @@ Choose the 2–3 most relevant:
 
 只有一个模组用到的内容，直接写在模组里就好。
 
-下一章：[推荐配置、插入点与界面翻译](11-configs-and-extension.md)。
+下一章：[推荐配置、插入点、快速回复与界面翻译](11-configs-and-extension.md)。

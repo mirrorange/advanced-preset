@@ -226,6 +226,8 @@ export interface ObjectOptions {
   openKey?: string;
   /** Field name of a stage (defaults to the default template). */
   fieldOf?: (stage: Stage) => string;
+  /** Field name of a structure this turn (defaults to `StructureDecl.field`; ordering-prefixed presets differ per turn). */
+  structureFieldOf?: (decl: StructureDecl) => string;
 }
 
 /** Parse a turn object (structured output / single tool arguments). */
@@ -242,6 +244,16 @@ export function parseTurnObject(obj: Record<string, unknown> | null | undefined,
     }
     return undefined;
   };
+  const structureFieldOf = o.structureFieldOf ?? ((d: StructureDecl) => d.field);
+  const stageKeys = new Set(o.stages.map(fieldOf));
+  /** Exact name, the bare field, or a key that only differs in its prefix (`2_status` for `3_status`). */
+  const findStructureKey = (d: StructureDecl): unknown => {
+    const name = structureFieldOf(d);
+    if (name in src) return src[name];
+    if (d.field in src) return src[d.field];
+    const k = Object.keys(src).find((x) => !stageKeys.has(x) && x.endsWith(`_${d.field}`));
+    return k ? src[k] : undefined;
+  };
   let lastPresent: string | null = null;
   for (const s of o.stages) {
     const v = findKey(fieldOf(s), s);
@@ -252,10 +264,10 @@ export function parseTurnObject(obj: Record<string, unknown> | null | undefined,
   }
   for (const d of o.structures) {
     if (isInlineStructure(d)) continue;
-    const v = findKey(d.field);
+    const v = findStructureKey(d);
     const n = normalizeStructure(d.kind, v, d);
     if (n !== undefined) r.structures[d.id] = n;
-    if (!o.final && o.openKey === d.field) r.openStructures.push(d.id);
+    if (!o.final && o.openKey !== undefined && (o.openKey === structureFieldOf(d) || o.openKey === d.field)) r.openStructures.push(d.id);
   }
   const terminal = terminalContentIndex(o.stages);
   if (!o.final) {

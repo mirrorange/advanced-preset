@@ -4,6 +4,7 @@ import { compile, type SourceTree } from '../src/compile';
 import { validate } from '../src/validate';
 import { Diagnostics } from '../src/diagnostics';
 import { compileContent, parseMarkdown } from '../src/markdown';
+import { isSourcePath } from '../src/io';
 
 const MANIFEST = `
 id: demo
@@ -320,10 +321,106 @@ tools:
     expect(diag.errors).toEqual([]);
     expect(preset!.structures.annotations).toMatchObject({ kind: 'annotations', history: 2, formatPrompt: { tag: 'Use {==x==}{>>y<<}.', field: 'Use {==x==}{>>y<<}.' } });
     const bad = tree();
-    bad.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, history: -1 }\n  options: { kind: options, history: 1 }\n'));
-    const msgs = build(bad).diag.errors.map((e) => e.message).join('\n');
-    expect(msgs).toMatch(/history` must be a non-negative integer/);
-    expect(msgs).toMatch(/only annotations and synopsis structures support `history`/);
+    bad.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, history: -1 }\n'));
+    expect(build(bad).diag.errors.map((e) => e.message).join('\n')).toMatch(/annotations take a number/);
+    const obj = tree();
+    obj.set('preset.yaml', MANIFEST.replace('structures:\n', 'structures:\n  annotations: { kind: annotations, history: { depth: 2 } }\n'));
+    expect(build(obj).diag.errors.map((e) => e.message).join('\n')).toMatch(/annotations take a number/);
+  });
+});
+
+describe('structure layout (I-134 – I-137)', () => {
+  const STATUS = '  status: { kind: status, ui: { position: top }, order: { before: "@content" }, properties: { weather: Sky }, formatPrompt: { tag: "<status/>", field: "Fill `{{field}}`." } }\n';
+  const layoutTree = (opts: { tools?: string; structures?: string; stages?: string; front?: string; min?: string; extra?: Record<string, string> } = {}) => {
+    const t = tree(opts.extra);
+    let m = MANIFEST.replace('structures:\n', `structures:\n${opts.structures ?? ''}`);
+    m += `minAdvancedPreset: ${opts.min ?? '1.10.0'}\n${opts.tools ?? ''}`;
+    t.set('preset.yaml', m);
+    let wf = t.get('workflows/linear.md')!;
+    if (opts.stages) wf = wf.replace(/stages:\n(  - .*\n)+/, `stages:\n${opts.stages}`);
+    if (opts.front) wf = wf.replace('---\n<!--', `${opts.front}---\n<!--`);
+    t.set('workflows/linear.md', wf);
+    return build(t);
+  };
+  const msgs = (xs: { message: string }[]) => xs.map((x) => x.message).join('\n');
+
+  it('compiles tools.orderPrefix and keeps {{field}} for the runtime', () => {
+    const { preset, diag } = layoutTree({ tools: 'tools:\n  orderPrefix: true\n  turn: { field: "{{stage}}" }\n', structures: STATUS });
+    expect(msgs(diag.errors)).toBe('');
+    expect(msgs(diag.warnings)).not.toMatch(/sorts before/);
+    const p = preset!;
+    expect(p.tools.orderPrefix).toBe('{{n}}_');
+    expect(p.tools.structurePrefix).toBe('');
+    expect(p.structures.status).toMatchObject({ kind: 'status', field: 'status', order: { before: '@content' }, ui: { position: 'top' }, formatPrompt: { field: 'Fill `{{field}}`.' } });
+    expect(p.structures.reply!.field).toBe('reply');
+  });
+
+  it('validates orderPrefix templates and ignores structurePrefix with a warning', () => {
+    expect(msgs(layoutTree({ tools: 'tools:\n  orderPrefix: "step_"\n' }).diag.errors)).toMatch(/must contain `\{\{n\}\}`/);
+    expect(msgs(layoutTree({ tools: 'tools:\n  orderPrefix: "{{n}}-"\n' }).diag.errors)).toMatch(/may only hold/);
+    const r = layoutTree({ tools: 'tools:\n  orderPrefix: "s{{n}}_"\n  structurePrefix: z_\n  turn: { field: "{{stage}}" }\n' });
+    expect(msgs(r.diag.warnings)).toMatch(/structurePrefix is ignored/);
+    expect(r.preset!.tools.orderPrefix).toBe('s{{n}}_');
+  });
+
+  it('compiles stage order and workflow structures.order, checking references', () => {
+    const ok = layoutTree({
+      tools: 'tools:\n  orderPrefix: true\n',
+      structures: STATUS,
+      stages: '  - { id: plan, actor: narrator, kind: text, label: Plan, order: 10 }\n  - { id: final, actor: narrator, kind: content, label: Write, order: 20 }\n',
+      front: 'structures:\n  order: { status: { after: plan }, reply: 15 }\n',
+    });
+    expect(msgs(ok.diag.errors)).toBe('');
+    const wf = ok.preset!.workflows.find((w) => w.id === 'linear')!;
+    expect(wf.stages.map((s) => s.order)).toEqual([10, 20]);
+    expect(wf.structureOrder).toEqual({ status: { after: 'plan' }, reply: 15 });
+    const bad = layoutTree({
+      structures: STATUS,
+      stages: '  - { id: plan, actor: narrator, kind: text, label: Plan, order: 200 }\n  - { id: final, actor: narrator, kind: content, label: Write }\n',
+      front: 'structures:\n  order: { status: { after: nowhere }, reply: "sideways", ghost: 5 }\n',
+    });
+    const e = msgs(bad.diag.errors);
+    expect(e).toMatch(/stage final: order 200 must be greater/);
+    expect(e).toMatch(/unknown stage `nowhere`/);
+    expect(e).toMatch(/order must be a number or/);
+    expect(msgs(bad.diag.warnings)).toMatch(/structures.order: unknown structure `ghost`/);
+  });
+
+  it('allows a single status structure with ::last and its sub-fields', () => {
+    const r = layoutTree({ tools: 'tools:\n  orderPrefix: true\n', structures: STATUS + '  status2: { kind: status, properties: { mood: x } }\n', extra: { 'modules/s.md': '---\nid: s\nregion: top\nstructures: [status]\n---\n{{ap::structure::status}} {{ap::structure::status::last}}\n' } });
+    const e = msgs(r.diag.errors);
+    expect(e).toMatch(/only one structure of kind status/);
+    expect(e).toMatch(/status has no sub-field `mood`/);
+    expect(e).not.toMatch(/::last/);
+  });
+
+  it('compiles custom structure components from inline text and ui/ files', () => {
+    const r = layoutTree({
+      structures: '  card: { kind: custom, ui: { position: bottom, order: 50, template: ./ui/card.ejs, style: "b { color: red }" } }\n  mod: { kind: custom, ui: { module: "export function mount() {}" } }\n',
+      extra: { 'ui/card.ejs': '<b><%= value %></b>\n' },
+    });
+    expect(msgs(r.diag.errors)).toBe('');
+    expect(r.preset!.structures.card!.ui).toEqual({ position: 'bottom', order: 50, template: '<b><%= value %></b>\n', style: 'b { color: red }' });
+    expect(r.preset!.structures.mod!.ui!.module).toMatch(/mount/);
+    const bad = layoutTree({ structures: '  card: { kind: custom, ui: { position: left, template: ./ui/missing.ejs, module: ./other.js } }\n  options: { kind: options, ui: { template: x } }\n' });
+    const e = msgs(bad.diag.errors);
+    expect(e).toMatch(/ui.position must be top \| bottom/);
+    expect(e).toMatch(/file `ui\/missing.ejs` not found/);
+    expect(e).toMatch(/component files live under ui\//);
+    expect(e).toMatch(/only custom structures bring their own component/);
+    const broken = layoutTree({ structures: '  card: { kind: custom, ui: { template: "<% if (x) { %>" } }\n  mod: { kind: custom, ui: { module: "function mount() {}" } }\n' });
+    expect(msgs(broken.diag.errors)).toMatch(/structure card: ui.template:/);
+    expect(msgs(broken.diag.warnings)).toMatch(/structure mod: ui.module exports nothing/);
+  });
+
+  it('warns when layout features need a newer Advanced Preset', () => {
+    const r = layoutTree({ min: '1.9.0', tools: 'tools:\n  orderPrefix: true\n', structures: STATUS });
+    expect(msgs(r.diag.warnings)).toMatch(/tools.orderPrefix, structure order, status structures, structure ui need Advanced Preset 1.10.0/);
+  });
+
+  it('checks the alphabetical order of explicitly placed legacy structures', () => {
+    const r = layoutTree({ structures: STATUS, tools: 'tools:\n  turn: { field: "{{stage}}" }\n  structurePrefix: ""\n', stages: '  - { id: a_plan, actor: narrator, kind: text, label: Plan }\n  - { id: b_final, actor: narrator, kind: content, label: Write }\n' });
+    expect(msgs(r.diag.warnings)).toMatch(/structure field `status` sorts after stage field `b_final`/);
   });
 });
 
@@ -712,13 +809,67 @@ configurationDefaults:
 
   it('flags bad values', () => {
     const r = build(tree({ 'preset.yaml': MANIFEST
-      .replace('structures:\n', 'structures:\n  synopsis: { kind: synopsis, history: -1, historyTemplate: "{{time}}" }\n  options: { kind: options, history: 2 }\n')
+      .replace('structures:\n', 'structures:\n  synopsis: { kind: synopsis, history: -1, historyTemplate: "{{time}}" }\n  options: { kind: options, historyTemplate: "x" }\n')
       .replace('diff: { connection: { transport: prefill } }', 'diff: { tokenSaving: { userInput: nope } }') + 'tokenSaving:\n  userInput: drop\n' }));
     const msgs = [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
     expect(msgs).toMatch(/history` must be a non-negative integer/);
     expect(msgs).toMatch(/no `\{\{content\}\}`/);
-    expect(msgs).toMatch(/only annotations and synopsis structures support `history`/);
+    expect(msgs).toMatch(/`historyTemplate` only applies to synopsis structures/);
     expect(r.diag.errors.filter((d) => /userInput/.test(d.message))).toHaveLength(2);
+  });
+});
+
+describe('structure history (I-139)', () => {
+  const withManifest = (structures: string, rest = '') =>
+    tree({ 'preset.yaml': MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.10.0').replace('structures:\n', `structures:\n${structures}`) + rest });
+
+  it('compiles history objects on any kind, and a number as shorthand', () => {
+    const r = build(withManifest(`  status:
+    kind: status
+    history:
+      depth: 1
+      template: "<status>{{date}} {{time}}</status>"
+      position: before
+      when: 'transport in ["plaintext", "prefill"]'
+  synopsis:
+    kind: synopsis
+    history: { depth: 3, template: "<synopsis>{{event}}</synopsis>", position: 450 }
+  options: { kind: options, history: 2 }
+  notes: { kind: custom, shape: kv, history: { template: "{{mood}}" } }
+`));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.diag.warnings.map((w) => w.message).join('\n')).not.toMatch(/history (key|placeholder)|is not a|minAdvancedPreset/);
+    const s = r.preset!.structures;
+    expect(s.status!.history).toEqual({ depth: 1, template: '<status>{{date}} {{time}}</status>', position: 'before', when: expect.objectContaining({ t: 'bin', op: 'in' }) });
+    expect(s.synopsis!.history).toEqual({ depth: 3, template: '<synopsis>{{event}}</synopsis>', position: 450 });
+    expect(s.synopsis!.historyTemplate).toBeUndefined();
+    expect(s.options!.history).toEqual({ depth: 2, template: '{{value}}' });
+    expect(s.notes!.history).toEqual({ depth: 1, template: '{{mood}}' });
+  });
+
+  it('flags bad values, stray placeholders and old version requirements', () => {
+    const r = build(tree({ 'preset.yaml': MANIFEST.replace('structures:\n', `structures:
+  status: { kind: status, history: { depth: -1, template: "{{content}} {{nope}}", position: middle, when: "unknown.x", extra: 1 } }
+  synopsis: { kind: synopsis, history: { depth: 1 }, historyTemplate: "{{content}}" }
+`) }));
+    const errors = r.diag.errors.map((d) => d.message).join('\n');
+    const warnings = r.diag.warnings.map((d) => d.message).join('\n');
+    expect(errors).toMatch(/history.depth` must be a non-negative integer/);
+    expect(errors).toMatch(/history.position` must be before \| after \| a number/);
+    expect(errors).toMatch(/unknown variable `unknown.x`/);
+    expect(warnings).toMatch(/unknown history key `extra`/);
+    expect(warnings).toMatch(/`\{\{content\}\}` is not a history placeholder/);
+    expect(warnings).toMatch(/`\{\{nope\}\}` is not a status field/);
+    expect(warnings).toMatch(/`historyTemplate` is ignored with a `history` object/);
+    expect(warnings).toMatch(/structure history need Advanced Preset 1.10.0/);
+  });
+
+  it('checks `last.<id>` conditions', () => {
+    const r = build(withManifest('  status: { kind: status }\n  synopsis: { kind: synopsis, history: { when: "last.status && last.synopsis && last.nope" } }\n'));
+    const errors = r.diag.errors.map((d) => d.message).join('\n');
+    expect(errors).toMatch(/`last.synopsis`: only custom and status structures keep a last value/);
+    expect(errors).toMatch(/unknown structure `nope` in condition/);
+    expect(errors).not.toMatch(/last.status/);
   });
 });
 
@@ -912,5 +1063,324 @@ ${extraModule || '{{ap::input::text}}'}
     const json = JSON.parse(preview(wrap, { input: 'Hi {{user}}', json: true }));
     expect(json.historyInput).toBe('<input>\nHi {{user}}\n</input>');
     expect(json.vars.input).toEqual({ shaped: true });
+  });
+});
+
+describe('storylines', () => {
+  const withStorylines = (decl: string, min = 'minAdvancedPreset: 1.10.0\n', body = 'Side: {{ap::storyline}}') => {
+    const t = tree({ 'preset.yaml': MANIFEST.replace('version: 1.0.0', `version: 1.0.0\n${min}`) + decl });
+    t.set('modules/side.md', `---\nid: side\ntoggle: always\nregion: task\nwhen: "!storyline.main"\n---\n${body}\n`);
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+
+  it('is absent unless declared (hash unchanged)', () => {
+    const plain = build(tree());
+    expect('storylines' in plain.preset!).toBe(false);
+    expect('storylines' in plain.preset!.configurationDefaults).toBe(false);
+    expect(build(tree()).preset!.hash).toBe(plain.preset!.hash);
+  });
+
+  it('compiles `true` and custom separators with the user switch', () => {
+    const on = build(withStorylines('storylines: true\n'));
+    expect(on.diag.errors).toEqual([]);
+    expect(messages(on)).toMatch(/no module requests a storyline structure/);
+    expect(on.preset!.storylines).toEqual({ separator: '<!-- Start of Storyline {{storyline}} -->', mainSeparator: '<!-- Start of the main storyline -->' });
+    expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: 'all' });
+    const custom = build(withStorylines('storylines: { separator: "[{{storyline}}]" }\nconfigurationDefaults: { storylines: { enabled: false } }\n'));
+    expect(custom.diag.errors).toEqual([]);
+    expect(custom.preset!.storylines).toEqual({ separator: '[{{storyline}}]', mainSeparator: '<!-- Start of the main storyline -->' });
+    expect(custom.preset!.configurationDefaults.storylines).toEqual({ enabled: false, freezeVariables: 'all' });
+  });
+
+  it('flags bad declarations, undeclared use and old AP versions', () => {
+    expect(build(withStorylines('storylines: yes please\n')).diag.errors.map((e) => e.message).join('\n')).toMatch(/storylines must be `true` or a mapping/);
+    const w = messages(build(withStorylines('storylines: { separator: "---", tag: x }\n')));
+    expect(w).toMatch(/has no \{\{storyline\}\}/);
+    expect(w).toMatch(/unknown key `tag`/);
+    expect(messages(build(withStorylines('')))).toMatch(/always describe the main storyline/);
+    expect(messages(build(withStorylines('storylines: true\n', '', 'x')))).toMatch(/storylines need Advanced Preset 1\.10\.0/);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, '{{ap::storyline::nope}}')))).toMatch(/expected no argument/);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, 'x')))).not.toMatch(/unknown variable/);
+  });
+
+  it('previews a storyline with --storyline', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withStorylines('storylines: true\n')).preset!;
+    expect(preview(p, {})).toMatch(/storyline: main\n/);
+    const out = preview(p, { storyline: 'ifRain', storylineNew: true });
+    expect(out).toMatch(/storyline: ifRain \(if-line\) \(new\) \(grouped\)/);
+    expect(preview(p, { storylineGrouped: true })).toMatch(/storyline: main \(grouped\)\n/);
+    expect(out).toMatch(/Side: ifRain/);
+    const json = JSON.parse(preview(p, { storyline: 'cellar', json: true }));
+    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false, grouped: true, naming: false, namingMain: false, switching: false, frozen: true });
+    expect(preview(p, { storyline: 'cellar' })).toMatch(/storyline: cellar \(grouped\) \(variables frozen\)/);
+    expect(preview(p, {})).not.toMatch(/variables frozen/);
+  });
+
+  it('checks the freeze mode and previews it (I-163)', async () => {
+    const { preview } = await import('../src/preview');
+    const bad = build(withStorylines('storylines: true\nconfigurationDefaults: { storylines: { freezeVariables: true } }\n'));
+    expect(bad.diag.errors.map((e) => e.message).join('\n')).toMatch(/freezeVariables` must be one of all \/ if \/ off/);
+    const p = build(withStorylines('storylines: true\nconfigurationDefaults: { storylines: { freezeVariables: if } }\n')).preset!;
+    expect(p.configurationDefaults.storylines!.freezeVariables).toBe('if');
+    expect(JSON.parse(preview(p, { storyline: 'cellar', json: true })).vars.storyline.frozen).toBe(false);
+    expect(JSON.parse(preview(p, { storyline: 'ifRain', json: true })).vars.storyline.frozen).toBe(true);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, '<!-- @if storyline.frozen -->x<!-- @end -->')))).not.toMatch(/unknown variable/);
+  });
+
+  const withNaming = (decl = 'storylines: true\n') => {
+    const t = withStorylines(decl);
+    t.set('manifest/naming.yaml', 'structures:\n  storyline:\n    kind: storyline\n    properties: { name: The new name, previous_main: The old name }\n    formatPrompt: { tag: "<storyline>", field: "{{field}}" }\n');
+    t.set('modules/naming.md', '---\nid: naming\ntoggle: always\nregion: task\nwhen: storyline.naming || storyline.namingMain\nstructures: [storyline]\n---\nName it.<!-- @if storyline.namingMain --> Name the old one too.<!-- @end -->\n');
+    return t;
+  };
+
+  it('compiles the storyline structure and checks its use (I-158)', () => {
+    const r = build(withNaming());
+    expect(r.diag.errors).toEqual([]);
+    expect(messages(r)).not.toMatch(/storyline/i);
+    expect(r.preset!.structures.storyline).toMatchObject({ kind: 'storyline', properties: { name: 'The new name', previous_main: 'The old name' } });
+    expect(messages(build(withNaming('')))).toMatch(/storyline structures are only requested when a storyline is named/);
+    const bad = withNaming();
+    bad.set('manifest/naming.yaml', bad.get('manifest/naming.yaml')!.replace('previous_main: The old name', 'old: x'));
+    expect(build(bad).diag.errors.map((e) => e.message).join('\n')).toMatch(/storyline has no sub-field `old` \(expected name \| previous_main\)/);
+  });
+
+  it('previews naming turns: --storyline ?, --storyline-switch, --storyline-naming-main', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withNaming()).preset!;
+    expect(preview(p, { storyline: 'cellar' })).not.toMatch(/Name it/);
+    const side = preview(p, { storyline: '?' });
+    expect(side).toMatch(/storyline: \? \(new\) \(grouped\) \(AI names it\)/);
+    expect(side).toMatch(/structures: storyline/);
+    expect(side).toMatch(/Name it\./);
+    expect(side).not.toMatch(/Name the old one/);
+    expect(preview(p, { storyline: 'if?' })).toMatch(/storyline: \? \(if-line\) \(new\) \(grouped\) \(AI names it\)/);
+    const sw = preview(p, { storyline: '?', storylineSwitch: true, storylineNamingMain: true, transport: 'structured', json: true });
+    const json = JSON.parse(sw);
+    expect(json.vars.storyline).toMatchObject({ main: true, naming: true, namingMain: true, switching: true });
+    const schema = JSON.stringify(json.schema);
+    expect(schema).toContain('previous_main');
+    const only = JSON.parse(preview(p, { storyline: 'B', storylineSwitch: true, storylineNamingMain: true, transport: 'structured', json: true }));
+    expect(only.vars.storyline).toMatchObject({ name: 'B', main: true, naming: false, namingMain: true });
+    expect(JSON.stringify(only.schema)).toMatch(/"required":\["previous_main"\]/);
+  });
+});
+
+describe('SillyTavern regex scripts & Quick Reply sets', () => {
+  const at110 = (extra: Record<string, string>) => {
+    const t = tree(extra);
+    t.set('preset.yaml', MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.10.0'));
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => `${d.file ?? ''} ${d.path ?? ''} ${d.message}`).join('\n');
+
+  it('are absent unless written (hash unchanged)', () => {
+    const plain = build(tree());
+    expect('regexScripts' in plain.preset!).toBe(false);
+    expect('quickReplySets' in plain.preset!).toBe(false);
+  });
+
+  it('compiles regex scripts in ST form, ordered by file, with stable ids', () => {
+    const r = build(at110({
+      'regex-scripts/20-hide.yaml': 'scriptName: Hide thinking\nfindRegex: "/<thinking>[\\\\s\\\\S]*?<\\\\/thinking>/gi"\nplacement: [ai-output]\nmarkdownOnly: true\n',
+      'regex-scripts/10-list.json': JSON.stringify([
+        { id: 'from-st-export', scriptName: 'A', findRegex: 'a+', replaceString: 'b', placement: [1, 2], trimStrings: ['x'], substituteRegex: 0, minDepth: null, maxDepth: 3, disabled: true },
+        { findRegex: '{{char}}', substituteRegex: 'raw', placement: 'user-input', promptOnly: true, runOnEdit: false },
+      ]),
+    }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.diag.warnings.filter((d) => d.file?.startsWith('regex-scripts') || /regex/.test(d.message))).toEqual([]);
+    const s = r.preset!.regexScripts!;
+    expect(s.map((x) => x.scriptName)).toEqual(['A', '10-list 2', 'Hide thinking']);
+    expect(s[0]).toEqual({ id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/), scriptName: 'A', findRegex: 'a+', replaceString: 'b', trimStrings: ['x'], placement: [1, 2], disabled: true, markdownOnly: false, promptOnly: false, runOnEdit: true, substituteRegex: 0, minDepth: null, maxDepth: 3 });
+    expect(s[1]).toMatchObject({ substituteRegex: 1, placement: [1], promptOnly: true, runOnEdit: false });
+    expect(s[2]).toMatchObject({ placement: [2], markdownOnly: true, findRegex: '/<thinking>[\\s\\S]*?<\\/thinking>/gi' });
+    expect(new Set(s.map((x) => x.id)).size).toBe(3);
+    expect(build(at110({ 'regex-scripts/20-hide.yaml': 'findRegex: x\nplacement: [2]\n' })).preset!.regexScripts![0]!.id).toBe(s[2]!.id);
+  });
+
+  it('reports bad regex scripts', () => {
+    const m = messages(build(tree({
+      'regex-scripts/a.yaml': 'findRegex: "/(/g"\nplacement: [ai-output, chat]\nfoo: 1\nmaxDepth: x\nreplaceString: "{{ap::name::narrator}}"\n',
+      'regex-scripts/b.yaml': 'replaceString: x\n',
+      'regex-scripts/c.yaml': 'findRegex: x\n',
+    })));
+    expect(m).toMatch(/a\.yaml findRegex `findRegex` is not a valid regular expression/);
+    expect(m).toMatch(/unknown placement `chat`/);
+    expect(m).toMatch(/unknown regex script field `foo`/);
+    expect(m).toMatch(/`maxDepth` must be an integer/);
+    expect(m).toMatch(/macros are not expanded in regex scripts/);
+    expect(m).toMatch(/b\.yaml findRegex `findRegex` is required/);
+    expect(m).toMatch(/c\.yaml placement no `placement`: the script never runs/);
+    expect(m).toMatch(/regex scripts need Advanced Preset 1\.10\.0/);
+  });
+
+  const SET = `
+qrList:
+  - id: meta
+    label: Meta
+    icon: fa-at
+    title: Talk to {{ap::name::narrator}}
+    message: "/setinput {{input}} @{{ap::name::narrator}}"
+    contextList: [more, { set: Someone Else, isChained: true }]
+  - label: Second
+    executeOnAi: true
+`;
+
+  it('compiles Quick Reply sets with every ST field, own context menus resolved', () => {
+    const r = build(at110({
+      'quick-replies/main.yaml': SET,
+      'quick-replies/more.json': JSON.stringify({ version: 2, name: 'Demo extra', disableSend: true, color: '#ff0000', onlyBorderColor: true, idIndex: 4, qrList: [{ id: 3, label: 'X', message: 'hi', preventAutoExecute: false, isHidden: true, automationId: 'a1' }] }),
+      'locales/zh-cn.yaml': 'quickReplySets:\n  main: { qrList: { meta: { label: 元指令, title: "和 {{ap::name::narrator}} 说话" } } }\n',
+    }));
+    expect(r.diag.errors).toEqual([]);
+    expect(messages(r)).toMatch(/context menu set `Someone Else` is not one of the preset's sets/);
+    const [main, more] = r.preset!.quickReplySets!;
+    expect(main).toMatchObject({ id: 'main', name: 'AP · Demo', global: true, visible: true, disableSend: false, placeBeforeInput: false, injectInput: false, color: 'transparent', onlyBorderColor: false });
+    expect(main!.qrList[0]).toEqual({
+      id: 'meta', label: 'Meta', icon: 'fa-at', showLabel: false, title: 'Talk to {{ap::name::narrator}}', message: '/setinput {{input}} @{{ap::name::narrator}}',
+      contextList: [{ set: 'Demo extra', isChained: false }, { set: 'Someone Else', isChained: true }], preventAutoExecute: true, isHidden: false, automationId: '',
+      executeOnStartup: false, executeOnUser: false, executeOnAi: false, executeOnChatChange: false, executeOnGroupMemberDraft: false, executeOnNewChat: false, executeBeforeGeneration: false,
+    });
+    expect(main!.qrList[1]).toMatchObject({ id: '2', label: 'Second', executeOnAi: true });
+    expect(more).toMatchObject({ id: 'more', name: 'Demo extra', disableSend: true, color: '#ff0000', onlyBorderColor: true });
+    expect(more!.qrList[0]).toMatchObject({ id: '3', preventAutoExecute: false, isHidden: true, automationId: 'a1' });
+  });
+
+  it('reports bad Quick Reply sets and translations', () => {
+    const m = messages(build(tree({
+      'quick-replies/My Set.yaml': SET,
+      'quick-replies/a.yaml': 'qrList:\n  - { id: x, icon: fa-solid fa-at, message: "{{ap::param::language}} {{ap::name::nobody}}" }\n  - { id: x, label: y, showLabel: yes }\n  - {}\n',
+      'quick-replies/b.yaml': 'name: AP · Demo\nqrList: oops\nfoo: 1\n',
+      'locales/zh-cn.yaml': 'quickReplySets:\n  a: { qrList: { nope: { label: x }, x: { message: "{{ap::lang}}" } } }\n  zzz: {}\n',
+    })));
+    expect(m).toMatch(/My Set\.yaml {2}a Quick Reply set file name must be lower-case kebab-case/);
+    expect(m).toMatch(/`icon` is one Font Awesome class/);
+    expect(m).toMatch(/\{\{ap::param::language\}\}: quick replies only expand/);
+    expect(m).toMatch(/unknown actor `nobody`/);
+    expect(m).toMatch(/duplicate quick reply id `x`/);
+    expect(m).toMatch(/`showLabel` must be true or false/);
+    expect(m).toMatch(/without `label` or `icon`/);
+    expect(m).toMatch(/`qrList` \(the quick replies\) must be a list/);
+    expect(m).toMatch(/unknown Quick Reply set field `foo`/);
+    expect(m).toMatch(/sets `a` and `b` are both named `AP · Demo`/);
+    expect(m).toMatch(/quickReplySets\.a\.qrList\.nope does not exist/);
+    expect(m).toMatch(/quickReplySets\.zzz does not exist/);
+    expect(m).toMatch(/quickReplySets\.a\.qrList\.x\.message \{\{ap::lang\}\}: quick replies only expand/);
+    expect(m).toMatch(/Quick Reply sets need Advanced Preset 1\.10\.0/);
+  });
+});
+
+describe('Tavern Helper scripts', () => {
+  const at110 = (extra: Record<string, string>) => {
+    const t = tree(extra);
+    t.set('preset.yaml', MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.10.0'));
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => `${d.file ?? ''} ${d.path ?? ''} ${d.message}`).join('\n');
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+  it('are absent unless written (hash unchanged)', () => {
+    expect('tavernHelperScripts' in build(tree()).preset!).toBe(false);
+  });
+
+  it('compiles scripts, folders and Tavern Helper exports, with code files and stable ids', () => {
+    const exported = {
+      type: 'script', enabled: false, name: 'Exported', id: 'f3c1-from-export', content: 'console.log(1)', info: 'notes',
+      button: { enabled: true, buttons: [{ name: 'Go', visible: false }] }, data: { a: 1 }, export_with: { data: false, button: true },
+    };
+    const r = build(at110({
+      'tavern-helper-scripts/20-main.yaml': 'name: Main\ncontent: ./tavern-helper-scripts/src/main.js\nbutton: { buttons: [Roll] }\n',
+      'tavern-helper-scripts/src/main.js': 'export const x = 1;\n',
+      'tavern-helper-scripts/10-exported.json': JSON.stringify(exported),
+      'tavern-helper-scripts/30-tools.yaml': 'name: Tools\nicon: fa-solid fa-toolbox\nscripts:\n  - { name: A, content: "a()" }\n  - { content: "b()", enabled: false }\n',
+    }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.diag.warnings.filter((d) => d.file?.startsWith('tavern-helper') || /Tavern Helper/.test(d.message))).toEqual([]);
+    const s = r.preset!.tavernHelperScripts!;
+    expect(s.map((x) => x.name)).toEqual(['Exported', 'Main', 'Tools']);
+    expect(s[0]).toEqual({ ...exported, id: expect.stringMatching(UUID) });
+    expect(s[1]).toEqual({
+      type: 'script', enabled: true, name: 'Main', id: expect.stringMatching(UUID), content: 'export const x = 1;\n', info: '',
+      button: { enabled: true, buttons: [{ name: 'Roll', visible: true }] }, data: {}, export_with: { data: true, button: true },
+    });
+    expect(s[2]).toMatchObject({ type: 'folder', enabled: true, name: 'Tools', icon: 'fa-solid fa-toolbox', id: expect.stringMatching(UUID) });
+    expect('color' in s[2]!).toBe(false);
+    const folder = s[2] as Extract<(typeof s)[number], { type: 'folder' }>;
+    expect(folder.scripts.map((x) => [x.name, x.enabled, x.content])).toEqual([['A', true, 'a()'], ['30-tools 2', false, 'b()']]);
+    const ids = [s[0]!.id, s[1]!.id, s[2]!.id, ...folder.scripts.map((x) => x.id)];
+    expect(new Set(ids).size).toBe(5);
+    // Same place → same id, whatever the content; the export's own id is replaced.
+    expect(build(at110({ 'tavern-helper-scripts/20-main.yaml': 'content: other()\n' })).preset!.tavernHelperScripts![0]!.id).toBe(s[1]!.id);
+    expect(r.preset!.tavernHelperScripts).not.toContainEqual(expect.objectContaining({ id: 'f3c1-from-export' }));
+  });
+
+  it('reads a list of trees from one file', () => {
+    const r = build(at110({ 'tavern-helper-scripts/all.json': JSON.stringify([{ name: 'One', content: '1' }, { type: 'folder', name: 'F', scripts: [{ content: '2' }] }]) }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.preset!.tavernHelperScripts!.map((x) => [x.type, x.name])).toEqual([['script', 'One'], ['folder', 'F']]);
+  });
+
+  it('reports bad scripts', () => {
+    const m = messages(build(tree({
+      'tavern-helper-scripts/a.yaml': 'name: A\nfoo: 1\ncontent: ./elsewhere/a.js\n',
+      'tavern-helper-scripts/b.yaml': 'name: B\n',
+      'tavern-helper-scripts/c.yaml': 'content: ./tavern-helper-scripts/missing.js\n',
+      'tavern-helper-scripts/d.yaml': 'type: folder\nscripts:\n  - { type: folder, scripts: [] }\n  - x\n',
+      'tavern-helper-scripts/e.yaml': 'type: macro\n',
+      'tavern-helper-scripts/f.yaml': 'content: x\nbutton: { buttons: [{ visible: true }] }\ndata: [1]\n',
+      'tavern-helper-scripts/g.yaml': 'content: x\nenabled: yes\n',
+    })));
+    expect(m).toMatch(/a\.yaml foo unknown Tavern Helper script field `foo`/);
+    expect(m).toMatch(/g\.yaml enabled `enabled` must be true or false/);
+    expect(m).toMatch(/script files live under tavern-helper-scripts\//);
+    expect(m).toMatch(/b\.yaml content `content` .* is required/);
+    expect(m).toMatch(/file `tavern-helper-scripts\/missing\.js` not found/);
+    expect(m).toMatch(/d\.yaml scripts\[0\] folders cannot contain folders/);
+    expect(m).toMatch(/d\.yaml scripts\[1\] a Tavern Helper script must be a mapping/);
+    expect(m).toMatch(/e\.yaml type `type` must be script or folder/);
+    expect(m).toMatch(/a button is `<name>` or `\{ name, visible \}`/);
+    expect(m).toMatch(/f\.yaml data `data` must be a mapping/);
+    expect(m).toMatch(/Tavern Helper scripts need Advanced Preset 1\.10\.0/);
+  });
+
+  it('keeps code files in the source tree', () => {
+    expect(isSourcePath('tavern-helper-scripts/src/main.js')).toBe(true);
+    expect(isSourcePath('tavern-helper-scripts/main.yaml')).toBe(true);
+  });
+});
+
+describe('preset file (I-170)', () => {
+  it('reads build.installer (default true) without touching the artifact', () => {
+    const plain = build(tree());
+    expect(plain.build).toEqual({ installer: true });
+    const off = build(tree({ 'preset.yaml': `${MANIFEST}build: { installer: false }\n` }));
+    expect(off.build).toEqual({ installer: false });
+    expect(off.preset!.hash).toBe(plain.preset!.hash);
+    expect((off.preset as Record<string, unknown>).build).toBeUndefined();
+    const bad = build(tree({ 'preset.yaml': `${MANIFEST}build: { installer: maybe, other: 1 }\n` }));
+    expect(bad.diag.errors.map((e) => e.message).join('\n')).toMatch(/build\.installer` must be true or false/);
+    expect(bad.diag.warnings.map((w) => w.message).join('\n')).toMatch(/unknown build key `other`/);
+  });
+
+  it('writes the preset file with the default sampling, with or without the installer', async () => {
+    const { mkdtemp, readFile: read } = await import('node:fs/promises');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { writePresetFile } = await import('../src/io');
+    const { upgradeArtifact, PRESET_FILE_FIELD, INSTALLER_SCRIPT_ID } = await import('@advanced-preset/protocol');
+    const { preset } = build(tree());
+    const dir = await mkdtemp(join(tmpdir(), 'ap-'));
+    const file = await writePresetFile(preset!, dir);
+    expect(file).toBe(join(dir, 'demo.apreset.json'));
+    const json = JSON.parse(await read(file, 'utf8'));
+    expect(json.extensions[PRESET_FILE_FIELD].artifact.hash).toBe(preset!.hash);
+    expect(json.extensions.tavern_helper.scripts[0].id).toBe(INSTALLER_SCRIPT_ID);
+    expect(upgradeArtifact(json)).toEqual(preset);
+    for (const [k, v] of Object.entries(resolveConfiguration(preset!, preset!.defaultConfiguration, undefined).sampling)) expect(json[k]).toEqual(v);
+    const bare = JSON.parse(await read(await writePresetFile(preset!, dir, { installer: false }), 'utf8'));
+    expect(bare.extensions.tavern_helper).toBeUndefined();
   });
 });

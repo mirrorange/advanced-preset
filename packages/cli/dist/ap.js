@@ -429,9 +429,9 @@ var require_anchors = __commonJS({
     "use strict";
     var identity = require_identity();
     var visit = require_visit();
-    function anchorIsValid(anchor) {
-      if (/[\x00-\x19\s,[\]{}]/.test(anchor)) {
-        const sa = JSON.stringify(anchor);
+    function anchorIsValid(anchor2) {
+      if (/[\x00-\x19\s,[\]{}]/.test(anchor2)) {
+        const sa = JSON.stringify(anchor2);
         const msg = `Anchor must not contain whitespace or control characters: ${sa}`;
         throw new Error(msg);
       }
@@ -462,9 +462,9 @@ var require_anchors = __commonJS({
         onAnchor: (source) => {
           aliasObjects.push(source);
           prevAnchors ?? (prevAnchors = anchorNames(doc));
-          const anchor = findNewAnchor(prefix, prevAnchors);
-          prevAnchors.add(anchor);
-          return anchor;
+          const anchor2 = findNewAnchor(prefix, prevAnchors);
+          prevAnchors.add(anchor2);
+          return anchor2;
         },
         /**
          * With circular references, the source node is only resolved after all
@@ -711,8 +711,8 @@ var require_Alias = __commonJS({
     function getAliasCount(doc, node, anchors2) {
       if (identity.isAlias(node)) {
         const source = node.resolve(doc);
-        const anchor = anchors2 && source && anchors2.get(source);
-        return anchor ? anchor.count * anchor.aliasCount : 0;
+        const anchor2 = anchors2 && source && anchors2.get(source);
+        return anchor2 ? anchor2.count * anchor2.aliasCount : 0;
       } else if (identity.isCollection(node)) {
         let count = 0;
         for (const item of node.items) {
@@ -1497,10 +1497,10 @@ var require_stringify = __commonJS({
       if (!doc.directives)
         return "";
       const props = [];
-      const anchor = (identity.isScalar(node) || identity.isCollection(node)) && node.anchor;
-      if (anchor && anchors.anchorIsValid(anchor)) {
-        anchors$1.add(anchor);
-        props.push(`&${anchor}`);
+      const anchor2 = (identity.isScalar(node) || identity.isCollection(node)) && node.anchor;
+      if (anchor2 && anchors.anchorIsValid(anchor2)) {
+        anchors$1.add(anchor2);
+        props.push(`&${anchor2}`);
       }
       const tag = node.tag ?? (tagObj.default ? null : tagObj.tag);
       if (tag)
@@ -3784,7 +3784,7 @@ var require_resolve_props = __commonJS({
       let hasNewline = false;
       let reqSpace = false;
       let tab = null;
-      let anchor = null;
+      let anchor2 = null;
       let tag = null;
       let newlineAfterProp = null;
       let comma = null;
@@ -3831,16 +3831,16 @@ var require_resolve_props = __commonJS({
               commentSep += token.source;
             atNewline = true;
             hasNewline = true;
-            if (anchor || tag)
+            if (anchor2 || tag)
               newlineAfterProp = token;
             hasSpace = true;
             break;
           case "anchor":
-            if (anchor)
+            if (anchor2)
               onError(token, "MULTIPLE_ANCHORS", "A node can have at most one anchor");
             if (token.source.endsWith(":"))
               onError(token.offset + token.source.length - 1, "BAD_ALIAS", "Anchor ending in : is ambiguous", true);
-            anchor = token;
+            anchor2 = token;
             start ?? (start = token.offset);
             atNewline = false;
             hasSpace = false;
@@ -3857,7 +3857,7 @@ var require_resolve_props = __commonJS({
             break;
           }
           case indicator:
-            if (anchor || tag)
+            if (anchor2 || tag)
               onError(token, "BAD_PROP_ORDER", `Anchors and tags must be after the ${token.source} indicator`);
             if (found)
               onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.source} in ${flow ?? "collection"}`);
@@ -3894,7 +3894,7 @@ var require_resolve_props = __commonJS({
         spaceBefore,
         comment,
         hasNewline,
-        anchor,
+        anchor: anchor2,
         tag,
         newlineAfterProp,
         end,
@@ -4403,8 +4403,8 @@ var require_compose_collection = __commonJS({
       const tagToken = props.tag;
       const tagName = !tagToken ? null : ctx.directives.tagName(tagToken.source, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg));
       if (token.type === "block-seq") {
-        const { anchor, newlineAfterProp: nl } = props;
-        const lastProp = anchor && tagToken ? anchor.offset > tagToken.offset ? anchor : tagToken : anchor ?? tagToken;
+        const { anchor: anchor2, newlineAfterProp: nl } = props;
+        const lastProp = anchor2 && tagToken ? anchor2.offset > tagToken.offset ? anchor2 : tagToken : anchor2 ?? tagToken;
         if (lastProp && (!nl || nl.offset < lastProp.offset)) {
           const message = "Missing newline after block sequence props";
           onError(lastProp, "MISSING_CHAR", message);
@@ -4970,13 +4970,13 @@ var require_compose_node = __commonJS({
     var CN = { composeNode, composeEmptyNode };
     function composeNode(ctx, token, props, onError) {
       const atKey = ctx.atKey;
-      const { spaceBefore, comment, anchor, tag } = props;
+      const { spaceBefore, comment, anchor: anchor2, tag } = props;
       let node;
       let isSrcToken = true;
       switch (token.type) {
         case "alias":
           node = composeAlias(ctx, token, onError);
-          if (anchor || tag)
+          if (anchor2 || tag)
             onError(token, "ALIAS_PROPS", "An alias node must not specify any properties");
           break;
         case "scalar":
@@ -4984,16 +4984,16 @@ var require_compose_node = __commonJS({
         case "double-quoted-scalar":
         case "block-scalar":
           node = composeScalar.composeScalar(ctx, token, tag, onError);
-          if (anchor)
-            node.anchor = anchor.source.substring(1);
+          if (anchor2)
+            node.anchor = anchor2.source.substring(1);
           break;
         case "block-map":
         case "block-seq":
         case "flow-collection":
           try {
             node = composeCollection.composeCollection(CN, ctx, token, props, onError);
-            if (anchor)
-              node.anchor = anchor.source.substring(1);
+            if (anchor2)
+              node.anchor = anchor2.source.substring(1);
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             onError(token, "RESOURCE_EXHAUSTION", message);
@@ -5006,8 +5006,8 @@ var require_compose_node = __commonJS({
         }
       }
       node ?? (node = composeEmptyNode(ctx, token.offset, void 0, null, props, onError));
-      if (anchor && node.anchor === "")
-        onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
+      if (anchor2 && node.anchor === "")
+        onError(anchor2, "BAD_ALIAS", "Anchor cannot be an empty string");
       if (atKey && ctx.options.stringKeys && (!identity.isScalar(node) || typeof node.value !== "string" || node.tag && node.tag !== "tag:yaml.org,2002:str")) {
         const msg = "With stringKeys, all keys must be strings";
         onError(tag ?? token, "NON_STRING_KEY", msg);
@@ -5024,7 +5024,7 @@ var require_compose_node = __commonJS({
         node.srcToken = token;
       return node;
     }
-    function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor, tag, end }, onError) {
+    function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor: anchor2, tag, end }, onError) {
       const token = {
         type: "scalar",
         offset: utilEmptyScalarPosition.emptyScalarPosition(offset, before, pos),
@@ -5032,10 +5032,10 @@ var require_compose_node = __commonJS({
         source: ""
       };
       const node = composeScalar.composeScalar(ctx, token, tag, onError);
-      if (anchor) {
-        node.anchor = anchor.source.substring(1);
+      if (anchor2) {
+        node.anchor = anchor2.source.substring(1);
         if (node.anchor === "")
-          onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
+          onError(anchor2, "BAD_ALIAS", "Anchor cannot be an empty string");
       }
       if (spaceBefore)
         node.spaceBefore = true;
@@ -7377,9 +7377,11 @@ var FORMAT_VERSION = 3;
 var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-multi"];
 var TOOL_ARG_STREAMING = ["auto", "on", "off"];
 var BUILD_VAR_TYPES = ["string", "list", "dict"];
-var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "custom", "annotations"];
+var CONTENT_STAGE_REF = "@content";
+var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "storyline", "custom", "annotations"];
 var INLINE_STRUCTURE_KINDS = ["annotations"];
 var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
+var CARD_POSITIONS = ["top", "bottom"];
 var USER_INPUT_MODES = ["keep", "truncate", "remove"];
 var DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = "{{content}}\n\n[{{time}} \xB7 {{location}}] {{event}}: {{summary}}";
 
@@ -7606,10 +7608,13 @@ var MACRO_HEADS = {
   memory: { min: 1, max: 1 },
   recap: { min: 0, max: 0 },
   recent_meta: { min: 0, max: 0 },
-  var: { min: 1, max: 2 }
+  var: { min: 1, max: 2 },
+  storyline: { min: 0, max: 1 }
 };
 
 // ../protocol/src/structures.ts
+var STATUS_FIELDS = ["date", "weekday", "time", "location", "weather"];
+var STORYLINE_NAMING_FIELDS = ["name", "previous_main"];
 var STRUCTURE_PROPERTIES = {
   reply: [],
   impersonate: [],
@@ -7617,6 +7622,8 @@ var STRUCTURE_PROPERTIES = {
   memory: ["scope", "operation", "key", "content"],
   synopsis: ["time", "location", "event", "summary"],
   options: ["label", "content"],
+  status: STATUS_FIELDS,
+  storyline: STORYLINE_NAMING_FIELDS,
   custom: [],
   annotations: []
 };
@@ -7667,6 +7674,22 @@ function structureFieldSchema(decl, expand = (t) => t) {
         },
         ...decl.count ? { minItems: decl.count, maxItems: decl.count } : {}
       });
+    case "status":
+      return withDesc({
+        type: "object",
+        properties: Object.fromEntries(STATUS_FIELDS.map((k) => [k, sub(k)])),
+        required: [...STATUS_FIELDS],
+        additionalProperties: false
+      });
+    case "storyline": {
+      const fields = (decl.requested ?? STORYLINE_NAMING_FIELDS).filter((k) => STORYLINE_NAMING_FIELDS.includes(k));
+      return withDesc({
+        type: "object",
+        properties: Object.fromEntries(fields.map((k) => [k, sub(k)])),
+        required: fields,
+        additionalProperties: false
+      });
+    }
     case "annotations":
       return withDesc({ type: "string" });
     case "custom":
@@ -7675,6 +7698,116 @@ function structureFieldSchema(decl, expand = (t) => t) {
 }
 function isStructureOptional(kind) {
   return kind === "memory" || kind === "recap";
+}
+
+// ../protocol/src/layout.ts
+var STRUCTURE_LAYOUT_SINCE = "1.10.0";
+var DEFAULT_ORDER_PREFIX = "{{n}}_";
+var STAGE_ORDER_STEP = 100;
+var fill = (text, vars) => {
+  let out = text;
+  for (const [k, v] of Object.entries(vars)) out = out.replaceAll(`{{${k}}}`, String(v));
+  return out;
+};
+function stageOrderKey(workflow, stage) {
+  if (typeof stage.order === "number") return stage.order;
+  const i = workflow.stages.findIndex((s) => s.id === stage.id);
+  return (i >= 0 ? i + 1 : workflow.stages.length + 1) * STAGE_ORDER_STEP;
+}
+function structureOrderOf(workflow, decl) {
+  return workflow.structureOrder?.[decl.id] ?? decl.order ?? { after: workflow.structuresAfter ?? CONTENT_STAGE_REF };
+}
+function anchorIndex(workflow, stages) {
+  if (workflow.structuresAfter) {
+    const i = stages.findIndex((s) => s.id === workflow.structuresAfter);
+    if (i >= 0) return i;
+  }
+  for (let i = stages.length - 1; i >= 0; i--) if (stages[i].kind === "content") return i;
+  return stages.length - 1;
+}
+function orderPrefixed(prefix, position, total, base) {
+  const digits = String(Math.max(total, 1)).length;
+  return fill(prefix, { n: String(position).padStart(digits, "0") }) + base;
+}
+function turnLayout(workflow, stages, allStructures, tools, stageBase) {
+  const structures = allStructures.filter((s) => !isInlineStructure(s));
+  const list = stages.map((stage, index) => ({ item: { type: "stage", stage, key: stageOrderKey(workflow, stage) }, rank: 0, index }));
+  const anchor2 = anchorIndex(workflow, stages);
+  const anchorKey = anchor2 >= 0 ? list[anchor2].item.key : Number.POSITIVE_INFINITY;
+  const stageKey = (ref) => {
+    if (ref === CONTENT_STAGE_REF) {
+      for (let i2 = stages.length - 1; i2 >= 0; i2--) if (stages[i2].kind === "content") return list[i2].item.key;
+      return void 0;
+    }
+    const i = stages.findIndex((s) => s.id === ref);
+    return i >= 0 ? list[i].item.key : void 0;
+  };
+  structures.forEach((structure, index) => {
+    const o = structureOrderOf(workflow, structure);
+    let key;
+    let rank = 1;
+    if (typeof o === "number") key = o;
+    else if ("before" in o) {
+      const k = stageKey(o.before);
+      if (k === void 0) key = anchorKey;
+      else {
+        key = k;
+        rank = -1;
+      }
+    } else key = stageKey(o.after) ?? anchorKey;
+    list.push({ item: { type: "structure", structure, key }, rank, index });
+  });
+  list.sort((a, b) => a.item.key - b.item.key || a.rank - b.rank || a.index - b.index);
+  const prefix = tools.orderPrefix || "";
+  const total = list.length;
+  const items = list.map(({ item }, i) => {
+    const base = item.type === "stage" ? stageBase(item.stage) : item.structure.field;
+    const name = prefix ? orderPrefixed(prefix, i + 1, total, base) : base;
+    return { ...item, position: i + 1, name };
+  });
+  const stageItem = /* @__PURE__ */ new Map();
+  const structureItem = /* @__PURE__ */ new Map();
+  for (const it of items) {
+    if (it.type === "stage") stageItem.set(it.stage, it);
+    else structureItem.set(it.structure.id, it);
+  }
+  const hosts = /* @__PURE__ */ new Map();
+  items.forEach((it, i) => {
+    if (it.type !== "structure") return;
+    let host;
+    for (let j = i - 1; j >= 0 && !host; j--) {
+      const x = items[j];
+      if (x.type === "stage") host = x.stage;
+    }
+    for (let j = i + 1; j < items.length && !host; j++) {
+      const x = items[j];
+      if (x.type === "stage") host = x.stage;
+    }
+    if (host) hosts.set(it.structure.id, host);
+  });
+  const carriedBy = (stage) => items.flatMap((it) => it.type === "structure" && hosts.get(it.structure.id) === stage ? [it.structure] : []);
+  return {
+    items,
+    prefixed: Boolean(prefix),
+    stageField: (stage) => stageItem.get(stage)?.name ?? stageBase(stage),
+    structureField: (decl) => structureItem.get(decl.id)?.name ?? decl.field,
+    hostOf: (decl) => hosts.get(decl.id),
+    carriedBy,
+    stageParam: (stage, base) => {
+      const it = stageItem.get(stage);
+      return prefix && it && carriedBy(stage).length ? orderPrefixed(prefix, it.position, total, base) : base;
+    }
+  };
+}
+function withFieldName(decl, name) {
+  const r = (t) => t.replaceAll("{{field}}", name);
+  if (![decl.description, decl.formatPrompt.field, ...Object.values(decl.properties ?? {})].some((t) => t?.includes("{{field}}"))) return decl;
+  return {
+    ...decl,
+    ...decl.description !== void 0 ? { description: r(decl.description) } : {},
+    ...decl.properties ? { properties: Object.fromEntries(Object.entries(decl.properties).map(([k, v]) => [k, r(v)])) } : {},
+    formatPrompt: { ...decl.formatPrompt, field: r(decl.formatPrompt.field) }
+  };
 }
 
 // ../protocol/src/workflow.ts
@@ -7702,18 +7835,6 @@ function fillTemplate(text, vars) {
 }
 function activeStages(workflow, resolve2) {
   return workflow.stages.filter((s) => test(s.when, resolve2));
-}
-function terminalContentIndex(stages) {
-  for (let i = stages.length - 1; i >= 0; i--) if (stages[i].kind === "content") return i;
-  return -1;
-}
-function structuresAnchorIndex(workflow, stages) {
-  if (workflow.structuresAfter) {
-    const i = stages.findIndex((s) => s.id === workflow.structuresAfter);
-    if (i >= 0) return i;
-  }
-  const t = terminalContentIndex(stages);
-  return t >= 0 ? t : stages.length - 1;
 }
 function stageVars(stages, stage) {
   return { n: stages.indexOf(stage) + 1, stage: stage.id, actor: stage.actor, label: stage.label };
@@ -7757,40 +7878,58 @@ function turnArtifacts(tools, workflow, stages, allStructures, expand = same) {
     const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();
     return t || void 0;
   };
-  const anchor = structuresAnchorIndex(workflow, stages);
-  const fieldOf = (s) => stageFieldName(stages, s, tools);
+  const layout = turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const fieldOf = (s) => layout.stageField(s);
+  const structureFieldOf = (d) => layout.structureField(d);
   const toolOf = (s) => stageToolName(stages, s, tools);
-  const paramOf = (s) => stageParam(s, tools).name;
-  const structureProps = (properties, required) => {
-    for (const s of structures) {
-      properties[s.field] = structureFieldSchema(s, expand);
-      if (!isStructureOptional(s.kind)) required.push(s.field);
-    }
+  const paramOf = (s) => layout.stageParam(s, stageParam(s, tools).name);
+  const addStructure = (properties, required, d) => {
+    const name = structureFieldOf(d);
+    properties[name] = structureFieldSchema(withFieldName(d, name), expand);
+    if (!isStructureOptional(d.kind)) required.push(name);
   };
   const turnSchema = () => {
     const properties = {};
     const required = [];
-    stages.forEach((stage, i) => {
-      const name = fieldOf(stage);
-      properties[name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
-      if (!stage.optional) required.push(name);
-      if (i === anchor) structureProps(properties, required);
-    });
-    if (anchor < 0) structureProps(properties, required);
+    for (const it of layout.items) {
+      if (it.type === "structure") {
+        addStructure(properties, required, it.structure);
+        continue;
+      }
+      const stage = it.stage;
+      properties[it.name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
+      if (!stage.optional) required.push(it.name);
+    }
     return { type: "object", properties, required, additionalProperties: false };
   };
-  const stageTools = () => stages.map((stage, i) => {
+  const stageTools = () => stages.map((stage) => {
     const properties = {};
     const required = [];
     const param = stageParam(stage, tools);
-    properties[param.name] = stageSchema(stage, desc(param.description, stage), tools, expand);
-    required.push(param.name);
-    if (i === anchor) structureProps(properties, required);
+    const carried = layout.carriedBy(stage);
+    const own2 = layout.items.find((it) => it.type === "stage" && it.stage === stage);
+    const addOwn = () => {
+      const name = paramOf(stage);
+      properties[name] = stageSchema(stage, desc(param.description, stage), tools, expand);
+      required.push(name);
+    };
+    let ownAdded = false;
+    for (const d of carried) {
+      const at = layout.items.findIndex((it) => it.type === "structure" && it.structure === d);
+      if (!ownAdded && at > own2.position - 1) {
+        addOwn();
+        ownAdded = true;
+      }
+      addStructure(properties, required, d);
+    }
+    if (!ownAdded) addOwn();
     return tool(toolOf(stage), desc(stage.tool?.description ?? tools.stage.description, stage), { type: "object", properties, required, additionalProperties: false });
   });
   const keys = { thinking: tools.envelope.thinking.name, result: tools.envelope.result.name };
   return {
+    layout,
     fieldOf,
+    structureFieldOf,
     toolOf,
     paramOf,
     stageOfTool: (name) => stages.find((s) => toolOf(s) === name),
@@ -8415,6 +8554,23 @@ function plainBuildVars(vars) {
   return Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, v instanceof Map ? Object.fromEntries(v) : v]));
 }
 
+// ../protocol/src/storylines.ts
+var DEFAULT_STORYLINES = {
+  separator: "<!-- Start of Storyline {{storyline}} -->",
+  mainSeparator: "<!-- Start of the main storyline -->"
+};
+var STORYLINE_FREEZE_MODES = ["all", "if", "off"];
+var STORYLINE_CONFIG_DEFAULTS = { enabled: true, freezeVariables: "all" };
+var freezeMode = (c) => STORYLINE_FREEZE_MODES.includes(c?.freezeVariables) ? c.freezeVariables : STORYLINE_CONFIG_DEFAULTS.freezeVariables;
+var freezesStoryline = (mode, line) => mode === "all" ? !line.main : mode === "if" ? line.if : false;
+var STORYLINES_SINCE = "1.10.0";
+var MAIN_STORYLINE_VARS = { name: "", main: true, if: false, new: false, grouped: false, naming: false, namingMain: false, switching: false, frozen: false };
+function storylineNamingFields(v) {
+  if (!v) return [];
+  return [...v.naming ? ["name"] : [], ...v.namingMain ? ["previous_main"] : []];
+}
+var isIfName = (name) => /^if/i.test(name);
+
 // ../protocol/src/assemble.ts
 function resolverOf(vars) {
   return (path) => {
@@ -8451,15 +8607,27 @@ function moduleSwitches(preset, config) {
   const on = new Set(activeModules(preset, config).map((m) => m.id));
   return Object.fromEntries(preset.modules.map((m) => [m.id, on.has(m.id)]));
 }
-function activeStructures(preset, modules) {
+function activeStructures(preset, modules, vars) {
   const ids = new Set(modules.flatMap((m) => m.structures));
-  return Object.values(preset.structures).filter((s) => ids.has(s.id));
+  const naming = storylineNamingFields(vars?.storyline);
+  return Object.values(preset.structures).filter((s) => ids.has(s.id)).flatMap((s) => {
+    if (s.kind !== "storyline") return [s];
+    return naming.length ? [{ ...s, requested: naming }] : [];
+  });
 }
 function actorName(preset, config, actor) {
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
 }
-function createMacroResolver(input, stages, workflow, buildVars) {
+function layoutOf(preset, workflow, stages, structures) {
+  return workflow && preset.tools ? turnLayout(workflow, stages, structures, preset.tools, (s) => stageFieldName(stages, s, preset.tools)) : void 0;
+}
+function createMacroResolver(input, stages, workflow, buildVars, structures) {
   const { preset, config, vars, data = {} } = input;
+  let layout = null;
+  const fieldName = (s) => {
+    if (layout === null) layout = structures ? layoutOf(preset, workflow, stages, structures) : void 0;
+    return layout?.structureField(s) ?? s.field;
+  };
   const paramText = (id, depth = 0) => {
     const p = preset.params.find((x) => x.id === id);
     if (!p) return "";
@@ -8504,7 +8672,7 @@ function createMacroResolver(input, stages, workflow, buildVars) {
         const s = preset.structures[a];
         if (!s) return "";
         if (b === "last") return data.customLast?.[a] ?? "";
-        return style === "dialogue" ? s.formatPrompt.tag : s.formatPrompt.field;
+        return style === "dialogue" ? s.formatPrompt.tag : s.formatPrompt.field.replaceAll("{{field}}", fieldName(s));
       }
       case "workflow":
         if (a === "hint") return workflow?.hint ?? "";
@@ -8519,6 +8687,8 @@ function createMacroResolver(input, stages, workflow, buildVars) {
         return data.recentMeta ?? "";
       case "var":
         return readVar(a, b);
+      case "storyline":
+        return a === "main" ? data.storyline?.main ?? "" : data.storyline?.name ?? vars.storyline?.name ?? "";
       default:
         return void 0;
     }
@@ -8571,14 +8741,15 @@ ${joined}
   flush();
   return out;
 }
-function workflowContent(preset, workflow, stages, style, transport, config) {
+function workflowContent(preset, workflow, stages, style, transport, config, structures = []) {
   const s = workflow.sections;
+  const layout = preset.tools?.orderPrefix ? layoutOf(preset, workflow, stages, structures) : void 0;
   const out = [...s.preamble ?? [], ...s.intro[style] ?? []];
   stages.forEach((stage, i) => {
     const body = s.stages[stage.id]?.[style];
     if (!body?.length) return;
     if (style === "imperative" && preset.stageHeading) {
-      const target = transport === "tool-multi" ? stageToolName(stages, stage, preset.tools) : stageFieldName(stages, stage, preset.tools);
+      const target = transport === "tool-multi" ? stageToolName(stages, stage, preset.tools) : layout?.stageField(stage) ?? stageFieldName(stages, stage, preset.tools);
       const heading = preset.stageHeading.replaceAll("{{n}}", String(i + 1)).replaceAll("{{label}}", stage.label).replaceAll("{{actor}}", actorName(preset, config, stage.actor)).replaceAll("{{target}}", target).replaceAll("{{optional}}", stage.optional ? " (optional)" : "");
       const [first, ...rest] = body;
       out.push({ ...first, pieces: [{ text: `${heading}
@@ -8598,9 +8769,9 @@ function assemble(input, workflowOverride) {
   vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
   const resolve2 = resolverOf(vars);
   const modules = activeModules(preset, config, resolve2);
-  const structures = activeStructures(preset, modules);
+  const structures = activeStructures(preset, modules, vars);
   const buildVars = computeBuildVars(preset.vars, modules);
-  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars);
+  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars, structures);
   const expand = (text) => expandMacros(text, macro);
   const activeIds = new Set(modules.map((m) => m.id));
   const warnings = [];
@@ -8615,7 +8786,7 @@ function assemble(input, workflowOverride) {
   }
   if (workflow) {
     const list = blocksByRegion.get(preset.workflowRegion) ?? [];
-    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config);
+    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config, structures);
     for (const b of renderContent(content, resolve2, expand, templateRenderer(getScope, warnings, `workflow ${workflow.id}`))) {
       const last = list[list.length - 1];
       if (!b.role && last && !last.role && last.workflow) last.text += `
@@ -8646,8 +8817,241 @@ function defaultVars(preset, config, over = {}) {
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },
     input: { shaped: false },
+    last: {},
+    storyline: { ...MAIN_STORYLINE_VARS },
     ...over
   };
+}
+
+// ../protocol/src/tavern-helper.ts
+var TAVERN_HELPER_SINCE = "1.10.0";
+var TAVERN_HELPER_FIELD = "tavern_helper";
+function tavernHelperScriptCount(trees) {
+  return trees.reduce((n, t) => n + (t.type === "folder" ? t.scripts.length : 1), 0);
+}
+
+// ../protocol/src/preset-file.ts
+var PRESET_FILE_SINCE = "1.10.0";
+var PRESET_FILE_FIELD = "advanced_preset_file";
+var PRESET_FILE_FORMAT = 1;
+var AP_MIRRORS = [
+  "https://github.com/mirrorange/advanced-preset",
+  "https://gitlab.com/mirrorange/advanced-preset",
+  "https://codeberg.org/mirrorange/advanced-preset"
+];
+var INSTALL_NOTICE_ID = "ap_install_notice";
+var INSTALL_NOTICE_MARK = "\u27E6ap:install-notice\u27E7";
+var INSTALLER_SCRIPT_ID = "6f1d6c2e-5a4b-4c3e-9a7d-a9e5c0f1b2d3";
+function requiredAdvancedPreset(artifact) {
+  const min = artifact.minAdvancedPreset;
+  return min && compareVersions(min, PRESET_FILE_SINCE) > 0 ? min : PRESET_FILE_SINCE;
+}
+var anchor = (content) => typeof content === "string" && content.includes("\u27E6ap:region:");
+function installNotice(artifact) {
+  return `${INSTALL_NOTICE_MARK}
+[Notice from the preset file \u2014 not part of the story]
+The selected Chat Completion preset, "${artifact.name}" ${artifact.version}, is an Advanced Preset preset. It only works with the Advanced Preset extension for SillyTavern, which is not installed or not enabled here, so none of the preset's prompts were loaded.
+
+Do not continue the story or the roleplay in this reply. Instead, tell the user in their own language, briefly and kindly, that this preset needs the Advanced Preset extension, and guide them to install it:
+1. Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".
+2. Paste one of these addresses and install (if one fails, try the next):
+${AP_MIRRORS.map((u) => `   - ${u}`).join("\n")}
+3. Reload the page. Advanced Preset then sets up this preset by itself.
+If the Tavern Helper extension is installed, the preset's installer script can do this automatically: enable the preset's scripts when Tavern Helper asks (or in Tavern Helper \u2192 Scripts \u2192 Preset scripts).
+If Advanced Preset is installed but disabled, enable it in Extensions \u2192 Manage extensions and reload.`;
+}
+function installerScript(artifact) {
+  return {
+    type: "script",
+    enabled: true,
+    name: "Advanced Preset Installer",
+    id: INSTALLER_SCRIPT_ID,
+    content: installerSource(artifact.name, requiredAdvancedPreset(artifact)),
+    info: `This preset ("${artifact.name}") needs the Advanced Preset extension. The script offers to install it (or to update or enable it) from:
+${AP_MIRRORS.join("\n")}
+It does nothing once Advanced Preset ${requiredAdvancedPreset(artifact)} or newer is running; Advanced Preset then replaces this preset with its own copy, without this script.
+
+\u6B64\u9884\u8BBE\u9700\u8981 Advanced Preset \u63D2\u4EF6\u3002\u811A\u672C\u4F1A\u8BE2\u95EE\u662F\u5426\u4ECE\u4EE5\u4E0A\u5730\u5740\u5B89\u88C5\uFF08\u6216\u66F4\u65B0\u3001\u542F\u7528\uFF09\u5B83\uFF1BAdvanced Preset ${requiredAdvancedPreset(artifact)} \u53CA\u4EE5\u4E0A\u7248\u672C\u8FD0\u884C\u540E\u811A\u672C\u4E0D\u505A\u4EFB\u4F55\u4E8B\uFF0C\u63D2\u4EF6\u4F1A\u7528\u81EA\u5DF1\u7684\u526F\u672C\u66FF\u6362\u6B64\u9884\u8BBE\uFF08\u4E0D\u542B\u6B64\u811A\u672C\uFF09\u3002`,
+    button: { enabled: false, buttons: [] },
+    data: {},
+    export_with: { data: true, button: true }
+  };
+}
+function presetFile(artifact, o = {}) {
+  const prompts = artifact.carrier.prompts.map((p) => ({ ...p }));
+  const regionIds = new Set(prompts.filter((p) => anchor(p.content)).map((p) => p.identifier));
+  prompts.push({
+    identifier: INSTALL_NOTICE_ID,
+    name: "Advanced Preset \xB7 install notice",
+    role: "system",
+    content: installNotice(artifact),
+    system_prompt: false,
+    marker: false,
+    injection_position: 0,
+    injection_depth: 4,
+    forbid_overrides: true
+  });
+  const order = [
+    ...artifact.carrier.prompt_order.map((x) => ({ ...x, enabled: x.enabled && !regionIds.has(x.identifier) })),
+    { identifier: INSTALL_NOTICE_ID, enabled: true }
+  ];
+  const data = { format: PRESET_FILE_FORMAT, artifact };
+  return {
+    ...o.sampling ?? {},
+    prompts,
+    prompt_order: [1e5, 100001].map((character_id) => ({ character_id, order: order.map((x) => ({ ...x })) })),
+    extensions: {
+      ...o.installer === false ? {} : { [TAVERN_HELPER_FIELD]: { scripts: [installerScript(artifact)], variables: {} } },
+      [PRESET_FILE_FIELD]: data
+    }
+  };
+}
+function installerSource(presetName, required) {
+  const json = (v) => JSON.stringify(v).replace(/</g, "\\u003c");
+  return `// Advanced Preset installer, written into the preset file by Advanced Preset.
+// It installs, updates or enables the Advanced Preset extension; it does nothing once
+// Advanced Preset ${required} or newer is running.
+const PRESET = ${json(presetName)};
+const REQUIRED = ${json(required)};
+const MIRRORS = ${json(AP_MIRRORS)};
+const FOLDER = 'advanced-preset';
+const EXTENSION = 'third-party/' + FOLDER;
+const LATER_KEY = 'advancedPreset.installer.later';
+const host = window.parent && window.parent.SillyTavern ? window.parent : window;
+const ctx = () => host.SillyTavern.getContext();
+
+const locale = String((ctx().getCurrentLocale && ctx().getCurrentLocale()) || host.localStorage.getItem('language') || host.navigator.language || '').toLowerCase();
+const zh = locale.startsWith('zh');
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const list = '<ul style="text-align:start;word-break:break-all">' + MIRRORS.map((u) => '<li><code>' + esc(u) + '</code></li>').join('') + '</ul>';
+const T = zh ? {
+  title: 'Advanced Preset',
+  install: '<h3>\u9700\u8981 Advanced Preset \u63D2\u4EF6</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset \u63D2\u4EF6\u624D\u80FD\u4F7F\u7528\uFF0C\u5F53\u524D\u5C1A\u672A\u5B89\u88C5\u3002</p><p>\u662F\u5426\u73B0\u5728\u5B89\u88C5\uFF1F\u5C06\u4F9D\u6B21\u5C1D\u8BD5\u4EE5\u4E0B\u5730\u5740\uFF1A</p>' + list,
+  update: (v) => '<h3>\u9700\u8981\u66F4\u65B0 Advanced Preset</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset ' + esc(REQUIRED) + ' \u6216\u66F4\u65B0\u7248\u672C' + (v ? '\uFF08\u5F53\u524D\u4E3A ' + esc(v) + '\uFF09' : '') + '\u3002</p><p>\u662F\u5426\u73B0\u5728\u66F4\u65B0\uFF1F</p>',
+  enable: '<h3>Advanced Preset \u5DF2\u505C\u7528</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset \u63D2\u4EF6\uFF0C\u5B83\u5DF2\u5B89\u88C5\u4F46\u5904\u4E8E\u505C\u7528\u72B6\u6001\u3002</p><p>\u662F\u5426\u542F\u7528\u5E76\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\uFF1F</p>',
+  installOk: '\u5B89\u88C5', updateOk: '\u66F4\u65B0', enableOk: '\u542F\u7528\u5E76\u91CD\u65B0\u52A0\u8F7D', later: '\u7A0D\u540E',
+  trying: (u) => '\u6B63\u5728\u4ECE ' + u + ' \u5B89\u88C5 Advanced Preset\u2026\u2026',
+  updating: '\u6B63\u5728\u66F4\u65B0 Advanced Preset\u2026\u2026',
+  done: '<h3>Advanced Preset \u5DF2\u5C31\u7EEA</h3><p>\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u540E\u63D2\u4EF6\u5373\u4F1A\u751F\u6548\uFF0C\u5E76\u81EA\u52A8\u63A5\u7BA1\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u3002</p><p>\u662F\u5426\u73B0\u5728\u91CD\u65B0\u52A0\u8F7D\uFF1F</p>',
+  reloadOk: '\u91CD\u65B0\u52A0\u8F7D',
+  stillOld: (v) => '\u5DF2\u662F\u53EF\u83B7\u53D6\u7684\u6700\u65B0\u7248\u672C\uFF08' + esc(v) + '\uFF09\uFF0C\u4F46\u9884\u8BBE\u9700\u8981 ' + esc(REQUIRED) + ' \u6216\u66F4\u65B0\u7248\u672C\u3002\u8BF7\u7A0D\u540E\u518D\u8BD5\uFF0C\u6216\u624B\u52A8\u66F4\u65B0 Advanced Preset\u3002',
+  failed: '<h3>\u65E0\u6CD5\u5B89\u88C5 Advanced Preset</h3><p>\u6240\u6709\u5730\u5740\u90FD\u5B89\u88C5\u5931\u8D25\u3002\u8BF7\u68C0\u67E5\u7F51\u7EDC\u8FDE\u63A5\u540E\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u91CD\u8BD5\uFF0C\u6216\u5C1D\u8BD5\u624B\u52A8\u5B89\u88C5 Advanced Preset \u63D2\u4EF6\uFF1A</p><ol style="text-align:start"><li>\u6253\u5F00\u300C\u6269\u5C55\u300D\u9762\u677F\uFF08\u9876\u680F\u7684\u79EF\u6728\u56FE\u6807\uFF09\uFF0C\u70B9\u51FB\u300C\u5B89\u88C5\u6269\u5C55\u300D\uFF1B</li><li>\u7C98\u8D34\u4EE5\u4E0B\u4EFB\u4E00\u5730\u5740\u5E76\u5B89\u88C5\uFF1A' + list + '</li><li>\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u3002</li></ol>',
+} : {
+  title: 'Advanced Preset',
+  install: '<h3>Advanced Preset is required</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is not installed.</p><p>Install it now? These addresses are tried in turn:</p>' + list,
+  update: (v) => '<h3>Advanced Preset needs an update</h3><p>The preset "' + esc(PRESET) + '" needs Advanced Preset ' + esc(REQUIRED) + ' or newer' + (v ? ' (installed: ' + esc(v) + ')' : '') + '.</p><p>Update it now?</p>',
+  enable: '<h3>Advanced Preset is disabled</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is installed but disabled.</p><p>Enable it and reload the page?</p>',
+  installOk: 'Install', updateOk: 'Update', enableOk: 'Enable and reload', later: 'Later',
+  trying: (u) => 'Installing Advanced Preset from ' + u + '\u2026',
+  updating: 'Updating Advanced Preset\u2026',
+  done: '<h3>Advanced Preset is ready</h3><p>It starts once the page is reloaded and then sets up the preset "' + esc(PRESET) + '" by itself.</p><p>Reload now?</p>',
+  reloadOk: 'Reload',
+  stillOld: (v) => 'This is the newest version available (' + esc(v) + '), but the preset needs ' + esc(REQUIRED) + ' or newer. Try again later, or update Advanced Preset by hand.',
+  failed: '<h3>Could not install Advanced Preset</h3><p>Installing failed from every address. Check your network connection and reload the page to try again, or install the Advanced Preset extension by hand:</p><ol style="text-align:start"><li>Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".</li><li>Paste one of these addresses and install:' + list + '</li><li>Reload the page.</li></ol>',
+};
+
+const toast = (kind, message) => (host.toastr || window.toastr)[kind](message, T.title);
+const parse = (v) => String(v).split('-')[0].split('.').map((n) => parseInt(n, 10) || 0);
+const atLeast = (v, min) => {
+  const a = parse(v), b = parse(min);
+  for (let i = 0; i < 3; i++) if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
+  return true;
+};
+const sleep = (ms) => new Promise((r) => host.setTimeout(r, ms));
+async function confirm(html, ok) {
+  const c = ctx();
+  return (await c.callGenericPopup(html, c.POPUP_TYPE.CONFIRM, '', { okButton: ok, cancelButton: T.later })) === c.POPUP_RESULT.AFFIRMATIVE;
+}
+const showFailure = () => ctx().callGenericPopup(T.failed, ctx().POPUP_TYPE.TEXT);
+const post = (url, body) => host.fetch(url, { method: 'POST', headers: ctx().getRequestHeaders(), body: JSON.stringify(body) });
+async function offerReload() {
+  if (await confirm(T.done, T.reloadOk)) host.location.reload();
+}
+
+async function installFromMirrors() {
+  for (const url of MIRRORS) {
+    toast('info', T.trying(url));
+    try {
+      const r = await post('/api/extensions/install', { url, global: false });
+      // 409: the folder exists (installed meanwhile, e.g. by another tab).
+      if (r.ok || r.status === 409) return true;
+      console.warn('[Advanced Preset installer]', url, r.status, await r.text().catch(() => ''));
+    } catch (e) {
+      console.warn('[Advanced Preset installer]', url, e);
+    }
+  }
+  return false;
+}
+
+async function updateFolder() {
+  toast('info', T.updating);
+  for (const global of [false, true]) {
+    try {
+      const r = await post('/api/extensions/update', { extensionName: FOLDER, global });
+      if (r.ok) return true;
+    } catch (e) {
+      console.warn('[Advanced Preset installer]', e);
+    }
+  }
+  return false;
+}
+
+async function installedFolder() {
+  try {
+    const r = await host.fetch('/api/extensions/discover', { headers: ctx().getRequestHeaders() });
+    const all = r.ok ? await r.json() : [];
+    return Array.isArray(all) && all.some((e) => e && e.name === EXTENSION);
+  } catch {
+    return false;
+  }
+}
+
+async function main() {
+  // AP loads with the other extensions, before Tavern Helper runs scripts; wait a little anyway.
+  for (let i = 0; i < 20 && !host.AdvancedPreset; i++) await sleep(250);
+  const ap = host.AdvancedPreset;
+  if (ap && atLeast(ap.version, REQUIRED)) return;
+  if (host.sessionStorage.getItem(LATER_KEY) || host.__advancedPresetInstaller) return;
+  host.__advancedPresetInstaller = true;
+  const later = () => host.sessionStorage.setItem(LATER_KEY, '1');
+
+  if (ap) {
+    if (!(await confirm(T.update(ap.version), T.updateOk))) return later();
+    toast('info', T.updating);
+    try {
+      // Reloads the page by itself when the extension changed.
+      if ((await ap.update()) === 'current') toast('warning', T.stillOld(ap.version));
+    } catch (e) {
+      console.warn('[Advanced Preset installer]', e);
+      await showFailure();
+    }
+    return;
+  }
+
+  if (await installedFolder()) {
+    const disabled = ctx().extensionSettings && ctx().extensionSettings.disabledExtensions;
+    if (Array.isArray(disabled) && disabled.includes(EXTENSION)) {
+      if (!(await confirm(T.enable, T.enableOk))) return later();
+      disabled.splice(disabled.indexOf(EXTENSION), 1);
+      ctx().saveSettingsDebounced();
+      await sleep(2000);
+      host.location.reload();
+      return;
+    }
+    // Installed but not running (too old for this SillyTavern, or broken): update it.
+    if (!(await confirm(T.update(''), T.updateOk))) return later();
+    if (await updateFolder()) return offerReload();
+    await showFailure();
+    return;
+  }
+
+  if (!(await confirm(T.install, T.installOk))) return later();
+  if (await installFromMirrors()) return offerReload();
+  await showFailure();
+}
+
+main().catch((e) => console.error('[Advanced Preset installer]', e));
+`;
 }
 
 // ../protocol/src/user-modules.ts
@@ -8918,13 +9322,51 @@ function wrapInput(template, text, expand = (s) => s) {
   return expand(template.replaceAll("{{content}}", SLOT)).replaceAll(SLOT, () => text);
 }
 
+// ../protocol/src/history-echo.ts
+var DEFAULT_SYNOPSIS_LINE = "[{{time}} \xB7 {{location}}] {{event}}: {{summary}}";
+var defaultHistoryTemplate = (kind) => kind === "synopsis" ? DEFAULT_SYNOPSIS_LINE : "{{value}}";
+
+// ../protocol/src/regex-scripts.ts
+var REGEX_SCRIPTS_SINCE = "1.10.0";
+var REGEX_PLACEMENTS = {
+  "user-input": 1,
+  "ai-output": 2,
+  "slash-command": 3,
+  "world-info": 5,
+  reasoning: 6
+};
+var REGEX_SUBSTITUTE = { none: 0, raw: 1, escaped: 2 };
+function regexFromString(input) {
+  try {
+    const m = /(\/?)(.+)\1([a-z]*)/i.exec(input);
+    if (!m) return new RegExp(input);
+    if (m[3] && !/^(?!.*?(.).*?\1)[gmixXsuUAJ]+$/.test(m[3])) return new RegExp(input);
+    return new RegExp(m[2], m[3]);
+  } catch {
+    return void 0;
+  }
+}
+
+// ../protocol/src/quick-replies.ts
+var QUICK_REPLIES_SINCE = "1.10.0";
+var QR_AUTO_EXECUTE = [
+  "executeOnStartup",
+  "executeOnUser",
+  "executeOnAi",
+  "executeOnChatChange",
+  "executeOnGroupMemberDraft",
+  "executeOnNewChat",
+  "executeBeforeGeneration"
+];
+var QR_TEXT_FIELDS = ["label", "title", "message"];
+
 // src/io.ts
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 
 // src/compile.ts
-var import_yaml4 = __toESM(require_dist(), 1);
-import { createHash } from "node:crypto";
+var import_yaml5 = __toESM(require_dist(), 1);
+import { createHash as createHash2 } from "node:crypto";
 
 // src/diagnostics.ts
 var Diagnostics = class {
@@ -9139,10 +9581,10 @@ function compileBody(file, src, ctx, id, kind, translation) {
 function compileUserModuleSources(tree, ctx, kind) {
   const dir = USER_MODULE_DIRS[kind];
   const re = fileRe(dir);
-  const files2 = [...tree.keys()].filter((p) => p.startsWith(`${dir}/`)).sort();
+  const files3 = [...tree.keys()].filter((p) => p.startsWith(`${dir}/`)).sort();
   const sources = [];
   const translations = [];
-  for (const file of files2) {
+  for (const file of files3) {
     const m = re.exec(file);
     if (!m) {
       ctx.diag.error(`${NOUN[kind]} files are \`${dir}/<id>.md\` or \`<id>.<lang>.md\` (id in lower-case kebab-case)`, { file });
@@ -9250,7 +9692,7 @@ function loadManifest(tree, diag) {
     }
   };
   const raw = {};
-  const files2 = [];
+  const files3 = [];
   for (const src of docs) {
     const value = src.doc.toJS();
     if (src.file === MANIFEST_FILE) {
@@ -9270,7 +9712,7 @@ function loadManifest(tree, diag) {
           delete value[k];
         }
     }
-    files2.push(src.file);
+    files3.push(src.file);
     merge(raw, value, [], src);
   }
   const locate = (where) => {
@@ -9281,18 +9723,376 @@ function loadManifest(tree, diag) {
     const line = lineOf(src, segs);
     return { ...where, file: src.file, ...line !== void 0 ? { line } : {} };
   };
-  return { raw, files: files2, locate };
+  return { raw, files: files3, locate };
+}
+
+// src/st-sources.ts
+var import_yaml4 = __toESM(require_dist(), 1);
+import { createHash } from "node:crypto";
+var isObj4 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var REGEX_SCRIPT_FILE_RE = /^regex-scripts\/([^/]+)\.(?:ya?ml|json)$/;
+var QUICK_REPLY_FILE_RE = /^quick-replies\/([^/]+)\.(?:ya?ml|json)$/;
+var KEBAB = /^[a-z0-9][a-z0-9-]*$/;
+function files(tree, re, diag) {
+  const out = [];
+  for (const file of [...tree.keys()].sort()) {
+    const m = re.exec(file);
+    if (!m) continue;
+    try {
+      out.push({ file, id: m[1], data: (0, import_yaml4.parse)(tree.get(file)) });
+    } catch (e) {
+      diag.error(`invalid ${file.endsWith(".json") ? "JSON" : "YAML"}: ${e.message}`, { file });
+    }
+  }
+  return out;
+}
+function stableUuid(seed) {
+  const h = createHash("sha256").update(seed).digest("hex");
+  const variant = (parseInt(h[16], 16) & 3 | 8).toString(16);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-${variant}${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
+function reader(o, diag, where) {
+  return {
+    bool(key, fallback) {
+      const v = o[key];
+      if (v === void 0 || v === null) return fallback;
+      if (typeof v !== "boolean") {
+        diag.error(`\`${key}\` must be true or false`, where(key));
+        return fallback;
+      }
+      return v;
+    },
+    text(key, fallback = "") {
+      const v = o[key];
+      if (v === void 0 || v === null) return fallback;
+      if (typeof v === "number") return String(v);
+      if (typeof v !== "string") {
+        diag.error(`\`${key}\` must be a string`, where(key));
+        return fallback;
+      }
+      return v;
+    }
+  };
+}
+function warnUnknown(o, known, diag, where, what) {
+  for (const k of Object.keys(o)) if (!known.includes(k)) diag.warn(`unknown ${what} field \`${k}\` (ignored)`, where(k));
+}
+var REGEX_FIELDS = ["id", "scriptName", "findRegex", "replaceString", "trimStrings", "placement", "disabled", "markdownOnly", "promptOnly", "runOnEdit", "substituteRegex", "minDepth", "maxDepth"];
+var PLACEMENT_NUMBERS = new Map(Object.entries(REGEX_PLACEMENTS).map(([k, v]) => [v, k]));
+function regexScript(src, seed, fallbackName, file, prefix, diag) {
+  const where = (key) => ({ file, ...prefix || key ? { path: [prefix, key].filter(Boolean).join(".") } : {} });
+  if (!isObj4(src)) {
+    diag.error("a regex script must be a mapping", where());
+    return void 0;
+  }
+  warnUnknown(src, REGEX_FIELDS, diag, where, "regex script");
+  const r = reader(src, diag, where);
+  const findRegex = r.text("findRegex");
+  if (!findRegex) {
+    diag.error("`findRegex` is required", where("findRegex"));
+    return void 0;
+  }
+  let substituteRegex = REGEX_SUBSTITUTE.none;
+  const sub = src.substituteRegex;
+  if (typeof sub === "string" && sub in REGEX_SUBSTITUTE) substituteRegex = REGEX_SUBSTITUTE[sub];
+  else if (typeof sub === "number" && Object.values(REGEX_SUBSTITUTE).includes(sub)) substituteRegex = sub;
+  else if (sub !== void 0 && sub !== null) diag.error(`\`substituteRegex\` must be ${Object.keys(REGEX_SUBSTITUTE).join(" | ")} (or 0 / 1 / 2)`, where("substituteRegex"));
+  if (substituteRegex === REGEX_SUBSTITUTE.none && !regexFromString(findRegex)) diag.error(`\`findRegex\` is not a valid regular expression: ${findRegex}`, where("findRegex"));
+  const trim = src.trimStrings;
+  let trimStrings = [];
+  if (typeof trim === "string") trimStrings = trim.split("\n").filter(Boolean);
+  else if (Array.isArray(trim) && trim.every((x) => typeof x === "string")) trimStrings = trim.filter(Boolean);
+  else if (trim !== void 0 && trim !== null) diag.error("`trimStrings` must be a list of strings", where("trimStrings"));
+  const placement = [];
+  const pl = src.placement;
+  for (const p of Array.isArray(pl) ? pl : pl === void 0 || pl === null ? [] : [pl]) {
+    const n = typeof p === "number" ? PLACEMENT_NUMBERS.has(p) ? p : void 0 : REGEX_PLACEMENTS[p];
+    if (n === void 0) diag.error(`unknown placement \`${String(p)}\` (expected ${Object.keys(REGEX_PLACEMENTS).join(" | ")}, or ST's numbers)`, where("placement"));
+    else if (!placement.includes(n)) placement.push(n);
+  }
+  if (!placement.length) diag.warn("no `placement`: the script never runs", where("placement"));
+  const depth = (key) => {
+    const v = src[key];
+    if (v === void 0 || v === null || v === "") return null;
+    if (typeof v !== "number" || !Number.isInteger(v) || v < -1) {
+      diag.error(`\`${key}\` must be an integer \u2265 -1 (or empty)`, where(key));
+      return null;
+    }
+    return v;
+  };
+  const script = {
+    id: stableUuid(seed),
+    scriptName: r.text("scriptName", fallbackName) || fallbackName,
+    findRegex,
+    replaceString: r.text("replaceString"),
+    trimStrings,
+    placement,
+    disabled: r.bool("disabled", false),
+    markdownOnly: r.bool("markdownOnly", false),
+    promptOnly: r.bool("promptOnly", false),
+    runOnEdit: r.bool("runOnEdit", true),
+    substituteRegex,
+    minDepth: depth("minDepth"),
+    maxDepth: depth("maxDepth")
+  };
+  if ([script.findRegex, script.replaceString, ...script.trimStrings].some((s) => s.includes("{{ap::")))
+    diag.warn("`{{ap::\u2026}}` macros are not expanded in regex scripts (ST runs them; use ST macros with `substituteRegex`)", where());
+  return script;
+}
+function compileRegexScripts(tree, presetId, diag) {
+  const out = [];
+  for (const { file, id, data } of files(tree, REGEX_SCRIPT_FILE_RE, diag)) {
+    if (Array.isArray(data)) data.forEach((s, i) => {
+      const x = regexScript(s, `${presetId}\0${file}\0${i}`, `${id} ${i + 1}`, file, `[${i}]`, diag);
+      if (x) out.push(x);
+    });
+    else {
+      const x = regexScript(data, `${presetId}\0${file}`, id, file, "", diag);
+      if (x) out.push(x);
+    }
+  }
+  const names = /* @__PURE__ */ new Set();
+  for (const s of out) {
+    if (names.has(s.scriptName)) diag.warn(`several regex scripts are named \`${s.scriptName}\``, { file: "regex-scripts" });
+    names.add(s.scriptName);
+  }
+  return out;
+}
+var SET_FIELDS = ["name", "global", "visible", "disableSend", "placeBeforeInput", "injectInput", "color", "onlyBorderColor", "qrList", "version", "idIndex"];
+var QR_FIELDS = ["id", "label", "icon", "showLabel", "title", "message", "contextList", "preventAutoExecute", "isHidden", "automationId", ...QR_AUTO_EXECUTE];
+var defaultQuickReplySetName = (presetName) => `AP \xB7 ${presetName}`;
+function checkQuickReplyText(text, actors, diag, where) {
+  for (const [head, ...rest] of listMacros(text)) {
+    const shown = `{{ap::${[head, ...rest].join("::")}}}`;
+    if (head !== "name" || rest.length !== 1) diag.error(`${shown}: quick replies only expand {{ap::name::<actor>}} (other macros: ST's own, e.g. {{user}} / {{input}})`, where);
+    else if (!actors.includes(rest[0])) diag.error(`${shown}: unknown actor \`${rest[0]}\``, where);
+  }
+}
+function quickReply(src, index, file, actors, diag) {
+  const prefix = `qrList[${index}]`;
+  const where = (key) => ({ file, path: key ? `${prefix}.${key}` : prefix });
+  if (!isObj4(src)) {
+    diag.error("a quick reply must be a mapping", where());
+    return void 0;
+  }
+  warnUnknown(src, QR_FIELDS, diag, where, "quick reply");
+  const r = reader(src, diag, where);
+  const icon = r.text("icon").trim();
+  if (/\s/.test(icon)) diag.error("`icon` is one Font Awesome class, e.g. `fa-at` (ST adds `fa-solid` itself)", where("icon"));
+  else if (icon && !icon.startsWith("fa-")) diag.warn("`icon` should be a Font Awesome class such as `fa-at`", where("icon"));
+  const contextList = [];
+  const ctx = src.contextList;
+  if (ctx !== void 0 && ctx !== null && !Array.isArray(ctx)) diag.error("`contextList` must be a list of sets", where("contextList"));
+  for (const [i, c] of (Array.isArray(ctx) ? ctx : []).entries()) {
+    if (typeof c === "string" && c) contextList.push({ set: c, isChained: false });
+    else if (isObj4(c) && typeof c.set === "string" && c.set) contextList.push({ set: c.set, isChained: c.isChained === true });
+    else diag.error("a context menu item is a set (`<set id or ST name>` or `{ set, isChained }`)", where(`contextList[${i}]`));
+  }
+  const id = src.id === void 0 || src.id === null ? String(index + 1) : String(src.id);
+  const qr = {
+    id,
+    label: r.text("label"),
+    icon,
+    showLabel: r.bool("showLabel", false),
+    title: r.text("title"),
+    message: r.text("message"),
+    contextList,
+    preventAutoExecute: r.bool("preventAutoExecute", true),
+    isHidden: r.bool("isHidden", false),
+    automationId: r.text("automationId"),
+    ...Object.fromEntries(QR_AUTO_EXECUTE.map((k) => [k, r.bool(k, false)]))
+  };
+  if (!qr.label && !qr.icon) diag.warn("a quick reply without `label` or `icon` shows an empty button", where());
+  for (const k of QR_TEXT_FIELDS) checkQuickReplyText(qr[k], actors, diag, where(k));
+  return qr;
+}
+function compileQuickReplySets(tree, presetName, actors, diag) {
+  const sets = [];
+  const fileOf = /* @__PURE__ */ new Map();
+  for (const { file, id, data } of files(tree, QUICK_REPLY_FILE_RE, diag)) {
+    const where = (key) => ({ file, ...key ? { path: key } : {} });
+    if (!KEBAB.test(id)) {
+      diag.error("a Quick Reply set file name must be lower-case kebab-case (it is the set id)", where());
+      continue;
+    }
+    if (!isObj4(data)) {
+      diag.error("a Quick Reply set must be a mapping", where());
+      continue;
+    }
+    warnUnknown(data, SET_FIELDS, diag, where, "Quick Reply set");
+    const r = reader(data, diag, where);
+    if (!Array.isArray(data.qrList)) diag.error("`qrList` (the quick replies) must be a list", where("qrList"));
+    const qrList = (Array.isArray(data.qrList) ? data.qrList : []).map((q, i) => quickReply(q, i, file, actors, diag)).filter((q) => Boolean(q));
+    const ids = /* @__PURE__ */ new Set();
+    for (const [i, q] of qrList.entries()) {
+      if (ids.has(q.id)) diag.error(`duplicate quick reply id \`${q.id}\``, where(`qrList[${i}].id`));
+      ids.add(q.id);
+    }
+    const name = r.text("name", defaultQuickReplySetName(presetName)).trim() || defaultQuickReplySetName(presetName);
+    fileOf.set(id, file);
+    sets.push({
+      id,
+      name,
+      global: r.bool("global", true),
+      visible: r.bool("visible", true),
+      disableSend: r.bool("disableSend", false),
+      placeBeforeInput: r.bool("placeBeforeInput", false),
+      injectInput: r.bool("injectInput", false),
+      color: r.text("color", "transparent") || "transparent",
+      onlyBorderColor: r.bool("onlyBorderColor", false),
+      qrList
+    });
+  }
+  const byName = /* @__PURE__ */ new Map();
+  for (const s of sets) {
+    const other = byName.get(s.name);
+    if (other) diag.error(`sets \`${other}\` and \`${s.id}\` are both named \`${s.name}\` in ST (give one a \`name\`)`, { file: fileOf.get(s.id), path: "name" });
+    byName.set(s.name, s.id);
+  }
+  for (const s of sets) for (const [i, q] of s.qrList.entries()) for (const c of q.contextList) {
+    const own2 = sets.find((x) => x.id === c.set);
+    if (own2) c.set = own2.name;
+    else if (!byName.has(c.set)) diag.warn(`context menu set \`${c.set}\` is not one of the preset's sets (it must exist in the user's ST)`, { file: fileOf.get(s.id), path: `qrList[${i}].contextList` });
+  }
+  return sets;
+}
+var TAVERN_HELPER_DIR = "tavern-helper-scripts";
+var TAVERN_HELPER_FILE_RE = /^tavern-helper-scripts\/([^/]+)\.(?:ya?ml|json)$/;
+var TH_SCRIPT_FIELDS = ["type", "enabled", "name", "id", "content", "info", "button", "data", "export_with"];
+var TH_FOLDER_FIELDS = ["type", "enabled", "name", "id", "icon", "color", "scripts"];
+function tavernHelperScript(src, seed, fallbackName, tree, file, prefix, diag) {
+  const where = (key) => ({ file, ...prefix || key ? { path: [prefix, key].filter(Boolean).join(".") } : {} });
+  warnUnknown(src, TH_SCRIPT_FIELDS, diag, where, "Tavern Helper script");
+  const r = reader(src, diag, where);
+  let content = r.text("content");
+  const path = /^\.\/(\S+)$/.exec(content.trim())?.[1];
+  if (path) {
+    if (!path.startsWith(`${TAVERN_HELPER_DIR}/`)) {
+      diag.error(`\`content\`: script files live under ${TAVERN_HELPER_DIR}/ (got \`${content.trim()}\`)`, where("content"));
+      return void 0;
+    }
+    const got = tree.get(path);
+    if (got === void 0) {
+      diag.error(`\`content\`: file \`${path}\` not found`, where("content"));
+      return void 0;
+    }
+    content = got;
+  }
+  if (!content.trim()) {
+    diag.error("`content` (the script code, or a ./tavern-helper-scripts/\u2026 file) is required", where("content"));
+    return void 0;
+  }
+  const button = src.button;
+  let buttonEnabled = true;
+  const buttons = [];
+  if (isObj4(button)) {
+    buttonEnabled = reader(button, diag, (k) => where(`button.${k}`)).bool("enabled", true);
+    const list = button.buttons;
+    if (list !== void 0 && list !== null && !Array.isArray(list)) diag.error("`button.buttons` must be a list", where("button.buttons"));
+    for (const [i, b] of (Array.isArray(list) ? list : []).entries()) {
+      if (typeof b === "string" && b) buttons.push({ name: b, visible: true });
+      else if (isObj4(b) && typeof b.name === "string" && b.name) buttons.push({ name: b.name, visible: b.visible !== false });
+      else diag.error("a button is `<name>` or `{ name, visible }`", where(`button.buttons[${i}]`));
+    }
+  } else if (button !== void 0 && button !== null) diag.error("`button` must be a mapping (`enabled`, `buttons`)", where("button"));
+  const data = src.data;
+  if (data !== void 0 && data !== null && !isObj4(data)) diag.error("`data` must be a mapping", where("data"));
+  const exp = isObj4(src.export_with) ? reader(src.export_with, diag, (k) => where(`export_with.${k}`)) : void 0;
+  return {
+    type: "script",
+    enabled: r.bool("enabled", true),
+    name: r.text("name", fallbackName) || fallbackName,
+    id: stableUuid(seed),
+    content,
+    info: r.text("info"),
+    button: { enabled: buttonEnabled, buttons },
+    data: isObj4(data) ? structuredClone(data) : {},
+    export_with: { data: exp?.bool("data", true) ?? true, button: exp?.bool("button", true) ?? true }
+  };
+}
+function tavernHelperTree(src, seed, fallbackName, tree, file, prefix, diag) {
+  const where = (key) => ({ file, ...prefix || key ? { path: [prefix, key].filter(Boolean).join(".") } : {} });
+  if (!isObj4(src)) {
+    diag.error("a Tavern Helper script (or folder) must be a mapping", where());
+    return void 0;
+  }
+  const type = src.type ?? (Array.isArray(src.scripts) ? "folder" : "script");
+  if (type === "script") return tavernHelperScript(src, seed, fallbackName, tree, file, prefix, diag);
+  if (type !== "folder") {
+    diag.error("`type` must be script or folder", where("type"));
+    return void 0;
+  }
+  warnUnknown(src, TH_FOLDER_FIELDS, diag, where, "Tavern Helper folder");
+  const r = reader(src, diag, where);
+  if (!Array.isArray(src.scripts)) diag.error("`scripts` (the scripts of the folder) must be a list", where("scripts"));
+  const scripts = [];
+  for (const [i, s] of (Array.isArray(src.scripts) ? src.scripts : []).entries()) {
+    const at = [prefix, `scripts[${i}]`].filter(Boolean).join(".");
+    if (isObj4(s) && (s.type === "folder" || Array.isArray(s.scripts))) {
+      diag.error("folders cannot contain folders", { file, path: at });
+      continue;
+    }
+    if (!isObj4(s)) {
+      diag.error("a Tavern Helper script must be a mapping", { file, path: at });
+      continue;
+    }
+    const x = tavernHelperScript(s, `${seed}\0${i}`, `${fallbackName} ${i + 1}`, tree, file, at, diag);
+    if (x) scripts.push(x);
+  }
+  const color2 = r.text("color").trim();
+  return {
+    type: "folder",
+    enabled: r.bool("enabled", true),
+    name: r.text("name", fallbackName) || fallbackName,
+    id: stableUuid(seed),
+    icon: r.text("icon", "fa-solid fa-folder").trim() || "fa-solid fa-folder",
+    ...color2 ? { color: color2 } : {},
+    scripts
+  };
+}
+function compileTavernHelperScripts(tree, presetId, diag) {
+  const out = [];
+  for (const { file, id, data } of files(tree, TAVERN_HELPER_FILE_RE, diag)) {
+    const seed = `${presetId}\0${file}`;
+    if (Array.isArray(data)) data.forEach((s, i) => {
+      const x = tavernHelperTree(s, `${seed}\0${i}`, `${id} ${i + 1}`, tree, file, `[${i}]`, diag);
+      if (x) out.push(x);
+    });
+    else {
+      const x = tavernHelperTree(data, seed, id, tree, file, "", diag);
+      if (x) out.push(x);
+    }
+  }
+  return out;
 }
 
 // src/compile.ts
 var SOURCE_FORMAT_VERSION = 1;
-var isObj4 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
+var isObj5 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
 var paramShape = (type) => type === "list" ? "a list of strings" : type === "number" ? "a number" : "a string or number";
 var str2 = (v, fallback = "") => typeof v === "string" ? v : v == null ? fallback : String(v);
 var ROLES4 = ["system", "user", "assistant"];
 var ANCHORS = ["historyStart", "historyEnd", "tail"];
 var STAGE_KINDS = ["text", "content", "patch"];
 var STYLES2 = ["dialogue", "imperative"];
+function compileStructureOrder(v, diag, where) {
+  if (v === void 0 || v === null) return void 0;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string") {
+    const m = /^(before|after)\s*:\s*(\S+)$/.exec(v.trim());
+    if (m) return m[1] === "before" ? { before: m[2] } : { after: m[2] };
+  }
+  if (isObj5(v)) {
+    const keys = Object.keys(v);
+    if (keys.length === 1 && (keys[0] === "before" || keys[0] === "after") && typeof v[keys[0]] === "string" && v[keys[0]]) {
+      const ref = v[keys[0]];
+      return keys[0] === "before" ? { before: ref } : { after: ref };
+    }
+  }
+  diag.error(`order must be a number or { before | after: <stage id | ${CONTENT_STAGE_REF}> }`, where);
+  return void 0;
+}
+var UI_FILE_RE = /^ui\/.+/;
 var NATIVE_PROMPTS = {
   main: { name: "Main Prompt", marker: false },
   worldInfoBefore: { name: "World Info (before)", marker: true },
@@ -9310,11 +10110,11 @@ var NATIVE_PROMPTS = {
 var anchorText = (region) => `\u27E6ap:region:${region}\u27E7`;
 var anchorIdentifier = (region) => `ap_${region}`;
 function compileTools(src, diag, text, file = "preset.yaml") {
-  const o = isObj4(src) ? src : {};
+  const o = isObj5(src) ? src : {};
   const at = (path) => ({ file, path: `tools.${path}` });
   const opt = (v, path) => v === void 0 || v === null ? void 0 : text(str2(v), at(path));
   const field = (v, path, fallback) => {
-    const f = typeof v === "string" ? { name: v } : isObj4(v) ? v : {};
+    const f = typeof v === "string" ? { name: v } : isObj5(v) ? v : {};
     const description = f.description !== void 0 ? opt(f.description, `${path}.description`) : fallback.description;
     return { name: str2(f.name, fallback.name), ...description ? { description } : {} };
   };
@@ -9322,12 +10122,12 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   if (legacy.length || typeof o.submit === "string")
     diag.warn(`legacy tools keys (${[...legacy, ...typeof o.submit === "string" ? ["submit: <text>"] : []].join(", ")}); see the README for the tools section`, { file, path: "tools" });
   const D = DEFAULT_TOOLS;
-  const turn = isObj4(o.turn) ? o.turn : {};
-  const submit = isObj4(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
-  const stage = isObj4(o.stage) ? o.stage : {};
-  const patch = isObj4(o.patch) ? o.patch : {};
-  const env = isObj4(o.envelope) ? o.envelope : {};
-  const results = isObj4(o.results) ? o.results : {};
+  const turn = isObj5(o.turn) ? o.turn : {};
+  const submit = isObj5(o.submit) ? o.submit : typeof o.submit === "string" ? { description: o.submit } : {};
+  const stage = isObj5(o.stage) ? o.stage : {};
+  const patch = isObj5(o.patch) ? o.patch : {};
+  const env = isObj5(o.envelope) ? o.envelope : {};
+  const results = isObj5(o.results) ? o.results : {};
   const pick2 = (v, fallback) => v === void 0 ? fallback : v;
   const tools = {
     turn: {
@@ -9360,9 +10160,34 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   if (hint) tools.jsonStringHint = hint;
   tools.structurePrefix = o.structurePrefix === void 0 || o.structurePrefix === null ? D.structurePrefix : str2(o.structurePrefix);
   if (tools.structurePrefix && !/^[A-Za-z_]\w*$/.test(tools.structurePrefix)) diag.error(`tools.structurePrefix \`${tools.structurePrefix}\` must be letters, digits and underscores, not starting with a digit`, at("structurePrefix"));
-  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "structurePrefix", "jsonStringHint", "callerSchemaHint", ...legacy]);
+  if (o.orderPrefix !== void 0 && o.orderPrefix !== null && o.orderPrefix !== false) {
+    const prefix = o.orderPrefix === true ? DEFAULT_ORDER_PREFIX : str2(o.orderPrefix);
+    if (!prefix.includes("{{n}}")) diag.error("tools.orderPrefix must contain `{{n}}` (the position in the turn)", at("orderPrefix"));
+    else if (!/^\w*$/.test(prefix.replaceAll("{{n}}", "1"))) diag.error(`tools.orderPrefix \`${prefix}\` may only hold letters, digits, underscores and {{n}}`, at("orderPrefix"));
+    else {
+      tools.orderPrefix = prefix;
+      if (o.structurePrefix !== void 0 && o.structurePrefix !== null && o.structurePrefix !== "") diag.warn("tools.structurePrefix is ignored when tools.orderPrefix is set", at("structurePrefix"));
+      tools.structurePrefix = "";
+    }
+  }
+  const known = /* @__PURE__ */ new Set(["turn", "submit", "stage", "patch", "envelope", "results", "structurePrefix", "orderPrefix", "jsonStringHint", "callerSchemaHint", ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
+}
+function compileBuildOptions(src, diag) {
+  const out = { installer: true };
+  if (src === void 0 || src === null) return out;
+  const at = (path) => ({ file: MANIFEST_FILE, path: path ? `build.${path}` : "build" });
+  if (!isObj5(src)) {
+    diag.error("`build` must be a mapping", at(""));
+    return out;
+  }
+  for (const k of Object.keys(src)) if (k !== "installer") diag.warn(`unknown build key \`${k}\``, at(k));
+  if (src.installer !== void 0) {
+    if (typeof src.installer === "boolean") out.installer = src.installer;
+    else diag.error("`build.installer` must be true or false", at("installer"));
+  }
+  return out;
 }
 function compile(tree) {
   const diag = new Diagnostics();
@@ -9408,8 +10233,8 @@ function compile(tree) {
   const version = str2(raw.version, "0.0.0");
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error("version must be semver", { file: M, path: "version" });
   const actors = {};
-  for (const [aid, a] of Object.entries(isObj4(raw.actors) ? raw.actors : {})) {
-    const o = isObj4(a) ? a : {};
+  for (const [aid, a] of Object.entries(isObj5(raw.actors) ? raw.actors : {})) {
+    const o = isObj5(a) ? a : {};
     actors[aid] = {
       name: text(str2(o.name, aid), { file: M, path: `actors.${aid}.name` }),
       prefix: text(str2(o.prefix, `{{ap::name::${aid}}}: `), { file: M, path: `actors.${aid}.prefix` }),
@@ -9421,7 +10246,7 @@ function compile(tree) {
   const user = str2(raw.user, "user");
   for (const [k, v] of [["narrator", narrator], ["user", user]])
     if (!actors[v]) diag.error(`${k} actor \`${v}\` is not declared`, { file: M, path: k });
-  const styleSrc = isObj4(raw.styles) ? raw.styles : {};
+  const styleSrc = isObj5(raw.styles) ? raw.styles : {};
   const styles = Object.fromEntries(
     TRANSPORTS.map((t) => {
       const s = str2(styleSrc[t], t === "prefill" || t === "plaintext" ? "dialogue" : "imperative");
@@ -9433,7 +10258,7 @@ function compile(tree) {
   const regions = [];
   const anchors = {};
   (Array.isArray(raw.regions) ? raw.regions : []).forEach((r, i) => {
-    const o = isObj4(r) ? r : {};
+    const o = isObj5(r) ? r : {};
     const where = { file: M, path: `regions[${i}]` };
     const rid = str2(o.id);
     if (!rid) return diag.error("region id is required", where);
@@ -9442,7 +10267,7 @@ function compile(tree) {
     if (!ROLES4.includes(role)) diag.error(`role must be ${ROLES4.join(" | ")}`, where);
     let merge = "none";
     if (o.merge === "join" || o.merge === "none") merge = o.merge;
-    else if (isObj4(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
+    else if (isObj5(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
     else if (o.merge !== void 0) diag.error("merge must be none | join | { wrap: <tag> }", where);
     regions.push({ id: rid, role, merge, separator: str2(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
     if (o.anchor !== void 0) {
@@ -9451,14 +10276,14 @@ function compile(tree) {
       else anchors[a] = rid;
     }
   });
-  for (const [a, rid] of Object.entries(isObj4(raw.anchors) ? raw.anchors : {})) {
+  for (const [a, rid] of Object.entries(isObj5(raw.anchors) ? raw.anchors : {})) {
     if (!ANCHORS.includes(a)) diag.error(`unknown semantic anchor \`${a}\``, { file: M, path: `anchors.${a}` });
     else anchors[a] = str2(rid);
   }
   for (const a of ANCHORS) if (!anchors[a]) diag.error(`semantic anchor \`${a}\` is not mapped to a region`, { file: M, path: "anchors" });
   const insertionPoints = [];
   (Array.isArray(raw.insertionPoints) ? raw.insertionPoints : []).forEach((r, i) => {
-    const o = isObj4(r) ? r : {};
+    const o = isObj5(r) ? r : {};
     const where = { file: M, path: `insertionPoints[${i}]` };
     const pid = str2(o.id);
     if (!/^[a-z0-9][a-z0-9-]*$/.test(pid)) return diag.error("insertion point id must be lower-case kebab-case", where);
@@ -9474,10 +10299,10 @@ function compile(tree) {
     insertionPoints.push(point);
   });
   const vars = [];
-  if (raw.vars !== void 0 && !isObj4(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
-  for (const [vid, v] of Object.entries(isObj4(raw.vars) ? raw.vars : {})) {
+  if (raw.vars !== void 0 && !isObj5(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
+  for (const [vid, v] of Object.entries(isObj5(raw.vars) ? raw.vars : {})) {
     const where = { file: M, path: `vars.${vid}` };
-    const o = isObj4(v) ? v : { type: v };
+    const o = isObj5(v) ? v : { type: v };
     if (!/^[A-Za-z][\w-]*$/.test(vid)) {
       diag.error("variable id must start with a letter (letters, digits, _ and -)", where);
       continue;
@@ -9496,11 +10321,11 @@ function compile(tree) {
     vars.push(decl);
   }
   const params = (Array.isArray(raw.params) ? raw.params : []).map((p, i) => {
-    const o = isObj4(p) ? p : {};
+    const o = isObj5(p) ? p : {};
     const where = { file: M, path: `params[${i}]` };
     const type = str2(o.type, "text");
     if (!PARAM_TYPES.includes(type)) diag.error(`param type must be ${PARAM_TYPES.join(" | ")}`, where);
-    const options = Array.isArray(o.options) ? o.options.map((x) => isObj4(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
+    const options = Array.isArray(o.options) ? o.options.map((x) => isObj5(x) ? { value: x.value, ...x.label !== void 0 ? { label: str2(x.label) } : {}, ...x.text !== void 0 ? { text: text(str2(x.text), where) } : {} } : { value: x }) : void 0;
     const param = {
       id: str2(o.id),
       type,
@@ -9526,8 +10351,8 @@ function compile(tree) {
   });
   const groups = {};
   let groupOrder = 0;
-  for (const [gid, g] of Object.entries(isObj4(raw.groups) ? raw.groups : {})) {
-    const o = isObj4(g) ? g : {};
+  for (const [gid, g] of Object.entries(isObj5(raw.groups) ? raw.groups : {})) {
+    const o = isObj5(g) ? g : {};
     groupOrder += 10;
     groups[gid] = {
       label: str2(o.label, gid),
@@ -9539,19 +10364,120 @@ function compile(tree) {
   }
   const tools = compileTools(raw.tools, diag, text, M);
   const structures = {};
-  for (const [sid, s] of Object.entries(isObj4(raw.structures) ? raw.structures : {})) {
-    const o = isObj4(s) ? s : {};
+  const ordered = Boolean(tools.orderPrefix);
+  const compileStructureUi = (src, kind, where) => {
+    if (src === void 0 || src === null) return void 0;
+    if (!isObj5(src)) {
+      diag.error("ui must be a mapping (position, order, template, module, style)", where);
+      return void 0;
+    }
+    const ui = {};
+    if (src.position !== void 0) {
+      if (CARD_POSITIONS.includes(src.position)) ui.position = src.position;
+      else diag.error(`ui.position must be ${CARD_POSITIONS.join(" | ")}`, { ...where, path: `${where.path}.position` });
+    }
+    if (src.order !== void 0) {
+      if (typeof src.order === "number" && Number.isFinite(src.order)) ui.order = src.order;
+      else diag.error("ui.order must be a number", { ...where, path: `${where.path}.order` });
+    }
+    for (const k of ["template", "module", "style"]) {
+      if (src[k] === void 0 || src[k] === null) continue;
+      const at = { ...where, path: `${where.path}.${k}` };
+      if (kind !== "custom") {
+        diag.error(`ui.${k}: only custom structures bring their own component`, at);
+        continue;
+      }
+      if (typeof src[k] !== "string") {
+        diag.error(`ui.${k} must be a string (source text or a ./ui/\u2026 file path)`, at);
+        continue;
+      }
+      let code = src[k];
+      const path = /^\.\/(\S+)$/.exec(code.trim())?.[1];
+      if (path) {
+        const file = path.replace(/^\.\//, "");
+        if (!UI_FILE_RE.test(file)) {
+          diag.error(`ui.${k}: component files live under ui/ (got \`${code.trim()}\`)`, at);
+          continue;
+        }
+        const got = tree.get(file);
+        if (got === void 0) {
+          diag.error(`ui.${k}: file \`${file}\` not found`, at);
+          continue;
+        }
+        code = got;
+      }
+      if (!code.trim()) {
+        diag.warn(`ui.${k} is empty`, at);
+        continue;
+      }
+      ui[k] = code;
+    }
+    if (ui.template !== void 0 && ui.module !== void 0) diag.error("ui: use either template or module, not both", where);
+    const known = /* @__PURE__ */ new Set(["position", "order", "template", "module", "style"]);
+    for (const k of Object.keys(src)) if (!known.has(k)) diag.warn(`unknown ui key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    if (ui.style !== void 0 && ui.template === void 0 && ui.module === void 0) diag.warn("ui.style only applies to a template or module component", where);
+    return Object.keys(ui).length ? ui : void 0;
+  };
+  const compileStructureHistory = (o, kind, where) => {
+    const src = o.history;
+    if (src === void 0 || src === null) return void 0;
+    const isDepth = (v) => typeof v === "number" && Number.isInteger(v) && v >= 0;
+    if (kind === "annotations") {
+      if (isDepth(src)) return src;
+      diag.error("annotations take a number: `history: N` re-injects the last N messages' annotations", where);
+      return void 0;
+    }
+    if (typeof src === "number") {
+      if (!isDepth(src)) {
+        diag.error("`history` must be a non-negative integer", where);
+        return void 0;
+      }
+      if (kind === "synopsis") return src;
+      return src > 0 ? { depth: src, template: defaultHistoryTemplate(kind) } : void 0;
+    }
+    if (!isObj5(src)) {
+      diag.error("`history` must be a number or an object with depth / template / position / when", where);
+      return void 0;
+    }
+    const known = /* @__PURE__ */ new Set(["depth", "template", "position", "when"]);
+    for (const k of Object.keys(src)) if (!known.has(k)) diag.warn(`unknown history key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    let depth = 1;
+    if (src.depth !== void 0) {
+      if (isDepth(src.depth)) depth = src.depth;
+      else diag.error("`history.depth` must be a non-negative integer", { ...where, path: `${where.path}.depth` });
+    }
+    const template = src.template === void 0 ? defaultHistoryTemplate(kind) : str2(src.template);
+    if (!template.trim()) diag.warn("`history.template` is empty: nothing would be inserted", { ...where, path: `${where.path}.template` });
+    if (template.includes("{{content}}")) diag.warn("`{{content}}` is not a history placeholder: the template is inserted next to the message text (set `history.position`)", { ...where, path: `${where.path}.template` });
+    const fields = /* @__PURE__ */ new Set(["value", ...STRUCTURE_PROPERTIES[kind] ?? []]);
+    if (kind !== "custom") {
+      for (const m of template.matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)) {
+        if (!fields.has(m[1]) && m[1] !== "content") diag.warn(`\`{{${m[1]}}}\` is not a ${kind} field (expected ${[...fields].join(" | ")}): it is sent as written`, { ...where, path: `${where.path}.template` });
+      }
+    }
+    const out = { depth, template };
+    if (src.position !== void 0) {
+      const p = src.position;
+      if (p === "before" || p === "after" || typeof p === "number" && Number.isFinite(p)) out.position = p;
+      else diag.error("`history.position` must be before | after | a number (sort key)", { ...where, path: `${where.path}.position` });
+    }
+    const when = expr(src.when, { ...where, path: `${where.path}.when` });
+    if (when) out.when = when;
+    return out;
+  };
+  for (const [sid, s] of Object.entries(isObj5(raw.structures) ? raw.structures : {})) {
+    const o = isObj5(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
     const kind = str2(o.kind, sid);
     if (!STRUCTURE_KINDS.includes(kind)) diag.error(`structure kind must be one of ${STRUCTURE_KINDS.join(", ")}`, where);
-    const fp = isObj4(o.formatPrompt) ? o.formatPrompt : {};
+    const fp = isObj5(o.formatPrompt) ? o.formatPrompt : {};
     const inline = isInlineStructure({ kind });
     const base = str2(o.field, sid);
     const field = inline ? base : `${tools.structurePrefix ?? ""}${base}`;
     const fieldText = (v, path, check = true) => {
-      const t = str2(v).replaceAll("{{field}}", field);
-      if (check && !inline && field !== base && t.includes(`\`${base}\``))
-        diag.warn(`mentions \`${base}\`, but the field is \`${field}\` (tools.structurePrefix); write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
+      const t = ordered ? str2(v) : str2(v).replaceAll("{{field}}", field);
+      if (check && !inline && (ordered || field !== base) && t.includes(`\`${base}\``))
+        diag.warn(`mentions \`${base}\`, but the field is ${ordered ? "ordering-prefixed (tools.orderPrefix)" : `\`${field}\` (tools.structurePrefix)`}; write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
       return text(t, where);
     };
     const decl = {
@@ -9562,7 +10488,7 @@ function compile(tree) {
       formatPrompt: { tag: text(str2(fp.tag), where), field: fieldText(fp.field, "formatPrompt.field") }
     };
     if (o.description !== void 0) decl.description = fieldText(o.description, "description");
-    if (isObj4(o.properties)) {
+    if (isObj5(o.properties)) {
       const allowed = STRUCTURE_PROPERTIES[kind] ?? [];
       const props = {};
       for (const [k, v] of Object.entries(o.properties)) {
@@ -9575,6 +10501,13 @@ function compile(tree) {
       if (Object.keys(props).length) decl.properties = props;
     }
     if (typeof o.count === "number") decl.count = o.count;
+    const order = compileStructureOrder(o.order, diag, { ...where, path: `${where.path}.order` });
+    if (order !== void 0) {
+      if (inline) diag.warn("inline structures have no field: `order` is ignored", { ...where, path: `${where.path}.order` });
+      else decl.order = order;
+    }
+    const ui = compileStructureUi(o.ui, kind, { ...where, path: `${where.path}.ui` });
+    if (ui) decl.ui = ui;
     if (kind === "custom") {
       decl.shape = o.shape === "kv" ? "kv" : "text";
       decl.display = o.display === "hidden" ? "hidden" : "card";
@@ -9583,22 +10516,21 @@ function compile(tree) {
       if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
       if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
     }
-    if (o.history !== void 0) {
-      if (kind !== "annotations" && kind !== "synopsis") diag.error("only annotations and synopsis structures support `history`", { ...where, path: `${where.path}.history` });
-      else if (typeof o.history === "number" && Number.isInteger(o.history) && o.history >= 0) decl.history = o.history;
-      else diag.error("`history` must be a non-negative integer", { ...where, path: `${where.path}.history` });
-    }
-    if (kind === "synopsis" && (o.history !== void 0 || o.historyTemplate !== void 0)) {
+    const history = compileStructureHistory(o, kind, { ...where, path: `${where.path}.history` });
+    if (history !== void 0) decl.history = history;
+    if (kind === "synopsis" && !isObj5(o.history) && (o.history !== void 0 || o.historyTemplate !== void 0)) {
       decl.historyTemplate = str2(o.historyTemplate, DEFAULT_SYNOPSIS_HISTORY_TEMPLATE);
       if (!decl.historyTemplate.includes("{{content}}")) diag.warn("`historyTemplate` has no `{{content}}`: kept messages would lose their text", { ...where, path: `${where.path}.historyTemplate` });
-    } else if (o.historyTemplate !== void 0) diag.warn("`historyTemplate` only applies to synopsis structures and is ignored", { ...where, path: `${where.path}.historyTemplate` });
+    } else if (o.historyTemplate !== void 0) {
+      diag.warn(isObj5(o.history) ? "`historyTemplate` is ignored with a `history` object: use `history.template`" : "`historyTemplate` only applies to synopsis structures and is ignored", { ...where, path: `${where.path}.historyTemplate` });
+    }
     if (o.title !== void 0) decl.title = text(str2(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);
     structures[sid] = decl;
   }
   const regex = (Array.isArray(raw.regex) ? raw.regex : []).map((r, i) => {
-    const o = isObj4(r) ? r : {};
+    const o = isObj5(r) ? r : {};
     const where = { file: M, path: `regex[${i}]` };
     const decl = { id: str2(o.id), pattern: str2(o.pattern), flags: str2(o.flags, "i"), target: str2(o.target, "meta") };
     try {
@@ -9611,8 +10543,8 @@ function compile(tree) {
     if (req) decl.requires = req;
     return decl;
   });
-  const metaSrc = isObj4(raw.meta) ? raw.meta : {};
-  const tasksSrc = isObj4(metaSrc.tasks) ? metaSrc.tasks : {};
+  const metaSrc = isObj5(raw.meta) ? raw.meta : {};
+  const tasksSrc = isObj5(metaSrc.tasks) ? metaSrc.tasks : {};
   const meta = {
     trigger: text(str2(metaSrc.trigger, `@{{ap::name::${narrator}}}`), { file: M, path: "meta.trigger" }),
     wrap: metaSrc.wrap !== false,
@@ -9628,7 +10560,7 @@ function compile(tree) {
     const e = expr(cond, { file: M, path: `meta.tasks.${task}` });
     if (e) meta.tasks[task] = e;
   }
-  const tsSrc = isObj4(raw.tokenSaving) ? raw.tokenSaving : {};
+  const tsSrc = isObj5(raw.tokenSaving) ? raw.tokenSaving : {};
   const userInputMode = (v, path) => {
     if (v === void 0) return void 0;
     if (USER_INPUT_MODES.includes(v)) return v;
@@ -9644,8 +10576,8 @@ function compile(tree) {
   let inputShaping;
   if (raw.inputShaping !== void 0 && raw.inputShaping !== null) {
     const where = { file: M, path: "inputShaping" };
-    const src = isObj4(raw.inputShaping) ? raw.inputShaping : {};
-    if (!isObj4(raw.inputShaping)) diag.error("inputShaping must be a mapping { mode, template? }", where);
+    const src = isObj5(raw.inputShaping) ? raw.inputShaping : {};
+    if (!isObj5(raw.inputShaping)) diag.error("inputShaping must be a mapping { mode, template? }", where);
     else {
       for (const k of Object.keys(src)) if (k !== "mode" && k !== "template") diag.warn(`inputShaping: unknown key \`${k}\``, { file: M, path: `inputShaping.${k}` });
       const mode = src.mode;
@@ -9658,11 +10590,27 @@ function compile(tree) {
       }
     }
   }
+  let storylines;
+  if (raw.storylines !== void 0 && raw.storylines !== null && raw.storylines !== false) {
+    const where = { file: M, path: "storylines" };
+    if (raw.storylines === true) storylines = { ...DEFAULT_STORYLINES };
+    else if (!isObj5(raw.storylines)) diag.error("storylines must be `true` or a mapping { separator?, mainSeparator? }", where);
+    else {
+      const src = raw.storylines;
+      for (const k of Object.keys(src)) if (k !== "separator" && k !== "mainSeparator") diag.warn(`storylines: unknown key \`${k}\``, { file: M, path: `storylines.${k}` });
+      const sep2 = (k) => {
+        if (src[k] !== void 0 && typeof src[k] !== "string") diag.error(`storylines.${k} must be a string`, { file: M, path: `storylines.${k}` });
+        return text(typeof src[k] === "string" ? src[k] : DEFAULT_STORYLINES[k], { file: M, path: `storylines.${k}` });
+      };
+      storylines = { separator: sep2("separator"), mainSeparator: sep2("mainSeparator") };
+      if (!storylines.separator.includes("{{storyline}}")) diag.warn("storylines.separator has no {{storyline}}: storylines cannot be told apart in the history", { file: M, path: "storylines.separator" });
+    }
+  }
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
-    const o = isObj4(s) ? s : {};
+    const o = isObj5(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
-    const toolSrc = isObj4(o.tool) ? o.tool : {};
-    const resp = isObj4(o.response) ? o.response : {};
+    const toolSrc = isObj5(o.tool) ? o.tool : {};
+    const resp = isObj5(o.response) ? o.response : {};
     const turn = {
       id: str2(o.id),
       label: str2(o.label, str2(o.id)),
@@ -9674,7 +10622,7 @@ function compile(tree) {
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error("invalid tool name", where);
     return turn;
   });
-  const theme = isObj4(raw.theme) ? raw.theme : {};
+  const theme = isObj5(raw.theme) ? raw.theme : {};
   const modules = [];
   const entries = [];
   const moduleFiles = [...tree.keys()].filter((p) => p.startsWith("modules/") && p.endsWith(".md")).sort();
@@ -9756,9 +10704,12 @@ function compile(tree) {
     const order = raw.workflowOrder.map((x) => str2(x));
     workflows.sort((a, b) => (order.indexOf(a.id) + 1 || 1e6) - (order.indexOf(b.id) + 1 || 1e6));
   }
-  const carrier = compileCarrier(isObj4(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
-  const cd = isObj4(raw.configurationDefaults) ? raw.configurationDefaults : {};
-  const sect = (k) => isObj4(cd[k]) ? cd[k] : {};
+  const regexScripts = compileRegexScripts(tree, id, diag);
+  const quickReplySets = compileQuickReplySets(tree, str2(raw.name, id), Object.keys(actors), diag);
+  const tavernHelperScripts = compileTavernHelperScripts(tree, id, diag);
+  const carrier = compileCarrier(isObj5(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
+  const cd = isObj5(raw.configurationDefaults) ? raw.configurationDefaults : {};
+  const sect = (k) => isObj5(cd[k]) ? cd[k] : {};
   const storyWorkflow = workflows.find((w) => w.kind === "story")?.id ?? "";
   const identitySrc = sect("identity");
   const configurationDefaults = {
@@ -9777,9 +10728,11 @@ function compile(tree) {
     params: Object.fromEntries(params.map((p) => [p.id, p.default])),
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...sect("tokenSaving") },
     cache: { ...CACHE_DEFAULTS, ...sect("cache") },
-    meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") }
+    meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") },
+    // Only for presets with storylines, so that other artifacts keep their hash.
+    ...storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...sect("storylines") } } : {}
   };
-  for (const k of ["names", "prefixes"]) if (isObj4(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
+  for (const k of ["names", "prefixes"]) if (isObj5(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
     if (!(k in configurationDefaults.modules)) diag.error(`configurationDefaults.modules: unknown user module \`${k}\``, { file: M, path: `configurationDefaults.modules.${k}` });
     else configurationDefaults.modules[k] = Boolean(v);
@@ -9810,16 +10763,28 @@ function compile(tree) {
     if ("enabled" in c && typeof c.enabled !== "boolean") diag.error("`enabled` must be a boolean", { file: M, path: `${path}.enabled` });
   };
   checkMeta(sect("meta"), "configurationDefaults.meta");
+  const checkStorylines = (c, path) => {
+    if (!storylines) return void (path.startsWith("configurations") && diag.warn(`${path}: the preset declares no storylines (ignored)`, { file: M, path }));
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
+      else if (k === "freezeVariables") {
+        if (!STORYLINE_FREEZE_MODES.includes(v)) diag.error(`\`freezeVariables\` must be one of ${STORYLINE_FREEZE_MODES.join(" / ")}`, where);
+      } else if (typeof v !== "boolean") diag.error(`\`${k}\` must be a boolean`, where);
+    }
+  };
+  if (isObj5(cd.storylines)) checkStorylines(cd.storylines, "configurationDefaults.storylines");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
-    const o = isObj4(c) ? c : {};
-    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj4(o.diff) ? o.diff : {} };
+    const o = isObj5(c) ? c : {};
+    const rc = { id: str2(o.id), name: str2(o.name, str2(o.id)), diff: isObj5(o.diff) ? o.diff : {} };
     if (o.description !== void 0) rc.description = str2(o.description);
     if (!rc.id) diag.error("configuration id is required", { file: M, path: `configurations[${i}]` });
-    if (isObj4(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
-    if (isObj4(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
-    if (isObj4(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
-    if (isObj4(rc.diff.params)) checkParams(rc.diff.params, `configurations[${i}].diff.params`, (k, v) => {
+    if (isObj5(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
+    if (isObj5(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
+    if (isObj5(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj5(rc.diff.storylines)) checkStorylines(rc.diff.storylines, `configurations[${i}].diff.storylines`);
+    if (isObj5(rc.diff.params)) checkParams(rc.diff.params, `configurations[${i}].diff.params`, (k, v) => {
       rc.diff.params[k] = v;
     }, false);
     return rc;
@@ -9827,8 +10792,8 @@ function compile(tree) {
   if (!configurations.length) configurations.push({ id: "default", name: "Default", diff: {} });
   const defaultConfiguration = str2(raw.defaultConfiguration, configurations[0].id);
   const migrations = (Array.isArray(raw.migrations) ? raw.migrations : []).map((m, i) => {
-    const o = isObj4(m) ? m : {};
-    const rename2 = isObj4(o.rename) ? o.rename : {};
+    const o = isObj5(m) ? m : {};
+    const rename2 = isObj5(o.rename) ? o.rename : {};
     const known = {
       modules: new Set(modules.map((x) => x.id)),
       params: new Set(params.map((x) => x.id)),
@@ -9841,7 +10806,7 @@ function compile(tree) {
         diag.warn(`unknown rename section \`${section}\``, where);
         continue;
       }
-      for (const [from, to] of Object.entries(isObj4(rename2[section]) ? rename2[section] : {}))
+      for (const [from, to] of Object.entries(isObj5(rename2[section]) ? rename2[section] : {}))
         if (!known[section].has(String(to))) diag.warn(`\`${from}\` is renamed to \`${String(to)}\`, which this version does not declare`, where);
     }
     return { from: str2(o.from), rename: rename2 };
@@ -9851,8 +10816,8 @@ function compile(tree) {
     const m = /^locales\/([\w-]+)\.ya?ml$/.exec(file);
     if (!m) continue;
     try {
-      const parsed = (0, import_yaml4.parse)(src);
-      if (isObj4(parsed)) locales[m[1].toLowerCase()] = parsed;
+      const parsed = (0, import_yaml5.parse)(src);
+      if (isObj5(parsed)) locales[m[1].toLowerCase()] = parsed;
       else diag.error("locale file must be a mapping", { file });
     } catch (e) {
       diag.error(`invalid YAML: ${e.message}`, { file });
@@ -9881,6 +10846,7 @@ function compile(tree) {
     anchors,
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
     ...inputShaping ? { inputShaping } : {},
+    ...storylines ? { storylines } : {},
     params,
     groups,
     modules,
@@ -9892,6 +10858,10 @@ function compile(tree) {
     workflows,
     structures,
     regex,
+    // Only when present, so that other artifacts keep their hash.
+    ...regexScripts.length ? { regexScripts } : {},
+    ...quickReplySets.length ? { quickReplySets } : {},
+    ...tavernHelperScripts.length ? { tavernHelperScripts } : {},
     meta,
     tokenSaving,
     syntheticTurns,
@@ -9906,12 +10876,12 @@ function compile(tree) {
     locales
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map, manifestFiles: manifest.files };
+  return { preset, build: compileBuildOptions(raw.build, diag), diag, map, manifestFiles: manifest.files };
 }
 var isScalar2 = (v) => ["string", "number", "boolean"].includes(typeof v);
 function varUpdates(src, decls, diag, where, text) {
   if (src === void 0) return [];
-  if (!isObj4(src)) {
+  if (!isObj5(src)) {
     diag.error("vars must be a mapping of variable id \u2192 value", where);
     return [];
   }
@@ -9939,7 +10909,7 @@ function varUpdates(src, decls, diag, where, text) {
         break;
       }
       case "dict": {
-        if (!isObj4(v)) {
+        if (!isObj5(v)) {
           diag.error(`\`${id}\` is a dict variable: expected a mapping`, at);
           break;
         }
@@ -9962,7 +10932,7 @@ function compileWorkflow(file, src, diag, expr, content, text) {
   const kind = fm.kind === "task" ? "task" : "story";
   const stages = [];
   (Array.isArray(fm.stages) ? fm.stages : []).forEach((s, i) => {
-    const o = isObj4(s) ? s : {};
+    const o = isObj5(s) ? s : {};
     const where = { file, path: `stages[${i}]` };
     const stage = { id: str2(o.id), actor: str2(o.actor), kind: str2(o.kind, "text"), label: str2(o.label, str2(o.id)) };
     if (!/^[a-z][\w-]*$/i.test(stage.id)) diag.error("stage id is required (letters, digits, _ and -)", where);
@@ -9971,24 +10941,28 @@ function compileWorkflow(file, src, diag, expr, content, text) {
     if (o.optional) stage.optional = true;
     if (o.tag !== void 0) stage.tag = str2(o.tag);
     if (o.field !== void 0) {
-      const f = isObj4(o.field) ? o.field : { description: o.field };
+      const f = isObj5(o.field) ? o.field : { description: o.field };
       const out = {};
       if (f.name !== void 0) out.name = str2(f.name);
       if (f.description !== void 0) out.description = text(str2(f.description), where);
       stage.field = out;
     }
     if (o.tool !== void 0) {
-      const t = isObj4(o.tool) ? o.tool : { description: o.tool };
+      const t = isObj5(o.tool) ? o.tool : { description: o.tool };
       const out = {};
       if (t.name !== void 0) out.name = str2(t.name);
       if (t.description !== void 0) out.description = text(str2(t.description), where);
       if (t.param !== void 0) {
-        const p = isObj4(t.param) ? t.param : { name: t.param };
+        const p = isObj5(t.param) ? t.param : { name: t.param };
         out.param = {};
         if (p.name !== void 0) out.param.name = str2(p.name);
         if (p.description !== void 0) out.param.description = text(str2(p.description), where);
       }
       stage.tool = out;
+    }
+    if (o.order !== void 0) {
+      if (typeof o.order === "number" && Number.isFinite(o.order)) stage.order = o.order;
+      else diag.error("stage order must be a number", { ...where, path: `${where.path}.order` });
     }
     if (o.executor !== void 0 && o.executor !== "default") diag.error("only `executor: default` is supported in v1", where);
     const w = expr(o.when, where);
@@ -10043,17 +11017,44 @@ function compileWorkflow(file, src, diag, expr, content, text) {
   const wf = { id, name: str2(fm.name, id), kind, stages, sections };
   if (fm.description !== void 0) wf.description = str2(fm.description).trim();
   if (fm.hint !== void 0) wf.hint = str2(fm.hint).trim();
-  const after = isObj4(fm.structures) ? fm.structures.after : void 0;
+  let prevKey = Number.NEGATIVE_INFINITY;
+  stages.forEach((s, i) => {
+    const key = typeof s.order === "number" ? s.order : (i + 1) * 100;
+    if (key <= prevKey) diag.error(`stage ${s.id}: order ${key} must be greater than the previous stage's (${prevKey}); stages keep their declared order`, { file, path: `stages[${i}].order` });
+    prevKey = key;
+  });
+  const after = isObj5(fm.structures) ? fm.structures.after : void 0;
   if (after !== void 0) {
     wf.structuresAfter = str2(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
   }
+  const orderSrc = isObj5(fm.structures) ? fm.structures.order : void 0;
+  if (orderSrc !== void 0) {
+    if (!isObj5(orderSrc)) diag.error("structures.order must map structure ids to positions", { file, path: "structures.order" });
+    else {
+      const out = {};
+      for (const [sid, v] of Object.entries(orderSrc)) {
+        const where = { file, path: `structures.order.${sid}` };
+        const o = compileStructureOrder(v, diag, where);
+        if (o === void 0) continue;
+        const ref = typeof o === "number" ? void 0 : "before" in o ? o.before : o.after;
+        if (ref !== void 0 && ref !== CONTENT_STAGE_REF && !stages.some((s) => s.id === ref)) {
+          diag.error(`unknown stage \`${ref}\` (expected a stage of this workflow or ${CONTENT_STAGE_REF})`, where);
+          continue;
+        }
+        if (ref === CONTENT_STAGE_REF && !stages.some((s) => s.kind === "content")) diag.warn(`${CONTENT_STAGE_REF}: this workflow has no content stage`, where);
+        out[sid] = o;
+      }
+      if (Object.keys(out).length) wf.structureOrder = out;
+    }
+  }
+  for (const k of Object.keys(isObj5(fm.structures) ? fm.structures : {})) if (k !== "after" && k !== "order") diag.warn(`unknown structures key \`${k}\` (expected after | order)`, { file, path: `structures.${k}` });
   return wf;
 }
 function compileCarrier(src, regions, presetName, diag) {
   const M = "preset.yaml";
   const label = str2(src.label, presetName);
-  const overrides = isObj4(src.prompts) ? src.prompts : {};
+  const overrides = isObj5(src.prompts) ? src.prompts : {};
   const prompts = [];
   const prompt_order = [];
   const order = Array.isArray(src.order) ? src.order : [];
@@ -10065,12 +11066,12 @@ function compileCarrier(src, regions, presetName, diag) {
     } else if (NATIVE_PROMPTS[identifier]) {
       const n = NATIVE_PROMPTS[identifier];
       p = n.marker ? { identifier, name: n.name, system_prompt: true, marker: true } : { identifier, name: n.name, system_prompt: true, role: "system", content: "", marker: false };
-    } else if (isObj4(overrides[identifier])) {
+    } else if (isObj5(overrides[identifier])) {
       p = { identifier, name: identifier, role: "system", content: "", system_prompt: false, marker: false, injection_position: 0, injection_depth: 4 };
     } else {
       return diag.error(`carrier.order: \`${identifier}\` is neither a region, an ST prompt nor declared in carrier.prompts`, where);
     }
-    if (isObj4(overrides[identifier])) Object.assign(p, overrides[identifier]);
+    if (isObj5(overrides[identifier])) Object.assign(p, overrides[identifier]);
     if (prompts.some((x) => x.identifier === p.identifier)) return diag.error(`carrier.order: duplicate \`${identifier}\``, where);
     prompts.push(p);
     prompt_order.push({ identifier: p.identifier, enabled });
@@ -10078,7 +11079,7 @@ function compileCarrier(src, regions, presetName, diag) {
   order.forEach((item, i) => {
     const where = { file: M, path: `carrier.order[${i}]` };
     if (typeof item === "string") add(item, true, where);
-    else if (isObj4(item) && Object.keys(item).length === 1) {
+    else if (isObj5(item) && Object.keys(item).length === 1) {
       const [k, v] = Object.entries(item)[0];
       add(k, v !== false, where);
     } else diag.error("carrier.order items are `id` or `{ id: false }`", where);
@@ -10094,7 +11095,7 @@ function canonicalJson(v) {
   return JSON.stringify(v);
 }
 function hashPreset(p) {
-  return createHash("sha256").update(canonicalJson({ ...p, hash: void 0 })).digest("hex").slice(0, 16);
+  return createHash2("sha256").update(canonicalJson({ ...p, hash: void 0 })).digest("hex").slice(0, 16);
 }
 
 // src/validate.ts
@@ -10116,7 +11117,16 @@ var FIXED_VARS = {
   "memory.hasChat": null,
   "memory.hasGlobal": null,
   "recap.present": null,
-  "input.shaped": null
+  "input.shaped": null,
+  "storyline.name": null,
+  "storyline.main": null,
+  "storyline.if": null,
+  "storyline.new": null,
+  "storyline.grouped": null,
+  "storyline.naming": null,
+  "storyline.namingMain": null,
+  "storyline.switching": null,
+  "storyline.frozen": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -10131,6 +11141,12 @@ function validate(p, map, diag) {
     if (path in FIXED_VARS) return;
     const [root, ...rest] = path.split(".");
     const key = rest.join(".");
+    if (root === "last") {
+      const decl = p.structures[key];
+      if (!decl) return diag.error(`unknown structure \`${key}\` in condition`, where);
+      if (decl.kind !== "custom" && decl.kind !== "status") diag.error(`\`last.${key}\`: only custom and status structures keep a last value`, where);
+      return;
+    }
     const known = root === "modules" ? moduleIds : root === "params" ? paramIds : root === "flags" ? flagIds : root === "stages" ? stageIds : void 0;
     if (!known) return diag.error(`unknown variable \`${path}\``, where);
     if (!known.has(key)) diag.error(`unknown ${root.slice(0, -1)} \`${key}\` in condition`, where);
@@ -10148,8 +11164,12 @@ function validate(p, map, diag) {
     checkLiterals(e.l, where);
     checkLiterals(e.r, where);
   };
+  let storylineUses = 0;
   for (const { expr, where } of map.exprs) {
-    for (const v of variables(expr)) checkVar(v, where);
+    for (const v of variables(expr)) {
+      checkVar(v, where);
+      if (v.startsWith("storyline.")) storylineUses++;
+    }
     checkLiterals(expr, where);
   }
   const dictKeys = (id) => new Set(p.modules.flatMap((m) => m.vars.flatMap((u) => u.var === id && u.type === "dict" ? u.items.map((x) => x.key) : [])));
@@ -10194,7 +11214,7 @@ function validate(p, map, diag) {
           break;
         case "structure":
           if (!structureIds.has(a)) bad(`unknown structure \`${a}\``);
-          else if (rest[1] !== void 0 && (rest[1] !== "last" || p.structures[a].kind !== "custom")) bad("only custom structures support `::last`");
+          else if (rest[1] !== void 0 && (rest[1] !== "last" || !["custom", "status"].includes(p.structures[a].kind))) bad("only custom and status structures support `::last`");
           break;
         case "workflow":
           if (a !== "summary" && a !== "hint") bad("expected summary | hint");
@@ -10205,6 +11225,10 @@ function validate(p, map, diag) {
           break;
         case "memory":
           if (a !== "chat" && a !== "global") bad("expected chat | global");
+          break;
+        case "storyline":
+          storylineUses++;
+          if (a !== void 0 && a !== "main") bad("expected no argument (current storyline) or `main`");
           break;
         case "var": {
           const decl = varDecls.get(a);
@@ -10227,6 +11251,7 @@ function validate(p, map, diag) {
   for (const { source, where } of map.templates) {
     const code = templateCode(source).join("\n");
     if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
+    if (/(?<![\w$.])storyline\s*\.|\bmacro\(\s*(['"`])storyline\1/.test(code)) storylineUses++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -10246,6 +11271,21 @@ function validate(p, map, diag) {
   if (shaping?.mode === "extract" && !inputTextUses) diag.warn("inputShaping extracts the input from the history but no prompt uses {{ap::input::text}}: the input would not be sent", { file: M, path: "inputShaping.mode" });
   if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
     diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: "minAdvancedPreset" });
+  if (!p.storylines && storylineUses) diag.warn("storyline variables and {{ap::storyline}} always describe the main storyline: the preset declares no storylines", { file: M, path: "storylines" });
+  const namingStructures = Object.values(p.structures).filter((s) => s.kind === "storyline");
+  if (!p.storylines && namingStructures.length) diag.warn(`structure ${namingStructures[0].id}: storyline structures are only requested when a storyline is named, and the preset declares no storylines`, { file: M, path: `structures.${namingStructures[0].id}` });
+  if (namingStructures.length > 1) diag.warn(`structures ${namingStructures.map((s) => s.id).join(", ")}: only one storyline structure is read (${namingStructures[0].id})`, { file: M, path: `structures.${namingStructures[1].id}` });
+  if (p.storylines && !namingStructures.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
+    diag.warn("no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names", { file: M, path: "storylines" });
+  if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
+    diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: "minAdvancedPreset" });
+  const below = (since) => !p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, since) < 0;
+  if (p.regexScripts?.length && below(REGEX_SCRIPTS_SINCE))
+    diag.warn(`regex scripts need Advanced Preset ${REGEX_SCRIPTS_SINCE}: set minAdvancedPreset to ${REGEX_SCRIPTS_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
+  if (p.quickReplySets?.length && below(QUICK_REPLIES_SINCE))
+    diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: "minAdvancedPreset" });
+  if (p.tavernHelperScripts?.length && below(TAVERN_HELPER_SINCE))
+    diag.warn(`Tavern Helper scripts need Advanced Preset ${TAVERN_HELPER_SINCE}: set minAdvancedPreset to ${TAVERN_HELPER_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
   if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: "workflowRegion" });
   for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
@@ -10309,49 +11349,114 @@ function validate(p, map, diag) {
   if (env.thinking.name === env.result.name) diag.error("envelope thinking and result fields must differ", T);
   const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
   if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
-  const structureFields = new Set(Object.values(p.structures).filter((s) => !isInlineStructure(s)).map((s) => s.field));
+  const PREFIXED_FIELD_NAME = /^[A-Za-z0-9_]{1,64}$/;
   function checkNames(w, where) {
     const structs = Object.values(p.structures);
     const a = turnArtifacts(p.tools, w, w.stages, structs);
+    const L = a.layout;
+    const fieldRe = L.prefixed ? PREFIXED_FIELD_NAME : FIELD_NAME;
     const seenFields = /* @__PURE__ */ new Map();
+    for (const it of L.items) {
+      const label = it.type === "stage" ? `stage ${it.stage.id}` : `structure ${it.structure.id}`;
+      const at = `workflow ${w.id}: ${label}`;
+      if (it.type === "stage" && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      if (it.type === "structure" && L.prefixed && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      const prev = seenFields.get(it.name);
+      if (prev) {
+        const mixed = prev.startsWith("structure") !== (it.type === "structure");
+        const stageLabel = it.type === "stage" ? label : prev;
+        diag.error(mixed ? `workflow ${w.id}: ${stageLabel}: field \`${it.name}\` collides with a structure field` : `${at}: field \`${it.name}\` is also used by ${prev}`, where);
+      }
+      seenFields.set(it.name, label);
+    }
     const seenTools = /* @__PURE__ */ new Map();
-    const anchor = structuresAnchorIndex(w, w.stages);
-    w.stages.forEach((s, i) => {
-      const field = a.fieldOf(s);
+    for (const s of w.stages) {
       const tool2 = a.toolOf(s);
       const param = a.paramOf(s);
       const at = `workflow ${w.id}: stage ${s.id}`;
-      if (!FIELD_NAME.test(field)) diag.error(`${at}: field name \`${field}\` must match ${FIELD_NAME}`, where);
-      if (structureFields.has(field)) diag.error(`${at}: field \`${field}\` collides with a structure field`, where);
-      if (seenFields.has(field)) diag.error(`${at}: field \`${field}\` is also used by stage ${seenFields.get(field)}`, where);
-      seenFields.set(field, s.id);
       if (!TOOL_NAME.test(tool2)) diag.error(`${at}: tool name \`${tool2}\` must match ${TOOL_NAME}`, where);
       if (seenTools.has(tool2)) diag.error(`${at}: tool \`${tool2}\` is also used by stage ${seenTools.get(tool2)}`, where);
       if (tool2 === p.tools.submit.name || synthetic.has(tool2)) diag.error(`${at}: tool \`${tool2}\` collides with the submit / synthetic turn tool`, where);
       seenTools.set(tool2, s.id);
-      if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
-      if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
-    });
-    checkOrder(w, a, anchor, where);
+      if (!fieldRe.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${fieldRe}`, where);
+      if (L.carriedBy(s).some((d) => a.structureFieldOf(d) === param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
+    }
+    checkOrder(w, a, where);
   }
-  function checkOrder(w, a, anchor, where) {
+  function checkOrder(w, a, where) {
     const hint = "APIs that generate fields alphabetically (Gemini) would write them out of order";
-    const fields2 = w.stages.map((s) => a.fieldOf(s));
-    for (let i = 1; i < fields2.length; i++) {
-      if (fields2[i] < fields2[i - 1]) {
-        diag.warn(`workflow ${w.id}: stage field \`${fields2[i]}\` sorts before \`${fields2[i - 1]}\`; ${hint}`, where);
+    const L = a.layout;
+    if (L.prefixed) {
+      const names = L.items.map((it) => it.name);
+      for (let i = 1; i < names.length; i++)
+        if (names[i] <= names[i - 1]) {
+          diag.warn(`workflow ${w.id}: field \`${names[i]}\` sorts before \`${names[i - 1]}\`; ${hint} (check tools.orderPrefix)`, where);
+          break;
+        }
+      return;
+    }
+    const stageItems = L.items.flatMap((it, i) => it.type === "stage" ? [{ name: it.name, i }] : []);
+    for (let k = 1; k < stageItems.length; k++) {
+      if (stageItems[k].name < stageItems[k - 1].name) {
+        diag.warn(`workflow ${w.id}: stage field \`${stageItems[k].name}\` sorts before \`${stageItems[k - 1].name}\`; ${hint}`, where);
         break;
       }
     }
-    if (anchor < 0) return;
-    const structs = [...structureFields].sort();
-    const first = structs[0];
-    if (first === void 0) return;
-    const last = fields2.slice(0, anchor + 1).sort().at(-1);
-    if (first < last) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before stage field \`${last}\`; ${hint} (set tools.structurePrefix)`, where);
-    const param = a.paramOf(w.stages[anchor]);
-    if (first < param) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before \`${param}\` of tool \`${a.toolOf(w.stages[anchor])}\`; ${hint} (set tools.structurePrefix)`, where);
+    const explicit = (id) => w.structureOrder?.[id] !== void 0 || p.structures[id]?.order !== void 0;
+    let warned = false;
+    L.items.forEach((it, i) => {
+      if (warned || it.type !== "structure") return;
+      const before = stageItems.filter((x) => x.i < i).map((x) => x.name).sort().at(-1);
+      if (before !== void 0 && it.name < before) {
+        warned = true;
+        return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts before stage field \`${before}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where);
+      }
+      const after = explicit(it.structure.id) ? stageItems.filter((x) => x.i > i).map((x) => x.name).sort()[0] : void 0;
+      if (after !== void 0 && it.name > after) {
+        warned = true;
+        return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts after stage field \`${after}\`; ${hint} (set tools.orderPrefix)`, where);
+      }
+    });
+    for (const s of w.stages) {
+      const param = a.paramOf(s);
+      const own2 = L.items.findIndex((it) => it.type === "stage" && it.stage === s);
+      for (const d of L.carriedBy(s)) {
+        const name = a.structureFieldOf(d);
+        const at = L.items.findIndex((it) => it.type === "structure" && it.structure === d);
+        if (at > own2 ? name < param : name > param) {
+          diag.warn(`workflow ${w.id}: structure field \`${name}\` sorts ${at > own2 ? "before" : "after"} \`${param}\` of tool \`${a.toolOf(s)}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where);
+          return;
+        }
+      }
+    }
   }
+  for (const s of Object.values(p.structures)) {
+    const o = s.order;
+    const ref = o === void 0 || typeof o === "number" ? void 0 : "before" in o ? o.before : o.after;
+    if (ref !== void 0 && ref !== CONTENT_STAGE_REF && !stageIds.has(ref)) diag.warn(`structure ${s.id}: order refers to unknown stage \`${ref}\` (no workflow declares it)`, { file: M, path: `structures.${s.id}.order` });
+  }
+  for (const s of Object.values(p.structures)) {
+    const err = s.ui?.template !== void 0 ? checkTemplate(s.ui.template) : null;
+    if (err) diag.error(`structure ${s.id}: ui.template: ${err.message}${err.line ? ` (template line ${err.line})` : ""}`, { file: M, path: `structures.${s.id}.ui.template` });
+    if (s.ui?.module !== void 0 && !/\bexport\b/.test(s.ui.module)) diag.warn(`structure ${s.id}: ui.module exports nothing (expected \`export function mount(root, context)\`)`, { file: M, path: `structures.${s.id}.ui.module` });
+  }
+  for (const w of p.workflows) {
+    for (const sid of Object.keys(w.structureOrder ?? {})) {
+      const where = map.workflows.get(w.id) ?? {};
+      if (!structureIds.has(sid)) diag.warn(`workflow ${w.id}: structures.order: unknown structure \`${sid}\``, where);
+      else if (isInlineStructure(p.structures[sid])) diag.warn(`workflow ${w.id}: structures.order: ${sid} is inline and has no field`, where);
+    }
+  }
+  const layoutFeatures = [
+    p.tools.orderPrefix ? "tools.orderPrefix" : "",
+    p.workflows.some((w) => w.stages.some((s) => s.order !== void 0)) ? "stage order" : "",
+    p.workflows.some((w) => w.structureOrder) || Object.values(p.structures).some((s) => s.order !== void 0) ? "structure order" : "",
+    Object.values(p.structures).some((s) => s.kind === "status") ? "status structures" : "",
+    Object.values(p.structures).some((s) => s.ui) ? "structure ui" : "",
+    Object.values(p.structures).some((s) => s.history !== void 0 && typeof s.history === "object") ? "structure history" : ""
+  ].filter(Boolean);
+  if (layoutFeatures.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STRUCTURE_LAYOUT_SINCE) < 0))
+    diag.warn(`${layoutFeatures.join(", ")} need Advanced Preset ${STRUCTURE_LAYOUT_SINCE}: set minAdvancedPreset to ${STRUCTURE_LAYOUT_SINCE} or later`, { file: M, path: "minAdvancedPreset" });
   const usedStyles = new Set(Object.values(p.styles));
   for (const w of p.workflows) {
     const where = map.workflows.get(w.id) ?? {};
@@ -10399,12 +11504,27 @@ function validate(p, map, diag) {
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
       userModules: new Set((p.userModules ?? []).map((x) => x.id)),
       userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
-      vars: new Set(varDecls.keys())
+      vars: new Set(varDecls.keys()),
+      quickReplySets: new Set((p.quickReplySets ?? []).map((x) => x.id))
     };
     for (const [section, ids] of Object.entries(known)) {
       const t = table[section];
       if (t && typeof t === "object") {
         for (const k of Object.keys(t)) if (!ids.has(k)) diag.warn(`${section}.${k} does not exist`, { file });
+      }
+    }
+    for (const [sid, tr] of Object.entries(table.quickReplySets ?? {})) {
+      const set = p.quickReplySets?.find((x) => x.id === sid);
+      if (!set || !tr || typeof tr !== "object") continue;
+      for (const [qid, q] of Object.entries(tr.qrList ?? {})) {
+        if (!set.qrList.some((x) => x.id === qid)) {
+          diag.warn(`quickReplySets.${sid}.qrList.${qid} does not exist`, { file });
+          continue;
+        }
+        for (const k of QR_TEXT_FIELDS) {
+          const v = q?.[k];
+          if (typeof v === "string") checkQuickReplyText(v, Object.keys(p.actors), diag, { file, path: `quickReplySets.${sid}.qrList.${qid}.${k}` });
+        }
       }
     }
     for (const [wid, w] of Object.entries(table.workflows ?? {})) {
@@ -10415,10 +11535,10 @@ function validate(p, map, diag) {
 }
 
 // src/io.ts
-var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|locales\/[^/]+\.ya?ml)$/;
+var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|regex-scripts\/[^/]+\.(?:ya?ml|json)|quick-replies\/[^/]+\.(?:ya?ml|json)|tavern-helper-scripts\/.+|locales\/[^/]+\.ya?ml)$/;
 function isSourcePath(rel) {
   const p = rel.split(sep).join("/");
-  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p);
+  return SOURCE_RE.test(p) || FRAGMENT_RE.test(p) || UI_FILE_RE.test(p);
 }
 async function walk(dir, root, out) {
   for (const ent of await readdir(dir, { withFileTypes: true })) {
@@ -10441,14 +11561,35 @@ async function buildDir(root) {
   if (result.preset) validate(result.preset, result.map, result.diag);
   return result;
 }
-async function writeArtifact(preset, outDir) {
+async function writePresetFile(preset, outDir, o = {}) {
   await mkdir(outDir, { recursive: true });
   const file = join(outDir, `${preset.id}.apreset.json`);
-  await writeFile(file, JSON.stringify(preset, null, 2) + "\n");
+  const sampling = resolveConfiguration(preset, preset.defaultConfiguration, void 0).sampling;
+  await writeFile(file, JSON.stringify(presetFile(preset, { installer: o.installer, sampling }), null, 2) + "\n");
   return file;
 }
 
 // src/preview.ts
+function previewStoryline(preset, config, o) {
+  if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
+  const ifNew = /^if\?$/i.test(o.storyline ?? "");
+  const naming = o.storyline === "?" || ifNew;
+  const name = naming ? "" : o.storyline ?? "";
+  const switching = Boolean(o.storylineSwitch);
+  if (!o.storyline && !switching) return { ...MAIN_STORYLINE_VARS, new: Boolean(o.storylineNew), grouped: Boolean(o.storylineGrouped) };
+  const line = { main: switching, if: !switching && (ifNew || isIfName(name)) };
+  return {
+    name,
+    ...line,
+    new: naming || Boolean(o.storylineNew),
+    grouped: true,
+    naming,
+    namingMain: switching && Boolean(o.storylineNamingMain),
+    switching,
+    // The configuration's freeze mode (I-163); storylines switched off: nothing is frozen.
+    frozen: config.storylines?.enabled !== false && freezesStoryline(freezeMode(config.storylines), line)
+  };
+}
 function pick(all, ids, noun) {
   const unknown = ids.filter((id) => id !== "all" && id !== "none" && !all.some((t) => t.id === id));
   if (unknown.length) return `unknown ${noun} ${unknown.join(", ")} (have: ${all.map((t) => t.id).join(", ") || "none"})`;
@@ -10502,20 +11643,23 @@ function preview(source, o) {
   const vars = defaultVars(preset, config, {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
     gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
-    input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 }
+    input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 },
+    storyline: previewStoryline(preset, config, o)
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "" } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "", storyline: { name: vars.storyline.name, main: "" } } }, workflow);
   const shaping = preset.inputShaping;
   const historyInput = o.input === void 0 ? void 0 : !shaping ? o.input : shaping.mode === "wrap" ? wrapInput(shaping.template, o.input, a.expand) : null;
   const transport = vars.transport;
   const wf = a.workflow;
   const artifacts = {};
+  let fields = [];
   if (wf) {
     const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
     const synthetic = preset.syntheticTurns.find((s) => s.id === config.connection.syntheticTurn);
     const init2 = synthetic && transport.startsWith("tool-") ? [{ type: "function", function: { name: synthetic.tool.name, description: a.expand(synthetic.tool.description), parameters: { type: "object", properties: {} } } }] : [];
+    if (transport === "structured" || transport.startsWith("tool-")) fields = t.layout.items.map((it) => `${it.name}${it.type === "structure" ? ` (${it.structure.id})` : ""}`);
     if (transport === "structured") artifacts.schema = t.schema();
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
@@ -10530,8 +11674,14 @@ function preview(source, o) {
   const size = (v) => typeof v === "string" ? `${v.length} chars` : `${Array.isArray(v) ? v.length : v.size} items`;
   if (preset.vars.length) lines.push(`vars: ${Object.entries(a.buildVars).map(([k, v]) => `${k} (${size(v)})`).join(", ")}`);
   lines.push(`structures: ${a.structures.map((s) => s.id).join(", ") || "\u2014"}`);
+  if (preset.storylines) {
+    const v = vars.storyline;
+    const flags = [v.if ? "if-line" : "", v.new ? "new" : "", v.grouped ? "grouped" : "", v.switching ? "switching" : "", v.naming ? "AI names it" : "", v.namingMain ? "AI names the previous main" : "", v.frozen ? "variables frozen" : ""].filter(Boolean);
+    lines.push(`storyline: ${v.main ? `main${v.name ? ` ${v.name}` : ""}` : v.name || "?"}${flags.map((f) => ` (${f})`).join("")}`);
+  } else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
+  if (fields.length) lines.push(`fields: ${fields.join(" \u2192 ")}`);
   for (const r of preset.regions) {
     if (r.native) {
       rule(`${r.id} (native)`);
@@ -10561,13 +11711,13 @@ async function dev(o) {
   let state = { builtAt: 0, ok: false, errors: [], warnings: [] };
   const rebuild = async () => {
     const t0 = Date.now();
-    const { preset, diag } = await buildDir(o.root);
+    const { preset, build, diag } = await buildDir(o.root);
     const fmt = (d) => formatDiagnostic(d).replace(/\x1b\[\d+m/g, "");
     state = { builtAt: Date.now(), ok: diag.ok, errors: diag.errors.map(fmt), warnings: diag.warnings.map(fmt) };
     report(diag);
     if (preset && diag.ok) {
       artifact = preset;
-      await writeArtifact(preset, o.outDir);
+      await writePresetFile(preset, o.outDir, { installer: o.installer ?? build?.installer ?? true });
       console.log(`\u2713 ${preset.id} ${preset.version} #${preset.hash} (${Date.now() - t0} ms)`);
     } else console.log("\u2717 build failed; serving the last good artifact");
   };
@@ -10601,12 +11751,12 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.9.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.10.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
-async function* files(dir) {
+async function* files2(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
     const p = join2(dir, ent.name);
-    if (ent.isDirectory()) yield* files(p);
+    if (ent.isDirectory()) yield* files2(p);
     else yield p;
   }
 }
@@ -10615,7 +11765,7 @@ async function init(o) {
   if (exists) throw new Error(`${o.dir} already contains a preset.yaml`);
   await mkdir2(o.dir, { recursive: true });
   await cp(TEMPLATE, o.dir, { recursive: true });
-  for await (const f of files(o.dir)) {
+  for await (const f of files2(o.dir)) {
     if (!/\.(ya?ml|md|json)$|gitignore$/.test(f)) continue;
     const src = await readFile2(f, "utf8");
     const out = src.replaceAll("__PRESET_ID__", o.id).replaceAll("__PRESET_NAME__", o.name).replaceAll("__AUTHOR__", o.author).replaceAll("__CLI_VERSION__", CLI_VERSION);
@@ -10626,7 +11776,7 @@ async function init(o) {
 }
 
 // src/skills.ts
-var import_yaml5 = __toESM(require_dist(), 1);
+var import_yaml6 = __toESM(require_dist(), 1);
 import { cp as cp2, mkdir as mkdir3, readdir as readdir3, readFile as readFile3, rm, stat as stat2 } from "node:fs/promises";
 import { join as join3, relative as relative3 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -10636,7 +11786,7 @@ var isDir = (p) => stat2(p).then((s) => s.isDirectory(), () => false);
 function parseSkillFrontmatter(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
   if (!m) return {};
-  const data = (0, import_yaml5.parse)(m[1]);
+  const data = (0, import_yaml6.parse)(m[1]);
   return {
     name: typeof data?.name === "string" ? data.name : void 0,
     description: typeof data?.description === "string" ? data.description : void 0
@@ -10697,16 +11847,19 @@ async function installSkills(target, source = SKILLS_SOURCE) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.9.0" : "0.0.0-dev";
+var VERSION = true ? "1.10.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage
-  ap build   [dir] [--out dist] [--strict]   compile sources to dist/<id>.apreset.json
+  ap build   [dir] [--out dist] [--strict] [--installer | --no-installer]
+                                             compile sources to the preset file dist/<id>.apreset.json
   ap check   [dir] [--strict]                validate only
-  ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
+  ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist] [--installer | --no-installer]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
+                   [--storyline name|?] [--storyline-new] [--storyline-grouped]
+                   [--storyline-switch] [--storyline-naming-main]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -10716,7 +11869,9 @@ Usage
   ap skills  install [dir] [--target .agents/skills]
                                              install / update the Agent Skills in a preset repo
 
---strict treats warnings as errors.`;
+--strict treats warnings as errors.
+--no-installer leaves the Tavern Helper installer script out of the preset file (default:
+preset.yaml#build.installer, else included).`;
 async function main(argv) {
   const [command, ...rest] = argv;
   const { values, positionals } = parseArgs({
@@ -10736,6 +11891,11 @@ async function main(argv) {
       json: { type: "boolean" },
       param: { type: "string", multiple: true },
       input: { type: "string" },
+      storyline: { type: "string" },
+      "storyline-new": { type: "boolean" },
+      "storyline-grouped": { type: "boolean" },
+      "storyline-switch": { type: "boolean" },
+      "storyline-naming-main": { type: "boolean" },
       "user-modules": { type: "string" },
       "bundled-modules": { type: "string" },
       "user-module-templates": { type: "string" },
@@ -10743,27 +11903,35 @@ async function main(argv) {
       id: { type: "string" },
       name: { type: "string" },
       author: { type: "string" },
-      target: { type: "string" }
+      target: { type: "string" },
+      installer: { type: "boolean" },
+      "no-installer": { type: "boolean" }
     }
   });
+  if (values.installer && values["no-installer"]) {
+    console.error("--installer and --no-installer exclude each other");
+    return 1;
+  }
+  const installerFlag = values.installer ? true : values["no-installer"] ? false : void 0;
   const dir = resolve(positionals[0] ?? ".");
   switch (command) {
     case "build":
     case "check": {
-      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
+      const { preset, build, diag, manifestFiles = [] } = await buildDir(dir);
       report(diag);
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ""}`);
         return 0;
       }
-      const file = await writeArtifact(preset, resolve(dir, values.out ?? "dist"));
-      console.log(`\u2713 ${file} #${preset.hash}`);
+      const installer = installerFlag ?? build?.installer ?? true;
+      const file = await writePresetFile(preset, resolve(dir, values.out ?? "dist"), { installer });
+      console.log(`\u2713 ${file} #${preset.hash}${installer ? " (with installer)" : ""}`);
       return 0;
     }
     case "dev":
-      await dev({ root: dir, outDir: resolve(dir, values.out ?? "dist"), port: Number(values.port ?? 4747), host: values.host ?? "127.0.0.1" });
+      await dev({ root: dir, outDir: resolve(dir, values.out ?? "dist"), port: Number(values.port ?? 4747), host: values.host ?? "127.0.0.1", installer: installerFlag });
       return new Promise(() => {
       });
     case "preview": {
@@ -10801,7 +11969,7 @@ async function main(argv) {
         }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], storylineSwitch: values["storyline-switch"], storylineNamingMain: values["storyline-naming-main"], userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

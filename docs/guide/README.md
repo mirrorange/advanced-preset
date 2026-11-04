@@ -29,7 +29,7 @@
 8. [工作流：让模型分步骤思考与写作](08-workflows.md)
 9. [内置功能：元指令、记忆、总结、代写、选项与事件摘要](09-built-in-features.md)
 10. [构建变量：让模组一起拼出一份清单](10-build-variables.md)
-11. [推荐配置、插入点与界面翻译](11-configs-and-extension.md)
+11. [推荐配置、插入点、快速回复与界面翻译](11-configs-and-extension.md)
 12. [测试、发布与更新](12-test-and-release.md)
 13. [案例：花瓣预设是怎样设计出来的](13-petals-case-study.md)
 14. [术语表与常见问题](glossary-and-faq.md)

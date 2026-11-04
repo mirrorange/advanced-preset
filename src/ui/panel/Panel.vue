@@ -1,7 +1,7 @@
 <script setup lang="ts">
-/** Settings panel (§16.5): header with preset + enable switch and six tabs, overlaid on ST's AI Response Configuration drawer. */
+/** Settings panel (§16.5): header with preset + enable switch and seven tabs, overlaid on ST's AI Response Configuration drawer. */
 import { computed, onBeforeUnmount, onMounted, watch, type Component } from 'vue';
-import { Blocks, Brain, Bug, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
+import { Blocks, Brain, Bug, GitBranch, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
 import { presetName, t } from '@/i18n';
 import { activePreset, presetSummary, ui, type PanelTab } from '../state';
@@ -14,6 +14,8 @@ import ModulesTab from './tabs/ModulesTab.vue';
 import WritingTab from './tabs/WritingTab.vue';
 import MemoryTab from './tabs/MemoryTab.vue';
 import DebugTab from './tabs/DebugTab.vue';
+import StorylinesTab from './tabs/StorylinesTab.vue';
+import { storylinesActive } from '../storylines';
 
 const tabs: { id: PanelTab; icon: Component; view: Component }[] = [
   { id: 'presets', icon: Package, view: PresetsTab },
@@ -21,9 +23,12 @@ const tabs: { id: PanelTab; icon: Component; view: Component }[] = [
   { id: 'modules', icon: Blocks, view: ModulesTab },
   { id: 'writing', icon: PenLine, view: WritingTab },
   { id: 'memory', icon: Brain, view: MemoryTab },
+  { id: 'storylines', icon: GitBranch, view: StorylinesTab },
   { id: 'debug', icon: Bug, view: DebugTab },
 ];
-const current = computed(() => tabs.find((x) => x.id === ui.tab) ?? tabs[0]!);
+/** The storylines tab only while the preset declares storylines and they are switched on. */
+const shown = computed(() => tabs.filter((x) => x.id !== 'storylines' || storylinesActive.value));
+const current = computed(() => shown.value.find((x) => x.id === ui.tab) ?? shown.value[0]!);
 
 const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => { settings().enabled = v; save(); } });
 const subtitle = computed(() => {
@@ -50,8 +55,8 @@ watch(() => ui.panelOpen, (open) => { if (open) coverDrawer(true); }, { immediat
         <Switch v-model="enabled" :label="t('panel.enabled')" />
         <IconButton :icon="X" :label="t('common.close')" align="end" below @click="ui.panelOpen = false" />
       </header>
-      <nav class="tabs" role="tablist">
-        <button v-for="x in tabs" :key="x.id" type="button" role="tab" class="tab" :class="{ on: x.id === ui.tab }" :title="t(`tab.${x.id}`)" :aria-selected="x.id === ui.tab" @click="ui.tab = x.id">
+      <nav class="tabs" :class="{ many: shown.length > 6 }" role="tablist">
+        <button v-for="x in shown" :key="x.id" type="button" role="tab" class="tab" :class="{ on: x.id === ui.tab }" :title="t(`tab.${x.id}`)" :aria-selected="x.id === ui.tab" @click="ui.tab = x.id">
           <component :is="x.icon" />
           <span>{{ t(`tab.${x.id}`) }}</span>
         </button>

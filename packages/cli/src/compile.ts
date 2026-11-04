@@ -7,6 +7,9 @@
  *   workflows/*.md       one workflow per file (frontmatter + sections)
  *   user-modules/*.md    user modules installed with the preset (raw text; see user-module-sources.ts)
  *   user-module-templates/*.md  example user modules offered when creating one (same format)
+ *   regex-scripts/*.yaml SillyTavern regex scripts written into the Carrier (see st-sources.ts)
+ *   quick-replies/*.yaml SillyTavern Quick Reply sets installed while the preset is active
+ *   tavern-helper-scripts/*.yaml  Tavern Helper scripts written into the Carrier (code may sit beside them)
  *   locales/<lang>.yaml  panel strings
  *
  * Compilation is pure over a `SourceTree` (path → text) so it can be tested without a disk.
@@ -22,13 +25,16 @@ import {
   type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
-  DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode,
+  DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode, defaultHistoryTemplate, type StructureHistory,
+  CARD_POSITIONS, CONTENT_STAGE_REF, DEFAULT_ORDER_PREFIX, type CardPosition, type StructureOrder, type StructureUi,
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
+  DEFAULT_STORYLINES, STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, type StorylineFreeze, type StorylinesDecl,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
 import { compileUserModuleSources, type SourceContext } from './user-module-sources';
 import { MANIFEST_FILE, loadManifest } from './manifest';
+import { compileQuickReplySets, compileRegexScripts, compileTavernHelperScripts } from './st-sources';
 
 export type SourceTree = Map<string, string>;
 
@@ -49,8 +55,15 @@ export interface SourceMap {
   workflows: Map<string, Where>;
 }
 
+/** How the preset file is written (`preset.yaml#build`; not part of the artifact). */
+export interface BuildOptions {
+  /** Add the Tavern Helper installer script to the preset file (default true). */
+  installer: boolean;
+}
+
 export interface CompileResult {
   preset?: APreset;
+  build?: BuildOptions;
   /** Manifest files that were merged: `preset.yaml`, then fragments in merge order. */
   manifestFiles?: string[];
   diag: Diagnostics;
@@ -65,6 +78,31 @@ const ROLES: Role[] = ['system', 'user', 'assistant'];
 const ANCHORS: SemanticAnchor[] = ['historyStart', 'historyEnd', 'tail'];
 const STAGE_KINDS: StageKind[] = ['text', 'content', 'patch'];
 const STYLES: Style[] = ['dialogue', 'imperative'];
+
+/**
+ * Structure position (I-134): a sort key, or `{ before | after: <stage id | @content> }`.
+ * The shorthand strings `before:<ref>` / `after:<ref>` are accepted too.
+ */
+function compileStructureOrder(v: unknown, diag: Diagnostics, where: Where): StructureOrder | undefined {
+  if (v === undefined || v === null) return undefined;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === 'string') {
+    const m = /^(before|after)\s*:\s*(\S+)$/.exec(v.trim());
+    if (m) return m[1] === 'before' ? { before: m[2]! } : { after: m[2]! };
+  }
+  if (isObj(v)) {
+    const keys = Object.keys(v);
+    if (keys.length === 1 && (keys[0] === 'before' || keys[0] === 'after') && typeof v[keys[0]] === 'string' && v[keys[0]]) {
+      const ref = v[keys[0]] as string;
+      return keys[0] === 'before' ? { before: ref } : { after: ref };
+    }
+  }
+  diag.error(`order must be a number or { before | after: <stage id | ${CONTENT_STAGE_REF}> }`, where);
+  return undefined;
+}
+
+/** Files a structure UI field may point at (`./ui/card.ejs`): kept in the source tree by io.ts. */
+export const UI_FILE_RE = /^ui\/.+/;
 
 /** ST native prompts the Carrier may reference by identifier. */
 export const NATIVE_PROMPTS: Record<string, { name: string; marker: boolean }> = {
@@ -141,9 +179,33 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
   if (hint) tools.jsonStringHint = hint;
   tools.structurePrefix = o.structurePrefix === undefined || o.structurePrefix === null ? D.structurePrefix! : str(o.structurePrefix);
   if (tools.structurePrefix && !/^[A-Za-z_]\w*$/.test(tools.structurePrefix)) diag.error(`tools.structurePrefix \`${tools.structurePrefix}\` must be letters, digits and underscores, not starting with a digit`, at('structurePrefix'));
-  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'structurePrefix', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
+  // Unified ordering prefix (I-135): replaces structurePrefix and the stage-number prefixes.
+  if (o.orderPrefix !== undefined && o.orderPrefix !== null && o.orderPrefix !== false) {
+    const prefix = o.orderPrefix === true ? DEFAULT_ORDER_PREFIX : str(o.orderPrefix);
+    if (!prefix.includes('{{n}}')) diag.error('tools.orderPrefix must contain `{{n}}` (the position in the turn)', at('orderPrefix'));
+    else if (!/^\w*$/.test(prefix.replaceAll('{{n}}', '1'))) diag.error(`tools.orderPrefix \`${prefix}\` may only hold letters, digits, underscores and {{n}}`, at('orderPrefix'));
+    else {
+      tools.orderPrefix = prefix;
+      if (o.structurePrefix !== undefined && o.structurePrefix !== null && o.structurePrefix !== '') diag.warn('tools.structurePrefix is ignored when tools.orderPrefix is set', at('structurePrefix'));
+      tools.structurePrefix = '';
+    }
+  }
+  const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'structurePrefix', 'orderPrefix', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
+}
+
+function compileBuildOptions(src: unknown, diag: Diagnostics): BuildOptions {
+  const out: BuildOptions = { installer: true };
+  if (src === undefined || src === null) return out;
+  const at = (path: string): Where => ({ file: MANIFEST_FILE, path: path ? `build.${path}` : 'build' });
+  if (!isObj(src)) { diag.error('`build` must be a mapping', at('')); return out; }
+  for (const k of Object.keys(src)) if (k !== 'installer') diag.warn(`unknown build key \`${k}\``, at(k));
+  if (src.installer !== undefined) {
+    if (typeof src.installer === 'boolean') out.installer = src.installer;
+    else diag.error('`build.installer` must be true or false', at('installer'));
+  }
+  return out;
 }
 
 export function compile(tree: SourceTree): CompileResult {
@@ -334,7 +396,90 @@ export function compile(tree: SourceTree): CompileResult {
 
   // ── structures ──────────────────────────────────────────────────────────────
   // Field names get `tools.structurePrefix` (I-94); `{{field}}` in the field-style texts is the final name.
+  // With `tools.orderPrefix` (I-135) the final name depends on the turn: `{{field}}` stays for the runtime.
   const structures: Record<string, StructureDecl> = {};
+  const ordered = Boolean(tools.orderPrefix);
+  /** `ui:` of a structure: card position / order; custom structures may bring a template or module (I-137). */
+  const compileStructureUi = (src: unknown, kind: string, where: Where): StructureUi | undefined => {
+    if (src === undefined || src === null) return undefined;
+    if (!isObj(src)) { diag.error('ui must be a mapping (position, order, template, module, style)', where); return undefined; }
+    const ui: StructureUi = {};
+    if (src.position !== undefined) {
+      if (CARD_POSITIONS.includes(src.position as CardPosition)) ui.position = src.position as CardPosition;
+      else diag.error(`ui.position must be ${CARD_POSITIONS.join(' | ')}`, { ...where, path: `${where.path}.position` });
+    }
+    if (src.order !== undefined) {
+      if (typeof src.order === 'number' && Number.isFinite(src.order)) ui.order = src.order;
+      else diag.error('ui.order must be a number', { ...where, path: `${where.path}.order` });
+    }
+    for (const k of ['template', 'module', 'style'] as const) {
+      if (src[k] === undefined || src[k] === null) continue;
+      const at = { ...where, path: `${where.path}.${k}` };
+      if (kind !== 'custom') { diag.error(`ui.${k}: only custom structures bring their own component`, at); continue; }
+      if (typeof src[k] !== 'string') { diag.error(`ui.${k} must be a string (source text or a ./ui/… file path)`, at); continue; }
+      let code = src[k] as string;
+      const path = /^\.\/(\S+)$/.exec(code.trim())?.[1];
+      if (path) {
+        const file = path.replace(/^\.\//, '');
+        if (!UI_FILE_RE.test(file)) { diag.error(`ui.${k}: component files live under ui/ (got \`${code.trim()}\`)`, at); continue; }
+        const got = tree.get(file);
+        if (got === undefined) { diag.error(`ui.${k}: file \`${file}\` not found`, at); continue; }
+        code = got;
+      }
+      if (!code.trim()) { diag.warn(`ui.${k} is empty`, at); continue; }
+      ui[k] = code;
+    }
+    if (ui.template !== undefined && ui.module !== undefined) diag.error('ui: use either template or module, not both', where);
+    const known = new Set(['position', 'order', 'template', 'module', 'style']);
+    for (const k of Object.keys(src)) if (!known.has(k)) diag.warn(`unknown ui key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    if (ui.style !== undefined && ui.template === undefined && ui.module === undefined) diag.warn('ui.style only applies to a template or module component', where);
+    return Object.keys(ui).length ? ui : undefined;
+  };
+  /**
+   * `history` of a structure: a number (annotations: CriticMarkup depth; synopsis: legacy form with
+   * `historyTemplate`; other kinds: shorthand for `{ depth }`) or an object (I-139).
+   */
+  const compileStructureHistory = (o: Obj, kind: StructureDecl['kind'], where: Where): StructureDecl['history'] => {
+    const src = o.history;
+    if (src === undefined || src === null) return undefined;
+    const isDepth = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0;
+    if (kind === 'annotations') {
+      if (isDepth(src)) return src;
+      diag.error('annotations take a number: `history: N` re-injects the last N messages\' annotations', where);
+      return undefined;
+    }
+    if (typeof src === 'number') {
+      if (!isDepth(src)) { diag.error('`history` must be a non-negative integer', where); return undefined; }
+      if (kind === 'synopsis') return src;
+      return src > 0 ? { depth: src, template: defaultHistoryTemplate(kind) } : undefined;
+    }
+    if (!isObj(src)) { diag.error('`history` must be a number or an object with depth / template / position / when', where); return undefined; }
+    const known = new Set(['depth', 'template', 'position', 'when']);
+    for (const k of Object.keys(src)) if (!known.has(k)) diag.warn(`unknown history key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    let depth = 1;
+    if (src.depth !== undefined) {
+      if (isDepth(src.depth)) depth = src.depth;
+      else diag.error('`history.depth` must be a non-negative integer', { ...where, path: `${where.path}.depth` });
+    }
+    const template = src.template === undefined ? defaultHistoryTemplate(kind) : str(src.template);
+    if (!template.trim()) diag.warn('`history.template` is empty: nothing would be inserted', { ...where, path: `${where.path}.template` });
+    if (template.includes('{{content}}')) diag.warn('`{{content}}` is not a history placeholder: the template is inserted next to the message text (set `history.position`)', { ...where, path: `${where.path}.template` });
+    const fields = new Set<string>(['value', ...(STRUCTURE_PROPERTIES[kind] ?? [])]);
+    if (kind !== 'custom') {
+      for (const m of template.matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)) {
+        if (!fields.has(m[1]!) && m[1] !== 'content') diag.warn(`\`{{${m[1]}}}\` is not a ${kind} field (expected ${[...fields].join(' | ')}): it is sent as written`, { ...where, path: `${where.path}.template` });
+      }
+    }
+    const out: StructureHistory = { depth, template };
+    if (src.position !== undefined) {
+      const p = src.position;
+      if (p === 'before' || p === 'after' || (typeof p === 'number' && Number.isFinite(p))) out.position = p;
+      else diag.error('`history.position` must be before | after | a number (sort key)', { ...where, path: `${where.path}.position` });
+    }
+    const when = expr(src.when, { ...where, path: `${where.path}.when` });
+    if (when) out.when = when;
+    return out;
+  };
   for (const [sid, s] of Object.entries(isObj(raw.structures) ? raw.structures : {})) {
     const o = isObj(s) ? s : {};
     const where = { file: M, path: `structures.${sid}` };
@@ -345,9 +490,9 @@ export function compile(tree: SourceTree): CompileResult {
     const base = str(o.field, sid);
     const field = inline ? base : `${tools.structurePrefix ?? ''}${base}`;
     const fieldText = (v: unknown, path: string, check = true) => {
-      const t = str(v).replaceAll('{{field}}', field);
-      if (check && !inline && field !== base && t.includes(`\`${base}\``))
-        diag.warn(`mentions \`${base}\`, but the field is \`${field}\` (tools.structurePrefix); write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
+      const t = ordered ? str(v) : str(v).replaceAll('{{field}}', field);
+      if (check && !inline && (ordered || field !== base) && t.includes(`\`${base}\``))
+        diag.warn(`mentions \`${base}\`, but the field is ${ordered ? 'ordering-prefixed (tools.orderPrefix)' : `\`${field}\` (tools.structurePrefix)`}; write {{field}} instead`, { ...where, path: `${where.path}.${path}` });
       return text(t, where);
     };
     const decl: StructureDecl = {
@@ -368,6 +513,13 @@ export function compile(tree: SourceTree): CompileResult {
       if (Object.keys(props).length) decl.properties = props;
     }
     if (typeof o.count === 'number') decl.count = o.count;
+    const order = compileStructureOrder(o.order, diag, { ...where, path: `${where.path}.order` });
+    if (order !== undefined) {
+      if (inline) diag.warn('inline structures have no field: `order` is ignored', { ...where, path: `${where.path}.order` });
+      else decl.order = order;
+    }
+    const ui = compileStructureUi(o.ui, kind, { ...where, path: `${where.path}.ui` });
+    if (ui) decl.ui = ui;
     if (kind === 'custom') {
       decl.shape = o.shape === 'kv' ? 'kv' : 'text';
       decl.display = o.display === 'hidden' ? 'hidden' : 'card';
@@ -377,15 +529,15 @@ export function compile(tree: SourceTree): CompileResult {
       if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
       if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
     }
-    if (o.history !== undefined) {
-      if (kind !== 'annotations' && kind !== 'synopsis') diag.error('only annotations and synopsis structures support `history`', { ...where, path: `${where.path}.history` });
-      else if (typeof o.history === 'number' && Number.isInteger(o.history) && o.history >= 0) decl.history = o.history;
-      else diag.error('`history` must be a non-negative integer', { ...where, path: `${where.path}.history` });
-    }
-    if (kind === 'synopsis' && (o.history !== undefined || o.historyTemplate !== undefined)) {
+    const history = compileStructureHistory(o, kind, { ...where, path: `${where.path}.history` });
+    if (history !== undefined) decl.history = history;
+    if (kind === 'synopsis' && !isObj(o.history) && (o.history !== undefined || o.historyTemplate !== undefined)) {
+      // Legacy synopsis history (I-88): kept as written so the artifact stays readable by older versions.
       decl.historyTemplate = str(o.historyTemplate, DEFAULT_SYNOPSIS_HISTORY_TEMPLATE);
       if (!decl.historyTemplate.includes('{{content}}')) diag.warn('`historyTemplate` has no `{{content}}`: kept messages would lose their text', { ...where, path: `${where.path}.historyTemplate` });
-    } else if (o.historyTemplate !== undefined) diag.warn('`historyTemplate` only applies to synopsis structures and is ignored', { ...where, path: `${where.path}.historyTemplate` });
+    } else if (o.historyTemplate !== undefined) {
+      diag.warn(isObj(o.history) ? '`historyTemplate` is ignored with a `history` object: use `history.template`' : '`historyTemplate` only applies to synopsis structures and is ignored', { ...where, path: `${where.path}.historyTemplate` });
+    }
     if (o.title !== undefined) decl.title = text(str(o.title), where);
     if (!/^[A-Za-z_][\w.-]*$/.test(decl.tag)) diag.error(`invalid tag name \`${decl.tag}\``, where);
     if (!/^[A-Za-z_]\w*$/.test(decl.field)) diag.error(`invalid field name \`${decl.field}\``, where);
@@ -452,6 +604,23 @@ export function compile(tree: SourceTree): CompileResult {
         if (mode === 'wrap' && !template.includes('{{content}}')) diag.warn('inputShaping.template has no {{content}}: the input text would be lost', { file: M, path: 'inputShaping.template' });
         inputShaping = { mode, template };
       }
+    }
+  }
+  // Storylines: optional, `true` for the default separators; absent keeps the artifact (and its hash) as before.
+  let storylines: StorylinesDecl | undefined;
+  if (raw.storylines !== undefined && raw.storylines !== null && raw.storylines !== false) {
+    const where = { file: M, path: 'storylines' };
+    if (raw.storylines === true) storylines = { ...DEFAULT_STORYLINES };
+    else if (!isObj(raw.storylines)) diag.error('storylines must be `true` or a mapping { separator?, mainSeparator? }', where);
+    else {
+      const src = raw.storylines;
+      for (const k of Object.keys(src)) if (k !== 'separator' && k !== 'mainSeparator') diag.warn(`storylines: unknown key \`${k}\``, { file: M, path: `storylines.${k}` });
+      const sep = (k: 'separator' | 'mainSeparator') => {
+        if (src[k] !== undefined && typeof src[k] !== 'string') diag.error(`storylines.${k} must be a string`, { file: M, path: `storylines.${k}` });
+        return text(typeof src[k] === 'string' ? src[k] : DEFAULT_STORYLINES[k], { file: M, path: `storylines.${k}` });
+      };
+      storylines = { separator: sep('separator'), mainSeparator: sep('mainSeparator') };
+      if (!storylines.separator.includes('{{storyline}}')) diag.warn('storylines.separator has no {{storyline}}: storylines cannot be told apart in the history', { file: M, path: 'storylines.separator' });
     }
   }
   const syntheticTurns: SyntheticTurn[] = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s: unknown, i: number) => {
@@ -562,6 +731,11 @@ export function compile(tree: SourceTree): CompileResult {
     workflows.sort((a, b) => (order.indexOf(a.id) + 1 || 1e6) - (order.indexOf(b.id) + 1 || 1e6));
   }
 
+  // ── SillyTavern regex scripts & Quick Reply sets ───────────────────────────
+  const regexScripts = compileRegexScripts(tree, id, diag);
+  const quickReplySets = compileQuickReplySets(tree, str(raw.name, id), Object.keys(actors), diag);
+  const tavernHelperScripts = compileTavernHelperScripts(tree, id, diag);
+
   // ── carrier ─────────────────────────────────────────────────────────────────
   const carrier = compileCarrier(isObj(raw.carrier) ? raw.carrier : {}, regions, str(raw.name, id), diag);
 
@@ -587,6 +761,8 @@ export function compile(tree: SourceTree): CompileResult {
     tokenSaving: { enabled: false, keepFullTurns: tokenSaving.keepFullTurns, truncateUserAfter: tokenSaving.truncateUserAfter, userInput: tokenSaving.userInput, ...(sect('tokenSaving') as object) },
     cache: { ...CACHE_DEFAULTS, ...(sect('cache') as Partial<Configuration['cache']>) },
     meta: { enabled: true, recentCount: meta.recentCount, ...(sect('meta') as object) },
+    // Only for presets with storylines, so that other artifacts keep their hash.
+    ...(storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...(sect('storylines') as Partial<Configuration['storylines']>) } } : {}),
   };
   for (const k of ['names', 'prefixes'] as const) if (isObj(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect('modules'))) {
@@ -619,6 +795,17 @@ export function compile(tree: SourceTree): CompileResult {
     if ('enabled' in c && typeof c.enabled !== 'boolean') diag.error('`enabled` must be a boolean', { file: M, path: `${path}.enabled` });
   };
   checkMeta(sect('meta'), 'configurationDefaults.meta');
+  /** `storylines` section of the defaults or of a recommended configuration's diff. */
+  const checkStorylines = (c: Obj, path: string) => {
+    if (!storylines) return void (path.startsWith('configurations') && diag.warn(`${path}: the preset declares no storylines (ignored)`, { file: M, path }));
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (!(k in STORYLINE_CONFIG_DEFAULTS)) diag.warn(`unknown storylines option \`${k}\``, where);
+      else if (k === 'freezeVariables') { if (!STORYLINE_FREEZE_MODES.includes(v as StorylineFreeze)) diag.error(`\`freezeVariables\` must be one of ${STORYLINE_FREEZE_MODES.join(' / ')}`, where); }
+      else if (typeof v !== 'boolean') diag.error(`\`${k}\` must be a boolean`, where);
+    }
+  };
+  if (isObj(cd.storylines)) checkStorylines(cd.storylines, 'configurationDefaults.storylines');
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
 
   const configurations: RecommendedConfiguration[] = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c: unknown, i: number) => {
@@ -629,6 +816,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (isObj(rc.diff.tokenSaving)) userInputMode(rc.diff.tokenSaving.userInput, `configurations[${i}].diff.tokenSaving.userInput`);
     if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
+    if (isObj(rc.diff.storylines)) checkStorylines(rc.diff.storylines as Obj, `configurations[${i}].diff.storylines`);
     if (isObj(rc.diff.params)) checkParams(rc.diff.params as Obj, `configurations[${i}].diff.params`, (k, v) => { rc.diff.params![k] = v; }, false); // unknown keys: validate
     return rc;
   });
@@ -690,6 +878,7 @@ export function compile(tree: SourceTree): CompileResult {
     anchors: anchors as APreset['anchors'],
     workflowRegion: str(raw.workflowRegion, anchors.tail ?? ''),
     ...(inputShaping ? { inputShaping } : {}),
+    ...(storylines ? { storylines } : {}),
     params,
     groups,
     modules,
@@ -701,6 +890,10 @@ export function compile(tree: SourceTree): CompileResult {
     workflows,
     structures,
     regex,
+    // Only when present, so that other artifacts keep their hash.
+    ...(regexScripts.length ? { regexScripts } : {}),
+    ...(quickReplySets.length ? { quickReplySets } : {}),
+    ...(tavernHelperScripts.length ? { tavernHelperScripts } : {}),
     meta,
     tokenSaving,
     syntheticTurns,
@@ -715,7 +908,7 @@ export function compile(tree: SourceTree): CompileResult {
     locales,
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map, manifestFiles: manifest.files };
+  return { preset, build: compileBuildOptions(raw.build, diag), diag, map, manifestFiles: manifest.files };
 }
 
 const isScalar = (v: unknown): v is string | number | boolean => ['string', 'number', 'boolean'].includes(typeof v);
@@ -798,6 +991,10 @@ function compileWorkflow(
       }
       stage.tool = out;
     }
+    if (o.order !== undefined) {
+      if (typeof o.order === 'number' && Number.isFinite(o.order)) stage.order = o.order;
+      else diag.error('stage order must be a number', { ...where, path: `${where.path}.order` });
+    }
     if (o.executor !== undefined && o.executor !== 'default') diag.error('only `executor: default` is supported in v1', where);
     const w = expr(o.when, where);
     if (w) stage.when = w;
@@ -847,11 +1044,36 @@ function compileWorkflow(
   const wf: Workflow = { id, name: str(fm.name, id), kind, stages, sections };
   if (fm.description !== undefined) wf.description = str(fm.description).trim();
   if (fm.hint !== undefined) wf.hint = str(fm.hint).trim();
+  // Stage sort keys (I-134): stages keep their declaration order, so explicit keys must increase.
+  let prevKey = Number.NEGATIVE_INFINITY;
+  stages.forEach((s, i) => {
+    const key = typeof s.order === 'number' ? s.order : (i + 1) * 100;
+    if (key <= prevKey) diag.error(`stage ${s.id}: order ${key} must be greater than the previous stage's (${prevKey}); stages keep their declared order`, { file, path: `stages[${i}].order` });
+    prevKey = key;
+  });
   const after = isObj(fm.structures) ? fm.structures.after : undefined;
   if (after !== undefined) {
     wf.structuresAfter = str(after);
     if (!stages.some((s) => s.id === wf.structuresAfter)) diag.error(`structures.after: unknown stage \`${wf.structuresAfter}\``, { file });
   }
+  const orderSrc = isObj(fm.structures) ? fm.structures.order : undefined;
+  if (orderSrc !== undefined) {
+    if (!isObj(orderSrc)) diag.error('structures.order must map structure ids to positions', { file, path: 'structures.order' });
+    else {
+      const out: Record<string, StructureOrder> = {};
+      for (const [sid, v] of Object.entries(orderSrc)) {
+        const where = { file, path: `structures.order.${sid}` };
+        const o = compileStructureOrder(v, diag, where);
+        if (o === undefined) continue;
+        const ref = typeof o === 'number' ? undefined : 'before' in o ? o.before : o.after;
+        if (ref !== undefined && ref !== CONTENT_STAGE_REF && !stages.some((s) => s.id === ref)) { diag.error(`unknown stage \`${ref}\` (expected a stage of this workflow or ${CONTENT_STAGE_REF})`, where); continue; }
+        if (ref === CONTENT_STAGE_REF && !stages.some((s) => s.kind === 'content')) diag.warn(`${CONTENT_STAGE_REF}: this workflow has no content stage`, where);
+        out[sid] = o;
+      }
+      if (Object.keys(out).length) wf.structureOrder = out;
+    }
+  }
+  for (const k of Object.keys(isObj(fm.structures) ? fm.structures : {})) if (k !== 'after' && k !== 'order') diag.warn(`unknown structures key \`${k}\` (expected after | order)`, { file, path: `structures.${k}` });
   return wf;
 }
 

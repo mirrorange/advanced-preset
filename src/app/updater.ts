@@ -1,8 +1,10 @@
 /**
  * Auto-apply updates (§17, I-16, I-35): the running bundle carries a content-derived build id; when the
  * `dist/build.json` on disk differs, reload once so the page never runs stale code. Checked at
- * APP_READY (stale browser cache) and from ST's manifest `update` hook, which ST calls after updating
- * the extension from its Extensions panel (that path only toasts "Reload the page to apply updates").
+ * APP_READY (stale browser cache), from ST's manifest `update` hook, which ST calls after updating
+ * the extension from its Extensions panel (that path only toasts "Reload the page to apply updates"),
+ * and after "Switch branch" in that panel, which has no hook — FetchGate reports it via
+ * `onExtensionFetch`.
  */
 import { extensionBaseUrl, extensionId, nativeFetch, st, toast } from '@/st/host';
 import { t } from '@/i18n';
@@ -37,6 +39,23 @@ export async function checkStaleBundle(): Promise<void> {
  */
 export async function onExtensionUpdated(): Promise<void> {
   await checkStaleBundle();
+}
+
+const SWITCH_URL = '/api/extensions/switch';
+const bareName = (name: string) => name.replace(/^third-party/, '').replace(/^\/+|\/+$/g, '');
+
+/**
+ * FetchGate pass-through observer: after ST's Extensions panel switched *this* extension's branch
+ * (POST `/api/extensions/switch` → git checkout on the server), reload if the bundle changed.
+ */
+export function onExtensionFetch(url: string, init: RequestInit, response: Response): void {
+  if (!response.ok || typeof init.body !== 'string') return;
+  let name: unknown;
+  try {
+    if (new URL(url, location.href).pathname !== SWITCH_URL) return;
+    name = (JSON.parse(init.body) as { extensionName?: unknown }).extensionName;
+  } catch { return; }
+  if (typeof name === 'string' && bareName(name) === bareName(extensionId())) void checkStaleBundle();
 }
 
 /** Panel "check for updates": git pull through ST, then reload if the bundle changed. */

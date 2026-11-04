@@ -10,6 +10,7 @@ import { refreshActivePreset } from './state';
 import Stages from './message/Stages.vue';
 import Cards from './message/Cards.vue';
 import Dock from './message/Dock.vue';
+import StorylineBadge from './message/StorylineBadge.vue';
 import Panel from './panel/Panel.vue';
 import SettingsDrawer from './SettingsDrawer.vue';
 import PresetBanner from './PresetBanner.vue';
@@ -29,7 +30,9 @@ function mountSettings(): void {
 export function mountUi(): void {
   defineHost('ap-stages', Stages, ['mesid']);
   defineHost('ap-cards', Cards, ['mesid']);
+  defineHost('ap-top-cards', Cards, ['mesid', 'position']);
   defineHost('ap-dock', Dock);
+  defineHost('ap-storyline', StorylineBadge, ['mesid']);
   defineHost('ap-panel', Panel);
   defineHost('ap-preset-banner', PresetBanner);
   installTheme();

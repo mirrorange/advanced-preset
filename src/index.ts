@@ -17,11 +17,14 @@ import { debugLog } from '@/core/debug';
 import { onMessageReceived } from '@/app/receive';
 import { installMemorySync, syncGlobalRefs } from '@/app/memory-sync';
 import { annotationsApi, installAnnotations } from '@/app/annotations';
+import { installVariableGuard } from '@/app/variable-guard';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
 import { installPresetIo } from '@/app/st-preset-io';
 import { syncBundledModules } from '@/app/bundled-modules';
+import { adoptPresetFiles, onPresetChanged } from '@/app/preset-files';
+import { installQuickReplies } from '@/app/quick-replies';
 import { mountUi } from '@/ui';
 import { ui } from '@/ui/state';
 import { registerChatSurface } from '@/ui/annotations';
@@ -80,6 +83,7 @@ async function init(): Promise<void> {
   first(E.CHAT_COMPLETION_PROMPT_READY!, (data: { chat: ChatMessage[]; dryRun: boolean }) => onPromptReady(data));
   eventSource.on(E.CHAT_COMPLETION_SETTINGS_READY!, (data: Record<string, unknown>) => onSettingsReady(data));
   installMemorySync();
+  installVariableGuard();
   eventSource.on(E.MESSAGE_RECEIVED!, (mesId: number, type?: string) => onMessageReceived(Number(mesId), type));
   eventSource.on(E.GENERATION_STOPPED!, () => { registry.setPending(null); registry.takeArmed(); });
   eventSource.on(E.GENERATION_ENDED!, () => registry.sweep());
@@ -91,13 +95,22 @@ async function init(): Promise<void> {
   }, 300);
   eventSource.on(E.SETTINGS_UPDATED!, pull);
   eventSource.on(E.OAI_PRESET_CHANGED_AFTER!, pull);
+  eventSource.on(E.OAI_PRESET_CHANGED_AFTER!, onPresetChanged);
 
   const ready = async () => {
+    // The dev artifact first: syncing from the installed copy before it would rebuild the dev
+    // preset's Carrier twice on every load (dropping what only the dev build has, such as new scripts).
+    await Promise.race([startDevSource(), new Promise((r) => setTimeout(r, 3000))]);
     await syncCarriers();
-    // Bundled user modules may ask which copy to keep: only once ST's UI is up, without holding up the rest.
-    void (async () => { for (const { preset } of listPresets()) await syncBundledModules(preset); })();
+    // Bundled user modules may ask which copy to keep, and preset files imported before AP was
+    // installed may ask for trust: only once ST's UI is up, without holding up the rest.
+    void (async () => {
+      for (const { preset } of listPresets()) await syncBundledModules(preset);
+      await adoptPresetFiles();
+    })();
     syncGlobalRefs({ reload: true });
-    startDevSource();
+    // The Quick Reply extension has loaded its sets by now.
+    installQuickReplies();
     void checkStaleBundle();
   };
   // APP_READY is sticky in ST's emitter (late listeners run immediately).

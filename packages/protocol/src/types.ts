@@ -8,6 +8,10 @@
 import type { Expr } from './expr';
 import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
 import type { InputShaping } from './input-shaping';
+import type { StorylineConfig, StorylinesDecl } from './storylines';
+import type { RegexScript } from './regex-scripts';
+import type { QuickReplySetDecl, QuickReplySetLocale } from './quick-replies';
+import type { TavernHelperScriptTree } from './tavern-helper';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -204,6 +208,11 @@ export interface Stage {
   field?: Partial<FieldText>;
   /** Multi-step tools: this stage's tool. Unset parts fall back to `tools.stage`. */
   tool?: { name?: string; description?: string; param?: Partial<FieldText> };
+  /**
+   * Sort key shared with structures (I-134). Defaults to 100 × the stage's position in the workflow;
+   * keys must increase in declaration order (stages are never reordered).
+   */
+  order?: number;
 }
 
 export interface WorkflowSections {
@@ -223,11 +232,22 @@ export interface Workflow {
   stages: Stage[];
   /** Stage after which structures are emitted (defaults to the last content stage). */
   structuresAfter?: string;
+  /** Per-workflow structure positions (`structures.order` in the frontmatter), overriding `StructureDecl.order`. */
+  structureOrder?: Record<string, StructureOrder>;
   sections: WorkflowSections;
 }
 
-export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'custom' | 'annotations';
-export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'custom', 'annotations'];
+/**
+ * Where a structure sits among the stages of a turn (I-134): an absolute sort key (stages default to
+ * 100, 200, …) or relative to a stage. `@content` is the terminal content stage. A reference to a
+ * stage that is not active falls back to the structures anchor (`structures.after` / content).
+ */
+export type StructureOrder = number | { before: string } | { after: string };
+/** Reference to the terminal content stage in {@link StructureOrder}. */
+export const CONTENT_STAGE_REF = '@content';
+
+export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'storyline' | 'custom' | 'annotations';
+export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'storyline', 'custom', 'annotations'];
 /** Kinds written inside the story content rather than as a tag block / field (I-77). */
 export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations'];
 export const isInlineStructure = (s: { kind: StructureKind }): boolean => INLINE_STRUCTURE_KINDS.includes(s.kind);
@@ -247,14 +267,66 @@ export interface StructureDecl {
   shape?: 'text' | 'kv';
   display?: 'card' | 'hidden';
   /**
-   * Recent history (I-80 / I-88): the last N assistant messages carry this structure again —
-   * annotations are re-injected as CriticMarkup, a synopsis is appended via `historyTemplate`. 0 = off.
+   * Recent history: the last N assistant messages carry this structure again.
+   * - A number: annotations re-injected as CriticMarkup (I-80); legacy synopsis history (I-88,
+   *   artifacts before 1.10) appended via `historyTemplate`. 0 = off.
+   * - An object (I-139, any non-inline kind): text rendered from `template` and inserted before /
+   *   after the message text or at a sort key, when `when` holds.
    */
-  history?: number;
-  /** synopsis only: how a kept message carries its synopsis; `{{content}}` + `{{time}}` `{{location}}` `{{event}}` `{{summary}}`. */
+  history?: number | StructureHistory;
+  /** Legacy synopsis history (with a numeric `history`): `{{content}}` + `{{time}}` `{{location}}` `{{event}}` `{{summary}}`. */
   historyTemplate?: string;
   title?: string;
   formatPrompt: { tag: string; field: string };
+  /** Position among the stages of a turn (structured output / tools), see {@link StructureOrder}. */
+  order?: StructureOrder;
+  /** Chat card placement and, for custom structures, a preset-supplied front-end component (I-137). */
+  ui?: StructureUi;
+  /**
+   * Runtime only (not in artifacts): the sub-fields requested this turn. A `storyline` structure is
+   * only requested when the AI names a storyline, with the names it has to give (I-158).
+   */
+  requested?: string[];
+}
+
+/**
+ * Where structure history goes in a history message (I-139): right before / after the message
+ * text, or a sort key on the turn axis (stages default to 100, 200, …; the message text sits at the
+ * terminal content stage's key). Unset: the structure's own position relative to the content stage.
+ */
+export type HistoryPosition = 'before' | 'after' | number;
+
+/** Structure history (I-139): how recent assistant messages carry a structure again. */
+export interface StructureHistory {
+  /** Number of recent assistant messages (messages replaced by their synopsis count too). 0 = off. */
+  depth: number;
+  /** Inserted text: `{{value}}` (the whole value as text) and the kind's sub-fields (`{{time}}`, `{{date}}`, a kv key …). */
+  template: string;
+  position?: HistoryPosition;
+  /** Condition for carrying the structure this turn (condition variables of the request). */
+  when?: Expr;
+}
+
+/** Message areas that hold structure cards: above the message text or below it. */
+export type CardPosition = 'top' | 'bottom';
+export const CARD_POSITIONS: readonly CardPosition[] = ['top', 'bottom'];
+
+/**
+ * Card of a structure in the chat (I-137). `position` / `order` place AP's built-in card (or the
+ * custom component) among the other cards of the same area; without `order` the kind's built-in
+ * key applies. Custom structures may bring their own component — an EJS `template` rendering HTML,
+ * or a JavaScript `module` mounted into a shadow root — which only shows once the user trusts and
+ * enables the preset's custom UI.
+ */
+export interface StructureUi {
+  position?: CardPosition;
+  order?: number;
+  /** EJS template (custom only): renders the card's HTML from the structure value. */
+  template?: string;
+  /** ES module source (custom only): `mount(root, context)` renders into a shadow root. */
+  module?: string;
+  /** CSS placed in the component's shadow root (template or module). */
+  style?: string;
 }
 
 export interface RegexDecl {
@@ -279,7 +351,7 @@ export interface MetaDecl {
 /** What token saving does with older user messages. */
 export type UserInputMode = 'keep' | 'truncate' | 'remove';
 export const USER_INPUT_MODES: readonly UserInputMode[] = ['keep', 'truncate', 'remove'];
-/** Default `historyTemplate` of a synopsis structure. */
+/** Default legacy `historyTemplate` of a synopsis structure (numeric `history`, before 1.10). */
 export const DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = '{{content}}\n\n[{{time}} · {{location}}] {{event}}: {{summary}}';
 
 export interface TokenSavingDecl {
@@ -352,6 +424,14 @@ export interface ToolsDecl {
    * content. `''` = no prefix.
    */
   structurePrefix?: string;
+  /**
+   * Ordering prefix (I-135): when set, every stage field and structure field of a turn gets this
+   * prefix, `{{n}}` being its zero-padded position among the turn's fields (stages and structures
+   * sorted together), e.g. `{{n}}_` → `1_questions`, `2_status`, `3_story`. Replaces the
+   * `{{n}}` numbering of stage field templates and `structurePrefix`; structure `field`s stay bare
+   * and their `{{field}}` placeholders are filled in per turn.
+   */
+  orderPrefix?: string;
   /** Appended to the description of free-form maps sent as JSON-encoded strings (Gemini). */
   jsonStringHint?: string;
   /** Prefill / plaintext task turns with a caller JSON schema: system hint asking for a JSON block (`{{schema}}`). */
@@ -398,6 +478,8 @@ export interface Configuration {
   cache: CacheConfig;
   /** `enabled: false` turns meta-instruction handling off (input is plain story text). */
   meta: { enabled: boolean; recentCount: number };
+  /** Storylines switch; only present when the preset declares `storylines`. */
+  storylines?: StorylineConfig;
 }
 
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
@@ -437,6 +519,8 @@ export interface LocaleTable {
   userModules?: Record<string, { name?: string }>;
   userModuleTemplates?: Record<string, { name?: string; description?: string }>;
   vars?: Record<string, { label?: string; description?: string }>;
+  /** Quick Reply sets by set id: `qrList.<reply id>` → `label` `title` `message`. */
+  quickReplySets?: Record<string, QuickReplySetLocale>;
   [key: string]: unknown;
 }
 
@@ -474,6 +558,8 @@ export interface APreset {
    * `{{ap::input::text}}`. Only when the last chat message is the user's.
    */
   inputShaping?: InputShaping;
+  /** Storylines (absent = the preset does not support them): separators of the storyline groups in the history. */
+  storylines?: StorylinesDecl;
 
   params: Param[];
   groups: Record<string, Group>;
@@ -490,6 +576,12 @@ export interface APreset {
   workflows: Workflow[];
   structures: Record<string, StructureDecl>;
   regex: RegexDecl[];
+  /** SillyTavern regex scripts written into the Carrier (`regex-scripts/`; absent → none). */
+  regexScripts?: RegexScript[];
+  /** SillyTavern Quick Reply sets installed while the preset is active (`quick-replies/`; absent → none). */
+  quickReplySets?: QuickReplySetDecl[];
+  /** Tavern Helper scripts written into the Carrier (`tavern-helper-scripts/`; absent → none). */
+  tavernHelperScripts?: TavernHelperScriptTree[];
   meta: MetaDecl;
   tokenSaving: TokenSavingDecl;
   syntheticTurns: SyntheticTurn[];

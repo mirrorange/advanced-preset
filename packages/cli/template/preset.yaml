@@ -117,6 +117,8 @@ tools:
   # Structure fields become `z_reply`, `z_options`: some APIs (Gemini) write fields alphabetically,
   # and the prefix keeps them after the steps. `{{field}}` in structure texts is the final name.
   structurePrefix: z_
+  # Advanced Preset 1.10+: `orderPrefix: true` numbers stages and structures together in turn order
+  # (`1_plan`, `2_status`, `3_draft`), so structures may sit between steps; use `field: "{{stage}}"` then.
   results:
     next: Recorded. Next, call `{{next}}`.
     done: Recorded. The turn is complete.

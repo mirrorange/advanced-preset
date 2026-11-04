@@ -1,9 +1,9 @@
 /**
  * Bundled user modules in the UI: installing them with a preset (asking which copy to keep when the
  * preset's version differs from the user's) and choosing which of the user's modules to bundle when
- * exporting a preset.
+ * exporting a preset (as a preset file, with the Tavern Helper installer unless unticked).
  */
-import type { APreset, UserModule } from '@advanced-preset/protocol';
+import { presetFile, resolveConfiguration, type APreset, type UserModule } from '@advanced-preset/protocol';
 import { confirmPopup, toast } from '@/st/host';
 import { presetState } from '@/store/config';
 import { getPreset } from '@/store/presets';
@@ -95,23 +95,58 @@ export function syncBundledModules(preset: APreset, o: SyncOptions = {}): Promis
   return run;
 }
 
+/** A checkbox in ST's style (`checked` by default). */
+function checkbox(label: string, note: string, checked: boolean) {
+  const row = document.createElement('label');
+  row.className = 'checkbox_label';
+  row.dataset.apOption = 'installer';
+  row.style.marginTop = '0.8em';
+  const box = document.createElement('input');
+  box.type = 'checkbox';
+  box.checked = checked;
+  const text = document.createElement('span');
+  text.textContent = label;
+  row.append(box, text);
+  const hint = document.createElement('small');
+  hint.className = 'text_muted';
+  hint.style.display = 'block';
+  hint.textContent = note;
+  const root = document.createElement('div');
+  root.style.textAlign = 'start';
+  root.append(row, hint);
+  return { root, box };
+}
+
 /**
- * Download the preset with the user's chosen modules bundled. Without user modules the artifact is
- * saved as it is; `false` when the user cancels the choice.
+ * Download the preset as a preset file (I-170) with the user's chosen modules bundled and, unless
+ * unticked, the Tavern Helper installer. `false` when the user cancels.
  */
 export async function exportPreset(preset: APreset): Promise<boolean> {
   const list = userModules(preset);
-  let chosen: UserModule[] = [];
+  const installer = checkbox(t('presetFile.installer'), t('presetFile.installerHint'), true);
+  let root: HTMLElement;
+  let picked: () => string[] = () => [];
   if (list.length) {
-    const { root, checked } = checklist(
+    const c = checklist(
       t('um.bundled.exportTitle', { name: presetName(preset) }),
       t('um.bundled.exportBody'),
       list.map((m) => ({ id: m.id, label: m.name || t('um.untitled'), ...(m.enabled ? {} : { note: t('um.bundled.disabled') }), checked: true })),
     );
-    if (!(await confirmPopup(root, t('um.bundled.export'), t('common.cancel')))) return false;
-    const ids = checked();
-    chosen = list.filter((m) => ids.includes(m.id));
+    c.root.append(installer.root);
+    root = c.root;
+    picked = c.checked;
+  } else {
+    root = document.createElement('div');
+    root.style.textAlign = 'start';
+    const h = document.createElement('h3');
+    h.textContent = t('um.bundled.exportTitle', { name: presetName(preset) });
+    root.append(h, installer.root);
   }
-  downloadJson(`${fileSlug(preset.id)}.apreset.json`, presetWithUserModules(preset, chosen, locale()));
+  if (!(await confirmPopup(root, t('um.bundled.export'), t('common.cancel')))) return false;
+  const ids = picked();
+  const chosen = list.filter((m) => ids.includes(m.id));
+  const artifact = presetWithUserModules(preset, chosen, locale());
+  const sampling = resolveConfiguration(artifact, artifact.defaultConfiguration, undefined).sampling;
+  downloadJson(`${fileSlug(preset.id)}.apreset.json`, presetFile(artifact, { installer: installer.box.checked, sampling }));
   return true;
 }

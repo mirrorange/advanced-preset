@@ -2,8 +2,8 @@
 import { parseArgs } from 'node:util';
 import { basename, resolve } from 'node:path';
 import { readFile, writeFile } from 'node:fs/promises';
-import { parseUserModuleFile, type ParamValue } from '@advanced-preset/protocol';
-import { buildDir, writeArtifact } from './io';
+import { parseUserModuleFile, tavernHelperScriptCount, type ParamValue } from '@advanced-preset/protocol';
+import { buildDir, writePresetFile } from './io';
 import { report } from './diagnostics';
 import { bundledModules, parseParamArg, preview, templateModules } from './preview';
 import { dev } from './dev';
@@ -16,12 +16,15 @@ const VERSION = typeof __AP_VERSION__ === 'string' ? __AP_VERSION__ : '0.0.0-dev
 const HELP = `ap ${VERSION} — Advanced Preset toolchain
 
 Usage
-  ap build   [dir] [--out dist] [--strict]   compile sources to dist/<id>.apreset.json
+  ap build   [dir] [--out dist] [--strict] [--installer | --no-installer]
+                                             compile sources to the preset file dist/<id>.apreset.json
   ap check   [dir] [--strict]                validate only
-  ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
+  ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist] [--installer | --no-installer]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value …] [--input text]
+                   [--storyline name|?] [--storyline-new] [--storyline-grouped]
+                   [--storyline-switch] [--storyline-naming-main]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -31,7 +34,9 @@ Usage
   ap skills  install [dir] [--target .agents/skills]
                                              install / update the Agent Skills in a preset repo
 
---strict treats warnings as errors.`;
+--strict treats warnings as errors.
+--no-installer leaves the Tavern Helper installer script out of the preset file (default:
+preset.yaml#build.installer, else included).`;
 
 async function main(argv: string[]): Promise<number> {
   const [command, ...rest] = argv;
@@ -52,6 +57,11 @@ async function main(argv: string[]): Promise<number> {
       json: { type: 'boolean' },
       param: { type: 'string', multiple: true },
       input: { type: 'string' },
+      storyline: { type: 'string' },
+      'storyline-new': { type: 'boolean' },
+      'storyline-grouped': { type: 'boolean' },
+      'storyline-switch': { type: 'boolean' },
+      'storyline-naming-main': { type: 'boolean' },
       'user-modules': { type: 'string' },
       'bundled-modules': { type: 'string' },
       'user-module-templates': { type: 'string' },
@@ -60,27 +70,32 @@ async function main(argv: string[]): Promise<number> {
       name: { type: 'string' },
       author: { type: 'string' },
       target: { type: 'string' },
+      installer: { type: 'boolean' },
+      'no-installer': { type: 'boolean' },
     },
   });
+  if (values.installer && values['no-installer']) { console.error('--installer and --no-installer exclude each other'); return 1; }
+  const installerFlag = values.installer ? true : values['no-installer'] ? false : undefined;
   const dir = resolve(positionals[0] ?? '.');
 
   switch (command) {
     case 'build':
     case 'check': {
-      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
+      const { preset, build, diag, manifestFiles = [] } = await buildDir(dir);
       report(diag);
       const failed = !diag.ok || (values.strict && diag.warnings.length > 0);
       if (failed || !preset) return 1;
       if (command === 'check') {
-        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}`);
+        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ''}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ''}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ''}`);
         return 0;
       }
-      const file = await writeArtifact(preset, resolve(dir, values.out ?? 'dist'));
-      console.log(`✓ ${file} #${preset.hash}`);
+      const installer = installerFlag ?? build?.installer ?? true;
+      const file = await writePresetFile(preset, resolve(dir, values.out ?? 'dist'), { installer });
+      console.log(`✓ ${file} #${preset.hash}${installer ? ' (with installer)' : ''}`);
       return 0;
     }
     case 'dev':
-      await dev({ root: dir, outDir: resolve(dir, values.out ?? 'dist'), port: Number(values.port ?? 4747), host: values.host ?? '127.0.0.1' });
+      await dev({ root: dir, outDir: resolve(dir, values.out ?? 'dist'), port: Number(values.port ?? 4747), host: values.host ?? '127.0.0.1', installer: installerFlag });
       return new Promise<number>(() => {});
     case 'preview': {
       const { preset, diag, manifestFiles = [] } = await buildDir(dir);
@@ -106,7 +121,7 @@ async function main(argv: string[]): Promise<number> {
         if (typeof picked === 'string') { console.error(picked); return 1; }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values['storyline-new'], storylineGrouped: values['storyline-grouped'], storylineSwitch: values['storyline-switch'], storylineNamingMain: values['storyline-naming-main'], userModules, json: values.json });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);
       return 0;

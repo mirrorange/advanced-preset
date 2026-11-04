@@ -1,9 +1,11 @@
 /**
- * Artifact loading. Only the current format is accepted (an installed copy in an older format is
+ * Artifact loading (from a bare artifact or a preset file, see preset-file.ts). Only the current format is accepted (an installed copy in an older format is
  * ignored, and the built-in copy of that preset is used instead); fields added without a format
  * bump get their defaults in memory.
  */
 import { CACHE_DEFAULTS, CONNECTION_DEFAULTS } from './config';
+import { STORYLINE_CONFIG_DEFAULTS } from './storylines';
+import { unwrapPresetFile } from './preset-file';
 import { FORMAT_VERSION, type APreset } from './types';
 
 type Obj = Record<string, any>;
@@ -53,9 +55,18 @@ function withMetaDefaults(p: APreset): APreset {
   return { ...p, configurationDefaults: { ...conf, meta: { enabled: true, ...(isObj(meta) ? meta : {}) } as Obj } } as APreset;
 }
 
+/** Storylines (declared by the preset): the user switch defaults to on. */
+function withStorylineDefaults(p: APreset): APreset {
+  const conf = p.configurationDefaults as APreset['configurationDefaults'] | undefined;
+  if (!isObj(p.storylines) || !isObj(conf)) return p;
+  const cur = (conf as Obj).storylines;
+  if (isObj(cur) && Object.keys(STORYLINE_CONFIG_DEFAULTS).every((k) => k in cur)) return p;
+  return { ...p, configurationDefaults: { ...conf, storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...(isObj(cur) ? cur : {}) } } };
+}
+
 /** Fields added without a format bump get their empty defaults. */
 function withOptionalDefaults(p: APreset): APreset {
-  const out = withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p))));
+  const out = withStorylineDefaults(withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p)))));
   const withPoints = Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
   return {
     ...withPoints,
@@ -64,8 +75,9 @@ function withOptionalDefaults(p: APreset): APreset {
   };
 }
 
-/** A parsed artifact in the current format, or `null` for anything else. */
-export function upgradeArtifact(raw: unknown): APreset | null {
+/** A parsed artifact in the current format (bare, or inside a preset file), or `null` for anything else. */
+export function upgradeArtifact(input: unknown): APreset | null {
+  const raw = unwrapPresetFile(input);
   if (!isObj(raw) || typeof raw.id !== 'string' || !Array.isArray(raw.entries)) return null;
   return raw.formatVersion === FORMAT_VERSION ? withOptionalDefaults(raw as APreset) : null;
 }

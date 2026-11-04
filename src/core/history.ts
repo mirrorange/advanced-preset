@@ -2,7 +2,10 @@
  * History rewriting (§9.1) on the interceptor's shallow chat copy, plus the alignment used by the
  * script path (§9.2). Pure functions over a minimal message shape; the real chat is never touched.
  */
-import { DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, activeModules, injectAnnotations, parseMeta, type APreset, type Configuration, type Synopsis, type TokenSavingConfig } from '@advanced-preset/protocol';
+import {
+  activeModules, annotationDepth, fillHistoryTemplate, formatSynopsisLine, hasStructureValue, historyContentKey, historyEchoOf, historyPlacement, injectAnnotations, insertPieces, parseMeta, resolverOf, test,
+  type APreset, type Configuration, type PlacedPiece, type StructureKind, type Synopsis, type TokenSavingConfig, type Vars, type Workflow,
+} from '@advanced-preset/protocol';
 import type { Sidecar } from '@/store/sidecar';
 
 export interface HistoryItem {
@@ -23,10 +26,8 @@ export interface RewriteOptions {
   synopsisTemplate: string;
   /** Structure id of the synopsis kind (if declared). */
   synopsisId?: string;
-  /** Append the synopsis to the last `depth` assistant messages that are still verbatim. */
-  synopsisHistory?: { depth: number; template: string };
-  /** Template used when a sticky rendering still carries a synopsis while synopsis history is off. */
-  synopsisHistoryTemplate?: string;
+  /** Structure history (I-139): structures recent assistant messages carry again. */
+  echoes?: HistoryEchoes;
   /** Latest effective recap: messages up to `coversUpTo` (real index) may be dropped. */
   recap?: { coversUpTo: number } | null;
   /** Real chat index of each item (for recap coverage). */
@@ -35,6 +36,33 @@ export interface RewriteOptions {
   currentInput: number;
   /** Re-inject inline annotations as CriticMarkup into the last `depth` assistant messages (I-80). */
   annotations?: { depth: number };
+  /** Item index of the assistant message being continued: it never carries structures. */
+  continuing?: number;
+  /**
+   * Storylines (I-149): items of side storylines other than the current one. With token saving and
+   * a synopsis structure they get the synopsis / user input rule whatever their depth.
+   */
+  background?: (index: number) => boolean;
+}
+
+/** One structure's history rule (I-139), placed relative to the message text. */
+export interface EchoRule {
+  id: string;
+  kind: StructureKind;
+  depth: number;
+  /** Carried by recent messages this turn (requested by a switched-on module, condition holds). */
+  active: boolean;
+  pieces: { template: string; key: number; rank: number; raw?: boolean }[];
+}
+
+/**
+ * Every structure that declares history, in declaration order. Inactive rules stay listed: a
+ * sticky rendering (cache optimization) may still carry them.
+ */
+export interface HistoryEchoes {
+  rules: EchoRule[];
+  /** Sort key of the message text. */
+  contentKey: number;
 }
 
 /**
@@ -46,25 +74,33 @@ export interface RenderMode {
   body: 'full' | 'synopsis' | 'truncate' | 'drop';
   /** `truncate`: character limit. */
   max?: number;
-  /** Full assistant text that also carries its synopsis (synopsis history). */
-  synopsis?: boolean;
   /** Inline annotations re-injected as CriticMarkup. */
   annotations?: boolean;
+  /** Full assistant text that also carries these structures (structure history, I-139), in rule order. */
+  echo?: string[];
 }
 
-/** Compact form stored between requests: `f` / `s` / `x` / `t<max>`, then `y` (synopsis) and `a` (annotations). */
+/**
+ * Compact form stored between requests: `f` / `s` / `x` / `t<max>`, then `a` (annotations) and
+ * `+<id>` per carried structure. `y` (synopsis, before 1.10) is still read.
+ */
 export function encodeMode(m: RenderMode): string {
   const body = m.body === 'full' ? 'f' : m.body === 'synopsis' ? 's' : m.body === 'drop' ? 'x' : `t${m.max ?? 0}`;
-  return body + (m.body === 'full' && m.synopsis ? 'y' : '') + (m.body === 'full' && m.annotations ? 'a' : '');
+  if (m.body !== 'full') return body;
+  return body + (m.annotations ? 'a' : '') + (m.echo ?? []).map((id) => `+${id}`).join('');
 }
 
-export function decodeMode(code: string | undefined): RenderMode | undefined {
-  const m = code ? /^(?:(f)(y?)(a?)|(s)|(x)|t(\d+))$/.exec(code) : null;
+/** `synopsisId`: the structure a legacy `y` refers to. */
+export function decodeMode(code: string | undefined, synopsisId?: string): RenderMode | undefined {
+  const m = code ? /^(?:(f)(y?)(a?)((?:\+[^+]+)*)|(s)|(x)|t(\d+))$/.exec(code) : null;
   if (!m) return undefined;
-  if (m[1]) return { body: 'full', ...(m[2] ? { synopsis: true } : {}), ...(m[3] ? { annotations: true } : {}) };
-  if (m[4]) return { body: 'synopsis' };
-  if (m[5]) return { body: 'drop' };
-  return { body: 'truncate', max: Number(m[6]) };
+  if (m[1]) {
+    const echo = [...(m[2] && synopsisId ? [synopsisId] : []), ...(m[4] ? m[4].slice(1).split('+') : [])];
+    return { body: 'full', ...(m[3] ? { annotations: true } : {}), ...(echo.length ? { echo } : {}) };
+  }
+  if (m[5]) return { body: 'synopsis' };
+  if (m[6]) return { body: 'drop' };
+  return { body: 'truncate', max: Number(m[7]) };
 }
 
 const sidecarOf = (m: HistoryItem): Sidecar | undefined => {
@@ -73,13 +109,12 @@ const sidecarOf = (m: HistoryItem): Sidecar | undefined => {
 };
 const PURE_TURNS = new Set(['meta-pure', 'summary', 'impersonate']);
 
-/** Fills `{{time}}` `{{location}}` `{{event}}` `{{summary}}` and (history template) `{{content}}`. */
-export function formatSynopsis(template: string, s: Synopsis, content = ''): string {
-  return template.replace(/\{\{(time|location|event|summary|content)\}\}/g, (_, k: keyof Synopsis | 'content') => (k === 'content' ? content : s[k] ?? ''));
-}
+/** Fills `{{time}}` `{{location}}` `{{event}}` `{{summary}}` (token-saving replacement). */
+export const formatSynopsis = (template: string, s: Synopsis): string => formatSynopsisLine(template, s);
 
 const synopsisOf = (item: HistoryItem, id?: string): Synopsis | undefined =>
   id ? (sidecarOf(item)?.structures?.[id] as Synopsis | undefined) : undefined;
+const structureOf = (item: HistoryItem, id: string): unknown => sidecarOf(item)?.structures?.[id];
 
 /** A history message after the fixed rewrites (pure meta turns dropped, meta segments stripped). */
 export interface PlannedItem {
@@ -137,7 +172,8 @@ export function planHistory(items: HistoryItem[], o: RewriteOptions): PlannedIte
     const inFull = (i: number) => depth[i]! <= keep;
     const covered = o.recap?.coversUpTo ?? -1;
     plan.forEach((p, i) => {
-      if (!p.fresh || inFull(i) || p.index === o.currentInput) return;
+      if (!p.fresh || p.index === o.currentInput) return;
+      if (inFull(i) && !(o.synopsisId && o.background?.(p.index))) return;
       if (covered >= 0 && o.realIndex(p.index) <= covered) { p.fresh = { body: 'drop' }; p.forced = true; return; }
       if (p.item.is_user) {
         const mode = o.tokenSaving.userInput ?? 'truncate';
@@ -165,13 +201,14 @@ export function planHistory(items: HistoryItem[], o: RewriteOptions): PlannedIte
     if (p.fresh!.body === 'full' && sidecarOf(p.item)?.annotations?.length) p.fresh!.annotations = true;
   }
 
-  // 5. Recent synopses: the last `depth` assistant messages keep their text and also carry their
-  //    synopsis, so the story keeps a time/place reference even when older turns are verbatim.
+  // 5. Structure history (I-139): the last `depth` assistant messages keep their text and also carry
+  //    the structure (e.g. a synopsis keeps a time/place reference while older turns are verbatim).
   //    Messages replaced by their synopsis (token saving) still count towards the depth.
-  const sh = o.synopsisHistory;
-  if (sh && o.synopsisId) {
-    for (const p of recentAssistants(sh.depth)) {
-      if (p.fresh!.body === 'full' && synopsisOf(p.item, o.synopsisId)) p.fresh!.synopsis = true;
+  for (const rule of o.echoes?.rules ?? []) {
+    if (!rule.active) continue;
+    for (const p of recentAssistants(rule.depth)) {
+      if (p.fresh!.body !== 'full' || p.index === o.continuing || !hasStructureValue(structureOf(p.item, rule.id))) continue;
+      p.fresh!.echo = [...(p.fresh!.echo ?? []), rule.id];
     }
   }
   return plan;
@@ -196,47 +233,77 @@ export function renderItem(p: PlannedItem, mode: RenderMode | null, o: RewriteOp
       if (item.is_user) return mes;
       const list = mode.annotations ? sidecarOf(item)?.annotations : undefined;
       if (list?.length) mes = injectAnnotations(mes, list);
-      const syn = mode.synopsis ? synopsisOf(item, o.synopsisId) : undefined;
-      if (syn) mes = formatSynopsis(o.synopsisHistory?.template ?? o.synopsisHistoryTemplate ?? DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, syn, mes);
+      if (mode.echo?.length && o.echoes) mes = insertEchoes(mes, item, mode.echo, o.echoes);
       return mes;
     }
   }
 }
 
-/** Returns the rewritten list (new array; items are shallow copies when changed). */
-export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): HistoryItem[] {
-  const out: HistoryItem[] = [];
+/** Message text with the carried structures inserted around it. Structures without a value or rule are skipped. */
+function insertEchoes(mes: string, item: HistoryItem, ids: string[], echoes: HistoryEchoes): string {
+  const pieces: PlacedPiece[] = [];
+  echoes.rules.forEach((rule, r) => {
+    if (!ids.includes(rule.id)) return;
+    const value = structureOf(item, rule.id);
+    if (!hasStructureValue(value)) return;
+    rule.pieces.forEach((p, i) => pieces.push({ text: fillHistoryTemplate(p.template, rule.kind, value), key: p.key, rank: p.rank, order: r * 16 + i, ...(p.raw ? { raw: true } : {}) }));
+  });
+  return pieces.length ? insertPieces(mes, echoes.contentKey, pieces) : mes;
+}
+
+/** The rewritten list with the input index of each item (items are shallow copies when changed). */
+export function rewriteHistoryIndexed(items: HistoryItem[], o: RewriteOptions): { item: HistoryItem; index: number }[] {
+  const out: { item: HistoryItem; index: number }[] = [];
   for (const p of planHistory(items, o)) {
     const mes = renderItem(p, p.fresh, o);
     if (mes === null) continue;
-    out.push(mes === p.item.mes ? p.item : { ...p.item, mes });
+    out.push({ item: mes === p.item.mes ? p.item : { ...p.item, mes }, index: p.index });
   }
   return out;
+}
+
+/** Returns the rewritten list (new array; items are shallow copies when changed). */
+export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): HistoryItem[] {
+  return rewriteHistoryIndexed(items, o).map((r) => r.item);
 }
 
 /** History re-injection depth for the preset (I-80): the annotations structure is declared by a switched-on module. */
 export function annotationHistory(preset: APreset, config: Configuration): { depth: number } | undefined {
   const decl = Object.values(preset.structures).find((s) => s.kind === 'annotations');
-  if (!decl?.history) return undefined;
-  const requested = activeModules(preset, config).some((m) => m.structures.includes(decl.id));
-  return requested ? { depth: decl.history } : undefined;
+  const depth = decl ? annotationDepth(decl) : 0;
+  if (!depth) return undefined;
+  const requested = activeModules(preset, config).some((m) => m.structures.includes(decl!.id));
+  return requested ? { depth } : undefined;
+}
+
+/** Synopsis options for {@link rewriteHistory}: the token-saving replacement template and the structure. */
+export function synopsisOptions(preset: APreset): Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId'> {
+  const decl = Object.values(preset.structures).find((s) => s.kind === 'synopsis');
+  return { synopsisTemplate: preset.tokenSaving.synopsisTemplate, synopsisId: decl?.id };
 }
 
 /**
- * Synopsis options for {@link rewriteHistory}: the replacement template (token saving) and, when a
- * switched-on module requests the synopsis structure, how many recent messages carry theirs.
+ * Structure history rules (I-139). A rule is active when a switched-on module requests the
+ * structure and its `when` holds under `vars`; pieces are placed by `workflow` (the story workflow
+ * whose turns make up the history).
  */
-export function synopsisOptions(preset: APreset, config: Configuration): Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory' | 'synopsisHistoryTemplate'> {
-  const decl = Object.values(preset.structures).find((s) => s.kind === 'synopsis');
-  const out: Pick<RewriteOptions, 'synopsisTemplate' | 'synopsisId' | 'synopsisHistory' | 'synopsisHistoryTemplate'> = {
-    synopsisTemplate: preset.tokenSaving.synopsisTemplate,
-    synopsisId: decl?.id,
-    synopsisHistoryTemplate: decl?.historyTemplate ?? DEFAULT_SYNOPSIS_HISTORY_TEMPLATE,
-  };
-  if (decl?.history && activeModules(preset, config).some((m) => m.structures.includes(decl.id))) {
-    out.synopsisHistory = { depth: decl.history, template: decl.historyTemplate ?? DEFAULT_SYNOPSIS_HISTORY_TEMPLATE };
+export function historyEchoes(preset: APreset, config: Configuration, vars: Vars | undefined, workflow: Workflow | undefined): HistoryEchoes | undefined {
+  const requested = new Set(activeModules(preset, config).flatMap((m) => m.structures));
+  const resolve = vars ? resolverOf(vars) : undefined;
+  const rules: EchoRule[] = [];
+  for (const decl of Object.values(preset.structures)) {
+    const echo = historyEchoOf(decl);
+    if (!echo) continue;
+    const active = requested.has(decl.id) && (!echo.when || (resolve ? test(echo.when, resolve) : false));
+    rules.push({
+      id: decl.id,
+      kind: decl.kind,
+      depth: echo.depth,
+      active,
+      pieces: echo.pieces.map((p) => ({ template: p.template, ...historyPlacement(workflow, decl, p.position), ...(p.raw ? { raw: true } : {}) })),
+    });
   }
-  return out;
+  return rules.length ? { rules, contentKey: historyContentKey(workflow) } : undefined;
 }
 
 // ---- script path alignment (§9.2) ----------------------------------------------------------

@@ -1,5 +1,5 @@
 /* Align with ST's message text so the swipe controls keep their gutter. */
-:host(ap-cards), :host(ap-stages) { padding-right: var(--mes-right-spacing, 30px); }
+:host(ap-cards), :host(ap-top-cards), :host(ap-stages) { padding-right: var(--mes-right-spacing, 30px); }
 
 /* Message mounts: stage panel, cards, dock. Quiet by default; colour comes from the actor. */
 .stages { --actor: var(--ap-primary); display: flex; flex-direction: column; gap: var(--ap-space-2); margin: 2px 0 var(--ap-space-2); }
@@ -29,6 +29,7 @@
 .patch-status { display: inline-flex; align-items: center; gap: 4px; color: var(--ap-muted); }
 
 .cards { display: flex; flex-direction: column; gap: var(--ap-space-2); margin: var(--ap-space-2) 0 2px; }
+.cards.cards-top { gap: 4px; margin: 0 0 var(--ap-space-2); }
 .section-icon { color: var(--ap-primary); }
 .chevron { color: var(--ap-faint); transition: transform 0.18s; }
 .chevron.flipped { transform: rotate(180deg); }
@@ -88,6 +89,29 @@
 .synopsis-actions .btn svg.lucide { width: 1em; height: 1em; }
 @media (hover: none) { .synopsis-keys { visibility: hidden; } }
 .row.tight { gap: 4px; white-space: nowrap; }
+
+/* Preset-supplied structure components (I-137): their own shadow root; AP only adds the error line. */
+.structure-component { display: flex; flex-direction: column; gap: 2px; }
+.structure-component .xs { color: var(--ap-danger); }
+
+/* Status bar (I-136): one quiet line above the story. */
+.status-bar {
+  display: flex; align-items: flex-start; gap: var(--ap-space-2); padding: 3px var(--ap-space-3); color: var(--ap-muted);
+  border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface);
+}
+/* Fields wrap on their own line box; the pencil stays pinned top-right (same as .synopsis-head). */
+.status-line { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-3); min-width: 0; }
+.status-line > .row { max-width: 100%; }
+.status-location { min-width: 0; overflow: hidden; }
+.status-bar:hover .synopsis-edit { opacity: 1; }
+.status-editor {
+  display: flex; flex-direction: column; gap: 6px; padding: var(--ap-space-2) var(--ap-space-3); font-size: var(--ap-font-size-sm);
+  border: 1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border)); border-radius: var(--ap-radius-md); background: var(--ap-surface);
+}
+.status-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.status-fields > :nth-child(-n + 3), .status-fields > :nth-child(5) { grid-column: span 2; }
+.status-fields > :nth-child(4) { grid-column: span 4; }
+@media (max-width: 480px) { .status-fields > * { grid-column: span 3 !important; } .status-fields > :nth-child(4) { grid-column: span 6 !important; } }
 .row.end { justify-content: flex-end; }
 .kv-list { display: grid; grid-template-columns: max-content 1fr; gap: 4px var(--ap-space-3); margin: 0; }
 .kv-list dt { color: var(--ap-muted); }
@@ -105,3 +129,17 @@
   font-size: var(--ap-font-size-sm); line-height: 1.55; text-align: left; overflow-wrap: anywhere;
 }
 .anno-author { font-weight: 700; font-size: var(--ap-font-size-xs); color: var(--actor); letter-spacing: 0.02em; margin-bottom: 2px; }
+
+/* Storyline badge (I-152): a quiet pill above messages outside the main storyline. */
+:host(ap-storyline) { display: block; padding-right: var(--mes-right-spacing, 30px); }
+.storyline-badge {
+  display: inline-flex; align-items: center; gap: 4px; max-width: 100%; margin: 2px 0 4px; padding: 1px 8px; min-height: 1.6em;
+  border: 1px solid color-mix(in srgb, var(--ap-primary) 30%, var(--ap-border)); border-radius: var(--ap-radius-pill);
+  background: color-mix(in srgb, var(--ap-primary) 8%, transparent); color: var(--ap-muted); font-size: var(--ap-font-size-xs); cursor: pointer;
+}
+.storyline-badge:hover { color: var(--ap-text); border-color: color-mix(in srgb, var(--ap-primary) 55%, transparent); }
+.storyline-badge svg.lucide { width: 1.1em; height: 1.1em; color: var(--ap-primary); flex: none; }
+.storyline-badge .storyline-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.storyline-badge .storyline-if { padding: 0 5px; border-radius: var(--ap-radius-pill); background: color-mix(in srgb, var(--ap-warning) 18%, transparent); color: var(--ap-warning); font-weight: 600; }
+.storyline-badge.if-line { border-style: dashed; }
+.storyline-badge svg.lucide.storyline-hidden { color: var(--ap-muted); }

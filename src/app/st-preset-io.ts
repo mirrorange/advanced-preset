@@ -1,12 +1,13 @@
 /**
- * ST's Chat Completion preset import / export buttons (I-70). Import: AP artifacts are installed as
- * AP presets, selected and the panel opened; any other file goes on to ST unchanged. Export: while
- * a Carrier is selected the AP artifact is saved instead of the Carrier.
+ * ST's Chat Completion preset import / export buttons (I-70). Import: AP preset files (and bare
+ * artifacts) are installed as AP presets, selected and the panel opened; any other file goes on to
+ * ST unchanged. Export: while a Carrier is selected the AP preset file is saved instead of the Carrier.
  *
  * ST binds both through jQuery on the elements themselves, so capture-phase listeners on `window`
  * run first. The import decision needs the file's contents, so the event is held and re-dispatched
  * to ST when the file is not an artifact.
  */
+import { unwrapPresetFile } from '@advanced-preset/protocol';
 import { toast } from '@/st/host';
 import { getPreset } from '@/store/presets';
 import { activatePreset, activeCarrierPresetId } from '@/store/carrier';
@@ -19,8 +20,12 @@ import { presetName, t } from '@/i18n';
 const IMPORT_INPUT = 'openai_preset_import_file';
 const EXPORT_BUTTON = 'export_oai_preset';
 
-/** Same shape check as the artifact loader, without the format version: old artifacts are reported, not handed to ST. */
-export function looksLikeArtifact(raw: unknown): boolean {
+/**
+ * Same shape check as the artifact loader (bare or in a preset file), without the format version:
+ * old artifacts are reported, not handed to ST.
+ */
+export function looksLikeArtifact(input: unknown): boolean {
+  const raw = unwrapPresetFile(input);
   return typeof raw === 'object' && raw !== null && typeof (raw as { id?: unknown }).id === 'string' && Array.isArray((raw as { entries?: unknown }).entries);
 }
 

@@ -31,9 +31,9 @@ https://github.com/mirrorange/advanced-preset
 2. 预设下拉下方出现「当前预设使用 Advanced Preset」横幅，点击 **打开面板**（扩展设置中也有入口）。面板覆盖在 AI 响应配置抽屉之上。
 
 > [!TIP]
-> ST 的预设 **导入** 按钮可以直接导入 `.apreset.json`：安装为 AP 预设、自动选中并打开面板。选中 `AP · <预设名>` 时，**导出** 按钮导出 AP 预设本身（可再次导入），重命名与另存为按钮会隐藏。其他预设的导入导出保持 ST 原生行为。
+> ST 的预设 **导入** 按钮可以直接导入 `.apreset.json`：安装为 AP 预设、自动选中并打开面板。`.apreset.json` 本身也是一个标准的 ST 预设：还没装 AP 时导入，预设会提示安装 AP；装有[酒馆助手](https://github.com/N0VI028/JS-Slash-Runner)时，启用预设脚本即可自动从 GitHub / GitLab / Codeberg 安装 AP，安装后 AP 自动接管该预设。选中 `AP · <预设名>` 时，**导出** 按钮导出 AP 预设本身（可再次导入），重命名与另存为按钮会隐藏。其他预设的导入导出保持 ST 原生行为。
 
-扩展支持 ST 的自动更新；在扩展管理面板更新后会自动重新加载。
+扩展支持 ST 的自动更新；在扩展管理面板更新或切换分支后会自动重新加载。
 
 ## ✨ 功能
 
@@ -46,6 +46,8 @@ https://github.com/mirrorange/advanced-preset
 | **省 Token** | 较早回复替换为事件摘要、用户输入截断或移除；缓存优化让历史沿用上次的渲染，提高提示词缓存命中 |
 | **配置** | 推荐配置 ⊕ 用户差异（稀疏存储），采样参数与 Carrier 预设双向同步 |
 | **我的模组** | 在预设开放的插入位置加入自己的提示词，可视化触发条件，可导入导出，随预设更新保留 |
+| **正则与快速回复** | 预设可携带 ST 正则脚本（写入 Carrier 作为预设正则）与快速回复集（启用预设时加入全局列表，切换预设时移除） |
+| **酒馆助手脚本** | 预设可携带酒馆助手的预设脚本（写入 Carrier，由酒馆助手询问用户后运行） |
 | **多语言** | 面板中英双语；预设可翻译自己的名称、描述、模组、参数等面板文字 |
 | **开发** | `ap dev` 本地热更新、组装预览、请求记录、事件日志 |
 
@@ -128,7 +130,7 @@ pnpm typecheck    # vue-tsc
 1. 构建、类型检查、测试；`dist/` 与已提交的不同时由 `github-actions[bot]` 自动提交 `build: rebuild dist`；
 2. 若 CLI（`packages/`、`pnpm-lock.yaml`）自上一个 dev 版本以来有变化，以 `dev` 标签发布预发布版本到 npm，版本号为 `<下一补丁版本>-dev.<UTC 时间>.g<提交>`（如 `1.7.1-dev.20261025083000.g7ca1ca3`；若版本号已升但未发布，则用该版本号）。
 
-预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.9.0` 这类范围，也不会移动 `latest`。
+预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.10.0` 这类范围，也不会移动 `latest`。
 
 ## 📄 许可
 

@@ -2,11 +2,11 @@
 import { compareVersions, type APreset } from '@advanced-preset/protocol';
 import { nativeFetch, st } from '@/st/host';
 import { settings, save } from '@/store/settings';
-import { getPreset, installPreset, isBuiltin, removeInstalled, toArtifact } from '@/store/presets';
+import { getPreset, getPresetEntry, installPreset, isBuiltin, removeInstalled, toArtifact } from '@/store/presets';
 import { migratePresetState } from '@/store/config';
 import { ensureCarrier, findCarrier } from '@/store/carrier';
 import { t } from '@/i18n';
-import { confirmPresetTemplates } from './trust';
+import { confirmCustomUi, confirmPresetTemplates, confirmQuickReplyAutomation } from './trust';
 import { syncBundledModules } from './bundled-modules';
 
 /** GitHub page URLs → raw file URLs. */
@@ -23,11 +23,15 @@ export async function installArtifact(raw: unknown, source?: string): Promise<AP
   }
   // Templates run code: ask unless the code is unchanged from the copy being replaced (I-110).
   await confirmPresetTemplates(data, getPreset(data.id));
+  // So do quick replies that run by themselves.
+  await confirmQuickReplyAutomation(data, getPreset(data.id));
   installPreset(data);
   if (source) settings().sources[data.id] = source;
   save();
   const effective = getPreset(data.id) ?? data;
   migratePresetState(effective);
+  // Custom structure components (I-137): trust and enable, or install with them hidden.
+  if (getPresetEntry(effective.id)?.source === 'installed') await confirmCustomUi(effective);
   await ensureCarrier(effective);
   await syncBundledModules(effective);
   return effective;

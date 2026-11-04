@@ -5,7 +5,8 @@
 | 术语 | 英文 / 写法 | 解释 |
 | --- | --- | --- |
 | 预设 | preset | 决定模型以什么身份、按什么要求写作的一组提示词和设定 |
-| 产物 | artifact，`*.apreset.json` | 构建后得到的预设文件，用户安装的就是它 |
+| 产物 | artifact | 构建后得到的预设数据，用户安装的就是它；放在预设文件中 |
+| 预设文件 | preset file，`*.apreset.json` | `ap build` 写出的文件：一个携带产物的标准 ST 预设，没装 AP 时导入 ST 会提示安装 AP（可附带酒馆助手安装脚本） |
 | 清单 | manifest，`preset.yaml` | 预设的总设定文件；除元数据外可拆到 `manifest/*.yaml` |
 | 区域 | region | 请求中的一段固定位置，模组的内容放在区域里 |
 | 原生区域 | native region | 由 ST 填入内容（角色卡、世界书等）的区域 |
@@ -33,11 +34,16 @@
 | 事件摘要 | synopsis | 每段故事的时间、地点、事件、概要 |
 | 节省 Token | token saving | 用事件摘要替代较早的回复、截断较早的长用户消息 |
 | 用户输入整形 | input shaping，`inputShaping` | 预设把本次输入在聊天记录中包裹起来（`wrap`），或取出来放到别的区域（`extract`） |
+| 故事线 | storyline，`#名称` | 同一聊天中的多条故事；输入末尾的 `#名称` 决定消息属于哪条线，没有标签的属于主线；`#` 为最近的支线，`#?` / `#!?` 为 AI 命名的新支线 / 新主线 |
+| 主线 / 支线 / if 线 | main / side / if-line | 主线是默认的线，总是可见；if 线（名字以 `if` 开头，或 `#if?`）是另一种可能。可见性单独设置：默认 if 线对其他线不可见、普通支线可见，`#@` 或故事线面板可以改 |
 | 构建变量 | build variable，`vars` | 由多个模组共同填写、在一处读出的值 |
 | 插入点 | insertion point | 预设开放给用户放入“我的模组”的位置 |
 | 用户模组模板 | user module template | 预设附带的示例用户模组（`user-module-templates/`），新建“我的模组”时可以从它开始 |
 | 随预设安装的用户模组 | bundled user module | 写在预设 `user-modules/` 中、安装预设时放进“我的模组”的用户模组；之后归用户所有 |
 | 我的模组 | user module | 用户在面板上写的模组 |
+| 正则脚本 | regex script，`regex-scripts/` | 预设携带的 ST 正则脚本，写入 Carrier，选中预设时由 ST 执行；与只做判断的正则标记 `regex` 不同 |
+| 快速回复集 | Quick Reply set，`quick-replies/` | 预设携带的 ST 快速回复集，选中预设时加入全局列表，换预设时移除 |
+| 酒馆助手脚本 | Tavern Helper script，`tavern-helper-scripts/` | 预设携带的酒馆助手预设脚本，写入 Carrier；是否启用由酒馆助手询问用户 |
 | 推荐配置 | recommended configuration | 预设提供的一套设定，如“Gemini” |
 | 示范轮次 | synthetic turn | 工具模式下放在请求末尾的一轮虚拟工具调用，示范工具用法 |
 | Carrier | carrier | AP 为每个预设生成的 ST 预设（`AP · <预设名>`），负责放置原生内容与区域 |

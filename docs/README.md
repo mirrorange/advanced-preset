@@ -26,7 +26,7 @@ Advanced Preset（下文简称 **AP**）是一个 SillyTavern 扩展：预设作
 8. [工作流：让模型分步骤思考与写作](guide/08-workflows.md)
 9. [内置功能：元指令、记忆、总结、代写、选项与事件摘要](guide/09-built-in-features.md)
 10. [构建变量：让模组一起拼出一份清单](guide/10-build-variables.md)
-11. [推荐配置、插入点与界面翻译](guide/11-configs-and-extension.md)
+11. [推荐配置、插入点、快速回复与界面翻译](guide/11-configs-and-extension.md)
 12. [测试、发布与更新](guide/12-test-and-release.md)
 13. [案例：花瓣预设是怎样设计出来的](guide/13-petals-case-study.md)
 14. [术语表与常见问题](guide/glossary-and-faq.md)
@@ -39,7 +39,7 @@ Advanced Preset（下文简称 **AP**）是一个 SillyTavern 扩展：预设作
 - [条件表达式与变量](reference/expressions.md) · [宏](reference/macros.md) · [构建变量](reference/build-variables.md)
 - [结构](reference/structures.md) · [传输方式与工具文案](reference/transports.md)
 - [元指令、任务与历史改写](reference/meta-and-tasks.md)
-- [配置、Carrier 与迁移](reference/configuration.md) · [用户模组与插入点](reference/user-modules.md) · [界面翻译](reference/locales.md)
+- [配置、Carrier 与迁移](reference/configuration.md) · [用户模组与插入点](reference/user-modules.md) · [正则脚本与快速回复](reference/regex-and-quick-replies.md) · [酒馆助手脚本](reference/tavern-helper-scripts.md) · [界面翻译](reference/locales.md)
 - [组装流程](reference/assembly.md) · [CLI](reference/cli.md) · [产物与运行期数据](reference/artifact-and-runtime.md)
 
 ## 相关仓库

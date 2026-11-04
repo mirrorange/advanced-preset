@@ -15,6 +15,25 @@ export interface MemoryOp {
 }
 export interface Synopsis { time: string; location: string; event: string; summary: string }
 export interface UserOption { label: string; content: string }
+/** Status bar (I-136): story date (or `Day N`), weekday, time of day, location and weather. */
+export interface StatusBar { date: string; weekday: string; time: string; location: string; weather: string }
+export const STATUS_FIELDS = ['date', 'weekday', 'time', 'location', 'weather'] as const;
+/** Alternative keys accepted for status sub-fields (lenient parsing). */
+const STATUS_ALIASES: Record<(typeof STATUS_FIELDS)[number], string[]> = {
+  date: ['date', 'day'],
+  weekday: ['weekday', 'week', 'dayOfWeek', 'day_of_week'],
+  time: ['time', 'clock'],
+  location: ['location', 'place'],
+  weather: ['weather'],
+};
+
+/** Storyline names chosen by the AI (I-158): the storyline of this turn and / or the previous main storyline. */
+export interface StorylineNaming { name: string; previous_main: string }
+export const STORYLINE_NAMING_FIELDS = ['name', 'previous_main'] as const;
+const STORYLINE_ALIASES: Record<(typeof STORYLINE_NAMING_FIELDS)[number], string[]> = {
+  name: ['name', 'storyline', 'title'],
+  previous_main: ['previous_main', 'previousMain', 'old_main', 'oldMain', 'main'],
+};
 
 export interface StructureValues {
   reply: string;
@@ -23,6 +42,8 @@ export interface StructureValues {
   impersonate: string;
   synopsis: Synopsis;
   options: UserOption[];
+  status: StatusBar;
+  storyline: StorylineNaming;
   custom: string | Record<string, string>;
 }
 
@@ -34,6 +55,8 @@ export const STRUCTURE_PROPERTIES: Record<StructureKind, readonly string[]> = {
   memory: ['scope', 'operation', 'key', 'content'],
   synopsis: ['time', 'location', 'event', 'summary'],
   options: ['label', 'content'],
+  status: STATUS_FIELDS,
+  storyline: STORYLINE_NAMING_FIELDS,
   custom: [],
   annotations: [],
 };
@@ -89,6 +112,22 @@ export function structureFieldSchema(decl: StructureDecl, expand: (text: string)
         },
         ...(decl.count ? { minItems: decl.count, maxItems: decl.count } : {}),
       });
+    case 'status':
+      return withDesc({
+        type: 'object',
+        properties: Object.fromEntries(STATUS_FIELDS.map((k) => [k, sub(k)])),
+        required: [...STATUS_FIELDS],
+        additionalProperties: false,
+      });
+    case 'storyline': {
+      const fields = (decl.requested ?? STORYLINE_NAMING_FIELDS).filter((k): k is (typeof STORYLINE_NAMING_FIELDS)[number] => (STORYLINE_NAMING_FIELDS as readonly string[]).includes(k));
+      return withDesc({
+        type: 'object',
+        properties: Object.fromEntries(fields.map((k) => [k, sub(k)])),
+        required: fields,
+        additionalProperties: false,
+      });
+    }
     case 'annotations':
       return withDesc({ type: 'string' });
     case 'custom':
@@ -99,6 +138,33 @@ export function structureFieldSchema(decl: StructureDecl, expand: (text: string)
 /** Optional structures do not go into `required` of the generated schema. */
 export function isStructureOptional(kind: StructureKind): boolean {
   return kind === 'memory' || kind === 'recap';
+}
+
+/** Status value from a key reader (first present alias of each sub-field), trimmed. */
+function statusOf(read: (key: string) => unknown): StatusBar {
+  const out = {} as StatusBar;
+  for (const k of STATUS_FIELDS) {
+    const v = STATUS_ALIASES[k].map(read).find((x) => x !== undefined && x !== null);
+    out[k] = asString(v).trim();
+  }
+  return out;
+}
+
+/** Storyline names from a key reader; a bare string is the name. */
+function storylineOf(read: (key: string) => unknown): StorylineNaming {
+  const out = {} as StorylineNaming;
+  for (const k of STORYLINE_NAMING_FIELDS) {
+    const v = STORYLINE_ALIASES[k].map(read).find((x) => x !== undefined && x !== null);
+    out[k] = asString(v).trim();
+  }
+  return out;
+}
+
+/** One-line status text: `date weekday time | location | weather` (empty parts skipped). */
+export function statusText(s: Partial<StatusBar> | null | undefined): string {
+  if (!s) return '';
+  const when = [s.date, s.weekday, s.time].map((x) => (x ?? '').trim()).filter(Boolean).join(' ');
+  return [when, s.location?.trim(), s.weather?.trim()].filter(Boolean).join(' | ');
 }
 
 const asString = (v: unknown): string => (typeof v === 'string' ? v : v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
@@ -137,6 +203,23 @@ export function normalizeStructure(kind: StructureKind, value: unknown, decl?: S
       if (!value || typeof value !== 'object') return undefined;
       const o = value as Record<string, unknown>;
       return { time: asString(o.time), location: asString(o.location), event: asString(o.event), summary: asString(o.summary) } satisfies Synopsis;
+    }
+    case 'status': {
+      if (typeof value === 'string') {
+        try { value = JSON.parse(value); } catch { return undefined; }
+      }
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+      return statusOf((k) => (value as Record<string, unknown>)[k]);
+    }
+    case 'storyline': {
+      if (typeof value === 'string') {
+        const t = value.trim();
+        if (t.startsWith('{')) { try { value = JSON.parse(t); } catch { /* a name */ } }
+        if (typeof value === 'string') return t ? ({ name: t, previous_main: '' } satisfies StorylineNaming) : undefined;
+      }
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+      const v = storylineOf((k) => (value as Record<string, unknown>)[k]);
+      return v.name || v.previous_main ? v : undefined;
     }
     case 'options': {
       if (!Array.isArray(value)) return undefined;
@@ -197,6 +280,14 @@ function parseTagBlocks(decl: StructureDecl, blocks: ReturnType<typeof findTags>
         event: childText(last.inner, 'event') ?? '',
         summary: childText(last.inner, 'summary') ?? '',
       } satisfies Synopsis;
+    case 'status':
+      return statusOf((k) => childText(last.inner, k));
+    case 'storyline': {
+      const v = storylineOf((k) => childText(last.inner, k));
+      // `<storyline>Name</storyline>`: the whole block is the name.
+      if (!v.name && !v.previous_main && !/<[A-Za-z_]/.test(last.inner)) v.name = unescapeXml(last.inner).trim();
+      return v.name || v.previous_main ? v : undefined;
+    }
     case 'options':
       return findTags(last.inner, 'option')
         .map((o) => ({ label: (o.attrs.title ?? o.attrs.label ?? '').trim(), content: unescapeXml(o.inner).trim() }))

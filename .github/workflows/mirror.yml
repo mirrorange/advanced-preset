@@ -1,0 +1,51 @@
+name: mirror
+
+# Push main and dev to the GitLab and Codeberg mirrors.
+# Commits pushed by release.yml with GITHUB_TOKEN (dist rebuilds on dev) do not trigger `push`,
+# so the mirror also runs after each release run. Every run pushes the current main and dev.
+on:
+  push:
+    branches: [main, dev]
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: GitLab
+            host: gitlab.com
+            user: oauth2
+            secret: GITLAB_TOKEN
+          - name: Codeberg
+            host: codeberg.org
+            user: mirrorange
+            secret: CODEBERG_TOKEN
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push main and dev
+        env:
+          TOKEN: ${{ secrets[matrix.secret] }}
+        run: |
+          [ -n "$TOKEN" ] || { echo "::error::secret ${{ matrix.secret }} is not set"; exit 1; }
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/dev:refs/remotes/origin/dev
+          git push --atomic "https://${{ matrix.user }}:${TOKEN}@${{ matrix.host }}/mirrorange/advanced-preset.git" \
+            refs/remotes/origin/main:refs/heads/main \
+            refs/remotes/origin/dev:refs/heads/dev

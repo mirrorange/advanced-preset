@@ -30,6 +30,11 @@ export interface PresetState {
   userModules?: UserModule[];
   /** Bundled user modules last synced, by id (see `bundled-modules.ts`). */
   bundledModules?: Record<string, BundledRecord>;
+  /**
+   * Custom structure components (I-137): whether the user enabled them, and the code fingerprint
+   * (`structureUiHash`) they trusted. A different fingerprint counts as not enabled.
+   */
+  customUi?: { enabled: boolean; hash: string };
 }
 
 export interface APSettings {
@@ -49,6 +54,10 @@ export interface APSettings {
   };
   dev: { url: string; enabled: boolean };
   debug: { keepRequests: number };
+  /** Quick Reply sets AP wrote, by ST set name: the preset they belong to and the fingerprint of what was written. */
+  quickReplies?: Record<string, { presetId: string; hash: string }>;
+  /** Preset files in ST's list whose preset the user declined to install (I-171): ST preset name → artifact hash. */
+  declinedPresetFiles?: Record<string, string>;
 }
 
 const defaults = (): APSettings => ({

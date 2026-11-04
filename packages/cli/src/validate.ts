@@ -1,11 +1,12 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, structuresAnchorIndex,
+  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
 import type { SourceMap } from './compile';
+import { checkQuickReplyText } from './st-sources';
 
 /** Fixed condition variables (§6.7) and the literal values they may be compared with. */
 const FIXED_VARS: Record<string, readonly string[] | null> = {
@@ -27,6 +28,15 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'memory.hasGlobal': null,
   'recap.present': null,
   'input.shaped': null,
+  'storyline.name': null,
+  'storyline.main': null,
+  'storyline.if': null,
+  'storyline.new': null,
+  'storyline.grouped': null,
+  'storyline.naming': null,
+  'storyline.namingMain': null,
+  'storyline.switching': null,
+  'storyline.frozen': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
@@ -44,6 +54,12 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     if (path in FIXED_VARS) return;
     const [root, ...rest] = path.split('.');
     const key = rest.join('.');
+    if (root === 'last') {
+      const decl = p.structures[key];
+      if (!decl) return diag.error(`unknown structure \`${key}\` in condition`, where);
+      if (decl.kind !== 'custom' && decl.kind !== 'status') diag.error(`\`last.${key}\`: only custom and status structures keep a last value`, where);
+      return;
+    }
     const known = root === 'modules' ? moduleIds : root === 'params' ? paramIds : root === 'flags' ? flagIds : root === 'stages' ? stageIds : undefined;
     if (!known) return diag.error(`unknown variable \`${path}\``, where);
     if (!known.has(key)) diag.error(`unknown ${root.slice(0, -1)} \`${key}\` in condition`, where);
@@ -59,8 +75,9 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     checkLiterals(e.l, where);
     checkLiterals(e.r, where);
   };
+  let storylineUses = 0;
   for (const { expr, where } of map.exprs) {
-    for (const v of variables(expr)) checkVar(v, where);
+    for (const v of variables(expr)) { checkVar(v, where); if (v.startsWith('storyline.')) storylineUses++; }
     checkLiterals(expr, where);
   }
 
@@ -102,7 +119,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
           break;
         case 'structure':
           if (!structureIds.has(a!)) bad(`unknown structure \`${a}\``);
-          else if (rest[1] !== undefined && (rest[1] !== 'last' || p.structures[a!]!.kind !== 'custom')) bad('only custom structures support `::last`');
+          else if (rest[1] !== undefined && (rest[1] !== 'last' || !['custom', 'status'].includes(p.structures[a!]!.kind))) bad('only custom and status structures support `::last`');
           break;
         case 'workflow':
           if (a !== 'summary' && a !== 'hint') bad('expected summary | hint');
@@ -113,6 +130,10 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
           break;
         case 'memory':
           if (a !== 'chat' && a !== 'global') bad('expected chat | global');
+          break;
+        case 'storyline':
+          storylineUses++;
+          if (a !== undefined && a !== 'main') bad('expected no argument (current storyline) or `main`');
           break;
         case 'var': {
           const decl = varDecls.get(a!);
@@ -137,6 +158,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   for (const { source, where } of map.templates) {
     const code = templateCode(source).join('\n');
     if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
+    if (/(?<![\w$.])storyline\s*\.|\bmacro\(\s*(['"`])storyline\1/.test(code)) storylineUses++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -156,6 +178,25 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   if (shaping?.mode === 'extract' && !inputTextUses) diag.warn('inputShaping extracts the input from the history but no prompt uses {{ap::input::text}}: the input would not be sent', { file: M, path: 'inputShaping.mode' });
   if (shaping && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, INPUT_SHAPING_SINCE) < 0))
     diag.warn(`input shaping needs Advanced Preset ${INPUT_SHAPING_SINCE}: set minAdvancedPreset to ${INPUT_SHAPING_SINCE} or later (older versions leave the input in the history)`, { file: M, path: 'minAdvancedPreset' });
+
+  // ── storylines ──────────────────────────────────────────────────────────────
+  if (!p.storylines && storylineUses) diag.warn('storyline variables and {{ap::storyline}} always describe the main storyline: the preset declares no storylines', { file: M, path: 'storylines' });
+  const namingStructures = Object.values(p.structures).filter((s) => s.kind === 'storyline');
+  if (!p.storylines && namingStructures.length) diag.warn(`structure ${namingStructures[0]!.id}: storyline structures are only requested when a storyline is named, and the preset declares no storylines`, { file: M, path: `structures.${namingStructures[0]!.id}` });
+  if (namingStructures.length > 1) diag.warn(`structures ${namingStructures.map((s) => s.id).join(', ')}: only one storyline structure is read (${namingStructures[0]!.id})`, { file: M, path: `structures.${namingStructures[1]!.id}` });
+  if (p.storylines && !namingStructures.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
+    diag.warn('no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names', { file: M, path: 'storylines' });
+  if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
+    diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: 'minAdvancedPreset' });
+
+  // ── SillyTavern regex scripts & Quick Reply sets ───────────────────────────
+  const below = (since: string) => !p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, since) < 0;
+  if (p.regexScripts?.length && below(REGEX_SCRIPTS_SINCE))
+    diag.warn(`regex scripts need Advanced Preset ${REGEX_SCRIPTS_SINCE}: set minAdvancedPreset to ${REGEX_SCRIPTS_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: 'minAdvancedPreset' });
+  if (p.quickReplySets?.length && below(QUICK_REPLIES_SINCE))
+    diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: 'minAdvancedPreset' });
+  if (p.tavernHelperScripts?.length && below(TAVERN_HELPER_SINCE))
+    diag.warn(`Tavern Helper scripts need Advanced Preset ${TAVERN_HELPER_SINCE}: set minAdvancedPreset to ${TAVERN_HELPER_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: 'minAdvancedPreset' });
 
   // ── regions / anchors ───────────────────────────────────────────────────────
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} → unknown region \`${rid}\``, { file: M, path: 'anchors' });
@@ -229,48 +270,109 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   if (env.thinking.name === env.result.name) diag.error('envelope thinking and result fields must differ', T);
   const synthetic = new Set(p.syntheticTurns.map((t) => t.tool.name));
   if (synthetic.has(p.tools.submit.name)) diag.error(`tools.submit.name \`${p.tools.submit.name}\` is also a synthetic turn tool`, T);
-  const structureFields = new Set(Object.values(p.structures).filter((s) => !isInlineStructure(s)).map((s) => s.field));
+  // Ordering-prefixed names (I-135) may start with a digit (`1_thinking`).
+  const PREFIXED_FIELD_NAME = /^[A-Za-z0-9_]{1,64}$/;
   function checkNames(w: APreset['workflows'][number], where: Where) {
     const structs = Object.values(p.structures);
     const a = turnArtifacts(p.tools, w, w.stages, structs);
+    const L = a.layout;
+    const fieldRe = L.prefixed ? PREFIXED_FIELD_NAME : FIELD_NAME;
     const seenFields = new Map<string, string>();
+    for (const it of L.items) {
+      const label = it.type === 'stage' ? `stage ${it.stage.id}` : `structure ${it.structure.id}`;
+      const at = `workflow ${w.id}: ${label}`;
+      if (it.type === 'stage' && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      if (it.type === 'structure' && L.prefixed && !fieldRe.test(it.name)) diag.error(`${at}: field name \`${it.name}\` must match ${fieldRe}`, where);
+      const prev = seenFields.get(it.name);
+      if (prev) {
+        const mixed = prev.startsWith('structure') !== (it.type === 'structure');
+        // A stage and a structure sharing a name: reported from the stage's side.
+        const stageLabel = it.type === 'stage' ? label : prev;
+        diag.error(mixed ? `workflow ${w.id}: ${stageLabel}: field \`${it.name}\` collides with a structure field` : `${at}: field \`${it.name}\` is also used by ${prev}`, where);
+      }
+      seenFields.set(it.name, label);
+    }
     const seenTools = new Map<string, string>();
-    const anchor = structuresAnchorIndex(w, w.stages);
-    w.stages.forEach((s, i) => {
-      const field = a.fieldOf(s);
+    for (const s of w.stages) {
       const tool = a.toolOf(s);
       const param = a.paramOf(s);
       const at = `workflow ${w.id}: stage ${s.id}`;
-      if (!FIELD_NAME.test(field)) diag.error(`${at}: field name \`${field}\` must match ${FIELD_NAME}`, where);
-      if (structureFields.has(field)) diag.error(`${at}: field \`${field}\` collides with a structure field`, where);
-      if (seenFields.has(field)) diag.error(`${at}: field \`${field}\` is also used by stage ${seenFields.get(field)}`, where);
-      seenFields.set(field, s.id);
       if (!TOOL_NAME.test(tool)) diag.error(`${at}: tool name \`${tool}\` must match ${TOOL_NAME}`, where);
       if (seenTools.has(tool)) diag.error(`${at}: tool \`${tool}\` is also used by stage ${seenTools.get(tool)}`, where);
       if (tool === p.tools.submit.name || synthetic.has(tool)) diag.error(`${at}: tool \`${tool}\` collides with the submit / synthetic turn tool`, where);
       seenTools.set(tool, s.id);
-      if (!FIELD_NAME.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${FIELD_NAME}`, where);
-      if (i === anchor && structureFields.has(param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
-    });
-    checkOrder(w, a, anchor, where);
+      if (!fieldRe.test(param)) diag.error(`${at}: tool parameter \`${param}\` must match ${fieldRe}`, where);
+      if (L.carriedBy(s).some((d) => a.structureFieldOf(d) === param)) diag.error(`${at}: tool parameter \`${param}\` collides with a structure field`, where);
+    }
+    checkOrder(w, a, where);
   }
   // Some APIs (Gemini) generate object fields in alphabetical order regardless of the schema order (I-94):
-  // stages must sort in order, and structures after the content they describe.
-  function checkOrder(w: APreset['workflows'][number], a: ReturnType<typeof turnArtifacts>, anchor: number, where: Where) {
+  // fields must sort in turn order. Ordering-prefixed names (I-135) do by construction.
+  function checkOrder(w: APreset['workflows'][number], a: ReturnType<typeof turnArtifacts>, where: Where) {
     const hint = 'APIs that generate fields alphabetically (Gemini) would write them out of order';
-    const fields = w.stages.map((s) => a.fieldOf(s));
-    for (let i = 1; i < fields.length; i++) {
-      if (fields[i]! < fields[i - 1]!) { diag.warn(`workflow ${w.id}: stage field \`${fields[i]}\` sorts before \`${fields[i - 1]}\`; ${hint}`, where); break; }
+    const L = a.layout;
+    if (L.prefixed) {
+      const names = L.items.map((it) => it.name);
+      for (let i = 1; i < names.length; i++)
+        if (names[i]! <= names[i - 1]!) { diag.warn(`workflow ${w.id}: field \`${names[i]}\` sorts before \`${names[i - 1]}\`; ${hint} (check tools.orderPrefix)`, where); break; }
+      return;
     }
-    if (anchor < 0) return;
-    const structs = [...structureFields].sort();
-    const first = structs[0];
-    if (first === undefined) return;
-    const last = fields.slice(0, anchor + 1).sort().at(-1)!;
-    if (first < last) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before stage field \`${last}\`; ${hint} (set tools.structurePrefix)`, where);
-    const param = a.paramOf(w.stages[anchor]!);
-    if (first < param) diag.warn(`workflow ${w.id}: structure field \`${first}\` sorts before \`${param}\` of tool \`${a.toolOf(w.stages[anchor]!)}\`; ${hint} (set tools.structurePrefix)`, where);
+    const stageItems = L.items.flatMap((it, i) => (it.type === 'stage' ? [{ name: it.name, i }] : []));
+    for (let k = 1; k < stageItems.length; k++) {
+      if (stageItems[k]!.name < stageItems[k - 1]!.name) { diag.warn(`workflow ${w.id}: stage field \`${stageItems[k]!.name}\` sorts before \`${stageItems[k - 1]!.name}\`; ${hint}`, where); break; }
+    }
+    const explicit = (id: string) => w.structureOrder?.[id] !== undefined || p.structures[id]?.order !== undefined;
+    let warned = false;
+    L.items.forEach((it, i) => {
+      if (warned || it.type !== 'structure') return;
+      const before = stageItems.filter((x) => x.i < i).map((x) => x.name).sort().at(-1);
+      if (before !== undefined && it.name < before) { warned = true; return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts before stage field \`${before}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where); }
+      const after = explicit(it.structure.id) ? stageItems.filter((x) => x.i > i).map((x) => x.name).sort()[0] : undefined;
+      if (after !== undefined && it.name > after) { warned = true; return diag.warn(`workflow ${w.id}: structure field \`${it.name}\` sorts after stage field \`${after}\`; ${hint} (set tools.orderPrefix)`, where); }
+    });
+    // Multi-step: a stage tool's own parameter and the structures it carries.
+    for (const s of w.stages) {
+      const param = a.paramOf(s);
+      const own = L.items.findIndex((it) => it.type === 'stage' && it.stage === s);
+      for (const d of L.carriedBy(s)) {
+        const name = a.structureFieldOf(d);
+        const at = L.items.findIndex((it) => it.type === 'structure' && it.structure === d);
+        if (at > own ? name < param : name > param) {
+          diag.warn(`workflow ${w.id}: structure field \`${name}\` sorts ${at > own ? 'before' : 'after'} \`${param}\` of tool \`${a.toolOf(s)}\`; ${hint} (set tools.structurePrefix or tools.orderPrefix)`, where);
+          return;
+        }
+      }
+    }
   }
+
+  // ── structure layout (I-134 / I-137) ──────────────────────────────────────
+  for (const s of Object.values(p.structures)) {
+    const o = s.order;
+    const ref = o === undefined || typeof o === 'number' ? undefined : 'before' in o ? o.before : o.after;
+    if (ref !== undefined && ref !== CONTENT_STAGE_REF && !stageIds.has(ref)) diag.warn(`structure ${s.id}: order refers to unknown stage \`${ref}\` (no workflow declares it)`, { file: M, path: `structures.${s.id}.order` });
+  }
+  for (const s of Object.values(p.structures)) {
+    const err = s.ui?.template !== undefined ? checkTemplate(s.ui.template) : null;
+    if (err) diag.error(`structure ${s.id}: ui.template: ${err.message}${err.line ? ` (template line ${err.line})` : ''}`, { file: M, path: `structures.${s.id}.ui.template` });
+    if (s.ui?.module !== undefined && !/\bexport\b/.test(s.ui.module)) diag.warn(`structure ${s.id}: ui.module exports nothing (expected \`export function mount(root, context)\`)`, { file: M, path: `structures.${s.id}.ui.module` });
+  }
+  for (const w of p.workflows) {
+    for (const sid of Object.keys(w.structureOrder ?? {})) {
+      const where = map.workflows.get(w.id) ?? {};
+      if (!structureIds.has(sid)) diag.warn(`workflow ${w.id}: structures.order: unknown structure \`${sid}\``, where);
+      else if (isInlineStructure(p.structures[sid]!)) diag.warn(`workflow ${w.id}: structures.order: ${sid} is inline and has no field`, where);
+    }
+  }
+  const layoutFeatures = [
+    p.tools.orderPrefix ? 'tools.orderPrefix' : '',
+    p.workflows.some((w) => w.stages.some((s) => s.order !== undefined)) ? 'stage order' : '',
+    p.workflows.some((w) => w.structureOrder) || Object.values(p.structures).some((s) => s.order !== undefined) ? 'structure order' : '',
+    Object.values(p.structures).some((s) => s.kind === 'status') ? 'status structures' : '',
+    Object.values(p.structures).some((s) => s.ui) ? 'structure ui' : '',
+    Object.values(p.structures).some((s) => s.history !== undefined && typeof s.history === 'object') ? 'structure history' : '',
+  ].filter(Boolean);
+  if (layoutFeatures.length && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STRUCTURE_LAYOUT_SINCE) < 0))
+    diag.warn(`${layoutFeatures.join(', ')} need Advanced Preset ${STRUCTURE_LAYOUT_SINCE}: set minAdvancedPreset to ${STRUCTURE_LAYOUT_SINCE} or later`, { file: M, path: 'minAdvancedPreset' });
 
   // ── workflows ───────────────────────────────────────────────────────────────
   const usedStyles = new Set(Object.values(p.styles));
@@ -325,10 +427,22 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       userModules: new Set((p.userModules ?? []).map((x) => x.id)),
       userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys()),
+      quickReplySets: new Set((p.quickReplySets ?? []).map((x) => x.id)),
     };
     for (const [section, ids] of Object.entries(known)) {
       const t = table[section];
       if (t && typeof t === 'object') for (const k of Object.keys(t)) if (!ids.has(k)) diag.warn(`${section}.${k} does not exist`, { file });
+    }
+    for (const [sid, tr] of Object.entries(table.quickReplySets ?? {})) {
+      const set = p.quickReplySets?.find((x) => x.id === sid);
+      if (!set || !tr || typeof tr !== 'object') continue;
+      for (const [qid, q] of Object.entries(tr.qrList ?? {})) {
+        if (!set.qrList.some((x) => x.id === qid)) { diag.warn(`quickReplySets.${sid}.qrList.${qid} does not exist`, { file }); continue; }
+        for (const k of QR_TEXT_FIELDS) {
+          const v = (q as Record<string, unknown> | null)?.[k];
+          if (typeof v === 'string') checkQuickReplyText(v, Object.keys(p.actors), diag, { file, path: `quickReplySets.${sid}.qrList.${qid}.${k}` });
+        }
+      }
     }
     for (const [wid, w] of Object.entries(table.workflows ?? {})) {
       const wf = p.workflows.find((x) => x.id === wid);

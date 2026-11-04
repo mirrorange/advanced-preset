@@ -1,10 +1,11 @@
+import { synopsisEchoes } from './helpers';
 import { describe, expect, it } from 'vitest';
 import { CACHE_DEFAULTS, type CacheConfig } from '@advanced-preset/protocol';
 import {
   hashText, markerOf, resolveSticky, stickyRewrite, swapInside, takeMarkers,
   type CacheFingerprint, type CacheState, type Candidate,
 } from '@/core/cache';
-import { decodeMode, encodeMode, rewriteHistory, type HistoryItem, type RewriteOptions } from '@/core/history';
+import { decodeMode, encodeMode, rewriteHistory, type HistoryItem, type RenderMode, type RewriteOptions } from '@/core/history';
 
 const syn = (n: number) => ({ time: `T${n}`, location: `L${n}`, event: `E${n}`, summary: `S${n}` });
 const ai = (n: number): HistoryItem => ({
@@ -24,7 +25,7 @@ const opts = (items: HistoryItem[], o: Partial<RewriteOptions> = {}): RewriteOpt
   trigger: '', wrap: true,
   tokenSaving: { enabled: false, keepFullTurns: 2, truncateUserAfter: 0, userInput: 'keep' },
   synopsisTemplate: '[{{time}}] {{event}}', synopsisId: 'synopsis',
-  synopsisHistory: { depth: 2, template: '{{content}} <{{time}}>' },
+  echoes: synopsisEchoes(2, '{{content}} <{{time}}>'),
   recap: null, realIndex: (i) => i, currentInput: items.length - 1,
   ...o,
 });
@@ -46,9 +47,13 @@ const isPrefix = (a: string[], b: string[]) => a.every((x, i) => b[i] === x);
 
 describe('cache: render modes', () => {
   it('round-trips the compact form', () => {
-    for (const m of [{ body: 'full' }, { body: 'full', synopsis: true }, { body: 'full', synopsis: true, annotations: true }, { body: 'full', annotations: true }, { body: 'synopsis' }, { body: 'drop' }, { body: 'truncate', max: 120 }] as const) {
-      expect(decodeMode(encodeMode(m))).toEqual(m);
+    for (const m of [{ body: 'full' }, { body: 'full', echo: ['synopsis'] }, { body: 'full', annotations: true, echo: ['status', 'synopsis'] }, { body: 'full', annotations: true }, { body: 'synopsis' }, { body: 'drop' }, { body: 'truncate', max: 120 }] as const) {
+      expect(decodeMode(encodeMode(m as RenderMode))).toEqual(m);
     }
+    expect(encodeMode({ body: 'full', annotations: true, echo: ['status', 'synopsis'] })).toBe('fa+status+synopsis');
+    // Codes stored before 1.10: `y` is the synopsis structure.
+    expect(decodeMode('fya', 'syn')).toEqual({ body: 'full', annotations: true, echo: ['syn'] });
+    expect(decodeMode('fy')).toEqual({ body: 'full' });
     expect(decodeMode('nope')).toBeUndefined();
     expect(decodeMode(undefined)).toBeUndefined();
   });
@@ -149,7 +154,7 @@ describe('cache: sticky rendering', () => {
   });
 
   it('keeps synopsis replacement and user removal postponed (token saving)', () => {
-    const rewrite: Partial<RewriteOptions> = { tokenSaving: { enabled: true, keepFullTurns: 2, truncateUserAfter: 0, userInput: 'remove' }, synopsisHistory: undefined };
+    const rewrite: Partial<RewriteOptions> = { tokenSaving: { enabled: true, keepFullTurns: 2, truncateUserAfter: 0, userInput: 'remove' }, echoes: undefined };
     const t1 = request(chat(4), undefined, { rewrite });
     const t2 = request(chat(5), t1.state, { now: 1, rewrite });
     expect(isPrefix(t1.sent, t2.sent)).toBe(true);
@@ -158,7 +163,7 @@ describe('cache: sticky rendering', () => {
   });
 
   it('a message left out by the sticky rendering stays out until the flush', () => {
-    const remove: Partial<RewriteOptions> = { tokenSaving: { enabled: true, keepFullTurns: 1, truncateUserAfter: 0, userInput: 'remove' }, synopsisHistory: undefined };
+    const remove: Partial<RewriteOptions> = { tokenSaving: { enabled: true, keepFullTurns: 1, truncateUserAfter: 0, userInput: 'remove' }, echoes: undefined };
     const t1 = request(chat(4), undefined, { rewrite: remove });
     expect(t1.sent).not.toContain('input 1');
     const keep: Partial<RewriteOptions> = { tokenSaving: { ...remove.tokenSaving!, userInput: 'keep' } };
@@ -181,6 +186,6 @@ describe('cache: sticky rendering', () => {
   it('stores hashes of what was sent and the modes by message key', () => {
     const t1 = request(chat(3), undefined);
     expect(t1.state.seq).toEqual(t1.sent.map((s) => hashText(s)));
-    expect(t1.state.modes).toMatchObject({ u1: 'f', a1: 'fy', a2: 'fy', u3: 'f' });
+    expect(t1.state.modes).toMatchObject({ u1: 'f', a1: 'f+synopsis', a2: 'f+synopsis', u3: 'f' });
   });
 });

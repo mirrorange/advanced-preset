@@ -10,8 +10,10 @@ import { renderContent, type TemplateRenderer } from './content';
 import { cloneData } from './clone';
 import { deepFreeze, renderTemplate, TemplateError } from './template';
 import { activeStages, stageFieldName, stageToolName, workflowSummary } from './workflow';
+import { turnLayout, type TurnLayout } from './layout';
 import { DEFAULT_LIST_SEPARATOR, isParamUnset, paramValue, paramValues } from './params';
 import { computeBuildVars, formatVar, plainBuildVars, type BuildVars } from './build-vars';
+import { MAIN_STORYLINE_VARS, storylineNamingFields, type StorylineVars } from './storylines';
 
 export interface Message {
   role: Role;
@@ -37,6 +39,10 @@ export interface Vars {
   recap: { present: boolean };
   /** `input.shaped`: input shaping applies this turn (the preset declares it and the last chat message is the user's). */
   input: { shaped: boolean };
+  /** `last.<id>`: a custom / status structure has an earlier value in the chat (what `{{ap::structure::<id>::last}}` shows, I-139). */
+  last: Record<string, boolean>;
+  /** `storyline.*`: the storyline this turn continues (presets with `storylines`; otherwise the main storyline). */
+  storyline: StorylineVars;
 }
 
 export function resolverOf(vars: Vars): Resolver {
@@ -59,6 +65,8 @@ export interface MacroData {
   recap?: string;
   recentMeta?: string;
   customLast?: Record<string, string>;
+  /** `{{ap::storyline}}` (current storyline) and `{{ap::storyline::main}}` (main storyline) names. */
+  storyline?: { name: string; main: string };
 }
 
 /** Whether an exclusive set may be left with no module selected (`groups[set].allowNone`). */
@@ -96,10 +104,18 @@ export function moduleSwitches(preset: APreset, config: Configuration): Record<s
   return Object.fromEntries(preset.modules.map((m) => [m.id, on.has(m.id)]));
 }
 
-/** Structures requested this turn (declared by active modules), in declaration order. */
-export function activeStructures(preset: APreset, modules: Module[]): StructureDecl[] {
+/**
+ * Structures requested this turn (declared by active modules), in declaration order. A `storyline`
+ * structure is only requested when this turn names a storyline (`vars.storyline`), with the names
+ * it has to give (I-158).
+ */
+export function activeStructures(preset: APreset, modules: Module[], vars?: Pick<Vars, 'storyline'>): StructureDecl[] {
   const ids = new Set(modules.flatMap((m) => m.structures));
-  return Object.values(preset.structures).filter((s) => ids.has(s.id));
+  const naming = storylineNamingFields(vars?.storyline);
+  return Object.values(preset.structures).filter((s) => ids.has(s.id)).flatMap((s) => {
+    if (s.kind !== 'storyline') return [s];
+    return naming.length ? [{ ...s, requested: naming }] : [];
+  });
 }
 
 export interface AssemblyInput {
@@ -130,14 +146,24 @@ export function actorName(preset: APreset, config: Configuration, actor: string)
   return config.identity.names[actor] || preset.actors[actor]?.name || actor;
 }
 
-export function createMacroExpander(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, buildVars: BuildVars): (text: string) => string {
-  const resolve = createMacroResolver(input, stages, workflow, buildVars);
+export function createMacroExpander(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, buildVars: BuildVars, structures?: StructureDecl[]): (text: string) => string {
+  const resolve = createMacroResolver(input, stages, workflow, buildVars, structures);
   return (text) => expandMacros(text, resolve);
 }
 
+/** Field layout of a turn (stage and structure field names), as the transports will name them. */
+export function layoutOf(preset: APreset, workflow: Workflow | undefined, stages: Stage[], structures: StructureDecl[]): TurnLayout | undefined {
+  return workflow && preset.tools ? turnLayout(workflow, stages, structures, preset.tools, (s) => stageFieldName(stages, s, preset.tools)) : undefined;
+}
+
 /** Resolves one `{{ap::…}}` macro (argument list) to its text; `undefined` for unknown macros. */
-export function createMacroResolver(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, buildVars: BuildVars): (args: string[]) => string | undefined {
+export function createMacroResolver(input: AssemblyInput, stages: Stage[], workflow: Workflow | undefined, buildVars: BuildVars, structures?: StructureDecl[]): (args: string[]) => string | undefined {
   const { preset, config, vars, data = {} } = input;
+  let layout: TurnLayout | undefined | null = null;
+  const fieldName = (s: StructureDecl) => {
+    if (layout === null) layout = structures ? layoutOf(preset, workflow, stages, structures) : undefined;
+    return layout?.structureField(s) ?? s.field;
+  };
   const paramText = (id: string, depth = 0): string => {
     const p = preset.params.find((x) => x.id === id);
     if (!p) return '';
@@ -179,7 +205,7 @@ export function createMacroResolver(input: AssemblyInput, stages: Stage[], workf
         const s = preset.structures[a!];
         if (!s) return '';
         if (b === 'last') return data.customLast?.[a!] ?? '';
-        return style === 'dialogue' ? s.formatPrompt.tag : s.formatPrompt.field;
+        return style === 'dialogue' ? s.formatPrompt.tag : s.formatPrompt.field.replaceAll('{{field}}', fieldName(s));
       }
       case 'workflow':
         if (a === 'hint') return workflow?.hint ?? '';
@@ -189,6 +215,7 @@ export function createMacroResolver(input: AssemblyInput, stages: Stage[], workf
       case 'recap': return data.recap ?? '';
       case 'recent_meta': return data.recentMeta ?? '';
       case 'var': return readVar(a!, b);
+      case 'storyline': return a === 'main' ? data.storyline?.main ?? '' : data.storyline?.name ?? vars.storyline?.name ?? '';
       default: return undefined;
     }
   };
@@ -249,14 +276,15 @@ function regionMessages(region: Region, blocks: { role?: Role; text: string }[])
 }
 
 /** Workflow prompt content: preamble + intro + per-stage sections (+ imperative headings) + outro. */
-export function workflowContent(preset: APreset, workflow: Workflow, stages: Stage[], style: Style, transport: Transport, config: Configuration): Content {
+export function workflowContent(preset: APreset, workflow: Workflow, stages: Stage[], style: Style, transport: Transport, config: Configuration, structures: StructureDecl[] = []): Content {
   const s = workflow.sections;
+  const layout = preset.tools?.orderPrefix ? layoutOf(preset, workflow, stages, structures) : undefined;
   const out: Content = [...(s.preamble ?? []), ...(s.intro[style] ?? [])];
   stages.forEach((stage, i) => {
     const body = s.stages[stage.id]?.[style];
     if (!body?.length) return;
     if (style === 'imperative' && preset.stageHeading) {
-      const target = transport === 'tool-multi' ? stageToolName(stages, stage, preset.tools) : stageFieldName(stages, stage, preset.tools);
+      const target = transport === 'tool-multi' ? stageToolName(stages, stage, preset.tools) : layout?.stageField(stage) ?? stageFieldName(stages, stage, preset.tools);
       const heading = preset.stageHeading
         .replaceAll('{{n}}', String(i + 1))
         .replaceAll('{{label}}', stage.label)
@@ -281,9 +309,9 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
   const resolve = resolverOf(vars);
   const modules = activeModules(preset, config, resolve);
-  const structures = activeStructures(preset, modules);
+  const structures = activeStructures(preset, modules, vars);
   const buildVars = computeBuildVars(preset.vars, modules);
-  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars);
+  const macro = createMacroResolver({ ...input, vars }, stages, workflow, buildVars, structures);
   const expand = (text: string) => expandMacros(text, macro);
   const activeIds = new Set(modules.map((m) => m.id));
   const warnings: string[] = [];
@@ -300,7 +328,7 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   if (workflow) {
     const list = blocksByRegion.get(preset.workflowRegion) ?? [];
     // One workflow is one prompt: role-less blocks merge into a single message; `@as` blocks stay separate.
-    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config);
+    const content = workflowContent(preset, workflow, stages, vars.style, vars.transport, config, structures);
     for (const b of renderContent(content, resolve, expand, templateRenderer(getScope, warnings, `workflow ${workflow.id}`))) {
       const last = list[list.length - 1];
       if (!b.role && last && !last.role && last.workflow) last.text += `\n\n${b.text}`;
@@ -331,6 +359,8 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     memory: { hasChat: false, hasGlobal: false },
     recap: { present: false },
     input: { shaped: false },
+    last: {},
+    storyline: { ...MAIN_STORYLINE_VARS },
     ...over,
   };
 }

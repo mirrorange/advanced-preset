@@ -1,4 +1,4 @@
-# 11. 推荐配置、插入点与界面翻译
+# 11. 推荐配置、插入点、快速回复与界面翻译
 
 这一章讲的是“预设怎样适应不同的用户”：不同模型用不同的推荐配置；用户想加自己的提示词时有固定的位置可放；中文用户看到中文界面。
 
@@ -94,6 +94,38 @@ How to use this template: rewrite the style guide below; edit the questions in "
 给出一份能直接用的完整示例，而不是“在这里填写”的占位符；用 `npx ap preview --user-module-templates all` 看看模板生效后的样子（`user-modules/` 中开启的模组在预览时默认就会合并）。完整规则见参考文档的[预设中的用户模组](../reference/user-modules.md#预设中的用户模组)。
 
 用户自己写的模组也能带走：在面板导出预设时，AP 会问要把「我的模组」中的哪些一起导出，对方安装后就会得到这些模组。
+
+## 正则脚本与快速回复
+
+预设还可以带上 SillyTavern 自己的两样东西，写法与在酒馆里创建的完全一样（字段名相同，从 ST 导出的 JSON 可以直接放进来）：
+
+- **`regex-scripts/`（正则脚本）**：每个文件一个脚本（或一个脚本列表）。AP 把它们写进 Carrier，成为 ST 的“预设正则”——只在用户选中这个预设时生效，ST 第一次遇到时会请用户允许。适合隐藏思考块、美化特定标签这类显示上的处理。
+- **`quick-replies/`（快速回复集）**：每个文件一个集合。用户选中这个预设时，AP 把集合写入 ST 的快速回复扩展，加到全局快速回复集列表里；换成别的预设时自动移除。适合把预设特有的操作做成按钮，比如“对叙述者说话”“请求总结”。
+
+```yaml
+# quick-replies/my-preset.yaml
+qrList:
+  - id: summary
+    label: Summary
+    icon: fa-scroll
+    message: "@{{ap::name::narrator}} Please summarize the story so far."
+```
+
+快速回复的文字里可以用 `{{ap::name::…}}`，用户改了叙述者的名字，按钮也会跟着变；按钮文字可以在 `locales/` 中翻译。完整字段见参考文档的[正则脚本与快速回复](../reference/regex-and-quick-replies.md)。
+
+### 酒馆助手脚本
+
+用户装了[酒馆助手](https://github.com/N0VI028/JS-Slash-Runner)时，预设还可以带上它的**预设脚本**：放进 `tavern-helper-scripts/`，每个文件一个脚本（或一个文件夹），字段与酒馆助手相同，从酒馆助手导出的 JSON 可以直接放进来；代码可以单独写成 `.js` 文件再引用：
+
+```yaml
+# tavern-helper-scripts/dice.yaml
+name: Dice
+content: ./tavern-helper-scripts/dice.js
+button:
+  buttons: [掷骰]
+```
+
+AP 只把脚本写进 Carrier，之后交给酒馆助手：用户选中这个预设时，酒馆助手会问要不要启用这些脚本——这是酒馆助手自己的信任机制，AP 不会替用户同意。预设更新时，用户的开关和脚本变量会保留。完整说明见参考文档的[酒馆助手脚本](../reference/tavern-helper-scripts.md)。
 
 ## 角色名称与前缀
 

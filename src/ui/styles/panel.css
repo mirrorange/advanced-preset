@@ -32,6 +32,7 @@
 .tab.on { color: var(--ap-primary); font-weight: 600; }
 .tab.on::after { content: ''; position: absolute; left: 20%; right: 20%; bottom: -1px; height: 2px; border-radius: 2px; background: var(--ap-primary); }
 .tab svg.lucide { width: 1.25em; height: 1.25em; }
+.tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .panel-body { flex: 1 1 auto; min-height: 0; padding: var(--ap-space-3) var(--ap-space-4) var(--ap-space-5); display: flex; flex-direction: column; gap: var(--ap-space-3); }
 .section .card-body { display: flex; flex-direction: column; gap: var(--ap-space-3); }
@@ -203,6 +204,12 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
 
 /* ST's drawer can be quite narrow (e.g. ~250px on a 1024px desktop): drop tab labels, let segmented
    controls wrap onto rows and tighten the body padding instead of clipping. */
+/* Seven tabs (with storylines) need more room for their labels. */
+@container ap-panel (max-width: 420px) {
+  .tabs.many .tab span { display: none; }
+  .tabs.many .tab { min-width: 2.4em; padding: var(--ap-space-2) 2px; }
+  .tabs.many .tab svg.lucide { width: 1.35em; height: 1.35em; }
+}
 @container ap-panel (max-width: 340px) {
   .tab span { display: none; }
   .tab { min-width: 2.4em; padding: var(--ap-space-2) 2px; }
@@ -226,3 +233,24 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
 .preset-banner-text { flex: 1 1 11em; min-width: 0; }
 /* In a narrow drawer the button drops below the text instead of squeezing it. */
 .preset-banner .btn { margin-left: auto; min-height: 1.8em; padding: 0 0.7em; }
+
+/* Config → Custom UI (I-137): the preset components listed under the switch. */
+.custom-ui-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.custom-ui-list .grow { flex: 1 1 auto; min-width: 0; }
+
+/* Storylines tab (I-152). */
+.storylines-head { gap: var(--ap-space-2); min-height: 1.6em; padding: 0 var(--ap-space-1) 0 var(--ap-space-3); }
+.storyline-card.current { border-color: color-mix(in srgb, var(--ap-primary) 45%, var(--ap-border)); }
+.storyline-card.hidden .card-title { color: var(--ap-muted); }
+.storyline-dot { width: 0.5em; height: 0.5em; flex: none; border-radius: 50%; background: var(--ap-primary); }
+.storyline-flag { width: 1.05em; height: 1.05em; flex: none; color: var(--ap-faint); }
+/* Toolbar of an expanded storyline: icon toggles, a hairline, then actions. */
+.storyline-toolbar { display: flex; align-items: center; gap: 2px; padding: 2px; margin-bottom: var(--ap-space-1); align-self: flex-start; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface-2); }
+.storyline-toolbar .icon-btn[aria-pressed='true'] { background: var(--ap-tint); }
+/* The main storyline's toolbar holds only rename: its frame hugs the button, so it is no larger than a branch's buttons. */
+.storyline-toolbar.solo { padding: 0; }
+.storyline-toolbar.solo .icon-btn.sm { width: calc(1.6em - 2px); height: calc(1.6em - 2px); }
+.storyline-toolbar-sep { width: 1px; align-self: stretch; margin: 3px 2px; background: var(--ap-border); }
+.storyline-floors { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 22em; overflow-y: auto; }
+.storyline-floors li { padding: 2px 4px; border-radius: var(--ap-radius-sm); }
+.storyline-floors li:hover { background: var(--ap-surface-2); }

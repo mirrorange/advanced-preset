@@ -6,6 +6,7 @@ import { cloneData } from '@advanced-preset/protocol';
 import type { Annotation, PatchResult, StageKind, Transport } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
 import type { ChatEvent } from './eventlog';
+import { STORYLINE_KEY } from '@/core/storylines';
 
 export type TurnKind = 'story' | 'meta-pure' | 'meta-mixed' | 'impersonate' | 'summary';
 
@@ -75,14 +76,17 @@ export function writeSidecar(mesId: number, sidecar: Sidecar): void {
 /**
  * A swipe being generated (ST overswipe: `swipe_id === swipes.length`) has no sidecar yet, but ST keeps
  * the previous swipe's `extra` on the message and even clones it into the new swipe slot while
- * streaming. Drop the mirror so the old turn's events, structures and cards stop counting; the old
+ * streaming. Drop the mirror (and the storyline) so the old turn's events, structures and cards stop counting; the old
  * swipe keeps its own copy in `swipe_info`. Returns whether anything was removed.
  */
 export function detachRegeneratingSidecar(mesId: number): boolean {
   const msg = st().chat[mesId];
-  if (!msg || msg.is_user || !Array.isArray(msg.swipes) || !msg.extra?.[SIDECAR_KEY]) return false;
+  if (!msg || msg.is_user || !Array.isArray(msg.swipes) || !msg.extra) return false;
   const sw = msg.swipe_id ?? 0;
   if (sw < msg.swipes.length && msg.swipe_info?.[sw]) return false;
+  // Its storyline too (written again when the swipe is received).
+  delete msg.extra[STORYLINE_KEY];
+  if (!msg.extra[SIDECAR_KEY]) return false;
   delete msg.extra[SIDECAR_KEY];
   return true;
 }
