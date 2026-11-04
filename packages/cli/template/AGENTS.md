@@ -23,6 +23,7 @@ user-modules/*.md    （可选）随预设安装的用户模组
 user-module-templates/*.md  用户模组模板（新建用户模组时可选的示例）
 regex-scripts/*.yaml （可选）ST 正则脚本，写入 Carrier
 quick-replies/*.yaml （可选）ST 快速回复集，选中预设时加入全局列表
+tavern-helper-scripts/*.yaml （可选）酒馆助手脚本，写入 Carrier（代码可放在同目录的 .js 文件中）
 locales/*.yaml       面板翻译
 dist/                构建产物（由 ap build 生成，发布时提交）
 DESIGN.md            设计稿（如果有）

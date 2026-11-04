@@ -42,6 +42,7 @@
 | 我的模组 | user module | 用户在面板上写的模组 |
 | 正则脚本 | regex script，`regex-scripts/` | 预设携带的 ST 正则脚本，写入 Carrier，选中预设时由 ST 执行；与只做判断的正则标记 `regex` 不同 |
 | 快速回复集 | Quick Reply set，`quick-replies/` | 预设携带的 ST 快速回复集，选中预设时加入全局列表，换预设时移除 |
+| 酒馆助手脚本 | Tavern Helper script，`tavern-helper-scripts/` | 预设携带的酒馆助手预设脚本，写入 Carrier；是否启用由酒馆助手询问用户 |
 | 推荐配置 | recommended configuration | 预设提供的一套设定，如“Gemini” |
 | 示范轮次 | synthetic turn | 工具模式下放在请求末尾的一轮虚拟工具调用，示范工具用法 |
 | Carrier | carrier | AP 为每个预设生成的 ST 预设（`AP · <预设名>`），负责放置原生内容与区域 |

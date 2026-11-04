@@ -39,7 +39,7 @@ Advanced Preset（下文简称 **AP**）是一个 SillyTavern 扩展：预设作
 - [条件表达式与变量](reference/expressions.md) · [宏](reference/macros.md) · [构建变量](reference/build-variables.md)
 - [结构](reference/structures.md) · [传输方式与工具文案](reference/transports.md)
 - [元指令、任务与历史改写](reference/meta-and-tasks.md)
-- [配置、Carrier 与迁移](reference/configuration.md) · [用户模组与插入点](reference/user-modules.md) · [正则脚本与快速回复](reference/regex-and-quick-replies.md) · [界面翻译](reference/locales.md)
+- [配置、Carrier 与迁移](reference/configuration.md) · [用户模组与插入点](reference/user-modules.md) · [正则脚本与快速回复](reference/regex-and-quick-replies.md) · [酒馆助手脚本](reference/tavern-helper-scripts.md) · [界面翻译](reference/locales.md)
 - [组装流程](reference/assembly.md) · [CLI](reference/cli.md) · [产物与运行期数据](reference/artifact-and-runtime.md)
 
 ## 相关仓库

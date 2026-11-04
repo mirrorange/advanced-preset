@@ -55,6 +55,7 @@ npm run dev        # 修改后自动重新构建，并在 http://localhost:4747 
 | `user-module-templates/*.md` | 用户模组模板：用户新建「我的模组」时可选的示例 |
 | `regex-scripts/*.yaml` | （可选）ST 正则脚本：写入 Carrier，选中预设时生效 |
 | `quick-replies/*.yaml` | （可选）ST 快速回复集：选中预设时加入全局快速回复集列表 |
+| `tavern-helper-scripts/*.yaml` | （可选）酒馆助手脚本：写入 Carrier，由酒馆助手询问用户后运行 |
 | `locales/*.yaml` | 面板文字翻译（含预设名称与描述） |
 | `dist/` | 构建产物（发布时提交） |
 | `.agents/skills/`、`AGENTS.md` | 给 AI Agent 的说明 |
