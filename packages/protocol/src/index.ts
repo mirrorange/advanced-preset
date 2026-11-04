@@ -29,3 +29,4 @@ export * from './storylines';
 export * from './regex-scripts';
 export * from './quick-replies';
 export * from './tavern-helper';
+export * from './preset-file';
