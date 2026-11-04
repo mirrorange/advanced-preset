@@ -2,17 +2,25 @@
  * CarrierManager (§8, D7): one ST Chat Completion preset per AP preset (`AP · <name>`).
  * Selecting a Carrier activates its AP preset; manual edits stay in the Carrier until the AP preset
  * is reinstalled or updated. Sampling is synced both ways with the configuration layer (§7.4).
- * The preset's regex scripts live in the Carrier (`extensions.regex_scripts`), as ST's preset-scoped scripts.
+ * The preset's regex scripts live in the Carrier (`extensions.regex_scripts`), as ST's preset-scoped scripts;
+ * its Tavern Helper scripts in `extensions.tavern_helper`, where Tavern Helper finds them (see tavern-helper.ts).
  */
-import { cloneData } from '@advanced-preset/protocol';
+import { cloneData, TAVERN_HELPER_FIELD } from '@advanced-preset/protocol';
 import type { APreset, Configuration } from '@advanced-preset/protocol';
-import { st, toast, type PresetManager } from '@/st/host';
+import { confirmPopup, escapeHtml, st, toast, type PresetManager } from '@/st/host';
+import { carrierTavernHelper, tavernHelperScriptsChanged } from './tavern-helper';
 import { presetState, activeConfiguration, updateConfiguration } from './config';
 import { save } from './settings';
 import { t } from '@/i18n';
 
 export const CARRIER_EXT = 'advanced_preset';
-export interface CarrierMeta { presetId: string; version: string; hash: string }
+export interface CarrierMeta {
+  presetId: string;
+  version: string;
+  hash: string;
+  /** Ids of the Tavern Helper scripts and folders written from the preset (absent: none). */
+  tavernHelperScripts?: string[];
+}
 
 /** Preset keys whose `oai_settings` name differs (ST `settingsToUpdate`). */
 const SETTING_ALIASES: Record<string, string> = {
@@ -45,16 +53,22 @@ function stablePromptsHash(obj: { prompts?: unknown; prompt_order?: unknown }): 
   return h.toString(16);
 }
 
-export function buildCarrier(preset: APreset, config: Configuration): Record<string, unknown> {
+/** `current`: the Carrier being rebuilt, whose Tavern Helper data is carried over. */
+export function buildCarrier(preset: APreset, config: Configuration, current?: Record<string, any>): Record<string, unknown> {
   const order = preset.carrier.prompt_order.map((o) => ({ ...o }));
+  const prevMeta = current?.extensions?.[CARRIER_EXT] as CarrierMeta | undefined;
+  const th = carrierTavernHelper(preset.tavernHelperScripts, current?.extensions?.[TAVERN_HELPER_FIELD], prevMeta?.presetId === preset.id ? prevMeta.tavernHelperScripts : undefined);
+  const meta: CarrierMeta = { presetId: preset.id, version: preset.version, hash: preset.hash, ...(th.owned.length ? { tavernHelperScripts: th.owned } : {}) };
   return {
     ...cloneData(config.sampling),
     prompts: cloneData(preset.carrier.prompts),
     prompt_order: [100000, 100001].map((character_id) => ({ character_id, order: cloneData(order) })),
     extensions: {
-      [CARRIER_EXT]: { presetId: preset.id, version: preset.version, hash: preset.hash } satisfies CarrierMeta,
+      [CARRIER_EXT]: meta,
       // Preset-scoped regex scripts: ST runs them while the Carrier is selected (once the user allows them).
       ...(preset.regexScripts?.length ? { regex_scripts: cloneData(preset.regexScripts) } : {}),
+      // Preset scripts of Tavern Helper, which asks before running them; AP only writes the data.
+      ...(th.data ? { [TAVERN_HELPER_FIELD]: th.data } : {}),
     },
   };
 }
@@ -103,17 +117,30 @@ export async function ensureCarrier(preset: APreset, opts: { select?: boolean; f
   const inUse = Boolean(existing) && m.getSelectedPresetName() === existing;
   if (stale) {
     if (current && s.carrierHash && stablePromptsHash(current) !== s.carrierHash) toast('info', t('carrier.reset', { name }));
-    const body = buildCarrier(preset, activeConfiguration(preset));
+    const body = buildCarrier(preset, activeConfiguration(preset), current);
     // Keep the user's connection-bound fields if any were stored in the Carrier.
     if (current) for (const k of ['chat_completion_source', 'reverse_proxy', 'proxy_password']) if (current[k] !== undefined) body[k] = current[k];
     s.carrierHash = stablePromptsHash(body);
     save();
     await writeCarrier(name, body, Boolean(opts.select) || inUse);
+    const th = (body.extensions as Record<string, unknown>)[TAVERN_HELPER_FIELD];
+    if (inUse && tavernHelperScriptsChanged(current?.extensions?.[TAVERN_HELPER_FIELD], th)) askReloadForTavernHelper(name);
   } else if (opts.select && m.getSelectedPresetName() !== name) {
     const value = m.findPreset(name);
     if (value !== undefined) await m.selectPreset(value);
   }
   return name;
+}
+
+/**
+ * Tavern Helper reads a preset's scripts when another preset is selected, not when the selected one
+ * is saved again: after rewriting the scripts of the Carrier in use, offer to reload the page (until
+ * then Tavern Helper runs, and may save back, the old scripts).
+ */
+function askReloadForTavernHelper(name: string): void {
+  if (!('TavernHelper' in globalThis)) return;
+  void confirmPopup(`<p>${escapeHtml(t('carrier.tavernHelper.reload', { name }))}</p>`, t('carrier.tavernHelper.reloadNow'), t('common.later'))
+    .then((ok) => { if (ok) location.reload(); });
 }
 
 export async function activatePreset(preset: APreset): Promise<void> {
