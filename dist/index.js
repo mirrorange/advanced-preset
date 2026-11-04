@@ -5684,10 +5684,10 @@ const ctx = () => host.SillyTavern.getContext();
 const locale = String((ctx().getCurrentLocale && ctx().getCurrentLocale()) || host.localStorage.getItem('language') || host.navigator.language || '').toLowerCase();
 const zh = locale.startsWith('zh');
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const list = MIRRORS.map((u) => '<li><code>' + esc(u) + '</code></li>').join('');
+const list = '<ul style="text-align:start;word-break:break-all">' + MIRRORS.map((u) => '<li><code>' + esc(u) + '</code></li>').join('') + '</ul>';
 const T = zh ? {
   title: 'Advanced Preset',
-  install: '<h3>需要 Advanced Preset 插件</h3><p>预设「' + esc(PRESET) + '」需要 Advanced Preset 插件才能使用，当前尚未安装。</p><p>是否现在安装？将依次尝试以下地址：</p><ul>' + list + '</ul>',
+  install: '<h3>需要 Advanced Preset 插件</h3><p>预设「' + esc(PRESET) + '」需要 Advanced Preset 插件才能使用，当前尚未安装。</p><p>是否现在安装？将依次尝试以下地址：</p>' + list,
   update: (v) => '<h3>需要更新 Advanced Preset</h3><p>预设「' + esc(PRESET) + '」需要 Advanced Preset ' + esc(REQUIRED) + ' 或更新版本' + (v ? '（当前为 ' + esc(v) + '）' : '') + '。</p><p>是否现在更新？</p>',
   enable: '<h3>Advanced Preset 已停用</h3><p>预设「' + esc(PRESET) + '」需要 Advanced Preset 插件，它已安装但处于停用状态。</p><p>是否启用并重新加载页面？</p>',
   installOk: '安装', updateOk: '更新', enableOk: '启用并重新加载', later: '稍后',
@@ -5696,10 +5696,10 @@ const T = zh ? {
   done: '<h3>Advanced Preset 已就绪</h3><p>重新加载页面后插件即会生效，并自动接管预设「' + esc(PRESET) + '」。</p><p>是否现在重新加载？</p>',
   reloadOk: '重新加载',
   stillOld: (v) => '已是可获取的最新版本（' + esc(v) + '），但预设需要 ' + esc(REQUIRED) + ' 或更新版本。请稍后再试，或手动更新 Advanced Preset。',
-  failed: '<h3>无法安装 Advanced Preset</h3><p>所有地址都安装失败。请检查网络连接后重新加载页面重试，或尝试手动安装 Advanced Preset 插件：</p><ol><li>打开「扩展」面板（顶栏的积木图标），点击「安装扩展」；</li><li>粘贴以下任一地址并安装：<ul>' + list + '</ul></li><li>重新加载页面。</li></ol>',
+  failed: '<h3>无法安装 Advanced Preset</h3><p>所有地址都安装失败。请检查网络连接后重新加载页面重试，或尝试手动安装 Advanced Preset 插件：</p><ol style="text-align:start"><li>打开「扩展」面板（顶栏的积木图标），点击「安装扩展」；</li><li>粘贴以下任一地址并安装：' + list + '</li><li>重新加载页面。</li></ol>',
 } : {
   title: 'Advanced Preset',
-  install: '<h3>Advanced Preset is required</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is not installed.</p><p>Install it now? These addresses are tried in turn:</p><ul>' + list + '</ul>',
+  install: '<h3>Advanced Preset is required</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is not installed.</p><p>Install it now? These addresses are tried in turn:</p>' + list,
   update: (v) => '<h3>Advanced Preset needs an update</h3><p>The preset "' + esc(PRESET) + '" needs Advanced Preset ' + esc(REQUIRED) + ' or newer' + (v ? ' (installed: ' + esc(v) + ')' : '') + '.</p><p>Update it now?</p>',
   enable: '<h3>Advanced Preset is disabled</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is installed but disabled.</p><p>Enable it and reload the page?</p>',
   installOk: 'Install', updateOk: 'Update', enableOk: 'Enable and reload', later: 'Later',
@@ -5708,7 +5708,7 @@ const T = zh ? {
   done: '<h3>Advanced Preset is ready</h3><p>It starts once the page is reloaded and then sets up the preset "' + esc(PRESET) + '" by itself.</p><p>Reload now?</p>',
   reloadOk: 'Reload',
   stillOld: (v) => 'This is the newest version available (' + esc(v) + '), but the preset needs ' + esc(REQUIRED) + ' or newer. Try again later, or update Advanced Preset by hand.',
-  failed: '<h3>Could not install Advanced Preset</h3><p>Installing failed from every address. Check your network connection and reload the page to try again, or install the Advanced Preset extension by hand:</p><ol><li>Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".</li><li>Paste one of these addresses and install:<ul>' + list + '</ul></li><li>Reload the page.</li></ol>',
+  failed: '<h3>Could not install Advanced Preset</h3><p>Installing failed from every address. Check your network connection and reload the page to try again, or install the Advanced Preset extension by hand:</p><ol style="text-align:start"><li>Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".</li><li>Paste one of these addresses and install:' + list + '</li><li>Reload the page.</li></ol>',
 };
 
 const toast = (kind, message) => (host.toastr || window.toastr)[kind](message, T.title);
@@ -11391,7 +11391,7 @@ function ly(e) {
 }
 async function uy() {
 	let e = await cy();
-	e && e !== "a01e140dd72abddb" && sessionStorage.getItem(sy) !== e && ly(e);
+	e && e !== "f0575ed2f916b718" && sessionStorage.getItem(sy) !== e && ly(e);
 }
 async function dy() {
 	await uy();
@@ -11412,7 +11412,7 @@ async function hy() {
 	let e = o().replace(/^third-party\//, ""), t = await gy(e, !1);
 	if (t.status === 404 && (t = await gy(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await cy();
-	return r && r !== "a01e140dd72abddb" ? (ly(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "f0575ed2f916b718" ? (ly(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var gy = (t, n) => v("/api/extensions/update", {
 	method: "POST",
@@ -18813,7 +18813,7 @@ var IO = ["aria-label"], LO = { class: "um-picker-head" }, RO = { class: "small 
 				"icon",
 				"help"
 			]),
-			H("div", eM, "Advanced Preset " + j(P("1.10.0")) + " · " + j(P("a01e140dd72abddb")), 1)
+			H("div", eM, "Advanced Preset " + j(P("1.10.0")) + " · " + j(P("f0575ed2f916b718")), 1)
 		], 64));
 	}
 }), nM = {
@@ -19140,7 +19140,7 @@ function VM() {
 //#region src/index.ts
 var HM = {
 	version: "1.10.0",
-	buildId: "a01e140dd72abddb",
+	buildId: "f0575ed2f916b718",
 	nextGeneration: (e) => Om(e),
 	listPresets: () => Nf().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19195,7 +19195,7 @@ async function GM() {
 	};
 	t.on(n.APP_READY, () => void a()), VM(), bh("init", {
 		version: "1.10.0",
-		build: "a01e140dd72abddb",
+		build: "f0575ed2f916b718",
 		enabled: q().enabled
 	});
 }
