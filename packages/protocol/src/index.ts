@@ -26,3 +26,5 @@ export * from './params';
 export * from './input-shaping';
 export * from './history-echo';
 export * from './storylines';
+export * from './regex-scripts';
+export * from './quick-replies';
