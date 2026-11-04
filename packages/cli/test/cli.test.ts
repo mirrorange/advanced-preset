@@ -1166,3 +1166,108 @@ describe('storylines', () => {
     expect(JSON.stringify(only.schema)).toMatch(/"required":\["previous_main"\]/);
   });
 });
+
+describe('SillyTavern regex scripts & Quick Reply sets', () => {
+  const at110 = (extra: Record<string, string>) => {
+    const t = tree(extra);
+    t.set('preset.yaml', MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.10.0'));
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => `${d.file ?? ''} ${d.path ?? ''} ${d.message}`).join('\n');
+
+  it('are absent unless written (hash unchanged)', () => {
+    const plain = build(tree());
+    expect('regexScripts' in plain.preset!).toBe(false);
+    expect('quickReplySets' in plain.preset!).toBe(false);
+  });
+
+  it('compiles regex scripts in ST form, ordered by file, with stable ids', () => {
+    const r = build(at110({
+      'regex-scripts/20-hide.yaml': 'scriptName: Hide thinking\nfindRegex: "/<thinking>[\\\\s\\\\S]*?<\\\\/thinking>/gi"\nplacement: [ai-output]\nmarkdownOnly: true\n',
+      'regex-scripts/10-list.json': JSON.stringify([
+        { id: 'from-st-export', scriptName: 'A', findRegex: 'a+', replaceString: 'b', placement: [1, 2], trimStrings: ['x'], substituteRegex: 0, minDepth: null, maxDepth: 3, disabled: true },
+        { findRegex: '{{char}}', substituteRegex: 'raw', placement: 'user-input', promptOnly: true, runOnEdit: false },
+      ]),
+    }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.diag.warnings.filter((d) => d.file?.startsWith('regex-scripts') || /regex/.test(d.message))).toEqual([]);
+    const s = r.preset!.regexScripts!;
+    expect(s.map((x) => x.scriptName)).toEqual(['A', '10-list 2', 'Hide thinking']);
+    expect(s[0]).toEqual({ id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/), scriptName: 'A', findRegex: 'a+', replaceString: 'b', trimStrings: ['x'], placement: [1, 2], disabled: true, markdownOnly: false, promptOnly: false, runOnEdit: true, substituteRegex: 0, minDepth: null, maxDepth: 3 });
+    expect(s[1]).toMatchObject({ substituteRegex: 1, placement: [1], promptOnly: true, runOnEdit: false });
+    expect(s[2]).toMatchObject({ placement: [2], markdownOnly: true, findRegex: '/<thinking>[\\s\\S]*?<\\/thinking>/gi' });
+    expect(new Set(s.map((x) => x.id)).size).toBe(3);
+    expect(build(at110({ 'regex-scripts/20-hide.yaml': 'findRegex: x\nplacement: [2]\n' })).preset!.regexScripts![0]!.id).toBe(s[2]!.id);
+  });
+
+  it('reports bad regex scripts', () => {
+    const m = messages(build(tree({
+      'regex-scripts/a.yaml': 'findRegex: "/(/g"\nplacement: [ai-output, chat]\nfoo: 1\nmaxDepth: x\nreplaceString: "{{ap::name::narrator}}"\n',
+      'regex-scripts/b.yaml': 'replaceString: x\n',
+      'regex-scripts/c.yaml': 'findRegex: x\n',
+    })));
+    expect(m).toMatch(/a\.yaml findRegex `findRegex` is not a valid regular expression/);
+    expect(m).toMatch(/unknown placement `chat`/);
+    expect(m).toMatch(/unknown regex script field `foo`/);
+    expect(m).toMatch(/`maxDepth` must be an integer/);
+    expect(m).toMatch(/macros are not expanded in regex scripts/);
+    expect(m).toMatch(/b\.yaml findRegex `findRegex` is required/);
+    expect(m).toMatch(/c\.yaml placement no `placement`: the script never runs/);
+    expect(m).toMatch(/regex scripts need Advanced Preset 1\.10\.0/);
+  });
+
+  const SET = `
+qrList:
+  - id: meta
+    label: Meta
+    icon: fa-at
+    title: Talk to {{ap::name::narrator}}
+    message: "/setinput {{input}} @{{ap::name::narrator}}"
+    contextList: [more, { set: Someone Else, isChained: true }]
+  - label: Second
+    executeOnAi: true
+`;
+
+  it('compiles Quick Reply sets with every ST field, own context menus resolved', () => {
+    const r = build(at110({
+      'quick-replies/main.yaml': SET,
+      'quick-replies/more.json': JSON.stringify({ version: 2, name: 'Demo extra', disableSend: true, color: '#ff0000', onlyBorderColor: true, idIndex: 4, qrList: [{ id: 3, label: 'X', message: 'hi', preventAutoExecute: false, isHidden: true, automationId: 'a1' }] }),
+      'locales/zh-cn.yaml': 'quickReplySets:\n  main: { qrList: { meta: { label: 元指令, title: "和 {{ap::name::narrator}} 说话" } } }\n',
+    }));
+    expect(r.diag.errors).toEqual([]);
+    expect(messages(r)).toMatch(/context menu set `Someone Else` is not one of the preset's sets/);
+    const [main, more] = r.preset!.quickReplySets!;
+    expect(main).toMatchObject({ id: 'main', name: 'AP · Demo', global: true, visible: true, disableSend: false, placeBeforeInput: false, injectInput: false, color: 'transparent', onlyBorderColor: false });
+    expect(main!.qrList[0]).toEqual({
+      id: 'meta', label: 'Meta', icon: 'fa-at', showLabel: false, title: 'Talk to {{ap::name::narrator}}', message: '/setinput {{input}} @{{ap::name::narrator}}',
+      contextList: [{ set: 'Demo extra', isChained: false }, { set: 'Someone Else', isChained: true }], preventAutoExecute: true, isHidden: false, automationId: '',
+      executeOnStartup: false, executeOnUser: false, executeOnAi: false, executeOnChatChange: false, executeOnGroupMemberDraft: false, executeOnNewChat: false, executeBeforeGeneration: false,
+    });
+    expect(main!.qrList[1]).toMatchObject({ id: '2', label: 'Second', executeOnAi: true });
+    expect(more).toMatchObject({ id: 'more', name: 'Demo extra', disableSend: true, color: '#ff0000', onlyBorderColor: true });
+    expect(more!.qrList[0]).toMatchObject({ id: '3', preventAutoExecute: false, isHidden: true, automationId: 'a1' });
+  });
+
+  it('reports bad Quick Reply sets and translations', () => {
+    const m = messages(build(tree({
+      'quick-replies/My Set.yaml': SET,
+      'quick-replies/a.yaml': 'qrList:\n  - { id: x, icon: fa-solid fa-at, message: "{{ap::param::language}} {{ap::name::nobody}}" }\n  - { id: x, label: y, showLabel: yes }\n  - {}\n',
+      'quick-replies/b.yaml': 'name: AP · Demo\nqrList: oops\nfoo: 1\n',
+      'locales/zh-cn.yaml': 'quickReplySets:\n  a: { qrList: { nope: { label: x }, x: { message: "{{ap::lang}}" } } }\n  zzz: {}\n',
+    })));
+    expect(m).toMatch(/My Set\.yaml {2}a Quick Reply set file name must be lower-case kebab-case/);
+    expect(m).toMatch(/`icon` is one Font Awesome class/);
+    expect(m).toMatch(/\{\{ap::param::language\}\}: quick replies only expand/);
+    expect(m).toMatch(/unknown actor `nobody`/);
+    expect(m).toMatch(/duplicate quick reply id `x`/);
+    expect(m).toMatch(/`showLabel` must be true or false/);
+    expect(m).toMatch(/without `label` or `icon`/);
+    expect(m).toMatch(/`qrList` \(the quick replies\) must be a list/);
+    expect(m).toMatch(/unknown Quick Reply set field `foo`/);
+    expect(m).toMatch(/sets `a` and `b` are both named `AP · Demo`/);
+    expect(m).toMatch(/quickReplySets\.a\.qrList\.nope does not exist/);
+    expect(m).toMatch(/quickReplySets\.zzz does not exist/);
+    expect(m).toMatch(/quickReplySets\.a\.qrList\.x\.message \{\{ap::lang\}\}: quick replies only expand/);
+    expect(m).toMatch(/Quick Reply sets need Advanced Preset 1\.10\.0/);
+  });
+});

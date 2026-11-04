@@ -1,11 +1,12 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate,
+  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
 import type { SourceMap } from './compile';
+import { checkQuickReplyText } from './st-sources';
 
 /** Fixed condition variables (§6.7) and the literal values they may be compared with. */
 const FIXED_VARS: Record<string, readonly string[] | null> = {
@@ -187,6 +188,13 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     diag.warn('no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names', { file: M, path: 'storylines' });
   if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
     diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: 'minAdvancedPreset' });
+
+  // ── SillyTavern regex scripts & Quick Reply sets ───────────────────────────
+  const below = (since: string) => !p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, since) < 0;
+  if (p.regexScripts?.length && below(REGEX_SCRIPTS_SINCE))
+    diag.warn(`regex scripts need Advanced Preset ${REGEX_SCRIPTS_SINCE}: set minAdvancedPreset to ${REGEX_SCRIPTS_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: 'minAdvancedPreset' });
+  if (p.quickReplySets?.length && below(QUICK_REPLIES_SINCE))
+    diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: 'minAdvancedPreset' });
 
   // ── regions / anchors ───────────────────────────────────────────────────────
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} → unknown region \`${rid}\``, { file: M, path: 'anchors' });
@@ -417,10 +425,22 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       userModules: new Set((p.userModules ?? []).map((x) => x.id)),
       userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys()),
+      quickReplySets: new Set((p.quickReplySets ?? []).map((x) => x.id)),
     };
     for (const [section, ids] of Object.entries(known)) {
       const t = table[section];
       if (t && typeof t === 'object') for (const k of Object.keys(t)) if (!ids.has(k)) diag.warn(`${section}.${k} does not exist`, { file });
+    }
+    for (const [sid, tr] of Object.entries(table.quickReplySets ?? {})) {
+      const set = p.quickReplySets?.find((x) => x.id === sid);
+      if (!set || !tr || typeof tr !== 'object') continue;
+      for (const [qid, q] of Object.entries(tr.qrList ?? {})) {
+        if (!set.qrList.some((x) => x.id === qid)) { diag.warn(`quickReplySets.${sid}.qrList.${qid} does not exist`, { file }); continue; }
+        for (const k of QR_TEXT_FIELDS) {
+          const v = (q as Record<string, unknown> | null)?.[k];
+          if (typeof v === 'string') checkQuickReplyText(v, Object.keys(p.actors), diag, { file, path: `quickReplySets.${sid}.qrList.${qid}.${k}` });
+        }
+      }
     }
     for (const [wid, w] of Object.entries(table.workflows ?? {})) {
       const wf = p.workflows.find((x) => x.id === wid);

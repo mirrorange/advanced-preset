@@ -7,6 +7,8 @@
  *   workflows/*.md       one workflow per file (frontmatter + sections)
  *   user-modules/*.md    user modules installed with the preset (raw text; see user-module-sources.ts)
  *   user-module-templates/*.md  example user modules offered when creating one (same format)
+ *   regex-scripts/*.yaml SillyTavern regex scripts written into the Carrier (see st-sources.ts)
+ *   quick-replies/*.yaml SillyTavern Quick Reply sets installed while the preset is active
  *   locales/<lang>.yaml  panel strings
  *
  * Compilation is pure over a `SourceTree` (path → text) so it can be tested without a disk.
@@ -31,6 +33,7 @@ import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
 import { compileUserModuleSources, type SourceContext } from './user-module-sources';
 import { MANIFEST_FILE, loadManifest } from './manifest';
+import { compileQuickReplySets, compileRegexScripts } from './st-sources';
 
 export type SourceTree = Map<string, string>;
 
@@ -707,6 +710,10 @@ export function compile(tree: SourceTree): CompileResult {
     workflows.sort((a, b) => (order.indexOf(a.id) + 1 || 1e6) - (order.indexOf(b.id) + 1 || 1e6));
   }
 
+  // ── SillyTavern regex scripts & Quick Reply sets ───────────────────────────
+  const regexScripts = compileRegexScripts(tree, id, diag);
+  const quickReplySets = compileQuickReplySets(tree, str(raw.name, id), Object.keys(actors), diag);
+
   // ── carrier ─────────────────────────────────────────────────────────────────
   const carrier = compileCarrier(isObj(raw.carrier) ? raw.carrier : {}, regions, str(raw.name, id), diag);
 
@@ -861,6 +868,9 @@ export function compile(tree: SourceTree): CompileResult {
     workflows,
     structures,
     regex,
+    // Only when present, so that other artifacts keep their hash.
+    ...(regexScripts.length ? { regexScripts } : {}),
+    ...(quickReplySets.length ? { quickReplySets } : {}),
     meta,
     tokenSaving,
     syntheticTurns,
