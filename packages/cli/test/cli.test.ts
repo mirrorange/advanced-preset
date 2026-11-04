@@ -4,6 +4,7 @@ import { compile, type SourceTree } from '../src/compile';
 import { validate } from '../src/validate';
 import { Diagnostics } from '../src/diagnostics';
 import { compileContent, parseMarkdown } from '../src/markdown';
+import { isSourcePath } from '../src/io';
 
 const MANIFEST = `
 id: demo
@@ -1269,5 +1270,84 @@ qrList:
     expect(m).toMatch(/quickReplySets\.zzz does not exist/);
     expect(m).toMatch(/quickReplySets\.a\.qrList\.x\.message \{\{ap::lang\}\}: quick replies only expand/);
     expect(m).toMatch(/Quick Reply sets need Advanced Preset 1\.10\.0/);
+  });
+});
+
+describe('Tavern Helper scripts', () => {
+  const at110 = (extra: Record<string, string>) => {
+    const t = tree(extra);
+    t.set('preset.yaml', MANIFEST.replace('version: 1.0.0', 'version: 1.0.0\nminAdvancedPreset: 1.10.0'));
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => `${d.file ?? ''} ${d.path ?? ''} ${d.message}`).join('\n');
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+  it('are absent unless written (hash unchanged)', () => {
+    expect('tavernHelperScripts' in build(tree()).preset!).toBe(false);
+  });
+
+  it('compiles scripts, folders and Tavern Helper exports, with code files and stable ids', () => {
+    const exported = {
+      type: 'script', enabled: false, name: 'Exported', id: 'f3c1-from-export', content: 'console.log(1)', info: 'notes',
+      button: { enabled: true, buttons: [{ name: 'Go', visible: false }] }, data: { a: 1 }, export_with: { data: false, button: true },
+    };
+    const r = build(at110({
+      'tavern-helper-scripts/20-main.yaml': 'name: Main\ncontent: ./tavern-helper-scripts/src/main.js\nbutton: { buttons: [Roll] }\n',
+      'tavern-helper-scripts/src/main.js': 'export const x = 1;\n',
+      'tavern-helper-scripts/10-exported.json': JSON.stringify(exported),
+      'tavern-helper-scripts/30-tools.yaml': 'name: Tools\nicon: fa-solid fa-toolbox\nscripts:\n  - { name: A, content: "a()" }\n  - { content: "b()", enabled: false }\n',
+    }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.diag.warnings.filter((d) => d.file?.startsWith('tavern-helper') || /Tavern Helper/.test(d.message))).toEqual([]);
+    const s = r.preset!.tavernHelperScripts!;
+    expect(s.map((x) => x.name)).toEqual(['Exported', 'Main', 'Tools']);
+    expect(s[0]).toEqual({ ...exported, id: expect.stringMatching(UUID) });
+    expect(s[1]).toEqual({
+      type: 'script', enabled: true, name: 'Main', id: expect.stringMatching(UUID), content: 'export const x = 1;\n', info: '',
+      button: { enabled: true, buttons: [{ name: 'Roll', visible: true }] }, data: {}, export_with: { data: true, button: true },
+    });
+    expect(s[2]).toMatchObject({ type: 'folder', enabled: true, name: 'Tools', icon: 'fa-solid fa-toolbox', id: expect.stringMatching(UUID) });
+    expect('color' in s[2]!).toBe(false);
+    const folder = s[2] as Extract<(typeof s)[number], { type: 'folder' }>;
+    expect(folder.scripts.map((x) => [x.name, x.enabled, x.content])).toEqual([['A', true, 'a()'], ['30-tools 2', false, 'b()']]);
+    const ids = [s[0]!.id, s[1]!.id, s[2]!.id, ...folder.scripts.map((x) => x.id)];
+    expect(new Set(ids).size).toBe(5);
+    // Same place → same id, whatever the content; the export's own id is replaced.
+    expect(build(at110({ 'tavern-helper-scripts/20-main.yaml': 'content: other()\n' })).preset!.tavernHelperScripts![0]!.id).toBe(s[1]!.id);
+    expect(r.preset!.tavernHelperScripts).not.toContainEqual(expect.objectContaining({ id: 'f3c1-from-export' }));
+  });
+
+  it('reads a list of trees from one file', () => {
+    const r = build(at110({ 'tavern-helper-scripts/all.json': JSON.stringify([{ name: 'One', content: '1' }, { type: 'folder', name: 'F', scripts: [{ content: '2' }] }]) }));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.preset!.tavernHelperScripts!.map((x) => [x.type, x.name])).toEqual([['script', 'One'], ['folder', 'F']]);
+  });
+
+  it('reports bad scripts', () => {
+    const m = messages(build(tree({
+      'tavern-helper-scripts/a.yaml': 'name: A\nfoo: 1\ncontent: ./elsewhere/a.js\n',
+      'tavern-helper-scripts/b.yaml': 'name: B\n',
+      'tavern-helper-scripts/c.yaml': 'content: ./tavern-helper-scripts/missing.js\n',
+      'tavern-helper-scripts/d.yaml': 'type: folder\nscripts:\n  - { type: folder, scripts: [] }\n  - x\n',
+      'tavern-helper-scripts/e.yaml': 'type: macro\n',
+      'tavern-helper-scripts/f.yaml': 'content: x\nbutton: { buttons: [{ visible: true }] }\ndata: [1]\n',
+      'tavern-helper-scripts/g.yaml': 'content: x\nenabled: yes\n',
+    })));
+    expect(m).toMatch(/a\.yaml foo unknown Tavern Helper script field `foo`/);
+    expect(m).toMatch(/g\.yaml enabled `enabled` must be true or false/);
+    expect(m).toMatch(/script files live under tavern-helper-scripts\//);
+    expect(m).toMatch(/b\.yaml content `content` .* is required/);
+    expect(m).toMatch(/file `tavern-helper-scripts\/missing\.js` not found/);
+    expect(m).toMatch(/d\.yaml scripts\[0\] folders cannot contain folders/);
+    expect(m).toMatch(/d\.yaml scripts\[1\] a Tavern Helper script must be a mapping/);
+    expect(m).toMatch(/e\.yaml type `type` must be script or folder/);
+    expect(m).toMatch(/a button is `<name>` or `\{ name, visible \}`/);
+    expect(m).toMatch(/f\.yaml data `data` must be a mapping/);
+    expect(m).toMatch(/Tavern Helper scripts need Advanced Preset 1\.10\.0/);
+  });
+
+  it('keeps code files in the source tree', () => {
+    expect(isSourcePath('tavern-helper-scripts/src/main.js')).toBe(true);
+    expect(isSourcePath('tavern-helper-scripts/main.yaml')).toBe(true);
   });
 });
