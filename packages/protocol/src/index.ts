@@ -28,3 +28,4 @@ export * from './history-echo';
 export * from './storylines';
 export * from './regex-scripts';
 export * from './quick-replies';
+export * from './tavern-helper';

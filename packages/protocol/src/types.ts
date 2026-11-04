@@ -11,6 +11,7 @@ import type { InputShaping } from './input-shaping';
 import type { StorylineConfig, StorylinesDecl } from './storylines';
 import type { RegexScript } from './regex-scripts';
 import type { QuickReplySetDecl, QuickReplySetLocale } from './quick-replies';
+import type { TavernHelperScriptTree } from './tavern-helper';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -579,6 +580,8 @@ export interface APreset {
   regexScripts?: RegexScript[];
   /** SillyTavern Quick Reply sets installed while the preset is active (`quick-replies/`; absent → none). */
   quickReplySets?: QuickReplySetDecl[];
+  /** Tavern Helper scripts written into the Carrier (`tavern-helper-scripts/`; absent → none). */
+  tavernHelperScripts?: TavernHelperScriptTree[];
   meta: MetaDecl;
   tokenSaving: TokenSavingDecl;
   syntheticTurns: SyntheticTurn[];

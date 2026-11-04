@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { regexFromString, stQuickReplySet, type QuickReplyDecl, type QuickReplySetDecl } from '../src';
+import { regexFromString, stQuickReplySet, tavernHelperIds, tavernHelperScriptCount, type QuickReplyDecl, type QuickReplySetDecl, type TavernHelperScript, type TavernHelperScriptTree } from '../src';
 
 const reply = (over: Partial<QuickReplyDecl>): QuickReplyDecl => ({
   id: 'x', label: '', icon: '', showLabel: false, title: '', message: '', contextList: [], preventAutoExecute: true, isHidden: false, automationId: '',
@@ -43,5 +43,17 @@ describe('regexFromString (as ST)', () => {
     expect(regexFromString('/a+b/gi')).toEqual(/a+b/gi);
     expect(regexFromString('a+b')!.source).toBe('a+b');
     expect(regexFromString('/(/g')).toBeUndefined();
+  });
+});
+
+describe('Tavern Helper script trees', () => {
+  const script = (id: string): TavernHelperScript => ({
+    type: 'script', enabled: true, name: id, id, content: '', info: '', button: { enabled: true, buttons: [] }, data: {}, export_with: { data: true, button: true },
+  });
+  const trees: TavernHelperScriptTree[] = [script('a'), { type: 'folder', enabled: true, name: 'F', id: 'f', icon: 'fa-solid fa-folder', scripts: [script('b'), script('c')] }];
+
+  it('lists folder and script ids in order, and counts scripts only', () => {
+    expect(tavernHelperIds(trees)).toEqual(['a', 'f', 'b', 'c']);
+    expect(tavernHelperScriptCount(trees)).toBe(3);
   });
 });
