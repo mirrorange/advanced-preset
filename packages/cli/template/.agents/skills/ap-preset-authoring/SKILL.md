@@ -46,6 +46,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 | 一次生成的完整组装流程（排查“为什么出现 / 没出现”） | [assembly.md](references/assembly.md) |
 | `ap` 命令 | [cli.md](references/cli.md) |
 | 产物格式、安装与更新、聊天中保存的数据 | [artifact-and-runtime.md](references/artifact-and-runtime.md) |
+| 预设文件（ST 预设形态的 `.apreset.json`）、安装提示、酒馆助手安装脚本、`build.installer` | [preset-file.md](references/preset-file.md) |
 
 常见任务的完整步骤见 [recipes.md](recipes.md)。
 

@@ -56,6 +56,8 @@ export interface APSettings {
   debug: { keepRequests: number };
   /** Quick Reply sets AP wrote, by ST set name: the preset they belong to and the fingerprint of what was written. */
   quickReplies?: Record<string, { presetId: string; hash: string }>;
+  /** Preset files in ST's list whose preset the user declined to install (I-171): ST preset name → artifact hash. */
+  declinedPresetFiles?: Record<string, string>;
 }
 
 const defaults = (): APSettings => ({

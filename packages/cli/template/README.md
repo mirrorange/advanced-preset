@@ -40,7 +40,7 @@ npm run dev        # 修改后自动重新构建，并在 http://localhost:4747 
 | `npm run dev` | 开发服务器：监视源码、自动构建、供 AP 调试页载入 |
 | `npm run check` | 检查错误（`npx ap check --strict` 把警告也算作失败） |
 | `npm run preview` | 查看组装结果，例如 `npm run preview -- --transport prefill` |
-| `npm run build` | 生成 `dist/__PRESET_ID__.apreset.json` |
+| `npm run build` | 生成预设文件 `dist/__PRESET_ID__.apreset.json` |
 | `npm run skills` | 安装 / 更新 `.agents/skills` 中的 AP 技能 |
 
 ## 📁 文件
@@ -72,6 +72,8 @@ npm run dev        # 修改后自动重新构建，并在 http://localhost:4747 
 ```
 https://github.com/<用户名>/<仓库名>/blob/main/dist/__PRESET_ID__.apreset.json
 ```
+
+还没有安装 AP 的用户也可以直接在 ST 中导入这个文件：它是一个标准的 ST 预设，会提示安装 Advanced Preset，装有酒馆助手时附带的安装脚本可以自动安装（不想附带时在 `preset.yaml` 中写 `build: { installer: false }`）。
 
 ## 📚 文档
 

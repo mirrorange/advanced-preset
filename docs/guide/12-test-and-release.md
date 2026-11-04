@@ -36,7 +36,8 @@
 
 - **链接导入**：AP 面板 → 预设 → 导入**链接**，填入仓库中预设文件的地址，例如 `https://github.com/<用户名>/<仓库名>/blob/main/dist/<id>.apreset.json`（AP 会自动换成 raw 地址）。这个地址始终指向最新提交的版本；
 - **从来源更新**：通过链接安装的预设，以后可以在“预设”页一键“从来源更新”；
-- **文件导入**：下载 `.apreset.json`（比如从 Release 页面）后导入文件。
+- **文件导入**：下载 `.apreset.json`（比如从 Release 页面）后导入文件；
+- **还没有安装 AP 的用户**：`.apreset.json` 同时是一个标准的 ST 预设，可以直接用 ST 对话补全预设的导入按钮导入。此时预设里只有一条提示词，让 AI 告诉用户需要先安装 Advanced Preset 插件、怎么安装；如果用户装了酒馆助手，启用预设附带的安装脚本后会自动从 GitHub / GitLab / Codeberg 安装（或更新）AP。刷新页面后 AP 会自动接管这个预设，换成 `AP · <预设名>`。不想附带安装脚本时，在 `preset.yaml` 里写 `build: { installer: false }`，或构建时加 `--no-installer`（详见参考 [preset-file.md](../reference/preset-file.md)）。
 
 > Release 附件的下载地址不能直接用于“链接导入”：浏览器会因为跨域限制拒绝读取。分享链接请用仓库里的文件地址。
 

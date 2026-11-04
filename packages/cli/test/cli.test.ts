@@ -1351,3 +1351,36 @@ describe('Tavern Helper scripts', () => {
     expect(isSourcePath('tavern-helper-scripts/main.yaml')).toBe(true);
   });
 });
+
+describe('preset file (I-170)', () => {
+  it('reads build.installer (default true) without touching the artifact', () => {
+    const plain = build(tree());
+    expect(plain.build).toEqual({ installer: true });
+    const off = build(tree({ 'preset.yaml': `${MANIFEST}build: { installer: false }\n` }));
+    expect(off.build).toEqual({ installer: false });
+    expect(off.preset!.hash).toBe(plain.preset!.hash);
+    expect((off.preset as Record<string, unknown>).build).toBeUndefined();
+    const bad = build(tree({ 'preset.yaml': `${MANIFEST}build: { installer: maybe, other: 1 }\n` }));
+    expect(bad.diag.errors.map((e) => e.message).join('\n')).toMatch(/build\.installer` must be true or false/);
+    expect(bad.diag.warnings.map((w) => w.message).join('\n')).toMatch(/unknown build key `other`/);
+  });
+
+  it('writes the preset file with the default sampling, with or without the installer', async () => {
+    const { mkdtemp, readFile: read } = await import('node:fs/promises');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { writePresetFile } = await import('../src/io');
+    const { upgradeArtifact, PRESET_FILE_FIELD, INSTALLER_SCRIPT_ID } = await import('@advanced-preset/protocol');
+    const { preset } = build(tree());
+    const dir = await mkdtemp(join(tmpdir(), 'ap-'));
+    const file = await writePresetFile(preset!, dir);
+    expect(file).toBe(join(dir, 'demo.apreset.json'));
+    const json = JSON.parse(await read(file, 'utf8'));
+    expect(json.extensions[PRESET_FILE_FIELD].artifact.hash).toBe(preset!.hash);
+    expect(json.extensions.tavern_helper.scripts[0].id).toBe(INSTALLER_SCRIPT_ID);
+    expect(upgradeArtifact(json)).toEqual(preset);
+    for (const [k, v] of Object.entries(resolveConfiguration(preset!, preset!.defaultConfiguration, undefined).sampling)) expect(json[k]).toEqual(v);
+    const bare = JSON.parse(await read(await writePresetFile(preset!, dir, { installer: false }), 'utf8'));
+    expect(bare.extensions.tavern_helper).toBeUndefined();
+  });
+});

@@ -23,6 +23,7 @@ import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
 import { installPresetIo } from '@/app/st-preset-io';
 import { syncBundledModules } from '@/app/bundled-modules';
+import { adoptPresetFiles, onPresetChanged } from '@/app/preset-files';
 import { installQuickReplies } from '@/app/quick-replies';
 import { mountUi } from '@/ui';
 import { ui } from '@/ui/state';
@@ -94,14 +95,19 @@ async function init(): Promise<void> {
   }, 300);
   eventSource.on(E.SETTINGS_UPDATED!, pull);
   eventSource.on(E.OAI_PRESET_CHANGED_AFTER!, pull);
+  eventSource.on(E.OAI_PRESET_CHANGED_AFTER!, onPresetChanged);
 
   const ready = async () => {
     // The dev artifact first: syncing from the installed copy before it would rebuild the dev
     // preset's Carrier twice on every load (dropping what only the dev build has, such as new scripts).
     await Promise.race([startDevSource(), new Promise((r) => setTimeout(r, 3000))]);
     await syncCarriers();
-    // Bundled user modules may ask which copy to keep: only once ST's UI is up, without holding up the rest.
-    void (async () => { for (const { preset } of listPresets()) await syncBundledModules(preset); })();
+    // Bundled user modules may ask which copy to keep, and preset files imported before AP was
+    // installed may ask for trust: only once ST's UI is up, without holding up the rest.
+    void (async () => {
+      for (const { preset } of listPresets()) await syncBundledModules(preset);
+      await adoptPresetFiles();
+    })();
     syncGlobalRefs({ reload: true });
     // The Quick Reply extension has loaded its sets by now.
     installQuickReplies();

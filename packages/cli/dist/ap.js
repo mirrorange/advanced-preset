@@ -429,9 +429,9 @@ var require_anchors = __commonJS({
     "use strict";
     var identity = require_identity();
     var visit = require_visit();
-    function anchorIsValid(anchor) {
-      if (/[\x00-\x19\s,[\]{}]/.test(anchor)) {
-        const sa = JSON.stringify(anchor);
+    function anchorIsValid(anchor2) {
+      if (/[\x00-\x19\s,[\]{}]/.test(anchor2)) {
+        const sa = JSON.stringify(anchor2);
         const msg = `Anchor must not contain whitespace or control characters: ${sa}`;
         throw new Error(msg);
       }
@@ -462,9 +462,9 @@ var require_anchors = __commonJS({
         onAnchor: (source) => {
           aliasObjects.push(source);
           prevAnchors ?? (prevAnchors = anchorNames(doc));
-          const anchor = findNewAnchor(prefix, prevAnchors);
-          prevAnchors.add(anchor);
-          return anchor;
+          const anchor2 = findNewAnchor(prefix, prevAnchors);
+          prevAnchors.add(anchor2);
+          return anchor2;
         },
         /**
          * With circular references, the source node is only resolved after all
@@ -711,8 +711,8 @@ var require_Alias = __commonJS({
     function getAliasCount(doc, node, anchors2) {
       if (identity.isAlias(node)) {
         const source = node.resolve(doc);
-        const anchor = anchors2 && source && anchors2.get(source);
-        return anchor ? anchor.count * anchor.aliasCount : 0;
+        const anchor2 = anchors2 && source && anchors2.get(source);
+        return anchor2 ? anchor2.count * anchor2.aliasCount : 0;
       } else if (identity.isCollection(node)) {
         let count = 0;
         for (const item of node.items) {
@@ -1497,10 +1497,10 @@ var require_stringify = __commonJS({
       if (!doc.directives)
         return "";
       const props = [];
-      const anchor = (identity.isScalar(node) || identity.isCollection(node)) && node.anchor;
-      if (anchor && anchors.anchorIsValid(anchor)) {
-        anchors$1.add(anchor);
-        props.push(`&${anchor}`);
+      const anchor2 = (identity.isScalar(node) || identity.isCollection(node)) && node.anchor;
+      if (anchor2 && anchors.anchorIsValid(anchor2)) {
+        anchors$1.add(anchor2);
+        props.push(`&${anchor2}`);
       }
       const tag = node.tag ?? (tagObj.default ? null : tagObj.tag);
       if (tag)
@@ -3784,7 +3784,7 @@ var require_resolve_props = __commonJS({
       let hasNewline = false;
       let reqSpace = false;
       let tab = null;
-      let anchor = null;
+      let anchor2 = null;
       let tag = null;
       let newlineAfterProp = null;
       let comma = null;
@@ -3831,16 +3831,16 @@ var require_resolve_props = __commonJS({
               commentSep += token.source;
             atNewline = true;
             hasNewline = true;
-            if (anchor || tag)
+            if (anchor2 || tag)
               newlineAfterProp = token;
             hasSpace = true;
             break;
           case "anchor":
-            if (anchor)
+            if (anchor2)
               onError(token, "MULTIPLE_ANCHORS", "A node can have at most one anchor");
             if (token.source.endsWith(":"))
               onError(token.offset + token.source.length - 1, "BAD_ALIAS", "Anchor ending in : is ambiguous", true);
-            anchor = token;
+            anchor2 = token;
             start ?? (start = token.offset);
             atNewline = false;
             hasSpace = false;
@@ -3857,7 +3857,7 @@ var require_resolve_props = __commonJS({
             break;
           }
           case indicator:
-            if (anchor || tag)
+            if (anchor2 || tag)
               onError(token, "BAD_PROP_ORDER", `Anchors and tags must be after the ${token.source} indicator`);
             if (found)
               onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.source} in ${flow ?? "collection"}`);
@@ -3894,7 +3894,7 @@ var require_resolve_props = __commonJS({
         spaceBefore,
         comment,
         hasNewline,
-        anchor,
+        anchor: anchor2,
         tag,
         newlineAfterProp,
         end,
@@ -4403,8 +4403,8 @@ var require_compose_collection = __commonJS({
       const tagToken = props.tag;
       const tagName = !tagToken ? null : ctx.directives.tagName(tagToken.source, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg));
       if (token.type === "block-seq") {
-        const { anchor, newlineAfterProp: nl } = props;
-        const lastProp = anchor && tagToken ? anchor.offset > tagToken.offset ? anchor : tagToken : anchor ?? tagToken;
+        const { anchor: anchor2, newlineAfterProp: nl } = props;
+        const lastProp = anchor2 && tagToken ? anchor2.offset > tagToken.offset ? anchor2 : tagToken : anchor2 ?? tagToken;
         if (lastProp && (!nl || nl.offset < lastProp.offset)) {
           const message = "Missing newline after block sequence props";
           onError(lastProp, "MISSING_CHAR", message);
@@ -4970,13 +4970,13 @@ var require_compose_node = __commonJS({
     var CN = { composeNode, composeEmptyNode };
     function composeNode(ctx, token, props, onError) {
       const atKey = ctx.atKey;
-      const { spaceBefore, comment, anchor, tag } = props;
+      const { spaceBefore, comment, anchor: anchor2, tag } = props;
       let node;
       let isSrcToken = true;
       switch (token.type) {
         case "alias":
           node = composeAlias(ctx, token, onError);
-          if (anchor || tag)
+          if (anchor2 || tag)
             onError(token, "ALIAS_PROPS", "An alias node must not specify any properties");
           break;
         case "scalar":
@@ -4984,16 +4984,16 @@ var require_compose_node = __commonJS({
         case "double-quoted-scalar":
         case "block-scalar":
           node = composeScalar.composeScalar(ctx, token, tag, onError);
-          if (anchor)
-            node.anchor = anchor.source.substring(1);
+          if (anchor2)
+            node.anchor = anchor2.source.substring(1);
           break;
         case "block-map":
         case "block-seq":
         case "flow-collection":
           try {
             node = composeCollection.composeCollection(CN, ctx, token, props, onError);
-            if (anchor)
-              node.anchor = anchor.source.substring(1);
+            if (anchor2)
+              node.anchor = anchor2.source.substring(1);
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             onError(token, "RESOURCE_EXHAUSTION", message);
@@ -5006,8 +5006,8 @@ var require_compose_node = __commonJS({
         }
       }
       node ?? (node = composeEmptyNode(ctx, token.offset, void 0, null, props, onError));
-      if (anchor && node.anchor === "")
-        onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
+      if (anchor2 && node.anchor === "")
+        onError(anchor2, "BAD_ALIAS", "Anchor cannot be an empty string");
       if (atKey && ctx.options.stringKeys && (!identity.isScalar(node) || typeof node.value !== "string" || node.tag && node.tag !== "tag:yaml.org,2002:str")) {
         const msg = "With stringKeys, all keys must be strings";
         onError(tag ?? token, "NON_STRING_KEY", msg);
@@ -5024,7 +5024,7 @@ var require_compose_node = __commonJS({
         node.srcToken = token;
       return node;
     }
-    function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor, tag, end }, onError) {
+    function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor: anchor2, tag, end }, onError) {
       const token = {
         type: "scalar",
         offset: utilEmptyScalarPosition.emptyScalarPosition(offset, before, pos),
@@ -5032,10 +5032,10 @@ var require_compose_node = __commonJS({
         source: ""
       };
       const node = composeScalar.composeScalar(ctx, token, tag, onError);
-      if (anchor) {
-        node.anchor = anchor.source.substring(1);
+      if (anchor2) {
+        node.anchor = anchor2.source.substring(1);
         if (node.anchor === "")
-          onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
+          onError(anchor2, "BAD_ALIAS", "Anchor cannot be an empty string");
       }
       if (spaceBefore)
         node.spaceBefore = true;
@@ -7732,8 +7732,8 @@ function orderPrefixed(prefix, position, total, base) {
 function turnLayout(workflow, stages, allStructures, tools, stageBase) {
   const structures = allStructures.filter((s) => !isInlineStructure(s));
   const list = stages.map((stage, index) => ({ item: { type: "stage", stage, key: stageOrderKey(workflow, stage) }, rank: 0, index }));
-  const anchor = anchorIndex(workflow, stages);
-  const anchorKey = anchor >= 0 ? list[anchor].item.key : Number.POSITIVE_INFINITY;
+  const anchor2 = anchorIndex(workflow, stages);
+  const anchorKey = anchor2 >= 0 ? list[anchor2].item.key : Number.POSITIVE_INFINITY;
   const stageKey = (ref) => {
     if (ref === CONTENT_STAGE_REF) {
       for (let i2 = stages.length - 1; i2 >= 0; i2--) if (stages[i2].kind === "content") return list[i2].item.key;
@@ -8823,6 +8823,237 @@ function defaultVars(preset, config, over = {}) {
   };
 }
 
+// ../protocol/src/tavern-helper.ts
+var TAVERN_HELPER_SINCE = "1.10.0";
+var TAVERN_HELPER_FIELD = "tavern_helper";
+function tavernHelperScriptCount(trees) {
+  return trees.reduce((n, t) => n + (t.type === "folder" ? t.scripts.length : 1), 0);
+}
+
+// ../protocol/src/preset-file.ts
+var PRESET_FILE_SINCE = "1.10.0";
+var PRESET_FILE_FIELD = "advanced_preset_file";
+var PRESET_FILE_FORMAT = 1;
+var AP_MIRRORS = [
+  "https://github.com/mirrorange/advanced-preset",
+  "https://gitlab.com/mirrorange/advanced-preset",
+  "https://codeberg.org/mirrorange/advanced-preset"
+];
+var INSTALL_NOTICE_ID = "ap_install_notice";
+var INSTALL_NOTICE_MARK = "\u27E6ap:install-notice\u27E7";
+var INSTALLER_SCRIPT_ID = "6f1d6c2e-5a4b-4c3e-9a7d-a9e5c0f1b2d3";
+function requiredAdvancedPreset(artifact) {
+  const min = artifact.minAdvancedPreset;
+  return min && compareVersions(min, PRESET_FILE_SINCE) > 0 ? min : PRESET_FILE_SINCE;
+}
+var anchor = (content) => typeof content === "string" && content.includes("\u27E6ap:region:");
+function installNotice(artifact) {
+  return `${INSTALL_NOTICE_MARK}
+[Notice from the preset file \u2014 not part of the story]
+The selected Chat Completion preset, "${artifact.name}" ${artifact.version}, is an Advanced Preset preset. It only works with the Advanced Preset extension for SillyTavern, which is not installed or not enabled here, so none of the preset's prompts were loaded.
+
+Do not continue the story or the roleplay in this reply. Instead, tell the user in their own language, briefly and kindly, that this preset needs the Advanced Preset extension, and guide them to install it:
+1. Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".
+2. Paste one of these addresses and install (if one fails, try the next):
+${AP_MIRRORS.map((u) => `   - ${u}`).join("\n")}
+3. Reload the page. Advanced Preset then sets up this preset by itself.
+If the Tavern Helper extension is installed, the preset's installer script can do this automatically: enable the preset's scripts when Tavern Helper asks (or in Tavern Helper \u2192 Scripts \u2192 Preset scripts).
+If Advanced Preset is installed but disabled, enable it in Extensions \u2192 Manage extensions and reload.`;
+}
+function installerScript(artifact) {
+  return {
+    type: "script",
+    enabled: true,
+    name: "Advanced Preset Installer",
+    id: INSTALLER_SCRIPT_ID,
+    content: installerSource(artifact.name, requiredAdvancedPreset(artifact)),
+    info: `This preset ("${artifact.name}") needs the Advanced Preset extension. The script offers to install it (or to update or enable it) from:
+${AP_MIRRORS.join("\n")}
+It does nothing once Advanced Preset ${requiredAdvancedPreset(artifact)} or newer is running; Advanced Preset then replaces this preset with its own copy, without this script.
+
+\u6B64\u9884\u8BBE\u9700\u8981 Advanced Preset \u63D2\u4EF6\u3002\u811A\u672C\u4F1A\u8BE2\u95EE\u662F\u5426\u4ECE\u4EE5\u4E0A\u5730\u5740\u5B89\u88C5\uFF08\u6216\u66F4\u65B0\u3001\u542F\u7528\uFF09\u5B83\uFF1BAdvanced Preset ${requiredAdvancedPreset(artifact)} \u53CA\u4EE5\u4E0A\u7248\u672C\u8FD0\u884C\u540E\u811A\u672C\u4E0D\u505A\u4EFB\u4F55\u4E8B\uFF0C\u63D2\u4EF6\u4F1A\u7528\u81EA\u5DF1\u7684\u526F\u672C\u66FF\u6362\u6B64\u9884\u8BBE\uFF08\u4E0D\u542B\u6B64\u811A\u672C\uFF09\u3002`,
+    button: { enabled: false, buttons: [] },
+    data: {},
+    export_with: { data: true, button: true }
+  };
+}
+function presetFile(artifact, o = {}) {
+  const prompts = artifact.carrier.prompts.map((p) => ({ ...p }));
+  const regionIds = new Set(prompts.filter((p) => anchor(p.content)).map((p) => p.identifier));
+  prompts.push({
+    identifier: INSTALL_NOTICE_ID,
+    name: "Advanced Preset \xB7 install notice",
+    role: "system",
+    content: installNotice(artifact),
+    system_prompt: false,
+    marker: false,
+    injection_position: 0,
+    injection_depth: 4,
+    forbid_overrides: true
+  });
+  const order = [
+    ...artifact.carrier.prompt_order.map((x) => ({ ...x, enabled: x.enabled && !regionIds.has(x.identifier) })),
+    { identifier: INSTALL_NOTICE_ID, enabled: true }
+  ];
+  const data = { format: PRESET_FILE_FORMAT, artifact };
+  return {
+    ...o.sampling ?? {},
+    prompts,
+    prompt_order: [1e5, 100001].map((character_id) => ({ character_id, order: order.map((x) => ({ ...x })) })),
+    extensions: {
+      ...o.installer === false ? {} : { [TAVERN_HELPER_FIELD]: { scripts: [installerScript(artifact)], variables: {} } },
+      [PRESET_FILE_FIELD]: data
+    }
+  };
+}
+function installerSource(presetName, required) {
+  const json = (v) => JSON.stringify(v).replace(/</g, "\\u003c");
+  return `// Advanced Preset installer, written into the preset file by Advanced Preset.
+// It installs, updates or enables the Advanced Preset extension; it does nothing once
+// Advanced Preset ${required} or newer is running.
+const PRESET = ${json(presetName)};
+const REQUIRED = ${json(required)};
+const MIRRORS = ${json(AP_MIRRORS)};
+const FOLDER = 'advanced-preset';
+const EXTENSION = 'third-party/' + FOLDER;
+const LATER_KEY = 'advancedPreset.installer.later';
+const host = window.parent && window.parent.SillyTavern ? window.parent : window;
+const ctx = () => host.SillyTavern.getContext();
+
+const locale = String((ctx().getCurrentLocale && ctx().getCurrentLocale()) || host.localStorage.getItem('language') || host.navigator.language || '').toLowerCase();
+const zh = locale.startsWith('zh');
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const list = '<ul style="text-align:start;word-break:break-all">' + MIRRORS.map((u) => '<li><code>' + esc(u) + '</code></li>').join('') + '</ul>';
+const T = zh ? {
+  title: 'Advanced Preset',
+  install: '<h3>\u9700\u8981 Advanced Preset \u63D2\u4EF6</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset \u63D2\u4EF6\u624D\u80FD\u4F7F\u7528\uFF0C\u5F53\u524D\u5C1A\u672A\u5B89\u88C5\u3002</p><p>\u662F\u5426\u73B0\u5728\u5B89\u88C5\uFF1F\u5C06\u4F9D\u6B21\u5C1D\u8BD5\u4EE5\u4E0B\u5730\u5740\uFF1A</p>' + list,
+  update: (v) => '<h3>\u9700\u8981\u66F4\u65B0 Advanced Preset</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset ' + esc(REQUIRED) + ' \u6216\u66F4\u65B0\u7248\u672C' + (v ? '\uFF08\u5F53\u524D\u4E3A ' + esc(v) + '\uFF09' : '') + '\u3002</p><p>\u662F\u5426\u73B0\u5728\u66F4\u65B0\uFF1F</p>',
+  enable: '<h3>Advanced Preset \u5DF2\u505C\u7528</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset \u63D2\u4EF6\uFF0C\u5B83\u5DF2\u5B89\u88C5\u4F46\u5904\u4E8E\u505C\u7528\u72B6\u6001\u3002</p><p>\u662F\u5426\u542F\u7528\u5E76\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\uFF1F</p>',
+  installOk: '\u5B89\u88C5', updateOk: '\u66F4\u65B0', enableOk: '\u542F\u7528\u5E76\u91CD\u65B0\u52A0\u8F7D', later: '\u7A0D\u540E',
+  trying: (u) => '\u6B63\u5728\u4ECE ' + u + ' \u5B89\u88C5 Advanced Preset\u2026\u2026',
+  updating: '\u6B63\u5728\u66F4\u65B0 Advanced Preset\u2026\u2026',
+  done: '<h3>Advanced Preset \u5DF2\u5C31\u7EEA</h3><p>\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u540E\u63D2\u4EF6\u5373\u4F1A\u751F\u6548\uFF0C\u5E76\u81EA\u52A8\u63A5\u7BA1\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u3002</p><p>\u662F\u5426\u73B0\u5728\u91CD\u65B0\u52A0\u8F7D\uFF1F</p>',
+  reloadOk: '\u91CD\u65B0\u52A0\u8F7D',
+  stillOld: (v) => '\u5DF2\u662F\u53EF\u83B7\u53D6\u7684\u6700\u65B0\u7248\u672C\uFF08' + esc(v) + '\uFF09\uFF0C\u4F46\u9884\u8BBE\u9700\u8981 ' + esc(REQUIRED) + ' \u6216\u66F4\u65B0\u7248\u672C\u3002\u8BF7\u7A0D\u540E\u518D\u8BD5\uFF0C\u6216\u624B\u52A8\u66F4\u65B0 Advanced Preset\u3002',
+  failed: '<h3>\u65E0\u6CD5\u5B89\u88C5 Advanced Preset</h3><p>\u6240\u6709\u5730\u5740\u90FD\u5B89\u88C5\u5931\u8D25\u3002\u8BF7\u68C0\u67E5\u7F51\u7EDC\u8FDE\u63A5\u540E\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u91CD\u8BD5\uFF0C\u6216\u5C1D\u8BD5\u624B\u52A8\u5B89\u88C5 Advanced Preset \u63D2\u4EF6\uFF1A</p><ol style="text-align:start"><li>\u6253\u5F00\u300C\u6269\u5C55\u300D\u9762\u677F\uFF08\u9876\u680F\u7684\u79EF\u6728\u56FE\u6807\uFF09\uFF0C\u70B9\u51FB\u300C\u5B89\u88C5\u6269\u5C55\u300D\uFF1B</li><li>\u7C98\u8D34\u4EE5\u4E0B\u4EFB\u4E00\u5730\u5740\u5E76\u5B89\u88C5\uFF1A' + list + '</li><li>\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u3002</li></ol>',
+} : {
+  title: 'Advanced Preset',
+  install: '<h3>Advanced Preset is required</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is not installed.</p><p>Install it now? These addresses are tried in turn:</p>' + list,
+  update: (v) => '<h3>Advanced Preset needs an update</h3><p>The preset "' + esc(PRESET) + '" needs Advanced Preset ' + esc(REQUIRED) + ' or newer' + (v ? ' (installed: ' + esc(v) + ')' : '') + '.</p><p>Update it now?</p>',
+  enable: '<h3>Advanced Preset is disabled</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is installed but disabled.</p><p>Enable it and reload the page?</p>',
+  installOk: 'Install', updateOk: 'Update', enableOk: 'Enable and reload', later: 'Later',
+  trying: (u) => 'Installing Advanced Preset from ' + u + '\u2026',
+  updating: 'Updating Advanced Preset\u2026',
+  done: '<h3>Advanced Preset is ready</h3><p>It starts once the page is reloaded and then sets up the preset "' + esc(PRESET) + '" by itself.</p><p>Reload now?</p>',
+  reloadOk: 'Reload',
+  stillOld: (v) => 'This is the newest version available (' + esc(v) + '), but the preset needs ' + esc(REQUIRED) + ' or newer. Try again later, or update Advanced Preset by hand.',
+  failed: '<h3>Could not install Advanced Preset</h3><p>Installing failed from every address. Check your network connection and reload the page to try again, or install the Advanced Preset extension by hand:</p><ol style="text-align:start"><li>Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".</li><li>Paste one of these addresses and install:' + list + '</li><li>Reload the page.</li></ol>',
+};
+
+const toast = (kind, message) => (host.toastr || window.toastr)[kind](message, T.title);
+const parse = (v) => String(v).split('-')[0].split('.').map((n) => parseInt(n, 10) || 0);
+const atLeast = (v, min) => {
+  const a = parse(v), b = parse(min);
+  for (let i = 0; i < 3; i++) if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
+  return true;
+};
+const sleep = (ms) => new Promise((r) => host.setTimeout(r, ms));
+async function confirm(html, ok) {
+  const c = ctx();
+  return (await c.callGenericPopup(html, c.POPUP_TYPE.CONFIRM, '', { okButton: ok, cancelButton: T.later })) === c.POPUP_RESULT.AFFIRMATIVE;
+}
+const showFailure = () => ctx().callGenericPopup(T.failed, ctx().POPUP_TYPE.TEXT);
+const post = (url, body) => host.fetch(url, { method: 'POST', headers: ctx().getRequestHeaders(), body: JSON.stringify(body) });
+async function offerReload() {
+  if (await confirm(T.done, T.reloadOk)) host.location.reload();
+}
+
+async function installFromMirrors() {
+  for (const url of MIRRORS) {
+    toast('info', T.trying(url));
+    try {
+      const r = await post('/api/extensions/install', { url, global: false });
+      // 409: the folder exists (installed meanwhile, e.g. by another tab).
+      if (r.ok || r.status === 409) return true;
+      console.warn('[Advanced Preset installer]', url, r.status, await r.text().catch(() => ''));
+    } catch (e) {
+      console.warn('[Advanced Preset installer]', url, e);
+    }
+  }
+  return false;
+}
+
+async function updateFolder() {
+  toast('info', T.updating);
+  for (const global of [false, true]) {
+    try {
+      const r = await post('/api/extensions/update', { extensionName: FOLDER, global });
+      if (r.ok) return true;
+    } catch (e) {
+      console.warn('[Advanced Preset installer]', e);
+    }
+  }
+  return false;
+}
+
+async function installedFolder() {
+  try {
+    const r = await host.fetch('/api/extensions/discover', { headers: ctx().getRequestHeaders() });
+    const all = r.ok ? await r.json() : [];
+    return Array.isArray(all) && all.some((e) => e && e.name === EXTENSION);
+  } catch {
+    return false;
+  }
+}
+
+async function main() {
+  // AP loads with the other extensions, before Tavern Helper runs scripts; wait a little anyway.
+  for (let i = 0; i < 20 && !host.AdvancedPreset; i++) await sleep(250);
+  const ap = host.AdvancedPreset;
+  if (ap && atLeast(ap.version, REQUIRED)) return;
+  if (host.sessionStorage.getItem(LATER_KEY) || host.__advancedPresetInstaller) return;
+  host.__advancedPresetInstaller = true;
+  const later = () => host.sessionStorage.setItem(LATER_KEY, '1');
+
+  if (ap) {
+    if (!(await confirm(T.update(ap.version), T.updateOk))) return later();
+    toast('info', T.updating);
+    try {
+      // Reloads the page by itself when the extension changed.
+      if ((await ap.update()) === 'current') toast('warning', T.stillOld(ap.version));
+    } catch (e) {
+      console.warn('[Advanced Preset installer]', e);
+      await showFailure();
+    }
+    return;
+  }
+
+  if (await installedFolder()) {
+    const disabled = ctx().extensionSettings && ctx().extensionSettings.disabledExtensions;
+    if (Array.isArray(disabled) && disabled.includes(EXTENSION)) {
+      if (!(await confirm(T.enable, T.enableOk))) return later();
+      disabled.splice(disabled.indexOf(EXTENSION), 1);
+      ctx().saveSettingsDebounced();
+      await sleep(2000);
+      host.location.reload();
+      return;
+    }
+    // Installed but not running (too old for this SillyTavern, or broken): update it.
+    if (!(await confirm(T.update(''), T.updateOk))) return later();
+    if (await updateFolder()) return offerReload();
+    await showFailure();
+    return;
+  }
+
+  if (!(await confirm(T.install, T.installOk))) return later();
+  if (await installFromMirrors()) return offerReload();
+  await showFailure();
+}
+
+main().catch((e) => console.error('[Advanced Preset installer]', e));
+`;
+}
+
 // ../protocol/src/user-modules.ts
 var USER_MODULE_PREFIX = "user-";
 var DEFAULT_KEYWORD_DEPTH = 3;
@@ -9128,12 +9359,6 @@ var QR_AUTO_EXECUTE = [
   "executeBeforeGeneration"
 ];
 var QR_TEXT_FIELDS = ["label", "title", "message"];
-
-// ../protocol/src/tavern-helper.ts
-var TAVERN_HELPER_SINCE = "1.10.0";
-function tavernHelperScriptCount(trees) {
-  return trees.reduce((n, t) => n + (t.type === "folder" ? t.scripts.length : 1), 0);
-}
 
 // src/io.ts
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
@@ -9949,6 +10174,21 @@ function compileTools(src, diag, text, file = "preset.yaml") {
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
 }
+function compileBuildOptions(src, diag) {
+  const out = { installer: true };
+  if (src === void 0 || src === null) return out;
+  const at = (path) => ({ file: MANIFEST_FILE, path: path ? `build.${path}` : "build" });
+  if (!isObj5(src)) {
+    diag.error("`build` must be a mapping", at(""));
+    return out;
+  }
+  for (const k of Object.keys(src)) if (k !== "installer") diag.warn(`unknown build key \`${k}\``, at(k));
+  if (src.installer !== void 0) {
+    if (typeof src.installer === "boolean") out.installer = src.installer;
+    else diag.error("`build.installer` must be true or false", at("installer"));
+  }
+  return out;
+}
 function compile(tree) {
   const diag = new Diagnostics();
   const map = { exprs: [], texts: [], templates: [], entries: /* @__PURE__ */ new Map(), modules: /* @__PURE__ */ new Map(), workflows: /* @__PURE__ */ new Map() };
@@ -10636,7 +10876,7 @@ function compile(tree) {
     locales
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map, manifestFiles: manifest.files };
+  return { preset, build: compileBuildOptions(raw.build, diag), diag, map, manifestFiles: manifest.files };
 }
 var isScalar2 = (v) => ["string", "number", "boolean"].includes(typeof v);
 function varUpdates(src, decls, diag, where, text) {
@@ -11321,10 +11561,11 @@ async function buildDir(root) {
   if (result.preset) validate(result.preset, result.map, result.diag);
   return result;
 }
-async function writeArtifact(preset, outDir) {
+async function writePresetFile(preset, outDir, o = {}) {
   await mkdir(outDir, { recursive: true });
   const file = join(outDir, `${preset.id}.apreset.json`);
-  await writeFile(file, JSON.stringify(preset, null, 2) + "\n");
+  const sampling = resolveConfiguration(preset, preset.defaultConfiguration, void 0).sampling;
+  await writeFile(file, JSON.stringify(presetFile(preset, { installer: o.installer, sampling }), null, 2) + "\n");
   return file;
 }
 
@@ -11470,13 +11711,13 @@ async function dev(o) {
   let state = { builtAt: 0, ok: false, errors: [], warnings: [] };
   const rebuild = async () => {
     const t0 = Date.now();
-    const { preset, diag } = await buildDir(o.root);
+    const { preset, build, diag } = await buildDir(o.root);
     const fmt = (d) => formatDiagnostic(d).replace(/\x1b\[\d+m/g, "");
     state = { builtAt: Date.now(), ok: diag.ok, errors: diag.errors.map(fmt), warnings: diag.warnings.map(fmt) };
     report(diag);
     if (preset && diag.ok) {
       artifact = preset;
-      await writeArtifact(preset, o.outDir);
+      await writePresetFile(preset, o.outDir, { installer: o.installer ?? build?.installer ?? true });
       console.log(`\u2713 ${preset.id} ${preset.version} #${preset.hash} (${Date.now() - t0} ms)`);
     } else console.log("\u2717 build failed; serving the last good artifact");
   };
@@ -11610,9 +11851,10 @@ var VERSION = true ? "1.10.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage
-  ap build   [dir] [--out dist] [--strict]   compile sources to dist/<id>.apreset.json
+  ap build   [dir] [--out dist] [--strict] [--installer | --no-installer]
+                                             compile sources to the preset file dist/<id>.apreset.json
   ap check   [dir] [--strict]                validate only
-  ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist]
+  ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist] [--installer | --no-installer]
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
@@ -11627,7 +11869,9 @@ Usage
   ap skills  install [dir] [--target .agents/skills]
                                              install / update the Agent Skills in a preset repo
 
---strict treats warnings as errors.`;
+--strict treats warnings as errors.
+--no-installer leaves the Tavern Helper installer script out of the preset file (default:
+preset.yaml#build.installer, else included).`;
 async function main(argv) {
   const [command, ...rest] = argv;
   const { values, positionals } = parseArgs({
@@ -11659,14 +11903,21 @@ async function main(argv) {
       id: { type: "string" },
       name: { type: "string" },
       author: { type: "string" },
-      target: { type: "string" }
+      target: { type: "string" },
+      installer: { type: "boolean" },
+      "no-installer": { type: "boolean" }
     }
   });
+  if (values.installer && values["no-installer"]) {
+    console.error("--installer and --no-installer exclude each other");
+    return 1;
+  }
+  const installerFlag = values.installer ? true : values["no-installer"] ? false : void 0;
   const dir = resolve(positionals[0] ?? ".");
   switch (command) {
     case "build":
     case "check": {
-      const { preset, diag, manifestFiles = [] } = await buildDir(dir);
+      const { preset, build, diag, manifestFiles = [] } = await buildDir(dir);
       report(diag);
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
@@ -11674,12 +11925,13 @@ async function main(argv) {
         console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ""}`);
         return 0;
       }
-      const file = await writeArtifact(preset, resolve(dir, values.out ?? "dist"));
-      console.log(`\u2713 ${file} #${preset.hash}`);
+      const installer = installerFlag ?? build?.installer ?? true;
+      const file = await writePresetFile(preset, resolve(dir, values.out ?? "dist"), { installer });
+      console.log(`\u2713 ${file} #${preset.hash}${installer ? " (with installer)" : ""}`);
       return 0;
     }
     case "dev":
-      await dev({ root: dir, outDir: resolve(dir, values.out ?? "dist"), port: Number(values.port ?? 4747), host: values.host ?? "127.0.0.1" });
+      await dev({ root: dir, outDir: resolve(dir, values.out ?? "dist"), port: Number(values.port ?? 4747), host: values.host ?? "127.0.0.1", installer: installerFlag });
       return new Promise(() => {
       });
     case "preview": {

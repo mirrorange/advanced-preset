@@ -8,9 +8,10 @@
  *   keep their `data` (Tavern Helper script variables) over the preset's defaults, matched by id;
  * - scripts and folders the user added (ids AP did not write last time) are kept, also inside the
  *   preset's folders; the ones the preset dropped are removed;
- * - preset variables and any other Tavern Helper fields are kept as they are.
+ * - preset variables and any other Tavern Helper fields are kept as they are;
+ * - the installer of a preset file (I-170) is dropped: it is only for pages without AP.
  */
-import { cloneData, tavernHelperIds, type TavernHelperScriptTree } from '@advanced-preset/protocol';
+import { cloneData, INSTALLER_SCRIPT_ID, tavernHelperIds, type TavernHelperScriptTree } from '@advanced-preset/protocol';
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
@@ -24,7 +25,9 @@ export interface CarrierTavernHelper {
 
 export function carrierTavernHelper(scripts: readonly TavernHelperScriptTree[] | undefined, current: unknown, ownedBefore: readonly string[] = []): CarrierTavernHelper {
   const cur = isObj(current) ? current : {};
-  const curTrees = (Array.isArray(cur.scripts) ? cur.scripts : []).filter(isObj);
+  const notInstaller = (x: Obj) => x.id !== INSTALLER_SCRIPT_ID;
+  const curTrees = (Array.isArray(cur.scripts) ? cur.scripts : []).filter(isObj).filter(notInstaller)
+    .map((t) => (Array.isArray(t.scripts) ? { ...t, scripts: t.scripts.filter((s) => !isObj(s) || notInstaller(s)) } : t));
   const fresh = cloneData(scripts ?? []);
   const owned = tavernHelperIds(fresh);
   const ours = new Set([...owned, ...ownedBefore]);
