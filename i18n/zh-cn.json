@@ -1,6 +1,7 @@
 {
   "app.name": "Advanced Preset",
   "carrier.reset": "预设已更新，「{name}」中的手动修改已被重置。",
+  "quickReplies.conflict": "已存在名为「{name}」的快速回复集且不是由 Advanced Preset 创建的，因此未安装预设中的同名快速回复集。将你的快速回复集改名后即可使用。",
   "error.toolsUnsupported": "当前 API 源或设置不支持工具调用。请切换传输模式或选择其他推荐配置。",
   "error.emptyTurn": "模型没有返回正文。",
   "update.reloading": "Advanced Preset 已更新，正在重新加载…",

@@ -1,6 +1,7 @@
 {
   "app.name": "Advanced Preset",
   "carrier.reset": "The preset was updated; manual edits in “{name}” were reset.",
+  "quickReplies.conflict": "A Quick Reply set named “{name}” already exists and was not made by Advanced Preset, so the preset’s set of that name is not installed. Rename your set to use it.",
   "error.toolsUnsupported": "The current API source or settings do not support tool calling. Switch the transport or pick another recommended configuration.",
   "error.emptyTurn": "The model returned no story content.",
   "update.reloading": "Advanced Preset was updated. Reloading…",
