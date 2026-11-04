@@ -11391,7 +11391,7 @@ function ly(e) {
 }
 async function uy() {
 	let e = await cy();
-	e && e !== "f0575ed2f916b718" && sessionStorage.getItem(sy) !== e && ly(e);
+	e && e !== "a6d0a017cff4391d" && sessionStorage.getItem(sy) !== e && ly(e);
 }
 async function dy() {
 	await uy();
@@ -11412,7 +11412,7 @@ async function hy() {
 	let e = o().replace(/^third-party\//, ""), t = await gy(e, !1);
 	if (t.status === 404 && (t = await gy(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await cy();
-	return r && r !== "f0575ed2f916b718" ? (ly(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "a6d0a017cff4391d" ? (ly(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var gy = (t, n) => v("/api/extensions/update", {
 	method: "POST",
@@ -18813,7 +18813,7 @@ var IO = ["aria-label"], LO = { class: "um-picker-head" }, RO = { class: "small 
 				"icon",
 				"help"
 			]),
-			H("div", eM, "Advanced Preset " + j(P("1.10.0")) + " · " + j(P("f0575ed2f916b718")), 1)
+			H("div", eM, "Advanced Preset " + j(P("1.10.0")) + " · " + j(P("a6d0a017cff4391d")), 1)
 		], 64));
 	}
 }), nM = {
@@ -19140,7 +19140,7 @@ function VM() {
 //#region src/index.ts
 var HM = {
 	version: "1.10.0",
-	buildId: "f0575ed2f916b718",
+	buildId: "a6d0a017cff4391d",
 	nextGeneration: (e) => Om(e),
 	listPresets: () => Nf().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19195,7 +19195,7 @@ async function GM() {
 	};
 	t.on(n.APP_READY, () => void a()), VM(), bh("init", {
 		version: "1.10.0",
-		build: "f0575ed2f916b718",
+		build: "a6d0a017cff4391d",
 		enabled: q().enabled
 	});
 }
