@@ -2,6 +2,7 @@
  * CarrierManager (§8, D7): one ST Chat Completion preset per AP preset (`AP · <name>`).
  * Selecting a Carrier activates its AP preset; manual edits stay in the Carrier until the AP preset
  * is reinstalled or updated. Sampling is synced both ways with the configuration layer (§7.4).
+ * The preset's regex scripts live in the Carrier (`extensions.regex_scripts`), as ST's preset-scoped scripts.
  */
 import { cloneData } from '@advanced-preset/protocol';
 import type { APreset, Configuration } from '@advanced-preset/protocol';
@@ -50,7 +51,11 @@ export function buildCarrier(preset: APreset, config: Configuration): Record<str
     ...cloneData(config.sampling),
     prompts: cloneData(preset.carrier.prompts),
     prompt_order: [100000, 100001].map((character_id) => ({ character_id, order: cloneData(order) })),
-    extensions: { [CARRIER_EXT]: { presetId: preset.id, version: preset.version, hash: preset.hash } satisfies CarrierMeta },
+    extensions: {
+      [CARRIER_EXT]: { presetId: preset.id, version: preset.version, hash: preset.hash } satisfies CarrierMeta,
+      // Preset-scoped regex scripts: ST runs them while the Carrier is selected (once the user allows them).
+      ...(preset.regexScripts?.length ? { regex_scripts: cloneData(preset.regexScripts) } : {}),
+    },
   };
 }
 
