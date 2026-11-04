@@ -4,6 +4,7 @@
  * macros, and shape the message list for the transport (prefill merge).
  */
 import {
+  INSTALL_NOTICE_MARK,
   MAIN_STORYLINE_VARS, freezeMode, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type StorylineVars, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, toast, type ChatMessage, type STMessage } from '@/st/host';
@@ -352,8 +353,18 @@ function reportTemplateWarnings(found: string[], into: string[]): void {
   }
 }
 
+/**
+ * The install notice of a preset file (I-170) asks the model to help install AP: with AP running it
+ * is never sent, even while such a file is selected before AP has taken it over.
+ */
+export function dropInstallNotice(chat: ChatMessage[]): void {
+  const notice = (m: ChatMessage) => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content ?? '')).includes(INSTALL_NOTICE_MARK);
+  for (let i = chat.length - 1; i >= 0; i--) if (notice(chat[i]!)) chat.splice(i, 1);
+}
+
 export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolean }): Promise<void> {
   const { chat, dryRun } = event;
+  dropInstallNotice(chat);
   if (!settings().enabled || !chat.some((m) => typeof m.content === 'string' && m.content.includes('⟦ap:region:'))) {
     stripMarkers(chat);
     stripInputMarks(chat);

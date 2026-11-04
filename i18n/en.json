@@ -413,5 +413,8 @@
   "storylines.fallback.if": "If-line",
   "storylines.fallback.main": "Previous-main",
   "storylines.switchFailed": "Could not make “{name}” the main storyline; the reply stays on that storyline.",
-  "storylines.unnamed": "Unnamed"
+  "storylines.unnamed": "Unnamed",
+  "presetFile.installer": "Include the Advanced Preset installer",
+  "presetFile.installerHint": "The file can be imported as an ordinary SillyTavern preset. Without Advanced Preset, the installer (a Tavern Helper script) offers to install it; the preset's notice also asks the model to explain how.",
+  "presetFile.adopted": "Set up from the imported preset “{file}”: now “{carrier}”."
 }

@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cloneData, presetTemplates, type APreset, type UserModuleSource } from '@advanced-preset/protocol';
+import { cloneData, INSTALLER_SCRIPT_ID, presetTemplates, unwrapPresetFile, type APreset, type UserModuleSource } from '@advanced-preset/protocol';
 import { planBundledSync, presetWithUserModules } from '@/store/bundled-modules';
 import { presetState } from '@/store/config';
 import { userModules } from '@/store/user-modules';
 import { petals, withoutTemplates } from './helpers';
 
-const downloads: { file: string; data: APreset }[] = [];
+const downloads: { file: string; data: APreset; raw: Record<string, any> }[] = [];
 vi.mock('@/ui/download', () => ({
-  downloadJson: (file: string, data: APreset) => downloads.push({ file, data: cloneData(data) }),
+  downloadJson: (file: string, raw: Record<string, any>) => downloads.push({ file, data: cloneData(unwrapPresetFile(raw)) as APreset, raw: cloneData(raw) }),
   fileSlug: (s: string) => s,
 }));
 
@@ -29,11 +29,13 @@ class El {
 }
 const items = (root: El): { id: string; box: El; text: string }[] =>
   root.children.flatMap((c) => (c.dataset.apItem ? [{ id: c.dataset.apItem, box: c.children[0]!, text: c.innerText }] : items(c)));
+const option = (root: El, id: string): El | undefined =>
+  root.children.map((c) => (c.dataset.apOption === id ? c.children[0] : option(c, id))).find(Boolean);
 
 let lang = 'en';
 /** Popup answer: called with the item list, may toggle boxes; returns true for OK. */
-let answer: (list: ReturnType<typeof items>) => boolean = () => true;
-const popup = vi.fn(async (root: El) => (answer(items(root)) ? 1 : 0));
+let answer: (list: ReturnType<typeof items>, root: El) => boolean = () => true;
+const popup = vi.fn(async (root: El) => (answer(items(root), root) ? 1 : 0));
 
 beforeEach(() => {
   lang = 'en';
@@ -207,9 +209,11 @@ describe('exporting a preset with user modules', () => {
     answer = (xs) => { seen = xs.map((x) => x.id); xs.find((x) => x.id === 'quiet')!.box.checked = false; return true; };
     expect(await exportPreset(p)).toBe(true);
     expect(seen).toEqual(['house-style', 'quiet', 'mine']);
-    const [{ file, data }] = downloads;
+    const [{ file, data, raw }] = downloads;
     expect(file).toBe(`${p.id}.apreset.json`);
     expect(data.hash).toBe(p.hash);
+    // A preset file, with the installer by default.
+    expect(raw.extensions.tavern_helper.scripts[0].id).toBe(INSTALLER_SCRIPT_ID);
     // Unchanged bundled module: its source with translations, in the user's state.
     expect(data.userModules[0]).toEqual({ ...style, enabled: false });
     expect(data.userModules[1]).toEqual({ id: 'mine', name: 'Mine', enabled: false, entries: [{ point: 'after-role', text: 'My text.' }], vars: [], trigger: { match: 'all', rules: [] } });
@@ -222,16 +226,21 @@ describe('exporting a preset with user modules', () => {
     expect(presetWithUserModules(p, [edited], 'en').userModules).toEqual([{ id: 'house-style', name: 'House style', entries: [{ point: 'writing-style', text: 'Edited.' }], vars: [], trigger: style.trigger }]);
   });
 
-  it('exports without asking when there are no user modules, and not at all on cancel', async () => {
+  it('without user modules only offers the installer; nothing is exported on cancel', async () => {
     const p = preset([]);
+    let seen: string[] = ['?'];
+    answer = (xs, root) => { seen = xs.map((x) => x.id); option(root, 'installer')!.checked = false; return true; };
     expect(await exportPreset(p)).toBe(true);
-    expect(popup).not.toHaveBeenCalled();
+    expect(seen).toEqual([]);
     expect(downloads[0]!.data.userModules).toEqual([]);
+    expect(downloads[0]!.raw.extensions.tavern_helper).toBeUndefined();
+    answer = () => true;
     const q = preset([style]);
     await syncBundledModules(q);
     answer = () => false;
     expect(await exportPreset(q)).toBe(false);
     expect(downloads).toHaveLength(1);
+    expect(popup).toHaveBeenCalledTimes(2);
   });
 
   it('a re-imported export links to the modules it came from', async () => {
