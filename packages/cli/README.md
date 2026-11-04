@@ -28,7 +28,7 @@ npx ap check --strict
 
 | 命令 | 作用 |
 | --- | --- |
-| `ap build [dir] [--out dist] [--strict]` | 编译源码为 `dist/<id>.apreset.json` |
+| `ap build [dir] [--out dist] [--strict] [--no-installer]` | 编译源码为预设文件 `dist/<id>.apreset.json`（标准 ST 预设，默认附带酒馆助手安装脚本） |
 | `ap check [dir] [--strict]` | 只校验，不输出产物；`--strict` 把警告也视为错误 |
 | `ap dev [dir] [--port 4747] [--host 127.0.0.1]` | 监视源码、自动重建，并为 AP 调试页提供产物 |
 | `ap preview [dir] [--transport t] [--workflow w] [--config c] …` | 以与运行期相同的组装器输出请求消息 |

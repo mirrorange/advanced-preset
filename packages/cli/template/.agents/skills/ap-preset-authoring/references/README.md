@@ -27,6 +27,7 @@
 | [assembly.md](assembly.md) | 一次生成的完整组装流程 |
 | [cli.md](cli.md) | `ap` 命令行 |
 | [artifact-and-runtime.md](artifact-and-runtime.md) | 产物 JSON、安装与更新、聊天里保存的数据、全局 API |
+| [preset-file.md](preset-file.md) | 预设文件（ST 预设形态的 `.apreset.json`）、安装提示与酒馆助手安装脚本 |
 
 ## 源码结构
 
@@ -50,12 +51,12 @@ ui/**                    自定义结构组件的模板 / 模块 / 样式（可�
 ## 构建流程
 
 ```
-源码树 ──compile──▶ APreset 对象 ──validate──▶ 诊断 ──write──▶ dist/<id>.apreset.json
+源码树 ──compile──▶ APreset 对象 ──validate──▶ 诊断 ──write──▶ dist/<id>.apreset.json（预设文件）
 ```
 
 1. **compile**（`packages/cli/src/compile.ts`）：解析 YAML 与 Markdown，填入默认值，把条件表达式编译成 AST，排序模组与条目，生成 Carrier，计算哈希。结构性错误（缺少字段、非法值、重复 id）在这里报告。
 2. **validate**（`packages/cli/src/validate.ts`）：交叉引用检查（未知变量、未知宏、未知区域……）与风格警告。
-3. 产物写成两空格缩进的 JSON。`hash` 是去掉 `hash` 字段后、键排序的规范化 JSON 的 SHA-256 前 16 位十六进制。相同源码总是得到相同产物。
+3. 产物包进[预设文件](preset-file.md)（一个携带产物的 ST 预设），写成两空格缩进的 JSON。`hash` 是去掉 `hash` 字段后、键排序的规范化 JSON 的 SHA-256 前 16 位十六进制。相同源码总是得到相同产物。
 
 `ap build` / `ap check` 在有错误时返回非零退出码；加 `--strict` 时警告也算失败（见 [cli.md](cli.md)）。
 
