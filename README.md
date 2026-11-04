@@ -132,6 +132,10 @@ pnpm typecheck    # vue-tsc
 
 预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.10.0` 这类范围，也不会移动 `latest`。
 
+### 镜像
+
+`main` 与 `dev` 由 [`mirror.yml`](.github/workflows/mirror.yml) 推送到 [GitLab](https://gitlab.com/mirrorange/advanced-preset) 与 [Codeberg](https://codeberg.org/mirrorange/advanced-preset)：每次推送这两个分支、以及 `dev` 上的 `release` 运行结束后（以带上自动提交的 `build: rebuild dist`）各推送一次，也可手动运行。需要仓库 Secrets `GITLAB_TOKEN`（GitLab 项目访问令牌，角色 Maintainer，`write_repository`）与 `CODEBERG_TOKEN`（Codeberg 访问令牌，`write:repository`）。镜像只接受快进推送，请勿直接向镜像提交。
+
 ## 📄 许可
 
 扩展、协议与 CLI 以 [MIT](LICENSE) 许可发布。`packages/cli/template/`（预设模板）与 `dist/presets/` 中内置的花瓣预设以 [CC0 1.0](packages/cli/template/LICENSE) 发布。
