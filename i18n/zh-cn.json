@@ -426,6 +426,6 @@
   "storylines.switchFailed": "未能将「{name}」设为主线，这条回复保留在该故事线上。",
   "storylines.unnamed": "未命名",
   "presetFile.installer": "附带 Advanced Preset 安装脚本",
-  "presetFile.installerHint": "导出的文件可作为普通的酒馆预设导入。未安装 Advanced Preset 时，安装脚本（酒馆助手脚本）会提示安装插件；预设中的提示词也会让 AI 说明安装方法。",
+  "presetFile.installerHint": "导出的文件可作为普通的酒馆预设导入。未安装 Advanced Preset 时，安装脚本会提示安装插件。",
   "presetFile.adopted": "已根据导入的预设「{file}」完成设置，现为「{carrier}」。"
 }
