@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS,
+  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -195,6 +195,8 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     diag.warn(`regex scripts need Advanced Preset ${REGEX_SCRIPTS_SINCE}: set minAdvancedPreset to ${REGEX_SCRIPTS_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: 'minAdvancedPreset' });
   if (p.quickReplySets?.length && below(QUICK_REPLIES_SINCE))
     diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: 'minAdvancedPreset' });
+  if (p.tavernHelperScripts?.length && below(TAVERN_HELPER_SINCE))
+    diag.warn(`Tavern Helper scripts need Advanced Preset ${TAVERN_HELPER_SINCE}: set minAdvancedPreset to ${TAVERN_HELPER_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: 'minAdvancedPreset' });
 
   // ── regions / anchors ───────────────────────────────────────────────────────
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} → unknown region \`${rid}\``, { file: M, path: 'anchors' });

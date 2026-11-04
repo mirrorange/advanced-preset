@@ -4,6 +4,7 @@
  *
  *   regex-scripts/<name>.yaml|yml|json   regex scripts: one script, or a list of scripts
  *   quick-replies/<id>.yaml|yml|json     Quick Reply sets: one set per file
+ *   tavern-helper-scripts/<name>.yaml|yml|json  Tavern Helper scripts: a script, a folder, or a list
  *
  * Regex scripts run in the order of their files (sorted by path), then of their lists. Each gets a
  * stable UUID derived from the preset id and its place. Quick Reply texts may use
@@ -14,6 +15,7 @@ import { parse as parseYaml } from 'yaml';
 import {
   listMacros, regexFromString, QR_AUTO_EXECUTE, QR_TEXT_FIELDS, REGEX_PLACEMENTS, REGEX_SUBSTITUTE,
   type QuickReplyContextItem, type QuickReplyDecl, type QuickReplySetDecl, type RegexScript,
+  type TavernHelperButton, type TavernHelperScript, type TavernHelperScriptTree,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
 
@@ -248,4 +250,108 @@ export function compileQuickReplySets(tree: Map<string, string>, presetName: str
     else if (!byName.has(c.set)) diag.warn(`context menu set \`${c.set}\` is not one of the preset's sets (it must exist in the user's ST)`, { file: fileOf.get(s.id), path: `qrList[${i}].contextList` });
   }
   return sets;
+}
+
+// ── Tavern Helper scripts ─────────────────────────────────────────────────────
+
+export const TAVERN_HELPER_DIR = 'tavern-helper-scripts';
+/** Script definitions: the files directly in the directory. Other files there may hold code. */
+export const TAVERN_HELPER_FILE_RE = /^tavern-helper-scripts\/([^/]+)\.(?:ya?ml|json)$/;
+
+/** Tavern Helper fields (`id` of an export is accepted and replaced). */
+const TH_SCRIPT_FIELDS = ['type', 'enabled', 'name', 'id', 'content', 'info', 'button', 'data', 'export_with'] as const;
+const TH_FOLDER_FIELDS = ['type', 'enabled', 'name', 'id', 'icon', 'color', 'scripts'] as const;
+
+function tavernHelperScript(src: Obj, seed: string, fallbackName: string, tree: Map<string, string>, file: string, prefix: string, diag: Diagnostics): TavernHelperScript | undefined {
+  const where = (key?: string): Where => ({ file, ...(prefix || key ? { path: [prefix, key].filter(Boolean).join('.') } : {}) });
+  warnUnknown(src, TH_SCRIPT_FIELDS, diag, where, 'Tavern Helper script');
+  const r = reader(src, diag, where);
+  let content = r.text('content');
+  const path = /^\.\/(\S+)$/.exec(content.trim())?.[1];
+  if (path) {
+    if (!path.startsWith(`${TAVERN_HELPER_DIR}/`)) { diag.error(`\`content\`: script files live under ${TAVERN_HELPER_DIR}/ (got \`${content.trim()}\`)`, where('content')); return undefined; }
+    const got = tree.get(path);
+    if (got === undefined) { diag.error(`\`content\`: file \`${path}\` not found`, where('content')); return undefined; }
+    content = got;
+  }
+  if (!content.trim()) { diag.error('`content` (the script code, or a ./tavern-helper-scripts/… file) is required', where('content')); return undefined; }
+
+  const button = src.button;
+  let buttonEnabled = true;
+  const buttons: TavernHelperButton[] = [];
+  if (isObj(button)) {
+    buttonEnabled = reader(button, diag, (k) => where(`button.${k}`)).bool('enabled', true);
+    const list = button.buttons;
+    if (list !== undefined && list !== null && !Array.isArray(list)) diag.error('`button.buttons` must be a list', where('button.buttons'));
+    for (const [i, b] of (Array.isArray(list) ? list : []).entries()) {
+      if (typeof b === 'string' && b) buttons.push({ name: b, visible: true });
+      else if (isObj(b) && typeof b.name === 'string' && b.name) buttons.push({ name: b.name, visible: b.visible !== false });
+      else diag.error('a button is `<name>` or `{ name, visible }`', where(`button.buttons[${i}]`));
+    }
+  } else if (button !== undefined && button !== null) diag.error('`button` must be a mapping (`enabled`, `buttons`)', where('button'));
+
+  const data = src.data;
+  if (data !== undefined && data !== null && !isObj(data)) diag.error('`data` must be a mapping', where('data'));
+  const exp = isObj(src.export_with) ? reader(src.export_with, diag, (k) => where(`export_with.${k}`)) : undefined;
+  return {
+    type: 'script',
+    enabled: r.bool('enabled', true),
+    name: r.text('name', fallbackName) || fallbackName,
+    id: stableUuid(seed),
+    content,
+    info: r.text('info'),
+    button: { enabled: buttonEnabled, buttons },
+    data: isObj(data) ? structuredClone(data) : {},
+    export_with: { data: exp?.bool('data', true) ?? true, button: exp?.bool('button', true) ?? true },
+  };
+}
+
+function tavernHelperTree(src: unknown, seed: string, fallbackName: string, tree: Map<string, string>, file: string, prefix: string, diag: Diagnostics): TavernHelperScriptTree | undefined {
+  const where = (key?: string): Where => ({ file, ...(prefix || key ? { path: [prefix, key].filter(Boolean).join('.') } : {}) });
+  if (!isObj(src)) { diag.error('a Tavern Helper script (or folder) must be a mapping', where()); return undefined; }
+  const type = src.type ?? (Array.isArray(src.scripts) ? 'folder' : 'script');
+  if (type === 'script') return tavernHelperScript(src, seed, fallbackName, tree, file, prefix, diag);
+  if (type !== 'folder') { diag.error('`type` must be script or folder', where('type')); return undefined; }
+  warnUnknown(src, TH_FOLDER_FIELDS, diag, where, 'Tavern Helper folder');
+  const r = reader(src, diag, where);
+  if (!Array.isArray(src.scripts)) diag.error('`scripts` (the scripts of the folder) must be a list', where('scripts'));
+  const scripts: TavernHelperScript[] = [];
+  for (const [i, s] of (Array.isArray(src.scripts) ? src.scripts : []).entries()) {
+    const at = [prefix, `scripts[${i}]`].filter(Boolean).join('.');
+    if (isObj(s) && (s.type === 'folder' || Array.isArray(s.scripts))) { diag.error('folders cannot contain folders', { file, path: at }); continue; }
+    if (!isObj(s)) { diag.error('a Tavern Helper script must be a mapping', { file, path: at }); continue; }
+    const x = tavernHelperScript(s, `${seed}\0${i}`, `${fallbackName} ${i + 1}`, tree, file, at, diag);
+    if (x) scripts.push(x);
+  }
+  const color = r.text('color').trim();
+  return {
+    type: 'folder',
+    enabled: r.bool('enabled', true),
+    name: r.text('name', fallbackName) || fallbackName,
+    id: stableUuid(seed),
+    icon: r.text('icon', 'fa-solid fa-folder').trim() || 'fa-solid fa-folder',
+    ...(color ? { color } : {}),
+    scripts,
+  };
+}
+
+/**
+ * Tavern Helper scripts: each definition file is a script, a folder (`type: folder`, or a `scripts`
+ * list), or a list of them, in Tavern Helper's own fields (its exports can be dropped in). `content`
+ * may point at a file under the directory (`./tavern-helper-scripts/main.js`). Ordered by file path.
+ */
+export function compileTavernHelperScripts(tree: Map<string, string>, presetId: string, diag: Diagnostics): TavernHelperScriptTree[] {
+  const out: TavernHelperScriptTree[] = [];
+  for (const { file, id, data } of files(tree, TAVERN_HELPER_FILE_RE, diag)) {
+    const seed = `${presetId}\0${file}`;
+    if (Array.isArray(data)) data.forEach((s, i) => {
+      const x = tavernHelperTree(s, `${seed}\0${i}`, `${id} ${i + 1}`, tree, file, `[${i}]`, diag);
+      if (x) out.push(x);
+    });
+    else {
+      const x = tavernHelperTree(data, seed, id, tree, file, '', diag);
+      if (x) out.push(x);
+    }
+  }
+  return out;
 }

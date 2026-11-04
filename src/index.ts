@@ -96,13 +96,15 @@ async function init(): Promise<void> {
   eventSource.on(E.OAI_PRESET_CHANGED_AFTER!, pull);
 
   const ready = async () => {
+    // The dev artifact first: syncing from the installed copy before it would rebuild the dev
+    // preset's Carrier twice on every load (dropping what only the dev build has, such as new scripts).
+    await Promise.race([startDevSource(), new Promise((r) => setTimeout(r, 3000))]);
     await syncCarriers();
     // Bundled user modules may ask which copy to keep: only once ST's UI is up, without holding up the rest.
     void (async () => { for (const { preset } of listPresets()) await syncBundledModules(preset); })();
     syncGlobalRefs({ reload: true });
     // The Quick Reply extension has loaded its sets by now.
     installQuickReplies();
-    startDevSource();
     void checkStaleBundle();
   };
   // APP_READY is sticky in ST's emitter (late listeners run immediately).

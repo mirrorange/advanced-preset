@@ -1,6 +1,8 @@
 {
   "app.name": "Advanced Preset",
   "carrier.reset": "The preset was updated; manual edits in “{name}” were reset.",
+  "carrier.tavernHelper.reload": "Tavern Helper scripts of “{name}” were updated. Tavern Helper loads them after the page is reloaded; until then it keeps the previous scripts.",
+  "carrier.tavernHelper.reloadNow": "Reload now",
   "quickReplies.conflict": "A Quick Reply set named “{name}” already exists and was not made by Advanced Preset, so the preset’s set of that name is not installed. Rename your set to use it.",
   "error.toolsUnsupported": "The current API source or settings do not support tool calling. Switch the transport or pick another recommended configuration.",
   "error.emptyTurn": "The model returned no story content.",
@@ -8,6 +10,7 @@
   "update.none": "Already up to date.",
   "update.failed": "Update failed: {error}",
   "common.add": "Add",
+  "common.later": "Later",
   "common.cancel": "Cancel",
   "common.clear": "Clear",
   "common.close": "Close",

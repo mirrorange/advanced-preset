@@ -9129,6 +9129,12 @@ var QR_AUTO_EXECUTE = [
 ];
 var QR_TEXT_FIELDS = ["label", "title", "message"];
 
+// ../protocol/src/tavern-helper.ts
+var TAVERN_HELPER_SINCE = "1.10.0";
+function tavernHelperScriptCount(trees) {
+  return trees.reduce((n, t) => n + (t.type === "folder" ? t.scripts.length : 1), 0);
+}
+
 // src/io.ts
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
@@ -9724,6 +9730,115 @@ function compileQuickReplySets(tree, presetName, actors, diag) {
     else if (!byName.has(c.set)) diag.warn(`context menu set \`${c.set}\` is not one of the preset's sets (it must exist in the user's ST)`, { file: fileOf.get(s.id), path: `qrList[${i}].contextList` });
   }
   return sets;
+}
+var TAVERN_HELPER_DIR = "tavern-helper-scripts";
+var TAVERN_HELPER_FILE_RE = /^tavern-helper-scripts\/([^/]+)\.(?:ya?ml|json)$/;
+var TH_SCRIPT_FIELDS = ["type", "enabled", "name", "id", "content", "info", "button", "data", "export_with"];
+var TH_FOLDER_FIELDS = ["type", "enabled", "name", "id", "icon", "color", "scripts"];
+function tavernHelperScript(src, seed, fallbackName, tree, file, prefix, diag) {
+  const where = (key) => ({ file, ...prefix || key ? { path: [prefix, key].filter(Boolean).join(".") } : {} });
+  warnUnknown(src, TH_SCRIPT_FIELDS, diag, where, "Tavern Helper script");
+  const r = reader(src, diag, where);
+  let content = r.text("content");
+  const path = /^\.\/(\S+)$/.exec(content.trim())?.[1];
+  if (path) {
+    if (!path.startsWith(`${TAVERN_HELPER_DIR}/`)) {
+      diag.error(`\`content\`: script files live under ${TAVERN_HELPER_DIR}/ (got \`${content.trim()}\`)`, where("content"));
+      return void 0;
+    }
+    const got = tree.get(path);
+    if (got === void 0) {
+      diag.error(`\`content\`: file \`${path}\` not found`, where("content"));
+      return void 0;
+    }
+    content = got;
+  }
+  if (!content.trim()) {
+    diag.error("`content` (the script code, or a ./tavern-helper-scripts/\u2026 file) is required", where("content"));
+    return void 0;
+  }
+  const button = src.button;
+  let buttonEnabled = true;
+  const buttons = [];
+  if (isObj4(button)) {
+    buttonEnabled = reader(button, diag, (k) => where(`button.${k}`)).bool("enabled", true);
+    const list = button.buttons;
+    if (list !== void 0 && list !== null && !Array.isArray(list)) diag.error("`button.buttons` must be a list", where("button.buttons"));
+    for (const [i, b] of (Array.isArray(list) ? list : []).entries()) {
+      if (typeof b === "string" && b) buttons.push({ name: b, visible: true });
+      else if (isObj4(b) && typeof b.name === "string" && b.name) buttons.push({ name: b.name, visible: b.visible !== false });
+      else diag.error("a button is `<name>` or `{ name, visible }`", where(`button.buttons[${i}]`));
+    }
+  } else if (button !== void 0 && button !== null) diag.error("`button` must be a mapping (`enabled`, `buttons`)", where("button"));
+  const data = src.data;
+  if (data !== void 0 && data !== null && !isObj4(data)) diag.error("`data` must be a mapping", where("data"));
+  const exp = isObj4(src.export_with) ? reader(src.export_with, diag, (k) => where(`export_with.${k}`)) : void 0;
+  return {
+    type: "script",
+    enabled: r.bool("enabled", true),
+    name: r.text("name", fallbackName) || fallbackName,
+    id: stableUuid(seed),
+    content,
+    info: r.text("info"),
+    button: { enabled: buttonEnabled, buttons },
+    data: isObj4(data) ? structuredClone(data) : {},
+    export_with: { data: exp?.bool("data", true) ?? true, button: exp?.bool("button", true) ?? true }
+  };
+}
+function tavernHelperTree(src, seed, fallbackName, tree, file, prefix, diag) {
+  const where = (key) => ({ file, ...prefix || key ? { path: [prefix, key].filter(Boolean).join(".") } : {} });
+  if (!isObj4(src)) {
+    diag.error("a Tavern Helper script (or folder) must be a mapping", where());
+    return void 0;
+  }
+  const type = src.type ?? (Array.isArray(src.scripts) ? "folder" : "script");
+  if (type === "script") return tavernHelperScript(src, seed, fallbackName, tree, file, prefix, diag);
+  if (type !== "folder") {
+    diag.error("`type` must be script or folder", where("type"));
+    return void 0;
+  }
+  warnUnknown(src, TH_FOLDER_FIELDS, diag, where, "Tavern Helper folder");
+  const r = reader(src, diag, where);
+  if (!Array.isArray(src.scripts)) diag.error("`scripts` (the scripts of the folder) must be a list", where("scripts"));
+  const scripts = [];
+  for (const [i, s] of (Array.isArray(src.scripts) ? src.scripts : []).entries()) {
+    const at = [prefix, `scripts[${i}]`].filter(Boolean).join(".");
+    if (isObj4(s) && (s.type === "folder" || Array.isArray(s.scripts))) {
+      diag.error("folders cannot contain folders", { file, path: at });
+      continue;
+    }
+    if (!isObj4(s)) {
+      diag.error("a Tavern Helper script must be a mapping", { file, path: at });
+      continue;
+    }
+    const x = tavernHelperScript(s, `${seed}\0${i}`, `${fallbackName} ${i + 1}`, tree, file, at, diag);
+    if (x) scripts.push(x);
+  }
+  const color2 = r.text("color").trim();
+  return {
+    type: "folder",
+    enabled: r.bool("enabled", true),
+    name: r.text("name", fallbackName) || fallbackName,
+    id: stableUuid(seed),
+    icon: r.text("icon", "fa-solid fa-folder").trim() || "fa-solid fa-folder",
+    ...color2 ? { color: color2 } : {},
+    scripts
+  };
+}
+function compileTavernHelperScripts(tree, presetId, diag) {
+  const out = [];
+  for (const { file, id, data } of files(tree, TAVERN_HELPER_FILE_RE, diag)) {
+    const seed = `${presetId}\0${file}`;
+    if (Array.isArray(data)) data.forEach((s, i) => {
+      const x = tavernHelperTree(s, `${seed}\0${i}`, `${id} ${i + 1}`, tree, file, `[${i}]`, diag);
+      if (x) out.push(x);
+    });
+    else {
+      const x = tavernHelperTree(data, seed, id, tree, file, "", diag);
+      if (x) out.push(x);
+    }
+  }
+  return out;
 }
 
 // src/compile.ts
@@ -10351,6 +10466,7 @@ function compile(tree) {
   }
   const regexScripts = compileRegexScripts(tree, id, diag);
   const quickReplySets = compileQuickReplySets(tree, str2(raw.name, id), Object.keys(actors), diag);
+  const tavernHelperScripts = compileTavernHelperScripts(tree, id, diag);
   const carrier = compileCarrier(isObj5(raw.carrier) ? raw.carrier : {}, regions, str2(raw.name, id), diag);
   const cd = isObj5(raw.configurationDefaults) ? raw.configurationDefaults : {};
   const sect = (k) => isObj5(cd[k]) ? cd[k] : {};
@@ -10505,6 +10621,7 @@ function compile(tree) {
     // Only when present, so that other artifacts keep their hash.
     ...regexScripts.length ? { regexScripts } : {},
     ...quickReplySets.length ? { quickReplySets } : {},
+    ...tavernHelperScripts.length ? { tavernHelperScripts } : {},
     meta,
     tokenSaving,
     syntheticTurns,
@@ -10927,6 +11044,8 @@ function validate(p, map, diag) {
     diag.warn(`regex scripts need Advanced Preset ${REGEX_SCRIPTS_SINCE}: set minAdvancedPreset to ${REGEX_SCRIPTS_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
   if (p.quickReplySets?.length && below(QUICK_REPLIES_SINCE))
     diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: "minAdvancedPreset" });
+  if (p.tavernHelperScripts?.length && below(TAVERN_HELPER_SINCE))
+    diag.warn(`Tavern Helper scripts need Advanced Preset ${TAVERN_HELPER_SINCE}: set minAdvancedPreset to ${TAVERN_HELPER_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
   if (!regionIds.has(p.workflowRegion)) diag.error(`unknown region \`${p.workflowRegion}\``, { file: M, path: "workflowRegion" });
   for (const v of p.vars) if (!usedVars.has(v.id)) diag.warn(`variable ${v.id} is never read ({{ap::var::${v.id}}})`, { file: M, path: `vars.${v.id}` });
@@ -11176,7 +11295,7 @@ function validate(p, map, diag) {
 }
 
 // src/io.ts
-var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|regex-scripts\/[^/]+\.(?:ya?ml|json)|quick-replies\/[^/]+\.(?:ya?ml|json)|locales\/[^/]+\.ya?ml)$/;
+var SOURCE_RE = /^(preset\.ya?ml|modules\/.+\.md|workflows\/[^/]+\.md|user-modules\/[^/]+\.md|user-module-templates\/[^/]+\.md|regex-scripts\/[^/]+\.(?:ya?ml|json)|quick-replies\/[^/]+\.(?:ya?ml|json)|tavern-helper-scripts\/.+|locales\/[^/]+\.ya?ml)$/;
 function isSourcePath(rel) {
   const p = rel.split(sep).join("/");
   return SOURCE_RE.test(p) || FRAGMENT_RE.test(p) || UI_FILE_RE.test(p);
@@ -11552,7 +11671,7 @@ async function main(argv) {
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ""}`);
         return 0;
       }
       const file = await writeArtifact(preset, resolve(dir, values.out ?? "dist"));

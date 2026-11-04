@@ -113,6 +113,20 @@ qrList:
 
 快速回复的文字里可以用 `{{ap::name::…}}`，用户改了叙述者的名字，按钮也会跟着变；按钮文字可以在 `locales/` 中翻译。完整字段见参考文档的[正则脚本与快速回复](../reference/regex-and-quick-replies.md)。
 
+### 酒馆助手脚本
+
+用户装了[酒馆助手](https://github.com/N0VI028/JS-Slash-Runner)时，预设还可以带上它的**预设脚本**：放进 `tavern-helper-scripts/`，每个文件一个脚本（或一个文件夹），字段与酒馆助手相同，从酒馆助手导出的 JSON 可以直接放进来；代码可以单独写成 `.js` 文件再引用：
+
+```yaml
+# tavern-helper-scripts/dice.yaml
+name: Dice
+content: ./tavern-helper-scripts/dice.js
+button:
+  buttons: [掷骰]
+```
+
+AP 只把脚本写进 Carrier，之后交给酒馆助手：用户选中这个预设时，酒馆助手会问要不要启用这些脚本——这是酒馆助手自己的信任机制，AP 不会替用户同意。预设更新时，用户的开关和脚本变量会保留。完整说明见参考文档的[酒馆助手脚本](../reference/tavern-helper-scripts.md)。
+
 ## 角色名称与前缀
 
 `preset.yaml` 里的**角色**（actors）是参与写作的身份：叙述者、编辑、用户……每个角色有名字、前缀和界面颜色。用户可以在“写作”页改名，所有用到 `{{ap::name::…}}`、`{{ap::prefix::…}}` 的地方都会跟着变。所以提示词里提到角色时，**用宏，不要把名字写死**。

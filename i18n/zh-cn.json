@@ -1,6 +1,8 @@
 {
   "app.name": "Advanced Preset",
   "carrier.reset": "预设已更新，「{name}」中的手动修改已被重置。",
+  "carrier.tavernHelper.reload": "「{name}」的酒馆助手脚本已更新。刷新页面后酒馆助手才会载入新脚本，在此之前仍使用旧脚本。",
+  "carrier.tavernHelper.reloadNow": "立即刷新",
   "quickReplies.conflict": "已存在名为「{name}」的快速回复集且不是由 Advanced Preset 创建的，因此未安装预设中的同名快速回复集。将你的快速回复集改名后即可使用。",
   "error.toolsUnsupported": "当前 API 源或设置不支持工具调用。请切换传输模式或选择其他推荐配置。",
   "error.emptyTurn": "模型没有返回正文。",
@@ -8,6 +10,7 @@
   "update.none": "已是最新版本。",
   "update.failed": "更新失败：{error}",
   "common.add": "添加",
+  "common.later": "稍后",
   "common.cancel": "取消",
   "common.clear": "清空",
   "common.close": "关闭",
