@@ -139,3 +139,19 @@ describe('Quick Reply sets of the active preset', () => {
     expect(settings().quickReplies).toEqual({});
   });
 });
+
+describe('built-in Petals Quick Reply set', () => {
+  it('has the five replies, with the narrator name and translations', () => {
+    const [set] = desiredSets(petals);
+    expect(set!.decl).toMatchObject({ name: 'AP · Petals Preset', global: true, disableSend: false, injectInput: false });
+    expect(set!.st.qrList.map((q) => [q.icon, q.message])).toEqual([
+      ['fa-at', '/setinput {{input}} @Freesia'],
+      ['fa-scroll', '@Freesia Please summarize the story so far.\n{{input}}'],
+      ['fa-feather-pointed', '@Freesia Please ghostwrite my next reply.\n{{input}}'],
+      ['fa-hashtag', '/setinput {{input}} #'],
+      ['fa-code-branch', '/setinput {{input}} #?'],
+    ]);
+    lang = 'zh-cn';
+    expect(desiredSets(petals)[0]!.st.qrList.map((q) => q.label)).toEqual(['元指令', '总结', '代写回复', '故事线', '新分支']);
+  });
+});
