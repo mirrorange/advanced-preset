@@ -3,13 +3,13 @@
  * the extension's Debug tab can hot-replace the preset.
  *
  *   GET /           → { id, name, version, hash, builtAt, ok, errors, warnings }
- *   GET /preset     → the artifact (last successful build)
+ *   GET /preset     → the artifact (last successful build; dist/ gets the preset file, as `ap build`)
  */
 import { createServer, type ServerResponse } from 'node:http';
 import { watch } from 'node:fs';
 import { relative } from 'node:path';
 import type { APreset } from '@advanced-preset/protocol';
-import { buildDir, isSourcePath, writeArtifact } from './io';
+import { buildDir, isSourcePath, writePresetFile } from './io';
 import { formatDiagnostic, report, type Diagnostic } from './diagnostics';
 
 export interface DevOptions {
@@ -17,6 +17,8 @@ export interface DevOptions {
   outDir: string;
   port: number;
   host: string;
+  /** Command-line choice for the installer script (else `preset.yaml#build.installer`). */
+  installer?: boolean;
 }
 
 export async function dev(o: DevOptions): Promise<void> {
@@ -25,13 +27,13 @@ export async function dev(o: DevOptions): Promise<void> {
 
   const rebuild = async () => {
     const t0 = Date.now();
-    const { preset, diag } = await buildDir(o.root);
+    const { preset, build, diag } = await buildDir(o.root);
     const fmt = (d: Diagnostic) => formatDiagnostic(d).replace(/\x1b\[\d+m/g, '');
     state = { builtAt: Date.now(), ok: diag.ok, errors: diag.errors.map(fmt), warnings: diag.warnings.map(fmt) };
     report(diag);
     if (preset && diag.ok) {
       artifact = preset;
-      await writeArtifact(preset, o.outDir);
+      await writePresetFile(preset, o.outDir, { installer: o.installer ?? build?.installer ?? true });
       console.log(`✓ ${preset.id} ${preset.version} #${preset.hash} (${Date.now() - t0} ms)`);
     } else console.log('✗ build failed; serving the last good artifact');
   };

@@ -1,6 +1,6 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
-import type { APreset } from '@advanced-preset/protocol';
+import { presetFile, resolveConfiguration, type APreset } from '@advanced-preset/protocol';
 import { compile, UI_FILE_RE, type CompileResult, type SourceTree } from './compile';
 import { validate } from './validate';
 import { FRAGMENT_RE } from './manifest';
@@ -37,9 +37,19 @@ export async function buildDir(root: string): Promise<CompileResult> {
   return result;
 }
 
-export async function writeArtifact(preset: APreset, outDir: string): Promise<string> {
+export interface WriteOptions {
+  /** Add the Tavern Helper installer script (default true). */
+  installer?: boolean;
+}
+
+/**
+ * Write `<outDir>/<id>.apreset.json`: the preset file, an ST Chat Completion preset that carries the
+ * artifact (see the protocol's preset-file.ts). Its sampling is the default configuration's.
+ */
+export async function writePresetFile(preset: APreset, outDir: string, o: WriteOptions = {}): Promise<string> {
   await mkdir(outDir, { recursive: true });
   const file = join(outDir, `${preset.id}.apreset.json`);
-  await writeFile(file, JSON.stringify(preset, null, 2) + '\n');
+  const sampling = resolveConfiguration(preset, preset.defaultConfiguration, undefined).sampling;
+  await writeFile(file, JSON.stringify(presetFile(preset, { installer: o.installer, sampling }), null, 2) + '\n');
   return file;
 }

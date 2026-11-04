@@ -55,8 +55,15 @@ export interface SourceMap {
   workflows: Map<string, Where>;
 }
 
+/** How the preset file is written (`preset.yaml#build`; not part of the artifact). */
+export interface BuildOptions {
+  /** Add the Tavern Helper installer script to the preset file (default true). */
+  installer: boolean;
+}
+
 export interface CompileResult {
   preset?: APreset;
+  build?: BuildOptions;
   /** Manifest files that were merged: `preset.yaml`, then fragments in merge order. */
   manifestFiles?: string[];
   diag: Diagnostics;
@@ -186,6 +193,19 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
   const known = new Set(['turn', 'submit', 'stage', 'patch', 'envelope', 'results', 'structurePrefix', 'orderPrefix', 'jsonStringHint', 'callerSchemaHint', ...legacy]);
   for (const k of Object.keys(o)) if (!known.has(k)) diag.warn(`unknown tools key \`${k}\``, at(k));
   return tools;
+}
+
+function compileBuildOptions(src: unknown, diag: Diagnostics): BuildOptions {
+  const out: BuildOptions = { installer: true };
+  if (src === undefined || src === null) return out;
+  const at = (path: string): Where => ({ file: MANIFEST_FILE, path: path ? `build.${path}` : 'build' });
+  if (!isObj(src)) { diag.error('`build` must be a mapping', at('')); return out; }
+  for (const k of Object.keys(src)) if (k !== 'installer') diag.warn(`unknown build key \`${k}\``, at(k));
+  if (src.installer !== undefined) {
+    if (typeof src.installer === 'boolean') out.installer = src.installer;
+    else diag.error('`build.installer` must be true or false', at('installer'));
+  }
+  return out;
 }
 
 export function compile(tree: SourceTree): CompileResult {
@@ -888,7 +908,7 @@ export function compile(tree: SourceTree): CompileResult {
     locales,
   };
   preset.hash = hashPreset(preset);
-  return { preset, diag, map, manifestFiles: manifest.files };
+  return { preset, build: compileBuildOptions(raw.build, diag), diag, map, manifestFiles: manifest.files };
 }
 
 const isScalar = (v: unknown): v is string | number | boolean => ['string', 'number', 'boolean'].includes(typeof v);
