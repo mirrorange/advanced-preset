@@ -105,5 +105,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          body_path: .github/release-notes/${{ github.ref_name }}.md   # falls back to `body` when missing
           body: |
             npm: [`advanced-preset@${{ env.VERSION }}`](https://www.npmjs.com/package/advanced-preset/v/${{ env.VERSION }})
