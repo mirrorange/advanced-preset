@@ -8923,10 +8923,10 @@ const ctx = () => host.SillyTavern.getContext();
 const locale = String((ctx().getCurrentLocale && ctx().getCurrentLocale()) || host.localStorage.getItem('language') || host.navigator.language || '').toLowerCase();
 const zh = locale.startsWith('zh');
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const list = MIRRORS.map((u) => '<li><code>' + esc(u) + '</code></li>').join('');
+const list = '<ul style="text-align:start;word-break:break-all">' + MIRRORS.map((u) => '<li><code>' + esc(u) + '</code></li>').join('') + '</ul>';
 const T = zh ? {
   title: 'Advanced Preset',
-  install: '<h3>\u9700\u8981 Advanced Preset \u63D2\u4EF6</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset \u63D2\u4EF6\u624D\u80FD\u4F7F\u7528\uFF0C\u5F53\u524D\u5C1A\u672A\u5B89\u88C5\u3002</p><p>\u662F\u5426\u73B0\u5728\u5B89\u88C5\uFF1F\u5C06\u4F9D\u6B21\u5C1D\u8BD5\u4EE5\u4E0B\u5730\u5740\uFF1A</p><ul>' + list + '</ul>',
+  install: '<h3>\u9700\u8981 Advanced Preset \u63D2\u4EF6</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset \u63D2\u4EF6\u624D\u80FD\u4F7F\u7528\uFF0C\u5F53\u524D\u5C1A\u672A\u5B89\u88C5\u3002</p><p>\u662F\u5426\u73B0\u5728\u5B89\u88C5\uFF1F\u5C06\u4F9D\u6B21\u5C1D\u8BD5\u4EE5\u4E0B\u5730\u5740\uFF1A</p>' + list,
   update: (v) => '<h3>\u9700\u8981\u66F4\u65B0 Advanced Preset</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset ' + esc(REQUIRED) + ' \u6216\u66F4\u65B0\u7248\u672C' + (v ? '\uFF08\u5F53\u524D\u4E3A ' + esc(v) + '\uFF09' : '') + '\u3002</p><p>\u662F\u5426\u73B0\u5728\u66F4\u65B0\uFF1F</p>',
   enable: '<h3>Advanced Preset \u5DF2\u505C\u7528</h3><p>\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u9700\u8981 Advanced Preset \u63D2\u4EF6\uFF0C\u5B83\u5DF2\u5B89\u88C5\u4F46\u5904\u4E8E\u505C\u7528\u72B6\u6001\u3002</p><p>\u662F\u5426\u542F\u7528\u5E76\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\uFF1F</p>',
   installOk: '\u5B89\u88C5', updateOk: '\u66F4\u65B0', enableOk: '\u542F\u7528\u5E76\u91CD\u65B0\u52A0\u8F7D', later: '\u7A0D\u540E',
@@ -8935,10 +8935,10 @@ const T = zh ? {
   done: '<h3>Advanced Preset \u5DF2\u5C31\u7EEA</h3><p>\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u540E\u63D2\u4EF6\u5373\u4F1A\u751F\u6548\uFF0C\u5E76\u81EA\u52A8\u63A5\u7BA1\u9884\u8BBE\u300C' + esc(PRESET) + '\u300D\u3002</p><p>\u662F\u5426\u73B0\u5728\u91CD\u65B0\u52A0\u8F7D\uFF1F</p>',
   reloadOk: '\u91CD\u65B0\u52A0\u8F7D',
   stillOld: (v) => '\u5DF2\u662F\u53EF\u83B7\u53D6\u7684\u6700\u65B0\u7248\u672C\uFF08' + esc(v) + '\uFF09\uFF0C\u4F46\u9884\u8BBE\u9700\u8981 ' + esc(REQUIRED) + ' \u6216\u66F4\u65B0\u7248\u672C\u3002\u8BF7\u7A0D\u540E\u518D\u8BD5\uFF0C\u6216\u624B\u52A8\u66F4\u65B0 Advanced Preset\u3002',
-  failed: '<h3>\u65E0\u6CD5\u5B89\u88C5 Advanced Preset</h3><p>\u6240\u6709\u5730\u5740\u90FD\u5B89\u88C5\u5931\u8D25\u3002\u8BF7\u68C0\u67E5\u7F51\u7EDC\u8FDE\u63A5\u540E\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u91CD\u8BD5\uFF0C\u6216\u5C1D\u8BD5\u624B\u52A8\u5B89\u88C5 Advanced Preset \u63D2\u4EF6\uFF1A</p><ol><li>\u6253\u5F00\u300C\u6269\u5C55\u300D\u9762\u677F\uFF08\u9876\u680F\u7684\u79EF\u6728\u56FE\u6807\uFF09\uFF0C\u70B9\u51FB\u300C\u5B89\u88C5\u6269\u5C55\u300D\uFF1B</li><li>\u7C98\u8D34\u4EE5\u4E0B\u4EFB\u4E00\u5730\u5740\u5E76\u5B89\u88C5\uFF1A<ul>' + list + '</ul></li><li>\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u3002</li></ol>',
+  failed: '<h3>\u65E0\u6CD5\u5B89\u88C5 Advanced Preset</h3><p>\u6240\u6709\u5730\u5740\u90FD\u5B89\u88C5\u5931\u8D25\u3002\u8BF7\u68C0\u67E5\u7F51\u7EDC\u8FDE\u63A5\u540E\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u91CD\u8BD5\uFF0C\u6216\u5C1D\u8BD5\u624B\u52A8\u5B89\u88C5 Advanced Preset \u63D2\u4EF6\uFF1A</p><ol style="text-align:start"><li>\u6253\u5F00\u300C\u6269\u5C55\u300D\u9762\u677F\uFF08\u9876\u680F\u7684\u79EF\u6728\u56FE\u6807\uFF09\uFF0C\u70B9\u51FB\u300C\u5B89\u88C5\u6269\u5C55\u300D\uFF1B</li><li>\u7C98\u8D34\u4EE5\u4E0B\u4EFB\u4E00\u5730\u5740\u5E76\u5B89\u88C5\uFF1A' + list + '</li><li>\u91CD\u65B0\u52A0\u8F7D\u9875\u9762\u3002</li></ol>',
 } : {
   title: 'Advanced Preset',
-  install: '<h3>Advanced Preset is required</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is not installed.</p><p>Install it now? These addresses are tried in turn:</p><ul>' + list + '</ul>',
+  install: '<h3>Advanced Preset is required</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is not installed.</p><p>Install it now? These addresses are tried in turn:</p>' + list,
   update: (v) => '<h3>Advanced Preset needs an update</h3><p>The preset "' + esc(PRESET) + '" needs Advanced Preset ' + esc(REQUIRED) + ' or newer' + (v ? ' (installed: ' + esc(v) + ')' : '') + '.</p><p>Update it now?</p>',
   enable: '<h3>Advanced Preset is disabled</h3><p>The preset "' + esc(PRESET) + '" needs the Advanced Preset extension, which is installed but disabled.</p><p>Enable it and reload the page?</p>',
   installOk: 'Install', updateOk: 'Update', enableOk: 'Enable and reload', later: 'Later',
@@ -8947,7 +8947,7 @@ const T = zh ? {
   done: '<h3>Advanced Preset is ready</h3><p>It starts once the page is reloaded and then sets up the preset "' + esc(PRESET) + '" by itself.</p><p>Reload now?</p>',
   reloadOk: 'Reload',
   stillOld: (v) => 'This is the newest version available (' + esc(v) + '), but the preset needs ' + esc(REQUIRED) + ' or newer. Try again later, or update Advanced Preset by hand.',
-  failed: '<h3>Could not install Advanced Preset</h3><p>Installing failed from every address. Check your network connection and reload the page to try again, or install the Advanced Preset extension by hand:</p><ol><li>Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".</li><li>Paste one of these addresses and install:<ul>' + list + '</ul></li><li>Reload the page.</li></ol>',
+  failed: '<h3>Could not install Advanced Preset</h3><p>Installing failed from every address. Check your network connection and reload the page to try again, or install the Advanced Preset extension by hand:</p><ol style="text-align:start"><li>Open the Extensions panel (the stacked-blocks icon in the top bar) and click "Install extension".</li><li>Paste one of these addresses and install:' + list + '</li><li>Reload the page.</li></ol>',
 };
 
 const toast = (kind, message) => (host.toastr || window.toastr)[kind](message, T.title);
