@@ -354,6 +354,8 @@
   "trust.declined": "Cancelled: the code was not trusted.",
   "warn.template": "A template failed and was left out of the prompt: {error}",
   "common.listSeparator": ", ",
+  "trust.qrTitle": "This preset runs quick replies by itself",
+  "trust.qrBody": "“{name}” brings {n} quick reply(ies) that run without a click (on startup, on new messages, from world info …). Their commands (STscript) can send messages and change your chats and settings like any Quick Reply.",
   "trust.uiTitle": "This preset brings custom UI components",
   "trust.uiBody": "“{name}” brings its own card components for {n} structure(s) ({list}), shown in chat messages. Components are code shipped with the preset (EJS templates or JavaScript modules); they run in your browser with the same permissions as the extension (your chats, settings and API connections).",
   "trust.uiRisk": "Only enable them if you trust where the preset comes from. Without enabling, the components stay hidden; you can turn them on later under Config → Custom UI. The code:",

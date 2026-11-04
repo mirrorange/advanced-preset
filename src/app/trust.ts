@@ -3,7 +3,7 @@
  * so a preset or user-module file containing them is only installed after the user confirms.
  * Built-in presets and the `ap dev` source (the author's own build) are trusted as they are.
  */
-import { presetTemplates, structureComponents, userModulesCode, type APreset, type UserModule } from '@advanced-preset/protocol';
+import { autoQuickReplies, presetTemplates, structureComponents, userModulesCode, type APreset, type UserModule } from '@advanced-preset/protocol';
 import { confirmPopup, escapeHtml } from '@/st/host';
 import { presetName, pt, t } from '@/i18n';
 import { customUiDecided, setCustomUi } from '@/store/custom-ui';
@@ -43,6 +43,23 @@ export async function confirmPresetTemplates(preset: APreset, previous?: APreset
   if (!code.length || (previous && sameCode(code, presetTemplates(previous)))) return;
   const name = presetName(preset);
   const ok = await confirmPopup(dialog(t('trust.presetTitle'), t('trust.preset', { name }), code.length, sampleOf(code)), t('trust.install'), t('common.cancel'));
+  if (!ok) throw new TrustDeclined();
+}
+
+/**
+ * Ask before installing a preset whose quick replies run without a click (auto-execute, world info
+ * automation): their STscript acts on the user's chats and settings. Skipped when unchanged.
+ */
+export async function confirmQuickReplyAutomation(preset: APreset, previous?: APreset): Promise<void> {
+  const auto = autoQuickReplies(preset);
+  if (!auto.length || (previous && sameCode(auto, autoQuickReplies(previous)))) return;
+  const html = [
+    `<h3>${escapeHtml(t('trust.qrTitle'))}</h3>`,
+    `<p>${escapeHtml(t('trust.qrBody', { name: presetName(preset), n: auto.length }))}</p>`,
+    `<p>${escapeHtml(t('trust.risk'))}</p>`,
+    `<pre style="text-align:start;max-height:12em;overflow:auto;white-space:pre-wrap;font-size:0.85em">${escapeHtml(sampleOf(auto))}</pre>`,
+  ].join('');
+  const ok = await confirmPopup(html, t('trust.install'), t('common.cancel'));
   if (!ok) throw new TrustDeclined();
 }
 

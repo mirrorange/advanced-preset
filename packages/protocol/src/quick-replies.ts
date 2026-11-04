@@ -102,3 +102,11 @@ export function stQuickReplySet(set: QuickReplySetDecl, actorName: (actor: strin
     idIndex: qrList.length,
   };
 }
+
+/** Does the reply run without a click (an auto-execute switch, or a world info automation id)? */
+export const autoExecutes = (qr: QuickReplyDecl): boolean => QR_AUTO_EXECUTE.some((k) => qr[k]) || Boolean(qr.automationId);
+
+/** The replies of a preset that run by themselves, as `set · label: message` (for the trust prompt). */
+export function autoQuickReplies(preset: { quickReplySets?: QuickReplySetDecl[] }): string[] {
+  return (preset.quickReplySets ?? []).flatMap((s) => s.qrList.filter(autoExecutes).map((q) => `${s.name} · ${q.label || q.id}: ${q.message}`));
+}

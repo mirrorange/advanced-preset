@@ -6,7 +6,7 @@ import { getPreset, getPresetEntry, installPreset, isBuiltin, removeInstalled, t
 import { migratePresetState } from '@/store/config';
 import { ensureCarrier, findCarrier } from '@/store/carrier';
 import { t } from '@/i18n';
-import { confirmCustomUi, confirmPresetTemplates } from './trust';
+import { confirmCustomUi, confirmPresetTemplates, confirmQuickReplyAutomation } from './trust';
 import { syncBundledModules } from './bundled-modules';
 
 /** GitHub page URLs → raw file URLs. */
@@ -23,6 +23,8 @@ export async function installArtifact(raw: unknown, source?: string): Promise<AP
   }
   // Templates run code: ask unless the code is unchanged from the copy being replaced (I-110).
   await confirmPresetTemplates(data, getPreset(data.id));
+  // So do quick replies that run by themselves.
+  await confirmQuickReplyAutomation(data, getPreset(data.id));
   installPreset(data);
   if (source) settings().sources[data.id] = source;
   save();
