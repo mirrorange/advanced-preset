@@ -247,6 +247,9 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
 /* Toolbar of an expanded storyline: icon toggles, a hairline, then actions. */
 .storyline-toolbar { display: flex; align-items: center; gap: 2px; padding: 2px; margin-bottom: var(--ap-space-1); align-self: flex-start; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface-2); }
 .storyline-toolbar .icon-btn[aria-pressed='true'] { background: var(--ap-tint); }
+/* The main storyline's toolbar holds only rename: its frame hugs the button, so it is no larger than a branch's buttons. */
+.storyline-toolbar.solo { padding: 0; }
+.storyline-toolbar.solo .icon-btn.sm { width: calc(1.6em - 2px); height: calc(1.6em - 2px); }
 .storyline-toolbar-sep { width: 1px; align-self: stretch; margin: 3px 2px; background: var(--ap-border); }
 .storyline-floors { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 22em; overflow-y: auto; }
 .storyline-floors li { padding: 2px 4px; border-radius: var(--ap-radius-sm); }

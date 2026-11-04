@@ -69,7 +69,7 @@ async function rename(e: StorylineEntry) {
         <ChevronDown class="chevron" :class="{ flipped: open.has(e.key) }" aria-hidden="true" />
       </header>
       <div v-if="open.has(e.key)" class="card-body col">
-        <div v-if="!e.pending" class="storyline-toolbar" role="toolbar" :aria-label="title(e)">
+        <div v-if="!e.pending" class="storyline-toolbar" :class="{ solo: e.main }" role="toolbar" :aria-label="title(e)">
           <template v-if="!e.main">
             <IconButton :icon="Split" :label="t('storylines.ifLine.toggle')" :pressed="e.if" small @click="setIf(e)" />
             <IconButton :icon="e.hidden ? EyeOff : Eye" :label="t('storylines.visible.toggle')" :pressed="!e.hidden" small @click="setVisible(e)" />
