@@ -4,6 +4,7 @@
  * bump get their defaults in memory.
  */
 import { CACHE_DEFAULTS, CONNECTION_DEFAULTS } from './config';
+import { STORYLINE_CONFIG_DEFAULTS } from './storylines';
 import { FORMAT_VERSION, type APreset } from './types';
 
 type Obj = Record<string, any>;
@@ -53,9 +54,18 @@ function withMetaDefaults(p: APreset): APreset {
   return { ...p, configurationDefaults: { ...conf, meta: { enabled: true, ...(isObj(meta) ? meta : {}) } as Obj } } as APreset;
 }
 
+/** Storylines (declared by the preset): the user switch defaults to on. */
+function withStorylineDefaults(p: APreset): APreset {
+  const conf = p.configurationDefaults as APreset['configurationDefaults'] | undefined;
+  if (!isObj(p.storylines) || !isObj(conf)) return p;
+  const cur = (conf as Obj).storylines;
+  if (isObj(cur) && Object.keys(STORYLINE_CONFIG_DEFAULTS).every((k) => k in cur)) return p;
+  return { ...p, configurationDefaults: { ...conf, storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...(isObj(cur) ? cur : {}) } } };
+}
+
 /** Fields added without a format bump get their empty defaults. */
 function withOptionalDefaults(p: APreset): APreset {
-  const out = withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p))));
+  const out = withStorylineDefaults(withMetaDefaults(withCacheDefaults(withTokenSavingDefaults(withConnectionDefaults(p)))));
   const withPoints = Array.isArray(out.insertionPoints) ? out : { ...out, insertionPoints: [] };
   return {
     ...withPoints,

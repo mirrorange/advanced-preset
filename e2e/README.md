@@ -12,6 +12,8 @@ node e2e/run.mjs carrier                             # select the AP Carrier (fr
 node e2e/run.mjs syn-edit                            # edit the last synopsis from its card (after gen)
 node e2e/run.mjs cache                               # token saving + cache optimization over 5 turns, prefix reuse per request (AP_CACHE=off to compare)
 node e2e/run.mjs memory                              # memory follows message versions: swipe, swipe back, regenerate, delete (after carrier)
+node e2e/run.mjs storylines-gen                      # side-story turns under each freeze mode: Petals' independent-state instruction only when frozen (after carrier)
+node e2e/run.mjs storylines                          # storylines tab toolbar (visibility, rename), freeze mode, tab gone when off (after carrier)
 AP_THEMES=Azure,Cappuccino node e2e/run.mjs theme        # panel over ST themes: drawer content hidden, panel transparent (I-122)
 ```
 

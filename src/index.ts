@@ -17,6 +17,7 @@ import { debugLog } from '@/core/debug';
 import { onMessageReceived } from '@/app/receive';
 import { installMemorySync, syncGlobalRefs } from '@/app/memory-sync';
 import { annotationsApi, installAnnotations } from '@/app/annotations';
+import { installVariableGuard } from '@/app/variable-guard';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
 import { installImpersonate } from '@/app/impersonate';
@@ -80,6 +81,7 @@ async function init(): Promise<void> {
   first(E.CHAT_COMPLETION_PROMPT_READY!, (data: { chat: ChatMessage[]; dryRun: boolean }) => onPromptReady(data));
   eventSource.on(E.CHAT_COMPLETION_SETTINGS_READY!, (data: Record<string, unknown>) => onSettingsReady(data));
   installMemorySync();
+  installVariableGuard();
   eventSource.on(E.MESSAGE_RECEIVED!, (mesId: number, type?: string) => onMessageReceived(Number(mesId), type));
   eventSource.on(E.GENERATION_STOPPED!, () => { registry.setPending(null); registry.takeArmed(); });
   eventSource.on(E.GENERATION_ENDED!, () => registry.sweep());

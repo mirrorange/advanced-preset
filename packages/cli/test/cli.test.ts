@@ -1064,3 +1064,105 @@ ${extraModule || '{{ap::input::text}}'}
     expect(json.vars.input).toEqual({ shaped: true });
   });
 });
+
+describe('storylines', () => {
+  const withStorylines = (decl: string, min = 'minAdvancedPreset: 1.10.0\n', body = 'Side: {{ap::storyline}}') => {
+    const t = tree({ 'preset.yaml': MANIFEST.replace('version: 1.0.0', `version: 1.0.0\n${min}`) + decl });
+    t.set('modules/side.md', `---\nid: side\ntoggle: always\nregion: task\nwhen: "!storyline.main"\n---\n${body}\n`);
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+
+  it('is absent unless declared (hash unchanged)', () => {
+    const plain = build(tree());
+    expect('storylines' in plain.preset!).toBe(false);
+    expect('storylines' in plain.preset!.configurationDefaults).toBe(false);
+    expect(build(tree()).preset!.hash).toBe(plain.preset!.hash);
+  });
+
+  it('compiles `true` and custom separators with the user switch', () => {
+    const on = build(withStorylines('storylines: true\n'));
+    expect(on.diag.errors).toEqual([]);
+    expect(messages(on)).toMatch(/no module requests a storyline structure/);
+    expect(on.preset!.storylines).toEqual({ separator: '<!-- Start of Storyline {{storyline}} -->', mainSeparator: '<!-- Start of the main storyline -->' });
+    expect(on.preset!.configurationDefaults.storylines).toEqual({ enabled: true, freezeVariables: 'all' });
+    const custom = build(withStorylines('storylines: { separator: "[{{storyline}}]" }\nconfigurationDefaults: { storylines: { enabled: false } }\n'));
+    expect(custom.diag.errors).toEqual([]);
+    expect(custom.preset!.storylines).toEqual({ separator: '[{{storyline}}]', mainSeparator: '<!-- Start of the main storyline -->' });
+    expect(custom.preset!.configurationDefaults.storylines).toEqual({ enabled: false, freezeVariables: 'all' });
+  });
+
+  it('flags bad declarations, undeclared use and old AP versions', () => {
+    expect(build(withStorylines('storylines: yes please\n')).diag.errors.map((e) => e.message).join('\n')).toMatch(/storylines must be `true` or a mapping/);
+    const w = messages(build(withStorylines('storylines: { separator: "---", tag: x }\n')));
+    expect(w).toMatch(/has no \{\{storyline\}\}/);
+    expect(w).toMatch(/unknown key `tag`/);
+    expect(messages(build(withStorylines('')))).toMatch(/always describe the main storyline/);
+    expect(messages(build(withStorylines('storylines: true\n', '', 'x')))).toMatch(/storylines need Advanced Preset 1\.10\.0/);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, '{{ap::storyline::nope}}')))).toMatch(/expected no argument/);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, 'x')))).not.toMatch(/unknown variable/);
+  });
+
+  it('previews a storyline with --storyline', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withStorylines('storylines: true\n')).preset!;
+    expect(preview(p, {})).toMatch(/storyline: main\n/);
+    const out = preview(p, { storyline: 'ifRain', storylineNew: true });
+    expect(out).toMatch(/storyline: ifRain \(if-line\) \(new\) \(grouped\)/);
+    expect(preview(p, { storylineGrouped: true })).toMatch(/storyline: main \(grouped\)\n/);
+    expect(out).toMatch(/Side: ifRain/);
+    const json = JSON.parse(preview(p, { storyline: 'cellar', json: true }));
+    expect(json.vars.storyline).toEqual({ name: 'cellar', main: false, if: false, new: false, grouped: true, naming: false, namingMain: false, switching: false, frozen: true });
+    expect(preview(p, { storyline: 'cellar' })).toMatch(/storyline: cellar \(grouped\) \(variables frozen\)/);
+    expect(preview(p, {})).not.toMatch(/variables frozen/);
+  });
+
+  it('checks the freeze mode and previews it (I-163)', async () => {
+    const { preview } = await import('../src/preview');
+    const bad = build(withStorylines('storylines: true\nconfigurationDefaults: { storylines: { freezeVariables: true } }\n'));
+    expect(bad.diag.errors.map((e) => e.message).join('\n')).toMatch(/freezeVariables` must be one of all \/ if \/ off/);
+    const p = build(withStorylines('storylines: true\nconfigurationDefaults: { storylines: { freezeVariables: if } }\n')).preset!;
+    expect(p.configurationDefaults.storylines!.freezeVariables).toBe('if');
+    expect(JSON.parse(preview(p, { storyline: 'cellar', json: true })).vars.storyline.frozen).toBe(false);
+    expect(JSON.parse(preview(p, { storyline: 'ifRain', json: true })).vars.storyline.frozen).toBe(true);
+    expect(messages(build(withStorylines('storylines: true\n', undefined, '<!-- @if storyline.frozen -->x<!-- @end -->')))).not.toMatch(/unknown variable/);
+  });
+
+  const withNaming = (decl = 'storylines: true\n') => {
+    const t = withStorylines(decl);
+    t.set('manifest/naming.yaml', 'structures:\n  storyline:\n    kind: storyline\n    properties: { name: The new name, previous_main: The old name }\n    formatPrompt: { tag: "<storyline>", field: "{{field}}" }\n');
+    t.set('modules/naming.md', '---\nid: naming\ntoggle: always\nregion: task\nwhen: storyline.naming || storyline.namingMain\nstructures: [storyline]\n---\nName it.<!-- @if storyline.namingMain --> Name the old one too.<!-- @end -->\n');
+    return t;
+  };
+
+  it('compiles the storyline structure and checks its use (I-158)', () => {
+    const r = build(withNaming());
+    expect(r.diag.errors).toEqual([]);
+    expect(messages(r)).not.toMatch(/storyline/i);
+    expect(r.preset!.structures.storyline).toMatchObject({ kind: 'storyline', properties: { name: 'The new name', previous_main: 'The old name' } });
+    expect(messages(build(withNaming('')))).toMatch(/storyline structures are only requested when a storyline is named/);
+    const bad = withNaming();
+    bad.set('manifest/naming.yaml', bad.get('manifest/naming.yaml')!.replace('previous_main: The old name', 'old: x'));
+    expect(build(bad).diag.errors.map((e) => e.message).join('\n')).toMatch(/storyline has no sub-field `old` \(expected name \| previous_main\)/);
+  });
+
+  it('previews naming turns: --storyline ?, --storyline-switch, --storyline-naming-main', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withNaming()).preset!;
+    expect(preview(p, { storyline: 'cellar' })).not.toMatch(/Name it/);
+    const side = preview(p, { storyline: '?' });
+    expect(side).toMatch(/storyline: \? \(new\) \(grouped\) \(AI names it\)/);
+    expect(side).toMatch(/structures: storyline/);
+    expect(side).toMatch(/Name it\./);
+    expect(side).not.toMatch(/Name the old one/);
+    expect(preview(p, { storyline: 'if?' })).toMatch(/storyline: \? \(if-line\) \(new\) \(grouped\) \(AI names it\)/);
+    const sw = preview(p, { storyline: '?', storylineSwitch: true, storylineNamingMain: true, transport: 'structured', json: true });
+    const json = JSON.parse(sw);
+    expect(json.vars.storyline).toMatchObject({ main: true, naming: true, namingMain: true, switching: true });
+    const schema = JSON.stringify(json.schema);
+    expect(schema).toContain('previous_main');
+    const only = JSON.parse(preview(p, { storyline: 'B', storylineSwitch: true, storylineNamingMain: true, transport: 'structured', json: true }));
+    expect(only.vars.storyline).toMatchObject({ name: 'B', main: true, naming: false, namingMain: true });
+    expect(JSON.stringify(only.schema)).toMatch(/"required":\["previous_main"\]/);
+  });
+});

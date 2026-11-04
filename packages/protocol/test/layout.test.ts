@@ -47,6 +47,13 @@ describe('turn layout (I-134)', () => {
     expect(layout.items.map((x) => (x.type === 'stage' ? x.stage.id : x.structure.id))).toEqual(['think', 'mid', 'story', 'review', 'status']);
   });
 
+  it('finds a structure by id: a turn may request a copy of its declaration', () => {
+    const naming = decl('storyline', 'storyline');
+    const layout = turnLayout(wf(), stages, [{ ...naming, requested: ['name'] }], prefixed, (s) => s.id);
+    expect(layout.structureField(naming)).toBe('3_storyline');
+    expect(layout.hostOf(naming)?.id).toBe('story');
+  });
+
   it('skips inline structures', () => {
     const layout = turnLayout(wf(), stages, [decl('annotations', 'annotations')], legacy, (s) => s.id);
     expect(layout.items).toHaveLength(3);

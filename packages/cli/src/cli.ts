@@ -22,6 +22,8 @@ Usage
                                              rebuild on change and serve the artifact
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value …] [--input text]
+                   [--storyline name|?] [--storyline-new] [--storyline-grouped]
+                   [--storyline-switch] [--storyline-naming-main]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -52,6 +54,11 @@ async function main(argv: string[]): Promise<number> {
       json: { type: 'boolean' },
       param: { type: 'string', multiple: true },
       input: { type: 'string' },
+      storyline: { type: 'string' },
+      'storyline-new': { type: 'boolean' },
+      'storyline-grouped': { type: 'boolean' },
+      'storyline-switch': { type: 'boolean' },
+      'storyline-naming-main': { type: 'boolean' },
       'user-modules': { type: 'string' },
       'bundled-modules': { type: 'string' },
       'user-module-templates': { type: 'string' },
@@ -106,7 +113,7 @@ async function main(argv: string[]): Promise<number> {
         if (typeof picked === 'string') { console.error(picked); return 1; }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values['storyline-new'], storylineGrouped: values['storyline-grouped'], storylineSwitch: values['storyline-switch'], storylineNamingMain: values['storyline-naming-main'], userModules, json: values.json });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);
       return 0;

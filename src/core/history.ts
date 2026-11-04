@@ -38,6 +38,11 @@ export interface RewriteOptions {
   annotations?: { depth: number };
   /** Item index of the assistant message being continued: it never carries structures. */
   continuing?: number;
+  /**
+   * Storylines (I-149): items of side storylines other than the current one. With token saving and
+   * a synopsis structure they get the synopsis / user input rule whatever their depth.
+   */
+  background?: (index: number) => boolean;
 }
 
 /** One structure's history rule (I-139), placed relative to the message text. */
@@ -167,7 +172,8 @@ export function planHistory(items: HistoryItem[], o: RewriteOptions): PlannedIte
     const inFull = (i: number) => depth[i]! <= keep;
     const covered = o.recap?.coversUpTo ?? -1;
     plan.forEach((p, i) => {
-      if (!p.fresh || inFull(i) || p.index === o.currentInput) return;
+      if (!p.fresh || p.index === o.currentInput) return;
+      if (inFull(i) && !(o.synopsisId && o.background?.(p.index))) return;
       if (covered >= 0 && o.realIndex(p.index) <= covered) { p.fresh = { body: 'drop' }; p.forced = true; return; }
       if (p.item.is_user) {
         const mode = o.tokenSaving.userInput ?? 'truncate';
@@ -245,15 +251,20 @@ function insertEchoes(mes: string, item: HistoryItem, ids: string[], echoes: His
   return pieces.length ? insertPieces(mes, echoes.contentKey, pieces) : mes;
 }
 
-/** Returns the rewritten list (new array; items are shallow copies when changed). */
-export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): HistoryItem[] {
-  const out: HistoryItem[] = [];
+/** The rewritten list with the input index of each item (items are shallow copies when changed). */
+export function rewriteHistoryIndexed(items: HistoryItem[], o: RewriteOptions): { item: HistoryItem; index: number }[] {
+  const out: { item: HistoryItem; index: number }[] = [];
   for (const p of planHistory(items, o)) {
     const mes = renderItem(p, p.fresh, o);
     if (mes === null) continue;
-    out.push(mes === p.item.mes ? p.item : { ...p.item, mes });
+    out.push({ item: mes === p.item.mes ? p.item : { ...p.item, mes }, index: p.index });
   }
   return out;
+}
+
+/** Returns the rewritten list (new array; items are shallow copies when changed). */
+export function rewriteHistory(items: HistoryItem[], o: RewriteOptions): HistoryItem[] {
+  return rewriteHistoryIndexed(items, o).map((r) => r.item);
 }
 
 /** History re-injection depth for the preset (I-80): the annotations structure is declared by a switched-on module. */

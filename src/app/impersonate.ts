@@ -9,16 +9,20 @@ import { getPreset } from '@/store/presets';
 import { activeConfiguration } from '@/store/config';
 import { activeCarrierPresetId } from '@/store/carrier';
 import { metaEnabled } from '@/core/classify';
+import { withStorylineOf } from './storylines';
 
 const BUTTONS = '#option_impersonate, #mes_impersonate';
 
 const textarea = () => document.querySelector<HTMLTextAreaElement>('#send_textarea');
 
-/** Write text into ST's input box (never sends). */
-export function fillInput(text: string, send = false): void {
+/**
+ * Write text into ST's input box (sends with `send`). `mesId`: the message the text comes from (a user
+ * option, an impersonated reply): on a side storyline the text gets its `#tag` (I-160).
+ */
+export function fillInput(text: string, send = false, mesId?: number): void {
   const el = textarea();
   if (!el) return;
-  el.value = text;
+  el.value = mesId === undefined ? text : withStorylineOf(text, mesId);
   el.dispatchEvent(new Event('input', { bubbles: true }));
   el.focus();
   if (send) document.querySelector<HTMLElement>('#send_but')?.click();
@@ -44,9 +48,10 @@ function onClick(e: MouseEvent): void {
   e.preventDefault();
   e.stopImmediatePropagation();
   document.querySelector<HTMLElement>('#options')?.style.setProperty('display', 'none');
-  // A draft in the input box becomes the hint of the instruction.
+  // A draft in the input box becomes the hint of the instruction; on a side storyline the
+  // instruction carries its tag (a tag in the draft wins).
   const draft = textarea()?.value.trim();
-  fillInput(draft ? `${prompt}\n${draft}` : prompt, true);
+  fillInput(withStorylineOf(draft ? `${prompt}\n${draft}` : prompt), true);
 }
 
 export function installImpersonate(): void {

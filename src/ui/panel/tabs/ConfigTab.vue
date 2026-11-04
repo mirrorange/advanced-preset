@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
-import { TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
+import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, GitBranch, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
+import { STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, freezeMode, type StorylineFreeze, TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
 } from '@/store/config';
@@ -123,6 +123,15 @@ const metaOn = computed({
   get: () => config.value?.meta?.enabled !== false,
   set: (v: boolean) => update((c) => { c.meta.enabled = v; }),
 });
+const storylinesOn = computed({
+  get: () => config.value?.storylines?.enabled !== false,
+  set: (v: boolean) => update((c) => { c.storylines = { ...STORYLINE_CONFIG_DEFAULTS, ...c.storylines, enabled: v }; }),
+});
+const freezeOptions = computed(() => STORYLINE_FREEZE_MODES.map((x) => ({ value: x, label: t(`storylines.freeze.${x}`), hint: t(`storylines.freeze.${x}.hint`) })));
+const freezeVariables = computed({
+  get: () => freezeMode(config.value?.storylines),
+  set: (v: StorylineFreeze) => update((c) => { c.storylines = { ...STORYLINE_CONFIG_DEFAULTS, ...c.storylines, freezeVariables: v }; }),
+});
 const setRecent = (v: string) => update((c) => { c.meta.recentCount = Math.max(0, Number(v) || 0); });
 const cache = computed({
   get: () => config.value?.cache?.enabled ?? false,
@@ -222,6 +231,15 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
       <template v-if="metaOn">
         <Field :label="t('writing.recentCount')" :help="t('writing.recentCount.hint')" inline>
           <input class="input" type="number" min="0" max="20" :value="config.meta.recentCount" @change="setRecent(($event.target as HTMLInputElement).value)" />
+        </Field>
+      </template>
+    </Section>
+
+    <Section v-if="preset.storylines" :title="t('storylines.enabled')" :icon="GitBranch" :help="t('storylines.config.hint')">
+      <template #actions><Switch v-model="storylinesOn" :label="t('storylines.enabled')" /></template>
+      <template v-if="storylinesOn">
+        <Field :label="t('storylines.freezeVariables')" :help="t('storylines.freezeVariables.hint')">
+          <Segmented v-model="freezeVariables" :options="freezeOptions" />
         </Field>
       </template>
     </Section>

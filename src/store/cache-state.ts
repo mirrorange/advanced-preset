@@ -42,6 +42,9 @@ export function currentChatKey(): string {
   return String(c.getCurrentChatId?.() || `${c.characterId ?? ''}|${c.groupId ?? ''}`);
 }
 
+/** Key of a storyline's state (storylines keep separate states; the main storyline uses the chat's key). */
+export const storylineCacheKey = (chat: string, storyline: string | undefined): string => (storyline ? `${chat}\u0001${storyline}` : chat);
+
 export function cacheState(chat: string): CacheState | undefined {
   return load()[chat];
 }
@@ -55,6 +58,21 @@ export function saveCacheState(chat: string, state: CacheState): void {
 export function touchCacheState(chat: string, at: number): void {
   const s = load()[chat];
   if (s) saveCacheState(chat, { ...s, at });
+}
+
+/**
+ * Storylines renamed or swapped (rename, switching the main storyline): their states follow them.
+ * `moves` maps old storyline keys to new ones (`''`: the main storyline); applied at once, so a swap works.
+ */
+export function moveStorylineCacheStates(chat: string, moves: ReadonlyArray<readonly [string, string]>): void {
+  const store = load();
+  const key = (line: string) => storylineCacheKey(chat, line);
+  if (!moves.some(([from, to]) => key(from) in store || key(to) in store)) return;
+  const next: Store = { ...store };
+  // Targets lose whatever they had (a stale state of an earlier storyline with that name), sources move.
+  for (const [from, to] of moves) { delete next[key(from)]; delete next[key(to)]; }
+  for (const [from, to] of moves) if (store[key(from)]) next[key(to)] = store[key(from)]!;
+  persist(next, Date.now());
 }
 
 export function clearCacheState(chat?: string): void {

@@ -8,6 +8,7 @@
 import type { Expr } from './expr';
 import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
 import type { InputShaping } from './input-shaping';
+import type { StorylineConfig, StorylinesDecl } from './storylines';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -242,8 +243,8 @@ export type StructureOrder = number | { before: string } | { after: string };
 /** Reference to the terminal content stage in {@link StructureOrder}. */
 export const CONTENT_STAGE_REF = '@content';
 
-export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'custom' | 'annotations';
-export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'custom', 'annotations'];
+export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'storyline' | 'custom' | 'annotations';
+export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'storyline', 'custom', 'annotations'];
 /** Kinds written inside the story content rather than as a tag block / field (I-77). */
 export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations'];
 export const isInlineStructure = (s: { kind: StructureKind }): boolean => INLINE_STRUCTURE_KINDS.includes(s.kind);
@@ -278,6 +279,11 @@ export interface StructureDecl {
   order?: StructureOrder;
   /** Chat card placement and, for custom structures, a preset-supplied front-end component (I-137). */
   ui?: StructureUi;
+  /**
+   * Runtime only (not in artifacts): the sub-fields requested this turn. A `storyline` structure is
+   * only requested when the AI names a storyline, with the names it has to give (I-158).
+   */
+  requested?: string[];
 }
 
 /**
@@ -469,6 +475,8 @@ export interface Configuration {
   cache: CacheConfig;
   /** `enabled: false` turns meta-instruction handling off (input is plain story text). */
   meta: { enabled: boolean; recentCount: number };
+  /** Storylines switch; only present when the preset declares `storylines`. */
+  storylines?: StorylineConfig;
 }
 
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
@@ -545,6 +553,8 @@ export interface APreset {
    * `{{ap::input::text}}`. Only when the last chat message is the user's.
    */
   inputShaping?: InputShaping;
+  /** Storylines (absent = the preset does not support them): separators of the storyline groups in the history. */
+  storylines?: StorylinesDecl;
 
   params: Param[];
   groups: Record<string, Group>;

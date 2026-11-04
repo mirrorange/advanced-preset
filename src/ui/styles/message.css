@@ -129,3 +129,17 @@
   font-size: var(--ap-font-size-sm); line-height: 1.55; text-align: left; overflow-wrap: anywhere;
 }
 .anno-author { font-weight: 700; font-size: var(--ap-font-size-xs); color: var(--actor); letter-spacing: 0.02em; margin-bottom: 2px; }
+
+/* Storyline badge (I-152): a quiet pill above messages outside the main storyline. */
+:host(ap-storyline) { display: block; padding-right: var(--mes-right-spacing, 30px); }
+.storyline-badge {
+  display: inline-flex; align-items: center; gap: 4px; max-width: 100%; margin: 2px 0 4px; padding: 1px 8px; min-height: 1.6em;
+  border: 1px solid color-mix(in srgb, var(--ap-primary) 30%, var(--ap-border)); border-radius: var(--ap-radius-pill);
+  background: color-mix(in srgb, var(--ap-primary) 8%, transparent); color: var(--ap-muted); font-size: var(--ap-font-size-xs); cursor: pointer;
+}
+.storyline-badge:hover { color: var(--ap-text); border-color: color-mix(in srgb, var(--ap-primary) 55%, transparent); }
+.storyline-badge svg.lucide { width: 1.1em; height: 1.1em; color: var(--ap-primary); flex: none; }
+.storyline-badge .storyline-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.storyline-badge .storyline-if { padding: 0 5px; border-radius: var(--ap-radius-pill); background: color-mix(in srgb, var(--ap-warning) 18%, transparent); color: var(--ap-warning); font-weight: 600; }
+.storyline-badge.if-line { border-style: dashed; }
+.storyline-badge svg.lucide.storyline-hidden { color: var(--ap-muted); }
