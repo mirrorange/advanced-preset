@@ -9059,6 +9059,7 @@ main().catch((e) => console.error('[Advanced Preset installer]', e));
 }
 
 // ../protocol/src/user-modules.ts
+var partEnabled = (part) => part.enabled !== false;
 var USER_MODULE_PREFIX = "user-";
 var DEFAULT_KEYWORD_DEPTH = 3;
 var USER_MODULES_FORMAT = "advanced-preset.user-modules";
@@ -9164,7 +9165,8 @@ function findPoint(preset, id) {
 function findVar(preset, id) {
   return (preset.vars ?? []).find((v) => v.id === id);
 }
-function effectiveUpdate(u) {
+function effectiveUpdate(update) {
+  const { enabled: _enabled, ...u } = update;
   switch (u.type) {
     case "string":
       return u.text.trim() ? u : null;
@@ -9190,7 +9192,7 @@ function insertEntry(entries, entry) {
   else entries.splice(at, 0, entry);
 }
 function withUserModules(preset, modules, texts) {
-  const enabled = modules.filter((m) => m.enabled && (m.entries.length || m.vars?.length));
+  const enabled = modules.filter((m) => m.enabled).map((m) => ({ ...m, entries: m.entries.filter(partEnabled), vars: (m.vars ?? []).filter(partEnabled) })).filter((m) => m.entries.length || m.vars.length);
   if (!enabled.length) return { preset, skipped: [] };
   const skipped = [];
   const extraModules = [];
@@ -9205,7 +9207,7 @@ function withUserModules(preset, modules, texts) {
       default: true,
       when: compileTrigger(m.trigger, texts),
       structures: [],
-      vars: (m.vars ?? []).filter((u) => findVar(preset, u.var)?.type === u.type).map(effectiveUpdate).filter((u) => Boolean(u))
+      vars: m.vars.filter((u) => findVar(preset, u.var)?.type === u.type).map(effectiveUpdate).filter((u) => Boolean(u))
     });
     for (const e of m.entries) {
       const point = findPoint(preset, e.point);
@@ -9250,11 +9252,12 @@ function normalizeRule(raw) {
 function normalizeVarUpdate(raw) {
   if (!isObj2(raw) || typeof raw.var !== "string") return [];
   const strings = (v) => Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
-  if (raw.type === "string") return [{ var: raw.var, type: "string", text: str(raw.text) }];
-  if (raw.type === "list") return [{ var: raw.var, type: "list", items: strings(raw.items) }];
+  const off = raw.enabled === false ? { enabled: false } : {};
+  if (raw.type === "string") return [{ var: raw.var, type: "string", text: str(raw.text), ...off }];
+  if (raw.type === "list") return [{ var: raw.var, type: "list", items: strings(raw.items), ...off }];
   if (raw.type === "dict" && Array.isArray(raw.items)) {
     const items = raw.items.filter(isObj2).map((x) => ({ key: str(x.key), value: typeof x.value === "string" ? x.value : null }));
-    return [{ var: raw.var, type: "dict", items }];
+    return [{ var: raw.var, type: "dict", items, ...off }];
   }
   return [];
 }
@@ -9265,6 +9268,7 @@ function normalizeUserModule(raw) {
     if (!isObj2(e)) return [];
     const entry = { id: str(e.id) || `e${i + 1}`, point: str(e.point), text: str(e.text) };
     if (ROLES2.includes(e.role)) entry.role = e.role;
+    if (e.enabled === false) entry.enabled = false;
     return [entry];
   });
   return {
