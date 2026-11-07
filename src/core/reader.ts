@@ -33,6 +33,8 @@ export class ToolCallCollector {
   private claudeIndex = new Map<number, number>();
   /** Gemini call whose arguments are still streaming (`willContinue`). */
   private geminiOpen: { call: ToolCallAcc; args: PartialArgs } | null = null;
+  /** OpenRouter thought signatures by tool call id (`reasoning_details`, may arrive before or after the call). */
+  private signatures = new Map<string, string>();
 
   get list(): ToolCallAcc[] { return this.calls; }
 
@@ -52,7 +54,10 @@ export class ToolCallCollector {
         const args = d?.function?.arguments;
         if (typeof args === 'string') c.arguments += args;
         else if (args && typeof args === 'object') c.arguments = JSON.stringify(args);
+        const sig = openAiCallSignature(d);
+        if (sig) c.signature = sig;
       }
+      this.reasoningDetails(choice?.delta?.reasoning_details ?? choice?.message?.reasoning_details);
     }
     // Claude
     if (p?.type === 'content_block_start' && p?.content_block?.type === 'tool_use') {
@@ -103,6 +108,14 @@ export class ToolCallCollector {
     if (!fc.willContinue) this.geminiOpen = null;
   }
 
+  /** OpenRouter: `reasoning.encrypted` details whose id is a tool call's carry that call's thought signature. */
+  private reasoningDetails(details: unknown): void {
+    if (Array.isArray(details)) {
+      for (const d of details) if (d?.type === 'reasoning.encrypted' && typeof d.id === 'string' && d.id && typeof d.data === 'string' && d.data) this.signatures.set(d.id, d.data);
+    }
+    if (this.signatures.size) for (const c of this.calls) if (!c.signature && c.id && this.signatures.has(c.id)) c.signature = this.signatures.get(c.id);
+  }
+
   /** Non-streaming bodies (ST normalises most sources to OpenAI shape, with mirrors). */
   fromBody(data: any): void {
     const parts = data?.responseContent?.parts;
@@ -115,14 +128,22 @@ export class ToolCallCollector {
         c.name = d.function?.name ?? '';
         const a = d.function?.arguments;
         c.arguments = typeof a === 'string' ? a : JSON.stringify(a ?? {});
-        if (d.signature) c.signature = d.signature;
+        const sig = typeof d.signature === 'string' && d.signature ? d.signature : openAiCallSignature(d);
+        if (sig) c.signature = sig;
       });
+      this.reasoningDetails(msg.reasoning_details);
       return;
     }
     if (Array.isArray(data?.content)) {
       for (const b of data.content) if (b?.type === 'tool_use') { const c = this.at(this.calls.length); c.id = b.id; c.name = b.name; c.arguments = JSON.stringify(b.input ?? {}); }
     }
   }
+}
+
+/** Google's OpenAI-compatible format (Gemini API, CLIProxyAPI): `extra_content.google.thought_signature`. */
+function openAiCallSignature(d: any): string | undefined {
+  const sig = d?.extra_content?.google?.thought_signature ?? d?.function?.extra_content?.google?.thought_signature;
+  return typeof sig === 'string' && sig ? sig : undefined;
 }
 
 function bodyText(data: any): string {

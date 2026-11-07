@@ -42,6 +42,8 @@ export interface GenerationContext {
   inputShaped?: boolean;
   /** Storylines (presets that declare them, switched on): the current storyline and the history groups. */
   storylines?: StorylineTurn;
+  /** A backend rejected the built-in thought signature: later requests leave it out. */
+  signatureFallback?: boolean;
   /** Set once FetchGate took over the request. */
   claimed?: boolean;
   warnings: string[];

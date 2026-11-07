@@ -329,6 +329,45 @@ tools:
   });
 });
 
+describe('thought signatures', () => {
+  const withSignatures = (yaml: string, min = '') => {
+    const t = tree();
+    t.set('preset.yaml', `${MANIFEST.replace('version: 1.0.0', `version: 1.0.0${min ? `\nminAdvancedPreset: ${min}` : ''}`)}${yaml}`);
+    return build(t);
+  };
+  const turn = (sig: string) => `
+syntheticTurns:
+  - id: init
+    user: Start
+    tool: { name: start_workflow }
+    thoughtSignature: ${sig}
+    response: { single: Go, multi: Go }
+`;
+
+  it('compiles a plain signature and signatures by channel', () => {
+    expect(withSignatures(turn('abc')).preset!.syntheticTurns[0]!.thoughtSignature).toBe('abc');
+    const { preset, diag } = withSignatures(turn('{ vertex: v1, aistudio: a1 }'), '1.11.0');
+    expect(diag.errors).toEqual([]);
+    expect(preset!.syntheticTurns[0]!.thoughtSignature).toEqual({ vertex: 'v1', aistudio: 'a1' });
+    expect(withSignatures(turn('{ openai: x }'), '1.11.0').diag.errors.map((e) => e.message).join('\n')).toMatch(/unknown thought signature channel `openai`/);
+  });
+
+  it('checks channels and the AP version they need', () => {
+    const conf = (v: string) => `  - { id: g, name: G, diff: { connection: { sendThoughtSignature: ${v} } } }\n`;
+    const withConf = (v: string, min = '') => {
+      const t = tree();
+      const manifest = MANIFEST.replace('version: 1.0.0', `version: 1.0.0${min ? `\nminAdvancedPreset: ${min}` : ''}`);
+      t.set('preset.yaml', manifest.replace('configurations:\n', `configurations:\n${conf(v)}`));
+      return build(t).diag;
+    };
+    expect(withConf('true').errors).toEqual([]);
+    expect(withConf('aistudio', '1.11.0').errors).toEqual([]);
+    expect(withConf('aistudio').warnings.map((w) => w.message).join('\n')).toMatch(/thought signature channels need Advanced Preset 1\.11\.0/);
+    expect(withConf('openai', '1.11.0').errors.map((e) => e.message).join('\n')).toMatch(/unknown sendThoughtSignature `openai`/);
+    expect(withSignatures(turn('{ vertex: v1 }')).diag.warnings.map((w) => w.message).join('\n')).toMatch(/thought signatures by channel need Advanced Preset 1\.11\.0/);
+  });
+});
+
 describe('structure layout (I-134 – I-137)', () => {
   const STATUS = '  status: { kind: status, ui: { position: top }, order: { before: "@content" }, properties: { weather: Sky }, formatPrompt: { tag: "<status/>", field: "Fill `{{field}}`." } }\n';
   const layoutTree = (opts: { tools?: string; structures?: string; stages?: string; front?: string; min?: string; extra?: Record<string, string> } = {}) => {

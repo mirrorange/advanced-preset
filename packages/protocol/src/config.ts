@@ -3,7 +3,7 @@
  * User data only stores sparse diffs, so new defaults flow in automatically.
  */
 import { cloneData } from './clone';
-import type { APreset, CacheConfig, Configuration, ConnectionConfig, Migration, SparseDiff } from './types';
+import { THOUGHT_SIGNATURE_CHANNELS, type APreset, type CacheConfig, type Configuration, type ConnectionConfig, type Migration, type SparseDiff, type SyntheticTurn, type ThoughtSignatureChannel } from './types';
 import { satisfies } from './semver';
 
 type Obj = Record<string, unknown>;
@@ -14,11 +14,28 @@ export const CONNECTION_DEFAULTS: Omit<ConnectionConfig, 'workflow' | 'synthetic
   transport: 'structured',
   forceTool: true,
   parallelTools: false,
+  // `false` (not 'off'): older versions read the field as a switch.
   sendThoughtSignature: false,
+  openAiSignatures: false,
   streamToolArguments: 'auto',
   maxSteps: 6,
   finalFallback: true,
 };
+
+/** Thought signature channel of a connection (the older boolean switch meant Vertex AI). */
+export function signatureChannel(conn: Pick<ConnectionConfig, 'sendThoughtSignature'>): ThoughtSignatureChannel {
+  const v = conn.sendThoughtSignature;
+  if (v === true) return 'vertex';
+  return typeof v === 'string' && THOUGHT_SIGNATURE_CHANNELS.includes(v) ? v : 'off';
+}
+
+/** Built-in thought signature of a synthetic turn for a channel (a plain string is the Vertex AI one). */
+export function builtInSignature(turn: Pick<SyntheticTurn, 'thoughtSignature'>, channel: ThoughtSignatureChannel): string | undefined {
+  const sig = turn.thoughtSignature;
+  if (channel === 'off' || !sig) return undefined;
+  if (typeof sig === 'string') return channel === 'vertex' ? sig : undefined;
+  return sig[channel] || undefined;
+}
 
 /** Cache optimization defaults (a preset may override them in `configurationDefaults.cache`). */
 export const CACHE_DEFAULTS: CacheConfig = {
