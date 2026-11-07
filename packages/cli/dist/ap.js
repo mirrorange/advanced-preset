@@ -51,9 +51,9 @@ var require_identity = __commonJS({
     var isAlias = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
     var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
     var isMap2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
-    var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
+    var isPair2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
     var isScalar3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
-    var isSeq2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
+    var isSeq3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
     function isCollection(node) {
       if (node && typeof node === "object")
         switch (node[NODE_TYPE]) {
@@ -88,9 +88,9 @@ var require_identity = __commonJS({
     exports.isDocument = isDocument;
     exports.isMap = isMap2;
     exports.isNode = isNode;
-    exports.isPair = isPair;
+    exports.isPair = isPair2;
     exports.isScalar = isScalar3;
-    exports.isSeq = isSeq2;
+    exports.isSeq = isSeq3;
   }
 });
 
@@ -102,7 +102,7 @@ var require_visit = __commonJS({
     var BREAK = /* @__PURE__ */ Symbol("break visit");
     var SKIP = /* @__PURE__ */ Symbol("skip children");
     var REMOVE = /* @__PURE__ */ Symbol("remove node");
-    function visit(node, visitor) {
+    function visit2(node, visitor) {
       const visitor_ = initVisitor(visitor);
       if (identity.isDocument(node)) {
         const cd = visit_(null, node.contents, visitor_, Object.freeze([node]));
@@ -111,9 +111,9 @@ var require_visit = __commonJS({
       } else
         visit_(null, node, visitor_, Object.freeze([]));
     }
-    visit.BREAK = BREAK;
-    visit.SKIP = SKIP;
-    visit.REMOVE = REMOVE;
+    visit2.BREAK = BREAK;
+    visit2.SKIP = SKIP;
+    visit2.REMOVE = REMOVE;
     function visit_(key, node, visitor, path) {
       const ctrl = callVisitor(key, node, visitor, path);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
@@ -247,7 +247,7 @@ var require_visit = __commonJS({
         throw new Error(`Cannot replace node with ${pt} parent`);
       }
     }
-    exports.visit = visit;
+    exports.visit = visit2;
     exports.visitAsync = visitAsync;
   }
 });
@@ -257,7 +257,7 @@ var require_directives = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/doc/directives.js"(exports) {
     "use strict";
     var identity = require_identity();
-    var visit = require_visit();
+    var visit2 = require_visit();
     var escapeChars = {
       "!": "%21",
       ",": "%2C",
@@ -401,7 +401,7 @@ var require_directives = __commonJS({
         let tagNames;
         if (doc && tagEntries.length > 0 && identity.isNode(doc.contents)) {
           const tags = {};
-          visit.visit(doc.contents, (_key, node) => {
+          visit2.visit(doc.contents, (_key, node) => {
             if (identity.isNode(node) && node.tag)
               tags[node.tag] = true;
           });
@@ -428,7 +428,7 @@ var require_anchors = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/doc/anchors.js"(exports) {
     "use strict";
     var identity = require_identity();
-    var visit = require_visit();
+    var visit2 = require_visit();
     function anchorIsValid(anchor2) {
       if (/[\x00-\x19\s,[\]{}]/.test(anchor2)) {
         const sa = JSON.stringify(anchor2);
@@ -439,7 +439,7 @@ var require_anchors = __commonJS({
     }
     function anchorNames(root) {
       const anchors = /* @__PURE__ */ new Set();
-      visit.visit(root, {
+      visit2.visit(root, {
         Value(_key, node) {
           if (node.anchor)
             anchors.add(node.anchor);
@@ -619,7 +619,7 @@ var require_Alias = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/nodes/Alias.js"(exports) {
     "use strict";
     var anchors = require_anchors();
-    var visit = require_visit();
+    var visit2 = require_visit();
     var identity = require_identity();
     var Node = require_Node();
     var toJS = require_toJS();
@@ -645,7 +645,7 @@ var require_Alias = __commonJS({
           nodes = ctx.aliasResolveCache;
         } else {
           nodes = [];
-          visit.visit(doc, {
+          visit2.visit(doc, {
             Node: (_key, node) => {
               if (identity.isAlias(node) || identity.hasAnchor(node))
                 nodes.push(node);
@@ -5567,15 +5567,15 @@ var require_cst_visit = __commonJS({
     var BREAK = /* @__PURE__ */ Symbol("break visit");
     var SKIP = /* @__PURE__ */ Symbol("skip children");
     var REMOVE = /* @__PURE__ */ Symbol("remove item");
-    function visit(cst, visitor) {
+    function visit2(cst, visitor) {
       if ("type" in cst && cst.type === "document")
         cst = { start: cst.start, value: cst.value };
       _visit(Object.freeze([]), cst, visitor);
     }
-    visit.BREAK = BREAK;
-    visit.SKIP = SKIP;
-    visit.REMOVE = REMOVE;
-    visit.itemAtPath = (cst, path) => {
+    visit2.BREAK = BREAK;
+    visit2.SKIP = SKIP;
+    visit2.REMOVE = REMOVE;
+    visit2.itemAtPath = (cst, path) => {
       let item = cst;
       for (const [field, index] of path) {
         const tok = item?.[field];
@@ -5586,8 +5586,8 @@ var require_cst_visit = __commonJS({
       }
       return item;
     };
-    visit.parentCollection = (cst, path) => {
-      const parent = visit.itemAtPath(cst, path.slice(0, -1));
+    visit2.parentCollection = (cst, path) => {
+      const parent = visit2.itemAtPath(cst, path.slice(0, -1));
       const field = path[path.length - 1][0];
       const coll = parent?.[field];
       if (coll && "items" in coll)
@@ -5618,7 +5618,7 @@ var require_cst_visit = __commonJS({
       }
       return typeof ctrl === "function" ? ctrl(item, path) : ctrl;
     }
-    exports.visit = visit;
+    exports.visit = visit2;
   }
 });
 
@@ -7248,7 +7248,7 @@ var require_public_api = __commonJS({
         return docs;
       return Object.assign([], { empty: true }, composer$1.streamInfo());
     }
-    function parseDocument2(source, options = {}) {
+    function parseDocument3(source, options = {}) {
       const { lineCounter: lineCounter2, prettyErrors } = parseOptions(options);
       const parser$1 = new parser.Parser(lineCounter2?.addNewLine);
       const composer$1 = new composer.Composer(options);
@@ -7274,7 +7274,7 @@ var require_public_api = __commonJS({
       } else if (options === void 0 && reviver && typeof reviver === "object") {
         options = reviver;
       }
-      const doc = parseDocument2(src, options);
+      const doc = parseDocument3(src, options);
       if (!doc)
         return null;
       doc.warnings.forEach((warning) => log.warn(doc.options.logLevel, warning));
@@ -7310,7 +7310,7 @@ var require_public_api = __commonJS({
     }
     exports.parse = parse;
     exports.parseAllDocuments = parseAllDocuments;
-    exports.parseDocument = parseDocument2;
+    exports.parseDocument = parseDocument3;
     exports.stringify = stringify;
   }
 });
@@ -7334,7 +7334,7 @@ var require_dist = __commonJS({
     var lineCounter = require_line_counter();
     var parser = require_parser();
     var publicApi = require_public_api();
-    var visit = require_visit();
+    var visit2 = require_visit();
     exports.Composer = composer.Composer;
     exports.Document = Document.Document;
     exports.Schema = Schema.Schema;
@@ -7362,8 +7362,8 @@ var require_dist = __commonJS({
     exports.parseAllDocuments = publicApi.parseAllDocuments;
     exports.parseDocument = publicApi.parseDocument;
     exports.stringify = publicApi.stringify;
-    exports.visit = visit.visit;
-    exports.visitAsync = visit.visitAsync;
+    exports.visit = visit2.visit;
+    exports.visitAsync = visit2.visitAsync;
   }
 });
 
@@ -9059,7 +9059,11 @@ main().catch((e) => console.error('[Advanced Preset installer]', e));
 }
 
 // ../protocol/src/user-modules.ts
-var partEnabled = (part) => part.enabled !== false;
+var partEnabled = (part) => typeof part === "string" || part.enabled !== false;
+var itemText = (item) => typeof item === "string" ? item : item.text;
+function listItem(text, on) {
+  return on ? text : { text, enabled: false };
+}
 var USER_MODULE_PREFIX = "user-";
 var DEFAULT_KEYWORD_DEPTH = 3;
 var USER_MODULES_FORMAT = "advanced-preset.user-modules";
@@ -9165,18 +9169,18 @@ function findPoint(preset, id) {
 function findVar(preset, id) {
   return (preset.vars ?? []).find((v) => v.id === id);
 }
-function effectiveUpdate(update) {
-  const { enabled: _enabled, ...u } = update;
+function effectiveUpdate(u) {
+  if (!partEnabled(u)) return null;
   switch (u.type) {
     case "string":
-      return u.text.trim() ? u : null;
+      return u.text.trim() ? { var: u.var, type: "string", text: u.text } : null;
     case "list": {
-      const items = u.items.filter((x) => x.trim());
-      return items.length ? { ...u, items } : null;
+      const items = u.items.filter(partEnabled).map(itemText).filter((x) => x.trim());
+      return items.length ? { var: u.var, type: "list", items } : null;
     }
     case "dict": {
-      const items = u.items.filter((x) => x.key.trim()).map((x) => ({ key: x.key.trim(), value: x.value?.trim() ? x.value : null }));
-      return items.length ? { ...u, items } : null;
+      const items = u.items.filter((x) => partEnabled(x) && x.key.trim()).map((x) => ({ key: x.key.trim(), value: x.value?.trim() ? x.value : null }));
+      return items.length ? { var: u.var, type: "dict", items } : null;
     }
   }
 }
@@ -9249,15 +9253,19 @@ function normalizeRule(raw) {
   }
   return null;
 }
+var off = (raw) => raw.enabled === false ? { enabled: false } : {};
+function normalizeListItem(raw) {
+  if (typeof raw === "string") return [raw];
+  if (isObj2(raw) && typeof raw.text === "string") return [raw.enabled === false ? { text: raw.text, enabled: false } : raw.text];
+  return [];
+}
 function normalizeVarUpdate(raw) {
   if (!isObj2(raw) || typeof raw.var !== "string") return [];
-  const strings = (v) => Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
-  const off = raw.enabled === false ? { enabled: false } : {};
-  if (raw.type === "string") return [{ var: raw.var, type: "string", text: str(raw.text), ...off }];
-  if (raw.type === "list") return [{ var: raw.var, type: "list", items: strings(raw.items), ...off }];
+  if (raw.type === "string") return [{ var: raw.var, type: "string", text: str(raw.text), ...off(raw) }];
+  if (raw.type === "list") return [{ var: raw.var, type: "list", items: Array.isArray(raw.items) ? raw.items.flatMap(normalizeListItem) : [], ...off(raw) }];
   if (raw.type === "dict" && Array.isArray(raw.items)) {
-    const items = raw.items.filter(isObj2).map((x) => ({ key: str(x.key), value: typeof x.value === "string" ? x.value : null }));
-    return [{ var: raw.var, type: "dict", items, ...off }];
+    const items = raw.items.filter(isObj2).map((x) => ({ key: str(x.key), value: typeof x.value === "string" ? x.value : null, ...off(x) }));
+    return [{ var: raw.var, type: "dict", items, ...off(raw) }];
   }
   return [];
 }
@@ -9526,21 +9534,62 @@ function parseTrigger(fm, ctx, where) {
   if (e) ctx.onExpr(e, where);
   return trigger;
 }
+var OFF = "!off";
+var OFF_TAGS = [
+  { tag: OFF, resolve: (v) => v },
+  { tag: OFF, collection: "map", resolve: (v) => v },
+  { tag: OFF, collection: "seq", resolve: (v) => v }
+];
+function parseFrontmatter(yaml) {
+  const doc = (0, import_yaml2.parseDocument)(yaml, { customTags: OFF_TAGS });
+  if (doc.errors.length) return { data: void 0, marks: [], error: doc.errors[0].message };
+  const marks = [];
+  (0, import_yaml2.visit)(doc, {
+    Node(key, node, path) {
+      if (node.tag !== OFF) return;
+      const keys = path.filter(import_yaml2.isPair).map((p) => String(p.key?.value ?? p.key));
+      marks.push((0, import_yaml2.isSeq)(path[path.length - 1]) && typeof key === "number" ? { keys, index: key } : { keys });
+    }
+  });
+  return { data: doc.toJS(), marks };
+}
+function applyOffMarks(updates, marks, diag, where) {
+  for (const { keys, index } of marks) {
+    const at = { ...where, path: keys.join(".") + (index !== void 0 ? `[${index}]` : "") };
+    const [head, id, key, ...rest] = keys;
+    const u = head === "vars" && id !== void 0 && !rest.length ? updates.find((x) => x.var === id) : void 0;
+    if (head !== "vars" || id === void 0 || rest.length || key !== void 0 && index !== void 0) {
+      diag.error("`!off` switches off a variable update, a dict key or a list item (in `vars`)", at);
+    } else if (!u) {
+      continue;
+    } else if (key === void 0 && index === void 0) {
+      u.enabled = false;
+    } else if (index !== void 0 && u.type === "list") {
+      u.items[index] = listItem(String(u.items[index]), false);
+    } else if (key !== void 0 && u.type === "dict") {
+      const item = u.items.find((x) => x.key === key);
+      if (item) item.enabled = false;
+    } else {
+      diag.error("`!off` switches off a variable update, a dict key or a list item (in `vars`)", at);
+    }
+  }
+}
 function compileBody(file, src, ctx, id, kind, translation) {
   const { diag } = ctx;
   const noun = NOUN[kind];
   const { yaml, body, bodyLine } = splitFrontmatter(src);
   const where = { file, line: 1 };
   let fm = {};
+  let marks = [];
   if (yaml) {
-    try {
-      const parsed = (0, import_yaml2.parse)(yaml);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) fm = parsed;
-      else diag.error("frontmatter must be a mapping", where);
-    } catch (e) {
-      diag.error(`invalid frontmatter: ${e.message}`, where);
+    const parsed = parseFrontmatter(yaml);
+    if (parsed.error) {
+      diag.error(`invalid frontmatter: ${parsed.error}`, where);
       return void 0;
     }
+    if (parsed.data && typeof parsed.data === "object" && !Array.isArray(parsed.data)) fm = parsed.data;
+    else diag.error("frontmatter must be a mapping", where);
+    marks = parsed.marks;
   }
   if (fm.id !== void 0 && String(fm.id) !== id) diag.error(`${noun} id comes from the file name (\`${id}\`)`, { ...where, path: "id" });
   const entries = [];
@@ -9561,18 +9610,23 @@ function compileBody(file, src, ctx, id, kind, translation) {
       if (!ROLES3.includes(head.role)) diag.error(`role must be ${ROLES3.join(" | ")}`, at);
       else entry.role = head.role;
     }
-    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== "point" && k !== "role") diag.warn(`unknown @entry attribute \`${k}\` in a ${noun}`, at);
+    const enabled = i === 0 ? void 0 : part.attrs?.enabled;
+    if (enabled === "false") entry.enabled = false;
+    else if (enabled !== void 0 && enabled !== "true") diag.error("@entry `enabled` must be true or false", at);
+    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (!["point", "role", "enabled"].includes(k)) diag.warn(`unknown @entry attribute \`${k}\` in a ${noun}`, at);
     const [chunk] = tokenizeDirectives(part.text, [], part.line, (message, line) => diag.error(message, { file, ...line !== void 0 ? { line } : {} }));
     ctx.content(chunk.tokens, { file, line: part.line });
     entries.push(entry);
   });
   if (!entries.length) diag.warn(`${noun} has no entries (set \`point\` in the frontmatter or add \`@entry point=\u2026\`)`, where);
   const name = fm.name === void 0 ? id : String(fm.name);
+  const vars = ctx.varUpdates(fm.vars, { ...where, path: "vars" });
+  applyOffMarks(vars, marks, diag, where);
   const out = {
     name,
     ...fm.description !== void 0 && kind === "template" ? { description: String(fm.description).trim() } : {},
     entries,
-    vars: ctx.varUpdates(fm.vars, { ...where, path: "vars" }),
+    vars,
     trigger: parseTrigger(fm, ctx, { ...where, path: fm.trigger !== void 0 ? "trigger" : "when" })
   };
   if (fm.description !== void 0 && kind === "module") diag.warn("`description` is only shown for user module templates (use an author comment `<!--# \u2026 -->` instead)", { ...where, path: "description" });
