@@ -7,9 +7,11 @@
  * - Gemini (generateContent): `tool_calls[].signature`, which ST / TauriTavern turn into the part's
  *   `thoughtSignature`. A call without one gets `skip_thought_signature_validator`, which ST only
  *   adds by itself for model names it recognises (`gemini-3`).
- * - OpenAI-compatible: OpenRouter's `reasoning_details` (`reasoning.encrypted`, id = tool call id),
- *   which ST only builds from `signature` for the OpenRouter source and TauriTavern not at all, and
- *   Google's / CLIProxyAPI's `tool_calls[].extra_content.google.thought_signature`.
+ * - OpenAI-compatible, only with `connection.openAiSignatures`: OpenRouter's `reasoning_details`
+ *   (`reasoning.encrypted`, id = tool call id), which ST only builds from `signature` for the
+ *   OpenRouter source and TauriTavern not at all, and Google's / CLIProxyAPI's
+ *   `tool_calls[].extra_content.google.thought_signature`. Without the switch no built-in signature
+ *   is sent there and AP's messages keep ST's own `signature` field, as before.
  */
 import { builtInSignature, signatureChannel } from '@advanced-preset/protocol';
 import type { ChatMessage } from '@/st/host';
@@ -31,7 +33,7 @@ export function markOwn<T extends object>(message: T): T {
 
 /** Built-in signature for a synthetic turn's tool call, or `undefined` (channel off, wire without signatures). */
 export function syntheticSignature(ctx: GenerationContext, family: WireFamily): string | undefined {
-  if (family !== 'gemini' && family !== 'openai') return undefined;
+  if (family !== 'gemini' && !(family === 'openai' && ctx.config.connection.openAiSignatures)) return undefined;
   const id = ctx.config.connection.syntheticTurn;
   const turn = id ? ctx.preset.syntheticTurns.find((t) => t.id === id) : undefined;
   return turn ? builtInSignature(turn, signatureChannel(ctx.config.connection)) : undefined;
@@ -57,10 +59,10 @@ type Call = Record<string, any>;
 
 /**
  * Messages of a request with the signatures placed for the wire. `fallback`: built-in signatures are
- * left out (signatures received from the backend stay).
+ * left out (signatures received from the backend stay); `openAi`: OpenAI-compatible fields are used.
  */
-export function placeSignatures(messages: ChatMessage[], family: WireFamily, opts: { fallback?: boolean; source?: string } = {}): ChatMessage[] {
-  if (family !== 'gemini' && family !== 'openai') return messages;
+export function placeSignatures(messages: ChatMessage[], family: WireFamily, opts: { fallback?: boolean; source?: string; openAi?: boolean } = {}): ChatMessage[] {
+  if (family !== 'gemini' && !(family === 'openai' && opts.openAi)) return messages;
   return messages.map((m) => {
     if (m.role !== 'assistant' || !Array.isArray(m.tool_calls) || !m.tool_calls.length) return m;
     if (family === 'gemini') return geminiMessage(m, Boolean(opts.fallback));

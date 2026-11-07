@@ -8394,6 +8394,7 @@ var CONNECTION_DEFAULTS = {
   parallelTools: false,
   // `false` (not 'off'): older versions read the field as a switch.
   sendThoughtSignature: false,
+  openAiSignatures: false,
   streamToolArguments: "auto",
   maxSteps: 6,
   finalFallback: true
@@ -11484,6 +11485,7 @@ function validate(p, map, diag) {
   const checkConnection = (conn, path) => {
     if (conn.transport !== void 0 && !TRANSPORTS.includes(conn.transport)) diag.error(`unknown transport \`${conn.transport}\``, { file: M, path });
     if (conn.streamToolArguments !== void 0 && !TOOL_ARG_STREAMING.includes(conn.streamToolArguments)) diag.error(`unknown streamToolArguments \`${conn.streamToolArguments}\` (expected ${TOOL_ARG_STREAMING.join(" / ")})`, { file: M, path });
+    if (conn.openAiSignatures !== void 0 && typeof conn.openAiSignatures !== "boolean") diag.error("openAiSignatures must be true or false", { file: M, path });
     const sig = conn.sendThoughtSignature;
     if (sig !== void 0 && typeof sig !== "boolean" && !THOUGHT_SIGNATURE_CHANNELS.includes(sig)) diag.error(`unknown sendThoughtSignature \`${sig}\` (expected ${THOUGHT_SIGNATURE_CHANNELS.join(" / ")})`, { file: M, path });
     if (typeof sig === "string" && below(SIGNATURE_CHANNELS_SINCE))

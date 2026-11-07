@@ -16,6 +16,7 @@ export const CONNECTION_DEFAULTS: Omit<ConnectionConfig, 'workflow' | 'synthetic
   parallelTools: false,
   // `false` (not 'off'): older versions read the field as a switch.
   sendThoughtSignature: false,
+  openAiSignatures: false,
   streamToolArguments: 'auto',
   maxSteps: 6,
   finalFallback: true,

@@ -120,7 +120,7 @@ export function baseBody(input: DriverInput, extra: Record<string, unknown> = {}
   if (input.caller.tools.length) { body.tools = input.caller.tools; body.tool_choice = input.caller.toolChoice ?? 'auto'; }
   Object.assign(body, extra);
   const source = String(body.chat_completion_source ?? '');
-  if (Array.isArray(body.messages)) body.messages = placeSignatures(body.messages as ChatMessage[], input.family, { fallback: input.ctx.signatureFallback, source });
+  if (Array.isArray(body.messages)) body.messages = placeSignatures(body.messages as ChatMessage[], input.family, { fallback: input.ctx.signatureFallback, source, openAi: input.ctx.config.connection.openAiSignatures });
   if (input.family === 'gemini') forGemini(body, input.ctx.preset.tools.jsonStringHint);
   if (wantsToolArgStreaming(input.ctx.config.connection.streamToolArguments, input.family, body)) requestToolArgStreaming(body);
   return body;

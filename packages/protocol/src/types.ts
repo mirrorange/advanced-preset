@@ -476,6 +476,12 @@ export interface ConnectionConfig {
   syntheticTurn: string | null;
   /** Thought signature channel; `true` / `false` are the older switch (`true` = Vertex AI). */
   sendThoughtSignature: ThoughtSignatureChannel | boolean;
+  /**
+   * Thought signatures on OpenAI-compatible connections too: OpenRouter `reasoning_details` and
+   * Google's / CLIProxyAPI's `extra_content.google.thought_signature`. Off by default, so these
+   * fields never reach an endpoint that may reject them.
+   */
+  openAiSignatures: boolean;
   streamToolArguments: ToolArgStreaming;
   maxSteps: number;
   finalFallback: boolean;

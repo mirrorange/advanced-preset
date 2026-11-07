@@ -102,6 +102,7 @@ const thoughtSignature = computed({
   get: () => (config.value ? signatureChannel(config.value.connection) : 'off'),
   set: (v: ThoughtSignatureChannel) => update((c) => { c.connection.sendThoughtSignature = v === 'off' ? false : v; }),
 });
+const openAiSignatures = conn('openAiSignatures');
 const streamToolArguments = conn('streamToolArguments');
 const finalFallback = conn('finalFallback');
 const maxSteps = conn('maxSteps');
@@ -207,6 +208,7 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
             <option v-for="m in THOUGHT_SIGNATURE_CHANNELS" :key="m" :value="m">{{ t(`config.thoughtSignature.${m}`) }}</option>
           </select>
         </Field>
+        <Field :label="t('config.openAiSignatures')" :help="t('config.openAiSignatures.hint')" inline><Switch v-model="openAiSignatures" /></Field>
         <Field :label="t('config.streamToolArguments')" :help="t('config.streamToolArguments.hint')" inline>
           <select v-model="streamToolArguments" class="input">
             <option v-for="m in TOOL_ARG_STREAMING" :key="m" :value="m">{{ t(`config.streamToolArguments.${m}`) }}</option>

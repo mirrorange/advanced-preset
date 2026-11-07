@@ -21,10 +21,11 @@ const history = [
   { role: 'tool', tool_call_id: 'st_call', content: 'ok' },
 ];
 
-function bodyFor(opts: { channel?: ThoughtSignatureChannel | boolean; family?: Family; source?: string; transport?: Transport; fallback?: boolean; p?: APreset } = {}) {
-  const { channel = 'off', family = 'gemini', source = family === 'gemini' ? 'makersuite' : 'openrouter', transport = 'tool-single', fallback, p = preset } = opts;
+function bodyFor(opts: { channel?: ThoughtSignatureChannel | boolean; family?: Family; source?: string; transport?: Transport; fallback?: boolean; openAi?: boolean; p?: APreset } = {}) {
+  const { channel = 'off', family = 'gemini', source = family === 'gemini' ? 'makersuite' : 'openrouter', transport = 'tool-single', fallback, openAi = true, p = preset } = opts;
   const ctx = ctxFor(transport, 'linear', {}, p);
   ctx.config.connection.sendThoughtSignature = channel;
+  ctx.config.connection.openAiSignatures = openAi;
   if (fallback) ctx.signatureFallback = true;
   const base = { chat_completion_source: source, model: 'gemini-4-pro', stream: true, messages: history };
   const body = createDriver({ ctx, base, messages: history as never, caller: { tools: [] }, family }).body(0) as Record<string, any>;
@@ -99,6 +100,15 @@ describe('OpenAI-compatible wire', () => {
     }
   });
 
+  it('switch off (the default): no built-in signature, no extra fields', () => {
+    const { init, call } = bodyFor({ channel: 'vertex', family: 'openai', source: 'custom', openAi: false });
+    expect(init).not.toHaveProperty('reasoning_details');
+    expect(call).not.toHaveProperty('signature');
+    expect(call).not.toHaveProperty('extra_content');
+    const received = [{ role: 'assistant', content: '', tool_calls: [{ id: 'a', type: 'function', function: { name: 'x', arguments: '{}' }, signature: 'real' }] }];
+    expect(placeSignatures(received as never, 'openai', { source: 'custom' })).toEqual(received);
+  });
+
   it('Claude wire: no built-in signature', () => {
     expect(bodyFor({ channel: 'vertex', family: 'claude', source: 'claude' }).call).not.toHaveProperty('signature');
   });
@@ -142,13 +152,14 @@ describe('signature fallback', () => {
     expect(isSignatureError(new BackendError('Rate limit', 429))).toBe(false);
   });
 
-  async function run(firstStatus: number, firstError: string, channel: ThoughtSignatureChannel = 'vertex') {
+  async function run(firstStatus: number, firstError: string, channel: ThoughtSignatureChannel = 'vertex', openAi = true) {
     vi.stubGlobal('localStorage', { getItem: () => 'en' });
     const warning = vi.fn();
     (globalThis as any).toastr = { warning, error: vi.fn() };
     (globalThis as any).SillyTavern = { getContext: () => ({ chat: [], getRequestHeaders: () => ({}), isToolCallingSupported: () => true, eventSource: { emit: async () => undefined } }) };
     const ctx = ctxFor('tool-single', 'linear', {}, preset);
     ctx.config.connection.sendThoughtSignature = channel;
+    ctx.config.connection.openAiSignatures = openAi;
     const art = artifactsOf(ctx);
     const bodies: Record<string, any>[] = [];
     setNativeFetch((async (_url: string, init: RequestInit) => {
@@ -177,5 +188,6 @@ describe('signature fallback', () => {
   it('other errors, or no built-in signature sent: no retry', async () => {
     expect((await run(429, 'Rate limit')).bodies).toHaveLength(1);
     expect((await run(400, 'Corrupted thought signature.', 'off')).bodies).toHaveLength(1);
+    expect((await run(400, 'Corrupted thought signature.', 'vertex', false)).bodies).toHaveLength(1);
   });
 });
