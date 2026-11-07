@@ -59,12 +59,19 @@ export async function orchestrate(ctx: GenerationContext, base: Record<string, a
   const g = startLive(ctx, stream);
 
   if (!stream) {
+    let outcome: Outcome;
     try {
-      const outcome = await run(ctx, base, caller, g, signal ?? undefined, () => undefined);
-      return new Response(JSON.stringify(encodeJson(family, outcome)), { headers: { 'Content-Type': 'application/json' } });
+      outcome = await run(ctx, base, caller, g, signal ?? undefined, () => undefined);
     } catch (e) {
       return failure(g, e);
     }
+    // Stopped: reject like a native fetch. A JSON response would be saved by ST as a reply (empty
+    // when nothing had arrived yet) and returned by Tavern Helper's `generate` as a result.
+    if (signal?.aborted) {
+      if (handoff.pending?.ctx === ctx) handoff.pending = null;
+      throw signal.reason;
+    }
+    return new Response(JSON.stringify(encodeJson(family, outcome)), { headers: { 'Content-Type': 'application/json' } });
   }
 
   const enc = streamEncoder(family);
