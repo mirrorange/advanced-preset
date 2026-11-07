@@ -6,7 +6,7 @@ import { petals } from './helpers';
 
 beforeEach(() => {
   vi.stubGlobal('localStorage', { getItem: () => 'en' });
-  vi.stubGlobal('__AP_VERSION__', '1.10.0');
+  vi.stubGlobal('__AP_VERSION__', '1.11.0');
   (globalThis as any).SillyTavern = { getContext: () => ({ extensionSettings: {}, saveSettingsDebounced: vi.fn(), chat: [], chatMetadata: {} }) };
 });
 afterEach(() => { delete (globalThis as any).SillyTavern; vi.unstubAllGlobals(); });

@@ -24,7 +24,7 @@ vi.mock('@/store/carrier', () => ({ ensureCarrier: (p: APreset, o?: { select?: b
 vi.mock('@/store/settings', () => ({ settings: () => settingsState, save: () => {} }));
 vi.mock('@/ui/state', () => ({ refreshActivePreset: () => {} }));
 
-(globalThis as any).__AP_VERSION__ = '1.10.0';
+(globalThis as any).__AP_VERSION__ = '1.11.0';
 (globalThis as any).localStorage ??= { getItem: () => 'en' };
 const { adoptPresetFiles, onPresetChanged, presetFilesInList } = await import('@/app/preset-files');
 
