@@ -55,7 +55,15 @@ export interface UserEntry {
   role?: Role;
   /** Prompt text; supports `ap::` macros and `@if` / `@as` / `@style` directives. */
   text: string;
+  /** `false`: kept in the module but not inserted. Absent → on. */
+  enabled?: boolean;
 }
+
+/** A build variable update of a user module; `enabled: false` keeps it without applying it. */
+export type UserVarUpdate = BuildVarUpdate & { enabled?: boolean };
+
+/** Whether an entry or variable update of a user module is switched on. */
+export const partEnabled = (part: { enabled?: boolean }) => part.enabled !== false;
 
 export interface UserModule {
   id: string;
@@ -66,7 +74,7 @@ export interface UserModule {
    * Updates of the preset's build variables, applied after the preset's own modules. In dicts an
    * empty value removes the key (so a user can drop a built-in item).
    */
-  vars: BuildVarUpdate[];
+  vars: UserVarUpdate[];
   trigger: Trigger;
 }
 
@@ -209,7 +217,8 @@ export function lostRefs(preset: APreset, module: UserModule): string[] {
 }
 
 /** A user update as applied: blank items are dropped and blank dict values remove the key. */
-export function effectiveUpdate(u: BuildVarUpdate): BuildVarUpdate | null {
+export function effectiveUpdate(update: UserVarUpdate): BuildVarUpdate | null {
+  const { enabled: _enabled, ...u } = update;
   switch (u.type) {
     case 'string': return u.text.trim() ? u : null;
     case 'list': {
@@ -237,10 +246,14 @@ function insertEntry(entries: Entry[], entry: Entry): void {
 
 /**
  * The preset with enabled user modules added as `always` modules. Each user entry follows the
- * preset entries of the same region and order; user modules keep their list order.
+ * preset entries of the same region and order; user modules keep their list order. Entries and
+ * variable updates switched off inside a module are left out.
  */
 export function withUserModules(preset: APreset, modules: UserModule[], texts?: KeywordTexts): { preset: APreset; skipped: SkippedEntry[] } {
-  const enabled = modules.filter((m) => m.enabled && (m.entries.length || m.vars?.length));
+  const enabled = modules
+    .filter((m) => m.enabled)
+    .map((m) => ({ ...m, entries: m.entries.filter(partEnabled), vars: (m.vars ?? []).filter(partEnabled) }))
+    .filter((m) => m.entries.length || m.vars.length);
   if (!enabled.length) return { preset, skipped: [] };
   const skipped: SkippedEntry[] = [];
   const extraModules: Module[] = [];
@@ -255,7 +268,7 @@ export function withUserModules(preset: APreset, modules: UserModule[], texts?: 
       default: true,
       when: compileTrigger(m.trigger, texts),
       structures: [],
-      vars: (m.vars ?? []).filter((u) => findVar(preset, u.var)?.type === u.type).map(effectiveUpdate).filter((u): u is BuildVarUpdate => Boolean(u)),
+      vars: m.vars.filter((u) => findVar(preset, u.var)?.type === u.type).map(effectiveUpdate).filter((u): u is BuildVarUpdate => Boolean(u)),
     });
     for (const e of m.entries) {
       const point = findPoint(preset, e.point);
@@ -355,14 +368,15 @@ function normalizeRule(raw: unknown): TriggerRule | null {
   return null;
 }
 
-function normalizeVarUpdate(raw: unknown): BuildVarUpdate[] {
+function normalizeVarUpdate(raw: unknown): UserVarUpdate[] {
   if (!isObj(raw) || typeof raw.var !== 'string') return [];
   const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
-  if (raw.type === 'string') return [{ var: raw.var, type: 'string', text: str(raw.text) }];
-  if (raw.type === 'list') return [{ var: raw.var, type: 'list', items: strings(raw.items) }];
+  const off = raw.enabled === false ? { enabled: false } : {};
+  if (raw.type === 'string') return [{ var: raw.var, type: 'string', text: str(raw.text), ...off }];
+  if (raw.type === 'list') return [{ var: raw.var, type: 'list', items: strings(raw.items), ...off }];
   if (raw.type === 'dict' && Array.isArray(raw.items)) {
     const items = raw.items.filter(isObj).map((x) => ({ key: str(x.key), value: typeof x.value === 'string' ? x.value : null }));
-    return [{ var: raw.var, type: 'dict', items }];
+    return [{ var: raw.var, type: 'dict', items, ...off }];
   }
   return [];
 }
@@ -375,6 +389,7 @@ export function normalizeUserModule(raw: unknown): UserModule | null {
     if (!isObj(e)) return [];
     const entry: UserEntry = { id: str(e.id) || `e${i + 1}`, point: str(e.point), text: str(e.text) };
     if (ROLES.includes(e.role as Role)) entry.role = e.role as Role;
+    if (e.enabled === false) entry.enabled = false;
     return [entry];
   });
   return {

@@ -5,7 +5,7 @@
  */
 import { computed, nextTick, ref } from 'vue';
 import { Download, FilePlus, GripVertical, LayoutTemplate, Plus, Upload, TriangleAlert, X, Zap } from 'lucide-vue-next';
-import { lostRefs, parseUserModuleFile, presetUserModuleTemplates, ruleComplete, type APreset, type UserModule, type UserModuleTemplate } from '@advanced-preset/protocol';
+import { lostRefs, parseUserModuleFile, partEnabled, presetUserModuleTemplates, ruleComplete, type APreset, type UserModule, type UserModuleTemplate } from '@advanced-preset/protocol';
 import { confirmUserModuleTemplates, isTrustDeclined } from '@/app/trust';
 import { localSource, t, pt } from '@/i18n';
 import { toast } from '@/st/host';
@@ -32,7 +32,7 @@ const varLabel = (id: string) => {
   const v = props.preset.vars.find((x) => x.id === id);
   return v ? pt(props.preset, 'vars', id, 'label', v.label ?? id) : id;
 };
-const pointsOf = (m: UserModule) => [...new Set(m.entries.map((e) => e.point))].map(pointLabel).concat(m.vars.map((u) => varLabel(u.var))).join(' · ');
+const pointsOf = (m: UserModule) => [...new Set(m.entries.filter(partEnabled).map((e) => e.point))].map(pointLabel).concat(m.vars.filter(partEnabled).map((u) => varLabel(u.var))).join(' · ');
 const lost = (m: UserModule) => lostRefs(props.preset, m);
 const lostText = (m: UserModule) => t('um.lostHint', { points: lost(m).join(', ') });
 const hasTrigger = (m: UserModule) => m.trigger.rules.some(ruleComplete);

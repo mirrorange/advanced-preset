@@ -153,9 +153,11 @@
 .um-head { display: flex; align-items: center; gap: var(--ap-space-2); margin-left: -6px; }
 .um-name { flex: 1 1 auto; font-size: var(--ap-font-size-lg); font-weight: 600; }
 .um-entry { display: flex; flex-direction: column; gap: 6px; }
+.um-entry > *, .um-entry-head > * { transition: opacity 0.15s; }
 .um-entry + .um-entry { padding-top: var(--ap-space-3); border-top: 1px solid var(--ap-border); }
 .um-entry-head { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
-.um-entry-head > svg.lucide { width: 1em; height: 1em; }
+.um-entry-head > .switch { margin-right: 6px; }
+.um-entry.off .um-entry-head > :not(.switch), .um-entry.off > :not(.um-entry-head) { opacity: 0.55; }
 .um-entry-head select.grow { flex: 1 1 8em; min-width: 0; font-weight: 600; text-overflow: ellipsis; }
 .um-entry.lost .um-entry-head select.grow { color: var(--ap-warning); }
 .um-role { flex: 0 0 auto; min-width: 0; field-sizing: content; text-overflow: ellipsis; color: var(--ap-muted); font-size: var(--ap-font-size-sm); }
@@ -164,9 +166,10 @@
 .um-warn svg.lucide { width: 1.1em; height: 1.1em; }
 .um-var-label { flex: 1 1 8em; min-width: 0; padding: 0 0.35em; font-weight: 600; }
 .um-entry.lost .um-var-label { color: var(--ap-warning); }
-.um-var-row { display: grid; grid-template-columns: minmax(5em, 36%) 1fr auto; gap: 4px; align-items: start; }
-.um-var-row.list { grid-template-columns: 1fr auto; }
-.um-var-key { min-width: 0; font-weight: 600; text-overflow: ellipsis; }
+.um-var-row { display: grid; grid-template-columns: 1fr auto; gap: 4px; align-items: start; }
+.um-var-pair { display: flex; flex-direction: column; gap: 2px; padding: 2px var(--ap-space-2) var(--ap-space-2); border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface); }
+.um-var-pair-head { display: flex; align-items: center; gap: 2px; margin: 0 -6px 0 -0.35em; }
+.um-var-key { flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: var(--ap-font-size-sm); text-overflow: ellipsis; }
 .um-var-key::-webkit-calendar-picker-indicator { display: none !important; }
 textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0; max-height: 12em; resize: none; }
 .um-var-add { align-self: flex-start; }
@@ -219,7 +222,7 @@ textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0
   .segmented { grid-auto-flow: row; grid-template-columns: repeat(auto-fit, minmax(4.6em, 1fr)); }
   .segmented.dense button { padding: 0 0.4em; }
   .um-foot .btn:not(.armed) > span { display: none; }
-  .um-role { order: 1; margin-left: 1.15em; }
+  .um-role { order: 1; margin-left: calc(2.2em / 0.875 + 8px); }
 }
 
 /* Banner under ST's Chat Completion preset select (PresetBanner.vue). */

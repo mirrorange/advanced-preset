@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /** Drill-in editor of one user module: name, switch, insertion entries, variable updates, trigger and file actions. */
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { ArrowLeft, CopyPlus, Download, MapPin, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
-import { compileText, findPoint, type APreset, type BuildVarUpdate, type Role, type UserEntry, type UserModule } from '@advanced-preset/protocol';
+import { ArrowLeft, CopyPlus, Download, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
+import { compileText, findPoint, partEnabled, type APreset, type Role, type UserEntry, type UserModule, type UserVarUpdate } from '@advanced-preset/protocol';
 import { t, pt } from '@/i18n';
 import { save } from '@/store/settings';
 import { duplicateUserModule, exportUserModules, newEntry, removeUserModule } from '@/store/user-modules';
@@ -37,6 +37,11 @@ function setRole(e: UserEntry, role: string) {
   if (role) e.role = role as Role;
   else delete e.role;
 }
+/** Only the off state is stored, so switching back on leaves the data as it was. */
+function setPartEnabled(part: { enabled?: boolean }, on: boolean) {
+  if (on) delete part.enabled;
+  else part.enabled = false;
+}
 const errors = (e: UserEntry) => compileText(e.text).errors;
 const errorText = (e: UserEntry) => errors(e).map((x) => (x.line ? t('um.lineError', { line: x.line, message: x.message }) : x.message)).join('\n');
 
@@ -55,7 +60,7 @@ function addVar(id: string) {
   const decl = props.preset.vars.find((v) => v.id === id);
   if (varPicker.value) varPicker.value.value = '';
   if (!decl) return;
-  const u: BuildVarUpdate = decl.type === 'string' ? { var: id, type: 'string', text: '' }
+  const u: UserVarUpdate = decl.type === 'string' ? { var: id, type: 'string', text: '' }
     : decl.type === 'list' ? { var: id, type: 'list', items: [''] }
     : { var: id, type: 'dict', items: [{ key: '', value: '' }] };
   props.module.vars.push(u);
@@ -83,9 +88,9 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
     </header>
 
     <Section :title="t('um.content')" :help="t('um.content.help')">
-      <div v-for="(e, i) in module.entries" :key="e.id" class="um-entry" :class="{ lost: missing(e) }">
+      <div v-for="(e, i) in module.entries" :key="e.id" class="um-entry" :class="{ lost: missing(e), off: !partEnabled(e) }">
         <div class="um-entry-head">
-          <MapPin class="faint" />
+          <Switch :model-value="partEnabled(e)" :label="t('panel.enabled')" @update:model-value="setPartEnabled(e, $event)" />
           <select v-model="e.point" class="input bare grow" :aria-label="t('um.point')">
             <option v-for="p in points" :key="p.id" :value="p.id">{{ p.label }}</option>
             <option v-if="missing(e)" :value="e.point" disabled>{{ t('um.pointMissing', { id: e.point }) }}</option>
@@ -104,7 +109,7 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
     </Section>
 
     <Section v-if="vars.length || module.vars.length" :title="t('um.bv')" :help="t('um.bv.help')">
-      <VarUpdateEditor v-for="(u, i) in module.vars" :key="u.var" :preset="preset" :update="u" @remove="module.vars.splice(i, 1)" />
+      <VarUpdateEditor v-for="(u, i) in module.vars" :key="u.var" :preset="preset" :update="u" @toggle="setPartEnabled(u, $event)" @remove="module.vars.splice(i, 1)" />
       <label v-if="unusedVars.length" class="btn ghost add picker">
         <Plus />{{ t('um.bv.add') }}
         <select ref="varPicker" :aria-label="t('um.bv.add')" @change="addVar(($event.target as HTMLSelectElement).value)">
