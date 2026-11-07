@@ -689,6 +689,37 @@ x
     expect(preset!.userModuleTemplates).toEqual([]);
   });
 
+  it('carries switched-off entries, variable updates, keys and items', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + '  tags: list\n  note: string\n',
+      'user-modules/parts.md': `---
+vars:
+  questions:
+    a: Kept?
+    b: !off Dropped?
+  tags: [one, !off two]
+  note: !off Quiet note.
+---
+<!-- @entry point=guide enabled=false -->
+Off.
+<!-- @entry point=intro-end -->
+On.
+`,
+      'user-modules/bad.md': '---\nname: !off x\npoint: guide\n---\nx\n<!-- @entry point=guide enabled=maybe -->\ny\n',
+    }));
+    const errors = diag.errors.map((e) => `${e.file}: ${e.message}`);
+    expect(errors.filter((e) => e.startsWith('user-modules/parts.md'))).toEqual([]);
+    expect(errors.join('\n')).toMatch(/bad\.md: `!off` switches off a variable update/);
+    expect(errors.join('\n')).toMatch(/bad\.md: @entry `enabled` must be true or false/);
+    const parts = preset!.userModules.find((m) => m.id === 'parts')!;
+    expect(parts.entries).toEqual([{ point: 'guide', text: 'Off.', enabled: false }, { point: 'intro-end', text: 'On.' }]);
+    expect(parts.vars).toEqual([
+      { var: 'questions', type: 'dict', items: [{ key: 'a', value: 'Kept?' }, { key: 'b', value: 'Dropped?', enabled: false }] },
+      { var: 'tags', type: 'list', items: ['one', { text: 'two', enabled: false }] },
+      { var: 'note', type: 'string', text: 'Quiet note.', enabled: false },
+    ]);
+  });
+
   it('previews bundled modules as a fresh install gets them', async () => {
     const { bundledModules, preview } = await import('../src/preview');
     const { preset } = build(tree({

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /** Drill-in editor of one user module: name, switch, insertion entries, variable updates, trigger and file actions. */
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { ArrowLeft, CopyPlus, Download, MapPin, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
-import { compileText, findPoint, type APreset, type BuildVarUpdate, type Role, type UserEntry, type UserModule } from '@advanced-preset/protocol';
+import { ArrowLeft, CopyPlus, Download, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
+import { compileText, findPoint, partEnabled, setPartEnabled, type APreset, type Role, type UserEntry, type UserModule, type UserVarUpdate } from '@advanced-preset/protocol';
 import { t, pt } from '@/i18n';
 import { save } from '@/store/settings';
 import { duplicateUserModule, exportUserModules, newEntry, removeUserModule } from '@/store/user-modules';
@@ -55,7 +55,7 @@ function addVar(id: string) {
   const decl = props.preset.vars.find((v) => v.id === id);
   if (varPicker.value) varPicker.value.value = '';
   if (!decl) return;
-  const u: BuildVarUpdate = decl.type === 'string' ? { var: id, type: 'string', text: '' }
+  const u: UserVarUpdate = decl.type === 'string' ? { var: id, type: 'string', text: '' }
     : decl.type === 'list' ? { var: id, type: 'list', items: [''] }
     : { var: id, type: 'dict', items: [{ key: '', value: '' }] };
   props.module.vars.push(u);
@@ -83,9 +83,9 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
     </header>
 
     <Section :title="t('um.content')" :help="t('um.content.help')">
-      <div v-for="(e, i) in module.entries" :key="e.id" class="um-entry" :class="{ lost: missing(e) }">
+      <div v-for="(e, i) in module.entries" :key="e.id" class="um-entry" :class="{ lost: missing(e), off: !partEnabled(e) }">
         <div class="um-entry-head">
-          <MapPin class="faint" />
+          <Switch :model-value="partEnabled(e)" :label="t('panel.enabled')" @update:model-value="setPartEnabled(e, $event)" />
           <select v-model="e.point" class="input bare grow" :aria-label="t('um.point')">
             <option v-for="p in points" :key="p.id" :value="p.id">{{ p.label }}</option>
             <option v-if="missing(e)" :value="e.point" disabled>{{ t('um.pointMissing', { id: e.point }) }}</option>
