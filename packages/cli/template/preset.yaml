@@ -6,6 +6,8 @@ version: 0.1.0
 author: __AUTHOR__
 description: A minimal Advanced Preset.
 minAdvancedPreset: 1.4.0
+# Once published: where copies installed from a file look for updates (needs Advanced Preset 1.11.0).
+# updateUrl: https://github.com/<user>/<repo>/blob/main/dist/__PRESET_ID__.apreset.json
 
 actors:
   narrator: { name: Narrator, prefix: "{{ap::name::narrator}}: " }

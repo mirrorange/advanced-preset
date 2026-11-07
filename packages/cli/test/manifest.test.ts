@@ -99,6 +99,17 @@ describe('manifest fragments', () => {
     expect(preset!.version).toBe('1.0.0');
   });
 
+  it('writes updateUrl into the artifact and rejects anything but an http(s) URL', () => {
+    const ok = build(tree({ 'preset.yaml': `${ROOT}updateUrl: https://github.com/me/demo/blob/main/dist/demo.apreset.json\n${REGIONS}` }));
+    expect(ok.diag.errors).toEqual([]);
+    expect(ok.preset!.updateUrl).toBe('https://github.com/me/demo/blob/main/dist/demo.apreset.json');
+    expect(build(single()).preset!.updateUrl).toBeUndefined();
+    const bad = build(tree({ 'preset.yaml': `${ROOT}updateUrl: file:///etc/passwd\n${REGIONS}` }));
+    expect(bad.diag.errors).toMatchObject([{ path: 'updateUrl', message: 'updateUrl must be an http(s) URL' }]);
+    const fragment = build(tree({ 'preset.yaml': ROOT + REGIONS, 'manifest/meta.yaml': 'updateUrl: https://example.com/x.json\n' }));
+    expect(fragment.diag.errors).toMatchObject([{ path: 'updateUrl', message: '`updateUrl` may only be set in preset.yaml' }]);
+  });
+
   it('reports invalid and non-mapping fragments; ignores empty ones', () => {
     const bad = build(tree({ 'preset.yaml': ROOT + REGIONS, 'manifest/bad.yaml': 'a: [1, 2\n' }));
     expect(bad.preset).toBeUndefined();

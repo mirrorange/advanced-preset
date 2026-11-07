@@ -552,6 +552,11 @@ export interface APreset {
   author?: string;
   description?: string;
   minAdvancedPreset?: string;
+  /**
+   * Where newer builds of the preset are published (an http(s) URL of a preset file or artifact).
+   * Copies installed without a URL (from a file, or a preset file AP took over) check it for updates.
+   */
+  updateUrl?: string;
   /** Content hash of the artifact (sha256 of the canonical JSON without `hash`). */
   hash: string;
 

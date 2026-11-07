@@ -43,7 +43,7 @@ export interface APSettings {
   presets: Record<string, PresetState>;
   /** User-installed artifacts (built-ins are shipped in dist/presets). */
   installed: Record<string, APreset>;
-  /** Where installed artifacts came from (URL), for one-click updates. */
+  /** Where installed artifacts came from (URL), for updates (others update from their `updateUrl`). */
   sources: Record<string, string>;
   ui: {
     primary?: string;
@@ -58,6 +58,8 @@ export interface APSettings {
   quickReplies?: Record<string, { presetId: string; hash: string }>;
   /** Preset files in ST's list whose preset the user declined to install (I-171): ST preset name → artifact hash. */
   declinedPresetFiles?: Record<string, string>;
+  /** Updates found at startup whose preset the user declined to trust: preset id → artifact hash. */
+  declinedUpdates?: Record<string, string>;
 }
 
 const defaults = (): APSettings => ({

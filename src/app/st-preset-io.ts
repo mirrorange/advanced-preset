@@ -11,7 +11,7 @@ import { unwrapPresetFile } from '@advanced-preset/protocol';
 import { toast } from '@/st/host';
 import { getPreset } from '@/store/presets';
 import { activatePreset, activeCarrierPresetId } from '@/store/carrier';
-import { installArtifact } from './install';
+import { installArtifact, isApUpdating } from './install';
 import { isTrustDeclined } from './trust';
 import { exportPreset } from './bundled-modules';
 import { openPanel, refreshActivePreset } from '@/ui/state';
@@ -48,7 +48,7 @@ async function onImport(input: HTMLInputElement, file: File): Promise<void> {
     toast('success', t('presets.installed'), presetName(preset));
     openPanel('presets');
   } catch (e) {
-    if (isTrustDeclined(e)) toast('info', e.message, t('app.name'));
+    if (isTrustDeclined(e) || isApUpdating(e)) toast('info', e.message, t('app.name'));
     else toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
   }
 }
