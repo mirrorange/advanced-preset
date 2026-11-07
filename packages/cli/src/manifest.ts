@@ -15,7 +15,7 @@ export const MANIFEST_FILE = 'preset.yaml';
 /** Fragment paths: any depth under `manifest/`, no dot-files or dot-directories. */
 export const FRAGMENT_RE = /^manifest\/(?:[^/.][^/]*\/)*[^/.][^/]*\.ya?ml$/;
 /** Keys that identify the preset; they stay in `preset.yaml` so it alone tells what and which version it is. */
-export const ROOT_ONLY_KEYS = ['formatVersion', 'id', 'name', 'version', 'author', 'description', 'minAdvancedPreset'];
+export const ROOT_ONLY_KEYS = ['formatVersion', 'id', 'name', 'version', 'author', 'description', 'minAdvancedPreset', 'updateUrl'];
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => Boolean(v) && typeof v === 'object' && !Array.isArray(v);

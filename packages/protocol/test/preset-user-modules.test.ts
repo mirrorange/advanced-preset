@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   localizeUserModuleSource, presetTemplates, presetUserModules, presetUserModuleTemplates, upgradeArtifact, userModuleFingerprint,
   userModuleFromSource, userModuleSourceFingerprint, userModuleToSource,
-  type APreset, type UserModuleSource,
+  type APreset, type UserModuleSource, type UserVarUpdate,
 } from '../src';
 
 const tpl: UserModuleSource = {
@@ -89,6 +89,13 @@ describe('preset user modules', () => {
     expect(userModuleFingerprint(reordered)).toBe(fp);
     expect(userModuleFingerprint({ ...m, name: 'Other' })).not.toBe(fp);
     expect(userModuleFingerprint({ ...m, entries: [{ ...m.entries[0]!, role: 'user' }, m.entries[1]!] })).not.toBe(fp);
+    // Switching an entry or a variable update off is a change of the module; switched on is the default.
+    expect(userModuleFingerprint({ ...m, entries: [{ ...m.entries[0]!, enabled: false }, m.entries[1]!] })).not.toBe(fp);
+    expect(userModuleFingerprint({ ...m, vars: [{ ...m.vars[0]!, enabled: false }] })).not.toBe(fp);
+    const dictVar = m.vars[0] as Extract<UserVarUpdate, { type: 'dict' }>;
+    expect(userModuleFingerprint({ ...m, vars: [{ ...dictVar, items: [{ ...dictVar.items[0]!, enabled: false }] }] })).not.toBe(fp);
+    expect(userModuleFingerprint({ ...m, vars: [{ ...dictVar, items: [{ ...dictVar.items[0]!, enabled: true }] }] })).toBe(fp);
+    expect(userModuleFingerprint({ ...m, entries: [{ ...m.entries[0]!, enabled: true }, m.entries[1]!], vars: [{ ...m.vars[0]!, enabled: true }] })).toBe(fp);
     // Translations and descriptions change the source fingerprint, not the module's.
     const src = userModuleSourceFingerprint(tpl);
     expect(userModuleSourceFingerprint({ ...tpl, locales: {} })).not.toBe(src);
@@ -102,5 +109,10 @@ describe('preset user modules', () => {
     expect(src.entries).toEqual(tpl.entries);
     expect(userModuleToSource({ ...m, enabled: true })).not.toHaveProperty('enabled');
     expect(userModuleFingerprint(src)).toBe(userModuleFingerprint(m));
+    const off = { ...m, entries: [{ ...m.entries[0]!, enabled: false }, m.entries[1]!], vars: [{ ...m.vars[0]!, enabled: false }] };
+    const offSrc = userModuleToSource(off);
+    expect(offSrc.entries.map((e) => e.enabled)).toEqual([false, undefined]);
+    expect(offSrc.vars[0]!.enabled).toBe(false);
+    expect(userModuleFingerprint(userModuleFromSource(offSrc, 'abc'))).toBe(userModuleFingerprint(off));
   });
 });

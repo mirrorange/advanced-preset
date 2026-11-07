@@ -1,9 +1,10 @@
 /**
  * Streaming of tool-call arguments on Gemini's generateContent API. Other wire formats carry argument
  * deltas by default; generateContent returns every function call whole unless
- * `toolConfig.functionCallingConfig.streamFunctionCallArguments` is set, which only Vertex AI accepts
- * (Gemini 3+). The Gemini API offers argument streaming through its Interactions API instead, which
- * SillyTavern does not use. The reader rebuilds the resulting `partialArgs` fragments (see `partial-args.ts`).
+ * `toolConfig.functionCallingConfig.streamFunctionCallArguments` is set, which only Vertex AI honours
+ * (Gemini 3+; the Gemini API ignores it without an error). The Gemini API offers argument streaming
+ * through its Interactions API instead, which SillyTavern does not use. The reader rebuilds the
+ * resulting `partialArgs` fragments (see `partial-args.ts`).
  *
  * The backend builds the Gemini request, so the flag has to travel through it:
  * - `stream_function_call_arguments: true` — the request field SillyTavern / TauriTavern read once
@@ -18,12 +19,16 @@ import { isTauriTavern, type WireFamily } from '@/st/host';
 export const STREAM_ARGS_FIELD = 'stream_function_call_arguments';
 
 /**
- * Whether to ask for streamed arguments: `on` for every Gemini-shaped connection (e.g. a custom
- * endpoint backed by Vertex AI), `auto` only where Google documents support — the Vertex AI source.
+ * Whether to ask for streamed arguments: `on` for every Gemini-shaped connection; `auto` wherever
+ * the upstream may be Vertex AI — the Vertex AI source, a custom generateContent endpoint, or the
+ * Gemini API source behind a reverse proxy. The Gemini API (AI Studio) silently ignores the flag,
+ * so asking on a connection that turns out not to be Vertex AI does no harm.
  */
-export function wantsToolArgStreaming(mode: ToolArgStreaming, family: WireFamily, source: string): boolean {
+export function wantsToolArgStreaming(mode: ToolArgStreaming, family: WireFamily, body: Record<string, any>): boolean {
   if (mode === 'off' || family !== 'gemini') return false;
-  return mode === 'on' || source === 'vertexai';
+  if (mode === 'on') return true;
+  const source = String(body.chat_completion_source ?? '');
+  return source === 'vertexai' || source === 'custom' || (source === 'makersuite' && Boolean(String(body.reverse_proxy ?? '').trim()));
 }
 
 /** OpenAI `tool_choice` → Gemini `functionCallingConfig`. */

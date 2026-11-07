@@ -28,6 +28,9 @@ export const AP_MIRRORS = [
   'https://codeberg.org/mirrorange/advanced-preset',
 ] as const;
 
+/** A preset's `updateUrl`: an absolute http(s) URL. */
+export const isUpdateUrl = (u: unknown): u is string => typeof u === 'string' && /^https?:\/\/[^\s/?#]+[^\s]*$/i.test(u.trim());
+
 /** Identifier of the notice prompt; its content starts with the marker, which AP removes from prompts. */
 export const INSTALL_NOTICE_ID = 'ap_install_notice';
 export const INSTALL_NOTICE_MARK = '⟦ap:install-notice⟧';

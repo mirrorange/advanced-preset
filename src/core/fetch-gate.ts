@@ -31,6 +31,10 @@ export function installFetchGate(): void {
         delete body[MARKER];
         ctx.claimed = true;
         try {
+          // Like a native fetch, a request stopped before it is sent rejects. Tavern Helper's prompt
+          // viewer stops its probe generation right at CHAT_COMPLETION_SETTINGS_READY: a response here
+          // would make ST start (and keep) a reply message.
+          init.signal?.throwIfAborted();
           return await orchestrate(ctx, body, init.signal);
         } finally {
           registry.release(id);

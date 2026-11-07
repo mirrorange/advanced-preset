@@ -12,15 +12,15 @@
 
 预设更新时，前两层随预设更新，第三层保留。所以你可以放心地改进推荐配置，用户的个人设置不会丢。
 
-花瓣有 8 套推荐配置（Gemini、DeepSeek 工具 / 预填充、三档 Claude、其他模型的结构化 / 工具），默认是“其他（结构化输出）”。一套推荐配置大致是这样：
+花瓣有 10 套推荐配置（Gemini 的 Vertex AI / AI Studio / 其他渠道、DeepSeek 工具 / 预填充、三档 Claude、其他模型的结构化 / 工具），默认是“其他（结构化输出）”。一套推荐配置大致是这样：
 
 ```yaml
 configurations:
   - id: gemini
-    name: Gemini
+    name: Gemini (Vertex AI)
     diff:
       sampling: { use_sysprompt: false }
-      connection: { transport: tool-single, sendThoughtSignature: true, parallelTools: true, syntheticTurn: init-skip-thought }
+      connection: { transport: tool-single, sendThoughtSignature: vertex, parallelTools: true, syntheticTurn: init-skip-thought }
       modules: { skip-thought: true }
 ```
 

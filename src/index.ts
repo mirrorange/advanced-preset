@@ -2,7 +2,7 @@
  * Advanced Preset — SillyTavern extension entry. Wires the generation pipeline (§5) into ST events,
  * restores state, and mounts the UI.
  */
-import { st, loadHostModules, type ChatMessage } from '@/st/host';
+import { st, loadHostModules, toast, type ChatMessage } from '@/st/host';
 import { settings } from '@/store/settings';
 import { listPresets, loadBuiltins } from '@/store/presets';
 import { migratePresetState } from '@/store/config';
@@ -24,6 +24,8 @@ import { installImpersonate } from '@/app/impersonate';
 import { installPresetIo } from '@/app/st-preset-io';
 import { syncBundledModules } from '@/app/bundled-modules';
 import { adoptPresetFiles, onPresetChanged } from '@/app/preset-files';
+import { checkPresetUpdates, dropSupersededCopies, resumePendingInstall } from '@/app/install';
+import { presetName, t } from '@/i18n';
 import { installQuickReplies } from '@/app/quick-replies';
 import { mountUi } from '@/ui';
 import { ui } from '@/ui/state';
@@ -74,6 +76,8 @@ async function init(): Promise<void> {
   installAnnotations();
   await loadHostModules();
   await loadBuiltins();
+  // A built-in the user had installed by hand, now shipped in a newer version: back to the built-in.
+  const superseded = dropSupersededCopies();
   for (const { preset } of listPresets()) {
     const notes = migratePresetState(preset);
     if (notes.length) debugLog('migrate', { id: preset.id, notes });
@@ -102,11 +106,15 @@ async function init(): Promise<void> {
     // preset's Carrier twice on every load (dropping what only the dev build has, such as new scripts).
     await Promise.race([startDevSource(), new Promise((r) => setTimeout(r, 3000))]);
     await syncCarriers();
+    for (const p of superseded) toast('info', t('presets.backToBuiltin', { version: p.version }), presetName(p));
     // Bundled user modules may ask which copy to keep, and preset files imported before AP was
-    // installed may ask for trust: only once ST's UI is up, without holding up the rest.
+    // installed and preset updates may ask for trust: only once ST's UI is up, without holding up
+    // the rest. First an install that waited for AP to update itself.
     void (async () => {
+      await resumePendingInstall();
       for (const { preset } of listPresets()) await syncBundledModules(preset);
       await adoptPresetFiles();
+      await checkPresetUpdates();
     })();
     syncGlobalRefs({ reload: true });
     // The Quick Reply extension has loaded its sets by now.

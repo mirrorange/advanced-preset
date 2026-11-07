@@ -63,6 +63,9 @@ input[type='range'] { width: 100%; accent-color: var(--ap-primary); }
 .switch input:checked + .track { background: var(--ap-primary); border-color: transparent; }
 .switch input:checked ~ .thumb { transform: translateX(0.95em); background: var(--ap-on-primary); }
 .switch input:focus-visible + .track { box-shadow: var(--ap-ring); }
+.switch.sm { width: 1.8em; height: 1.05em; }
+.switch.sm .thumb { top: 0.15em; left: 0.15em; width: 0.75em; height: 0.75em; }
+.switch.sm input:checked ~ .thumb { transform: translateX(0.75em); }
 
 /* Segmented */
 .segmented { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 2px; border-radius: var(--ap-radius-md); background: var(--ap-surface-2); }

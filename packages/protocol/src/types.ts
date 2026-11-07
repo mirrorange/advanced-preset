@@ -34,6 +34,18 @@ export const TRANSPORTS: readonly Transport[] = ['prefill', 'plaintext', 'struct
  */
 export type ToolArgStreaming = 'auto' | 'on' | 'off';
 export const TOOL_ARG_STREAMING: readonly ToolArgStreaming[] = ['auto', 'on', 'off'];
+
+/**
+ * Where the built-in thought signatures of synthetic turns come from. A Gemini thought signature
+ * only validates on the backend that issued it, so the channel names the real upstream — chosen in
+ * the configuration, never guessed from SillyTavern's connection (proxies and routers hide it).
+ */
+export type ThoughtSignatureChannel = 'off' | 'vertex' | 'aistudio';
+export const THOUGHT_SIGNATURE_CHANNELS: readonly ThoughtSignatureChannel[] = ['off', 'vertex', 'aistudio'];
+/** Built-in thought signatures by channel. */
+export type ThoughtSignatures = Partial<Record<Exclude<ThoughtSignatureChannel, 'off'>, string>>;
+/** First Advanced Preset version with signature channels (older versions only know the boolean switch). */
+export const SIGNATURE_CHANNELS_SINCE = '1.11.0';
 export type Style = 'dialogue' | 'imperative';
 export type Role = 'system' | 'user' | 'assistant';
 export type ActorId = string;
@@ -381,7 +393,8 @@ export interface SyntheticTurn {
   label: string;
   user: string;
   tool: { name: string; description: string };
-  thoughtSignature?: string;
+  /** Built-in thought signatures of the tool call by channel; a plain string is the Vertex AI one (older artifacts). */
+  thoughtSignature?: string | ThoughtSignatures;
   /** Tool results by tool mode. `{{first}}` = first stage tool. */
   response: { single: string; multi: string; parallel: string };
 }
@@ -461,7 +474,14 @@ export interface ConnectionConfig {
   forceTool: boolean;
   parallelTools: boolean;
   syntheticTurn: string | null;
-  sendThoughtSignature: boolean;
+  /** Thought signature channel; `true` / `false` are the older switch (`true` = Vertex AI). */
+  sendThoughtSignature: ThoughtSignatureChannel | boolean;
+  /**
+   * Thought signatures on OpenAI-compatible connections too: OpenRouter `reasoning_details` and
+   * Google's / CLIProxyAPI's `extra_content.google.thought_signature`. Off by default, so these
+   * fields never reach an endpoint that may reject them.
+   */
+  openAiSignatures: boolean;
   streamToolArguments: ToolArgStreaming;
   maxSteps: number;
   finalFallback: boolean;
@@ -532,6 +552,11 @@ export interface APreset {
   author?: string;
   description?: string;
   minAdvancedPreset?: string;
+  /**
+   * Where newer builds of the preset are published (an http(s) URL of a preset file or artifact).
+   * Copies installed without a URL (from a file, or a preset file AP took over) check it for updates.
+   */
+  updateUrl?: string;
   /** Content hash of the artifact (sha256 of the canonical JSON without `hash`). */
   hash: string;
 

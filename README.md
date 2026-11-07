@@ -39,7 +39,7 @@ https://github.com/mirrorange/advanced-preset
 
 | | |
 | --- | --- |
-| **传输** | 预填充 · 纯文本 · 结构化输出（`json_schema`）· 单步工具 · 多步工具；工具参数流式输出（含 Vertex AI Gemini 3+ 的 `streamFunctionCallArguments`） |
+| **传输** | 预填充 · 纯文本 · 结构化输出（`json_schema`）· 单步工具 · 多步工具；工具参数流式输出（含 Vertex AI Gemini 3+ 的 `streamFunctionCallArguments`）；Gemini 思维签名按配置的渠道（Vertex AI / AI Studio）发送，可选支持 OpenRouter 与 CLIProxyAPI，被拒绝时自动回退 |
 | **工作流** | 由预设声明的阶段序列（如 linear / iterative / edit / task），流式展示每个阶段 |
 | **结构** | 回复、代写、选项、记忆、回顾、事件摘要、自定义结构，以卡片显示在消息下方 |
 | **元指令** | `@叙述者 …` 触发任务回合；代写按钮直接走元指令 |
@@ -59,6 +59,7 @@ https://github.com/mirrorange/advanced-preset
 - 内容支持 `{{ap::…}}`、SillyTavern 宏与 `<!-- @if … -->` 等指令；可按条目选择消息角色。
 - 触发条件全部或任一满足时生效：传输方式、工作流、参数、模组开关、关键词（本轮输入或最近 N 条消息，可用正则）或任意表达式；不设条件即始终生效。
 - 可更新预设声明的构建变量（如「规划要点」）：字符串追加、列表添加项、字典设置键；与内置同键时以用户为准，值留空即移除该内置项。
+- 每个插入位置、每条变量更新及其中的每个键 / 每一项都可单独开关，方便比较不同组合；开关状态随模组一同导出，预设也可在 `user-modules/` 中预设这些开关。
 - 可导出为 `*.ap-modules.json` 分享或备份；导入较旧版本预设的导出文件时按迁移表更新。
 - 预设更新后模组原样保留：插入位置被改名时自动跟随，被移除时标出警告、该段内容暂不插入。
 
@@ -130,7 +131,7 @@ pnpm typecheck    # vue-tsc
 1. 构建、类型检查、测试；`dist/` 与已提交的不同时由 `github-actions[bot]` 自动提交 `build: rebuild dist`；
 2. 若 CLI（`packages/`、`pnpm-lock.yaml`）自上一个 dev 版本以来有变化，以 `dev` 标签发布预发布版本到 npm，版本号为 `<下一补丁版本>-dev.<UTC 时间>.g<提交>`（如 `1.7.1-dev.20261025083000.g7ca1ca3`；若版本号已升但未发布，则用该版本号）。
 
-预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.10.0` 这类范围，也不会移动 `latest`。
+预设仓库的 `dev` 分支可把依赖写为 `"advanced-preset": "dev"`，用 `npm update advanced-preset` 跟随最新 dev 版本（`npm i -D advanced-preset@dev` 会写入固定版本号，不建议）；合并进 `main` 前改回已发布的版本范围。预发布版本不会匹配 `^1.11.0` 这类范围，也不会移动 `latest`。
 
 ## 📄 许可
 

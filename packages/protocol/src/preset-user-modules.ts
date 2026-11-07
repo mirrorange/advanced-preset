@@ -9,8 +9,8 @@
  * ordinary, fully editable user module; a whole file may be translated per UI locale.
  */
 import { cloneData } from './clone';
-import { emptyTrigger, type Trigger, type UserEntry, type UserModule } from './user-modules';
-import type { APreset, BuildVarUpdate } from './types';
+import { emptyTrigger, normalizeVarUpdate, type Trigger, type UserEntry, type UserModule, type UserVarUpdate } from './user-modules';
+import type { APreset } from './types';
 
 /** An entry of a source: a user module entry without its id. */
 export type UserModuleSourceEntry = Omit<UserEntry, 'id'>;
@@ -22,7 +22,7 @@ export interface UserModuleSourceBody {
   description?: string;
   /** Raw text as the user will edit it (author comments `<!--# … -->` included). */
   entries: UserModuleSourceEntry[];
-  vars: BuildVarUpdate[];
+  vars: UserVarUpdate[];
   trigger: Trigger;
 }
 
@@ -82,7 +82,7 @@ export function userModuleToSource(m: UserModule): UserModuleSource {
     id: m.id,
     name: m.name,
     ...(m.enabled ? {} : { enabled: false }),
-    entries: m.entries.map(({ point, role, text }) => ({ point, ...(role ? { role } : {}), text })),
+    entries: m.entries.map(({ point, role, text, enabled }) => ({ point, ...(role ? { role } : {}), text, ...(enabled === false ? { enabled } : {}) })),
     vars: cloneData(m.vars ?? []),
     trigger: cloneData(m.trigger),
   };
@@ -99,14 +99,15 @@ function stable(v: unknown): unknown {
 }
 
 /**
- * What a module says, independent of ids, enabled state and description: name, entries (point,
- * role, text), variable updates and trigger. Two modules with the same fingerprint behave alike.
+ * What a module says, independent of ids, the module's enabled state and description: name, entries
+ * (point, role, text, switched off), variable updates (with switched-off parts) and trigger. Two modules with the same
+ * fingerprint behave alike.
  */
 export function userModuleFingerprint(m: UserModule | UserModuleSourceBody): string {
   return JSON.stringify(stable({
     name: m.name,
-    entries: m.entries.map((e) => ({ point: e.point, role: e.role ?? null, text: e.text })),
-    vars: m.vars ?? [],
+    entries: m.entries.map((e) => ({ point: e.point, role: e.role ?? null, text: e.text, ...(e.enabled === false ? { enabled: false } : {}) })),
+    vars: (m.vars ?? []).flatMap(normalizeVarUpdate),
     trigger: m.trigger ?? emptyTrigger(),
   }));
 }

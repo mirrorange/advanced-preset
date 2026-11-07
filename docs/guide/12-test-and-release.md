@@ -22,7 +22,7 @@
 - 加了新模组、新功能：次版本 +1（`7.6.1` → `7.7.0`）；
 - 大改结构、改了 id：主版本 +1（`7.7.0` → `8.0.0`），并写好迁移。
 
-如果用到了新版 AP 才有的功能，把 `minAdvancedPreset` 设为那个 AP 版本，旧版 AP 的用户安装时会被提示升级。
+如果用到了新版 AP 才有的功能，把 `minAdvancedPreset` 设为那个 AP 版本。旧版 AP 的用户安装或更新这个预设时，AP 会先尝试更新自己，更新后自动继续安装；更新不了时提示用户升级。
 
 ## 发布到 GitHub
 
@@ -35,7 +35,11 @@
 用户的安装方式：
 
 - **链接导入**：AP 面板 → 预设 → 导入**链接**，填入仓库中预设文件的地址，例如 `https://github.com/<用户名>/<仓库名>/blob/main/dist/<id>.apreset.json`（AP 会自动换成 raw 地址）。这个地址始终指向最新提交的版本；
-- **从来源更新**：通过链接安装的预设，以后可以在“预设”页一键“从来源更新”；
+- **自动更新**：通过链接安装的预设，AP 每次启动时会检查这个链接，有更高版本时自动更新（也可以在“预设”页点“从来源更新”）。想让**以文件安装**的用户也能自动更新，在 `preset.yaml` 里写上 `updateUrl`，指向仓库中的预设文件：
+
+  ```yaml
+  updateUrl: https://github.com/<用户名>/<仓库名>/blob/main/dist/<id>.apreset.json
+  ```
 - **文件导入**：下载 `.apreset.json`（比如从 Release 页面）后导入文件；
 - **还没有安装 AP 的用户**：`.apreset.json` 同时是一个标准的 ST 预设，可以直接用 ST 对话补全预设的导入按钮导入。此时预设里只有一条提示词，让 AI 告诉用户需要先安装 Advanced Preset 插件、怎么安装；如果用户装了酒馆助手，启用预设附带的安装脚本后会自动从 GitHub / GitLab / Codeberg 安装（或更新）AP。刷新页面后 AP 会自动接管这个预设，换成 `AP · <预设名>`。不想附带安装脚本时，在 `preset.yaml` 里写 `build: { installer: false }`，或构建时加 `--no-installer`（详见参考 [preset-file.md](../reference/preset-file.md)）。
 

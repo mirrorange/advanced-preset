@@ -329,6 +329,45 @@ tools:
   });
 });
 
+describe('thought signatures', () => {
+  const withSignatures = (yaml: string, min = '') => {
+    const t = tree();
+    t.set('preset.yaml', `${MANIFEST.replace('version: 1.0.0', `version: 1.0.0${min ? `\nminAdvancedPreset: ${min}` : ''}`)}${yaml}`);
+    return build(t);
+  };
+  const turn = (sig: string) => `
+syntheticTurns:
+  - id: init
+    user: Start
+    tool: { name: start_workflow }
+    thoughtSignature: ${sig}
+    response: { single: Go, multi: Go }
+`;
+
+  it('compiles a plain signature and signatures by channel', () => {
+    expect(withSignatures(turn('abc')).preset!.syntheticTurns[0]!.thoughtSignature).toBe('abc');
+    const { preset, diag } = withSignatures(turn('{ vertex: v1, aistudio: a1 }'), '1.11.0');
+    expect(diag.errors).toEqual([]);
+    expect(preset!.syntheticTurns[0]!.thoughtSignature).toEqual({ vertex: 'v1', aistudio: 'a1' });
+    expect(withSignatures(turn('{ openai: x }'), '1.11.0').diag.errors.map((e) => e.message).join('\n')).toMatch(/unknown thought signature channel `openai`/);
+  });
+
+  it('checks channels and the AP version they need', () => {
+    const conf = (v: string) => `  - { id: g, name: G, diff: { connection: { sendThoughtSignature: ${v} } } }\n`;
+    const withConf = (v: string, min = '') => {
+      const t = tree();
+      const manifest = MANIFEST.replace('version: 1.0.0', `version: 1.0.0${min ? `\nminAdvancedPreset: ${min}` : ''}`);
+      t.set('preset.yaml', manifest.replace('configurations:\n', `configurations:\n${conf(v)}`));
+      return build(t).diag;
+    };
+    expect(withConf('true').errors).toEqual([]);
+    expect(withConf('aistudio', '1.11.0').errors).toEqual([]);
+    expect(withConf('aistudio').warnings.map((w) => w.message).join('\n')).toMatch(/thought signature channels need Advanced Preset 1\.11\.0/);
+    expect(withConf('openai', '1.11.0').errors.map((e) => e.message).join('\n')).toMatch(/unknown sendThoughtSignature `openai`/);
+    expect(withSignatures(turn('{ vertex: v1 }')).diag.warnings.map((w) => w.message).join('\n')).toMatch(/thought signatures by channel need Advanced Preset 1\.11\.0/);
+  });
+});
+
 describe('structure layout (I-134 – I-137)', () => {
   const STATUS = '  status: { kind: status, ui: { position: top }, order: { before: "@content" }, properties: { weather: Sky }, formatPrompt: { tag: "<status/>", field: "Fill `{{field}}`." } }\n';
   const layoutTree = (opts: { tools?: string; structures?: string; stages?: string; front?: string; min?: string; extra?: Record<string, string> } = {}) => {
@@ -648,6 +687,37 @@ x
     expect(style!.entries).toHaveLength(2);
     expect(style!.locales?.['zh-cn']?.name).toBe('自定义文风');
     expect(preset!.userModuleTemplates).toEqual([]);
+  });
+
+  it('carries switched-off entries, variable updates, keys and items', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + '  tags: list\n  note: string\n',
+      'user-modules/parts.md': `---
+vars:
+  questions:
+    a: Kept?
+    b: !off Dropped?
+  tags: [one, !off two]
+  note: !off Quiet note.
+---
+<!-- @entry point=guide enabled=false -->
+Off.
+<!-- @entry point=intro-end -->
+On.
+`,
+      'user-modules/bad.md': '---\nname: !off x\npoint: guide\n---\nx\n<!-- @entry point=guide enabled=maybe -->\ny\n',
+    }));
+    const errors = diag.errors.map((e) => `${e.file}: ${e.message}`);
+    expect(errors.filter((e) => e.startsWith('user-modules/parts.md'))).toEqual([]);
+    expect(errors.join('\n')).toMatch(/bad\.md: `!off` switches off a variable update/);
+    expect(errors.join('\n')).toMatch(/bad\.md: @entry `enabled` must be true or false/);
+    const parts = preset!.userModules.find((m) => m.id === 'parts')!;
+    expect(parts.entries).toEqual([{ point: 'guide', text: 'Off.', enabled: false }, { point: 'intro-end', text: 'On.' }]);
+    expect(parts.vars).toEqual([
+      { var: 'questions', type: 'dict', items: [{ key: 'a', value: 'Kept?' }, { key: 'b', value: 'Dropped?', enabled: false }] },
+      { var: 'tags', type: 'list', items: ['one', { text: 'two', enabled: false }] },
+      { var: 'note', type: 'string', text: 'Quiet note.', enabled: false },
+    ]);
   });
 
   it('previews bundled modules as a fresh install gets them', async () => {

@@ -73,3 +73,4 @@ export function setDevPreset(a: APreset | null, id?: string): void {
 }
 
 export const isBuiltin = (id: string) => builtins.has(id);
+export const builtinPreset = (id: string) => builtins.get(id);

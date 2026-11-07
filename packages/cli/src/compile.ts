@@ -18,13 +18,14 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
+  isUpdateUrl,
   isInlineStructure, templateLiterals, DEFAULT_INPUT_TEMPLATE, INPUT_SHAPING_MODES,
   CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type InputShaping, type InputShapingMode, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
   type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
-  type FieldText, type SyntheticTurn, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
+  type FieldText, type SyntheticTurn, type ThoughtSignatures, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
   DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode, defaultHistoryTemplate, type StructureHistory,
   CARD_POSITIONS, CONTENT_STAGE_REF, DEFAULT_ORDER_PREFIX, type CardPosition, type StructureOrder, type StructureUi,
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
@@ -252,6 +253,8 @@ export function compile(tree: SourceTree): CompileResult {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) diag.error('id must be lower-case kebab-case', { file: M, path: 'id' });
   const version = str(raw.version, '0.0.0');
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error('version must be semver', { file: M, path: 'version' });
+  const updateUrl = raw.updateUrl === undefined ? undefined : str(raw.updateUrl).trim();
+  if (updateUrl !== undefined && !isUpdateUrl(updateUrl)) diag.error('updateUrl must be an http(s) URL', { file: M, path: 'updateUrl' });
 
   // ── actors ──────────────────────────────────────────────────────────────────
   const actors: Record<string, Actor> = {};
@@ -635,7 +638,15 @@ export function compile(tree: SourceTree): CompileResult {
       tool: { name: str(toolSrc.name, 'ap_workflow_init'), description: text(str(toolSrc.description), where) },
       response: { single: text(str(resp.single), where), multi: text(str(resp.multi), where), parallel: text(str(resp.parallel ?? resp.multi), where) },
     };
-    if (o.thoughtSignature) turn.thoughtSignature = str(o.thoughtSignature);
+    if (typeof o.thoughtSignature === 'string' && o.thoughtSignature) turn.thoughtSignature = o.thoughtSignature;
+    else if (isObj(o.thoughtSignature)) {
+      const sigs: ThoughtSignatures = {};
+      for (const [k, v] of Object.entries(o.thoughtSignature)) {
+        if (k !== 'vertex' && k !== 'aistudio') diag.error(`unknown thought signature channel \`${k}\` (expected vertex / aistudio)`, where);
+        else if (typeof v === 'string' && v) sigs[k] = v;
+      }
+      if (Object.keys(sigs).length) turn.thoughtSignature = sigs;
+    }
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error('invalid tool name', where);
     return turn;
   });
@@ -863,6 +874,7 @@ export function compile(tree: SourceTree): CompileResult {
     ...(raw.author !== undefined ? { author: str(raw.author) } : {}),
     ...(raw.description !== undefined ? { description: str(raw.description).trim() } : {}),
     ...(raw.minAdvancedPreset !== undefined ? { minAdvancedPreset: str(raw.minAdvancedPreset) } : {}),
+    ...(updateUrl && isUpdateUrl(updateUrl) ? { updateUrl } : {}),
     hash: '',
     actors,
     narrator,
