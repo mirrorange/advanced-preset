@@ -67,7 +67,7 @@ npm run dev        # 修改后自动重新构建，并在 http://localhost:4747 
 2. `npm run build`，把 `dist/` 一起提交并推送；
 3. （可选）推送 `v1.0.0` 这样的标签，GitHub Actions 会创建 Release。
 
-用户在 **AP 面板 → 预设 → 导入链接**中填入下面的地址即可安装，之后可以一键“从来源更新”：
+用户在 **AP 面板 → 预设 → 导入链接**中填入下面的地址即可安装，之后 AP 会自动从这个地址更新。把它写进 `preset.yaml` 的 `updateUrl`，以文件安装的用户也能自动更新：
 
 ```
 https://github.com/<用户名>/<仓库名>/blob/main/dist/__PRESET_ID__.apreset.json
