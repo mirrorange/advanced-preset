@@ -7376,6 +7376,8 @@ import { readFile as readFile4, writeFile as writeFile3 } from "node:fs/promises
 var FORMAT_VERSION = 3;
 var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-multi"];
 var TOOL_ARG_STREAMING = ["auto", "on", "off"];
+var THOUGHT_SIGNATURE_CHANNELS = ["off", "vertex", "aistudio"];
+var SIGNATURE_CHANNELS_SINCE = "1.11.0";
 var BUILD_VAR_TYPES = ["string", "list", "dict"];
 var CONTENT_STAGE_REF = "@content";
 var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "storyline", "custom", "annotations"];
@@ -8390,6 +8392,7 @@ var CONNECTION_DEFAULTS = {
   transport: "structured",
   forceTool: true,
   parallelTools: false,
+  // `false` (not 'off'): older versions read the field as a switch.
   sendThoughtSignature: false,
   streamToolArguments: "auto",
   maxSteps: 6,
@@ -10618,7 +10621,15 @@ function compile(tree) {
       tool: { name: str2(toolSrc.name, "ap_workflow_init"), description: text(str2(toolSrc.description), where) },
       response: { single: text(str2(resp.single), where), multi: text(str2(resp.multi), where), parallel: text(str2(resp.parallel ?? resp.multi), where) }
     };
-    if (o.thoughtSignature) turn.thoughtSignature = str2(o.thoughtSignature);
+    if (typeof o.thoughtSignature === "string" && o.thoughtSignature) turn.thoughtSignature = o.thoughtSignature;
+    else if (isObj5(o.thoughtSignature)) {
+      const sigs = {};
+      for (const [k, v] of Object.entries(o.thoughtSignature)) {
+        if (k !== "vertex" && k !== "aistudio") diag.error(`unknown thought signature channel \`${k}\` (expected vertex / aistudio)`, where);
+        else if (typeof v === "string" && v) sigs[k] = v;
+      }
+      if (Object.keys(sigs).length) turn.thoughtSignature = sigs;
+    }
     if (!/^[A-Za-z_][\w-]*$/.test(turn.tool.name)) diag.error("invalid tool name", where);
     return turn;
   });
@@ -11284,6 +11295,8 @@ function validate(p, map, diag) {
     diag.warn(`regex scripts need Advanced Preset ${REGEX_SCRIPTS_SINCE}: set minAdvancedPreset to ${REGEX_SCRIPTS_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
   if (p.quickReplySets?.length && below(QUICK_REPLIES_SINCE))
     diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: "minAdvancedPreset" });
+  if (p.syntheticTurns.some((t) => typeof t.thoughtSignature === "object") && below(SIGNATURE_CHANNELS_SINCE))
+    diag.warn(`thought signatures by channel need Advanced Preset ${SIGNATURE_CHANNELS_SINCE}: set minAdvancedPreset to ${SIGNATURE_CHANNELS_SINCE} or later (older versions send a broken signature)`, { file: M, path: "syntheticTurns" });
   if (p.tavernHelperScripts?.length && below(TAVERN_HELPER_SINCE))
     diag.warn(`Tavern Helper scripts need Advanced Preset ${TAVERN_HELPER_SINCE}: set minAdvancedPreset to ${TAVERN_HELPER_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
@@ -11471,6 +11484,10 @@ function validate(p, map, diag) {
   const checkConnection = (conn, path) => {
     if (conn.transport !== void 0 && !TRANSPORTS.includes(conn.transport)) diag.error(`unknown transport \`${conn.transport}\``, { file: M, path });
     if (conn.streamToolArguments !== void 0 && !TOOL_ARG_STREAMING.includes(conn.streamToolArguments)) diag.error(`unknown streamToolArguments \`${conn.streamToolArguments}\` (expected ${TOOL_ARG_STREAMING.join(" / ")})`, { file: M, path });
+    const sig = conn.sendThoughtSignature;
+    if (sig !== void 0 && typeof sig !== "boolean" && !THOUGHT_SIGNATURE_CHANNELS.includes(sig)) diag.error(`unknown sendThoughtSignature \`${sig}\` (expected ${THOUGHT_SIGNATURE_CHANNELS.join(" / ")})`, { file: M, path });
+    if (typeof sig === "string" && below(SIGNATURE_CHANNELS_SINCE))
+      diag.warn(`thought signature channels need Advanced Preset ${SIGNATURE_CHANNELS_SINCE}: set minAdvancedPreset to ${SIGNATURE_CHANNELS_SINCE} or later, or use true / false (older versions read any value as the on / off switch)`, { file: M, path });
     if (conn.workflow !== void 0) {
       const wf = p.workflows.find((w) => w.id === conn.workflow);
       if (!wf) diag.error(`unknown workflow \`${conn.workflow}\``, { file: M, path });
