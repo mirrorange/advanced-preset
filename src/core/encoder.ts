@@ -101,13 +101,19 @@ export function streamEncoder(family: Family): StreamEncoder {
         text: (t) => (t ? sse({ choices: [{ index: 0, delta: { content: t } }] }) : ''),
         reasoning: (t) => (t ? sse({ choices: [{ index: 0, delta: { reasoning_content: t, reasoning: t } }] }) : ''),
         toolCalls: (calls) => (calls.length ? sse({
-          choices: [{ index: 0, delta: { tool_calls: calls.map((c, index) => ({ index, id: c.id, type: 'function', function: { name: c.name, arguments: c.arguments } })) } }],
+          choices: [{ index: 0, delta: { tool_calls: calls.map((c, index) => ({ index, id: c.id, type: 'function', function: { name: c.name, arguments: c.arguments } })), ...signatureDetails(calls) } }],
         }) : ''),
         error: (message) => sse({ error: { message } }),
         // OpenAI `stream_options.include_usage` / DeepSeek: a final chunk with empty choices.
         end: (usage) => (usage ? sse({ object: 'chat.completion.chunk', choices: [], usage }) : '') + sse('[DONE]'),
       };
   }
+}
+
+/** Thought signatures of tool calls as OpenRouter `reasoning_details` (ST keeps them for the OpenRouter source). */
+function signatureDetails(calls: EncodedToolCall[]): { reasoning_details?: Record<string, unknown>[] } {
+  const details = calls.filter((c) => c.signature).map((c, index) => ({ type: 'reasoning.encrypted', data: c.signature, id: c.id, format: 'google-gemini-v1', index }));
+  return details.length ? { reasoning_details: details } : {};
 }
 
 function safeParse(s: string): unknown {
@@ -124,7 +130,7 @@ export function encodeJson(family: Family, m: FinalMessage): Record<string, unkn
   const body: Record<string, unknown> = {
     choices: [{
       index: 0,
-      message: { role: 'assistant', content: m.content, ...(m.reasoning ? { reasoning_content: m.reasoning, reasoning: m.reasoning } : {}), ...(toolCalls ? { tool_calls: toolCalls } : {}) },
+      message: { role: 'assistant', content: m.content, ...(m.reasoning ? { reasoning_content: m.reasoning, reasoning: m.reasoning } : {}), ...(toolCalls ? { tool_calls: toolCalls, ...signatureDetails(m.toolCalls!) } : {}) },
       finish_reason: toolCalls ? 'tool_calls' : 'stop',
     }],
   };

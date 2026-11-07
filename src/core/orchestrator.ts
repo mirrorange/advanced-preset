@@ -14,6 +14,7 @@ import { t } from '@/i18n';
 import type { GenerationContext } from './context';
 import { createDriver, type CallerInfo } from './transports';
 import { presetToolNames } from './transports/base';
+import { isSignatureError, sendsBuiltInSignature } from './transports/signatures';
 import { encodeJson, errorResponse, familyOf, streamEncoder, type EncodedToolCall } from './encoder';
 import { BackendError, readResponse, type ReadState } from './reader';
 import { live, startLive, updateLive, type LiveGeneration } from './live';
@@ -110,7 +111,8 @@ async function run(
   onContent: (text: string) => void,
 ): Promise<Outcome> {
   const source = String(base.chat_completion_source ?? '');
-  const driver = createDriver({ ctx, base, messages: base.messages ?? [], caller, family: familyOf(source, base) });
+  const family = familyOf(source, base);
+  const driver = createDriver({ ctx, base, messages: base.messages ?? [], caller, family });
   const terminal = terminalContentIndex(ctx.stages);
   const terminalId = terminal >= 0 ? ctx.stages[terminal]!.id : null;
   const hasPatch = ctx.stages.some((s) => s.kind === 'patch');
@@ -161,6 +163,14 @@ async function run(
         if (read.text || read.reasoning || read.toolCalls.length) commitCache(ctx);
         usage = addUsage(usage, read.usage);
         interrupted = true; partial = driver.progress(read, false); break;
+      }
+      // The channel does not accept the preset's built-in thought signature: retry without it (once).
+      if (!read.text && !read.toolCalls.length && isSignatureError(e) && sendsBuiltInSignature(ctx, family)) {
+        ctx.signatureFallback = true;
+        ctx.warnings.push('thought signature rejected: retried without the built-in signature');
+        toast('warning', t('error.signatureFallback'), t('app.name'));
+        step--;
+        continue;
       }
       throw e;
     }

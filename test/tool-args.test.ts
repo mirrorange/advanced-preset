@@ -22,10 +22,13 @@ const include = (body: Record<string, any>) => JSON.parse(body.custom_include_bo
 afterEach(() => { delete (globalThis as any).__TAURITAVERN__; });
 
 describe('asking Gemini to stream tool-call arguments', () => {
-  it('auto: Vertex AI tool requests only', () => {
+  it('auto: tool requests that may reach Vertex AI', () => {
     expect(bodyFor().body.stream_function_call_arguments).toBe(true);
     expect(bodyFor({ transport: 'tool-multi' }).body.stream_function_call_arguments).toBe(true);
+    expect(bodyFor({ source: 'custom', extra: { custom_api_format: 'gemini_generate_content' } }).body.stream_function_call_arguments).toBe(true);
+    expect(bodyFor({ source: 'makersuite', extra: { reverse_proxy: 'https://proxy.example/v1beta' } }).body.stream_function_call_arguments).toBe(true);
     expect(bodyFor({ source: 'makersuite' }).body.stream_function_call_arguments).toBeUndefined();
+    expect(bodyFor({ source: 'makersuite', extra: { reverse_proxy: ' ' } }).body.stream_function_call_arguments).toBeUndefined();
     expect(bodyFor({ source: 'vertexai', family: 'claude' }).body.stream_function_call_arguments).toBeUndefined();
     expect(bodyFor({ stream: false }).body.stream_function_call_arguments).toBeUndefined();
     expect(bodyFor({ transport: 'structured' }).body.stream_function_call_arguments).toBeUndefined();

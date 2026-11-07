@@ -10,6 +10,7 @@ import { st, type ChatMessage } from '@/st/host';
 import type { GenerationContext } from '../context';
 import type { ReadState, ToolCallAcc } from '../reader';
 import { requestToolArgStreaming, wantsToolArgStreaming } from './tool-args';
+import { markBuiltIn, markOwn, placeSignatures, syntheticSignature } from './signatures';
 
 export interface CallerInfo {
   /** Caller tools (OpenAI format), task generations only. */
@@ -96,14 +97,16 @@ export function syntheticTurn(input: DriverInput, mode: 'single' | 'multi' | 'pa
   const turn = id ? ctx.preset.syntheticTurns.find((t) => t.id === id) : undefined;
   if (!turn) return null;
   const callId = `call_${turn.id}_init`;
-  const signature = ctx.config.connection.sendThoughtSignature && family === 'gemini' ? turn.thoughtSignature : undefined;
+  const signature = syntheticSignature(ctx, family);
+  const call = { id: callId, type: 'function', function: { name: turn.tool.name, arguments: '{}' }, ...(signature ? { signature } : {}) };
+  if (signature) markBuiltIn(call);
   const expand = textExpander(ctx);
   const description = expand(turn.tool.description);
   return {
     tool: { type: 'function', function: { name: turn.tool.name, ...(description ? { description } : {}), parameters: { type: 'object', properties: {} } } },
     messages: [
       { role: 'user', content: expand(turn.user) },
-      { role: 'assistant', content: '', tool_calls: [{ id: callId, type: 'function', function: { name: turn.tool.name, arguments: '{}' }, ...(signature ? { signature } : {}) }] },
+      markOwn<ChatMessage>({ role: 'assistant', content: '', tool_calls: [call] }),
       { role: 'tool', tool_call_id: callId, content: fillToolText(ctx, turn.response[mode], { first }) },
     ],
   };
@@ -116,8 +119,10 @@ export function baseBody(input: DriverInput, extra: Record<string, unknown> = {}
   delete body.json_schema;
   if (input.caller.tools.length) { body.tools = input.caller.tools; body.tool_choice = input.caller.toolChoice ?? 'auto'; }
   Object.assign(body, extra);
+  const source = String(body.chat_completion_source ?? '');
+  if (Array.isArray(body.messages)) body.messages = placeSignatures(body.messages as ChatMessage[], input.family, { fallback: input.ctx.signatureFallback, source });
   if (input.family === 'gemini') forGemini(body, input.ctx.preset.tools.jsonStringHint);
-  if (wantsToolArgStreaming(input.ctx.config.connection.streamToolArguments, input.family, String(body.chat_completion_source ?? ''))) requestToolArgStreaming(body);
+  if (wantsToolArgStreaming(input.ctx.config.connection.streamToolArguments, input.family, body)) requestToolArgStreaming(body);
   return body;
 }
 

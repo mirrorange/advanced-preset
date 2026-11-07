@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, GitBranch, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
-import { STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, freezeMode, type StorylineFreeze, TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
+import { STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, freezeMode, type StorylineFreeze, THOUGHT_SIGNATURE_CHANNELS, TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, signatureChannel, type ThoughtSignatureChannel, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
 } from '@/store/config';
@@ -97,7 +97,11 @@ function conn<K extends keyof NonNullable<typeof config.value>['connection']>(ke
 }
 const forceTool = conn('forceTool');
 const parallelTools = conn('parallelTools');
-const sendThoughtSignature = conn('sendThoughtSignature');
+// Off is stored as `false`, which older versions also read as off.
+const thoughtSignature = computed({
+  get: () => (config.value ? signatureChannel(config.value.connection) : 'off'),
+  set: (v: ThoughtSignatureChannel) => update((c) => { c.connection.sendThoughtSignature = v === 'off' ? false : v; }),
+});
 const streamToolArguments = conn('streamToolArguments');
 const finalFallback = conn('finalFallback');
 const maxSteps = conn('maxSteps');
@@ -198,7 +202,11 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
             <option v-for="s in preset.syntheticTurns" :key="s.id" :value="s.id">{{ s.label }}</option>
           </select>
         </Field>
-        <Field :label="t('config.thoughtSignature')" :help="t('config.thoughtSignature.hint')" inline><Switch v-model="sendThoughtSignature" /></Field>
+        <Field :label="t('config.thoughtSignature')" :help="t('config.thoughtSignature.hint')" inline>
+          <select v-model="thoughtSignature" class="input">
+            <option v-for="m in THOUGHT_SIGNATURE_CHANNELS" :key="m" :value="m">{{ t(`config.thoughtSignature.${m}`) }}</option>
+          </select>
+        </Field>
         <Field :label="t('config.streamToolArguments')" :help="t('config.streamToolArguments.hint')" inline>
           <select v-model="streamToolArguments" class="input">
             <option v-for="m in TOOL_ARG_STREAMING" :key="m" :value="m">{{ t(`config.streamToolArguments.${m}`) }}</option>

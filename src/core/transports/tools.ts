@@ -11,8 +11,9 @@ import {
   artifactsOf, baseBody, callerCalls, fillToolText, syntheticTurn, type Driver, type DriverInput,
 } from './base';
 import { envelopeTurn } from './structured';
+import { markOwn } from './signatures';
 
-const assistantToolMessage = (read: ReadState, calls: ToolCallAcc[]): ChatMessage => ({
+const assistantToolMessage = (read: ReadState, calls: ToolCallAcc[]): ChatMessage => markOwn({
   role: 'assistant',
   content: read.text || '',
   tool_calls: calls.map((c) => ({ id: c.id, type: 'function', function: { name: c.name, arguments: c.arguments || '{}' }, ...(c.signature ? { signature: c.signature } : {}) })),
