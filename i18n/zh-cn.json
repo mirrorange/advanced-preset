@@ -89,7 +89,7 @@
   "config.syntheticTurn.hint": "预置一轮虚拟的工具调用，向模型示范工具用法。",
   "config.thoughtSignature": "思维签名",
   "config.thoughtSignature.hint": "Gemini：示范轮次附带的思维签名。签名只在签发它的后端有效，请按请求实际到达的上游选择，与 SillyTavern 的 API 连接或反向代理无关。关闭时改为发送 skip_thought_signature_validator。",
-  "config.openAiSignatures": "OpenRouter / CLIProxyAPI 签名",
+  "config.openAiSignatures": "OR/CPA 签名",
   "config.openAiSignatures.hint": "在 OpenAI 兼容的连接上也发送思维签名：OpenRouter 的 reasoning_details 与 CLIProxyAPI（Google 格式）的 extra_content。仅在这类连接确实通向 Gemini 时开启，其他端点可能拒绝这些额外字段。",
   "config.thoughtSignature.off": "关闭",
   "config.thoughtSignature.vertex": "Vertex AI",

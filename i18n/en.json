@@ -89,7 +89,7 @@
   "config.syntheticTurn.hint": "A fake earlier tool exchange that shows the model how the tools are used.",
   "config.thoughtSignature": "Thought signature",
   "config.thoughtSignature.hint": "Gemini: the thought signature attached to the synthetic turn. A signature only works on the backend that issued it, so pick where your requests really end up — whatever SillyTavern's connection or proxy says. Off sends skip_thought_signature_validator instead.",
-  "config.openAiSignatures": "OpenRouter / CLIProxyAPI signatures",
+  "config.openAiSignatures": "OR/CPA signatures",
   "config.openAiSignatures.hint": "Also send thought signatures on OpenAI-compatible connections: OpenRouter's reasoning_details and CLIProxyAPI's (Google's) extra_content. Only turn this on when such a connection really ends at Gemini — other endpoints may reject the extra fields.",
   "config.thoughtSignature.off": "Off",
   "config.thoughtSignature.vertex": "Vertex AI",
