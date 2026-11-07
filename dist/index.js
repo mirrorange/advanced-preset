@@ -6853,7 +6853,7 @@ var Zf = (e) => zf.has(e), Qf = (e) => zf.get(e), $f = {
 	"config.syntheticTurn.hint": "A fake earlier tool exchange that shows the model how the tools are used.",
 	"config.thoughtSignature": "Thought signature",
 	"config.thoughtSignature.hint": "Gemini: the thought signature attached to the synthetic turn. A signature only works on the backend that issued it, so pick where your requests really end up — whatever SillyTavern's connection or proxy says. Off sends skip_thought_signature_validator instead.",
-	"config.openAiSignatures": "OpenRouter / CLIProxyAPI signatures",
+	"config.openAiSignatures": "OR/CPA signatures",
 	"config.openAiSignatures.hint": "Also send thought signatures on OpenAI-compatible connections: OpenRouter's reasoning_details and CLIProxyAPI's (Google's) extra_content. Only turn this on when such a connection really ends at Gemini — other endpoints may reject the extra fields.",
 	"config.thoughtSignature.off": "Off",
 	"config.thoughtSignature.vertex": "Vertex AI",
@@ -7285,7 +7285,7 @@ var Zf = (e) => zf.has(e), Qf = (e) => zf.get(e), $f = {
 		"config.syntheticTurn.hint": "预置一轮虚拟的工具调用，向模型示范工具用法。",
 		"config.thoughtSignature": "思维签名",
 		"config.thoughtSignature.hint": "Gemini：示范轮次附带的思维签名。签名只在签发它的后端有效，请按请求实际到达的上游选择，与 SillyTavern 的 API 连接或反向代理无关。关闭时改为发送 skip_thought_signature_validator。",
-		"config.openAiSignatures": "OpenRouter / CLIProxyAPI 签名",
+		"config.openAiSignatures": "OR/CPA 签名",
 		"config.openAiSignatures.hint": "在 OpenAI 兼容的连接上也发送思维签名：OpenRouter 的 reasoning_details 与 CLIProxyAPI（Google 格式）的 extra_content。仅在这类连接确实通向 Gemini 时开启，其他端点可能拒绝这些额外字段。",
 		"config.thoughtSignature.off": "关闭",
 		"config.thoughtSignature.vertex": "Vertex AI",
@@ -11566,7 +11566,7 @@ function Py(e) {
 }
 async function Fy() {
 	let e = await Ny();
-	e && e !== "15922e6eb71119e2" && sessionStorage.getItem(My) !== e && Py(e);
+	e && e !== "f8f64cfbee14c7ce" && sessionStorage.getItem(My) !== e && Py(e);
 }
 async function Iy() {
 	await Fy();
@@ -11587,7 +11587,7 @@ async function By() {
 	let e = o().replace(/^third-party\//, ""), t = await Wy(e, !1);
 	if (t.status === 404 && (t = await Wy(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ny();
-	return r && r !== "15922e6eb71119e2" ? (Py(r), {
+	return r && r !== "f8f64cfbee14c7ce" ? (Py(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -19164,7 +19164,7 @@ var bk = ["aria-label"], xk = { class: "um-picker-head" }, Sk = { class: "small 
 				"icon",
 				"help"
 			]),
-			H("div", zM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("15922e6eb71119e2")), 1)
+			H("div", zM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("f8f64cfbee14c7ce")), 1)
 		], 64));
 	}
 }), VM = {
@@ -19491,7 +19491,7 @@ function EN() {
 //#region src/index.ts
 var DN = {
 	version: "1.11.0",
-	buildId: "15922e6eb71119e2",
+	buildId: "f8f64cfbee14c7ce",
 	nextGeneration: (e) => zm(e),
 	listPresets: () => Uf().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19550,7 +19550,7 @@ async function AN() {
 	};
 	t.on(n.APP_READY, () => void o()), EN(), jh("init", {
 		version: "1.11.0",
-		build: "15922e6eb71119e2",
+		build: "f8f64cfbee14c7ce",
 		enabled: q().enabled
 	});
 }
