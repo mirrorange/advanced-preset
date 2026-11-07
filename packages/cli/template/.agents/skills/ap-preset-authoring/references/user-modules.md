@@ -40,10 +40,12 @@ insertionPoints:
   "enabled": true,
   "entries": [
     { "id": "e1", "point": "guidelines", "text": "It is always raining in this city." },
-    { "id": "e2", "point": "after-history", "role": "user", "text": "<!-- @if transport == \"prefill\" -->Remember the rain.<!-- @end -->" }
+    { "id": "e2", "point": "after-history", "role": "user", "text": "<!-- @if transport == \"prefill\" -->Remember the rain.<!-- @end -->" },
+    { "id": "e3", "point": "after-history", "text": "Thunder in the distance.", "enabled": false }
   ],
   "vars": [
-    { "var": "questions", "type": "list", "items": ["Is it still raining?"] }
+    { "var": "questions", "type": "list", "items": ["Is it still raining?"] },
+    { "var": "tags", "type": "list", "items": ["storm"], "enabled": false }
   ],
   "trigger": {
     "match": "all",
@@ -60,8 +62,8 @@ insertionPoints:
 | `id` | 用户模组 id。合并进预设时变为 `user-<id>` |
 | `name` | 显示名 |
 | `enabled` | 是否启用 |
-| `entries[]` | 条目：`id`、`point`（插入点 id）、`role`（可选：`system` / `user` / `assistant`）、`text` |
-| `vars[]` | 构建变量更新，见下 |
+| `entries[]` | 条目：`id`、`point`（插入点 id）、`role`（可选：`system` / `user` / `assistant`）、`text`、`enabled`（可选，`false` 时关闭） |
+| `vars[]` | 构建变量更新，见下；同样可带 `enabled: false` |
 | `trigger` | 触发条件，见下 |
 
 ### 条目
@@ -70,6 +72,11 @@ insertionPoints:
 - 没有 `role` 的条目与区域中的其他文字合并；有 `role` 时成为单独的消息（等同于 `@as`）；
 - `text` 支持 `{{ap::…}}` 宏、ST 宏，以及 `@if` / `@as` / `@style` / `@template` 指令与 `<!--# … -->` 注释（[directives.md](directives.md)），不支持 `@entry` / `@section`；
 - 插入点不存在（例如预设更新后被删除）的条目被跳过，并在调试信息中警告；空文字的条目忽略。
+- `enabled: false` 的条目保留在模组中但不插入（编辑器中每个条目前的开关），省略即开启。
+
+### 条目与变量更新的开关
+
+编辑器中每个插入条目、每条构建变量更新前都有开关，便于在不删除内容的情况下比较不同组合。开关状态是模组内容的一部分：随模组导出、导入、复制与[随预设导出](#随预设导出)，也计入“用户是否改过随预设模组”的比较。只保存关闭状态（`enabled: false`），重新打开即去掉该字段。模组本身的 `enabled` 则是用户的开关偏好，不计入比较。
 
 ### 构建变量更新
 
@@ -79,7 +86,7 @@ insertionPoints:
 | `list` | `items: string[]` | 追加列表项（空项忽略） |
 | `dict` | `items: [{ key, value }]` | 设置字典键；`value` 为空或 `null` 时**删除**该键 |
 
-只有预设声明过、且类型一致的变量会被更新；用户模组的更新在所有预设模组之后应用（[build-variables.md](build-variables.md#用户模组)）。
+`enabled: false` 的更新不应用。只有预设声明过、且类型一致的变量会被更新；用户模组的更新在所有预设模组之后应用（[build-variables.md](build-variables.md#用户模组)）。
 
 ### 触发条件
 
