@@ -9,7 +9,7 @@
  * ordinary, fully editable user module; a whole file may be translated per UI locale.
  */
 import { cloneData } from './clone';
-import { emptyTrigger, type Trigger, type UserEntry, type UserModule, type UserVarUpdate } from './user-modules';
+import { emptyTrigger, normalizeVarUpdate, type Trigger, type UserEntry, type UserModule, type UserVarUpdate } from './user-modules';
 import type { APreset } from './types';
 
 /** An entry of a source: a user module entry without its id. */
@@ -100,14 +100,14 @@ function stable(v: unknown): unknown {
 
 /**
  * What a module says, independent of ids, the module's enabled state and description: name, entries
- * (point, role, text, switched off), variable updates and trigger. Two modules with the same
+ * (point, role, text, switched off), variable updates (with switched-off parts) and trigger. Two modules with the same
  * fingerprint behave alike.
  */
 export function userModuleFingerprint(m: UserModule | UserModuleSourceBody): string {
   return JSON.stringify(stable({
     name: m.name,
     entries: m.entries.map((e) => ({ point: e.point, role: e.role ?? null, text: e.text, ...(e.enabled === false ? { enabled: false } : {}) })),
-    vars: (m.vars ?? []).map(({ enabled, ...u }) => (enabled === false ? { ...u, enabled } : u)),
+    vars: (m.vars ?? []).flatMap(normalizeVarUpdate),
     trigger: m.trigger ?? emptyTrigger(),
   }));
 }

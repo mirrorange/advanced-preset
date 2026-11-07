@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   localizeUserModuleSource, presetTemplates, presetUserModules, presetUserModuleTemplates, upgradeArtifact, userModuleFingerprint,
   userModuleFromSource, userModuleSourceFingerprint, userModuleToSource,
-  type APreset, type UserModuleSource,
+  type APreset, type UserModuleSource, type UserVarUpdate,
 } from '../src';
 
 const tpl: UserModuleSource = {
@@ -92,6 +92,9 @@ describe('preset user modules', () => {
     // Switching an entry or a variable update off is a change of the module; switched on is the default.
     expect(userModuleFingerprint({ ...m, entries: [{ ...m.entries[0]!, enabled: false }, m.entries[1]!] })).not.toBe(fp);
     expect(userModuleFingerprint({ ...m, vars: [{ ...m.vars[0]!, enabled: false }] })).not.toBe(fp);
+    const dictVar = m.vars[0] as Extract<UserVarUpdate, { type: 'dict' }>;
+    expect(userModuleFingerprint({ ...m, vars: [{ ...dictVar, items: [{ ...dictVar.items[0]!, enabled: false }] }] })).not.toBe(fp);
+    expect(userModuleFingerprint({ ...m, vars: [{ ...dictVar, items: [{ ...dictVar.items[0]!, enabled: true }] }] })).toBe(fp);
     expect(userModuleFingerprint({ ...m, entries: [{ ...m.entries[0]!, enabled: true }, m.entries[1]!], vars: [{ ...m.vars[0]!, enabled: true }] })).toBe(fp);
     // Translations and descriptions change the source fingerprint, not the module's.
     const src = userModuleSourceFingerprint(tpl);

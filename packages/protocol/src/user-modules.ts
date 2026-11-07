@@ -7,7 +7,7 @@ import { compileText, type DirectiveError } from './directives';
 import { contentTemplates } from './content';
 import { parseExpr, type Expr, type Literal } from './expr';
 import { satisfies } from './semver';
-import type { APreset, BuildVarDecl, BuildVarUpdate, Entry, InsertionPoint, Migration, Module, Role } from './types';
+import type { APreset, BuildVarDecl, BuildVarUpdate, DictItem, Entry, InsertionPoint, Migration, Module, Role } from './types';
 
 export type VarOp = 'on' | 'off' | '==' | '!=' | 'in' | 'notIn' | '>' | '>=' | '<' | '<=';
 
@@ -59,11 +59,39 @@ export interface UserEntry {
   enabled?: boolean;
 }
 
-/** A build variable update of a user module; `enabled: false` keeps it without applying it. */
-export type UserVarUpdate = BuildVarUpdate & { enabled?: boolean };
+/** A list item of a user module's variable update. A switched-off item is kept as an object. */
+export type UserListItem = string | { text: string; enabled: false };
 
-/** Whether an entry or variable update of a user module is switched on. */
-export const partEnabled = (part: { enabled?: boolean }) => part.enabled !== false;
+/** A dict key of a user module's variable update; `enabled: false` keeps it without setting it. */
+export interface UserDictItem extends DictItem {
+  enabled?: boolean;
+}
+
+/**
+ * A build variable update of a user module. The update, each list item and each dict key can be
+ * switched off (`enabled: false`): kept in the module, not applied. Only the off state is stored.
+ */
+export type UserVarUpdate = (
+  | { var: string; type: 'string'; text: string }
+  | { var: string; type: 'list'; items: UserListItem[] }
+  | { var: string; type: 'dict'; items: UserDictItem[] }
+) & { enabled?: boolean };
+
+/** Whether an entry, variable update, list item or dict key of a user module is switched on. */
+export const partEnabled = (part: string | { enabled?: boolean }) => typeof part === 'string' || part.enabled !== false;
+
+export const itemText = (item: UserListItem) => (typeof item === 'string' ? item : item.text);
+
+/** Switch an entry, variable update or dict key on / off (on → `enabled` removed). */
+export function setPartEnabled(part: { enabled?: boolean }, on: boolean): void {
+  if (on) delete part.enabled;
+  else part.enabled = false;
+}
+
+/** A list item with new text or a new switch state, in its stored form. */
+export function listItem(text: string, on: boolean): UserListItem {
+  return on ? text : { text, enabled: false };
+}
 
 export interface UserModule {
   id: string;
@@ -207,7 +235,7 @@ export function findVar(preset: APreset, id: string): BuildVarDecl | undefined {
 }
 
 /** Variable updates the preset no longer supports (variable removed or its type changed). */
-export function missingVars(preset: APreset, module: UserModule): BuildVarUpdate[] {
+export function missingVars(preset: APreset, module: UserModule): UserVarUpdate[] {
   return (module.vars ?? []).filter((u) => findVar(preset, u.var)?.type !== u.type);
 }
 
@@ -216,18 +244,21 @@ export function lostRefs(preset: APreset, module: UserModule): string[] {
   return [...new Set([...missingPoints(preset, module).map((e) => e.point), ...missingVars(preset, module).map((u) => u.var)])];
 }
 
-/** A user update as applied: blank items are dropped and blank dict values remove the key. */
-export function effectiveUpdate(update: UserVarUpdate): BuildVarUpdate | null {
-  const { enabled: _enabled, ...u } = update;
+/**
+ * A user update as applied: switched-off and blank items are dropped and blank dict values remove
+ * the key. Switched off as a whole → `null`.
+ */
+export function effectiveUpdate(u: UserVarUpdate): BuildVarUpdate | null {
+  if (!partEnabled(u)) return null;
   switch (u.type) {
-    case 'string': return u.text.trim() ? u : null;
+    case 'string': return u.text.trim() ? { var: u.var, type: 'string', text: u.text } : null;
     case 'list': {
-      const items = u.items.filter((x) => x.trim());
-      return items.length ? { ...u, items } : null;
+      const items = u.items.filter(partEnabled).map(itemText).filter((x) => x.trim());
+      return items.length ? { var: u.var, type: 'list', items } : null;
     }
     case 'dict': {
-      const items = u.items.filter((x) => x.key.trim()).map((x) => ({ key: x.key.trim(), value: x.value?.trim() ? x.value : null }));
-      return items.length ? { ...u, items } : null;
+      const items = u.items.filter((x) => partEnabled(x) && x.key.trim()).map((x) => ({ key: x.key.trim(), value: x.value?.trim() ? x.value : null }));
+      return items.length ? { var: u.var, type: 'dict', items } : null;
     }
   }
 }
@@ -368,15 +399,25 @@ function normalizeRule(raw: unknown): TriggerRule | null {
   return null;
 }
 
-function normalizeVarUpdate(raw: unknown): UserVarUpdate[] {
+const off = (raw: Obj) => (raw.enabled === false ? { enabled: false as const } : {});
+
+function normalizeListItem(raw: unknown): UserListItem[] {
+  if (typeof raw === 'string') return [raw];
+  if (isObj(raw) && typeof raw.text === 'string') return [raw.enabled === false ? { text: raw.text, enabled: false } : raw.text];
+  return [];
+}
+
+/**
+ * Coerce untrusted data into a user variable update (`[]` when invalid). Switched-on parts lose
+ * their `enabled`, so equal updates have one form.
+ */
+export function normalizeVarUpdate(raw: unknown): UserVarUpdate[] {
   if (!isObj(raw) || typeof raw.var !== 'string') return [];
-  const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
-  const off = raw.enabled === false ? { enabled: false } : {};
-  if (raw.type === 'string') return [{ var: raw.var, type: 'string', text: str(raw.text), ...off }];
-  if (raw.type === 'list') return [{ var: raw.var, type: 'list', items: strings(raw.items), ...off }];
+  if (raw.type === 'string') return [{ var: raw.var, type: 'string', text: str(raw.text), ...off(raw) }];
+  if (raw.type === 'list') return [{ var: raw.var, type: 'list', items: Array.isArray(raw.items) ? raw.items.flatMap(normalizeListItem) : [], ...off(raw) }];
   if (raw.type === 'dict' && Array.isArray(raw.items)) {
-    const items = raw.items.filter(isObj).map((x) => ({ key: str(x.key), value: typeof x.value === 'string' ? x.value : null }));
-    return [{ var: raw.var, type: 'dict', items, ...off }];
+    const items = raw.items.filter(isObj).map((x): UserDictItem => ({ key: str(x.key), value: typeof x.value === 'string' ? x.value : null, ...off(x) }));
+    return [{ var: raw.var, type: 'dict', items, ...off(raw) }];
   }
   return [];
 }

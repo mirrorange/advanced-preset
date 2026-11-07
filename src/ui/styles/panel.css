@@ -161,15 +161,19 @@
 .um-entry-head select.grow { flex: 1 1 8em; min-width: 0; font-weight: 600; text-overflow: ellipsis; }
 .um-entry.lost .um-entry-head select.grow { color: var(--ap-warning); }
 .um-role { flex: 0 0 auto; min-width: 0; field-sizing: content; text-overflow: ellipsis; color: var(--ap-muted); font-size: var(--ap-font-size-sm); }
-.um-text { field-sizing: content; min-height: 5.5em; max-height: 24em; font-family: var(--monoFontFamily, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: var(--ap-font-size-sm); }
+.um-text, .um-var-key, .um-var-value { font-family: var(--monoFontFamily, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: var(--ap-font-size-sm); }
+.um-text { field-sizing: content; min-height: 5.5em; max-height: 24em; }
 .um-warn { display: flex; align-items: center; gap: 6px; color: var(--ap-warning); }
 .um-warn svg.lucide { width: 1.1em; height: 1.1em; }
 .um-var-label { flex: 1 1 8em; min-width: 0; padding: 0 0.35em; font-weight: 600; }
 .um-entry.lost .um-var-label { color: var(--ap-warning); }
-.um-var-row { display: grid; grid-template-columns: 1fr auto; gap: 4px; align-items: start; }
+.um-var-row { display: grid; grid-template-columns: auto 1fr auto; gap: 4px; align-items: start; }
+.um-var-row > .switch { margin: calc(0.375em + 1px) 4px 0 0; }
 .um-var-pair { display: flex; flex-direction: column; gap: 2px; padding: 2px var(--ap-space-2) var(--ap-space-2); border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); background: var(--ap-surface); }
-.um-var-pair-head { display: flex; align-items: center; gap: 2px; margin: 0 -6px 0 -0.35em; }
-.um-var-key { flex: 1 1 auto; min-width: 0; font-weight: 600; font-size: var(--ap-font-size-sm); text-overflow: ellipsis; }
+.um-var-pair-head { display: flex; align-items: center; gap: 2px; margin-right: -6px; }
+.um-var-key { flex: 1 1 auto; min-width: 0; font-weight: 600; text-overflow: ellipsis; }
+.um-var-row > *, .um-var-pair > *, .um-var-pair-head > * { transition: opacity 0.15s; }
+.um-var-row.off > :not(.switch), .um-var-pair.off > :not(.um-var-pair-head), .um-var-pair.off .um-var-pair-head > :not(.switch) { opacity: 0.55; }
 .um-var-key::-webkit-calendar-picker-indicator { display: none !important; }
 textarea.input.um-var-value { min-width: 0; field-sizing: content; min-height: 0; max-height: 12em; resize: none; }
 .um-var-add { align-self: flex-start; }

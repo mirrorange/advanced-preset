@@ -45,6 +45,16 @@ describe('user modules', () => {
     const merged = withUserModules(p, [m]).preset;
     expect(merged.entries.map((e) => e.id).filter((id) => id.startsWith('user-'))).toEqual(['user-x/e0']);
     expect(merged.modules.find((x) => x.id === 'user-x')!.vars).toEqual([{ var: 'tags', type: 'list', items: ['t'] }]);
+    const items = mod('z', [], {
+      vars: [
+        { var: 'qs', type: 'list', items: ['a', { text: 'b', enabled: false }] },
+        { var: 'tags', type: 'list', items: [{ text: 'c', enabled: false }] },
+      ],
+    });
+    expect(withUserModules(p, [items]).preset.modules.find((x) => x.id === 'user-z')!.vars).toEqual([{ var: 'qs', type: 'list', items: ['a'] }]);
+    const dict = { ...p, vars: [{ id: 'qs', type: 'dict' }] } as unknown as APreset;
+    const keys = mod('d', [], { vars: [{ var: 'qs', type: 'dict', items: [{ key: 'k', value: 'v' }, { key: 'gone', value: null, enabled: false }] }] });
+    expect(withUserModules(dict, [keys]).preset.modules.find((x) => x.id === 'user-d')!.vars).toEqual([{ var: 'qs', type: 'dict', items: [{ key: 'k', value: 'v' }] }]);
     const off = mod('y', ['early'], { vars: [{ var: 'qs', type: 'list', items: ['q'], enabled: false }] });
     off.entries[0]!.enabled = false;
     expect(withUserModules(p, [off]).preset).toBe(p);
@@ -104,6 +114,14 @@ describe('user modules', () => {
     const parts = parseUserModuleFile({ entries: [{ point: 'p', text: '', enabled: false }, { point: 'q', text: '', enabled: 'no' }], vars: [{ var: 'v', type: 'list', items: [], enabled: false }] });
     expect(parts.modules[0]!.entries.map((e) => e.enabled)).toEqual([false, undefined]);
     expect(parts.modules[0]!.vars).toEqual([{ var: 'v', type: 'list', items: [], enabled: false }]);
+    const items = parseUserModuleFile({ entries: [], vars: [
+      { var: 'l', type: 'list', items: ['a', { text: 'b', enabled: false }, { text: 'c', enabled: true }, { text: 1 }, 2] },
+      { var: 'd', type: 'dict', items: [{ key: 'k', value: 'v', enabled: false }, { key: 'j', value: 'w', enabled: true }] },
+    ] });
+    expect(items.modules[0]!.vars).toEqual([
+      { var: 'l', type: 'list', items: ['a', { text: 'b', enabled: false }, 'c'] },
+      { var: 'd', type: 'dict', items: [{ key: 'k', value: 'v', enabled: false }, { key: 'j', value: 'w' }] },
+    ]);
     expect(() => parseUserModuleFile({ format: 'advanced-preset.user-modules', version: 2 })).toThrow();
     expect(() => parseUserModuleFile([1])).toThrow();
   });

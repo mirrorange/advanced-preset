@@ -11,16 +11,17 @@
  *
  * Frontmatter: `name`, `point` / `role` (first entry), `vars`, `when` or `trigger`; `enabled`
  * (bundled modules) and `description` (templates). Further entries start with
- * `<!-- @entry point=<id> role=<role> -->` on a line of its own.
+ * `<!-- @entry point=<id> role=<role> -->` on a line of its own (`enabled=false`: switched off).
+ * In `vars`, the YAML tag `!off` switches off a whole update, a dict key or a list item.
  */
 import {
-  compileTrigger, normalizeUserModule, parseAttributes, ruleError, tokenizeDirectives,
+  compileTrigger, listItem, normalizeUserModule, parseAttributes, ruleError, tokenizeDirectives,
   type BuildVarUpdate, type Content, type Expr, type InsertionPoint, type Role, type Token, type Trigger,
-  type UserModuleSource, type UserModuleSourceBody, type UserModuleSourceEntry,
+  type UserModuleSource, type UserModuleSourceBody, type UserModuleSourceEntry, type UserVarUpdate,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
 import { splitFrontmatter } from './markdown';
-import { parse as parseYaml } from 'yaml';
+import { isPair, isSeq, parseDocument, visit, type ScalarTag, type CollectionTag } from 'yaml';
 
 export type SourceKind = 'module' | 'template';
 export const USER_MODULE_DIRS: Record<SourceKind, string> = { module: 'user-modules', template: 'user-module-templates' };
@@ -129,21 +130,71 @@ function parseTrigger(fm: Record<string, unknown>, ctx: SourceContext, where: Wh
 
 interface Compiled extends UserModuleSourceBody { enabled?: boolean }
 
+const OFF = '!off';
+/** `!off` on any node keeps its value; the marks are read from the document. */
+const OFF_TAGS: (ScalarTag | CollectionTag)[] = [
+  { tag: OFF, resolve: (v: string) => v } as ScalarTag,
+  { tag: OFF, collection: 'map', resolve: (v) => v } as CollectionTag,
+  { tag: OFF, collection: 'seq', resolve: (v) => v } as CollectionTag,
+];
+
+/** Where `!off` was written: a path of mapping keys, plus the index for a list item. */
+interface OffMark { keys: string[]; index?: number }
+
+/** Parse frontmatter YAML, collecting `!off` marks. */
+function parseFrontmatter(yaml: string): { data: unknown; marks: OffMark[]; error?: string } {
+  const doc = parseDocument(yaml, { customTags: OFF_TAGS });
+  if (doc.errors.length) return { data: undefined, marks: [], error: doc.errors[0]!.message };
+  const marks: OffMark[] = [];
+  visit(doc, {
+    Node(key, node, path) {
+      if ((node as { tag?: string }).tag !== OFF) return;
+      const keys = path.filter(isPair).map((p) => String((p.key as { value?: unknown })?.value ?? p.key));
+      marks.push(isSeq(path[path.length - 1]) && typeof key === 'number' ? { keys, index: key } : { keys });
+    },
+  });
+  return { data: doc.toJS(), marks };
+}
+
+/** Switch off what the marks point at: `vars.<id>`, `vars.<id>.<key>` (dict) or `vars.<id>[i]` (list). */
+function applyOffMarks(updates: UserVarUpdate[], marks: OffMark[], diag: Diagnostics, where: Where): void {
+  for (const { keys, index } of marks) {
+    const at = { ...where, path: keys.join('.') + (index !== undefined ? `[${index}]` : '') };
+    const [head, id, key, ...rest] = keys;
+    const u = head === 'vars' && id !== undefined && !rest.length ? updates.find((x) => x.var === id) : undefined;
+    if (head !== 'vars' || id === undefined || rest.length || (key !== undefined && index !== undefined)) {
+      diag.error('`!off` switches off a variable update, a dict key or a list item (in `vars`)', at);
+    } else if (!u) {
+      continue; // unknown variable or wrong value: already reported
+    } else if (key === undefined && index === undefined) {
+      u.enabled = false;
+    } else if (index !== undefined && u.type === 'list') {
+      u.items[index] = listItem(String(u.items[index]), false);
+    } else if (key !== undefined && u.type === 'dict') {
+      const item = u.items.find((x) => x.key === key);
+      if (item) item.enabled = false;
+    } else {
+      diag.error('`!off` switches off a variable update, a dict key or a list item (in `vars`)', at);
+    }
+  }
+}
+
 function compileBody(file: string, src: string, ctx: SourceContext, id: string, kind: SourceKind, translation: boolean): Compiled | undefined {
   const { diag } = ctx;
   const noun = NOUN[kind];
   const { yaml, body, bodyLine } = splitFrontmatter(src);
   const where = { file, line: 1 };
   let fm: Record<string, unknown> = {};
+  let marks: OffMark[] = [];
   if (yaml) {
-    try {
-      const parsed = parseYaml(yaml);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) fm = parsed as Record<string, unknown>;
-      else diag.error('frontmatter must be a mapping', where);
-    } catch (e) {
-      diag.error(`invalid frontmatter: ${(e as Error).message}`, where);
+    const parsed = parseFrontmatter(yaml);
+    if (parsed.error) {
+      diag.error(`invalid frontmatter: ${parsed.error}`, where);
       return undefined;
     }
+    if (parsed.data && typeof parsed.data === 'object' && !Array.isArray(parsed.data)) fm = parsed.data as Record<string, unknown>;
+    else diag.error('frontmatter must be a mapping', where);
+    marks = parsed.marks;
   }
   if (fm.id !== undefined && String(fm.id) !== id) diag.error(`${noun} id comes from the file name (\`${id}\`)`, { ...where, path: 'id' });
 
@@ -165,7 +216,10 @@ function compileBody(file: string, src: string, ctx: SourceContext, id: string, 
       if (!ROLES.includes(head.role as Role)) diag.error(`role must be ${ROLES.join(' | ')}`, at);
       else entry.role = head.role as Role;
     }
-    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (k !== 'point' && k !== 'role') diag.warn(`unknown @entry attribute \`${k}\` in a ${noun}`, at);
+    const enabled = i === 0 ? undefined : part.attrs?.enabled;
+    if (enabled === 'false') entry.enabled = false;
+    else if (enabled !== undefined && enabled !== 'true') diag.error('@entry `enabled` must be true or false', at);
+    for (const k of Object.keys(i === 0 ? {} : part.attrs ?? {})) if (!['point', 'role', 'enabled'].includes(k)) diag.warn(`unknown @entry attribute \`${k}\` in a ${noun}`, at);
     // Compiled only for diagnostics and `ap check`; the artifact keeps the raw text.
     const [chunk] = tokenizeDirectives(part.text, [], part.line, (message, line) => diag.error(message, { file, ...(line !== undefined ? { line } : {}) }));
     ctx.content(chunk!.tokens, { file, line: part.line });
@@ -174,11 +228,13 @@ function compileBody(file: string, src: string, ctx: SourceContext, id: string, 
   if (!entries.length) diag.warn(`${noun} has no entries (set \`point\` in the frontmatter or add \`@entry point=…\`)`, where);
 
   const name = fm.name === undefined ? id : String(fm.name);
+  const vars: UserVarUpdate[] = ctx.varUpdates(fm.vars, { ...where, path: 'vars' });
+  applyOffMarks(vars, marks, diag, where);
   const out: Compiled = {
     name,
     ...(fm.description !== undefined && kind === 'template' ? { description: String(fm.description).trim() } : {}),
     entries,
-    vars: ctx.varUpdates(fm.vars, { ...where, path: 'vars' }),
+    vars,
     trigger: parseTrigger(fm, ctx, { ...where, path: fm.trigger !== undefined ? 'trigger' : 'when' }),
   };
   if (fm.description !== undefined && kind === 'module') diag.warn('`description` is only shown for user module templates (use an author comment `<!--# … -->` instead)', { ...where, path: 'description' });

@@ -2,7 +2,7 @@
 /** Drill-in editor of one user module: name, switch, insertion entries, variable updates, trigger and file actions. */
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { ArrowLeft, CopyPlus, Download, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
-import { compileText, findPoint, partEnabled, type APreset, type Role, type UserEntry, type UserModule, type UserVarUpdate } from '@advanced-preset/protocol';
+import { compileText, findPoint, partEnabled, setPartEnabled, type APreset, type Role, type UserEntry, type UserModule, type UserVarUpdate } from '@advanced-preset/protocol';
 import { t, pt } from '@/i18n';
 import { save } from '@/store/settings';
 import { duplicateUserModule, exportUserModules, newEntry, removeUserModule } from '@/store/user-modules';
@@ -36,11 +36,6 @@ const ROLES: ('' | Role)[] = ['', 'system', 'user', 'assistant'];
 function setRole(e: UserEntry, role: string) {
   if (role) e.role = role as Role;
   else delete e.role;
-}
-/** Only the off state is stored, so switching back on leaves the data as it was. */
-function setPartEnabled(part: { enabled?: boolean }, on: boolean) {
-  if (on) delete part.enabled;
-  else part.enabled = false;
 }
 const errors = (e: UserEntry) => compileText(e.text).errors;
 const errorText = (e: UserEntry) => errors(e).map((x) => (x.line ? t('um.lineError', { line: x.line, message: x.message }) : x.message)).join('\n');
@@ -109,7 +104,7 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
     </Section>
 
     <Section v-if="vars.length || module.vars.length" :title="t('um.bv')" :help="t('um.bv.help')">
-      <VarUpdateEditor v-for="(u, i) in module.vars" :key="u.var" :preset="preset" :update="u" @toggle="setPartEnabled(u, $event)" @remove="module.vars.splice(i, 1)" />
+      <VarUpdateEditor v-for="(u, i) in module.vars" :key="u.var" :preset="preset" :update="u" @remove="module.vars.splice(i, 1)" />
       <label v-if="unusedVars.length" class="btn ghost add picker">
         <Plus />{{ t('um.bv.add') }}
         <select ref="varPicker" :aria-label="t('um.bv.add')" @change="addVar(($event.target as HTMLSelectElement).value)">
