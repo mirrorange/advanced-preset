@@ -7190,7 +7190,7 @@ var Zf = (e) => zf.has(e), Qf = (e) => zf.get(e), $f = {
 	"storylines.switchFailed": "Could not make “{name}” the main storyline; the reply stays on that storyline.",
 	"storylines.unnamed": "Unnamed",
 	"presetFile.installer": "Include the Advanced Preset installer",
-	"presetFile.installerHint": "The file can be imported as an ordinary SillyTavern preset. Without Advanced Preset, the installer (a Tavern Helper script) offers to install it; the preset's notice also asks the model to explain how.",
+	"presetFile.installerHint": "The file can be imported as an ordinary SillyTavern preset. Without Advanced Preset, the installer offers to install it.",
 	"presetFile.adopted": "Set up from the imported preset “{file}”: now “{carrier}”."
 }, ep = {
 	en: $f,
@@ -7622,7 +7622,7 @@ var Zf = (e) => zf.has(e), Qf = (e) => zf.get(e), $f = {
 		"storylines.switchFailed": "未能将「{name}」设为主线，这条回复保留在该故事线上。",
 		"storylines.unnamed": "未命名",
 		"presetFile.installer": "附带 Advanced Preset 安装脚本",
-		"presetFile.installerHint": "导出的文件可作为普通的酒馆预设导入。未安装 Advanced Preset 时，安装脚本（酒馆助手脚本）会提示安装插件；预设中的提示词也会让 AI 说明安装方法。",
+		"presetFile.installerHint": "导出的文件可作为普通的酒馆预设导入。未安装 Advanced Preset 时，安装脚本会提示安装插件。",
 		"presetFile.adopted": "已根据导入的预设「{file}」完成设置，现为「{carrier}」。"
 	}
 };
@@ -11566,7 +11566,7 @@ function Py(e) {
 }
 async function Fy() {
 	let e = await Ny();
-	e && e !== "e754142e1905d832" && sessionStorage.getItem(My) !== e && Py(e);
+	e && e !== "15922e6eb71119e2" && sessionStorage.getItem(My) !== e && Py(e);
 }
 async function Iy() {
 	await Fy();
@@ -11587,7 +11587,7 @@ async function By() {
 	let e = o().replace(/^third-party\//, ""), t = await Wy(e, !1);
 	if (t.status === 404 && (t = await Wy(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ny();
-	return r && r !== "e754142e1905d832" ? (Py(r), {
+	return r && r !== "15922e6eb71119e2" ? (Py(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -19164,7 +19164,7 @@ var bk = ["aria-label"], xk = { class: "um-picker-head" }, Sk = { class: "small 
 				"icon",
 				"help"
 			]),
-			H("div", zM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("e754142e1905d832")), 1)
+			H("div", zM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("15922e6eb71119e2")), 1)
 		], 64));
 	}
 }), VM = {
@@ -19491,7 +19491,7 @@ function EN() {
 //#region src/index.ts
 var DN = {
 	version: "1.11.0",
-	buildId: "e754142e1905d832",
+	buildId: "15922e6eb71119e2",
 	nextGeneration: (e) => zm(e),
 	listPresets: () => Uf().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19550,7 +19550,7 @@ async function AN() {
 	};
 	t.on(n.APP_READY, () => void o()), EN(), jh("init", {
 		version: "1.11.0",
-		build: "e754142e1905d832",
+		build: "15922e6eb71119e2",
 		enabled: q().enabled
 	});
 }
