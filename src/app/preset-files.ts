@@ -5,8 +5,9 @@
  * file with the preset's Carrier and selects the Carrier when the file was selected. The install
  * notice and the installer script go with the file.
  *
- * Runs at startup and whenever a preset file gets selected. An artifact this AP cannot read (newer
- * format, or a newer `minAdvancedPreset`) is left alone: the file's installer offers the update.
+ * Runs at startup and whenever a preset file gets selected. An artifact in a newer format is left
+ * alone; one that needs a newer AP (`minAdvancedPreset`) makes AP update itself (once per session),
+ * and the file is taken over after the reload.
  */
 import { compareVersions, presetFileData, upgradeArtifact } from '@advanced-preset/protocol';
 import { st, toast, type PresetManager } from '@/st/host';
@@ -17,6 +18,7 @@ import { refreshActivePreset } from '@/ui/state';
 import { presetName, t } from '@/i18n';
 import { installArtifact } from './install';
 import { isTrustDeclined } from './trust';
+import { updateForPreset } from './updater';
 
 type Manager = PresetManager & { getPresetList(): { presets: Record<string, any>[]; preset_names: Record<string, number> } };
 const pm = () => st().getPresetManager('openai') as Manager | undefined;
@@ -34,7 +36,10 @@ export function presetFilesInList(): { name: string; artifact: unknown }[] {
 async function adopt(name: string, raw: unknown): Promise<void> {
   const data = upgradeArtifact(raw);
   if (!data) { console.warn('[AP] preset file in an unsupported format', name); return; }
-  if (data.minAdvancedPreset && compareVersions(__AP_VERSION__, data.minAdvancedPreset) < 0) return;
+  if (data.minAdvancedPreset && compareVersions(__AP_VERSION__, data.minAdvancedPreset) < 0) {
+    if (!(await updateForPreset(data.minAdvancedPreset, presetName(data)))) console.warn('[AP] preset file needs a newer Advanced Preset', name, data.minAdvancedPreset);
+    return;
+  }
   // A file whose preset the user declined is not asked about again (until it carries another build).
   const declined = settings().declinedPresetFiles ?? {};
   if (declined[name] === data.hash) return;

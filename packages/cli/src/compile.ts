@@ -18,6 +18,7 @@
 import { createHash } from 'node:crypto';
 import { parse as parseYaml } from 'yaml';
 import {
+  isUpdateUrl,
   isInlineStructure, templateLiterals, DEFAULT_INPUT_TEMPLATE, INPUT_SHAPING_MODES,
   CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type InputShaping, type InputShapingMode, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
@@ -252,6 +253,8 @@ export function compile(tree: SourceTree): CompileResult {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) diag.error('id must be lower-case kebab-case', { file: M, path: 'id' });
   const version = str(raw.version, '0.0.0');
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error('version must be semver', { file: M, path: 'version' });
+  const updateUrl = raw.updateUrl === undefined ? undefined : str(raw.updateUrl).trim();
+  if (updateUrl !== undefined && !isUpdateUrl(updateUrl)) diag.error('updateUrl must be an http(s) URL', { file: M, path: 'updateUrl' });
 
   // ── actors ──────────────────────────────────────────────────────────────────
   const actors: Record<string, Actor> = {};
@@ -871,6 +874,7 @@ export function compile(tree: SourceTree): CompileResult {
     ...(raw.author !== undefined ? { author: str(raw.author) } : {}),
     ...(raw.description !== undefined ? { description: str(raw.description).trim() } : {}),
     ...(raw.minAdvancedPreset !== undefined ? { minAdvancedPreset: str(raw.minAdvancedPreset) } : {}),
+    ...(updateUrl && isUpdateUrl(updateUrl) ? { updateUrl } : {}),
     hash: '',
     actors,
     narrator,

@@ -4,10 +4,9 @@ import { Check, CodeXml, FileDown, Link, LoaderCircle, RefreshCw, Trash2, Upload
 import { presetTemplates } from '@advanced-preset/protocol';
 import { listPresets, type PresetEntry } from '@/store/presets';
 import { activatePreset } from '@/store/carrier';
-import { settings } from '@/store/settings';
 import { toast } from '@/st/host';
 import { presetDescription, presetName, t } from '@/i18n';
-import { installFromFile, installFromUrl, removePreset } from '@/app/install';
+import { installFromFile, installFromUrl, isApUpdating, removePreset, updateFromSource, updateSource } from '@/app/install';
 import { isTrustDeclined } from '@/app/trust';
 import { exportPreset } from '@/app/bundled-modules';
 import { updateExtension } from '@/app/updater';
@@ -29,7 +28,7 @@ async function run(key: string, f: () => Promise<unknown>, ok?: string) {
     await f();
     if (ok) toast('success', ok);
   } catch (e) {
-    if (isTrustDeclined(e)) toast('info', e.message);
+    if (isTrustDeclined(e) || isApUpdating(e)) toast('info', e.message);
     else toast('error', e instanceof Error ? e.message : String(e), t('app.name'));
   } finally {
     busy.value = null;
@@ -43,7 +42,7 @@ const importFile = (ev: Event) => {
   if (file) void run('file', () => installFromFile(file), t('presets.installed'));
   (ev.target as HTMLInputElement).value = '';
 };
-const updateFromSource = (e: PresetEntry) => run(`update:${e.preset.id}`, () => installFromUrl(settings().sources[e.preset.id]!), t('presets.updated'));
+const update = (e: PresetEntry) => run(`update:${e.preset.id}`, () => updateFromSource(e.preset.id), t('presets.updated'));
 const exportFile = (e: PresetEntry) => run(`export:${e.preset.id}`, () => exportPreset(e.preset));
 const remove = (e: PresetEntry) => run(`remove:${e.preset.id}`, () => removePreset(e.preset.id));
 const checkUpdates = () => run('ext', async () => toast('info', (await updateExtension()) === 'current' ? t('update.none') : t('update.reloading')));
@@ -80,7 +79,7 @@ const checkUpdates = () => run('ext', async () => toast('info', (await updateExt
       </div>
       <div class="row preset-actions" @click.stop>
         <IconButton :icon="FileDown" :label="t('presets.export')" align="end" small @click="exportFile(e)" />
-        <IconButton v-if="e.source === 'installed' && settings().sources[e.preset.id]" :icon="RefreshCw" :label="t('presets.update')" align="end" small @click="updateFromSource(e)" />
+        <IconButton v-if="updateSource(e.preset.id)" :icon="RefreshCw" :label="t('presets.update')" align="end" small @click="update(e)" />
         <IconButton v-if="e.source === 'installed'" :icon="Trash2" :label="t('common.delete')" align="end" small danger @click="remove(e)" />
       </div>
     </div>

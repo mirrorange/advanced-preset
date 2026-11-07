@@ -5,6 +5,9 @@
  * the extension from its Extensions panel (that path only toasts "Reload the page to apply updates"),
  * and after "Switch branch" in that panel, which has no hook — FetchGate reports it via
  * `onExtensionFetch`.
+ *
+ * A preset that needs a newer AP (`minAdvancedPreset`) makes AP update itself the same way
+ * (`updateForPreset`).
  */
 import { extensionBaseUrl, extensionId, nativeFetch, st, toast } from '@/st/host';
 import { t } from '@/i18n';
@@ -58,8 +61,8 @@ export function onExtensionFetch(url: string, init: RequestInit, response: Respo
   if (typeof name === 'string' && bareName(name) === bareName(extensionId())) void checkStaleBundle();
 }
 
-/** Panel "check for updates": git pull through ST, then reload if the bundle changed. */
-export async function updateExtension(): Promise<'updated' | 'current'> {
+/** git pull through ST; reload when the bundle on disk changed (`reloading`). */
+async function pull(): Promise<{ upToDate: boolean; reloading: boolean }> {
   const extensionName = extensionId().replace(/^third-party\//, '');
   // ST keeps the local/global type private; try the user folder first, then the global one.
   let r = await post(extensionName, false);
@@ -67,8 +70,34 @@ export async function updateExtension(): Promise<'updated' | 'current'> {
   if (!r.ok) throw new Error((await r.text()) || r.statusText);
   const data = (await r.json()) as { isUpToDate?: boolean };
   const disk = await diskBuildId();
-  if (disk && disk !== __AP_BUILD_ID__) { reload(disk); return 'updated'; }
-  return data.isUpToDate ? 'current' : 'updated';
+  if (disk && disk !== __AP_BUILD_ID__) { reload(disk); return { upToDate: false, reloading: true }; }
+  return { upToDate: Boolean(data.isUpToDate), reloading: false };
+}
+
+/** Panel "check for updates": git pull through ST, then reload if the bundle changed. */
+export async function updateExtension(): Promise<'updated' | 'current'> {
+  const r = await pull();
+  return r.reloading || !r.upToDate ? 'updated' : 'current';
+}
+
+const TRIED = 'advancedPreset.selfUpdateFor';
+
+/**
+ * A preset needs Advanced Preset `required` or newer: update AP (once per browser session for this
+ * AP version and requirement, so a release that is still too old does not reload the page again and
+ * again). `true` when the page reloads into the new bundle.
+ */
+export async function updateForPreset(required: string, preset: string): Promise<boolean> {
+  const key = `${__AP_VERSION__}>${required}`;
+  if (sessionStorage.getItem(TRIED) === key) return false;
+  sessionStorage.setItem(TRIED, key);
+  toast('info', t('update.forPreset', { name: preset, version: required }));
+  try {
+    return (await pull()).reloading;
+  } catch (e) {
+    console.warn('[AP] self-update failed', e);
+    return false;
+  }
 }
 
 const post = (extensionName: string, global: boolean) =>

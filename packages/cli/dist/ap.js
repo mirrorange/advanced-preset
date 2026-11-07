@@ -8843,6 +8843,7 @@ var AP_MIRRORS = [
   "https://gitlab.com/mirrorange/advanced-preset",
   "https://codeberg.org/mirrorange/advanced-preset"
 ];
+var isUpdateUrl = (u) => typeof u === "string" && /^https?:\/\/[^\s/?#]+[^\s]*$/i.test(u.trim());
 var INSTALL_NOTICE_ID = "ap_install_notice";
 var INSTALL_NOTICE_MARK = "\u27E6ap:install-notice\u27E7";
 var INSTALLER_SCRIPT_ID = "6f1d6c2e-5a4b-4c3e-9a7d-a9e5c0f1b2d3";
@@ -9680,7 +9681,7 @@ function compileUserModuleSources(tree, ctx, kind) {
 var import_yaml3 = __toESM(require_dist(), 1);
 var MANIFEST_FILE = "preset.yaml";
 var FRAGMENT_RE = /^manifest\/(?:[^/.][^/]*\/)*[^/.][^/]*\.ya?ml$/;
-var ROOT_ONLY_KEYS = ["formatVersion", "id", "name", "version", "author", "description", "minAdvancedPreset"];
+var ROOT_ONLY_KEYS = ["formatVersion", "id", "name", "version", "author", "description", "minAdvancedPreset", "updateUrl"];
 var isObj3 = (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v);
 var own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 function parsePath(path) {
@@ -10294,6 +10295,8 @@ function compile(tree) {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) diag.error("id must be lower-case kebab-case", { file: M, path: "id" });
   const version = str2(raw.version, "0.0.0");
   if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version)) diag.error("version must be semver", { file: M, path: "version" });
+  const updateUrl = raw.updateUrl === void 0 ? void 0 : str2(raw.updateUrl).trim();
+  if (updateUrl !== void 0 && !isUpdateUrl(updateUrl)) diag.error("updateUrl must be an http(s) URL", { file: M, path: "updateUrl" });
   const actors = {};
   for (const [aid, a] of Object.entries(isObj5(raw.actors) ? raw.actors : {})) {
     const o = isObj5(a) ? a : {};
@@ -10901,6 +10904,7 @@ function compile(tree) {
     ...raw.author !== void 0 ? { author: str2(raw.author) } : {},
     ...raw.description !== void 0 ? { description: str2(raw.description).trim() } : {},
     ...raw.minAdvancedPreset !== void 0 ? { minAdvancedPreset: str2(raw.minAdvancedPreset) } : {},
+    ...updateUrl && isUpdateUrl(updateUrl) ? { updateUrl } : {},
     hash: "",
     actors,
     narrator,
