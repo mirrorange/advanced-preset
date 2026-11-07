@@ -11523,7 +11523,7 @@ function Ey(e) {
 }
 async function Dy() {
 	let e = await Ty();
-	e && e !== "27ef7ce8fc21bbc5" && sessionStorage.getItem(wy) !== e && Ey(e);
+	e && e !== "51bc678c8b205f2e" && sessionStorage.getItem(wy) !== e && Ey(e);
 }
 async function Oy() {
 	await Dy();
@@ -11544,7 +11544,7 @@ async function My() {
 	let e = o().replace(/^third-party\//, ""), t = await Ny(e, !1);
 	if (t.status === 404 && (t = await Ny(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ty();
-	return r && r !== "27ef7ce8fc21bbc5" ? (Ey(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "51bc678c8b205f2e" ? (Ey(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Ny = (t, n) => v("/api/extensions/update", {
 	method: "POST",
@@ -18964,7 +18964,7 @@ var ek = ["aria-label"], tk = { class: "um-picker-head" }, nk = { class: "small 
 				"icon",
 				"help"
 			]),
-			U("div", vM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("27ef7ce8fc21bbc5")), 1)
+			U("div", vM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("51bc678c8b205f2e")), 1)
 		], 64));
 	}
 }), bM = {
@@ -19291,7 +19291,7 @@ function aN() {
 //#region src/index.ts
 var oN = {
 	version: "1.11.0",
-	buildId: "27ef7ce8fc21bbc5",
+	buildId: "51bc678c8b205f2e",
 	nextGeneration: (e) => jm(e),
 	listPresets: () => If().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19346,7 +19346,7 @@ async function lN() {
 	};
 	t.on(n.APP_READY, () => void a()), aN(), Ch("init", {
 		version: "1.11.0",
-		build: "27ef7ce8fc21bbc5",
+		build: "51bc678c8b205f2e",
 		enabled: q().enabled
 	});
 }
