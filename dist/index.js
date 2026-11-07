@@ -11523,7 +11523,7 @@ function Ey(e) {
 }
 async function Dy() {
 	let e = await Ty();
-	e && e !== "9a619e6bec4d9a95" && sessionStorage.getItem(wy) !== e && Ey(e);
+	e && e !== "27ef7ce8fc21bbc5" && sessionStorage.getItem(wy) !== e && Ey(e);
 }
 async function Oy() {
 	await Dy();
@@ -11544,7 +11544,7 @@ async function My() {
 	let e = o().replace(/^third-party\//, ""), t = await Ny(e, !1);
 	if (t.status === 404 && (t = await Ny(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ty();
-	return r && r !== "9a619e6bec4d9a95" ? (Ey(r), "updated") : n.isUpToDate ? "current" : "updated";
+	return r && r !== "27ef7ce8fc21bbc5" ? (Ey(r), "updated") : n.isUpToDate ? "current" : "updated";
 }
 var Ny = (t, n) => v("/api/extensions/update", {
 	method: "POST",
@@ -12105,7 +12105,7 @@ function Hb(e) {
 async function Ub(e, t) {
 	let n = Ff(e);
 	if (!n) throw Error(X("presets.invalid"));
-	if (n.minAdvancedPreset && Cl("1.10.0", n.minAdvancedPreset) < 0) throw Error(X("presets.tooNew", { version: n.minAdvancedPreset }));
+	if (n.minAdvancedPreset && Cl("1.11.0", n.minAdvancedPreset) < 0) throw Error(X("presets.tooNew", { version: n.minAdvancedPreset }));
 	await Lb(n, Bf(n.id)), await Rb(n, Bf(n.id)), Vf(n), t && (q().sources[n.id] = t), J();
 	let r = Bf(n.id) ?? n;
 	return sm(r), Lf(r.id)?.source === "installed" && await Vb(r), await Cm(r), await mb(r), r;
@@ -12218,7 +12218,7 @@ async function ux(e, t) {
 		console.warn("[AP] preset file in an unsupported format", e);
 		return;
 	}
-	if (n.minAdvancedPreset && Cl("1.10.0", n.minAdvancedPreset) < 0) return;
+	if (n.minAdvancedPreset && Cl("1.11.0", n.minAdvancedPreset) < 0) return;
 	let r = q().declinedPresetFiles ?? {};
 	if (r[e] === n.hash) return;
 	let i = Bf(n.id);
@@ -18964,7 +18964,7 @@ var ek = ["aria-label"], tk = { class: "um-picker-head" }, nk = { class: "small 
 				"icon",
 				"help"
 			]),
-			U("div", vM, "Advanced Preset " + j(P("1.10.0")) + " · " + j(P("9a619e6bec4d9a95")), 1)
+			U("div", vM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("27ef7ce8fc21bbc5")), 1)
 		], 64));
 	}
 }), bM = {
@@ -19290,8 +19290,8 @@ function aN() {
 //#endregion
 //#region src/index.ts
 var oN = {
-	version: "1.10.0",
-	buildId: "9a619e6bec4d9a95",
+	version: "1.11.0",
+	buildId: "27ef7ce8fc21bbc5",
 	nextGeneration: (e) => jm(e),
 	listPresets: () => If().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19345,8 +19345,8 @@ async function lN() {
 		})(), Gy({ reload: !0 }), yx(), Dy();
 	};
 	t.on(n.APP_READY, () => void a()), aN(), Ch("init", {
-		version: "1.10.0",
-		build: "9a619e6bec4d9a95",
+		version: "1.11.0",
+		build: "27ef7ce8fc21bbc5",
 		enabled: q().enabled
 	});
 }
