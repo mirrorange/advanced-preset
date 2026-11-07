@@ -11348,11 +11348,15 @@ async function Dy(e, t, n) {
 		toolChoice: t.tool_choice,
 		schema: t.json_schema ?? void 0
 	} : { tools: [] }, c = xy(e, i);
-	if (!i) try {
-		let i = await Ay(e, t, s, c, n ?? void 0, () => void 0);
+	if (!i) {
+		let i;
+		try {
+			i = await Ay(e, t, s, c, n ?? void 0, () => void 0);
+		} catch (e) {
+			return ky(c, e);
+		}
+		if (n?.aborted) throw wy.pending?.ctx === e && (wy.pending = null), n.reason;
 		return new Response(JSON.stringify(ty(r, i)), { headers: { "Content-Type": "application/json" } });
-	} catch (e) {
-		return ky(c, e);
 	}
 	let l = Qv(r), u = new TextEncoder(), d = new TransformStream(), f = d.writable.getWriter(), p = (e) => e ? f.write(u.encode(e)).catch(() => void 0) : Promise.resolve(), m = "";
 	return (async () => {
@@ -11566,7 +11570,7 @@ function Py(e) {
 }
 async function Fy() {
 	let e = await Ny();
-	e && e !== "f8f64cfbee14c7ce" && sessionStorage.getItem(My) !== e && Py(e);
+	e && e !== "2cd0b83662779a6e" && sessionStorage.getItem(My) !== e && Py(e);
 }
 async function Iy() {
 	await Fy();
@@ -11587,7 +11591,7 @@ async function By() {
 	let e = o().replace(/^third-party\//, ""), t = await Wy(e, !1);
 	if (t.status === 404 && (t = await Wy(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Ny();
-	return r && r !== "f8f64cfbee14c7ce" ? (Py(r), {
+	return r && r !== "2cd0b83662779a6e" ? (Py(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -11640,7 +11644,7 @@ function qy() {
 			if (e && r && !r.claimed) {
 				delete e[Gy], r.claimed = !0;
 				try {
-					return await Dy(r, e, n.signal);
+					return n.signal?.throwIfAborted(), await Dy(r, e, n.signal);
 				} finally {
 					Xm.release(t);
 				}
@@ -19164,7 +19168,7 @@ var bk = ["aria-label"], xk = { class: "um-picker-head" }, Sk = { class: "small 
 				"icon",
 				"help"
 			]),
-			H("div", zM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("f8f64cfbee14c7ce")), 1)
+			H("div", zM, "Advanced Preset " + j(P("1.11.0")) + " · " + j(P("2cd0b83662779a6e")), 1)
 		], 64));
 	}
 }), VM = {
@@ -19491,7 +19495,7 @@ function EN() {
 //#region src/index.ts
 var DN = {
 	version: "1.11.0",
-	buildId: "f8f64cfbee14c7ce",
+	buildId: "2cd0b83662779a6e",
 	nextGeneration: (e) => zm(e),
 	listPresets: () => Uf().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19550,7 +19554,7 @@ async function AN() {
 	};
 	t.on(n.APP_READY, () => void o()), EN(), jh("init", {
 		version: "1.11.0",
-		build: "f8f64cfbee14c7ce",
+		build: "2cd0b83662779a6e",
 		enabled: q().enabled
 	});
 }
