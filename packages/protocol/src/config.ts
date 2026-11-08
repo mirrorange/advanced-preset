@@ -20,6 +20,7 @@ export const CONNECTION_DEFAULTS: Omit<ConnectionConfig, 'workflow' | 'synthetic
   streamToolArguments: 'auto',
   maxSteps: 6,
   finalFallback: true,
+  assumeToolSupport: false,
 };
 
 /** Thought signature channel of a connection (the older boolean switch meant Vertex AI). */

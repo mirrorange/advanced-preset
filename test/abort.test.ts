@@ -11,7 +11,7 @@ beforeEach(() => {
   vi.stubGlobal('localStorage', { getItem: () => 'en' });
   vi.stubGlobal('location', { href: 'http://localhost:8000/' });
   (globalThis as any).toastr = { warning: vi.fn(), error: vi.fn(), info: vi.fn() };
-  (globalThis as any).SillyTavern = { getContext: () => ({ chat: [], getRequestHeaders: () => ({}), isToolCallingSupported: () => true, eventSource: { emit: async () => undefined } }) };
+  (globalThis as any).SillyTavern = { getContext: () => ({ chat: [], mainApi: 'openai', chatCompletionSettings: {}, getRequestHeaders: () => ({}), isToolCallingSupported: () => true, eventSource: { emit: async () => undefined } }) };
   handoff.pending = null;
 });
 afterEach(() => { delete (globalThis as any).SillyTavern; delete (globalThis as any).toastr; vi.unstubAllGlobals(); });

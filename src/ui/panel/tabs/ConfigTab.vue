@@ -106,6 +106,7 @@ const openAiSignatures = conn('openAiSignatures');
 const streamToolArguments = conn('streamToolArguments');
 const finalFallback = conn('finalFallback');
 const maxSteps = conn('maxSteps');
+const assumeToolSupport = conn('assumeToolSupport');
 const syntheticTurn = computed({
   get: () => config.value?.connection.syntheticTurn ?? '',
   set: (v: string) => update((c) => { c.connection.syntheticTurn = v || null; }),
@@ -217,6 +218,7 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
         <Field v-if="transport === 'tool-multi'" :label="t('config.maxSteps')" inline>
           <input class="input" type="number" min="1" max="20" :value="maxSteps" @change="maxSteps = num($event)" />
         </Field>
+        <Field :label="t('config.assumeToolSupport')" :help="t('config.assumeToolSupport.hint')" inline><Switch v-model="assumeToolSupport" /></Field>
       </template>
       <Field :label="t('config.finalFallback')" :help="t('config.finalFallback.hint')" inline><Switch v-model="finalFallback" /></Field>
     </Section>

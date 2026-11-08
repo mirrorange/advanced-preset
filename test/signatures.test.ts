@@ -156,7 +156,7 @@ describe('signature fallback', () => {
     vi.stubGlobal('localStorage', { getItem: () => 'en' });
     const warning = vi.fn();
     (globalThis as any).toastr = { warning, error: vi.fn() };
-    (globalThis as any).SillyTavern = { getContext: () => ({ chat: [], getRequestHeaders: () => ({}), isToolCallingSupported: () => true, eventSource: { emit: async () => undefined } }) };
+    (globalThis as any).SillyTavern = { getContext: () => ({ chat: [], mainApi: 'openai', chatCompletionSettings: {}, getRequestHeaders: () => ({}), isToolCallingSupported: () => true, eventSource: { emit: async () => undefined } }) };
     const ctx = ctxFor('tool-single', 'linear', {}, preset);
     ctx.config.connection.sendThoughtSignature = channel;
     ctx.config.connection.openAiSignatures = openAi;

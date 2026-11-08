@@ -491,6 +491,11 @@ export interface ConnectionConfig {
   streamToolArguments: ToolArgStreaming;
   maxSteps: number;
   finalFallback: boolean;
+  /**
+   * Tool transports skip ST's source / model check, which relies on the model list's metadata and
+   * can reject models that do support tools. The API type and prompt post-processing are still checked.
+   */
+  assumeToolSupport: boolean;
 }
 
 export interface Configuration {

@@ -147,7 +147,13 @@ prefill 与 plaintext 的输出按以下步骤解析（流式时对累计文本�
 
 ## 能力检查
 
-使用 `tool-single` / `tool-multi` 时，如果 ST 当前的连接不支持工具调用，生成会直接报错并提示切换传输方式。
+使用 `tool-single` / `tool-multi` 时，生成前依次检查下面几项。不满足时直接报错，并说明是哪一项、怎么修改：
+
+1. **API 类型**：必须是 Chat Completion。
+2. **提示词后处理**（ST 的 API 连接设置）：必须是「未选择」或带「（含工具）」的选项。ST 后端对所有来源都会执行后处理，不带工具的选项（合并、半严格、严格、单一用户消息）会把历史中的工具调用合并成文本。
+3. **API 源与模型**：使用 ST 的 `ToolManager.isToolCallingSupported`。模型在 ST 的模型列表中时，按服务商返回的元数据判断（OpenRouter、ElectronHub、Chutes 等）；其他情况按 API 源白名单判断。`connection.assumeToolSupport` 为真时跳过这一项。元数据缺少工具标记、但模型实际支持工具调用时，可以开启它。
+
+ST 的「启用函数调用」开关不影响 AP 的工具传输：这个开关只决定 ST 是否发送 ST 中注册的函数工具，AP 的工具由 AP 自己放进请求。较旧的 ST（2025 年底之前）无法跳过这个开关，所以这些版本仍要求开启它。
 
 ## tools 文案
 
