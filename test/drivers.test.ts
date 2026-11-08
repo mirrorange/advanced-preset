@@ -150,6 +150,26 @@ describe('preset-defined tool texts', () => {
     expect(task.driver.callerResult!()).toEqual({ x: 'y' });
   });
 
+  it('caller schema without the envelope when tools.envelope.when is false', () => {
+    const direct: APreset = { ...custom, tools: { ...custom.tools, envelope: { ...custom.tools.envelope, when: { t: 'lit', v: false } } } };
+    const value = { type: 'object', properties: { x: { type: 'string' } } };
+    const single = driverFor('tool-single', 'task', direct, { tools: [], schema: { name: 'caller', value } });
+    const params = (single.driver.body(0) as any).tools.find((t: any) => t.function.name === 'hand_in').function.parameters;
+    expect(params).toEqual(value);
+    const r = read({ toolCalls: [{ id: 'c', name: 'hand_in', arguments: JSON.stringify({ x: 'y' }) }] });
+    const turn = single.driver.progress(r, true);
+    expect(single.driver.callerResult!()).toEqual({ x: 'y' });
+    expect(Object.values(turn.stages).every((s) => !s.text)).toBe(true);
+    const structured = driverFor('structured', 'task', direct, { tools: [], schema: { name: 'caller', value } });
+    expect((structured.driver.body(0) as any).json_schema.value).toEqual(value);
+    structured.driver.progress(read({ text: JSON.stringify({ x: 'z' }) }), true);
+    expect(structured.driver.callerResult!()).toEqual({ x: 'z' });
+    // A condition that holds keeps the envelope.
+    const kept: APreset = { ...custom, tools: { ...custom.tools, envelope: { ...custom.tools.envelope, when: { t: 'lit', v: true } } } };
+    const wrapped = driverFor('structured', 'task', kept, { tools: [], schema: { name: 'caller', value } });
+    expect(Object.keys((wrapped.driver.body(0) as any).json_schema.value.properties)).toEqual(['musings', 'answer']);
+  });
+
   it('tool-multi: stage tools, params and loop texts from the preset', () => {
     const { ctx, driver } = driverFor('tool-multi', 'linear', custom);
     const tools = (driver.body(0) as any).tools.filter((t: any) => t.function.name.startsWith('do_'));
