@@ -46,6 +46,8 @@ export const THOUGHT_SIGNATURE_CHANNELS: readonly ThoughtSignatureChannel[] = ['
 export type ThoughtSignatures = Partial<Record<Exclude<ThoughtSignatureChannel, 'off'>, string>>;
 /** First Advanced Preset version with signature channels (older versions only know the boolean switch). */
 export const SIGNATURE_CHANNELS_SINCE = '1.11.0';
+/** `tools.envelope.when`: caller schemas sent without the envelope. */
+export const CALLER_SCHEMA_DIRECT_SINCE = '1.11.1';
 export type Style = 'dialogue' | 'imperative';
 export type Role = 'system' | 'user' | 'assistant';
 export type ActorId = string;
@@ -422,8 +424,12 @@ export interface ToolsDecl {
   stage: { name: string; description?: string; param: FieldText; patchParam: FieldText };
   /** Descriptions inside patch edits (`old_string` / `new_string` are fixed keys). */
   patch: { description?: string; old?: string; new?: string };
-  /** Task turns with a caller JSON schema: `{ <thinking>, <result> }`. */
-  envelope: { thinking: FieldText; result: FieldText };
+  /**
+   * Task turns with a caller JSON schema: `{ <thinking>, <result> }`. `when` (since
+   * {@link CALLER_SCHEMA_DIRECT_SINCE}): the envelope is used only while it holds; otherwise the
+   * caller schema is sent as it is (models that reason natively need no visible thinking field).
+   */
+  envelope: { thinking: FieldText; result: FieldText; when?: Expr };
   /**
    * Multi-step loop texts. `next`: tool result after a stage (`{{next}}` = next tool); `done`: tool
    * result after the last stage; `unknown`: result of an unknown tool (`{{name}}`); `nudge`: user

@@ -3,7 +3,7 @@
  * turns accumulated response state into a TurnResult, and decides whether another segment is needed.
  */
 import {
-  actorName, emptyTurn, fillTemplate, toGeminiSchema, toGeminiTools, turnArtifacts,
+  actorName, emptyTurn, fillTemplate, test, toGeminiSchema, toGeminiTools, turnArtifacts,
   type APreset, type JsonSchema, type TurnArtifacts, type TurnResult,
 } from '@advanced-preset/protocol';
 import { st, type ChatMessage } from '@/st/host';
@@ -72,6 +72,15 @@ export function textExpander(ctx: GenerationContext): (text: string) => string {
 /** Schema / tool names and descriptions of this turn, all from the preset. */
 export function artifactsOf(ctx: GenerationContext): TurnArtifacts {
   return turnArtifacts(ctx.preset.tools, ctx.workflow!, ctx.stages, ctx.structures, textExpander(ctx));
+}
+
+/**
+ * Caller-schema task turns: wrap the caller schema in the `{ thinking, result }` envelope unless
+ * `tools.envelope.when` is false for this turn, in which case the caller schema is sent as it is.
+ */
+export function usesEnvelope(ctx: GenerationContext): boolean {
+  const when = ctx.preset.tools.envelope.when;
+  return !when || !ctx.assembly || test(when, ctx.assembly.resolve);
 }
 
 export function prefixesOf(ctx: GenerationContext): Record<string, string> {
