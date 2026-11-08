@@ -34,7 +34,7 @@ beforeEach(() => {
   popup.mockClear();
   updateForPreset.mockReset();
   updateForPreset.mockResolvedValue(false);
-  vi.stubGlobal('__AP_VERSION__', '1.11.0');
+  vi.stubGlobal('__AP_VERSION__', '1.11.1');
   vi.stubGlobal('localStorage', { getItem: () => 'en' });
   vi.stubGlobal('sessionStorage', { getItem: (k: string) => session.get(k) ?? null, setItem: (k: string, v: string) => void session.set(k, v), removeItem: (k: string) => void session.delete(k) });
   vi.stubGlobal('fetch', vi.fn(async (url: string) => {
