@@ -7378,6 +7378,7 @@ var TRANSPORTS = ["prefill", "plaintext", "structured", "tool-single", "tool-mul
 var TOOL_ARG_STREAMING = ["auto", "on", "off"];
 var THOUGHT_SIGNATURE_CHANNELS = ["off", "vertex", "aistudio"];
 var SIGNATURE_CHANNELS_SINCE = "1.11.0";
+var CALLER_SCHEMA_DIRECT_SINCE = "1.11.1";
 var BUILD_VAR_TYPES = ["string", "list", "dict"];
 var CONTENT_STAGE_REF = "@content";
 var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "storyline", "custom", "annotations"];
@@ -10172,7 +10173,7 @@ var NATIVE_PROMPTS = {
 };
 var anchorText = (region) => `\u27E6ap:region:${region}\u27E7`;
 var anchorIdentifier = (region) => `ap_${region}`;
-function compileTools(src, diag, text, file = "preset.yaml") {
+function compileTools(src, diag, text, file = "preset.yaml", expr) {
   const o = isObj5(src) ? src : {};
   const at = (path) => ({ file, path: `tools.${path}` });
   const opt = (v, path) => v === void 0 || v === null ? void 0 : text(str2(v), at(path));
@@ -10210,7 +10211,14 @@ function compileTools(src, diag, text, file = "preset.yaml") {
       patchParam: field(stage.patchParam, "stage.patchParam", D.stage.patchParam)
     },
     patch: Object.fromEntries(["description", "old", "new"].flatMap((k) => patch[k] !== void 0 ? [[k, opt(patch[k], `patch.${k}`)]] : [])),
-    envelope: { thinking: field(env.thinking, "envelope.thinking", D.envelope.thinking), result: field(env.result, "envelope.result", D.envelope.result) },
+    envelope: {
+      thinking: field(env.thinking, "envelope.thinking", D.envelope.thinking),
+      result: field(env.result, "envelope.result", D.envelope.result),
+      ...(() => {
+        const when = expr?.(env.when, at("envelope.when"));
+        return when ? { when } : {};
+      })()
+    },
     results: {
       next: text(str2(results.next ?? o.stageResult, D.results.next), at("results.next")),
       done: text(str2(results.done, D.results.done), at("results.done")),
@@ -10427,7 +10435,7 @@ function compile(tree) {
       ...o.tab ? { tab: str2(o.tab) } : {}
     };
   }
-  const tools = compileTools(raw.tools, diag, text, M);
+  const tools = compileTools(raw.tools, diag, text, M, expr);
   const structures = {};
   const ordered = Boolean(tools.orderPrefix);
   const compileStructureUi = (src, kind, where) => {
@@ -11360,6 +11368,8 @@ function validate(p, map, diag) {
     diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: "minAdvancedPreset" });
   if (p.syntheticTurns.some((t) => typeof t.thoughtSignature === "object") && below(SIGNATURE_CHANNELS_SINCE))
     diag.warn(`thought signatures by channel need Advanced Preset ${SIGNATURE_CHANNELS_SINCE}: set minAdvancedPreset to ${SIGNATURE_CHANNELS_SINCE} or later (older versions send a broken signature)`, { file: M, path: "syntheticTurns" });
+  if (p.tools.envelope.when && below(CALLER_SCHEMA_DIRECT_SINCE))
+    diag.warn(`tools.envelope.when needs Advanced Preset ${CALLER_SCHEMA_DIRECT_SINCE}: set minAdvancedPreset to ${CALLER_SCHEMA_DIRECT_SINCE} or later (older versions always use the envelope)`, { file: M, path: "tools.envelope.when" });
   if (p.tavernHelperScripts?.length && below(TAVERN_HELPER_SINCE))
     diag.warn(`Tavern Helper scripts need Advanced Preset ${TAVERN_HELPER_SINCE}: set minAdvancedPreset to ${TAVERN_HELPER_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
   for (const [a, rid] of Object.entries(p.anchors)) if (!regionIds.has(rid)) diag.error(`anchor ${a} \u2192 unknown region \`${rid}\``, { file: M, path: "anchors" });
@@ -11832,7 +11842,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.11.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.11.1" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files2(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -11928,7 +11938,7 @@ async function installSkills(target, source = SKILLS_SOURCE) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.11.0" : "0.0.0-dev";
+var VERSION = true ? "1.11.1" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage

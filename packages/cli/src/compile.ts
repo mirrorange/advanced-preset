@@ -129,7 +129,13 @@ export const anchorIdentifier = (region: string) => `ap_${region}`;
  * parts fall back to {@link DEFAULT_TOOLS}. Legacy (format 1) keys are still accepted:
  * `submit: <description>`, `stagePrefix`, `stageResult`, `nudge`.
  */
-export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, where: Where) => string, file = 'preset.yaml'): ToolsDecl {
+export function compileTools(
+  src: unknown,
+  diag: Diagnostics,
+  text: (s: string, where: Where) => string,
+  file = 'preset.yaml',
+  expr?: (src: unknown, where: Where) => Expr | undefined,
+): ToolsDecl {
   const o = isObj(src) ? src : {};
   const at = (path: string): Where => ({ file, path: `tools.${path}` });
   const opt = (v: unknown, path: string): string | undefined => (v === undefined || v === null ? undefined : text(str(v), at(path)));
@@ -167,7 +173,14 @@ export function compileTools(src: unknown, diag: Diagnostics, text: (s: string, 
       patchParam: field(stage.patchParam, 'stage.patchParam', D.stage.patchParam),
     },
     patch: Object.fromEntries((['description', 'old', 'new'] as const).flatMap((k) => (patch[k] !== undefined ? [[k, opt(patch[k], `patch.${k}`)!]] : []))),
-    envelope: { thinking: field(env.thinking, 'envelope.thinking', D.envelope.thinking), result: field(env.result, 'envelope.result', D.envelope.result) },
+    envelope: {
+      thinking: field(env.thinking, 'envelope.thinking', D.envelope.thinking),
+      result: field(env.result, 'envelope.result', D.envelope.result),
+      ...((): Partial<ToolsDecl['envelope']> => {
+        const when = expr?.(env.when, at('envelope.when'));
+        return when ? { when } : {};
+      })(),
+    },
     results: {
       next: text(str(results.next ?? o.stageResult, D.results.next), at('results.next')),
       done: text(str(results.done, D.results.done), at('results.done')),
@@ -395,7 +408,7 @@ export function compile(tree: SourceTree): CompileResult {
     };
   }
 
-  const tools = compileTools(raw.tools, diag, text, M);
+  const tools = compileTools(raw.tools, diag, text, M, expr);
 
   // ── structures ──────────────────────────────────────────────────────────────
   // Field names get `tools.structurePrefix` (I-94); `{{field}}` in the field-style texts is the final name.

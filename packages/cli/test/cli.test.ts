@@ -250,6 +250,17 @@ tools:
     expect(p.workflows[0]!.stages[0]!.field).toEqual({ description: 'The plan' });
   });
 
+  it('compiles envelope.when and asks for the AP version that reads it', () => {
+    const { preset, diag } = withTools(`
+tools:
+  envelope: { when: 'transport != "structured"' }
+`);
+    expect(diag.errors).toEqual([]);
+    expect(preset!.tools.envelope.when).toBeDefined();
+    expect(preset!.tools.envelope.thinking.name).toBe('thinking');
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/tools\.envelope\.when needs Advanced Preset 1\.11\.1/);
+  });
+
   it('accepts legacy keys with a warning', () => {
     const { preset, diag } = withTools(`
 tools:

@@ -8,7 +8,7 @@ import type { ChatMessage } from '@/st/host';
 import type { ReadState, ToolCallAcc } from '../reader';
 import { parsePartialObject } from '../partial-json';
 import {
-  artifactsOf, baseBody, callerCalls, fillToolText, syntheticTurn, type Driver, type DriverInput,
+  artifactsOf, baseBody, callerCalls, fillToolText, syntheticTurn, usesEnvelope, type Driver, type DriverInput,
 } from './base';
 import { envelopeTurn } from './structured';
 import { markOwn } from './signatures';
@@ -27,7 +27,8 @@ function withIds(calls: ToolCallAcc[], step: number): ToolCallAcc[] {
 export function toolSingleDriver(input: DriverInput): Driver {
   const { ctx, caller } = input;
   const art = artifactsOf(ctx);
-  const submit = art.submitTool(caller.schema ? art.envelope(caller.schema.value) : undefined);
+  const enveloped = usesEnvelope(ctx);
+  const submit = art.submitTool(caller.schema ? (enveloped ? art.envelope(caller.schema.value) : caller.schema.value) : undefined);
   const submitName = submit.function.name;
   const syn = syntheticTurn(input, 'single', submitName);
   const tools = [...(syn ? [syn.tool] : []), submit, ...caller.tools];
@@ -39,7 +40,7 @@ export function toolSingleDriver(input: DriverInput): Driver {
     const call = r.toolCalls.find((c) => c.name === submitName) ?? (r.toolCalls.length === 1 && !r.toolCalls[0]!.name ? r.toolCalls[0] : undefined);
     const po = parsePartialObject(call?.arguments ?? '', final);
     value = po.value;
-    if (caller.schema) return envelopeTurn(ctx, art, po.value, final);
+    if (caller.schema) return envelopeTurn(ctx, art, po.value, final, enveloped);
     return parseTurnObject(po.value, { stages: ctx.stages, structures: ctx.structures, final, openKey: po.openKey, fieldOf: art.fieldOf, structureFieldOf: art.structureFieldOf });
   };
   return {
@@ -51,7 +52,7 @@ export function toolSingleDriver(input: DriverInput): Driver {
     },
     result: () => parse(last, true),
     rawText: () => last.text,
-    callerResult: () => value?.[art.envelopeKeys.result],
+    callerResult: () => (enveloped ? value?.[art.envelopeKeys.result] : value ?? undefined),
   };
 }
 

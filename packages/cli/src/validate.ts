@@ -2,7 +2,7 @@
 import {
   isInlineStructure,
   INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
-  SIGNATURE_CHANNELS_SINCE, THOUGHT_SIGNATURE_CHANNELS,
+  SIGNATURE_CHANNELS_SINCE, THOUGHT_SIGNATURE_CHANNELS, CALLER_SCHEMA_DIRECT_SINCE,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -198,6 +198,8 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     diag.warn(`Quick Reply sets need Advanced Preset ${QUICK_REPLIES_SINCE}: set minAdvancedPreset to ${QUICK_REPLIES_SINCE} or later (older versions do not install them)`, { file: M, path: 'minAdvancedPreset' });
   if (p.syntheticTurns.some((t) => typeof t.thoughtSignature === 'object') && below(SIGNATURE_CHANNELS_SINCE))
     diag.warn(`thought signatures by channel need Advanced Preset ${SIGNATURE_CHANNELS_SINCE}: set minAdvancedPreset to ${SIGNATURE_CHANNELS_SINCE} or later (older versions send a broken signature)`, { file: M, path: 'syntheticTurns' });
+  if (p.tools.envelope.when && below(CALLER_SCHEMA_DIRECT_SINCE))
+    diag.warn(`tools.envelope.when needs Advanced Preset ${CALLER_SCHEMA_DIRECT_SINCE}: set minAdvancedPreset to ${CALLER_SCHEMA_DIRECT_SINCE} or later (older versions always use the envelope)`, { file: M, path: 'tools.envelope.when' });
   if (p.tavernHelperScripts?.length && below(TAVERN_HELPER_SINCE))
     diag.warn(`Tavern Helper scripts need Advanced Preset ${TAVERN_HELPER_SINCE}: set minAdvancedPreset to ${TAVERN_HELPER_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: 'minAdvancedPreset' });
 

@@ -175,6 +175,7 @@ tools:
   envelope:                                    # 调用方 schema 的信封
     thinking: { name: thinking, description: "" }
     result: { name: result, description: "" }
+    # when: "!modules.native-reasoning"        # 可选：条件为假时不用信封，直接发送调用方 schema
   results:
     next: "Recorded. Continue with `{{next}}`."
     done: "Recorded. The workflow is complete."
@@ -191,6 +192,7 @@ tools:
 - 单个阶段可以在工作流里覆盖自己的字段名 / 工具名 / 说明（[workflows.md](workflows.md)）；
 - `orderPrefix`（I-135）：阶段与结构字段统一加上按本轮位置生成的前缀（`{{n}}` 按字段数补零），替代 `step{{n}}_` 阶段前缀与 `structurePrefix`；设置后 `structurePrefix` 被忽略（告警），结构说明中的 `{{field}}` 在运行时替换（[structures.md](structures.md#字段名与顺序)）；
 - `structurePrefix` 在构建时加到每个结构的 `field` 上，结构说明中的 `{{field}}` 是加前缀后的名字（[structures.md](structures.md#旧的结构前缀)）；
+- `envelope.when`（1.11.1）：信封的使用条件（[条件表达式](expressions.md)），缺省总是使用。条件为假时 structured / tool-single 直接发送调用方 schema（不加思考字段），模型的回复整个交给调用方；适合有原生推理的模型（Claude ≥ 5.5 会拒绝要求把推理写进输出字段的请求）。用到它时 `minAdvancedPreset` 至少写 1.11.1，否则 `ap check` 警告（旧版本总是使用信封）；
 - 名字规则（报错）：工具名匹配 `^[A-Za-z0-9_-]{1,64}$`，字段名与参数名匹配 `^[A-Za-z_][A-Za-z0-9_]{0,63}$`（带 `orderPrefix` 的名字允许数字开头）；信封的两个字段不能同名；提交工具不能与示范轮次工具同名；
 - 旧写法 `stagePrefix`、`stageResult`、`nudge`、`submit: <文字>` 仍能编译但给出警告；未知键给出警告。
 
@@ -235,7 +237,7 @@ syntheticTurns:
 
 - **调用方工具**：加入工具列表（预设自己的工具名会被过滤掉）。模型调用了调用方工具时，本轮立即结束，把调用原样交还调用方；
 - **调用方 schema**：
-  - structured / tool-single：schema 改为信封 `{ <thinking>: string, <result>: <调用方 schema> }`；`thinking` 显示为第一个文字阶段，`result` 交给调用方；
+  - structured / tool-single：schema 改为信封 `{ <thinking>: string, <result>: <调用方 schema> }`；`thinking` 显示为第一个文字阶段，`result` 交给调用方。`tools.envelope.when` 为假时直接发送调用方 schema，整个回复交给调用方，没有阶段文字；
   - prefill / plaintext：在提示词末尾（预填充助手消息之前）追加一条 system 消息 `tools.callerSchemaHint`，然后从回复中提取第一个 ```` ```json ```` 代码块；
   - tool-multi 不提取调用方结果，需要结构化结果的调用方应配合其他传输方式；
 - quiet / 脚本生成时，消息正文为调用方结果的 JSON；没有结果时为正文（或去注释的原始文本）。
