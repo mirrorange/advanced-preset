@@ -397,6 +397,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     if (conn.transport !== undefined && !TRANSPORTS.includes(conn.transport)) diag.error(`unknown transport \`${conn.transport}\``, { file: M, path });
     if (conn.streamToolArguments !== undefined && !TOOL_ARG_STREAMING.includes(conn.streamToolArguments)) diag.error(`unknown streamToolArguments \`${conn.streamToolArguments}\` (expected ${TOOL_ARG_STREAMING.join(' / ')})`, { file: M, path });
     if (conn.openAiSignatures !== undefined && typeof conn.openAiSignatures !== 'boolean') diag.error('openAiSignatures must be true or false', { file: M, path });
+    if (conn.assumeToolSupport !== undefined && typeof conn.assumeToolSupport !== 'boolean') diag.error('assumeToolSupport must be true or false', { file: M, path });
     const sig = conn.sendThoughtSignature;
     if (sig !== undefined && typeof sig !== 'boolean' && !THOUGHT_SIGNATURE_CHANNELS.includes(sig)) diag.error(`unknown sendThoughtSignature \`${sig}\` (expected ${THOUGHT_SIGNATURE_CHANNELS.join(' / ')})`, { file: M, path });
     if (typeof sig === 'string' && below(SIGNATURE_CHANNELS_SINCE))

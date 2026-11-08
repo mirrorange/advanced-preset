@@ -54,7 +54,8 @@ export interface STContext {
   substituteParams(text: string, ...rest: unknown[]): string;
   getRequestHeaders(): Record<string, string>;
   getPresetManager(apiId?: string): PresetManager | undefined;
-  isToolCallingSupported(): boolean;
+  /** ST reads `settings` / `model` since late 2025; older versions always check the live settings. */
+  isToolCallingSupported(settings?: Record<string, unknown> | null, model?: string | null): boolean;
   updateMessageBlock(id: number, message: STMessage, options?: { rerenderMessage?: boolean }): void;
   getTokenCountAsync(text: string): Promise<number>;
   stopGeneration(): boolean;
@@ -97,14 +98,55 @@ export async function loadHostModules(): Promise<void> {
 export function connectionKey(): string {
   const s = st().chatCompletionSettings ?? {};
   const source = String(s.chat_completion_source ?? '');
+  const endpoint = source === 'custom' ? String(s.custom_url ?? '') : String(s.reverse_proxy ?? '');
+  return [source, chatCompletionModel(s), endpoint].join('|');
+}
+
+/** Model of the current Chat Completion connection (ST's own lookup when available). */
+function chatCompletionModel(s: Record<string, any>): string {
+  const source = String(s.chat_completion_source ?? '');
   let model = '';
   try { model = String(openaiModule.getChatCompletionModel?.() ?? ''); } catch { model = ''; }
   if (!model) {
     const key = ({ makersuite: 'google_model', mistralai: 'mistralai_model' } as Record<string, string>)[source] ?? `${source}_model`;
     model = String(s[key] ?? '');
   }
-  const endpoint = source === 'custom' ? String(s.custom_url ?? '') : String(s.reverse_proxy ?? '');
-  return [source, model, endpoint].join('|');
+  return model;
+}
+
+/** Prompt post-processing types that keep tool calls (ST `custom_prompt_post_processing_types`). */
+const TOOL_POST_PROCESSING = ['', 'merge_tools', 'semi_tools', 'strict_tools'];
+
+export type ToolCallingIssue =
+  | { reason: 'mainApi' }
+  | { reason: 'postProcessing'; label: string }
+  | { reason: 'functionCalling' }
+  | { reason: 'model'; source: string; model: string };
+
+/**
+ * Why tool transports cannot run on the current connection (`null`: they can). The checks of ST's
+ * `ToolManager.isToolCallingSupported`, without "Enable function calling": that switch only decides
+ * whether ST adds the tools registered in ST, and AP sends its own. `assumeSupport` skips the
+ * source / model check, which relies on the model list's metadata.
+ */
+export function toolCallingIssue(assumeSupport = false): ToolCallingIssue | null {
+  const c = st();
+  const s = c.chatCompletionSettings ?? {};
+  if (c.mainApi !== 'openai') return { reason: 'mainApi' };
+  // The backend applies post-processing to every source; the "no tools" types flatten tool calls.
+  const pp = String(s.custom_prompt_post_processing ?? '');
+  if (!TOOL_POST_PROCESSING.includes(pp)) return { reason: 'postProcessing', label: postProcessingLabel(pp) };
+  if (assumeSupport || c.isToolCallingSupported({ ...s, function_calling: true })) return null;
+  // ST versions that ignore the settings argument still check their own switch.
+  if (!s.function_calling) return { reason: 'functionCalling' };
+  return { reason: 'model', source: String(s.chat_completion_source ?? ''), model: chatCompletionModel(s) };
+}
+
+/** Label of a post-processing type as ST's own dropdown shows it (localized by ST). */
+function postProcessingLabel(value: string): string {
+  if (typeof document === 'undefined') return value;
+  const options = Array.from(document.querySelectorAll<HTMLOptionElement>('#custom_prompt_post_processing option'));
+  return options.find((o) => o.value === value)?.textContent?.trim() || value;
 }
 
 /** Extension folder id as ST knows it, e.g. `third-party/advanced-preset`. */

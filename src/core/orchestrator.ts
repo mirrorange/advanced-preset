@@ -7,7 +7,7 @@ import {
   applyPatches, parseAnnotations, partialTagTail, replyToPlainText, stripComments, terminalContentIndex,
   type Annotation, type MemoryOp, type PatchResult, type TurnResult,
 } from '@advanced-preset/protocol';
-import { nativeFetch, st, streamContextOf, toast } from '@/st/host';
+import { nativeFetch, st, streamContextOf, toast, toolCallingIssue } from '@/st/host';
 import { planMemoryOps, type ChatEvent, type PendingGlobalOp } from '@/store/eventlog';
 import type { Sidecar, SidecarStage, TurnKind } from '@/store/sidecar';
 import { t } from '@/i18n';
@@ -41,8 +41,14 @@ export const handoff = { pending: null as null | { ctx: GenerationContext; outco
 const isAbort = (e: unknown) => (e as Error)?.name === 'AbortError';
 
 function capabilityError(ctx: GenerationContext): string | null {
-  if ((ctx.transport === 'tool-single' || ctx.transport === 'tool-multi') && !st().isToolCallingSupported()) return t('error.toolsUnsupported');
-  return null;
+  if (ctx.transport !== 'tool-single' && ctx.transport !== 'tool-multi') return null;
+  const issue = toolCallingIssue(ctx.config.connection.assumeToolSupport);
+  if (!issue) return null;
+  switch (issue.reason) {
+    case 'postProcessing': return t('error.toolsUnsupported.postProcessing', { value: issue.label });
+    case 'model': return t('error.toolsUnsupported.model', { target: issue.model ? `${issue.source} / ${issue.model}` : issue.source });
+    default: return t(`error.toolsUnsupported.${issue.reason}`);
+  }
 }
 
 export async function orchestrate(ctx: GenerationContext, base: Record<string, any>, signal?: AbortSignal | null): Promise<Response> {
