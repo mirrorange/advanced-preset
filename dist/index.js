@@ -11620,7 +11620,7 @@ function By(e) {
 }
 async function Vy() {
 	let e = await zy();
-	e && e !== "910eef0562e54a83" && sessionStorage.getItem(Ry) !== e && By(e);
+	e && e !== "c1e85fc09a9a6c25" && sessionStorage.getItem(Ry) !== e && By(e);
 }
 async function Hy() {
 	await Vy();
@@ -11641,7 +11641,7 @@ async function Ky() {
 	let e = u().replace(/^third-party\//, ""), t = await Xy(e, !1);
 	if (t.status === 404 && (t = await Xy(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await zy();
-	return r && r !== "910eef0562e54a83" ? (By(r), {
+	return r && r !== "c1e85fc09a9a6c25" ? (By(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -19229,7 +19229,7 @@ var Tk = ["aria-label"], Ek = { class: "um-picker-head" }, Dk = { class: "small 
 				"icon",
 				"help"
 			]),
-			V("div", WM, "Advanced Preset " + A(N("1.11.1")) + " · " + A(N("910eef0562e54a83")), 1)
+			V("div", WM, "Advanced Preset " + A(N("1.11.1")) + " · " + A(N("c1e85fc09a9a6c25")), 1)
 		], 64));
 	}
 }), KM = {
@@ -19556,7 +19556,7 @@ function jN() {
 //#region src/index.ts
 var MN = {
 	version: "1.11.1",
-	buildId: "910eef0562e54a83",
+	buildId: "c1e85fc09a9a6c25",
 	nextGeneration: (e) => Wm(e),
 	listPresets: () => Jf().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -19615,7 +19615,7 @@ async function FN() {
 	};
 	t.on(n.APP_READY, () => void o()), jN(), Ih("init", {
 		version: "1.11.1",
-		build: "910eef0562e54a83",
+		build: "c1e85fc09a9a6c25",
 		enabled: K().enabled
 	});
 }
