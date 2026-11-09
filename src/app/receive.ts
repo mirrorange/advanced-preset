@@ -7,7 +7,7 @@ import { st } from '@/st/host';
 import { writeSidecar } from '@/store/sidecar';
 import { commitStoryline } from './storylines';
 import { handoff } from '@/core/orchestrator';
-import { live } from '@/core/live';
+import { bindLive, live } from '@/core/live';
 import { presetState } from '@/store/config';
 import { commitGlobalOps } from '@/store/eventlog';
 import { syncGlobalRefs } from './memory-sync';
@@ -36,7 +36,7 @@ export async function onMessageReceived(mesId: number, type?: string): Promise<v
   // Global memory exists once its message does (I-98); the sync also records the new refs as active.
   if (outcome.global?.length) commitGlobalOps(presetState(p.ctx.preset), outcome.global);
   syncGlobalRefs();
-  if (live.current?.genId === p.ctx.id) live.current.mesId = mesId;
+  if (live.current?.genId === p.ctx.id) bindLive(live.current, mesId);
   st().updateMessageBlock(mesId, msg);
   await st().saveChat();
   await st().eventSource.emit('advanced_preset_message_updated', mesId);

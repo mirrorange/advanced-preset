@@ -2,6 +2,7 @@
 import { reactive } from 'vue';
 import type { PatchResult, StageKind, StageStatus, TurnResult } from '@advanced-preset/protocol';
 import type { GenerationContext } from './context';
+import { st, type STMessage } from '@/st/host';
 
 export interface StageView {
   id: string;
@@ -29,6 +30,8 @@ export interface LiveGeneration {
   startedAt: number;
   /** ST message the output lands in (streaming placeholder), when known. */
   mesId: number | null;
+  /** Swipe of that message the output lands in (an interrupted swipe can be swiped away from). */
+  swipeId: number | null;
 }
 
 export const live = reactive({ current: null as LiveGeneration | null });
@@ -47,6 +50,7 @@ export function startLive(ctx: GenerationContext, streaming: boolean): LiveGener
     step: 0,
     startedAt: Date.now(),
     mesId: null,
+    swipeId: null,
   };
   return live.current;
 }
@@ -61,4 +65,21 @@ export function updateLive(g: LiveGeneration, turn: TurnResult, reasoning: strin
   }
   g.structures = turn.structures;
   g.reasoning = reasoning;
+}
+
+/** Bind the generation to the message (and its current swipe) its output lands in. */
+export function bindLive(g: LiveGeneration, mesId: number): void {
+  g.mesId = mesId;
+  g.swipeId = st().chat[mesId]?.swipe_id ?? 0;
+}
+
+/**
+ * The generation shown on a message: bound to it and to the swipe still selected there. After an
+ * interrupted swipe ST returns to the previous swipe, whose stored sidecar is shown again.
+ */
+export function liveOn(mesId: number, msg: STMessage | undefined = st().chat[mesId]): LiveGeneration | null {
+  const g = live.current;
+  if (!g || g.mesId !== mesId) return null;
+  if (g.swipeId !== null && (msg?.swipe_id ?? 0) !== g.swipeId) return null;
+  return g;
 }
