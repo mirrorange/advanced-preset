@@ -8,7 +8,7 @@
 import { watch } from 'vue';
 import { st } from '@/st/host';
 import { getSidecar, type TurnKind } from '@/store/sidecar';
-import { live } from '@/core/live';
+import { bindLive, live, liveOn } from '@/core/live';
 import { bumpChat } from './state';
 import { pruneViews, syncAnnotationView } from './annotations';
 import { forgetLineKeys, lineKeys, storylinesActive } from './storylines';
@@ -30,7 +30,7 @@ function sync(mes: Element): void {
   if (!block || !text || Number.isNaN(id)) return;
   const msg = st().chat[id];
   const sc = getSidecar(msg);
-  const isLive = live.current?.mesId === id;
+  const isLive = Boolean(liveOn(id, msg));
   if (msg && !msg.is_user) syncAnnotationView(text as HTMLElement, Boolean(sc?.annotations?.length || isLive));
   const lines = storylinesActive.value;
   syncTagView(text as HTMLElement, msg, lines);
@@ -138,7 +138,7 @@ export function installMounts(): void {
       const g = live.current;
       const id = st().streamingProcessor?.messageId;
       if (!g || g.status !== 'running') return clearInterval(timer);
-      if (typeof id === 'number' && id >= 0) { g.mesId = id; clearInterval(timer); refreshMessages(); }
+      if (typeof id === 'number' && id >= 0) { bindLive(g, id); clearInterval(timer); refreshMessages(); }
     }, 100);
   });
   watch(() => live.current?.status, () => schedule());

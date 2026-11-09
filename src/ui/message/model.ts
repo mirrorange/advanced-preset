@@ -1,11 +1,11 @@
 /** View model of one assistant message: live generation first, otherwise the stored sidecar. */
 import { computed } from 'vue';
 import type { APreset, PatchResult, StageKind, StageStatus } from '@advanced-preset/protocol';
-import { live } from '@/core/live';
+import { liveOn } from '@/core/live';
 import { getPreset } from '@/store/presets';
 import type { Sidecar } from '@/store/sidecar';
 import { presetLocale } from '@/i18n';
-import { sidecarAt } from '../state';
+import { messageAt, sidecarAt } from '../state';
 import { actorColor } from '../theme';
 
 export interface StageItem {
@@ -44,8 +44,8 @@ export function useMessageView(mesId: () => number) {
   return computed<MessageView | null>(() => {
     const id = mesId();
     const sc = sidecarAt(id);
-    const g = live.current;
-    if (g && g.mesId === id && (g.status === 'running' || !sc || sc.genId !== g.genId)) {
+    const g = liveOn(id, messageAt(id));
+    if (g && (g.status === 'running' || !sc || sc.genId !== g.genId)) {
       const preset = getPreset(g.presetId);
       return {
         live: true, running: g.status === 'running', genId: g.genId, preset, workflow: g.workflow, transport: g.transport, error: g.error,
