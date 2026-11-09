@@ -26,7 +26,7 @@ vi.mock('@/ui/state', () => ({ refreshActivePreset: () => {} }));
 const updateForPreset = vi.fn(async (_required: string, _name: string) => false);
 vi.mock('@/app/updater', () => ({ updateForPreset: (r: string, n: string) => updateForPreset(r, n) }));
 
-(globalThis as any).__AP_VERSION__ = '1.11.1';
+(globalThis as any).__AP_VERSION__ = '1.11.2';
 (globalThis as any).localStorage ??= { getItem: () => 'en' };
 const { adoptPresetFiles, onPresetChanged, presetFilesInList } = await import('@/app/preset-files');
 

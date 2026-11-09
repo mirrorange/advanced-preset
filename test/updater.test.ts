@@ -53,7 +53,7 @@ describe('updating AP for a preset that needs a newer version', () => {
     reload = vi.fn();
     const store = new Map<string, string>();
     vi.stubGlobal('__AP_BUILD_ID__', 'running-build');
-    vi.stubGlobal('__AP_VERSION__', '1.11.1');
+    vi.stubGlobal('__AP_VERSION__', '1.11.2');
     vi.stubGlobal('fetch', vi.fn(async (url: string) => {
       calls.push(String(url).split('?')[0]!);
       return String(url).includes('build.json') ? new Response(JSON.stringify({ id: disk })) : new Response(JSON.stringify({ isUpToDate: disk === 'running-build' }));
