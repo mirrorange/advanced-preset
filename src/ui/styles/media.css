@@ -47,7 +47,7 @@
 .speech-seg.on { height: 8px; background: var(--ap-primary); opacity: 1; }
 .speech-seg:hover { height: 8px; }
 .speech-who { flex: 0 1 auto; max-width: 8em; }
-.speech-binding { display: flex; align-items: center; gap: var(--ap-space-2); min-width: 0; }
+.speech-binding { display: flex; align-items: flex-start; gap: var(--ap-space-2); min-width: 0; }
 .speech-binding > .input:first-child { flex: 0 1 9em; min-width: 5em; }
 .speech-voice { flex: 1 1 auto; display: flex; align-items: center; gap: 4px; min-width: 0; }
 .speech-voice > .input { flex: 1 1 auto; min-width: 0; }

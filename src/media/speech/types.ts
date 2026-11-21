@@ -15,7 +15,7 @@ export type VoiceRef =
    * User reference audio (IndexedDB key) and its transcript. `consent` is a second recording some
    * providers require (Gemini). `id` caches the provider-side clone id once created.
    */
-  | { kind: 'clone'; audio: string; text?: string; consent?: string; id?: string };
+  | { kind: 'clone'; audio: string; text?: string; consent?: string; id?: string; name?: string };
 
 export interface SpeechConnection {
   id: string;
@@ -31,7 +31,8 @@ export interface SpeechConnection {
   /** Voice of unbound characters (and of narration when no narrator voice is set). */
   voice: VoiceRef | null;
   narrator: VoiceRef | null;
-  bindings: { character: string; voice: VoiceRef }[];
+  /** Story character → voice (`null`: the default voice). */
+  bindings: { character: string; voice: VoiceRef | null }[];
 }
 
 /** A voice the user can pick (built-in list or library search result). */

@@ -91,8 +91,10 @@ function remember(key: string, clip: Clip): Clip {
 const keyOf = (conn: SpeechConnection, seg: Segment) => clipKey(conn, voiceFor(conn, seg), seg.text);
 
 /** The clip of a segment: in memory, from the cache, or synthesized now. */
-export async function clipOf(conn: SpeechConnection, seg: Segment): Promise<Clip> {
-  const key = keyOf(conn, seg);
+export const clipOf = (conn: SpeechConnection, seg: Segment): Promise<Clip> => clipFor(conn, voiceFor(conn, seg), seg.text);
+
+async function clipFor(conn: SpeechConnection, voice: VoiceRef | null, text: string): Promise<Clip> {
+  const key = clipKey(conn, voice, text);
   const known = clips.get(key);
   if (known && known.state !== 'error') return remember(key, known);
   const cached = await getBlob(key).catch(() => undefined);
@@ -105,8 +107,8 @@ export async function clipOf(conn: SpeechConnection, seg: Segment): Promise<Clip
   if (!provider) throw new Error(`Unknown speech API ${conn.api}`);
   speech.clips[key] = 'loading';
   const clip = new Clip(async (signal) => {
-    const voice = await usableVoice(conn, voiceFor(conn, seg), signal);
-    return provider.synthesize(env, { conn, text: seg.text, voice, signal });
+    const usable = await usableVoice(conn, voice, signal);
+    return provider.synthesize(env, { conn, text, voice: usable, signal });
   }, (c) => {
     speech.clips[key] = c.state;
     if (c.state === 'ready') void putBlob(pcmToWav(c.pcm(), c.sampleRate), { key }).catch((e) => console.warn('[AP] speech cache write failed', e));
@@ -196,6 +198,36 @@ export function playMessage(mesId: number, segId?: string): void {
   void run(mesId, segs, i, true);
 }
 
+/** Try a voice with a short sample sentence. */
+export async function previewVoice(conn: SpeechConnection, voice: VoiceRef | null): Promise<void> {
+  stopSpeech();
+  const run = { playback: null as Playback | null, cancelled: false };
+  current = run;
+  try {
+    const clip = await clipFor(conn, voice, t('media.speech.sample'));
+    if (run.cancelled) return;
+    run.playback = new Playback(clip);
+    await run.playback.run();
+  } catch (e) {
+    if (!run.cancelled) report(e);
+  } finally {
+    if (current === run) current = null;
+  }
+}
+
+/** Delete stored reference audio no connection uses any more. */
+export async function gcVoices(): Promise<void> {
+  const keep = new Set<string>();
+  for (const c of mediaSettings().speech.connections) {
+    for (const v of [c.voice, c.narrator, ...c.bindings.map((b) => b.voice)]) {
+      if (v?.kind !== 'clone') continue;
+      keep.add(v.audio);
+      if (v.consent) keep.add(v.consent);
+    }
+  }
+  await gc('voice:', keep).catch(() => undefined);
+}
+
 /** Synthesize every segment of a message without playing (auto generation / "Generate all"). */
 export async function generateMessage(mesId: number): Promise<void> {
   const conn = speechConnection();
@@ -246,7 +278,7 @@ function runtime(): SpeechRuntime {
   return {
     vars: { on: Boolean(conn), auto: s.auto, api, narrator: s.narrator, characters: false },
     format: speechFormat(api),
-    characters: conn?.bindings.map((b) => b.character) ?? [],
+    characters: conn?.bindings.filter((b) => b.voice).map((b) => b.character) ?? [],
     ...(tags ? { cleaner: tags } : {}),
   };
 }
