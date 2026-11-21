@@ -488,5 +488,22 @@
   "media.image.refs.add": "Add images",
   "media.image.geminiEndpoint": "API",
   "media.speech": "Speech synthesis",
-  "media.speech.narrator": "Narrator voice"
+  "media.speech.narrator": "Narrator voice",
+  "media.image.view": "View full size",
+  "media.image.generating": "Generating…",
+  "media.image.previous": "Previous",
+  "media.image.next": "Next",
+  "media.image.prompt": "Image prompt",
+  "media.image.generate": "Generate",
+  "media.image.retry": "Retry",
+  "media.image.regenerate": "Regenerate",
+  "media.image.editPrompt": "Edit prompt",
+  "media.image.download": "Download",
+  "media.error.proxy.disabled": "SillyTavern’s CORS proxy is off. Set enableCorsProxy: true in config.yaml and restart, or use a custom proxy.",
+  "media.error.proxy.unsupported": "This TauriTavern version has no CORS proxy. Update TauriTavern or use a custom proxy.",
+  "media.error.proxy.body": "SillyTavern’s CORS proxy only forwards JSON requests. Turn the proxy off for this API or use a custom proxy.",
+  "media.error.proxy.noCustomUrl": "Enter the custom proxy URL in the Media tab.",
+  "media.error.noConnection": "No image connection. Add one in the Media tab.",
+  "media.error.network": "The request was blocked or the server could not be reached. Check the Base URL, or set the CORS proxy to Auto or Always.",
+  "media.error.body": "Invalid request body override: {error}"
 }

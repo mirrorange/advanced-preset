@@ -488,5 +488,22 @@
   "media.image.refs.add": "添加图片",
   "media.image.geminiEndpoint": "API",
   "media.speech": "语音合成",
-  "media.speech.narrator": "旁白语音"
+  "media.speech.narrator": "旁白语音",
+  "media.image.view": "查看大图",
+  "media.image.generating": "生成中…",
+  "media.image.previous": "上一张",
+  "media.image.next": "下一张",
+  "media.image.prompt": "图像提示词",
+  "media.image.generate": "生成",
+  "media.image.retry": "重试",
+  "media.image.regenerate": "重新生成",
+  "media.image.editPrompt": "编辑提示词",
+  "media.image.download": "下载",
+  "media.error.proxy.disabled": "SillyTavern 的 CORS 代理未开启。请在 config.yaml 中设置 enableCorsProxy: true 并重启，或改用自定义代理。",
+  "media.error.proxy.unsupported": "当前 TauriTavern 版本没有 CORS 代理。请更新 TauriTavern，或改用自定义代理。",
+  "media.error.proxy.body": "SillyTavern 的 CORS 代理只转发 JSON 请求。请对此 API 关闭代理，或改用自定义代理。",
+  "media.error.proxy.noCustomUrl": "请在多模态标签页填写自定义代理地址。",
+  "media.error.noConnection": "没有图像连接。请在多模态标签页添加。",
+  "media.error.network": "请求被拦截或无法连接服务器。请检查 Base URL，或把 CORS 代理设为自动 / 始终。",
+  "media.error.body": "请求体覆盖无效：{error}"
 }

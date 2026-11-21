@@ -15,12 +15,18 @@ export function deepMerge<T extends Obj>(base: T, over: Obj): T {
   return out as T;
 }
 
-/** The connection's body override as an object; throws on invalid JSON / non-objects. */
+/** The connection's request body override is not a JSON object. */
+export class BodyOverrideError extends Error {
+  constructor(message: string) { super(message); this.name = 'BodyOverrideError'; }
+}
+
+/** The connection's body override as an object; throws {@link BodyOverrideError} on invalid JSON / non-objects. */
 export function bodyOverride(c: Pick<ConnectionBase, 'body'>): Obj {
   const text = c.body.trim();
   if (!text) return {};
-  const v = JSON.parse(text) as unknown;
-  if (!isObj(v)) throw new SyntaxError('Request body override must be a JSON object');
+  let v: unknown;
+  try { v = JSON.parse(text); } catch (e) { throw new BodyOverrideError(e instanceof Error ? e.message : String(e)); }
+  if (!isObj(v)) throw new BodyOverrideError('Not a JSON object');
   return v;
 }
 
