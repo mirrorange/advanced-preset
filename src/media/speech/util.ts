@@ -1,6 +1,8 @@
 /** Shared request / response helpers of the speech providers. */
-import { deepMerge } from '@advanced-preset/protocol';
 import { sseEvents } from '@/core/reader';
+import { ensureOk } from '@/media/net';
+import { bodyOverride, deepMerge, joinUrl } from '@/media/request';
+export { blobBase64 } from '@/store/media-db';
 import type { SpeechConnection } from './types';
 
 export class SpeechError extends Error {
@@ -10,26 +12,17 @@ export class SpeechError extends Error {
   }
 }
 
-/** `base` + `path` without doubled or missing slashes. */
-export function joinUrl(base: string, path: string): string {
-  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
-}
+export { joinUrl, ensureOk };
 
 /** The connection's Base URL, or the provider default. */
 export const baseOf = (conn: SpeechConnection, fallback: string) => conn.baseUrl.trim() || fallback;
 
-/** The user's advanced body override (`conn.body`, JSON object); invalid JSON is an error, not ignored. */
-export function bodyOverride(conn: SpeechConnection): Record<string, unknown> | undefined {
-  const raw = conn.body.trim();
-  if (!raw) return undefined;
-  let v: unknown;
-  try { v = JSON.parse(raw); } catch { throw new SpeechError('Request body override is not valid JSON.'); }
-  if (!v || typeof v !== 'object' || Array.isArray(v)) throw new SpeechError('Request body override must be a JSON object.');
-  return v as Record<string, unknown>;
+/** Built-in body ⊕ connection body (`null` removes a field); invalid JSON is an error, not ignored. */
+export function mergeBody<T extends Record<string, unknown>>(conn: SpeechConnection, body: T): T {
+  let over: Record<string, unknown>;
+  try { over = bodyOverride(conn); } catch (e) { throw new SpeechError(`Request body override: ${e instanceof Error ? e.message : String(e)}`); }
+  return deepMerge(body, over);
 }
-
-/** Built-in body ⊕ connection body. */
-export const mergeBody = <T extends Record<string, unknown>>(conn: SpeechConnection, body: T): T => deepMerge(body, bodyOverride(conn));
 
 /** Built-in headers ⊕ connection headers (case-insensitive override; an empty value removes the header). */
 export function mergeHeaders(conn: SpeechConnection, headers: Record<string, string>): Record<string, string> {
@@ -41,20 +34,6 @@ export function mergeHeaders(conn: SpeechConnection, headers: Record<string, str
   for (const [k, v] of Object.entries(headers)) set(k, v);
   for (const [k, v] of Object.entries(conn.headers ?? {})) if (k.trim()) set(k.trim(), v);
   return out;
-}
-
-/** Throw a readable error for a failed response (provider JSON error shapes vary). */
-export async function ensureOk(resp: Response): Promise<Response> {
-  if (resp.ok) return resp;
-  const text = await resp.text().catch(() => '');
-  let msg = '';
-  try {
-    const j = JSON.parse(text);
-    const d = j?.error ?? j?.detail ?? j?.base_resp ?? j;
-    msg = typeof d === 'string' ? d : d?.message ?? d?.status_msg ?? d?.msg ?? (Array.isArray(d) ? d.map((x) => x?.msg ?? '').join('; ') : '') ?? '';
-    if (!msg && typeof j?.message === 'string') msg = j.message;
-  } catch { msg = text.slice(0, 300); }
-  throw new SpeechError(`HTTP ${resp.status}${msg ? `: ${msg}` : ''}`, resp.status);
 }
 
 /** Body bytes as they arrive. */
@@ -96,13 +75,6 @@ export function hexBytes(hex: string): Uint8Array {
   const out = new Uint8Array(n);
   for (let i = 0; i < n; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
   return out;
-}
-
-export async function blobBase64(blob: Blob): Promise<string> {
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let bin = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(bin);
 }
 
 /** Skip a RIFF/WAVE header if the stream starts with one (some providers send WAV even when streaming). */

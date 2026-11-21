@@ -2,7 +2,13 @@
  * Multimodal settings (`extension_settings.advancedPreset.media`): CORS proxy, image generation and
  * speech synthesis connections. Global, not per preset; binaries live in IndexedDB (`media-db.ts`).
  */
+import { SPEECH_APIS, type SpeechApi } from '@advanced-preset/protocol';
+import type { SpeechConnection, VoiceRef } from '@/media/speech/types';
+import { speechProvider } from '@/media/speech/providers';
 import { settings, save } from './settings';
+
+export { SPEECH_APIS };
+export type { SpeechApi, SpeechConnection, VoiceRef };
 
 export type CorsMode = 'auto' | 'on' | 'off';
 export interface CorsSettings { mode: CorsMode; proxy: 'host' | 'custom'; customUrl: string }
@@ -36,17 +42,6 @@ export interface ImageConnection extends ConnectionBase {
   endpoint?: 'interactions' | 'generateContent';
 }
 
-export type SpeechApi = 'fish' | 'elevenlabs' | 'minimax' | 'gemini' | 'openai' | 'deepseek';
-export type VoiceRef =
-  | { kind: 'voice'; id: string }
-  | { kind: 'clone'; audio: string; text?: string; id?: string };
-
-export interface SpeechConnection extends ConnectionBase {
-  api: SpeechApi;
-  narrator: VoiceRef | null;
-  bindings: { character: string; voice: VoiceRef }[];
-}
-
 export interface MediaSettings {
   cors: CorsSettings;
   image: { enabled: boolean; auto: boolean; active: string | null; connections: ImageConnection[] };
@@ -54,7 +49,6 @@ export interface MediaSettings {
 }
 
 export const IMAGE_APIS: readonly ImageApi[] = ['openai', 'gemini', 'novelai'];
-export const SPEECH_APIS: readonly SpeechApi[] = ['fish', 'elevenlabs', 'minimax', 'gemini', 'openai', 'deepseek'];
 
 /** Default endpoint and model per image API. */
 export const IMAGE_DEFAULTS: Record<ImageApi, { baseUrl: string; model: string; nsfwBlock: boolean }> = {
@@ -107,6 +101,24 @@ export function changeImageApi(c: ImageConnection, api: ImageApi): void {
   if (!c.model || c.model === from.model) c.model = to.model;
   if (c.nsfwBlock === from.nsfwBlock) c.nsfwBlock = to.nsfwBlock;
   c.api = api;
+}
+
+export function newSpeechConnection(api: SpeechApi, name: string): SpeechConnection {
+  const d = speechProvider(api)?.defaults;
+  return { id: newId(), name, api, baseUrl: d?.baseUrl ?? '', apiKey: '', model: d?.model ?? '', headers: {}, body: '', voice: null, narrator: null, bindings: [] };
+}
+
+/** Switch a speech connection to another API; voices belong to one API and are cleared. */
+export function changeSpeechApi(c: SpeechConnection, api: SpeechApi): void {
+  if (c.api === api) return;
+  const from = speechProvider(c.api)?.defaults;
+  const to = speechProvider(api)?.defaults;
+  if (!c.baseUrl || c.baseUrl === from?.baseUrl) c.baseUrl = to?.baseUrl ?? '';
+  if (!c.model || c.model === from?.model) c.model = to?.model ?? '';
+  c.api = api;
+  c.voice = null;
+  c.narrator = null;
+  c.bindings = [];
 }
 
 /** The selected connection of a section (falls back to the first one). */

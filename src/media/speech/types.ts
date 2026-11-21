@@ -4,7 +4,9 @@
  * are shared. Providers never touch settings or storage directly: they get a `SpeechEnv`.
  */
 
-export type SpeechApi = 'fish' | 'elevenlabs' | 'minimax' | 'gemini' | 'openai' | 'deepseek';
+import type { SpeechApi } from '@advanced-preset/protocol';
+
+export type { SpeechApi };
 
 export type VoiceRef =
   /** Built-in speaker, voice library id or provider-side voice / reference id. */
