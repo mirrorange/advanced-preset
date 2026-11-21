@@ -40,8 +40,8 @@ async function download() {
     <div class="speech-track" role="group" :aria-label="t('media.speech.lines')">
       <button
         v-for="(s, i) in segments" :key="s.id" type="button" class="speech-seg"
-        :class="[states[i], s.kind, { on: s.id === playingId }]" :style="{ flexGrow: Math.max(4, Math.min(s.text.length, 160)) }"
-        :aria-label="`${s.character || t('media.speech.narration')}: ${s.text}`" :title="`${s.character || t('media.speech.narration')}: ${s.text}`"
+        :class="[states[i], s.kind, { on: s.id === playingId }]" :style="{ flexGrow: Math.max(4, Math.min(s.display.length, 160)) }"
+        :aria-label="`${s.character || t('media.speech.narration')}: ${s.display}`" :title="`${s.character || t('media.speech.narration')}: ${s.display}`"
         @click="playMessage(mesid, s.id)"
       />
     </div>
