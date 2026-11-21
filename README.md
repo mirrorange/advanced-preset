@@ -42,6 +42,7 @@ https://github.com/mirrorange/advanced-preset
 | **传输** | 预填充 · 纯文本 · 结构化输出（`json_schema`）· 单步工具 · 多步工具；工具参数流式输出（含 Vertex AI Gemini 3+ 的 `streamFunctionCallArguments`）；Gemini 思维签名按配置的渠道（Vertex AI / AI Studio）发送，可选支持 OpenRouter 与 CLIProxyAPI，被拒绝时自动回退 |
 | **工作流** | 由预设声明的阶段序列（如 linear / iterative / edit / task），流式展示每个阶段 |
 | **结构** | 回复、代写、选项、记忆、回顾、事件摘要、自定义结构，以卡片显示在消息下方 |
+| **图像与语音** | 预设声明后可用：插图（OpenAI · Gemini · NovelAI；风格提示词、参考图、NSFW 屏蔽）显示在正文下方；台词语音（Fish Audio · ElevenLabs · MiniMax · Gemini · OpenAI · DeepSeek；角色绑定说话人、语音克隆、旁白、流式播放）点句播放或全文朗读；自动或手动生成；可走 CORS 代理，Base URL / 请求头 / 请求体可自定义 |
 | **元指令** | `@叙述者 …` 触发任务回合；代写按钮直接走元指令 |
 | **省 Token** | 较早回复替换为事件摘要、用户输入截断或移除；缓存优化让历史沿用上次的渲染，提高提示词缓存命中 |
 | **配置** | 推荐配置 ⊕ 用户差异（稀疏存储），采样参数与 Carrier 预设双向同步 |
