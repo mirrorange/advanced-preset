@@ -3,9 +3,12 @@
  * speech synthesis connections. Global, not per preset; binaries live in IndexedDB (`media-db.ts`).
  */
 import type { ImageApi, SpeechApi } from '@advanced-preset/protocol';
+import type { SpeechConnection, VoiceRef } from '@/media/speech/types';
+import { speechProvider } from '@/media/speech/providers';
 import { settings, save } from './settings';
 
 export { IMAGE_APIS, SPEECH_APIS, type ImageApi, type SpeechApi } from '@advanced-preset/protocol';
+export type { SpeechConnection, VoiceRef };
 
 export type CorsMode = 'auto' | 'on' | 'off';
 export interface CorsSettings { mode: CorsMode; proxy: 'host' | 'custom'; customUrl: string }
@@ -37,16 +40,6 @@ export interface ImageConnection extends ConnectionBase {
   refs: StoredRef[];
   /** Gemini only: request shape (default `interactions`). */
   endpoint?: 'interactions' | 'generateContent';
-}
-
-export type VoiceRef =
-  | { kind: 'voice'; id: string }
-  | { kind: 'clone'; audio: string; text?: string; id?: string };
-
-export interface SpeechConnection extends ConnectionBase {
-  api: SpeechApi;
-  narrator: VoiceRef | null;
-  bindings: { character: string; voice: VoiceRef }[];
 }
 
 export interface MediaSettings {
@@ -106,6 +99,24 @@ export function changeImageApi(c: ImageConnection, api: ImageApi): void {
   if (!c.model || c.model === from.model) c.model = to.model;
   if (c.nsfwBlock === from.nsfwBlock) c.nsfwBlock = to.nsfwBlock;
   c.api = api;
+}
+
+export function newSpeechConnection(api: SpeechApi, name: string): SpeechConnection {
+  const d = speechProvider(api)?.defaults;
+  return { id: newId(), name, api, baseUrl: d?.baseUrl ?? '', apiKey: '', model: d?.model ?? '', headers: {}, body: '', voice: null, narrator: null, bindings: [] };
+}
+
+/** Switch a speech connection to another API; voices belong to one API and are cleared. */
+export function changeSpeechApi(c: SpeechConnection, api: SpeechApi): void {
+  if (c.api === api) return;
+  const from = speechProvider(c.api)?.defaults;
+  const to = speechProvider(api)?.defaults;
+  if (!c.baseUrl || c.baseUrl === from?.baseUrl) c.baseUrl = to?.baseUrl ?? '';
+  if (!c.model || c.model === from?.model) c.model = to?.model ?? '';
+  c.api = api;
+  c.voice = null;
+  c.narrator = null;
+  c.bindings = [];
 }
 
 /** The selected connection of a section (falls back to the first one). */

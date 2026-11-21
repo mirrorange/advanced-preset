@@ -31,7 +31,7 @@ function sync(mes: Element): void {
   const msg = st().chat[id];
   const sc = getSidecar(msg);
   const isLive = Boolean(liveOn(id, msg));
-  if (msg && !msg.is_user) syncAnnotationView(text as HTMLElement, Boolean(sc?.annotations?.length || isLive));
+  if (msg && !msg.is_user) syncAnnotationView(text as HTMLElement, Boolean(sc?.annotations?.length || sc?.speech?.length || isLive));
   const lines = storylinesActive.value;
   syncTagView(text as HTMLElement, msg, lines);
   const want = Boolean(msg && !msg.is_user && (sc || isLive));

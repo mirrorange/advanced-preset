@@ -1,18 +1,30 @@
 /**
- * One message's annotation view (I-83 – I-85): watches its `.mes_text` and the same-origin iframes
- * inside it, re-locates the message's annotations in every display surface and paints them.
- * Created by the static mount scan, or by TauriTavern's ChatSurface `didCommitContent`.
+ * One message's inline view (I-83 – I-85): watches its `.mes_text` and the same-origin iframes
+ * inside it, re-locates the message's annotations and speech lines in every display surface and
+ * paints them (two layers). Created by the static mount scan, or by TauriTavern's ChatSurface
+ * `didCommitContent`.
  */
+import type { Annotation, SpeechSpan } from '@advanced-preset/protocol';
 import { st } from '@/st/host';
 import { live } from '@/core/live';
 import { settings } from '@/store/settings';
 import { annotationsOf } from '@/app/annotations';
-import { canHighlight, clear, paint } from './paint';
+import { speechOf } from '@/app/speech';
+import { messageSegments } from '@/media/speech/service';
+import { speechLayer } from '../speech/layer';
+import { annotationLayer, canHighlight } from './paint';
+import type { Layer } from './layer';
+import type { Anchor } from './match';
 import { locateIn } from './surface';
 
 interface Frame { doc: Document | null; observer: MutationObserver | null; onLoad: () => void }
 
 const views = new Set<AnnotationView>();
+
+/** Speech lines shown for a message: speech synthesis on, its preset declares speech. */
+function speechLines(mesId: number): SpeechSpan[] {
+  return messageSegments(mesId).length ? speechOf(mesId).filter((s) => !s.orphan) : [];
+}
 
 /** Frontend opt-out on the iframe's `<html>` / `<body>`: `off` (nothing) or `manual` (draws itself via the API). */
 function optedOut(doc: Document): boolean {
@@ -55,7 +67,7 @@ export class AnnotationView {
       if (found.has(f)) continue;
       f.removeEventListener('load', s.onLoad);
       s.observer?.disconnect();
-      if (s.doc) clear(this, s.doc);
+      if (s.doc) this.clear(s.doc);
       this.frames.delete(f);
     }
     for (const f of found) {
@@ -69,7 +81,7 @@ export class AnnotationView {
       try { doc = f.contentDocument; } catch { /* cross-origin */ }
       if (doc === s.doc) continue;
       s.observer?.disconnect();
-      if (s.doc) clear(this, s.doc);
+      if (s.doc) this.clear(s.doc);
       s.doc = doc;
       s.observer = null;
       if (doc?.documentElement) {
@@ -79,21 +91,34 @@ export class AnnotationView {
     }
   }
 
+  private clear(doc?: Document): void {
+    annotationLayer.clear(this, doc);
+    speechLayer.clear(this, doc);
+  }
+
   refresh(): void {
     if (this.disposed) return;
-    if (!this.el.isConnected) { clear(this); return; }
+    if (!this.el.isConnected) { this.clear(); return; }
     this.syncFrames();
     const id = this.mesId;
     const msg = st().chat[id];
     const g = live.current;
     const streaming = g?.status === 'running' && g.mesId === id;
-    const anns = msg && !msg.is_user && !streaming && annotationsShown() ? annotationsOf(id).filter((a) => !a.orphan) : [];
+    const shown = Boolean(msg && !msg.is_user && !streaming);
+    const anns: Annotation[] = shown && annotationsShown() ? annotationsOf(id).filter((a) => !a.orphan) : [];
+    const lines: SpeechSpan[] = shown ? speechLines(id) : [];
     const mes = msg?.mes ?? '';
-    paint(this, document, id, anns.length ? locateIn(this.el, mes, anns) : null, !canHighlight(document));
+    // Located one layer at a time: fallback wrappers of one layer split the text nodes of the next.
+    const draw = <T extends Anchor>(layer: Layer<T>, items: T[], doc: Document, root: Element, fallback: boolean) =>
+      layer.paint(this, doc, id, items.length ? locateIn(root, mes, items) : null, fallback);
+    draw(annotationLayer, anns, document, this.el, !canHighlight(document));
+    draw(speechLayer, lines, document, this.el, !canHighlight(document));
     for (const s of this.frames.values()) {
       const doc = s.doc;
       if (!doc?.body || !doc.defaultView) continue;
-      paint(this, doc, id, anns.length && !optedOut(doc) ? locateIn(doc.body, mes, anns) : null, false);
+      const out = optedOut(doc);
+      draw(annotationLayer, out ? [] : anns, doc, doc.body, false);
+      draw(speechLayer, out ? [] : lines, doc, doc.body, false);
       s.observer?.takeRecords();
     }
     // Our own `<ap-anno>` wrappers must not trigger another pass.
@@ -107,7 +132,7 @@ export class AnnotationView {
     this.observer.disconnect();
     for (const [f, s] of this.frames) { f.removeEventListener('load', s.onLoad); s.observer?.disconnect(); }
     this.frames.clear();
-    clear(this);
+    this.clear();
     views.delete(this);
   }
 }
