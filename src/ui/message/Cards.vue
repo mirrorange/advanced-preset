@@ -25,6 +25,8 @@ import SynopsisCard from './cards/SynopsisCard.vue';
 import StatusCard from './cards/StatusCard.vue';
 import CustomCard from './cards/CustomCard.vue';
 import ComponentCard from './cards/ComponentCard.vue';
+import SpeechCard from './cards/SpeechCard.vue';
+import { messageSegments } from '@/media/speech/service';
 
 const props = withDefaults(defineProps<{ mesid: number; position?: CardPosition }>(), { position: 'bottom' });
 const view = useMessageView(() => props.mesid);
@@ -114,12 +116,17 @@ const data = computed(() => {
     items,
   };
 });
+
+// The message player leads the top area once the turn is stored.
+const segments = computed(() => (props.position === 'top' && view.value && !view.value.live ? messageSegments(props.mesid) : []));
 </script>
 
 <template>
-  <div v-if="data?.items.length" class="cards" :class="`cards-${position}`">
-    <template v-for="c in data.items" :key="c.id">
-      <ReplyCard v-if="c.type === 'reply'" :text="c.text" :name="data.narrator" :color="data.color" />
+  <div v-if="data?.items.length || segments.length" class="cards" :class="`cards-${position}`">
+    <SpeechCard v-if="segments.length" :mesid="mesid" :segments="segments" />
+    <template v-for="c in data?.items ?? []" :key="c.id">
+      <template v-if="!data" />
+      <ReplyCard v-else-if="c.type === 'reply'" :text="c.text" :name="data.narrator" :color="data.color" />
       <ImpersonateCard v-else-if="c.type === 'impersonate'" :text="c.text" :mesid="mesid" />
       <OptionsCard v-else-if="c.type === 'options'" :options="c.options" :mesid="mesid" />
       <SynopsisCard v-else-if="c.type === 'synopsis'" :synopsis="c.synopsis" :editable="data.editable" @save="(v) => setStructure(mesid, c.id, v)" />

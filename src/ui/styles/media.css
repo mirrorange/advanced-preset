@@ -6,3 +6,23 @@
 .media-ref { display: flex; align-items: center; gap: var(--ap-space-2); min-width: 0; }
 .media-ref-thumb { flex: none; width: 2.6em; height: 2.6em; object-fit: cover; border-radius: var(--ap-radius-sm); background: var(--ap-surface-2); }
 .blob-placeholder { display: inline-block; background: var(--ap-surface-2); }
+
+/* Speech: message player (top card area) and settings. */
+.speech-card { display: flex; align-items: center; gap: var(--ap-space-2); min-height: 2em; padding: 0 var(--ap-space-1, 4px); border-radius: var(--ap-radius-md); background: color-mix(in srgb, var(--ap-primary) 5%, transparent); }
+.speech-track { flex: 1 1 auto; display: flex; align-items: center; gap: 2px; min-width: 3em; height: 1.4em; }
+.speech-seg { flex: 1 1 0; min-width: 3px; height: 4px; padding: 0; border: 0; border-radius: 2px; background: var(--ap-border); cursor: pointer; transition: height 0.12s, background 0.12s; }
+.speech-seg.narration { opacity: 0.6; }
+.speech-seg.ready { background: color-mix(in srgb, var(--ap-primary) 45%, transparent); }
+.speech-seg.loading { background: color-mix(in srgb, var(--ap-primary) 30%, transparent); animation: ap-pulse 1.2s ease-in-out infinite; }
+.speech-seg.error { background: var(--ap-danger); }
+.speech-seg.on { height: 8px; background: var(--ap-primary); opacity: 1; }
+.speech-seg:hover { height: 8px; }
+.speech-who { flex: 0 1 auto; max-width: 8em; }
+.speech-binding { display: flex; align-items: center; gap: var(--ap-space-2); min-width: 0; }
+.speech-binding > .input:first-child { flex: 0 1 9em; min-width: 5em; }
+.speech-voice { flex: 1 1 auto; display: flex; align-items: center; gap: 4px; min-width: 0; }
+.speech-voice > .input { flex: 1 1 auto; min-width: 0; }
+.speech-results { display: flex; flex-direction: column; max-height: 14em; overflow: auto; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); }
+.speech-result { display: flex; align-items: center; gap: var(--ap-space-2); padding: 4px var(--ap-space-2); border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.speech-result:hover { background: var(--ap-surface-2); }
+.speech-result .grow { min-width: 0; }
