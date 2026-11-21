@@ -134,18 +134,17 @@ const segments = computed(() => (props.position === 'top' && view.value && !view
 <template>
   <div v-if="data?.items.length || segments.length" class="cards" :class="`cards-${position}`">
     <SpeechCard v-if="segments.length" :mesid="mesid" :segments="segments" />
-    <template v-for="c in data?.items ?? []" :key="c.id">
-      <template v-if="!data" />
-      <ReplyCard v-else-if="c.type === 'reply'" :text="c.text" :name="data.narrator" :color="data.color" />
+    <template v-for="c in data ? data.items : []" :key="c.id">
+      <ReplyCard v-if="c.type === 'reply'" :text="c.text" :name="data!.narrator" :color="data!.color" />
       <ImpersonateCard v-else-if="c.type === 'impersonate'" :text="c.text" :mesid="mesid" />
       <OptionsCard v-else-if="c.type === 'options'" :options="c.options" :mesid="mesid" />
-      <SynopsisCard v-else-if="c.type === 'synopsis'" :synopsis="c.synopsis" :editable="data.editable" @save="(v) => setStructure(mesid, c.id, v)" />
-      <StatusCard v-else-if="c.type === 'status'" :status="c.status" :editable="data.editable" @save="(v) => setStructure(mesid, c.id, v)" />
-      <MemoryCard v-else-if="c.type === 'memory'" :events="c.events" :preset="data.preset" />
+      <SynopsisCard v-else-if="c.type === 'synopsis'" :synopsis="c.synopsis" :editable="data!.editable" @save="(v) => setStructure(mesid, c.id, v)" />
+      <StatusCard v-else-if="c.type === 'status'" :status="c.status" :editable="data!.editable" @save="(v) => setStructure(mesid, c.id, v)" />
+      <MemoryCard v-else-if="c.type === 'memory'" :events="c.events" :preset="data!.preset" />
       <RecapCard v-else-if="c.type === 'recap'" :text="c.text" :covers-up-to="c.coversUpTo" />
       <CustomCard v-else-if="c.type === 'custom'" :title="c.title" :value="c.value" />
       <ComponentCard v-else-if="c.type === 'component'" :component="c.component" :context="c.context" />
-      <ImageCard v-else-if="c.type === 'image'" :mesid="mesid" :gen-id="data.genId" :structure="c.id" :prompts="c.prompts" :records="c.records" :editable="data.editable" />
+      <ImageCard v-else-if="c.type === 'image'" :mesid="mesid" :gen-id="data!.genId" :structure="c.id" :prompts="c.prompts" :records="c.records" :editable="data!.editable" />
     </template>
   </div>
 </template>

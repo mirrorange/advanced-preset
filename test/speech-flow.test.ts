@@ -16,7 +16,8 @@ vi.mock('@/store/presets', () => ({ getPreset: () => preset }));
 const { generateMessage, messageSegments, speech } = await import('@/media/speech/service');
 const { mediaRuntime, resetMedia } = await import('@/core/media-vars');
 const { installSpeechRuntime } = await import('@/media/speech/service');
-const { mediaSettings, newSpeechConnection } = await import('@/store/media');
+const { mediaSettings } = await import('@/store/media');
+const { newSpeechConnection } = await import('@/media/speech/connections');
 const { wavToPcm } = await import('@/media/speech/wav');
 
 const PCM = new Uint8Array([1, 0, 2, 0, 3, 0, 4, 0]);
