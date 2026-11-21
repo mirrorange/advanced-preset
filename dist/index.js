@@ -12254,7 +12254,7 @@ function wb(e) {
 }
 async function Tb() {
 	let e = await Cb();
-	e && e !== "b04965fa847cb162" && sessionStorage.getItem(Sb) !== e && wb(e);
+	e && e !== "84206583beb5db5d" && sessionStorage.getItem(Sb) !== e && wb(e);
 }
 async function Eb() {
 	await Tb();
@@ -12275,7 +12275,7 @@ async function Ab() {
 	let e = u().replace(/^third-party\//, ""), t = await Pb(e, !1);
 	if (t.status === 404 && (t = await Pb(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Cb();
-	return r && r !== "b04965fa847cb162" ? (wb(r), {
+	return r && r !== "84206583beb5db5d" ? (wb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -12498,14 +12498,12 @@ function Qb() {
 	let e = G(), t = Zb();
 	(!e.media || typeof e.media != "object") && (e.media = t);
 	let n = e.media;
-	for (let e of Object.keys(t)) {
-		let r = n[e];
-		n[e] = r && typeof r == "object" ? {
-			...t[e],
-			...r
-		} : t[e];
+	for (let [e, r] of Object.entries(t)) {
+		let t = n[e];
+		if (!t || typeof t != "object" || Array.isArray(t)) n[e] = r;
+		else for (let [e, n] of Object.entries(r)) e in t || (t[e] = n);
 	}
-	return n;
+	return e.media;
 }
 var $b = K, ex = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
 function tx(e, t) {
@@ -15447,12 +15445,13 @@ var zE = class {
 		this.stateOf(e);
 	}
 	paint(e, t, n, r, i) {
-		let a = this.drop(e, t, !!r?.located.length);
-		if (r?.located.length) {
-			let o = this.stateOf(t), s = (e) => `${o.serial}:${n}:${this.spec.id(e)}`, c = [];
-			if (o.highlight) for (let e of r.located) {
-				let t = jE(r, e);
-				o.highlight.add(t), c.push({
+		let a = this.drop(e, t, !!r), o = r?.() ?? null;
+		if (!o?.located.length) this.release(t);
+		else {
+			let r = this.stateOf(t), s = (e) => `${r.serial}:${n}:${this.spec.id(e)}`, c = [];
+			if (r.highlight) for (let e of o.located) {
+				let t = jE(o, e);
+				r.highlight.add(t), c.push({
 					key: s(e.item),
 					mesId: n,
 					item: e.item,
@@ -15461,19 +15460,19 @@ var zE = class {
 			}
 			else if (i) {
 				let e = /* @__PURE__ */ new Map();
-				NE(r, this.spec.name, (t, r) => {
-					let i = e.get(r);
-					i || (i = {
-						key: s(r.item),
+				NE(o, this.spec.name, (t, i) => {
+					let a = e.get(i);
+					a || (a = {
+						key: s(i.item),
 						mesId: n,
-						item: r.item,
+						item: i.item,
 						wraps: []
-					}, e.set(r, i), c.push(i)), i.wraps.push(t), o.byWrap.set(t, i);
+					}, e.set(i, a), c.push(a)), a.wraps.push(t), r.byWrap.set(t, a);
 				});
 			}
-			c.length && o.owners.set(e, c);
+			c.length && r.owners.set(e, c);
 			for (let e of c) a.delete(e.key);
-			if (this.marked) for (let e of c) this.emphasise(o, e, this.marked(e.mesId, e.item));
+			if (this.marked) for (let e of c) this.emphasise(r, e, this.marked(e.mesId, e.item));
 		}
 		a.size && this.spec.forget?.(a);
 	}
@@ -15496,6 +15495,10 @@ var zE = class {
 			}
 		}
 		return r;
+	}
+	release(e) {
+		let t = this.states.get(e);
+		t && !t.owners.size && e !== document && (t.detach(), this.states.delete(e));
 	}
 	clear(e, t) {
 		let n = this.drop(e, t);
@@ -15918,7 +15921,7 @@ var AD = () => G().ui.annotations?.show !== !1, jD = class {
 			return;
 		}
 		this.syncFrames();
-		let t = this.mesId, n = e().chat[t], r = sb.current, i = r?.status === "running" && r.mesId === t, a = !(!n || n.is_user || i), o = a && AD() ? BS(t).filter((e) => !e.orphan) : [], s = a ? OD(t) : [], c = n?.mes ?? "", l = (e, n, r, i, a) => e.paint(this, r, t, n.length ? AE(i, c, n) : null, a);
+		let t = this.mesId, n = e().chat[t], r = sb.current, i = r?.status === "running" && r.mesId === t, a = !(!n || n.is_user || i), o = a && AD() ? BS(t).filter((e) => !e.orphan) : [], s = a ? OD(t) : [], c = n?.mes ?? "", l = (e, n, r, i, a) => e.paint(this, r, t, n.length ? () => AE(i, c, n) : null, a);
 		l(pD, o, document, this.el, !RE(document)), l(yD, s, document, this.el, !RE(document));
 		for (let e of this.frames.values()) {
 			let t = e.doc;
@@ -22685,7 +22688,7 @@ var qI = { class: "row tight xs muted" }, JI = { class: "row" }, YI = {
 				"icon",
 				"help"
 			]),
-			B("div", XL, "Advanced Preset " + k(j("1.12.0")) + " · " + k(j("b04965fa847cb162")), 1)
+			B("div", XL, "Advanced Preset " + k(j("1.12.0")) + " · " + k(j("84206583beb5db5d")), 1)
 		], 64));
 	}
 }), QL = {
@@ -23997,7 +24000,7 @@ function Wz() {
 //#region src/index.ts
 var Gz = {
 	version: "1.12.0",
-	buildId: "b04965fa847cb162",
+	buildId: "84206583beb5db5d",
 	nextGeneration: (e) => _h(e),
 	listPresets: () => xp().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -24057,7 +24060,7 @@ async function Jz() {
 	};
 	t.on(n.APP_READY, () => void o()), Wz(), ug("init", {
 		version: "1.12.0",
-		build: "b04965fa847cb162",
+		build: "84206583beb5db5d",
 		enabled: G().enabled
 	});
 }
