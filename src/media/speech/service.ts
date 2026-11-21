@@ -17,7 +17,7 @@ import { t } from '@/i18n';
 import { mediaErrorText } from '@/ui/media/errors';
 import { Clip, type ClipState } from './clip';
 import { pausePlayback, Playback, resumePlayback } from './player';
-import { speechFormat, speechProvider, speechTags } from './providers';
+import { speakableLine, speechFormat, speechProvider, speechTags } from './providers';
 import { clipKey, segmentsOf, voiceFor, type Segment } from './segments';
 import type { SpeechConnection, SpeechEnv, VoiceRef } from './types';
 import { pcmToWav, wavToPcm } from './wav';
@@ -44,10 +44,11 @@ export function speechConnection(): SpeechConnection | undefined {
 /** Segments of a message (none unless its preset declares speech and synthesis is on). */
 export function messageSegments(mesId: number): Segment[] {
   const msg = st().chat[mesId];
-  if (!msg || msg.is_user || !speechConnection()) return [];
+  const conn = speechConnection();
+  if (!msg || msg.is_user || !conn) return [];
   const sc = getSidecar(msg);
   if (!sc || !declaresSpeech(getPreset(sc.presetId))) return [];
-  return segmentsOf(msg.mes, speechOf(mesId), mediaSettings().speech.narrator);
+  return segmentsOf(msg.mes, speechOf(mesId), mediaSettings().speech.narrator, (text, quote) => speakableLine(conn.api, text, quote));
 }
 
 // ---- voices -------------------------------------------------------------------------------------

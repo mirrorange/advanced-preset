@@ -8,7 +8,7 @@ export function newSpeechConnection(api: SpeechApi, name: string): SpeechConnect
   return { id: newId(), name, api, baseUrl: d?.baseUrl ?? '', apiKey: '', model: d?.model ?? '', headers: {}, body: '', voice: null, narrator: null, bindings: [] };
 }
 
-/** Switch a speech connection to another API; voices belong to one API and are cleared. */
+/** Switch a speech connection to another API; voices belong to one API and are cleared (characters stay). */
 export function changeSpeechApi(c: SpeechConnection, api: SpeechApi): void {
   if (c.api === api) return;
   const from = speechProvider(c.api)?.defaults;
@@ -18,5 +18,5 @@ export function changeSpeechApi(c: SpeechConnection, api: SpeechApi): void {
   c.api = api;
   c.voice = null;
   c.narrator = null;
-  c.bindings = [];
+  c.bindings = c.bindings.map((b) => ({ character: b.character, voice: null }));
 }

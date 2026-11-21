@@ -113,3 +113,28 @@ describe('segments', () => {
     expect(clipKey(c, { kind: 'clone', audio: 'k', id: 'x' }, 'hi')).toBe(clipKey(c, { kind: 'clone', audio: 'k' }, 'hi'));
   });
 });
+
+describe('speakable lines', async () => {
+  const { speakableLine } = await import('@/media/speech/providers');
+  const { changeSpeechApi } = await import('@/media/speech/connections');
+
+  it('uses the clean line when the provider has no tags', () => {
+    expect(speakableLine('openai', '[whispering] "Anyone there?"', '"Anyone there?"')).toBe('"Anyone there?"');
+    expect(speakableLine('deepseek', '<sigh> Fine.', 'Fine.')).toBe('Fine.');
+  });
+
+  it('keeps own tags and drops other providers\' tags', () => {
+    expect(speakableLine('fish', '[whispering] Hi', 'Hi')).toBe('[whispering] Hi');
+    expect(speakableLine('minimax', 'Oh(sighs) <#0.5#> no', 'Oh no')).toBe('Oh(sighs) <#0.5#> no');
+    expect(speakableLine('minimax', '[whispering] Oh(sighs) no', 'Oh no')).toBe('Oh(sighs) no');
+    expect(speakableLine('gemini', '[whispering] Wait <sigh> no', 'Wait no')).toBe('Wait <sigh> no');
+  });
+
+  it('switching API keeps the characters and clears voices', () => {
+    const c = conn('fish', { voice: { kind: 'voice', id: 'a' }, bindings: [{ character: 'Mia', voice: { kind: 'voice', id: 'b' } }] });
+    changeSpeechApi(c, 'openai');
+    expect(c.bindings).toEqual([{ character: 'Mia', voice: null }]);
+    expect(c.voice).toBeNull();
+    expect(c.baseUrl).toBe('https://api.openai.com/v1');
+  });
+});

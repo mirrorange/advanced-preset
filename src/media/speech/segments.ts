@@ -23,6 +23,8 @@ export interface Segment {
   character: string;
   /** Text sent to the provider. */
   text: string;
+  /** Text as shown (speech lines without provider tags). */
+  display: string;
   /** `[start, end)` in `mes`. */
   start: number;
   end: number;
@@ -39,7 +41,8 @@ export function spokenText(raw: string): string {
   return /[\p{L}\p{N}]/u.test(s) ? s : '';
 }
 
-export function segmentsOf(mes: string, spans: SpanLike[], narration: boolean): Segment[] {
+/** `speak(text, quote)`: the line as the current provider should get it (default: as written). */
+export function segmentsOf(mes: string, spans: SpanLike[], narration: boolean, speak: (text: string, quote: string) => string = (t) => t): Segment[] {
   const sorted = spans.filter((s) => !s.orphan && s.end > s.start).sort((a, b) => a.start - b.start);
   const out: Segment[] = [];
   let at = 0;
@@ -49,15 +52,15 @@ export function segmentsOf(mes: string, spans: SpanLike[], narration: boolean): 
     let p = from;
     for (const part of mes.slice(from, to).split(/(\n\s*\n)/)) {
       const text = spokenText(part);
-      if (text) out.push({ id: `n${p}`, kind: 'narration', character: '', text, start: p, end: p + part.length });
+      if (text) out.push({ id: `n${p}`, kind: 'narration', character: '', text, display: text, start: p, end: p + part.length });
       p += part.length;
     }
   };
   for (const s of sorted) {
     if (s.start < at) continue;
     narrate(at, s.start);
-    const text = (s.text ?? s.quote).trim();
-    if (text) out.push({ id: s.id, kind: 'speech', character: s.character, text, start: s.start, end: s.end });
+    const text = speak(s.text ?? s.quote, s.quote).trim();
+    if (text) out.push({ id: s.id, kind: 'speech', character: s.character, text, display: s.quote, start: s.start, end: s.end });
     at = s.end;
   }
   narrate(at, mes.length);
