@@ -197,10 +197,16 @@ export class Layer<T extends Anchor> {
   /** Listen in `doc` even before it has items (the parent document closes bubbles opened from iframes). */
   watch(doc: Document): void { this.stateOf(doc); }
 
-  /** Replace what `owner` painted in `doc` with `surface`; `fallback` allows wrapper elements. */
-  paint(owner: object, doc: Document, mesId: number, surface: Surface<T> | null, fallback: boolean): void {
-    const gone = this.drop(owner, doc, Boolean(surface?.located.length));
-    if (surface?.located.length) {
+  /**
+   * Replace what `owner` painted in `doc` with the surface `locate` returns (`null`: nothing);
+   * `fallback` allows wrapper elements. Located only after the previous wrappers are removed:
+   * unwrapping merges text nodes, which would invalidate a surface located before.
+   */
+  paint(owner: object, doc: Document, mesId: number, locate: (() => Surface<T>) | null, fallback: boolean): void {
+    const gone = this.drop(owner, doc, Boolean(locate));
+    const surface = locate?.() ?? null;
+    if (!surface?.located.length) this.release(doc);
+    else {
       const s = this.stateOf(doc);
       const key = (item: T) => `${s.serial}:${mesId}:${this.spec.id(item)}`;
       const entries: Entry<T>[] = [];
@@ -251,6 +257,12 @@ export class Layer<T extends Anchor> {
       if (!keep && !s.owners.size && s.doc !== document) { s.detach(); this.states.delete(s.doc); }
     }
     return gone;
+  }
+
+  /** Stop listening in a frame document nothing is painted in any more. */
+  private release(doc: Document): void {
+    const s = this.states.get(doc);
+    if (s && !s.owners.size && doc !== document) { s.detach(); this.states.delete(doc); }
   }
 
   /** Remove what `owner` painted (in one document, or everywhere). */
