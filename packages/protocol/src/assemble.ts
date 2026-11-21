@@ -14,6 +14,7 @@ import { turnLayout, type TurnLayout } from './layout';
 import { DEFAULT_LIST_SEPARATOR, isParamUnset, paramValue, paramValues } from './params';
 import { computeBuildVars, formatVar, plainBuildVars, type BuildVars } from './build-vars';
 import { MAIN_STORYLINE_VARS, storylineNamingFields, type StorylineVars } from './storylines';
+import { IMAGE_FIELDS, IMAGE_OFF, SPEECH_OFF, imageRefsText, type ImageRef, type ImageVars, type SpeechVars } from './media';
 
 export interface Message {
   role: Role;
@@ -43,6 +44,10 @@ export interface Vars {
   last: Record<string, boolean>;
   /** `storyline.*`: the storyline this turn continues (presets with `storylines`; otherwise the main storyline). */
   storyline: StorylineVars;
+  /** `image.*`: image generation (always off when the preset does not declare `image`). */
+  image: ImageVars;
+  /** `speech.*`: speech synthesis (always off when the preset does not declare `speech`). */
+  speech: SpeechVars;
 }
 
 export function resolverOf(vars: Vars): Resolver {
@@ -67,6 +72,10 @@ export interface MacroData {
   customLast?: Record<string, string>;
   /** `{{ap::storyline}}` (current storyline) and `{{ap::storyline::main}}` (main storyline) names. */
   storyline?: { name: string; main: string };
+  /** `{{ap::image::refs}}`: reference images of the image connection. */
+  image?: { refs: ImageRef[] };
+  /** `{{ap::speech::format}}` (format notes of the speech API) and `{{ap::speech::characters}}` (characters with a bound voice). */
+  speech?: { format: string; characters: string[] };
 }
 
 /** Whether an exclusive set may be left with no module selected (`groups[set].allowNone`). */
@@ -107,14 +116,19 @@ export function moduleSwitches(preset: APreset, config: Configuration): Record<s
 /**
  * Structures requested this turn (declared by active modules), in declaration order. A `storyline`
  * structure is only requested when this turn names a storyline (`vars.storyline`), with the names
- * it has to give (I-158).
+ * it has to give (I-158). Image / speech structures only while `image.on` / `speech.on`; image
+ * prompts ask for reference ids only while the connection has references (`image.refs`).
  */
-export function activeStructures(preset: APreset, modules: Module[], vars?: Pick<Vars, 'storyline'>): StructureDecl[] {
+export function activeStructures(preset: APreset, modules: Module[], vars?: Partial<Pick<Vars, 'storyline' | 'image' | 'speech'>>): StructureDecl[] {
   const ids = new Set(modules.flatMap((m) => m.structures));
   const naming = storylineNamingFields(vars?.storyline);
   return Object.values(preset.structures).filter((s) => ids.has(s.id)).flatMap((s) => {
-    if (s.kind !== 'storyline') return [s];
-    return naming.length ? [{ ...s, requested: naming }] : [];
+    switch (s.kind) {
+      case 'storyline': return naming.length ? [{ ...s, requested: naming }] : [];
+      case 'image': return vars?.image?.on ? [{ ...s, requested: IMAGE_FIELDS.filter((k) => k !== 'refs' || vars.image!.refs) }] : [];
+      case 'speech': return vars?.speech?.on ? [s] : [];
+      default: return [s];
+    }
   });
 }
 
@@ -216,6 +230,10 @@ export function createMacroResolver(input: AssemblyInput, stages: Stage[], workf
       case 'recent_meta': return data.recentMeta ?? '';
       case 'var': return readVar(a!, b);
       case 'storyline': return a === 'main' ? data.storyline?.main ?? '' : data.storyline?.name ?? vars.storyline?.name ?? '';
+      case 'image': return a === 'refs' && vars.image?.on ? imageRefsText(data.image?.refs) : '';
+      case 'speech':
+        if (!vars.speech?.on) return '';
+        return a === 'format' ? data.speech?.format ?? '' : a === 'characters' ? (data.speech?.characters ?? []).join(', ') : '';
       default: return undefined;
     }
   };
@@ -361,6 +379,8 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     input: { shaped: false },
     last: {},
     storyline: { ...MAIN_STORYLINE_VARS },
+    image: { ...IMAGE_OFF },
+    speech: { ...SPEECH_OFF },
     ...over,
   };
 }

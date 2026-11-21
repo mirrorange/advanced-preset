@@ -13,6 +13,7 @@ export async function togglePatches(mesId: number): Promise<void> {
   if (Array.isArray(msg.swipes)) msg.swipes[msg.swipe_id ?? 0] = msg.mes;
   const next = { ...sc, patchesApplied: applied };
   if (sc.annotationVersions) next.annotations = applied ? sc.annotationVersions.patched : sc.annotationVersions.draft;
+  if (sc.speechVersions) next.speech = applied ? sc.speechVersions.patched : sc.speechVersions.draft;
   writeSidecar(mesId, next);
   st().updateMessageBlock(mesId, msg);
   await st().saveChat();

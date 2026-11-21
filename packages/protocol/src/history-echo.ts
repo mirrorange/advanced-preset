@@ -8,6 +8,7 @@ import { CONTENT_STAGE_REF, DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, isInlineStructure
 import type { Expr } from './expr';
 import { stageOrderKey, structureOrderOf } from './layout';
 import { STRUCTURE_PROPERTIES, statusText, type StatusBar, type Synopsis, type UserOption } from './structures';
+import type { ImagePromptValue } from './media';
 
 /** Default synopsis line (token-saving replacement and default history template). */
 export const DEFAULT_SYNOPSIS_LINE = '[{{time}} · {{location}}] {{event}}: {{summary}}';
@@ -63,6 +64,8 @@ export function historyEchoOf(decl: StructureDecl): HistoryEcho | undefined {
 
 /** Annotation re-injection depth (I-80): a numeric `history` on the annotations structure. */
 export const annotationDepth = (decl: StructureDecl): number => (decl.kind === 'annotations' && typeof decl.history === 'number' ? decl.history : 0);
+/** Speech re-injection depth: a numeric `history` on the speech structure (lines written back as speech tags). */
+export const speechDepth = (decl: StructureDecl): number => (decl.kind === 'speech' && typeof decl.history === 'number' ? decl.history : 0);
 
 // ---- placement --------------------------------------------------------------------------------
 
@@ -132,6 +135,10 @@ export function structureValueText(kind: StructureKind, value: unknown): string 
     case 'status': return statusText(value as StatusBar);
     case 'storyline': return (value as { name?: string })?.name ?? '';
     case 'options': return Array.isArray(value) ? (value as UserOption[]).map((o) => `- ${o?.label ? `${o.label}: ` : ''}${o?.content ?? ''}`).join('\n') : str(value);
+    case 'image': {
+      const list = (value as Partial<ImagePromptValue>)?.images;
+      return Array.isArray(list) ? list.map((x) => `- ${x?.caption ? `${x.caption}: ` : ''}${x?.prompt ?? ''}`).join('\n') : str(value);
+    }
     default:
       if (!Array.isArray(value) && typeof value === 'object') return Object.entries(value as Record<string, unknown>).map(([k, v]) => `${k}: ${str(v)}`).join('\n');
       return JSON.stringify(value, null, 2);
