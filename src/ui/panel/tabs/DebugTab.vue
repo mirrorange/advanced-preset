@@ -1,17 +1,19 @@
 <script setup lang="ts">
 /** Assembly preview, request segments, log and the `ap dev` source (§16.5, §18.3). */
 import { computed, reactive, ref, watch } from 'vue';
-import { ChevronRight, Code, Copy, FileStack, MessageSquareDashed, ScrollText, Server, Trash2 } from 'lucide-vue-next';
+import { ChevronRight, Code, Copy, FileStack, HardDrive, MessageSquareDashed, ScrollText, Server, Trash2 } from 'lucide-vue-next';
 import { debugState } from '@/core/debug';
 import type { AssemblySnapshot } from '@/core/assembler';
 import type { CacheReport } from '@/core/sticky';
 import { settings, save } from '@/store/settings';
-import { st } from '@/st/host';
+import { confirmPopup, escapeHtml, st } from '@/st/host';
 import { t } from '@/i18n';
 import { devSource } from '@/app/dev-source';
 import { annotationsOf } from '@/app/annotations';
 import { speechOf } from '@/app/speech';
-import { ui } from '../../state';
+import { cleanImages, type ImageGcProgress } from '@/app/image-gc';
+import { mediaSettings } from '@/store/media';
+import { activePreset, ui } from '../../state';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
@@ -72,6 +74,21 @@ const orphans = computed(() => {
   }
   return out;
 });
+
+/** Generated images no chat refers to (shown once image generation has been set up). */
+const imagesUsed = computed(() => Boolean(activePreset.value?.image || mediaSettings().image.connections.length));
+const gcState = ref<{ running: boolean; progress?: ImageGcProgress; result?: string; error?: string }>({ running: false });
+async function runImageGc() {
+  if (gcState.value.running) return;
+  if (!(await confirmPopup(`<p>${escapeHtml(t('debug.images.confirm'))}</p>`, t('common.delete'), t('common.cancel')))) return;
+  gcState.value = { running: true };
+  try {
+    const r = await cleanImages((progress) => { gcState.value = { running: true, progress }; });
+    gcState.value = { running: false, result: t('debug.images.done', { removed: r.removed, kept: r.kept }) };
+  } catch (e) {
+    gcState.value = { running: false, error: t('debug.images.failed', { error: e instanceof Error ? e.message : String(e) }) };
+  }
+}
 </script>
 
 <template>
@@ -161,6 +178,15 @@ const orphans = computed(() => {
       <pre class="mono scroll">{{ pretty(e.data) }}</pre>
     </div>
     <div v-if="!logEntries.length" class="faint small">{{ t('debug.noLog') }}</div>
+  </Section>
+
+  <Section v-if="imagesUsed" :title="t('debug.images')" :icon="HardDrive" :help="t('debug.images.hint')" collapsible :open="false">
+    <div class="row">
+      <button type="button" class="btn" :disabled="gcState.running" @click="runImageGc"><Trash2 />{{ t('debug.images.clean') }}</button>
+      <span v-if="gcState.running" class="xs muted">{{ gcState.progress ? t('debug.images.scanning', { done: gcState.progress.done, total: gcState.progress.total }) : '…' }}</span>
+      <span v-else-if="gcState.result" class="xs muted">{{ gcState.result }}</span>
+      <span v-else-if="gcState.error" class="xs text-danger">{{ gcState.error }}</span>
+    </div>
   </Section>
 
   <Section :title="t('debug.annotations')" :icon="MessageSquareDashed" :help="t('debug.annotations.hint')" collapsible :open="false">

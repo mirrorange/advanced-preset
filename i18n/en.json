@@ -506,5 +506,12 @@
   "media.error.proxy.noCustomUrl": "Enter the custom proxy URL in the Media tab.",
   "media.error.noConnection": "No image connection. Add one in the Media tab.",
   "media.error.network": "The request was blocked or the server could not be reached. Check the Base URL, or set the CORS proxy to Auto or Always.",
-  "media.error.body": "Invalid request body override: {error}"
+  "media.error.body": "Invalid request body override: {error}",
+  "debug.images": "Generated images",
+  "debug.images.hint": "Deletes stored images that no chat uses any more (deleted messages, swipes or chats). Every chat is scanned first.",
+  "debug.images.clean": "Clean up unused images",
+  "debug.images.confirm": "Scan all chats and delete generated images none of them uses? This cannot be undone.",
+  "debug.images.scanning": "Scanning chats {done} / {total}",
+  "debug.images.done": "Removed {removed} images; {kept} kept.",
+  "debug.images.failed": "Nothing was deleted: {error}"
 }

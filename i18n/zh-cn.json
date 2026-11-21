@@ -506,5 +506,12 @@
   "media.error.proxy.noCustomUrl": "请在多模态标签页填写自定义代理地址。",
   "media.error.noConnection": "没有图像连接。请在多模态标签页添加。",
   "media.error.network": "请求被拦截或无法连接服务器。请检查 Base URL，或把 CORS 代理设为自动 / 始终。",
-  "media.error.body": "请求体覆盖无效：{error}"
+  "media.error.body": "请求体覆盖无效：{error}",
+  "debug.images": "生成的图像",
+  "debug.images.hint": "删除已没有任何聊天使用的图像（已删除的消息、swipe 或聊天）。会先扫描所有聊天。",
+  "debug.images.clean": "清理未使用的图像",
+  "debug.images.confirm": "扫描所有聊天，并删除没有任何聊天使用的生成图像？此操作无法撤销。",
+  "debug.images.scanning": "正在扫描聊天 {done} / {total}",
+  "debug.images.done": "已删除 {removed} 张，保留 {kept} 张。",
+  "debug.images.failed": "未删除任何图像：{error}"
 }
