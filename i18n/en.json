@@ -359,6 +359,8 @@
   "um.var.hasGlobal": "Has global memory",
   "um.var.recap": "Has recap",
   "um.var.inputShaped": "Input shaped",
+  "um.var.imageOn": "Image generation on",
+  "um.var.speechOn": "Speech synthesis on",
   "um.var.module": "Module",
   "um.var.param": "Parameter",
   "um.var.flag": "Regex flag",

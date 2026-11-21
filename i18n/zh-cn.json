@@ -359,6 +359,8 @@
   "um.var.hasGlobal": "有全局记忆",
   "um.var.recap": "有总结",
   "um.var.inputShaped": "输入已整形",
+  "um.var.imageOn": "图像生成已开启",
+  "um.var.speechOn": "语音合成已开启",
   "um.var.module": "模组",
   "um.var.param": "参数",
   "um.var.flag": "正则标记",
