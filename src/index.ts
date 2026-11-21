@@ -18,6 +18,7 @@ import { onMessageReceived } from '@/app/receive';
 import { installMemorySync, syncGlobalRefs } from '@/app/memory-sync';
 import { annotationsApi, installAnnotations } from '@/app/annotations';
 import { installSpeech, speechApi } from '@/app/speech';
+import { installImages } from '@/app/images';
 import { installVariableGuard } from '@/app/variable-guard';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
@@ -78,6 +79,7 @@ async function init(): Promise<void> {
   installPresetIo();
   installAnnotations();
   installSpeech();
+  installImages();
   await loadHostModules();
   await loadBuiltins();
   // A built-in the user had installed by hand, now shipped in a newer version: back to the built-in.

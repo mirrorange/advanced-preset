@@ -11,6 +11,7 @@ import { bindLive, live } from '@/core/live';
 import { presetState } from '@/store/config';
 import { commitGlobalOps } from '@/store/eventlog';
 import { syncGlobalRefs } from './memory-sync';
+import { autoGenerateImages } from './images';
 
 const MAX_AGE_MS = 10 * 60_000;
 const NO_MESSAGE_TYPES = new Set(['impersonate', 'quiet']);
@@ -40,4 +41,5 @@ export async function onMessageReceived(mesId: number, type?: string): Promise<v
   st().updateMessageBlock(mesId, msg);
   await st().saveChat();
   await st().eventSource.emit('advanced_preset_message_updated', mesId);
+  void autoGenerateImages(mesId);
 }

@@ -2,7 +2,10 @@
  * Multimodal settings (`extension_settings.advancedPreset.media`): CORS proxy, image generation and
  * speech synthesis connections. Global, not per preset; binaries live in IndexedDB (`media-db.ts`).
  */
+import type { ImageApi, SpeechApi } from '@advanced-preset/protocol';
 import { settings, save } from './settings';
+
+export { IMAGE_APIS, SPEECH_APIS, type ImageApi, type SpeechApi } from '@advanced-preset/protocol';
 
 export type CorsMode = 'auto' | 'on' | 'off';
 export interface CorsSettings { mode: CorsMode; proxy: 'host' | 'custom'; customUrl: string }
@@ -20,8 +23,8 @@ export interface ConnectionBase {
   body: string;
 }
 
-export type ImageApi = 'openai' | 'gemini' | 'novelai';
-export interface ImageRef { id: string; description: string; /** IndexedDB key. */ blob: string }
+/** A reference image of a connection (`blob`: IndexedDB key). */
+export interface StoredRef { id: string; description: string; blob: string }
 
 export interface ImageConnection extends ConnectionBase {
   api: ImageApi;
@@ -31,12 +34,11 @@ export interface ImageConnection extends ConnectionBase {
   negative?: string;
   nsfwBlock: boolean;
   /** Reference images (openai / gemini). */
-  refs: ImageRef[];
+  refs: StoredRef[];
   /** Gemini only: request shape (default `interactions`). */
   endpoint?: 'interactions' | 'generateContent';
 }
 
-export type SpeechApi = 'fish' | 'elevenlabs' | 'minimax' | 'gemini' | 'openai' | 'deepseek';
 export type VoiceRef =
   | { kind: 'voice'; id: string }
   | { kind: 'clone'; audio: string; text?: string; id?: string };
@@ -52,9 +54,6 @@ export interface MediaSettings {
   image: { enabled: boolean; auto: boolean; active: string | null; connections: ImageConnection[] };
   speech: { enabled: boolean; auto: boolean; narrator: boolean; active: string | null; connections: SpeechConnection[] };
 }
-
-export const IMAGE_APIS: readonly ImageApi[] = ['openai', 'gemini', 'novelai'];
-export const SPEECH_APIS: readonly SpeechApi[] = ['fish', 'elevenlabs', 'minimax', 'gemini', 'openai', 'deepseek'];
 
 /** Default endpoint and model per image API. */
 export const IMAGE_DEFAULTS: Record<ImageApi, { baseUrl: string; model: string; nsfwBlock: boolean }> = {
