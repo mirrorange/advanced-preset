@@ -541,5 +541,6 @@
   "debug.images.confirm": "扫描所有聊天，并删除没有任何聊天使用的生成图像？此操作无法撤销。",
   "debug.images.scanning": "正在扫描聊天 {done} / {total}",
   "debug.images.done": "已删除 {removed} 张，保留 {kept} 张。",
-  "debug.images.failed": "未删除任何图像：{error}"
+  "debug.images.failed": "未删除任何图像：{error}",
+  "media.image.missing": "此设备上找不到该图像"
 }
