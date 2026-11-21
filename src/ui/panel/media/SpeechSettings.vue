@@ -3,7 +3,8 @@
 import { computed } from 'vue';
 import { AudioLines, Plus, Trash2 } from 'lucide-vue-next';
 import { t } from '@/i18n';
-import { activeConnection, changeSpeechApi, copyConnection, mediaSettings, newSpeechConnection, saveMedia, SPEECH_APIS, type SpeechApi, type SpeechConnection, type VoiceRef } from '@/store/media';
+import { activeConnection, copyConnection, mediaSettings, saveMedia, SPEECH_APIS, type SpeechApi, type SpeechConnection, type VoiceRef } from '@/store/media';
+import { changeSpeechApi, newSpeechConnection } from '@/media/speech/connections';
 import { speechProvider } from '@/media/speech/providers';
 import { gcVoices } from '@/media/speech/service';
 import Section from '../../components/Section.vue';
