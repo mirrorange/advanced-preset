@@ -108,9 +108,9 @@ export class AnnotationView {
     const anns: Annotation[] = shown && annotationsShown() ? annotationsOf(id).filter((a) => !a.orphan) : [];
     const lines: SpeechSpan[] = shown ? speechLines(id) : [];
     const mes = msg?.mes ?? '';
-    // Located one layer at a time: fallback wrappers of one layer split the text nodes of the next.
+    // Located one layer at a time, each after its old wrappers are gone: fallback wrappers split text nodes.
     const draw = <T extends Anchor>(layer: Layer<T>, items: T[], doc: Document, root: Element, fallback: boolean) =>
-      layer.paint(this, doc, id, items.length ? locateIn(root, mes, items) : null, fallback);
+      layer.paint(this, doc, id, items.length ? () => locateIn(root, mes, items) : null, fallback);
     draw(annotationLayer, anns, document, this.el, !canHighlight(document));
     draw(speechLayer, lines, document, this.el, !canHighlight(document));
     for (const s of this.frames.values()) {
