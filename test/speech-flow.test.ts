@@ -66,7 +66,11 @@ describe('speech runtime', () => {
   });
 
   it('segments only when synthesis is on and the preset declares speech', () => {
-    expect(messageSegments(0).map((s) => s.text)).toEqual(['[whispers] Don\'t move', 'Run!']);
+    // OpenAI has no tag syntax: the clean line is spoken.
+    expect(messageSegments(0).map((s) => s.text)).toEqual(['Don\'t move', 'Run!']);
+    mediaSettings().speech.connections[0]!.api = 'elevenlabs';
+    expect(messageSegments(0).map((s) => [s.text, s.display])).toEqual([['[whispers] Don\'t move', 'Don\'t move'], ['Run!', 'Run!']]);
+    mediaSettings().speech.connections[0]!.api = 'openai';
     mediaSettings().speech.narrator = true;
     expect(messageSegments(0).map((s) => s.kind)).toEqual(['narration', 'speech', 'narration', 'speech']);
     preset = { id: 'p' };
@@ -75,7 +79,7 @@ describe('speech runtime', () => {
 
   it('generates each line once with its bound voice and caches WAV', async () => {
     await generateMessage(0);
-    expect(requests.map((r) => [r.body.input, r.body.voice])).toEqual([['[whispers] Don\'t move', 'coral'], ['Run!', 'marin']]);
+    expect(requests.map((r) => [r.body.input, r.body.voice])).toEqual([['Don\'t move', 'coral'], ['Run!', 'marin']]);
     const wavs = [...stored.entries()].filter(([k]) => k.startsWith('tts:'));
     expect(wavs).toHaveLength(2);
     const pcm = wavToPcm(await wavs[0]![1].arrayBuffer())!;
