@@ -161,7 +161,7 @@ function bodyReasoning(data: any): string {
   return '';
 }
 
-async function* sseEvents(body: ReadableStream<Uint8Array>, signal?: AbortSignal): AsyncGenerator<string> {
+export async function* sseEvents(body: ReadableStream<Uint8Array>, signal?: AbortSignal): AsyncGenerator<string> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buf = '';
