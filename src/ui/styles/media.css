@@ -55,3 +55,4 @@
 .speech-result { display: flex; align-items: center; gap: var(--ap-space-2); padding: 4px var(--ap-space-2); border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
 .speech-result:hover { background: var(--ap-surface-2); }
 .speech-result .grow { min-width: 0; }
+.image-open .blob-placeholder { display: block; width: 100%; min-height: 8em; }

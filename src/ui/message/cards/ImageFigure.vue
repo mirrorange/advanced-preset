@@ -4,12 +4,12 @@
  * button. Toolbar: previous / next version, regenerate, edit prompt, download, delete; click the image
  * to view it full size.
  */
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { ChevronLeft, ChevronRight, Download, ImageOff, LoaderCircle, Pencil, RefreshCw, Trash2, WandSparkles, X } from 'lucide-vue-next';
 import type { ImagePrompt } from '@advanced-preset/protocol';
 import { t } from '@/i18n';
 import type { SidecarImage } from '@/store/sidecar';
-import { getBlob } from '@/store/media-db';
+import { getBlob, hasBlob } from '@/store/media-db';
 import { cancelImage, deleteImage, generateImage, imageJobs, jobKey, setImagePrompt, showImage } from '@/app/images';
 import { downloadBlob } from '../../download';
 import { mediaErrorText } from '../../media/errors';
@@ -19,9 +19,21 @@ import ImageViewer from './ImageViewer.vue';
 
 const props = defineProps<{ mesid: number; genId: string; structure: string; index: number; prompt: ImagePrompt; record?: SidecarImage; editable: boolean }>();
 
-const keys = computed(() => props.record?.keys ?? []);
-const shown = computed(() => Math.min(props.record?.shown ?? keys.value.length - 1, keys.value.length - 1));
+const stored = computed(() => props.record?.keys ?? []);
+/** Images no longer in the media store (other browser profile, cleaned up): skipped like deleted ones. */
+const missing = reactive(new Set<string>());
+watch(stored, async (list) => {
+  for (const k of list) if (!missing.has(k) && !(await hasBlob(k).catch(() => true))) missing.add(k);
+}, { immediate: true });
+const keys = computed(() => stored.value.filter((k) => !missing.has(k)));
+/** Position in `keys` of the image shown (the record's choice when it is still there, else the newest). */
+const shown = computed(() => {
+  const chosen = stored.value[props.record?.shown ?? -1];
+  const at = chosen ? keys.value.indexOf(chosen) : -1;
+  return at >= 0 ? at : keys.value.length - 1;
+});
 const current = computed(() => keys.value[shown.value]);
+const lost = computed(() => !keys.value.length && stored.value.length > 0);
 const promptText = computed(() => props.record?.prompt ?? props.prompt.prompt);
 const job = computed(() => imageJobs.get(jobKey(props.genId, props.structure, props.index)));
 const running = computed(() => job.value?.status === 'running');
@@ -30,7 +42,10 @@ const ratio = computed(() => (props.prompt.ratio ?? '3:4').replace(':', ' / '));
 
 const generate = () => generateImage(props.mesid, props.structure, props.index);
 const cancel = () => cancelImage(props.genId, props.structure, props.index);
-const step = (d: number) => { const n = keys.value.length; if (n > 1) void showImage(props.mesid, props.structure, props.index, (shown.value + d + n) % n); };
+const step = (d: number) => {
+  const n = keys.value.length;
+  if (n > 1) void showImage(props.mesid, props.structure, props.index, stored.value.indexOf(keys.value[(shown.value + d + n) % n]!));
+};
 const remove = () => { if (current.value) void deleteImage(props.mesid, props.structure, props.index, current.value); };
 
 async function download() {
@@ -70,10 +85,11 @@ const viewing = ref(false);
   <figure class="image-figure">
     <div class="image-frame" :class="{ empty: !current }" :style="current ? undefined : { aspectRatio: ratio }">
       <button v-if="current" type="button" class="image-open" :aria-label="t('media.image.view')" @click="viewing = true">
-        <BlobImage :blob-key="current" :alt="prompt.caption ?? promptText" />
+        <BlobImage :blob-key="current" :alt="prompt.caption ?? promptText" @missing="missing.add(current)" />
       </button>
       <div v-else class="image-empty">
         <ImageOff v-if="!running && !error" class="faint" aria-hidden="true" />
+        <span v-if="lost && !running" class="xs faint">{{ t('media.image.missing') }}</span>
         <p v-if="!editing" class="image-prompt small muted">{{ promptText }}</p>
       </div>
       <div v-if="running" class="image-busy" role="status">
