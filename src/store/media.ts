@@ -76,12 +76,15 @@ export function mediaSettings(): MediaSettings {
   const s = settings() as { media?: MediaSettings };
   const d = defaults();
   if (!s.media || typeof s.media !== 'object') s.media = d;
-  const m = s.media;
-  for (const k of Object.keys(d) as (keyof MediaSettings)[]) {
-    const cur = m[k] as unknown;
-    (m as unknown as Record<string, unknown>)[k] = cur && typeof cur === 'object' ? { ...d[k], ...cur } : d[k];
+  const m = s.media as unknown as Record<string, Record<string, unknown>>;
+  // Only fill in what is missing: this runs inside computed properties, and replacing the sections
+  // with fresh objects on every read would invalidate them again (an endless render loop).
+  for (const [k, section] of Object.entries(d) as [string, Record<string, unknown>][]) {
+    const cur = m[k];
+    if (!cur || typeof cur !== 'object' || Array.isArray(cur)) { m[k] = section; continue; }
+    for (const [kk, v] of Object.entries(section)) if (!(kk in cur)) cur[kk] = v;
   }
-  return m;
+  return s.media;
 }
 
 export const saveMedia = save;
