@@ -51,3 +51,71 @@ describe('openai', () => {
     await expect(p.synthesize(e, { conn: conn('openai'), text: 'a', voice: null })).rejects.toThrow('HTTP 401: bad key');
   });
 });
+
+describe('fish', () => {
+  const p = speechProvider('fish')!;
+
+  it('sends JSON with reference_id and the model header', async () => {
+    const e = env(() => chunked(pcm));
+    const out = await p.synthesize(e, { conn: conn('fish', { model: 's2.1-pro-free' }), text: '[whispering] hi', voice: { kind: 'voice', id: 'abc' } });
+    expect([...await drain(out.chunks)]).toEqual([...pcm]);
+    expect(e.calls[0]!.url).toBe('https://api.fish.audio/v1/tts');
+    expect(e.calls[0]!.body).toMatchObject({ text: '[whispering] hi', reference_id: 'abc', format: 'pcm', sample_rate: 24000 });
+    expect((e.calls[0]!.init.headers as Record<string, string>).model).toBe('s2.1-pro-free');
+  });
+
+  it('sends clone references as MessagePack', async () => {
+    const e = env(() => chunked(pcm), { k1: new Blob([new Uint8Array([9, 9, 9])]) });
+    await p.synthesize(e, { conn: conn('fish'), text: 'hi', voice: { kind: 'clone', audio: 'k1', text: 'sample' } });
+    const h = e.calls[0]!.init.headers as Record<string, string>;
+    expect(h['Content-Type']).toBe('application/msgpack');
+    const body = e.calls[0]!.init.body as Uint8Array;
+    expect(body[0]! & 0xf0).toBe(0x80);
+    // bin8 of the audio bytes is embedded as is
+    expect(Buffer.from(body).includes(Buffer.from([0xc4, 3, 9, 9, 9]))).toBe(true);
+  });
+
+  it('strips its bracket cues for display', () => {
+    expect('[whispering] Don\'t move. [break] Run!'.replace(p.tags!, '').trim()).toBe('Don\'t move.  Run!');
+  });
+
+  it('searches the model library', async () => {
+    const e = env(() => Response.json({ items: [{ _id: 'm1', title: 'Girl', samples: [{ audio: 'https://x/a.mp3' }] }] }));
+    expect(await p.search!(e, conn('fish'), 'girl')).toEqual([{ id: 'm1', name: 'Girl', description: undefined, preview: 'https://x/a.mp3' }]);
+    expect(e.calls[0]!.url).toContain('/model?page_size=20&title=girl');
+  });
+});
+
+describe('elevenlabs', () => {
+  const p = speechProvider('elevenlabs')!;
+
+  it('streams PCM from the voice endpoint', async () => {
+    const e = env(() => chunked(pcm));
+    await p.synthesize(e, { conn: conn('elevenlabs'), text: 'hi', voice: { kind: 'voice', id: 'v 1' } });
+    expect(e.calls[0]!.url).toBe('https://api.elevenlabs.io/v1/text-to-speech/v%201/stream?output_format=pcm_24000');
+    expect(e.calls[0]!.body).toEqual({ text: 'hi', model_id: 'eleven_v3' });
+    expect((e.calls[0]!.init.headers as Record<string, string>)['xi-api-key']).toBe('KEY');
+  });
+
+  it('needs a created clone', async () => {
+    const e = env(() => chunked(pcm));
+    await expect(p.synthesize(e, { conn: conn('elevenlabs'), text: 'hi', voice: { kind: 'clone', audio: 'k' } })).rejects.toThrow();
+    await p.synthesize(e, { conn: conn('elevenlabs'), text: 'hi', voice: { kind: 'clone', audio: 'k', id: 'ivc1' } });
+    expect(e.calls[0]!.url).toContain('/text-to-speech/ivc1/stream');
+  });
+
+  it('creates an instant clone', async () => {
+    const e = env(() => Response.json({ voice_id: 'new1' }), { k: new Blob([new Uint8Array([1])]) });
+    expect(await p.createClone!(e, conn('elevenlabs'), { kind: 'clone', audio: 'k' })).toBe('new1');
+    expect(e.calls[0]!.init.body).toBeInstanceOf(FormData);
+  });
+
+  it('lists account voices before library voices and adopts library voices', async () => {
+    const e = env(({ url }) => Response.json({ voices: url.includes('shared') ? [{ voice_id: 'a', name: 'A' }, { voice_id: 'b', name: 'B', public_owner_id: 'o' }] : [{ voice_id: 'a', name: 'A' }] }));
+    const found = await p.search!(e, conn('elevenlabs'), 'x');
+    expect(found.map((v) => v.id)).toEqual(['a', 'b']);
+    const e2 = env(() => Response.json({ voice_id: 'b2' }));
+    expect(await p.adopt!(e2, conn('elevenlabs'), found[1]!)).toBe('b2');
+    expect(e2.calls[0]!.url).toBe('https://api.elevenlabs.io/v1/voices/add/o/b');
+  });
+});
