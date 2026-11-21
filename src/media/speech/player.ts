@@ -33,7 +33,9 @@ export class PcmDecoder {
 
 const toFloat = (u: number) => ((u & 0x8000 ? u - 0x10000 : u) / 0x8000);
 
-const MIN_BLOCK = 0.1;
+/** Seconds buffered before a block is scheduled; doubled after each underrun (slow streams play smoothly, later). */
+const MIN_BLOCK = 0.15;
+const MAX_BLOCK = 1.2;
 
 export class Playback {
   private sources = new Set<AudioBufferSourceNode>();
@@ -52,6 +54,8 @@ export class Playback {
     let pending: Float32Array[] = [];
     let pendingLen = 0;
     let next = 0;
+    let block = MIN_BLOCK;
+    let started = false;
     let last = null as AudioBufferSourceNode | null;
     const flush = () => {
       if (!pendingLen || this.stopped) return;
@@ -64,6 +68,8 @@ export class Playback {
       const src = ac.createBufferSource();
       src.buffer = buf;
       src.connect(ac.destination);
+      if (started && next < ac.currentTime) block = Math.min(block * 2, MAX_BLOCK);
+      started = true;
       next = Math.max(next, ac.currentTime + 0.05);
       src.start(next);
       next += buf.duration;
@@ -78,7 +84,7 @@ export class Playback {
       if (!f.length) continue;
       pending.push(f);
       pendingLen += f.length;
-      if (pendingLen >= rate * MIN_BLOCK) flush();
+      if (pendingLen >= rate * block) flush();
     }
     flush();
     const tail = last as AudioBufferSourceNode | null;
