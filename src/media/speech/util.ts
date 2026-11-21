@@ -107,23 +107,22 @@ export async function blobBase64(blob: Blob): Promise<string> {
 
 /** Skip a RIFF/WAVE header if the stream starts with one (some providers send WAV even when streaming). */
 export async function* stripWavHeader(chunks: AsyncIterable<Uint8Array>): AsyncGenerator<Uint8Array> {
-  let head: Uint8Array | null = new Uint8Array(0);
+  let head = new Uint8Array(0);
+  let passed = false;
   for await (const c of chunks) {
-    if (!head) { yield c; continue; }
+    if (passed) { yield c; continue; }
     const joined = new Uint8Array(head.length + c.length);
     joined.set(head);
     joined.set(c, head.length);
     head = joined;
     if (head.length < 12) continue;
     const tag = String.fromCharCode(...head.subarray(0, 4)) + String.fromCharCode(...head.subarray(8, 12));
-    if (tag !== 'RIFFWAVE') { yield head; head = null; continue; }
-    const at = dataOffset(head);
+    const at = tag === 'RIFFWAVE' ? dataOffset(head) : 0;
     if (at < 0) continue;
-    const rest = head.subarray(at);
-    head = null;
-    if (rest.length) yield rest;
+    passed = true;
+    if (head.length > at) yield head.subarray(at);
   }
-  if (head?.length) yield head;
+  if (!passed && head.length) yield head;
 }
 
 /** Offset of the first sample after the `data` chunk header, -1 when not yet complete. */
