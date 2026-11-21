@@ -98,13 +98,17 @@ export default async function (page, shots) {
   await h.field('API', sec).locator('select').selectOption('fish');
   await h.set(h.field('Base URL', sec).locator('input'), 'http://127.0.0.1:5055');
   await h.set(h.field('Default voice', sec).locator('input').first(), 'ref-default');
-  // Switching the API clears the voices and the character list (voices are per provider).
-  console.log('bindings after API switch', await bindings.locator('.speech-binding').count());
+  // Switching the API keeps the characters and clears their voices (voices are per provider).
+  const kept = await bindings.locator('.speech-binding > input').evaluateAll((xs) => xs.map((x) => x.value));
+  console.log('bindings after API switch', JSON.stringify(kept));
   for (const [name, voice] of [['Mira', 'ref-mira'], ['Keeper', 'ref-keeper']]) {
-    await bindings.locator('button', { hasText: 'Add character' }).click();
-    const row = bindings.locator('.speech-binding').last();
-    await h.set(row.locator('input').first(), name);
-    await h.set(row.locator('input').nth(1), voice);
+    let i = kept.indexOf(name);
+    if (i < 0) {
+      await bindings.locator('button', { hasText: 'Add character' }).click();
+      i = (await bindings.locator('.speech-binding').count()) - 1;
+      await h.set(bindings.locator('.speech-binding').nth(i).locator('input').first(), name);
+    }
+    await h.set(bindings.locator('.speech-binding').nth(i).locator('input').nth(1), voice);
   }
   await page.waitForTimeout(300);
   await shot('6-fish');
