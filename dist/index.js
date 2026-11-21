@@ -7587,7 +7587,14 @@ var Dp = (e) => hp.has(e), Op = (e) => hp.get(e), kp = {
 	"media.error.proxy.noCustomUrl": "Enter the custom proxy URL in the Media tab.",
 	"media.error.noConnection": "No image connection. Add one in the Media tab.",
 	"media.error.network": "The request was blocked or the server could not be reached. Check the Base URL, or set the CORS proxy to Auto or Always.",
-	"media.error.body": "Invalid request body override: {error}"
+	"media.error.body": "Invalid request body override: {error}",
+	"debug.images": "Generated images",
+	"debug.images.hint": "Deletes stored images that no chat uses any more (deleted messages, swipes or chats). Every chat is scanned first.",
+	"debug.images.clean": "Clean up unused images",
+	"debug.images.confirm": "Scan all chats and delete generated images none of them uses? This cannot be undone.",
+	"debug.images.scanning": "Scanning chats {done} / {total}",
+	"debug.images.done": "Removed {removed} images; {kept} kept.",
+	"debug.images.failed": "Nothing was deleted: {error}"
 }, Ap = {
 	en: kp,
 	"zh-cn": {
@@ -8098,7 +8105,14 @@ var Dp = (e) => hp.has(e), Op = (e) => hp.get(e), kp = {
 		"media.error.proxy.noCustomUrl": "请在多模态标签页填写自定义代理地址。",
 		"media.error.noConnection": "没有图像连接。请在多模态标签页添加。",
 		"media.error.network": "请求被拦截或无法连接服务器。请检查 Base URL，或把 CORS 代理设为自动 / 始终。",
-		"media.error.body": "请求体覆盖无效：{error}"
+		"media.error.body": "请求体覆盖无效：{error}",
+		"debug.images": "生成的图像",
+		"debug.images.hint": "删除已没有任何聊天使用的图像（已删除的消息、swipe 或聊天）。会先扫描所有聊天。",
+		"debug.images.clean": "清理未使用的图像",
+		"debug.images.confirm": "扫描所有聊天，并删除没有任何聊天使用的生成图像？此操作无法撤销。",
+		"debug.images.scanning": "正在扫描聊天 {done} / {total}",
+		"debug.images.done": "已删除 {removed} 张，保留 {kept} 张。",
+		"debug.images.failed": "未删除任何图像：{error}"
 	}
 };
 function jp() {
@@ -12177,7 +12191,7 @@ function Sb(e) {
 }
 async function Cb() {
 	let e = await xb();
-	e && e !== "b1206a0ca5e63a96" && sessionStorage.getItem(bb) !== e && Sb(e);
+	e && e !== "7b72083d4d445ee8" && sessionStorage.getItem(bb) !== e && Sb(e);
 }
 async function wb() {
 	await Cb();
@@ -12198,7 +12212,7 @@ async function Ob() {
 	let e = u().replace(/^third-party\//, ""), t = await Mb(e, !1);
 	if (t.status === 404 && (t = await Mb(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await xb();
-	return r && r !== "b1206a0ca5e63a96" ? (Sb(r), {
+	return r && r !== "7b72083d4d445ee8" ? (Sb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -15661,7 +15675,24 @@ var GE = (e) => {
 		r: "1",
 		key: "f4zoj3"
 	}]
-]), HD = Z("image-off", [
+]), HD = Z("hard-drive", [
+	["path", {
+		d: "M10 16h.01",
+		key: "1bzywj"
+	}],
+	["path", {
+		d: "M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+		key: "18tbho"
+	}],
+	["path", {
+		d: "M21.946 12.013H2.054",
+		key: "zqlbp7"
+	}],
+	["path", {
+		d: "M6 16h.01",
+		key: "1pmjb7"
+	}]
+]), UD = Z("image-off", [
 	["line", {
 		x1: "2",
 		x2: "22",
@@ -15695,7 +15726,7 @@ var GE = (e) => {
 		d: "M21 15V5a2 2 0 0 0-2-2H9",
 		key: "43el77"
 	}]
-]), UD = Z("image-plus", [
+]), WD = Z("image-plus", [
 	["path", {
 		d: "M16 5h6",
 		key: "1vod17"
@@ -15718,7 +15749,7 @@ var GE = (e) => {
 		r: "2",
 		key: "af1f0g"
 	}]
-]), WD = Z("images", [
+]), GD = Z("images", [
 	["path", {
 		d: "m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16",
 		key: "9kzy35"
@@ -15742,7 +15773,7 @@ var GE = (e) => {
 		rx: "2",
 		key: "1gvhby"
 	}]
-]), GD = Z("info", [
+]), KD = Z("info", [
 	["circle", {
 		cx: "12",
 		cy: "12",
@@ -15757,7 +15788,7 @@ var GE = (e) => {
 		d: "M12 8h.01",
 		key: "e9boi3"
 	}]
-]), KD = Z("layers", [
+]), qD = Z("layers", [
 	["path", {
 		d: "M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z",
 		key: "zw3jo"
@@ -15770,7 +15801,7 @@ var GE = (e) => {
 		d: "M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17",
 		key: "kqbvx6"
 	}]
-]), qD = Z("layout-template", [
+]), JD = Z("layout-template", [
 	["rect", {
 		width: "18",
 		height: "7",
@@ -15795,16 +15826,16 @@ var GE = (e) => {
 		rx: "1",
 		key: "q5h2i8"
 	}]
-]), JD = Z("link", [["path", {
+]), YD = Z("link", [["path", {
 	d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71",
 	key: "1cjeqo"
 }], ["path", {
 	d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
 	key: "19qd67"
-}]]), YD = Z("loader-circle", [["path", {
+}]]), XD = Z("loader-circle", [["path", {
 	d: "M21 12a9 9 0 1 1-6.219-8.56",
 	key: "13zald"
-}]]), XD = Z("map-pin", [["path", {
+}]]), ZD = Z("map-pin", [["path", {
 	d: "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0",
 	key: "1r0f0z"
 }], ["circle", {
@@ -15812,10 +15843,10 @@ var GE = (e) => {
 	cy: "10",
 	r: "3",
 	key: "ilqhr7"
-}]]), ZD = Z("message-circle", [["path", {
+}]]), QD = Z("message-circle", [["path", {
 	d: "M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719",
 	key: "1sd12s"
-}]]), QD = Z("message-square-dashed", [
+}]]), $D = Z("message-square-dashed", [
 	["path", {
 		d: "M14 3h2",
 		key: "1d12a5"
@@ -15856,16 +15887,16 @@ var GE = (e) => {
 		d: "M8 3h2",
 		key: "ysbsee"
 	}]
-]), $D = Z("messages-square", [["path", {
+]), eO = Z("messages-square", [["path", {
 	d: "M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
 	key: "1n2ejm"
 }], ["path", {
 	d: "M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1",
 	key: "1qfcsi"
-}]]), eO = Z("moon", [["path", {
+}]]), tO = Z("moon", [["path", {
 	d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401",
 	key: "kfwtm"
-}]]), tO = Z("network", [
+}]]), nO = Z("network", [
 	["rect", {
 		x: "16",
 		y: "16",
@@ -15898,7 +15929,7 @@ var GE = (e) => {
 		d: "M12 12V8",
 		key: "2874zd"
 	}]
-]), nO = Z("notebook-pen", [
+]), rO = Z("notebook-pen", [
 	["path", {
 		d: "M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4",
 		key: "re6nr2"
@@ -15923,7 +15954,7 @@ var GE = (e) => {
 		d: "M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z",
 		key: "pqwjuv"
 	}]
-]), rO = Z("package", [
+]), iO = Z("package", [
 	["path", {
 		d: "M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z",
 		key: "1a0edw"
@@ -15940,7 +15971,7 @@ var GE = (e) => {
 		d: "m7.5 4.27 9 5.15",
 		key: "1c824w"
 	}]
-]), iO = Z("palette", [
+]), aO = Z("palette", [
 	["path", {
 		d: "M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z",
 		key: "e79jfc"
@@ -15973,34 +16004,34 @@ var GE = (e) => {
 		fill: "currentColor",
 		key: "fotxhn"
 	}]
-]), aO = Z("pen-line", [["path", {
+]), oO = Z("pen-line", [["path", {
 	d: "M13 21h8",
 	key: "1jsn5i"
 }], ["path", {
 	d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
 	key: "1a8usu"
-}]]), oO = Z("pencil", [["path", {
+}]]), sO = Z("pencil", [["path", {
 	d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
 	key: "1a8usu"
 }], ["path", {
 	d: "m15 5 4 4",
 	key: "1mk7zo"
-}]]), sO = Z("plus", [["path", {
+}]]), cO = Z("plus", [["path", {
 	d: "M5 12h14",
 	key: "1ays0h"
 }], ["path", {
 	d: "M12 5v14",
 	key: "s699le"
-}]]), cO = Z("puzzle", [["path", {
+}]]), lO = Z("puzzle", [["path", {
 	d: "M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z",
 	key: "w46dr5"
-}]]), lO = Z("redo-2", [["path", {
+}]]), uO = Z("redo-2", [["path", {
 	d: "m15 14 5-5-5-5",
 	key: "12vg1m"
 }], ["path", {
 	d: "M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13",
 	key: "6uklza"
-}]]), uO = Z("refresh-cw", [
+}]]), dO = Z("refresh-cw", [
 	["path", {
 		d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8",
 		key: "v9h5vc"
@@ -16017,7 +16048,7 @@ var GE = (e) => {
 		d: "M8 16H3v5",
 		key: "1cv678"
 	}]
-]), dO = Z("regex", [
+]), fO = Z("regex", [
 	["path", {
 		d: "M17 3v10",
 		key: "15fgeh"
@@ -16034,13 +16065,13 @@ var GE = (e) => {
 		d: "M9 17a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2z",
 		key: "swwfx4"
 	}]
-]), fO = Z("rotate-ccw", [["path", {
+]), pO = Z("rotate-ccw", [["path", {
 	d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
 	key: "1357e3"
 }], ["path", {
 	d: "M3 3v5h5",
 	key: "1xhq8a"
-}]]), pO = Z("save", [
+}]]), mO = Z("save", [
 	["path", {
 		d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
 		key: "1c8476"
@@ -16053,7 +16084,7 @@ var GE = (e) => {
 		d: "M7 3v4a1 1 0 0 0 1 1h7",
 		key: "t51u73"
 	}]
-]), mO = Z("scroll-text", [
+]), hO = Z("scroll-text", [
 	["path", {
 		d: "M15 12h-5",
 		key: "r7krc0"
@@ -16070,7 +16101,7 @@ var GE = (e) => {
 		d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3",
 		key: "1ph1d7"
 	}]
-]), hO = Z("server", [
+]), gO = Z("server", [
 	["rect", {
 		width: "20",
 		height: "8",
@@ -16103,7 +16134,7 @@ var GE = (e) => {
 		y2: "18",
 		key: "nzw8ys"
 	}]
-]), gO = Z("shapes", [
+]), _O = Z("shapes", [
 	["path", {
 		d: "M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z",
 		key: "1bo67w"
@@ -16122,7 +16153,7 @@ var GE = (e) => {
 		r: "3.5",
 		key: "w3z12y"
 	}]
-]), _O = Z("sliders-horizontal", [
+]), vO = Z("sliders-horizontal", [
 	["path", {
 		d: "M10 5H3",
 		key: "1qgfaw"
@@ -16159,7 +16190,7 @@ var GE = (e) => {
 		d: "M8 12H3",
 		key: "a7s4jb"
 	}]
-]), vO = Z("sliders-vertical", [
+]), yO = Z("sliders-vertical", [
 	["path", {
 		d: "M10 8h4",
 		key: "1sr2af"
@@ -16196,7 +16227,7 @@ var GE = (e) => {
 		d: "M5 21v-7",
 		key: "1w1uti"
 	}]
-]), yO = Z("snowflake", [
+]), bO = Z("snowflake", [
 	["path", {
 		d: "m10 20-1.25-2.5L6 18",
 		key: "18frcb"
@@ -16245,7 +16276,7 @@ var GE = (e) => {
 		d: "m7 3 3 6h4",
 		key: "1otusx"
 	}]
-]), bO = Z("split", [
+]), xO = Z("split", [
 	["path", {
 		d: "M16 3h5v5",
 		key: "1806ms"
@@ -16262,7 +16293,7 @@ var GE = (e) => {
 		d: "m15 9 6-6",
 		key: "ko1vev"
 	}]
-]), xO = Z("sun", [
+]), SO = Z("sun", [
 	["circle", {
 		cx: "12",
 		cy: "12",
@@ -16301,7 +16332,7 @@ var GE = (e) => {
 		d: "m19.07 4.93-1.41 1.41",
 		key: "1shlcs"
 	}]
-]), SO = Z("text-cursor-input", [
+]), CO = Z("text-cursor-input", [
 	["path", {
 		d: "M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6",
 		key: "1528k5"
@@ -16322,7 +16353,7 @@ var GE = (e) => {
 		d: "M9 6v12",
 		key: "velyjx"
 	}]
-]), CO = Z("trash-2", [
+]), wO = Z("trash-2", [
 	["path", {
 		d: "M10 11v6",
 		key: "nco0om"
@@ -16343,7 +16374,7 @@ var GE = (e) => {
 		d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
 		key: "e791ji"
 	}]
-]), wO = Z("triangle-alert", [
+]), TO = Z("triangle-alert", [
 	["path", {
 		d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
 		key: "wmoenq"
@@ -16356,13 +16387,13 @@ var GE = (e) => {
 		d: "M12 17h.01",
 		key: "p32p05"
 	}]
-]), TO = Z("undo-2", [["path", {
+]), EO = Z("undo-2", [["path", {
 	d: "M9 14 4 9l5-5",
 	key: "102s5s"
 }], ["path", {
 	d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11",
 	key: "f3b9sd"
-}]]), EO = Z("upload", [
+}]]), DO = Z("upload", [
 	["path", {
 		d: "M12 3v12",
 		key: "1x0j5s"
@@ -16375,7 +16406,7 @@ var GE = (e) => {
 		d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
 		key: "ih7n3h"
 	}]
-]), DO = Z("user-pen", [
+]), OO = Z("user-pen", [
 	["path", {
 		d: "M11.5 15H7a4 4 0 0 0-4 4v2",
 		key: "15lzij"
@@ -16390,7 +16421,7 @@ var GE = (e) => {
 		r: "4",
 		key: "e45bow"
 	}]
-]), OO = Z("wand-sparkles", [
+]), kO = Z("wand-sparkles", [
 	["path", {
 		d: "m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72",
 		key: "ul74o6"
@@ -16423,7 +16454,7 @@ var GE = (e) => {
 		d: "M11 3H9",
 		key: "1obp7u"
 	}]
-]), kO = Z("wind", [
+]), AO = Z("wind", [
 	["path", {
 		d: "M12.8 19.6A2 2 0 1 0 14 16H2",
 		key: "148xed"
@@ -16436,7 +16467,7 @@ var GE = (e) => {
 		d: "M9.8 4.4A2 2 0 1 1 11 8H2",
 		key: "75valh"
 	}]
-]), AO = Z("workflow", [
+]), jO = Z("workflow", [
 	["rect", {
 		width: "8",
 		height: "8",
@@ -16457,16 +16488,16 @@ var GE = (e) => {
 		rx: "2",
 		key: "1cgmvn"
 	}]
-]), jO = Z("x", [["path", {
+]), MO = Z("x", [["path", {
 	d: "M18 6 6 18",
 	key: "1bl5f8"
 }], ["path", {
 	d: "m6 6 12 12",
 	key: "d8bk6v"
-}]]), MO = Z("zap", [["path", {
+}]]), NO = Z("zap", [["path", {
 	d: "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z",
 	key: "1xq2db"
-}]]), NO = /* @__PURE__ */ F({
+}]]), PO = /* @__PURE__ */ F({
 	__name: "Tip",
 	props: {
 		text: {},
@@ -16492,7 +16523,7 @@ var GE = (e) => {
 			role: "tooltip"
 		}, k(e.text), 513)) : W("", !0)], 544));
 	}
-}), PO = [
+}), FO = [
 	"disabled",
 	"aria-label",
 	"aria-pressed"
@@ -16511,7 +16542,7 @@ var GE = (e) => {
 	},
 	emits: ["click"],
 	setup(e) {
-		return (t, n) => (R(), B(NO, {
+		return (t, n) => (R(), B(PO, {
 			text: e.label,
 			align: e.align,
 			below: e.below
@@ -16527,7 +16558,7 @@ var GE = (e) => {
 				"aria-label": e.label,
 				"aria-pressed": e.pressed === void 0 ? void 0 : e.pressed,
 				onClick: n[0] ||= (e) => t.$emit("click", e)
-			}, [(R(), B($r(e.icon)))], 10, PO)]),
+			}, [(R(), B($r(e.icon)))], 10, FO)]),
 			_: 1
 		}, 8, [
 			"text",
@@ -16535,16 +16566,16 @@ var GE = (e) => {
 			"below"
 		]));
 	}
-}), FO = {
+}), IO = {
 	key: 0,
 	class: "patches"
-}, IO = { class: "patch-old pre" }, LO = { class: "patch-new pre" }, RO = {
+}, LO = { class: "patch-old pre" }, RO = { class: "patch-new pre" }, zO = {
 	key: 0,
 	class: "patch-status xs"
-}, zO = {
+}, BO = {
 	key: 2,
 	class: "faint small stage-empty"
-}, BO = /* @__PURE__ */ F({
+}, VO = /* @__PURE__ */ F({
 	__name: "StageBody",
 	props: {
 		stage: {},
@@ -16562,25 +16593,25 @@ var GE = (e) => {
 		return (t, i) => (R(), z("div", {
 			class: "stage-body",
 			style: Le({ "--actor": e.stage.color })
-		}, [e.stage.kind === "patch" && e.stage.patches?.length ? (R(), z("div", FO, [(R(!0), z(L, null, I(e.stage.patches, (e, t) => (R(), z("div", {
+		}, [e.stage.kind === "patch" && e.stage.patches?.length ? (R(), z("div", IO, [(R(!0), z(L, null, I(e.stage.patches, (e, t) => (R(), z("div", {
 			key: t,
 			class: O(["patch", { failed: r(e.status) }])
 		}, [
-			V("div", IO, k(e.old_string), 1),
+			V("div", LO, k(e.old_string), 1),
 			H(M($E), { class: "patch-arrow" }),
-			V("div", LO, k(e.new_string), 1),
-			r(e.status) ? (R(), z("div", RO, [H(M(nD)), U(k(M(Y)(`patch.${e.status}`)), 1)])) : W("", !0)
+			V("div", RO, k(e.new_string), 1),
+			r(e.status) ? (R(), z("div", zO, [H(M(nD)), U(k(M(Y)(`patch.${e.status}`)), 1)])) : W("", !0)
 		], 2))), 128))])) : e.stage.text ? (R(), z("div", {
 			key: 1,
 			ref_key: "box",
 			ref: n,
 			class: "stage-text pre scroll"
-		}, k(e.stage.text), 513)) : (R(), z("div", zO, k(M(Y)(`stage.${e.stage.status}`)), 1))], 4));
+		}, k(e.stage.text), 513)) : (R(), z("div", BO, k(M(Y)(`stage.${e.stage.status}`)), 1))], 4));
 	}
 });
 //#endregion
 //#region src/ui/actions.ts
-async function VO(t) {
+async function HO(t) {
 	let n = e().chat[t], r = sm(n);
 	if (!n || !r || r.draft === void 0 || r.patched === void 0) return;
 	let i = !r.patchesApplied;
@@ -16591,19 +16622,19 @@ async function VO(t) {
 	};
 	r.annotationVersions && (a.annotations = i ? r.annotationVersions.patched : r.annotationVersions.draft), r.speechVersions && (a.speech = i ? r.speechVersions.patched : r.speechVersions.draft), lm(t, a), e().updateMessageBlock(t, n), await e().saveChat(), await e().eventSource.emit(e().eventTypes.MESSAGE_EDITED, t), aS();
 }
-async function HO(t, n, r) {
+async function UO(t, n, r) {
 	let i = e().chat[t], a = sm(i);
 	return !i || !a ? !1 : (lm(t, cm(a, n, r)), aS(), await e().saveChat(), !0);
 }
 //#endregion
 //#region src/ui/message/Stages.vue?vue&type=script&setup=true&lang.ts
-var UO = { class: "stage-bar" }, WO = ["onClick"], GO = { class: "ellipsis" }, KO = {
+var WO = { class: "stage-bar" }, GO = ["onClick"], KO = { class: "ellipsis" }, qO = {
 	key: 0,
 	class: "chip stage-chip error"
-}, qO = { class: "ellipsis" }, JO = { class: "badge warn" }, YO = {
+}, JO = { class: "ellipsis" }, YO = { class: "badge warn" }, XO = {
 	class: "icon-btn sm faint",
 	tabindex: "0"
-}, XO = /* @__PURE__ */ F({
+}, ZO = /* @__PURE__ */ F({
 	__name: "Stages",
 	props: { mesid: {} },
 	setup(e) {
@@ -16620,10 +16651,10 @@ var UO = { class: "stage-bar" }, WO = ["onClick"], GO = { class: "ellipsis" }, K
 			i.value = !0, r.value = s.value === e.id ? null : e.id;
 		}
 		let u = {
-			text: nO,
+			text: rO,
 			content: ND,
 			patch: zD
-		}, d = (e) => e.status === "streaming" ? YD : e.status === "interrupted" ? mD : e.status === "missing" ? fD : u[e.kind], f = G(() => n.value?.sidecar?.diagnostics?.warnings ?? []), p = G(() => n.value?.sidecar?.draft === void 0 ? null : n.value.sidecar), m = G(() => {
+		}, d = (e) => e.status === "streaming" ? XD : e.status === "interrupted" ? mD : e.status === "missing" ? fD : u[e.kind], f = G(() => n.value?.sidecar?.diagnostics?.warnings ?? []), p = G(() => n.value?.sidecar?.draft === void 0 ? null : n.value.sidecar), m = G(() => {
 			let e = n.value;
 			if (!e) return "";
 			let t = e.sidecar?.diagnostics, r = [`${Y(`transport.${e.transport}`)} · ${e.workflow}`];
@@ -16632,47 +16663,47 @@ var UO = { class: "stage-bar" }, WO = ["onClick"], GO = { class: "ellipsis" }, K
 		return (t, r) => M(n) && (o.value.length || M(n).error) ? (R(), z("div", {
 			key: 0,
 			class: O(["stages", { live: M(n).running }])
-		}, [V("div", UO, [
+		}, [V("div", WO, [
 			(R(!0), z(L, null, I(o.value, (e) => (R(), z("button", {
 				key: e.id,
 				type: "button",
 				class: O(["chip stage-chip", [e.status, { open: s.value === e.id }]]),
 				style: Le({ "--actor": e.color }),
 				onClick: (t) => l(e)
-			}, [(R(), B($r(d(e)), { class: O({ spin: e.status === "streaming" }) }, null, 8, ["class"])), V("span", GO, k(e.label), 1)], 14, WO))), 128)),
-			M(n).error ? (R(), z("span", KO, [H(M(wO)), V("span", qO, k(M(n).error), 1)])) : W("", !0),
+			}, [(R(), B($r(d(e)), { class: O({ spin: e.status === "streaming" }) }, null, 8, ["class"])), V("span", KO, k(e.label), 1)], 14, GO))), 128)),
+			M(n).error ? (R(), z("span", qO, [H(M(TO)), V("span", JO, k(M(n).error), 1)])) : W("", !0),
 			r[1] ||= V("span", { class: "grow" }, null, -1),
-			f.value.length ? (R(), B(NO, {
+			f.value.length ? (R(), B(PO, {
 				key: 1,
 				text: f.value.join("\n"),
 				align: "end"
 			}, {
-				default: N(() => [V("span", JO, [H(M(wO)), U(k(f.value.length), 1)])]),
+				default: N(() => [V("span", YO, [H(M(TO)), U(k(f.value.length), 1)])]),
 				_: 1
 			}, 8, ["text"])) : W("", !0),
 			p.value ? (R(), B(Q, {
 				key: 2,
 				small: "",
 				align: "end",
-				icon: p.value.patchesApplied ? M(TO) : M(lO),
+				icon: p.value.patchesApplied ? M(EO) : M(uO),
 				label: p.value.patchesApplied ? M(Y)("stages.revertDraft") : M(Y)("stages.reapplyPatches"),
-				onClick: r[0] ||= (t) => M(VO)(e.mesid)
+				onClick: r[0] ||= (t) => M(HO)(e.mesid)
 			}, null, 8, ["icon", "label"])) : W("", !0),
-			M(n).running ? W("", !0) : (R(), B(NO, {
+			M(n).running ? W("", !0) : (R(), B(PO, {
 				key: 3,
 				text: m.value,
 				align: "end"
 			}, {
-				default: N(() => [V("span", YO, [H(M(GD))])]),
+				default: N(() => [V("span", XO, [H(M(KD))])]),
 				_: 1
 			}, 8, ["text"]))
-		]), c.value ? (R(), B(BO, {
+		]), c.value ? (R(), B(VO, {
 			key: c.value.id,
 			stage: c.value,
 			follow: M(n).running && !i.value
 		}, null, 8, ["stage", "follow"])) : W("", !0)], 2)) : W("", !0);
 	}
-}), ZO = {
+}), QO = {
 	status: {
 		position: "top",
 		order: 100
@@ -16713,16 +16744,16 @@ var UO = { class: "stage-bar" }, WO = ["onClick"], GO = { class: "ellipsis" }, K
 	},
 	speech: null
 };
-function QO(e) {
-	let t = ZO[e.kind];
+function $O(e) {
+	let t = QO[e.kind];
 	return t ? {
 		position: e.ui?.position ?? t.position,
 		order: e.ui?.order ?? t.order
 	} : null;
 }
-function $O(e, t) {
+function ek(e, t) {
 	return e.flatMap((e, n) => {
-		let r = QO(e);
+		let r = $O(e);
 		return r && r.position === t ? [{
 			decl: e,
 			...r,
@@ -16732,7 +16763,7 @@ function $O(e, t) {
 }
 //#endregion
 //#region src/ui/message/cards/ReplyCard.vue?vue&type=script&setup=true&lang.ts
-var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F({
+var tk = { class: "reply-name xs" }, nk = ["innerHTML"], rk = /* @__PURE__ */ F({
 	__name: "ReplyCard",
 	props: {
 		text: {},
@@ -16744,29 +16775,29 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 		return (t, r) => (R(), z("div", {
 			class: "reply-card",
 			style: Le({ "--actor": e.color })
-		}, [V("div", ek, k(e.name), 1), V("div", {
+		}, [V("div", tk, k(e.name), 1), V("div", {
 			class: "rich",
 			innerHTML: n.value
-		}, null, 8, tk)], 4));
+		}, null, 8, nk)], 4));
 	}
-}), rk = { class: "card mini-card" }, ik = { class: "card-head" }, ak = { class: "card-title" }, ok = { class: "card-body pre" }, sk = /* @__PURE__ */ F({
+}), ik = { class: "card mini-card" }, ak = { class: "card-head" }, ok = { class: "card-title" }, sk = { class: "card-body pre" }, ck = /* @__PURE__ */ F({
 	__name: "ImpersonateCard",
 	props: {
 		text: {},
 		mesid: {}
 	},
 	setup(e) {
-		return (t, n) => (R(), z("div", rk, [V("header", ik, [
-			H(M(DO), { class: "section-icon" }),
-			V("span", ak, k(M(Y)("cards.impersonate")), 1),
+		return (t, n) => (R(), z("div", ik, [V("header", ak, [
+			H(M(OO), { class: "section-icon" }),
+			V("span", ok, k(M(Y)("cards.impersonate")), 1),
 			V("button", {
 				type: "button",
 				class: "btn primary sm-btn",
 				onClick: n[0] ||= (t) => M(gC)(e.text, !1, e.mesid)
-			}, [H(M(SO)), U(k(M(Y)("cards.fillInput")), 1)])
-		]), V("div", ok, k(e.text), 1)]));
+			}, [H(M(CO)), U(k(M(Y)("cards.fillInput")), 1)])
+		]), V("div", sk, k(e.text), 1)]));
 	}
-}), ck = ["aria-label"], lk = ["title", "onClick"], uk = { class: "option-label" }, dk = { class: "option-content small muted" }, fk = /* @__PURE__ */ F({
+}), lk = ["aria-label"], uk = ["title", "onClick"], dk = { class: "option-label" }, fk = { class: "option-content small muted" }, pk = /* @__PURE__ */ F({
 	__name: "OptionsCard",
 	props: {
 		options: {},
@@ -16785,12 +16816,12 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			class: "option",
 			title: M(Y)("cards.optionHint"),
 			onClick: (t) => n(e, t)
-		}, [V("span", uk, k(e.label), 1), V("span", dk, k(e.content), 1)], 8, lk))), 128))], 8, ck));
+		}, [V("span", dk, k(e.label), 1), V("span", fk, k(e.content), 1)], 8, uk))), 128))], 8, lk));
 	}
-}), pk = {
+}), mk = {
 	key: 0,
 	class: "memory-ops"
-}, mk = { class: "ellipsis" }, hk = ["aria-label", "onClick"], gk = /* @__PURE__ */ F({
+}, hk = { class: "ellipsis" }, gk = ["aria-label", "onClick"], _k = /* @__PURE__ */ F({
 	__name: "MemoryCard",
 	props: {
 		events: {},
@@ -16830,27 +16861,27 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 		function r(e) {
 			e.id !== void 0 && Om(Mm(t.preset), e.id);
 		}
-		return (e, t) => n.value.length ? (R(), z("div", pk, [(R(!0), z(L, null, I(n.value, (e, t) => (R(), B(NO, {
+		return (e, t) => n.value.length ? (R(), z("div", mk, [(R(!0), z(L, null, I(n.value, (e, t) => (R(), B(PO, {
 			key: t,
 			text: e.op === "delete" ? M(Y)("memory.deleted") : e.content,
 			align: "start"
 		}, {
 			default: N(() => [V("span", { class: O(["chip memory-chip", [e.op, { undone: e.undone }]]) }, [
-				(R(), B($r(e.scope === "global" ? M(BD) : M(ZD)), { class: "faint" })),
-				V("span", mk, k(e.key), 1),
-				(R(), B($r(e.op === "delete" ? M(CO) : M(oO)), { class: "op-icon" })),
+				(R(), B($r(e.scope === "global" ? M(BD) : M(QD)), { class: "faint" })),
+				V("span", hk, k(e.key), 1),
+				(R(), B($r(e.op === "delete" ? M(wO) : M(sO)), { class: "op-icon" })),
 				e.scope === "global" && !e.undone ? (R(), z("button", {
 					key: 0,
 					type: "button",
 					class: "icon-btn sm",
 					"aria-label": M(Y)("common.undo"),
 					onClick: (t) => r(e)
-				}, [H(M(TO))], 8, hk)) : W("", !0)
+				}, [H(M(EO))], 8, gk)) : W("", !0)
 			], 2)]),
 			_: 2
 		}, 1032, ["text"]))), 128))])) : W("", !0);
 	}
-}), _k = ["aria-label"], vk = /* @__PURE__ */ F({
+}), vk = ["aria-label"], yk = /* @__PURE__ */ F({
 	__name: "Help",
 	props: {
 		text: {},
@@ -16872,7 +16903,7 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			"aria-label": e.text,
 			onClick: a[0] ||= hs((e) => r.value = !M(r), ["stop"]),
 			onBlur: a[1] ||= (e) => r.value = !1
-		}, [H(M(pD))], 40, _k), M(r) ? (R(), z("span", {
+		}, [H(M(pD))], 40, vk), M(r) ? (R(), z("span", {
 			key: 0,
 			ref_key: "bubble",
 			ref: i,
@@ -16881,10 +16912,10 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			role: "tooltip"
 		}, k(e.text), 513)) : W("", !0)], 544)) : W("", !0);
 	}
-}), yk = { class: "card-title" }, bk = {
+}), bk = { class: "card-title" }, xk = {
 	key: 0,
 	class: "card-body"
-}, xk = /* @__PURE__ */ F({
+}, Sk = /* @__PURE__ */ F({
 	__name: "Section",
 	props: {
 		title: {},
@@ -16904,8 +16935,8 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 				key: 0,
 				class: "section-icon"
 			})) : W("", !0),
-			V("span", yk, k(e.title), 1),
-			H(vk, {
+			V("span", bk, k(e.title), 1),
+			H(yk, {
 				text: e.help,
 				align: "end"
 			}, null, 8, ["text"]),
@@ -16917,42 +16948,42 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 				key: 1,
 				class: O(["chevron", { flipped: t.value }])
 			}, null, 8, ["class"])) : W("", !0)
-		], 2), !e.collapsible || t.value ? (R(), z("div", bk, [ri(n.$slots, "default")])) : W("", !0)], 2));
+		], 2), !e.collapsible || t.value ? (R(), z("div", xk, [ri(n.$slots, "default")])) : W("", !0)], 2));
 	}
-}), Sk = {
+}), Ck = {
 	key: 0,
 	class: "badge neutral"
-}, Ck = { class: "pre small" }, wk = /* @__PURE__ */ F({
+}, wk = { class: "pre small" }, Tk = /* @__PURE__ */ F({
 	__name: "RecapCard",
 	props: {
 		text: {},
 		coversUpTo: {}
 	},
 	setup(e) {
-		return (t, n) => (R(), B(xk, {
+		return (t, n) => (R(), B(Sk, {
 			title: M(Y)("cards.recap"),
-			icon: M(mO),
+			icon: M(hO),
 			collapsible: "",
 			open: !1
 		}, {
-			actions: N(() => [e.coversUpTo === void 0 ? W("", !0) : (R(), z("span", Sk, "#0–" + k(e.coversUpTo), 1))]),
-			default: N(() => [V("div", Ck, k(e.text), 1)]),
+			actions: N(() => [e.coversUpTo === void 0 ? W("", !0) : (R(), z("span", Ck, "#0–" + k(e.coversUpTo), 1))]),
+			default: N(() => [V("div", wk, k(e.text), 1)]),
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), Tk = { class: "synopsis-fields" }, Ek = { class: "synopsis-field" }, Dk = ["placeholder", "aria-label"], Ok = { class: "synopsis-field" }, kk = ["placeholder", "aria-label"], Ak = ["placeholder", "aria-label"], jk = ["placeholder", "aria-label"], Mk = { class: "synopsis-actions" }, Nk = { class: "xs faint grow synopsis-keys" }, Pk = {
+}), Ek = { class: "synopsis-fields" }, Dk = { class: "synopsis-field" }, Ok = ["placeholder", "aria-label"], kk = { class: "synopsis-field" }, Ak = ["placeholder", "aria-label"], jk = ["placeholder", "aria-label"], Mk = ["placeholder", "aria-label"], Nk = { class: "synopsis-actions" }, Pk = { class: "xs faint grow synopsis-keys" }, Fk = {
 	type: "submit",
 	class: "btn primary sm-btn"
-}, Fk = { class: "synopsis-head" }, Ik = { class: "synopsis-line small" }, Lk = {
+}, Ik = { class: "synopsis-head" }, Lk = { class: "synopsis-line small" }, Rk = {
 	key: 0,
 	class: "row tight"
-}, Rk = {
+}, zk = {
 	key: 1,
 	class: "row tight"
-}, zk = { class: "synopsis-event ellipsis" }, Bk = {
+}, Bk = { class: "synopsis-event ellipsis" }, Vk = {
 	key: 0,
 	class: "small muted pre synopsis-summary"
-}, Vk = /* @__PURE__ */ F({
+}, Hk = /* @__PURE__ */ F({
 	__name: "SynopsisCard",
 	props: {
 		synopsis: {},
@@ -17003,17 +17034,17 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			onTouchmovePassive: n[6] ||= hs(() => {}, ["stop"]),
 			onTouchendPassive: n[7] ||= hs(() => {}, ["stop"])
 		}, [
-			V("div", Tk, [V("label", Ek, [H(M(gD), { class: "faint" }), P(V("input", {
+			V("div", Ek, [V("label", Dk, [H(M(gD), { class: "faint" }), P(V("input", {
 				"onUpdate:modelValue": n[0] ||= (e) => o.time = e,
 				class: "input",
 				placeholder: M(Y)("cards.synopsis.time"),
 				"aria-label": M(Y)("cards.synopsis.time")
-			}, null, 8, Dk), [[as, o.time]])]), V("label", Ok, [H(M(XD), { class: "faint" }), P(V("input", {
+			}, null, 8, Ok), [[as, o.time]])]), V("label", kk, [H(M(ZD), { class: "faint" }), P(V("input", {
 				"onUpdate:modelValue": n[1] ||= (e) => o.location = e,
 				class: "input",
 				placeholder: M(Y)("cards.synopsis.location"),
 				"aria-label": M(Y)("cards.synopsis.location")
-			}, null, 8, kk), [[as, o.location]])])]),
+			}, null, 8, Ak), [[as, o.location]])])]),
 			P(V("input", {
 				ref_key: "eventInput",
 				ref: s,
@@ -17021,7 +17052,7 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 				class: "input synopsis-event-input",
 				placeholder: M(Y)("cards.synopsis.event"),
 				"aria-label": M(Y)("cards.synopsis.event")
-			}, null, 8, Ak), [[as, o.event]]),
+			}, null, 8, jk), [[as, o.event]]),
 			P(V("textarea", {
 				ref_key: "summaryInput",
 				ref: c,
@@ -17031,60 +17062,60 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 				placeholder: M(Y)("cards.synopsis.summary"),
 				"aria-label": M(Y)("cards.synopsis.summary"),
 				onInput: f
-			}, null, 40, jk), [[as, o.summary]]),
-			V("div", Mk, [
-				V("span", Nk, k(M(Y)("cards.synopsis.keys")), 1),
+			}, null, 40, Mk), [[as, o.summary]]),
+			V("div", Nk, [
+				V("span", Pk, k(M(Y)("cards.synopsis.keys")), 1),
 				V("button", {
 					type: "button",
 					class: "btn ghost sm-btn",
 					onClick: m
 				}, k(M(Y)("common.cancel")), 1),
-				V("button", Pk, [H(M(cD)), U(k(M(Y)("common.save")), 1)])
+				V("button", Fk, [H(M(cD)), U(k(M(Y)("common.save")), 1)])
 			])
 		], 32)) : (R(), z("div", {
 			key: 1,
 			class: O(["synopsis", { open: i.value }]),
 			onClick: n[9] ||= (e) => i.value = !i.value
-		}, [V("div", Fk, [V("div", Ik, [
-			e.synopsis.time ? (R(), z("span", Lk, [H(M(gD), { class: "faint" }), U(k(e.synopsis.time), 1)])) : W("", !0),
-			e.synopsis.location ? (R(), z("span", Rk, [H(M(XD), { class: "faint" }), U(k(e.synopsis.location), 1)])) : W("", !0),
-			V("span", zk, k(e.synopsis.event), 1)
+		}, [V("div", Ik, [V("div", Lk, [
+			e.synopsis.time ? (R(), z("span", Rk, [H(M(gD), { class: "faint" }), U(k(e.synopsis.time), 1)])) : W("", !0),
+			e.synopsis.location ? (R(), z("span", zk, [H(M(ZD), { class: "faint" }), U(k(e.synopsis.location), 1)])) : W("", !0),
+			V("span", Bk, k(e.synopsis.event), 1)
 		]), e.editable ? (R(), z("span", {
 			key: 0,
 			class: "synopsis-edit",
 			onClick: n[8] ||= hs(() => {}, ["stop"])
 		}, [H(Q, {
-			icon: M(oO),
+			icon: M(sO),
 			label: M(Y)("cards.synopsis.edit"),
 			small: "",
 			align: "end",
 			onClick: p
-		}, null, 8, ["icon", "label"])])) : W("", !0)]), i.value && e.synopsis.summary ? (R(), z("div", Bk, k(e.synopsis.summary), 1)) : W("", !0)], 2));
+		}, null, 8, ["icon", "label"])])) : W("", !0)]), i.value && e.synopsis.summary ? (R(), z("div", Vk, k(e.synopsis.summary), 1)) : W("", !0)], 2));
 	}
-}), Hk = { class: "status-fields" }, Uk = [
+}), Uk = { class: "status-fields" }, Wk = [
 	"onUpdate:modelValue",
 	"placeholder",
 	"aria-label"
-], Wk = { class: "synopsis-actions" }, Gk = { class: "xs faint grow synopsis-keys" }, Kk = {
+], Gk = { class: "synopsis-actions" }, Kk = { class: "xs faint grow synopsis-keys" }, qk = {
 	type: "submit",
 	class: "btn primary sm-btn"
-}, qk = {
+}, Jk = {
 	key: 1,
 	class: "status-bar small",
 	role: "status"
-}, Jk = { class: "status-line" }, Yk = {
+}, Yk = { class: "status-line" }, Xk = {
 	key: 0,
 	class: "row tight"
-}, Xk = {
+}, Zk = {
 	key: 1,
 	class: "row tight"
-}, Zk = {
+}, Qk = {
 	key: 2,
 	class: "row tight status-location"
-}, Qk = { class: "ellipsis" }, $k = {
+}, $k = { class: "ellipsis" }, eA = {
 	key: 3,
 	class: "row tight"
-}, eA = /* @__PURE__ */ F({
+}, tA = /* @__PURE__ */ F({
 	__name: "StatusCard",
 	props: {
 		status: {},
@@ -17100,13 +17131,13 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			weather: ""
 		}), o = /* @__PURE__ */ j(), s = (e) => (n.status[e] ?? "").trim(), c = G(() => [s("date"), s("weekday")].filter(Boolean).join(" ")), l = [
 			[/雷|thunder|storm|lightning/i, vD],
-			[/雪|snow|sleet|blizzard/i, yO],
+			[/雪|snow|sleet|blizzard/i, bO],
 			[/雨|rain|drizzle|shower/i, yD],
 			[/雾|霾|fog|mist|haze|smog/i, _D],
-			[/风|wind|gale|breez/i, kO],
+			[/风|wind|gale|breez/i, AO],
 			[/阴|云|cloud|overcast/i, xD],
-			[/夜|月|night|moon/i, eO],
-			[/晴|sun|clear|fair/i, xO]
+			[/夜|月|night|moon/i, tO],
+			[/晴|sun|clear|fair/i, SO]
 		], u = G(() => l.find(([e]) => e.test(s("weather")))?.[1] ?? bD), d = () => Object.fromEntries(Ic.map((e) => [e, a[e].trim()])), f = G(() => Ic.some((e) => d()[e] !== s(e)));
 		async function p() {
 			for (let e of Ic) a[e] = n.status[e] ?? "";
@@ -17125,7 +17156,7 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			date: sD,
 			weekday: sD,
 			time: gD,
-			location: XD,
+			location: ZD,
 			weather: bD
 		};
 		return (t, n) => i.value ? (R(), z("form", {
@@ -17139,7 +17170,7 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			onTouchstartPassive: n[1] ||= hs(() => {}, ["stop"]),
 			onTouchmovePassive: n[2] ||= hs(() => {}, ["stop"]),
 			onTouchendPassive: n[3] ||= hs(() => {}, ["stop"])
-		}, [V("div", Hk, [(R(!0), z(L, null, I(M(Ic), (e) => (R(), z("label", {
+		}, [V("div", Uk, [(R(!0), z(L, null, I(M(Ic), (e) => (R(), z("label", {
 			key: e,
 			class: "synopsis-field"
 		}, [(R(), B($r(_[e]), { class: "faint" })), P(V("input", {
@@ -17147,35 +17178,35 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 			class: "input",
 			placeholder: M(Y)(`cards.status.${e}`),
 			"aria-label": M(Y)(`cards.status.${e}`)
-		}, null, 8, Uk), [[as, a[e]]])]))), 128))]), V("div", Wk, [
-			V("span", Gk, k(M(Y)("cards.status.keys")), 1),
+		}, null, 8, Wk), [[as, a[e]]])]))), 128))]), V("div", Gk, [
+			V("span", Kk, k(M(Y)("cards.status.keys")), 1),
 			V("button", {
 				type: "button",
 				class: "btn ghost sm-btn",
 				onClick: m
 			}, k(M(Y)("common.cancel")), 1),
-			V("button", Kk, [H(M(cD)), U(k(M(Y)("common.save")), 1)])
-		])], 544)) : (R(), z("div", qk, [V("div", Jk, [
-			c.value ? (R(), z("span", Yk, [H(M(sD), { class: "faint" }), U(k(c.value), 1)])) : W("", !0),
-			s("time") ? (R(), z("span", Xk, [H(M(gD), { class: "faint" }), U(k(s("time")), 1)])) : W("", !0),
-			s("location") ? (R(), z("span", Zk, [H(M(XD), { class: "faint" }), V("span", Qk, k(s("location")), 1)])) : W("", !0),
-			s("weather") ? (R(), z("span", $k, [(R(), B($r(u.value), { class: "faint" })), U(k(s("weather")), 1)])) : W("", !0)
+			V("button", qk, [H(M(cD)), U(k(M(Y)("common.save")), 1)])
+		])], 544)) : (R(), z("div", Jk, [V("div", Yk, [
+			c.value ? (R(), z("span", Xk, [H(M(sD), { class: "faint" }), U(k(c.value), 1)])) : W("", !0),
+			s("time") ? (R(), z("span", Zk, [H(M(gD), { class: "faint" }), U(k(s("time")), 1)])) : W("", !0),
+			s("location") ? (R(), z("span", Qk, [H(M(ZD), { class: "faint" }), V("span", $k, k(s("location")), 1)])) : W("", !0),
+			s("weather") ? (R(), z("span", eA, [(R(), B($r(u.value), { class: "faint" })), U(k(s("weather")), 1)])) : W("", !0)
 		]), e.editable ? (R(), z("span", {
 			key: 0,
 			class: "synopsis-edit",
 			onClick: n[4] ||= hs(() => {}, ["stop"])
 		}, [H(Q, {
-			icon: M(oO),
+			icon: M(sO),
 			label: M(Y)("cards.status.edit"),
 			small: "",
 			align: "end",
 			onClick: p
 		}, null, 8, ["icon", "label"])])) : W("", !0)]));
 	}
-}), tA = ["innerHTML"], nA = {
+}), nA = ["innerHTML"], rA = {
 	key: 1,
 	class: "kv-list small"
-}, rA = { class: "pre" }, iA = /* @__PURE__ */ F({
+}, iA = { class: "pre" }, aA = /* @__PURE__ */ F({
 	__name: "CustomCard",
 	props: {
 		title: {},
@@ -17183,9 +17214,9 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 	},
 	setup(e) {
 		let t = e, n = G(() => typeof t.value == "string" ? Hw(t.value) : "");
-		return (t, r) => (R(), B(xk, {
+		return (t, r) => (R(), B(Sk, {
 			title: e.title,
-			icon: M(gO),
+			icon: M(_O),
 			collapsible: "",
 			open: !1
 		}, {
@@ -17193,34 +17224,34 @@ var ek = { class: "reply-name xs" }, tk = ["innerHTML"], nk = /* @__PURE__ */ F(
 				key: 0,
 				class: "rich small",
 				innerHTML: n.value
-			}, null, 8, tA)) : (R(), z("dl", nA, [(R(!0), z(L, null, I(e.value, (e, t) => (R(), z(L, { key: t }, [V("dt", null, k(t), 1), V("dd", rA, k(e), 1)], 64))), 128))]))]),
+			}, null, 8, nA)) : (R(), z("dl", rA, [(R(!0), z(L, null, I(e.value, (e, t) => (R(), z(L, { key: t }, [V("dt", null, k(t), 1), V("dd", iA, k(e), 1)], 64))), 128))]))]),
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), aA = /* @__PURE__ */ new Map();
-function oA(e) {
-	let t = aA.get(e);
+}), oA = /* @__PURE__ */ new Map();
+function sA(e) {
+	let t = oA.get(e);
 	if (!t) {
 		let n = URL.createObjectURL(new Blob([e], { type: "text/javascript" }));
 		t = import(
 			/* @vite-ignore */
 			n
-).finally(() => URL.revokeObjectURL(n)), t.catch(() => aA.delete(e)), aA.set(e, t);
+).finally(() => URL.revokeObjectURL(n)), t.catch(() => oA.delete(e)), oA.set(e, t);
 	}
 	return t;
 }
-function sA(e) {
+function cA(e) {
 	let t = e.default;
 	if (typeof e.mount == "function") return e.mount;
 	if (typeof t == "function") return t;
 	if (t && typeof t == "object" && typeof t.mount == "function") return t.mount.bind(t);
 }
-function cA(e) {
+function lA(e) {
 	if (!e) return null;
 	let t = document.createElement("style");
 	return t.textContent = e, t;
 }
-var lA = (e) => ({
+var uA = (e) => ({
 	value: e.value,
 	structure: e.structure,
 	structures: e.structures,
@@ -17228,12 +17259,12 @@ var lA = (e) => ({
 	preset: e.preset,
 	lang: e.lang
 });
-async function uA(e, t, n) {
+async function dA(e, t, n) {
 	let r = n;
 	if (e.mode === "template") {
 		let n = () => {
-			let n = ql(e.code, lA(r));
-			t.replaceChildren(...[cA(e.style)].filter((e) => !!e));
+			let n = ql(e.code, uA(r));
+			t.replaceChildren(...[lA(e.style)].filter((e) => !!e));
 			let i = document.createElement("div");
 			i.className = "ap-component", i.innerHTML = n, t.append(i);
 		}, i = (e) => {
@@ -17251,10 +17282,10 @@ async function uA(e, t, n) {
 			}
 		};
 	}
-	let i = sA(await oA(e.code));
+	let i = cA(await sA(e.code));
 	if (!i) throw Error("the module exports no mount(root, context)");
 	let a, o = async () => {
-		t.replaceChildren(...[cA(e.style)].filter((e) => !!e)), a = await i(t, r);
+		t.replaceChildren(...[lA(e.style)].filter((e) => !!e)), a = await i(t, r);
 	}, s = () => {
 		try {
 			typeof a == "function" ? a() : a?.unmount?.();
@@ -17274,10 +17305,10 @@ async function uA(e, t, n) {
 }
 //#endregion
 //#region src/ui/message/cards/ComponentCard.vue?vue&type=script&setup=true&lang.ts
-var dA = { class: "structure-component" }, fA = ["data-structure"], pA = {
+var fA = { class: "structure-component" }, pA = ["data-structure"], mA = {
 	key: 0,
 	class: "xs"
-}, mA = /* @__PURE__ */ F({
+}, hA = /* @__PURE__ */ F({
 	__name: "ComponentCard",
 	props: {
 		component: {},
@@ -17298,14 +17329,14 @@ var dA = { class: "structure-component" }, fA = ["data-structure"], pA = {
 			if (!e) return;
 			let r = e.shadowRoot ?? e.attachShadow({ mode: "open" });
 			s(async () => {
-				i = await uA(t.component, r, t.context);
+				i = await dA(t.component, r, t.context);
 			});
 		}), gr(() => t.context, (e) => s(async () => {
 			await i?.update(e);
 		})), gr(() => t.component, (e) => s(async () => {
 			i?.unmount(), i = null;
 			let r = n.value?.shadowRoot;
-			r && (i = await uA(e, r, t.context));
+			r && (i = await dA(e, r, t.context));
 		})), Xr(() => {
 			o = !1;
 			try {
@@ -17314,26 +17345,26 @@ var dA = { class: "structure-component" }, fA = ["data-structure"], pA = {
 				console.error("[Advanced Preset] structure component", t.component.id, e);
 			}
 			i = null;
-		}), (t, i) => (R(), z("div", dA, [V("div", {
+		}), (t, i) => (R(), z("div", fA, [V("div", {
 			ref_key: "host",
 			ref: n,
 			class: "structure-component-host",
 			"data-structure": e.component.id
-		}, null, 8, fA), r.value ? (R(), z("div", pA, k(M(Y)("cards.custom.error", { error: r.value })), 1)) : W("", !0)]));
+		}, null, 8, pA), r.value ? (R(), z("div", mA, k(M(Y)("cards.custom.error", { error: r.value })), 1)) : W("", !0)]));
 	}
 });
 //#endregion
 //#region src/ui/media/errors.ts
-function hA(e) {
+function gA(e) {
 	return e instanceof vx ? Y(`media.error.proxy.${e.issue}`) : e instanceof yx ? e.message : e instanceof Error && e.name === "NoImageConnection" ? Y("media.error.noConnection") : e instanceof TypeError ? Y("media.error.network") : e instanceof Mx ? Y("media.error.body", { error: e.message }) : e instanceof Error ? e.message : String(e);
 }
 //#endregion
 //#region src/ui/components/BlobImage.vue?vue&type=script&setup=true&lang.ts
-var gA = ["src", "alt"], _A = {
+var _A = ["src", "alt"], vA = {
 	key: 1,
 	class: "blob-placeholder",
 	"aria-hidden": "true"
-}, vA = /* @__PURE__ */ F({
+}, yA = /* @__PURE__ */ F({
 	__name: "BlobImage",
 	props: {
 		blobKey: {},
@@ -17351,12 +17382,12 @@ var gA = ["src", "alt"], _A = {
 			src: i.value,
 			alt: e.alt ?? "",
 			draggable: "false"
-		}, null, 8, gA)) : (R(), z("span", _A));
+		}, null, 8, _A)) : (R(), z("span", vA));
 	}
-}), yA = ["aria-label"], bA = { class: "image-viewer-bar" }, xA = { class: "small" }, SA = {
+}), bA = ["aria-label"], xA = { class: "image-viewer-bar" }, SA = { class: "small" }, CA = {
 	key: 1,
 	class: "small grow ellipsis image-viewer-caption"
-}, CA = /* @__PURE__ */ F({
+}, wA = /* @__PURE__ */ F({
 	__name: "ImageViewer",
 	props: {
 		keys: {},
@@ -17387,56 +17418,56 @@ var gA = ["src", "alt"], _A = {
 			onKeydown: s,
 			onTouchstartPassive: n[5] ||= (e) => /* @__PURE__ */ wn(c) ? c.value = e.touches[0]?.clientX ?? null : c = e.touches[0]?.clientX ?? null,
 			onTouchend: l
-		}, [H(vA, {
+		}, [H(yA, {
 			"blob-key": e.keys[a.value],
 			alt: e.caption,
 			class: "image-viewer-img"
-		}, null, 8, ["blob-key", "alt"]), V("div", bA, [
+		}, null, 8, ["blob-key", "alt"]), V("div", xA, [
 			e.keys.length > 1 ? (R(), z(L, { key: 0 }, [
 				H(Q, {
 					icon: M(uD),
 					label: M(Y)("media.image.previous"),
 					onClick: n[0] ||= (e) => o(-1)
 				}, null, 8, ["icon", "label"]),
-				V("span", xA, k(a.value + 1) + " / " + k(e.keys.length), 1),
+				V("span", SA, k(a.value + 1) + " / " + k(e.keys.length), 1),
 				H(Q, {
 					icon: M(dD),
 					label: M(Y)("media.image.next"),
 					onClick: n[1] ||= (e) => o(1)
 				}, null, 8, ["icon", "label"])
 			], 64)) : W("", !0),
-			e.caption ? (R(), z("span", SA, k(e.caption), 1)) : W("", !0),
+			e.caption ? (R(), z("span", CA, k(e.caption), 1)) : W("", !0),
 			H(Q, {
-				icon: M(jO),
+				icon: M(MO),
 				label: M(Y)("common.close"),
 				align: "end",
 				onClick: n[2] ||= (e) => i.value?.close()
 			}, null, 8, ["icon", "label"])
-		])], 40, yA));
+		])], 40, bA));
 	}
-}), wA = { class: "image-figure" }, TA = ["aria-label"], EA = {
+}), TA = { class: "image-figure" }, EA = ["aria-label"], DA = {
 	key: 1,
 	class: "image-empty"
-}, DA = {
+}, OA = {
 	key: 1,
 	class: "image-prompt small muted"
-}, OA = {
+}, kA = {
 	key: 2,
 	class: "image-busy",
 	role: "status"
-}, kA = { class: "small" }, AA = {
+}, AA = { class: "small" }, jA = {
 	key: 3,
 	class: "image-pager"
-}, jA = { class: "xs" }, MA = ["aria-label"], NA = { class: "row end tight" }, PA = {
+}, MA = { class: "xs" }, NA = ["aria-label"], PA = { class: "row end tight" }, FA = {
 	type: "submit",
 	class: "btn sm-btn"
-}, FA = {
+}, IA = {
 	key: 1,
 	class: "image-foot"
-}, IA = ["title"], LA = {
+}, LA = ["title"], RA = {
 	key: 1,
 	class: "xs muted grow ellipsis"
-}, RA = { class: "row tight image-tools" }, zA = /* @__PURE__ */ F({
+}, zA = { class: "row tight image-tools" }, BA = /* @__PURE__ */ F({
 	__name: "ImageFigure",
 	props: {
 		mesid: {},
@@ -17448,7 +17479,7 @@ var gA = ["src", "alt"], _A = {
 		editable: { type: Boolean }
 	},
 	setup(e) {
-		let t = e, n = G(() => t.record?.keys ?? []), r = G(() => Math.min(t.record?.shown ?? n.value.length - 1, n.value.length - 1)), i = G(() => n.value[r.value]), a = G(() => t.record?.prompt ?? t.prompt.prompt), o = G(() => pS.get(mS(t.genId, t.structure, t.index))), s = G(() => o.value?.status === "running"), c = G(() => o.value?.status === "error" ? hA(o.value.error) : ""), l = G(() => (t.prompt.ratio ?? "3:4").replace(":", " / ")), u = () => TS(t.mesid, t.structure, t.index), d = () => ES(t.genId, t.structure, t.index), f = (e) => {
+		let t = e, n = G(() => t.record?.keys ?? []), r = G(() => Math.min(t.record?.shown ?? n.value.length - 1, n.value.length - 1)), i = G(() => n.value[r.value]), a = G(() => t.record?.prompt ?? t.prompt.prompt), o = G(() => pS.get(mS(t.genId, t.structure, t.index))), s = G(() => o.value?.status === "running"), c = G(() => o.value?.status === "error" ? gA(o.value.error) : ""), l = G(() => (t.prompt.ratio ?? "3:4").replace(":", " / ")), u = () => TS(t.mesid, t.structure, t.index), d = () => ES(t.genId, t.structure, t.index), f = (e) => {
 			let i = n.value.length;
 			i > 1 && OS(t.mesid, t.structure, t.index, (r.value + e + i) % i);
 		}, p = () => {
@@ -17471,7 +17502,7 @@ var gA = ["src", "alt"], _A = {
 			e.stopPropagation(), !e.isComposing && (e.key === "Escape" ? (e.preventDefault(), h.value = !1) : e.key === "Enter" && (e.ctrlKey || e.metaKey) && (e.preventDefault(), y(!0)));
 		}
 		let x = /* @__PURE__ */ j(!1);
-		return (t, o) => (R(), z("figure", wA, [
+		return (t, o) => (R(), z("figure", TA, [
 			V("div", {
 				class: O(["image-frame", { empty: !i.value }]),
 				style: Le(i.value ? void 0 : { aspectRatio: l.value })
@@ -17482,35 +17513,35 @@ var gA = ["src", "alt"], _A = {
 					class: "image-open",
 					"aria-label": M(Y)("media.image.view"),
 					onClick: o[0] ||= (e) => x.value = !0
-				}, [H(vA, {
+				}, [H(yA, {
 					"blob-key": i.value,
 					alt: e.prompt.caption ?? a.value
-				}, null, 8, ["blob-key", "alt"])], 8, TA)) : (R(), z("div", EA, [!s.value && !c.value ? (R(), B(M(HD), {
+				}, null, 8, ["blob-key", "alt"])], 8, EA)) : (R(), z("div", DA, [!s.value && !c.value ? (R(), B(M(UD), {
 					key: 0,
 					class: "faint",
 					"aria-hidden": "true"
-				})) : W("", !0), h.value ? W("", !0) : (R(), z("p", DA, k(a.value), 1))])),
-				s.value ? (R(), z("div", OA, [
-					H(M(YD), {
+				})) : W("", !0), h.value ? W("", !0) : (R(), z("p", OA, k(a.value), 1))])),
+				s.value ? (R(), z("div", kA, [
+					H(M(XD), {
 						class: "spin",
 						"aria-hidden": "true"
 					}),
-					V("span", kA, k(M(Y)("media.image.generating")), 1),
+					V("span", AA, k(M(Y)("media.image.generating")), 1),
 					H(Q, {
-						icon: M(jO),
+						icon: M(MO),
 						label: M(Y)("common.cancel"),
 						small: "",
 						onClick: d
 					}, null, 8, ["icon", "label"])
 				])) : W("", !0),
-				i.value && n.value.length > 1 && !s.value ? (R(), z("div", AA, [
+				i.value && n.value.length > 1 && !s.value ? (R(), z("div", jA, [
 					H(Q, {
 						icon: M(uD),
 						label: M(Y)("media.image.previous"),
 						small: "",
 						onClick: o[1] ||= (e) => f(-1)
 					}, null, 8, ["icon", "label"]),
-					V("span", jA, k(r.value + 1) + " / " + k(n.value.length), 1),
+					V("span", MA, k(r.value + 1) + " / " + k(n.value.length), 1),
 					H(Q, {
 						icon: M(dD),
 						label: M(Y)("media.image.next"),
@@ -17532,39 +17563,39 @@ var gA = ["src", "alt"], _A = {
 				class: "input small",
 				rows: "4",
 				"aria-label": M(Y)("media.image.prompt")
-			}, null, 8, MA), [[as, g.value]]), V("div", NA, [
+			}, null, 8, NA), [[as, g.value]]), V("div", PA, [
 				V("button", {
 					type: "button",
 					class: "btn ghost sm-btn",
 					onClick: o[4] ||= (e) => h.value = !1
 				}, k(M(Y)("common.cancel")), 1),
-				V("button", PA, k(M(Y)("common.save")), 1),
+				V("button", FA, k(M(Y)("common.save")), 1),
 				V("button", {
 					type: "button",
 					class: "btn primary sm-btn",
 					onClick: o[5] ||= (e) => y(!0)
-				}, [H(M(OO)), U(k(M(Y)("media.image.generate")), 1)])
-			])], 32)) : (R(), z("figcaption", FA, [c.value ? (R(), z("span", {
+				}, [H(M(kO)), U(k(M(Y)("media.image.generate")), 1)])
+			])], 32)) : (R(), z("figcaption", IA, [c.value ? (R(), z("span", {
 				key: 0,
 				class: "xs text-danger grow image-error",
 				title: c.value
-			}, k(c.value), 9, IA)) : (R(), z("span", LA, k(e.prompt.caption ?? ""), 1)), V("div", RA, [
+			}, k(c.value), 9, LA)) : (R(), z("span", RA, k(e.prompt.caption ?? ""), 1)), V("div", zA, [
 				!i.value && !s.value ? (R(), z("button", {
 					key: 0,
 					type: "button",
 					class: "btn sm-btn",
 					onClick: u
-				}, [H(M(OO)), U(k(M(Y)(c.value ? "media.image.retry" : "media.image.generate")), 1)])) : W("", !0),
+				}, [H(M(kO)), U(k(M(Y)(c.value ? "media.image.retry" : "media.image.generate")), 1)])) : W("", !0),
 				i.value && !s.value ? (R(), B(Q, {
 					key: 1,
-					icon: M(uO),
+					icon: M(dO),
 					label: M(Y)("media.image.regenerate"),
 					small: "",
 					onClick: u
 				}, null, 8, ["icon", "label"])) : W("", !0),
 				e.editable && !s.value ? (R(), B(Q, {
 					key: 2,
-					icon: M(oO),
+					icon: M(sO),
 					label: M(Y)("media.image.editPrompt"),
 					small: "",
 					onClick: v
@@ -17578,7 +17609,7 @@ var gA = ["src", "alt"], _A = {
 				}, null, 8, ["icon", "label"])) : W("", !0),
 				i.value && e.editable && !s.value ? (R(), B(Q, {
 					key: 4,
-					icon: M(CO),
+					icon: M(wO),
 					label: M(Y)("common.delete"),
 					small: "",
 					danger: "",
@@ -17586,7 +17617,7 @@ var gA = ["src", "alt"], _A = {
 					onClick: p
 				}, null, 8, ["icon", "label"])) : W("", !0)
 			])])),
-			x.value && i.value ? (R(), B(CA, {
+			x.value && i.value ? (R(), B(wA, {
 				key: 2,
 				keys: n.value,
 				start: r.value,
@@ -17599,7 +17630,7 @@ var gA = ["src", "alt"], _A = {
 			])) : W("", !0)
 		]));
 	}
-}), BA = /* @__PURE__ */ F({
+}), VA = /* @__PURE__ */ F({
 	__name: "ImageCard",
 	props: {
 		mesid: {},
@@ -17610,7 +17641,7 @@ var gA = ["src", "alt"], _A = {
 		editable: { type: Boolean }
 	},
 	setup(e) {
-		return (t, n) => (R(), z("div", { class: O(["image-card", { multi: e.prompts.length > 1 }]) }, [(R(!0), z(L, null, I(e.prompts, (t, n) => (R(), B(zA, {
+		return (t, n) => (R(), z("div", { class: O(["image-card", { multi: e.prompts.length > 1 }]) }, [(R(!0), z(L, null, I(e.prompts, (t, n) => (R(), B(BA, {
 			key: n,
 			mesid: e.mesid,
 			"gen-id": e.genId,
@@ -17629,7 +17660,7 @@ var gA = ["src", "alt"], _A = {
 			"editable"
 		]))), 128))], 2));
 	}
-}), VA = /* @__PURE__ */ F({
+}), HA = /* @__PURE__ */ F({
 	__name: "Cards",
 	props: {
 		mesid: {},
@@ -17653,7 +17684,7 @@ var gA = ["src", "alt"], _A = {
 				}
 			});
 			let c = [], l = bC(r), u = !(!i || e.live), d = J(o);
-			for (let { decl: n } of $O(s, t.position)) {
+			for (let { decl: n } of ek(s, t.position)) {
 				let a = o[n.id];
 				switch (n.kind) {
 					case "reply":
@@ -17751,7 +17782,7 @@ var gA = ["src", "alt"], _A = {
 									version: r.version
 								},
 								lang: jp(),
-								setValue: async (e) => u ? HO(f, s, e) : !1,
+								setValue: async (e) => u ? UO(f, s, e) : !1,
 								fillInput: (e, t) => gC(String(e ?? ""), !!t, f)
 							}
 						});
@@ -17771,7 +17802,7 @@ var gA = ["src", "alt"], _A = {
 		return (t, n) => r.value?.items.length ? (R(), z("div", {
 			key: 0,
 			class: O(["cards", `cards-${e.position}`])
-		}, [(R(!0), z(L, null, I(r.value.items, (t) => (R(), z(L, { key: t.id }, [t.type === "reply" ? (R(), B(nk, {
+		}, [(R(!0), z(L, null, I(r.value.items, (t) => (R(), z(L, { key: t.id }, [t.type === "reply" ? (R(), B(rk, {
 			key: 0,
 			text: t.text,
 			name: r.value.narrator,
@@ -17780,49 +17811,49 @@ var gA = ["src", "alt"], _A = {
 			"text",
 			"name",
 			"color"
-		])) : t.type === "impersonate" ? (R(), B(sk, {
+		])) : t.type === "impersonate" ? (R(), B(ck, {
 			key: 1,
 			text: t.text,
 			mesid: e.mesid
-		}, null, 8, ["text", "mesid"])) : t.type === "options" ? (R(), B(fk, {
+		}, null, 8, ["text", "mesid"])) : t.type === "options" ? (R(), B(pk, {
 			key: 2,
 			options: t.options,
 			mesid: e.mesid
-		}, null, 8, ["options", "mesid"])) : t.type === "synopsis" ? (R(), B(Vk, {
+		}, null, 8, ["options", "mesid"])) : t.type === "synopsis" ? (R(), B(Hk, {
 			key: 3,
 			synopsis: t.synopsis,
 			editable: r.value.editable,
-			onSave: (n) => M(HO)(e.mesid, t.id, n)
+			onSave: (n) => M(UO)(e.mesid, t.id, n)
 		}, null, 8, [
 			"synopsis",
 			"editable",
 			"onSave"
-		])) : t.type === "status" ? (R(), B(eA, {
+		])) : t.type === "status" ? (R(), B(tA, {
 			key: 4,
 			status: t.status,
 			editable: r.value.editable,
-			onSave: (n) => M(HO)(e.mesid, t.id, n)
+			onSave: (n) => M(UO)(e.mesid, t.id, n)
 		}, null, 8, [
 			"status",
 			"editable",
 			"onSave"
-		])) : t.type === "memory" ? (R(), B(gk, {
+		])) : t.type === "memory" ? (R(), B(_k, {
 			key: 5,
 			events: t.events,
 			preset: r.value.preset
-		}, null, 8, ["events", "preset"])) : t.type === "recap" ? (R(), B(wk, {
+		}, null, 8, ["events", "preset"])) : t.type === "recap" ? (R(), B(Tk, {
 			key: 6,
 			text: t.text,
 			"covers-up-to": t.coversUpTo
-		}, null, 8, ["text", "covers-up-to"])) : t.type === "custom" ? (R(), B(iA, {
+		}, null, 8, ["text", "covers-up-to"])) : t.type === "custom" ? (R(), B(aA, {
 			key: 7,
 			title: t.title,
 			value: t.value
-		}, null, 8, ["title", "value"])) : t.type === "component" ? (R(), B(mA, {
+		}, null, 8, ["title", "value"])) : t.type === "component" ? (R(), B(hA, {
 			key: 8,
 			component: t.component,
 			context: t.context
-		}, null, 8, ["component", "context"])) : t.type === "image" ? (R(), B(BA, {
+		}, null, 8, ["component", "context"])) : t.type === "image" ? (R(), B(VA, {
 			key: 9,
 			mesid: e.mesid,
 			"gen-id": r.value.genId,
@@ -17839,13 +17870,13 @@ var gA = ["src", "alt"], _A = {
 			"editable"
 		])) : W("", !0)], 64))), 128))], 2)) : W("", !0);
 	}
-}), HA = {
+}), UA = {
 	key: 0,
 	class: "dock stages live"
-}, UA = { class: "stage-bar" }, WA = { class: "ellipsis" }, GA = {
+}, WA = { class: "stage-bar" }, GA = { class: "ellipsis" }, KA = {
 	key: 0,
 	class: "small muted"
-}, KA = /* @__PURE__ */ F({
+}, qA = /* @__PURE__ */ F({
 	__name: "Dock",
 	setup(e) {
 		let t = G(() => ab.current && !ab.current.streaming && ab.current.status === "running" ? ab.current : null), n = G(() => {
@@ -17858,24 +17889,24 @@ var gA = ["src", "alt"], _A = {
 				color: Ww(n, t.actor)
 			}));
 		}), r = G(() => n.value.find((e) => e.status === "streaming") ?? [...n.value].reverse().find((e) => e.text));
-		return (e, i) => t.value ? (R(), z("div", HA, [V("div", UA, [
-			H(M(YD), { class: "spin faint" }),
+		return (e, i) => t.value ? (R(), z("div", UA, [V("div", WA, [
+			H(M(XD), { class: "spin faint" }),
 			(R(!0), z(L, null, I(n.value, (e) => (R(), z("span", {
 				key: e.id,
 				class: O(["chip stage-chip", [e.status, { open: r.value?.id === e.id }]]),
 				style: Le({ "--actor": e.color })
-			}, [V("span", WA, k(e.label), 1)], 6))), 128)),
-			n.value.length ? W("", !0) : (R(), z("span", GA, k(M(Y)("stages.waiting")), 1))
-		]), r.value ? (R(), B(BO, {
+			}, [V("span", GA, k(e.label), 1)], 6))), 128)),
+			n.value.length ? W("", !0) : (R(), z("span", KA, k(M(Y)("stages.waiting")), 1))
+		]), r.value ? (R(), B(VO, {
 			key: 0,
 			stage: r.value,
 			follow: ""
 		}, null, 8, ["stage"])) : W("", !0)])) : W("", !0);
 	}
-}), qA = ["title"], JA = { class: "storyline-name" }, YA = {
+}), JA = ["title"], YA = { class: "storyline-name" }, XA = {
 	key: 0,
 	class: "storyline-if"
-}, XA = /* @__PURE__ */ F({
+}, ZA = /* @__PURE__ */ F({
 	__name: "StorylineBadge",
 	props: { mesid: {} },
 	setup(e) {
@@ -17902,16 +17933,16 @@ var gA = ["src", "alt"], _A = {
 				class: "lucide",
 				"aria-hidden": "true"
 			}),
-			V("span", JA, k(n.value.name), 1),
-			n.value.if ? (R(), z("span", YA, k(M(Y)("storylines.ifLine")), 1)) : W("", !0),
+			V("span", YA, k(n.value.name), 1),
+			n.value.if ? (R(), z("span", XA, k(M(Y)("storylines.ifLine")), 1)) : W("", !0),
 			n.value.hidden ? (R(), B(M(jD), {
 				key: 1,
 				class: "lucide storyline-hidden",
 				"aria-label": M(Y)("storylines.hidden")
 			}, null, 8, ["aria-label"])) : W("", !0)
-		], 10, qA)) : W("", !0);
+		], 10, JA)) : W("", !0);
 	}
-}), ZA = ["aria-label"], QA = ["disabled"], $A = /* @__PURE__ */ F({
+}), QA = ["aria-label"], $A = ["disabled"], ej = /* @__PURE__ */ F({
 	__name: "Switch",
 	props: /*@__PURE__*/ ui({
 		label: {},
@@ -17936,15 +17967,15 @@ var gA = ["src", "alt"], _A = {
 				type: "checkbox",
 				role: "switch",
 				disabled: e.disabled
-			}, null, 8, QA), [[os, t.value]]),
+			}, null, 8, $A), [[os, t.value]]),
 			r[1] ||= V("span", { class: "track" }, null, -1),
 			r[2] ||= V("span", { class: "thumb" }, null, -1)
-		], 10, ZA));
+		], 10, QA));
 	}
-}), ej = { class: "field-label" }, tj = { class: "ellipsis" }, nj = {
+}), tj = { class: "field-label" }, nj = { class: "ellipsis" }, rj = {
 	key: 0,
 	class: "dot modified"
-}, rj = { class: "field-control" }, $ = /* @__PURE__ */ F({
+}, ij = { class: "field-control" }, $ = /* @__PURE__ */ F({
 	__name: "Field",
 	props: {
 		label: {},
@@ -17953,16 +17984,16 @@ var gA = ["src", "alt"], _A = {
 		modified: { type: Boolean }
 	},
 	setup(e) {
-		return (t, n) => (R(), z("div", { class: O(["field", { inline: e.inline }]) }, [V("div", ej, [
-			V("span", tj, k(e.label), 1),
-			e.modified ? (R(), z("span", nj)) : W("", !0),
-			H(vk, {
+		return (t, n) => (R(), z("div", { class: O(["field", { inline: e.inline }]) }, [V("div", tj, [
+			V("span", nj, k(e.label), 1),
+			e.modified ? (R(), z("span", rj)) : W("", !0),
+			H(yk, {
 				text: e.help,
 				align: "start"
 			}, null, 8, ["text"])
-		]), V("div", rj, [ri(t.$slots, "default")])], 2));
+		]), V("div", ij, [ri(t.$slots, "default")])], 2));
 	}
-}), ij = { class: "swatches" }, aj = ["title"], oj = ["title"], sj = { class: "swatches" }, cj = ["title"], lj = /* @__PURE__ */ F({
+}), aj = { class: "swatches" }, oj = ["title"], sj = ["title"], cj = { class: "swatches" }, lj = ["title"], uj = /* @__PURE__ */ F({
 	__name: "Appearance",
 	setup(e) {
 		let t = K().ui, n = (e) => G({
@@ -17988,9 +18019,9 @@ var gA = ["src", "alt"], _A = {
 				s().color = e || void 0, q();
 			}
 		});
-		return (e, t) => (R(), B(xk, {
+		return (e, t) => (R(), B(Sk, {
 			title: M(Y)("appearance.title"),
-			icon: M(iO),
+			icon: M(aO),
 			collapsible: "",
 			open: !1
 		}, {
@@ -18000,7 +18031,7 @@ var gA = ["src", "alt"], _A = {
 					help: M(Y)("appearance.colors.hint"),
 					inline: ""
 				}, {
-					default: N(() => [V("div", ij, [
+					default: N(() => [V("div", aj, [
 						V("label", {
 							class: "swatch",
 							style: Le({ background: M(r) || "var(--ap-primary-500)" }),
@@ -18013,7 +18044,7 @@ var gA = ["src", "alt"], _A = {
 							M(r),
 							void 0,
 							{ lazy: !0 }
-						]])], 12, aj),
+						]])], 12, oj),
 						V("label", {
 							class: "swatch",
 							style: Le({ background: M(i) || "var(--ap-accent-500)" }),
@@ -18026,9 +18057,9 @@ var gA = ["src", "alt"], _A = {
 							M(i),
 							void 0,
 							{ lazy: !0 }
-						]])], 12, oj),
+						]])], 12, sj),
 						H(Q, {
-							icon: M(fO),
+							icon: M(pO),
 							label: M(Y)("common.reset"),
 							small: "",
 							align: "end",
@@ -18046,7 +18077,7 @@ var gA = ["src", "alt"], _A = {
 					label: M(Y)("appearance.collapseStages"),
 					inline: ""
 				}, {
-					default: N(() => [H($A, {
+					default: N(() => [H(ej, {
 						modelValue: a.value,
 						"onUpdate:modelValue": t[2] ||= (e) => a.value = e
 					}, null, 8, ["modelValue"])]),
@@ -18057,7 +18088,7 @@ var gA = ["src", "alt"], _A = {
 					help: M(Y)("appearance.annotations.hint"),
 					inline: ""
 				}, {
-					default: N(() => [H($A, {
+					default: N(() => [H(ej, {
 						modelValue: c.value,
 						"onUpdate:modelValue": t[3] ||= (e) => c.value = e
 					}, null, 8, ["modelValue"])]),
@@ -18068,7 +18099,7 @@ var gA = ["src", "alt"], _A = {
 					label: M(Y)("appearance.annotationColor"),
 					inline: ""
 				}, {
-					default: N(() => [V("div", sj, [V("label", {
+					default: N(() => [V("div", cj, [V("label", {
 						class: "swatch",
 						style: Le({ background: l.value || "var(--ap-accent)" }),
 						title: M(Y)("appearance.annotationColor")
@@ -18080,8 +18111,8 @@ var gA = ["src", "alt"], _A = {
 						l.value,
 						void 0,
 						{ lazy: !0 }
-					]])], 12, cj), H(Q, {
-						icon: M(fO),
+					]])], 12, lj), H(Q, {
+						icon: M(pO),
 						label: M(Y)("common.reset"),
 						small: "",
 						align: "end",
@@ -18098,16 +18129,16 @@ var gA = ["src", "alt"], _A = {
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), uj = { class: "toolbar" }, dj = ["disabled"], fj = ["disabled"], pj = { class: "preset-list" }, mj = ["onClick", "onKeydown"], hj = { class: "preset-mark" }, gj = { class: "grow col preset-info" }, _j = { class: "row wrap preset-head" }, vj = { class: "preset-name" }, yj = { class: "badge neutral" }, bj = { class: "badge neutral icon-badge" }, xj = {
+}), dj = { class: "toolbar" }, fj = ["disabled"], pj = ["disabled"], mj = { class: "preset-list" }, hj = ["onClick", "onKeydown"], gj = { class: "preset-mark" }, _j = { class: "grow col preset-info" }, vj = { class: "row wrap preset-head" }, yj = { class: "preset-name" }, bj = { class: "badge neutral" }, xj = { class: "badge neutral icon-badge" }, Sj = {
 	key: 0,
 	class: "xs muted"
-}, Sj = {
+}, Cj = {
 	key: 1,
 	class: "small muted preset-desc"
-}, Cj = {
+}, wj = {
 	key: 0,
 	class: "empty"
-}, wj = /* @__PURE__ */ F({
+}, Tj = /* @__PURE__ */ F({
 	__name: "PresetsTab",
 	setup(e) {
 		let t = G(() => yp()), n = (e) => uu(e.preset).length > 0, r = /* @__PURE__ */ j(null), i = /* @__PURE__ */ j(!1), a = /* @__PURE__ */ j(""), o = /* @__PURE__ */ j(null);
@@ -18131,21 +18162,21 @@ var gA = ["src", "alt"], _A = {
 			t && s("file", () => VC(t), Y("presets.installed")), e.target.value = "";
 		}, d = (e) => s(`update:${e.preset.id}`, () => UC(e.preset.id), Y("presets.updated")), f = (e) => s(`export:${e.preset.id}`, () => sC(e.preset)), p = (e) => s(`remove:${e.preset.id}`, () => qC(e.preset.id)), m = () => s("ext", async () => x("info", await kb() === "current" ? Y("update.none") : Y("update.reloading")));
 		return (e, s) => (R(), z(L, null, [
-			V("div", uj, [
+			V("div", dj, [
 				V("button", {
 					type: "button",
 					class: "btn",
 					disabled: r.value === "file",
 					onClick: s[0] ||= (e) => o.value?.click()
-				}, [H(M(EO)), U(k(M(Y)("presets.importFile")), 1)], 8, dj),
+				}, [H(M(DO)), U(k(M(Y)("presets.importFile")), 1)], 8, fj),
 				V("button", {
 					type: "button",
 					class: O(["btn", { primary: i.value }]),
 					onClick: s[1] ||= (e) => i.value = !i.value
-				}, [H(M(JD)), U(k(M(Y)("presets.importUrl")), 1)], 2),
+				}, [H(M(YD)), U(k(M(Y)("presets.importUrl")), 1)], 2),
 				s[4] ||= V("span", { class: "grow" }, null, -1),
 				H(Q, {
-					icon: r.value === "ext" ? M(YD) : M(uO),
+					icon: r.value === "ext" ? M(XD) : M(dO),
 					label: M(Y)("presets.checkUpdates"),
 					align: "end",
 					disabled: r.value === "ext",
@@ -18178,11 +18209,11 @@ var gA = ["src", "alt"], _A = {
 				type: "submit",
 				class: "btn primary",
 				disabled: r.value === "url"
-			}, [r.value === "url" ? (R(), B(M(YD), {
+			}, [r.value === "url" ? (R(), B(M(XD), {
 				key: 0,
 				class: "spin"
-			})) : (R(), B(M(kD), { key: 1 })), U(k(M(Y)("common.install")), 1)], 8, fj)], 32)) : W("", !0),
-			V("div", pj, [(R(!0), z(L, null, I(t.value, (e) => (R(), z("div", {
+			})) : (R(), B(M(kD), { key: 1 })), U(k(M(Y)("common.install")), 1)], 8, pj)], 32)) : W("", !0),
+			V("div", mj, [(R(!0), z(L, null, I(t.value, (e) => (R(), z("div", {
 				key: e.preset.id,
 				class: O(["preset-item", { on: M(sS)?.id === e.preset.id }]),
 				role: "button",
@@ -18190,28 +18221,28 @@ var gA = ["src", "alt"], _A = {
 				onClick: (t) => c(e),
 				onKeydown: _s((t) => c(e), ["enter"])
 			}, [
-				V("span", hj, [r.value === `select:${e.preset.id}` ? (R(), B(M(YD), {
+				V("span", gj, [r.value === `select:${e.preset.id}` ? (R(), B(M(XD), {
 					key: 0,
 					class: "spin"
 				})) : M(sS)?.id === e.preset.id ? (R(), B(M(cD), { key: 1 })) : W("", !0)]),
-				V("div", gj, [
-					V("div", _j, [
-						V("span", vj, k(M(Pp)(e.preset)), 1),
-						V("span", yj, "v" + k(e.preset.version), 1),
+				V("div", _j, [
+					V("div", vj, [
+						V("span", yj, k(M(Pp)(e.preset)), 1),
+						V("span", bj, "v" + k(e.preset.version), 1),
 						e.source === "builtin" ? W("", !0) : (R(), z("span", {
 							key: 0,
 							class: O(["badge", { warn: e.source === "dev" }])
 						}, k(M(Y)(`presets.source.${e.source}`)), 3)),
-						n(e) ? (R(), B(NO, {
+						n(e) ? (R(), B(PO, {
 							key: 1,
 							text: M(Y)("presets.templates.help")
 						}, {
-							default: N(() => [V("span", bj, [H(M(SD)), U(k(M(Y)("presets.templates")), 1)])]),
+							default: N(() => [V("span", xj, [H(M(SD)), U(k(M(Y)("presets.templates")), 1)])]),
 							_: 1
 						}, 8, ["text"])) : W("", !0)
 					]),
-					e.preset.author ? (R(), z("span", xj, k(e.preset.author), 1)) : W("", !0),
-					M(Fp)(e.preset) ? (R(), z("span", Sj, k(M(Fp)(e.preset)), 1)) : W("", !0)
+					e.preset.author ? (R(), z("span", Sj, k(e.preset.author), 1)) : W("", !0),
+					M(Fp)(e.preset) ? (R(), z("span", Cj, k(M(Fp)(e.preset)), 1)) : W("", !0)
 				]),
 				V("div", {
 					class: "row preset-actions",
@@ -18230,7 +18261,7 @@ var gA = ["src", "alt"], _A = {
 					]),
 					M(HC)(e.preset.id) ? (R(), B(Q, {
 						key: 0,
-						icon: M(uO),
+						icon: M(dO),
 						label: M(Y)("presets.update"),
 						align: "end",
 						small: "",
@@ -18242,7 +18273,7 @@ var gA = ["src", "alt"], _A = {
 					])) : W("", !0),
 					e.source === "installed" ? (R(), B(Q, {
 						key: 1,
-						icon: M(CO),
+						icon: M(wO),
 						label: M(Y)("common.delete"),
 						align: "end",
 						small: "",
@@ -18254,16 +18285,16 @@ var gA = ["src", "alt"], _A = {
 						"onClick"
 					])) : W("", !0)
 				])
-			], 42, mj))), 128)), t.value.length ? W("", !0) : (R(), z("div", Cj, k(M(Y)("presets.none")), 1))]),
-			H(lj)
+			], 42, hj))), 128)), t.value.length ? W("", !0) : (R(), z("div", wj, k(M(Y)("presets.none")), 1))]),
+			H(uj)
 		], 64));
 	}
-}), Tj;
-function Ej() {
+}), Ej;
+function Dj() {
 	let e = sS, t = G(() => e.value ? Fm(e.value) : null);
 	function n(t, n = {}) {
 		let r = e.value;
-		r && (Lm(r, t), n.sampling && (clearTimeout(Tj), Tj = setTimeout(() => void dh(r), 400)));
+		r && (Lm(r, t), n.sampling && (clearTimeout(Ej), Ej = setTimeout(() => void dh(r), 400)));
 	}
 	return {
 		preset: e,
@@ -18273,11 +18304,11 @@ function Ej() {
 }
 //#endregion
 //#region src/ui/panel/NoPreset.vue?vue&type=script&setup=true&lang.ts
-var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
+var Oj = { class: "empty" }, kj = /* @__PURE__ */ F({
 	__name: "NoPreset",
 	setup(e) {
-		return (e, t) => (R(), z("div", Dj, [
-			H(M(rO)),
+		return (e, t) => (R(), z("div", Oj, [
+			H(M(iO)),
 			V("span", null, k(M(Y)("panel.noPreset")), 1),
 			V("button", {
 				type: "button",
@@ -18286,11 +18317,11 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 			}, k(M(Y)("panel.choosePreset")), 1)
 		]));
 	}
-}), kj = [
+}), Aj = [
 	"aria-checked",
 	"title",
 	"onClick"
-], Aj = { class: "ellipsis" }, jj = /* @__PURE__ */ F({
+], jj = { class: "ellipsis" }, Mj = /* @__PURE__ */ F({
 	__name: "Segmented",
 	props: /*@__PURE__*/ ui({ options: {} }, {
 		modelValue: {},
@@ -18310,38 +18341,38 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 			class: O({ on: t.value === e.value }),
 			title: e.hint,
 			onClick: (n) => t.value = e.value
-		}, [e.icon ? (R(), B($r(e.icon), { key: 0 })) : W("", !0), V("span", Aj, k(e.label), 1)], 10, kj))), 128))], 2));
+		}, [e.icon ? (R(), B($r(e.icon), { key: 0 })) : W("", !0), V("span", jj, k(e.label), 1)], 10, Aj))), 128))], 2));
 	}
-}), Mj = { class: "col" }, Nj = { class: "row" }, Pj = ["aria-label"], Fj = ["label"], Ij = ["value"], Lj = ["label"], Rj = ["value"], zj = ["placeholder"], Bj = {
+}), Nj = { class: "col" }, Pj = { class: "row" }, Fj = ["aria-label"], Ij = ["label"], Lj = ["value"], Rj = ["label"], zj = ["value"], Bj = ["placeholder"], Vj = {
 	key: 1,
 	class: "xs muted row tight"
-}, Vj = { value: "" }, Hj = ["value"], Uj = ["value"], Wj = ["value"], Gj = ["value"], Kj = [
+}, Hj = { value: "" }, Uj = ["value"], Wj = ["value"], Gj = ["value"], Kj = ["value"], qj = [
 	"value",
 	"placeholder",
 	"onChange"
-], qj = [
+], Jj = [
 	"value",
 	"placeholder",
 	"onChange"
-], Jj = ["value"], Yj = ["value"], Xj = ["value"], Zj = ["value"], Qj = ["value"], $j = {
+], Yj = ["value"], Xj = ["value"], Zj = ["value"], Qj = ["value"], $j = ["value"], eM = {
 	key: 0,
 	class: "xs muted"
-}, eM = { class: "custom-ui-list small" }, tM = { class: "grow ellipsis" }, nM = { class: "xs faint" }, rM = { class: "slider" }, iM = [
+}, tM = { class: "custom-ui-list small" }, nM = { class: "grow ellipsis" }, rM = { class: "xs faint" }, iM = { class: "slider" }, aM = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onInput"
-], aM = [
+], oM = [
 	"min",
 	"max",
 	"step",
 	"value",
 	"onChange"
-], oM = { class: "field-grid" }, sM = ["value", "onChange"], cM = ["value"], lM = ["value"], uM = /* @__PURE__ */ F({
+], sM = { class: "field-grid" }, cM = ["value", "onChange"], lM = ["value"], uM = ["value"], dM = /* @__PURE__ */ F({
 	__name: "ConfigTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Ej(), i = G(() => t.value ? Mm(t.value) : null), a = G({
+		let { preset: t, config: n, update: r } = Dj(), i = G(() => t.value ? Mm(t.value) : null), a = G({
 			get: () => i.value ? `${i.value.active.ref.kind}:${i.value.active.ref.id}` : "",
 			set: (e) => {
 				let n = t.value;
@@ -18539,9 +18570,9 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 		], we = G(() => n.value?.sampling ?? {}), Te = (e) => e in we.value, Ee = (e, t) => r((n) => {
 			n.sampling[e] = t;
 		}, { sampling: !0 }), De = (e) => Number(e.target.value);
-		return (e, r) => !M(t) || !M(n) || !i.value ? (R(), B(Oj, { key: 0 })) : (R(), z(L, { key: 1 }, [
-			V("div", Mj, [
-				V("div", Nj, [
+		return (e, r) => !M(t) || !M(n) || !i.value ? (R(), B(kj, { key: 0 })) : (R(), z(L, { key: 1 }, [
+			V("div", Nj, [
+				V("div", Pj, [
 					P(V("select", {
 						"onUpdate:modelValue": r[0] ||= (e) => a.value = e,
 						class: "input grow",
@@ -18549,43 +18580,43 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 					}, [V("optgroup", { label: M(Y)("config.recommended") }, [(R(!0), z(L, null, I(M(t).configurations, (e) => (R(), z("option", {
 						key: e.id,
 						value: `recommended:${e.id}`
-					}, k(M(Np)(M(t), "configurations", e.id, "name", e.name)), 9, Ij))), 128))], 8, Fj), i.value.saved.length ? (R(), z("optgroup", {
+					}, k(M(Np)(M(t), "configurations", e.id, "name", e.name)), 9, Lj))), 128))], 8, Ij), i.value.saved.length ? (R(), z("optgroup", {
 						key: 0,
 						label: M(Y)("config.saved")
 					}, [(R(!0), z(L, null, I(i.value.saved, (e) => (R(), z("option", {
 						key: e.id,
 						value: `saved:${e.id}`
-					}, k(e.name), 9, Rj))), 128))], 8, Lj)) : W("", !0)], 8, Pj), [[cs, a.value]]),
+					}, k(e.name), 9, zj))), 128))], 8, Rj)) : W("", !0)], 8, Fj), [[cs, a.value]]),
 					u.value && l.value ? (R(), B(Q, {
 						key: 0,
-						icon: M(pO),
+						icon: M(mO),
 						label: M(Y)("config.overwrite"),
 						align: "end",
 						onClick: _
 					}, null, 8, ["icon", "label"])) : W("", !0),
 					H(Q, {
-						icon: M(sO),
+						icon: M(cO),
 						label: M(Y)("config.saveAs"),
 						align: "end",
 						onClick: r[1] ||= (e) => p("new")
 					}, null, 8, ["icon", "label"]),
 					u.value ? (R(), B(Q, {
 						key: 1,
-						icon: M(oO),
+						icon: M(sO),
 						label: M(Y)("common.rename"),
 						align: "end",
 						onClick: r[2] ||= (e) => p("rename")
 					}, null, 8, ["icon", "label"])) : W("", !0),
 					u.value ? (R(), B(Q, {
 						key: 2,
-						icon: M(CO),
+						icon: M(wO),
 						label: M(Y)("common.delete"),
 						align: "end",
 						danger: "",
 						onClick: g
 					}, null, 8, ["icon", "label"])) : W("", !0),
 					H(Q, {
-						icon: M(fO),
+						icon: M(pO),
 						label: M(Y)("config.reset"),
 						align: "end",
 						disabled: !l.value,
@@ -18606,9 +18637,9 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						class: "input grow",
 						placeholder: M(Y)("config.name"),
 						autofocus: ""
-					}, null, 8, zj), [[as, f.value]]),
+					}, null, 8, Bj), [[as, f.value]]),
 					H(Q, {
-						icon: M(jO),
+						icon: M(MO),
 						label: M(Y)("common.cancel"),
 						align: "end",
 						onClick: r[4] ||= (e) => d.value = null
@@ -18621,9 +18652,9 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						onClick: m
 					}, null, 8, ["icon", "label"])
 				], 32)) : W("", !0),
-				l.value ? (R(), z("span", Bj, [r[29] ||= V("span", { class: "dot modified" }, null, -1), U(k(M(Y)("config.modified")), 1)])) : W("", !0)
+				l.value ? (R(), z("span", Vj, [r[29] ||= V("span", { class: "dot modified" }, null, -1), U(k(M(Y)("config.modified")), 1)])) : W("", !0)
 			]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("config.connection"),
 				icon: M(oD)
 			}, {
@@ -18632,7 +18663,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						label: M(Y)("config.transport"),
 						help: M(Y)(`transport.${y.value}.hint`)
 					}, {
-						default: N(() => [H(jj, {
+						default: N(() => [H(Mj, {
 							modelValue: y.value,
 							"onUpdate:modelValue": r[5] ||= (e) => y.value = e,
 							options: v.value
@@ -18645,7 +18676,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							help: M(Y)("config.forceTool.hint"),
 							inline: ""
 						}, {
-							default: N(() => [H($A, {
+							default: N(() => [H(ej, {
 								modelValue: M(ne),
 								"onUpdate:modelValue": r[6] ||= (e) => /* @__PURE__ */ wn(ne) ? ne.value = e : null
 							}, null, 8, ["modelValue"])]),
@@ -18656,7 +18687,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							help: M(Y)("config.parallelTools.hint"),
 							inline: ""
 						}, {
-							default: N(() => [H($A, {
+							default: N(() => [H(ej, {
 								modelValue: M(re),
 								"onUpdate:modelValue": r[7] ||= (e) => /* @__PURE__ */ wn(re) ? re.value = e : null
 							}, null, 8, ["modelValue"])]),
@@ -18670,10 +18701,10 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							default: N(() => [P(V("select", {
 								"onUpdate:modelValue": r[8] ||= (e) => w.value = e,
 								class: "input"
-							}, [V("option", Vj, k(M(Y)("common.none")), 1), (R(!0), z(L, null, I(M(t).syntheticTurns, (e) => (R(), z("option", {
+							}, [V("option", Hj, k(M(Y)("common.none")), 1), (R(!0), z(L, null, I(M(t).syntheticTurns, (e) => (R(), z("option", {
 								key: e.id,
 								value: e.id
-							}, k(e.label), 9, Hj))), 128))], 512), [[cs, w.value]])]),
+							}, k(e.label), 9, Uj))), 128))], 512), [[cs, w.value]])]),
 							_: 1
 						}, 8, ["label", "help"]),
 						H($, {
@@ -18687,7 +18718,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							}, [(R(!0), z(L, null, I(M(Os), (e) => (R(), z("option", {
 								key: e,
 								value: e
-							}, k(M(Y)(`config.thoughtSignature.${e}`)), 9, Uj))), 128))], 512), [[cs, ie.value]])]),
+							}, k(M(Y)(`config.thoughtSignature.${e}`)), 9, Wj))), 128))], 512), [[cs, ie.value]])]),
 							_: 1
 						}, 8, ["label", "help"]),
 						H($, {
@@ -18695,7 +18726,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							help: M(Y)("config.openAiSignatures.hint"),
 							inline: ""
 						}, {
-							default: N(() => [H($A, {
+							default: N(() => [H(ej, {
 								modelValue: M(ae),
 								"onUpdate:modelValue": r[10] ||= (e) => /* @__PURE__ */ wn(ae) ? ae.value = e : null
 							}, null, 8, ["modelValue"])]),
@@ -18712,7 +18743,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							}, [(R(!0), z(L, null, I(M(Ds), (e) => (R(), z("option", {
 								key: e,
 								value: e
-							}, k(M(Y)(`config.streamToolArguments.${e}`)), 9, Wj))), 128))], 512), [[cs, M(oe)]])]),
+							}, k(M(Y)(`config.streamToolArguments.${e}`)), 9, Gj))), 128))], 512), [[cs, M(oe)]])]),
 							_: 1
 						}, 8, ["label", "help"]),
 						y.value === "tool-multi" ? (R(), B($, {
@@ -18727,7 +18758,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 								max: "20",
 								value: M(ce),
 								onChange: r[12] ||= (e) => ce.value = De(e)
-							}, null, 40, Gj)]),
+							}, null, 40, Kj)]),
 							_: 1
 						}, 8, ["label"])) : W("", !0),
 						H($, {
@@ -18735,7 +18766,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							help: M(Y)("config.assumeToolSupport.hint"),
 							inline: ""
 						}, {
-							default: N(() => [H($A, {
+							default: N(() => [H(ej, {
 								modelValue: M(le),
 								"onUpdate:modelValue": r[13] ||= (e) => /* @__PURE__ */ wn(le) ? le.value = e : null
 							}, null, 8, ["modelValue"])]),
@@ -18747,7 +18778,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						help: M(Y)("config.finalFallback.hint"),
 						inline: ""
 					}, {
-						default: N(() => [H($A, {
+						default: N(() => [H(ej, {
 							modelValue: M(se),
 							"onUpdate:modelValue": r[14] ||= (e) => /* @__PURE__ */ wn(se) ? se.value = e : null
 						}, null, 8, ["modelValue"])]),
@@ -18756,13 +18787,13 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 				]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			S.value.length > 1 ? (R(), B(xk, {
+			S.value.length > 1 ? (R(), B(Sk, {
 				key: 0,
 				title: M(Y)("config.workflow"),
-				icon: M(AO),
+				icon: M(jO),
 				help: te.value
 			}, {
-				default: N(() => [H(jj, {
+				default: N(() => [H(Mj, {
 					modelValue: ee.value,
 					"onUpdate:modelValue": r[15] ||= (e) => ee.value = e,
 					options: S.value
@@ -18773,7 +18804,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			])) : W("", !0),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("writing.actors"),
 				icon: M(AD),
 				collapsible: "",
@@ -18788,7 +18819,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						value: M(n).identity.names[e] ?? "",
 						placeholder: t.name,
 						onChange: (t) => ue("names", e, t.target.value)
-					}, null, 40, Kj)]),
+					}, null, 40, qj)]),
 					_: 2
 				}, 1032, ["label"]), H($, { label: M(Y)("writing.actorPrefix") }, {
 					default: N(() => [V("input", {
@@ -18796,17 +18827,17 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						value: M(n).identity.prefixes[e] ?? "",
 						placeholder: t.prefix,
 						onChange: (t) => ue("prefixes", e, t.target.value)
-					}, null, 40, qj)]),
+					}, null, 40, Jj)]),
 					_: 2
 				}, 1032, ["label"])]))), 128))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("writing.meta"),
-				icon: M($D),
+				icon: M(eO),
 				help: M(Y)("writing.meta.hint")
 			}, {
-				actions: N(() => [H($A, {
+				actions: N(() => [H(ej, {
 					modelValue: D.value,
 					"onUpdate:modelValue": r[16] ||= (e) => D.value = e,
 					label: M(Y)("writing.meta")
@@ -18824,7 +18855,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						max: "20",
 						value: M(n).meta.recentCount,
 						onChange: r[17] ||= (e) => _e(e.target.value)
-					}, null, 40, Jj)]),
+					}, null, 40, Yj)]),
 					_: 1
 				}, 8, ["label", "help"])) : W("", !0)]),
 				_: 1
@@ -18833,13 +18864,13 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			]),
-			M(t).storylines ? (R(), B(xk, {
+			M(t).storylines ? (R(), B(Sk, {
 				key: 1,
 				title: M(Y)("storylines.enabled"),
 				icon: M(RD),
 				help: M(Y)("storylines.config.hint")
 			}, {
-				actions: N(() => [H($A, {
+				actions: N(() => [H(ej, {
 					modelValue: me.value,
 					"onUpdate:modelValue": r[18] ||= (e) => me.value = e,
 					label: M(Y)("storylines.enabled")
@@ -18849,7 +18880,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 					label: M(Y)("storylines.freezeVariables"),
 					help: M(Y)("storylines.freezeVariables.hint")
 				}, {
-					default: N(() => [H(jj, {
+					default: N(() => [H(Mj, {
 						modelValue: ge.value,
 						"onUpdate:modelValue": r[19] ||= (e) => ge.value = e,
 						options: he.value
@@ -18862,12 +18893,12 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			])) : W("", !0),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("writing.tokenSaving"),
 				icon: M(wD),
 				help: M(Y)("writing.tokenSaving.hint")
 			}, {
-				actions: N(() => [H($A, {
+				actions: N(() => [H(ej, {
 					modelValue: de.value,
 					"onUpdate:modelValue": r[20] ||= (e) => de.value = e,
 					label: M(Y)("writing.tokenSaving")
@@ -18884,14 +18915,14 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							min: "0",
 							value: M(n).tokenSaving.keepFullTurns,
 							onChange: r[21] ||= (e) => fe("keepFullTurns", e.target.value)
-						}, null, 40, Yj)]),
+						}, null, 40, Xj)]),
 						_: 1
 					}, 8, ["label", "help"]),
 					H($, {
 						label: M(Y)("writing.userInput"),
 						help: M(Y)("writing.userInput.hint")
 					}, {
-						default: N(() => [H(jj, {
+						default: N(() => [H(Mj, {
 							modelValue: E.value,
 							"onUpdate:modelValue": r[22] ||= (e) => E.value = e,
 							options: pe.value
@@ -18910,7 +18941,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							min: "0",
 							value: M(n).tokenSaving.truncateUserAfter,
 							onChange: r[23] ||= (e) => fe("truncateUserAfter", e.target.value)
-						}, null, 40, Xj)]),
+						}, null, 40, Zj)]),
 						_: 1
 					}, 8, ["label", "help"])) : W("", !0)
 				], 64)) : W("", !0)]),
@@ -18920,12 +18951,12 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("writing.cache"),
 				icon: M(OD),
 				help: M(Y)("writing.cache.hint")
 			}, {
-				actions: N(() => [H($A, {
+				actions: N(() => [H(ej, {
 					modelValue: ve.value,
 					"onUpdate:modelValue": r[24] ||= (e) => ve.value = e,
 					label: M(Y)("writing.cache")
@@ -18941,7 +18972,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						min: "0",
 						value: M(n).cache.ttlMinutes,
 						onChange: r[25] ||= (e) => ye("ttlMinutes", e.target.value)
-					}, null, 40, Zj)]),
+					}, null, 40, Qj)]),
 					_: 1
 				}, 8, ["label", "help"]), H($, {
 					label: M(Y)("writing.cacheMaxDeferred"),
@@ -18954,7 +18985,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						min: "0",
 						value: M(n).cache.maxDeferredTurns,
 						onChange: r[26] ||= (e) => ye("maxDeferredTurns", e.target.value)
-					}, null, 40, Qj)]),
+					}, null, 40, $j)]),
 					_: 1
 				}, 8, ["label", "help"])], 64)) : W("", !0)]),
 				_: 1
@@ -18963,28 +18994,28 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			]),
-			o.value.length ? (R(), B(xk, {
+			o.value.length ? (R(), B(Sk, {
 				key: 2,
 				title: M(Y)("config.customUi"),
-				icon: M(cO),
+				icon: M(lO),
 				help: M(Y)("config.customUi.hint")
 			}, {
-				actions: N(() => [H($A, {
+				actions: N(() => [H(ej, {
 					modelValue: s.value,
 					"onUpdate:modelValue": r[27] ||= (e) => s.value = e,
 					label: M(Y)("config.customUi.enable")
 				}, null, 8, ["modelValue", "label"])]),
-				default: N(() => [c.value && !s.value ? (R(), z("p", $j, k(M(Y)("config.customUi.changed")), 1)) : W("", !0), V("ul", eM, [(R(!0), z(L, null, I(o.value, (e) => (R(), z("li", {
+				default: N(() => [c.value && !s.value ? (R(), z("p", eM, k(M(Y)("config.customUi.changed")), 1)) : W("", !0), V("ul", tM, [(R(!0), z(L, null, I(o.value, (e) => (R(), z("li", {
 					key: e.id,
 					class: "row tight"
-				}, [V("span", tM, k(e.title), 1), V("span", nM, k(M(Y)(`config.customUi.${e.mode}`)) + " · " + k(M(Y)(`config.customUi.${e.position}`)), 1)]))), 128))])]),
+				}, [V("span", nM, k(e.title), 1), V("span", rM, k(M(Y)(`config.customUi.${e.mode}`)) + " · " + k(M(Y)(`config.customUi.${e.position}`)), 1)]))), 128))])]),
 				_: 1
 			}, 8, [
 				"title",
 				"icon",
 				"help"
 			])) : W("", !0),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("config.sampling"),
 				icon: M(LD),
 				collapsible: "",
@@ -18995,14 +19026,14 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						key: 0,
 						label: M(Y)(`sampling.${e.key}`)
 					}, {
-						default: N(() => [V("div", rM, [V("input", {
+						default: N(() => [V("div", iM, [V("input", {
 							type: "range",
 							min: e.min,
 							max: e.max,
 							step: e.step,
 							value: we.value[e.key],
 							onInput: (t) => Ee(e.key, De(t))
-						}, null, 40, iM), V("input", {
+						}, null, 40, aM), V("input", {
 							class: "input",
 							type: "number",
 							min: e.min,
@@ -19010,10 +19041,10 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							step: e.step,
 							value: we.value[e.key],
 							onChange: (t) => Ee(e.key, De(t))
-						}, null, 40, aM)])]),
+						}, null, 40, oM)])]),
 						_: 2
 					}, 1032, ["label"])) : W("", !0)], 64))), 64)),
-					V("div", oM, [(R(), z(L, null, I(xe, (e) => (R(), z(L, { key: e }, [Te(e) ? (R(), B($, {
+					V("div", sM, [(R(), z(L, null, I(xe, (e) => (R(), z(L, { key: e }, [Te(e) ? (R(), B($, {
 						key: 0,
 						label: M(Y)(`sampling.${e}`)
 					}, {
@@ -19022,7 +19053,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 							type: "number",
 							value: we.value[e],
 							onChange: (t) => Ee(e, De(t))
-						}, null, 40, sM)]),
+						}, null, 40, cM)]),
 						_: 2
 					}, 1032, ["label"])) : W("", !0)], 64))), 64)), Te("reasoning_effort") ? (R(), B($, {
 						key: 0,
@@ -19035,7 +19066,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						}, [(R(), z(L, null, I(Ce, (e) => V("option", {
 							key: e,
 							value: e
-						}, k(M(Y)(`effort.${e}`)), 9, lM)), 64))], 40, cM)]),
+						}, k(M(Y)(`effort.${e}`)), 9, uM)), 64))], 40, lM)]),
 						_: 1
 					}, 8, ["label"])) : W("", !0)]),
 					(R(), z(L, null, I(Se, (e) => (R(), z(L, { key: e }, [Te(e) ? (R(), B($, {
@@ -19043,7 +19074,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 						label: M(Y)(`sampling.${e}`),
 						inline: ""
 					}, {
-						default: N(() => [H($A, {
+						default: N(() => [H(ej, {
 							"model-value": !!we.value[e],
 							"onUpdate:modelValue": (t) => Ee(e, t)
 						}, null, 8, ["model-value", "onUpdate:modelValue"])]),
@@ -19054,7 +19085,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 			}, 8, ["title", "icon"])
 		], 64));
 	}
-}), dM = [
+}), fM = [
 	"normal",
 	"regenerate",
 	"swipe",
@@ -19062,7 +19093,7 @@ var Dj = { class: "empty" }, Oj = /* @__PURE__ */ F({
 	"quiet",
 	"impersonate"
 ];
-function fM(e) {
+function pM(e) {
 	let t = (e, t) => e.map((e) => ({
 		value: e,
 		label: t(String(e))
@@ -19094,7 +19125,7 @@ function fM(e) {
 		"gen.type": {
 			kind: "enum",
 			label: Y("um.var.genType"),
-			options: t(dM, (e) => Y(`um.genType.${e}`))
+			options: t(fM, (e) => Y(`um.genType.${e}`))
 		},
 		"meta.present": {
 			kind: "bool",
@@ -19138,13 +19169,13 @@ function fM(e) {
 		} } : {}
 	};
 }
-var pM = (e) => e.modules.filter((e) => e.toggle === "user");
-function mM(e) {
-	let t = fM(e), n = (e) => e.filter((e) => t[e]).map((e) => ({
+var mM = (e) => e.modules.filter((e) => e.toggle === "user");
+function hM(e) {
+	let t = pM(e), n = (e) => e.filter((e) => t[e]).map((e) => ({
 		id: e,
 		label: t[e].label
 	})), r = [];
-	return pM(e).length && r.push({
+	return mM(e).length && r.push({
 		id: "module",
 		label: Y("um.var.module")
 	}), e.params.length && r.push({
@@ -19196,13 +19227,13 @@ function mM(e) {
 		}
 	].filter((e) => e.subjects.length);
 }
-function hM(e) {
+function gM(e) {
 	if (e.kind !== "var") return e.kind;
 	let t = e.path.split(".")[0];
 	return t === "modules" ? "module" : t === "params" ? "param" : t === "flags" ? "flag" : e.path;
 }
-function gM(e, t) {
-	return t === "module" ? pM(e).map((t) => ({
+function _M(e, t) {
+	return t === "module" ? mM(e).map((t) => ({
 		value: t.id,
 		label: Np(e, "modules", t.id, "name", t.name)
 	})) : t === "param" ? e.params.map((t) => ({
@@ -19213,11 +19244,11 @@ function gM(e, t) {
 		label: e.id
 	})) : [];
 }
-function _M(e, t) {
+function vM(e, t) {
 	let [n, r = ""] = t.split(".", 2);
 	if (n === "modules") return {
 		kind: "bool",
-		label: gM(e, "module").find((e) => e.value === r)?.label ?? r
+		label: _M(e, "module").find((e) => e.value === r)?.label ?? r
 	};
 	if (n === "flags") return {
 		kind: "bool",
@@ -19239,7 +19270,7 @@ function _M(e, t) {
 		};
 		let i = (t.options ?? []).map((n) => ({
 			value: n.value,
-			label: vM(e, t.id, n.value, n.label)
+			label: yM(e, t.id, n.value, n.label)
 		}));
 		return t.type === "select" ? {
 			kind: "enum",
@@ -19251,12 +19282,12 @@ function _M(e, t) {
 			suggestions: i.map((e) => String(e.value))
 		};
 	}
-	return fM(e)[t] ?? {
+	return pM(e)[t] ?? {
 		kind: "text",
 		label: t
 	};
 }
-var vM = (e, t, n, r) => Mp(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String(n), yM = {
+var yM = (e, t, n, r) => Mp(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String(n), bM = {
 	bool: ["on", "off"],
 	list: ["on", "off"],
 	enum: ["in", "notIn"],
@@ -19270,7 +19301,7 @@ var vM = (e, t, n, r) => Mp(e)?.params?.[t]?.options?.[String(n)] ?? r ?? String
 	],
 	text: ["==", "!="]
 };
-function bM(e, t) {
+function xM(e, t) {
 	if (t === "keyword") return {
 		kind: "keyword",
 		target: "input",
@@ -19282,8 +19313,8 @@ function bM(e, t) {
 		source: ""
 	};
 	if (t === "module" || t === "param" || t === "flag") {
-		let n = String(gM(e, t)[0]?.value ?? "");
-		return xM(e, {
+		let n = String(_M(e, t)[0]?.value ?? "");
+		return SM(e, {
 			kind: "var",
 			path: "",
 			op: "on"
@@ -19293,15 +19324,15 @@ function bM(e, t) {
 			flag: "flags"
 		}[t]}.${n}`);
 	}
-	return xM(e, {
+	return SM(e, {
 		kind: "var",
 		path: "",
 		op: "on"
 	}, t);
 }
-function xM(e, t, n) {
-	let r = _M(e, n);
-	return t.path && _M(e, t.path).kind === r.kind && yM[r.kind].includes(t.op) && r.kind !== "enum" ? {
+function SM(e, t, n) {
+	let r = vM(e, n);
+	return t.path && vM(e, t.path).kind === r.kind && bM[r.kind].includes(t.op) && r.kind !== "enum" ? {
 		...t,
 		path: n
 	} : r.kind === "bool" || r.kind === "list" ? {
@@ -19325,35 +19356,35 @@ function xM(e, t, n) {
 		value: ""
 	};
 }
-function SM(e, t, n = "") {
+function CM(e, t, n = "") {
 	return e === "bool" ? Y(n.startsWith("modules.") ? `um.op.module.${t}` : `um.op.${t}`) : e === "list" ? Y(`um.op.list.${t}`) : e === "enum" ? Y(`um.op.${t}`) : t === "==" ? "=" : t === "!=" ? "≠" : t === ">=" ? "≥" : t === "<=" ? "≤" : t;
 }
-var CM = (e, t) => {
+var wM = (e, t) => {
 	let n = (t) => e.options?.find((e) => String(e.value) === String(t))?.label ?? String(t);
 	return Array.isArray(t) ? t.map(n).join(Y("um.or")) : t === void 0 ? "" : n(t);
 };
-function wM(e, t) {
+function TM(e, t) {
 	if (t.kind === "expr") return t.source;
 	if (t.kind === "keyword") return `${t.target === "input" ? Y("um.kw.input") : Y("um.kw.recentN", { n: t.depth ?? 3 })} ${Y(`um.kw.${t.op}`)} ${t.words.join(Y("um.or"))}`;
-	let n = _M(e, t.path);
+	let n = vM(e, t.path);
 	return n.kind === "bool" || n.kind === "list" ? Y("um.boolDesc", {
 		label: n.label,
-		value: SM(n.kind, t.op, t.path)
-	}) : `${n.label} ${SM(n.kind, t.op)} ${CM(n, t.value)}`;
+		value: CM(n.kind, t.op, t.path)
+	}) : `${n.label} ${CM(n.kind, t.op)} ${wM(n, t.value)}`;
 }
-function TM(e, t) {
+function EM(e, t) {
 	let n = t.rules.filter(cf);
-	return n.length ? n.map((t) => wM(e, t)).join(t.match === "any" ? `\n${Y("um.match.anyJoin")} ` : `\n${Y("um.match.allJoin")} `) : Y("um.always");
+	return n.length ? n.map((t) => TM(e, t)).join(t.match === "any" ? `\n${Y("um.match.anyJoin")} ` : `\n${Y("um.match.allJoin")} `) : Y("um.always");
 }
 //#endregion
 //#region src/ui/panel/user-modules/UserModulesSection.vue?vue&type=script&setup=true&lang.ts
-var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small muted" }, kM = { class: "um-choice-text" }, AM = { class: "xs muted" }, jM = ["data-template", "onClick"], MM = { class: "um-choice-text" }, NM = {
+var DM = ["aria-label"], OM = { class: "um-picker-head" }, kM = { class: "small muted" }, AM = { class: "um-choice-text" }, jM = { class: "xs muted" }, MM = ["data-template", "onClick"], NM = { class: "um-choice-text" }, PM = {
 	key: 0,
 	class: "xs muted um-choice-desc"
-}, PM = ["data-id"], FM = ["aria-label", "onPointerdown"], IM = ["onClick"], LM = { class: "um-row-name ellipsis" }, RM = { class: "um-row-meta xs muted ellipsis" }, zM = {
+}, FM = ["data-id"], IM = ["aria-label", "onPointerdown"], LM = ["onClick"], RM = { class: "um-row-name ellipsis" }, zM = { class: "um-row-meta xs muted ellipsis" }, BM = {
 	key: 3,
 	class: "faint small"
-}, BM = /* @__PURE__ */ F({
+}, VM = /* @__PURE__ */ F({
 	__name: "UserModulesSection",
 	props: { preset: {} },
 	emits: ["open"],
@@ -19417,14 +19448,14 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 		let re = () => {
 			te.value = null;
 		};
-		return (t, n) => (R(), B(xk, {
+		return (t, n) => (R(), B(Sk, {
 			title: M(Y)("um.title"),
 			help: M(Y)("um.help")
 		}, {
 			actions: N(() => [
 				a.value ? (R(), B(Q, {
 					key: 0,
-					icon: M(EO),
+					icon: M(DO),
 					label: M(Y)("um.import"),
 					small: "",
 					align: "end",
@@ -19440,7 +19471,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				}, null, 8, ["icon", "label"])) : W("", !0),
 				a.value && i.value.length ? (R(), B(Q, {
 					key: 2,
-					icon: M(sO),
+					icon: M(cO),
 					label: M(Y)("um.new"),
 					active: m.value,
 					small: "",
@@ -19462,8 +19493,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					"aria-label": M(Y)("um.startFrom"),
 					onKeydown: n[2] ||= _s(hs((e) => m.value = !1, ["stop"]), ["esc"])
 				}, [
-					V("div", DM, [V("span", OM, k(M(Y)("um.startFrom")), 1), H(Q, {
-						icon: M(jO),
+					V("div", OM, [V("span", kM, k(M(Y)("um.startFrom")), 1), H(Q, {
+						icon: M(MO),
 						label: M(Y)("common.cancel"),
 						small: "",
 						align: "end",
@@ -19473,15 +19504,15 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						type: "button",
 						class: "um-choice",
 						onClick: g
-					}, [H(M(FD)), V("span", kM, [V("span", null, k(M(Y)("um.blank")), 1), V("span", AM, k(M(Y)("um.blank.desc")), 1)])]),
+					}, [H(M(FD)), V("span", AM, [V("span", null, k(M(Y)("um.blank")), 1), V("span", jM, k(M(Y)("um.blank.desc")), 1)])]),
 					(R(!0), z(L, null, I(p.value, (e) => (R(), z("button", {
 						key: e.tpl.id,
 						type: "button",
 						class: "um-choice",
 						"data-template": e.tpl.id,
 						onClick: (t) => _(e.tpl)
-					}, [H(M(qD)), V("span", MM, [V("span", null, k(e.body.name), 1), e.body.description ? (R(), z("span", NM, k(e.body.description), 1)) : W("", !0)])], 8, jM))), 128))
-				], 40, EM)) : W("", !0),
+					}, [H(M(JD)), V("span", NM, [V("span", null, k(e.body.name), 1), e.body.description ? (R(), z("span", PM, k(e.body.description), 1)) : W("", !0)])], 8, MM))), 128))
+				], 40, DM)) : W("", !0),
 				i.value.length ? (R(), z("div", {
 					key: 1,
 					ref_key: "listEl",
@@ -19503,35 +19534,35 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						onPointermove: ne,
 						onPointerup: re,
 						onPointercancel: re
-					}, [H(M(VD))], 40, FM)) : W("", !0),
+					}, [H(M(VD))], 40, IM)) : W("", !0),
 					V("button", {
 						type: "button",
 						class: "um-open",
 						onClick: (e) => r("open", t.id)
-					}, [V("span", LM, k(t.name || M(Y)("um.untitled")), 1), V("span", RM, k(c(t) || M(Y)("um.noEntries")), 1)], 8, IM),
-					l(t).length ? (R(), B(NO, {
+					}, [V("span", RM, k(t.name || M(Y)("um.untitled")), 1), V("span", zM, k(c(t) || M(Y)("um.noEntries")), 1)], 8, LM),
+					l(t).length ? (R(), B(PO, {
 						key: 1,
 						text: u(t),
 						align: "end"
 					}, {
-						default: N(() => [H(M(wO), {
+						default: N(() => [H(M(TO), {
 							class: "text-warning um-flag",
 							tabindex: "0"
 						})]),
 						_: 1
 					}, 8, ["text"])) : W("", !0),
-					d(t) ? (R(), B(NO, {
+					d(t) ? (R(), B(PO, {
 						key: 2,
-						text: M(TM)(e.preset, t.trigger),
+						text: M(EM)(e.preset, t.trigger),
 						align: "end"
 					}, {
-						default: N(() => [H(M(MO), {
+						default: N(() => [H(M(NO), {
 							class: "um-flag um-zap",
 							tabindex: "0"
 						})]),
 						_: 1
 					}, 8, ["text"])) : W("", !0),
-					H($A, {
+					H(ej, {
 						"model-value": t.enabled,
 						label: t.name,
 						"onUpdate:modelValue": (e) => f(t, e)
@@ -19540,12 +19571,12 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						"label",
 						"onUpdate:modelValue"
 					])
-				], 10, PM))), 128))], 512)) : a.value && !m.value ? (R(), z("button", {
+				], 10, FM))), 128))], 512)) : a.value && !m.value ? (R(), z("button", {
 					key: 2,
 					type: "button",
 					class: "um-new",
 					onClick: v
-				}, [H(M(sO)), U(k(M(Y)("um.new")), 1)])) : a.value ? W("", !0) : (R(), z("div", zM, k(M(Y)("um.noPoints")), 1)),
+				}, [H(M(cO)), U(k(M(Y)("um.new")), 1)])) : a.value ? W("", !0) : (R(), z("div", BM, k(M(Y)("um.noPoints")), 1)),
 				V("input", {
 					ref_key: "fileInput",
 					ref: y,
@@ -19558,7 +19589,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			_: 1
 		}, 8, ["title", "help"]));
 	}
-}), VM = ["title"], HM = ["aria-label", "onClick"], UM = ["placeholder"], WM = /* @__PURE__ */ F({
+}), HM = ["title"], UM = ["aria-label", "onClick"], WM = ["placeholder"], GM = /* @__PURE__ */ F({
 	__name: "ChipsInput",
 	props: /*@__PURE__*/ ui({
 		placeholder: {},
@@ -19601,12 +19632,12 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 		}, [V("span", {
 			class: "ellipsis",
 			title: t
-		}, k(t), 9, VM), V("button", {
+		}, k(t), 9, HM), V("button", {
 			type: "button",
 			class: "chip-x",
 			"aria-label": e.removeLabel,
 			onClick: hs((e) => c(n), ["stop"])
-		}, [H(M(jO))], 8, HM)], 2))), 128)), P(V("input", {
+		}, [H(M(MO))], 8, UM)], 2))), 128)), P(V("input", {
 			ref_key: "input",
 			ref: i,
 			"onUpdate:modelValue": l[0] ||= (e) => r.value = e,
@@ -19615,30 +19646,30 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			onKeydown: o,
 			onBlur: l[1] ||= (e) => a(),
 			onPaste: s
-		}, null, 42, UM), [[as, r.value]])]));
+		}, null, 42, WM), [[as, r.value]])]));
 	}
-}), GM = { class: "rule" }, KM = { class: "rule-head" }, qM = ["value", "aria-label"], JM = ["label"], YM = ["value"], XM = ["value"], ZM = ["value"], QM = ["value"], $M = ["value"], eN = {
+}), KM = { class: "rule" }, qM = { class: "rule-head" }, JM = ["value", "aria-label"], YM = ["label"], XM = ["value"], ZM = ["value"], QM = ["value"], $M = ["value"], eN = ["value"], tN = {
 	key: 1,
 	class: "grow"
-}, tN = {
+}, nN = {
 	key: 0,
 	class: "rule-body"
-}, nN = { class: "row wrap" }, rN = {
+}, rN = { class: "row wrap" }, iN = {
 	key: 0,
 	class: "unit small muted"
-}, iN = ["value"], aN = ["value"], oN = { value: "any" }, sN = { value: "none" }, cN = { class: "row kw-words" }, lN = {
+}, aN = ["value"], oN = ["value"], sN = { value: "any" }, cN = { value: "none" }, lN = { class: "row kw-words" }, uN = {
 	key: 1,
 	class: "rule-body"
-}, uN = ["value"], dN = {
+}, dN = ["value"], fN = {
 	key: 2,
 	class: "rule-body"
-}, fN = ["value"], pN = ["value"], mN = { class: "row wrap option-chips" }, hN = ["aria-pressed", "onClick"], gN = {
+}, pN = ["value"], mN = ["value"], hN = { class: "row wrap option-chips" }, gN = ["aria-pressed", "onClick"], _N = {
 	key: 2,
 	class: "row"
-}, _N = ["value"], vN = ["value"], yN = ["value"], bN = ["list", "value"], xN = ["value"], SN = {
+}, vN = ["value"], yN = ["value"], bN = ["value"], xN = ["list", "value"], SN = ["value"], CN = {
 	key: 3,
 	class: "rule-error xs"
-}, CN = /* @__PURE__ */ F({
+}, wN = /* @__PURE__ */ F({
 	__name: "RuleRow",
 	props: /*@__PURE__*/ ui({ preset: {} }, {
 		modelValue: { required: !0 },
@@ -19646,13 +19677,13 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 	}),
 	emits: /*@__PURE__*/ ui(["remove"], ["update:modelValue"]),
 	setup(e) {
-		let t = e, n = hi(e, "modelValue"), r = G(() => mM(t.preset)), i = G(() => hM(n.value)), a = G(() => gM(t.preset, i.value)), o = G(() => n.value.kind === "var" ? n.value.path.split(".").slice(1).join(".") : ""), s = G(() => n.value.kind === "var" ? _M(t.preset, n.value.path) : null), c = G(() => mf(n.value)), l = `ap-um-${Math.random().toString(36).slice(2, 8)}`;
+		let t = e, n = hi(e, "modelValue"), r = G(() => hM(t.preset)), i = G(() => gM(n.value)), a = G(() => _M(t.preset, i.value)), o = G(() => n.value.kind === "var" ? n.value.path.split(".").slice(1).join(".") : ""), s = G(() => n.value.kind === "var" ? vM(t.preset, n.value.path) : null), c = G(() => mf(n.value)), l = `ap-um-${Math.random().toString(36).slice(2, 8)}`;
 		function u(e) {
-			e !== i.value && (n.value = bM(t.preset, e));
+			e !== i.value && (n.value = xM(t.preset, e));
 		}
 		function d(e) {
 			let r = n.value, i = r.path.split(".")[0];
-			n.value = xM(t.preset, r, `${i}.${e}`);
+			n.value = SM(t.preset, r, `${i}.${e}`);
 		}
 		let f = (e) => {
 			n.value = {
@@ -19672,12 +19703,12 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			let t = n.value.value, r = Array.isArray(t) ? [...t] : [], i = r.findIndex((t) => String(t) === String(e));
 			i >= 0 ? r.splice(i, 1) : r.push(e), f({ value: r });
 		}
-		let g = G(() => s.value?.kind === "list" ? "list" : "bool"), _ = G(() => yM[g.value].map((e) => ({
+		let g = G(() => s.value?.kind === "list" ? "list" : "bool"), _ = G(() => bM[g.value].map((e) => ({
 			value: e,
-			label: SM(g.value, e, n.value.path)
-		}))), v = G(() => (s.value ? yM[s.value.kind] : []).map((e) => ({
+			label: CM(g.value, e, n.value.path)
+		}))), v = G(() => (s.value ? bM[s.value.kind] : []).map((e) => ({
 			value: e,
-			label: SM(s.value.kind, e)
+			label: CM(s.value.kind, e)
 		}))), y = G({
 			get: () => n.value.target,
 			set: (e) => p(e === "recent" ? {
@@ -19694,8 +19725,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			value: "recent",
 			label: Y("um.kw.recent")
 		}]);
-		return (e, t) => (R(), z("div", GM, [
-			V("div", KM, [
+		return (e, t) => (R(), z("div", KM, [
+			V("div", qM, [
 				V("select", {
 					class: "input bare rule-subject",
 					value: i.value,
@@ -19707,10 +19738,10 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				}, [(R(!0), z(L, null, I(e.subjects, (e) => (R(), z("option", {
 					key: e.id,
 					value: e.id
-				}, k(e.label), 9, YM))), 128))], 8, JM))), 128)), n.value.kind === "var" && !r.value.some((e) => e.subjects.some((e) => e.id === i.value)) ? (R(), z("option", {
+				}, k(e.label), 9, XM))), 128))], 8, YM))), 128)), n.value.kind === "var" && !r.value.some((e) => e.subjects.some((e) => e.id === i.value)) ? (R(), z("option", {
 					key: 0,
 					value: i.value
-				}, k(n.value.path), 9, XM)) : W("", !0)], 40, qM),
+				}, k(n.value.path), 9, ZM)) : W("", !0)], 40, JM),
 				a.value.length ? (R(), z("select", {
 					key: 0,
 					class: "input bare rule-target grow",
@@ -19719,40 +19750,40 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				}, [(R(!0), z(L, null, I(a.value, (e) => (R(), z("option", {
 					key: String(e.value),
 					value: e.value
-				}, k(e.label), 9, QM))), 128)), a.value.some((e) => String(e.value) === o.value) ? W("", !0) : (R(), z("option", {
+				}, k(e.label), 9, $M))), 128)), a.value.some((e) => String(e.value) === o.value) ? W("", !0) : (R(), z("option", {
 					key: 0,
 					value: o.value,
 					disabled: ""
-				}, k(o.value), 9, $M))], 40, ZM)) : (R(), z("span", eN)),
+				}, k(o.value), 9, eN))], 40, QM)) : (R(), z("span", tN)),
 				H(Q, {
-					icon: M(jO),
+					icon: M(MO),
 					label: M(Y)("um.removeRule"),
 					small: "",
 					align: "end",
 					onClick: t[2] ||= (t) => e.$emit("remove")
 				}, null, 8, ["icon", "label"])
 			]),
-			n.value.kind === "keyword" ? (R(), z("div", tN, [V("div", nN, [
-				H(jj, {
+			n.value.kind === "keyword" ? (R(), z("div", nN, [V("div", rN, [
+				H(Mj, {
 					modelValue: y.value,
 					"onUpdate:modelValue": t[3] ||= (e) => y.value = e,
 					class: "rule-scope",
 					options: b.value
 				}, null, 8, ["modelValue", "options"]),
-				n.value.target === "recent" ? (R(), z("label", rN, [V("input", {
+				n.value.target === "recent" ? (R(), z("label", iN, [V("input", {
 					class: "input depth",
 					type: "number",
 					min: "1",
 					max: "50",
 					value: n.value.depth ?? M(3),
 					onChange: t[4] ||= (e) => p({ depth: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })
-				}, null, 40, iN), U(" " + k(M(Y)("um.kw.messages")), 1)])) : W("", !0),
+				}, null, 40, aN), U(" " + k(M(Y)("um.kw.messages")), 1)])) : W("", !0),
 				V("select", {
 					class: "input bare rule-op",
 					value: n.value.op,
 					onChange: t[5] ||= (e) => p({ op: e.target.value })
-				}, [V("option", oN, k(M(Y)("um.kw.any")), 1), V("option", sN, k(M(Y)("um.kw.none")), 1)], 40, aN)
-			]), V("div", cN, [H(WM, {
+				}, [V("option", sN, k(M(Y)("um.kw.any")), 1), V("option", cN, k(M(Y)("um.kw.none")), 1)], 40, oN)
+			]), V("div", lN, [H(GM, {
 				class: "grow",
 				"model-value": n.value.words,
 				literal: n.value.regex,
@@ -19767,7 +19798,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				"remove-label",
 				"placeholder"
 			]), H(Q, {
-				icon: M(dO),
+				icon: M(fO),
 				label: M(Y)("um.kw.regex"),
 				active: n.value.regex,
 				align: "end",
@@ -19776,7 +19807,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				"icon",
 				"label",
 				"active"
-			])])])) : n.value.kind === "expr" ? (R(), z("div", lN, [V("input", {
+			])])])) : n.value.kind === "expr" ? (R(), z("div", uN, [V("input", {
 				class: "input mono",
 				value: n.value.source,
 				spellcheck: "false",
@@ -19785,7 +19816,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					kind: "expr",
 					source: e.target.value
 				}
-			}, null, 40, uN)])) : s.value ? (R(), z("div", dN, [s.value.kind === "bool" || s.value.kind === "list" ? (R(), B(jj, {
+			}, null, 40, dN)])) : s.value ? (R(), z("div", fN, [s.value.kind === "bool" || s.value.kind === "list" ? (R(), B(Mj, {
 				key: 0,
 				"model-value": n.value.op,
 				options: _.value,
@@ -19797,47 +19828,47 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			}, [(R(!0), z(L, null, I(v.value, (e) => (R(), z("option", {
 				key: e.value,
 				value: e.value
-			}, k(e.label), 9, pN))), 128))], 40, fN), V("div", mN, [(R(!0), z(L, null, I(s.value.options, (e) => (R(), z("button", {
+			}, k(e.label), 9, mN))), 128))], 40, pN), V("div", hN, [(R(!0), z(L, null, I(s.value.options, (e) => (R(), z("button", {
 				key: String(e.value),
 				type: "button",
 				class: O(["chip", { on: m.value.includes(String(e.value)) }]),
 				"aria-pressed": m.value.includes(String(e.value)),
 				onClick: (t) => h(e.value)
-			}, k(e.label), 11, hN))), 128))])], 64)) : (R(), z("div", gN, [V("select", {
+			}, k(e.label), 11, gN))), 128))])], 64)) : (R(), z("div", _N, [V("select", {
 				class: "input rule-cmp",
 				value: n.value.op,
 				onChange: t[11] ||= (e) => f({ op: e.target.value })
 			}, [(R(!0), z(L, null, I(v.value, (e) => (R(), z("option", {
 				key: e.value,
 				value: e.value
-			}, k(e.label), 9, vN))), 128))], 40, _N), s.value.kind === "number" ? (R(), z("input", {
+			}, k(e.label), 9, yN))), 128))], 40, vN), s.value.kind === "number" ? (R(), z("input", {
 				key: 0,
 				class: "input grow",
 				type: "number",
 				value: n.value.value,
 				onChange: t[12] ||= (e) => f({ value: Number(e.target.value) })
-			}, null, 40, yN)) : (R(), z(L, { key: 1 }, [V("input", {
+			}, null, 40, bN)) : (R(), z(L, { key: 1 }, [V("input", {
 				class: "input grow",
 				list: s.value.suggestions?.length ? l : void 0,
 				value: n.value.value,
 				onInput: t[13] ||= (e) => f({ value: e.target.value })
-			}, null, 40, bN), s.value.suggestions?.length ? (R(), z("datalist", {
+			}, null, 40, xN), s.value.suggestions?.length ? (R(), z("datalist", {
 				key: 0,
 				id: l
 			}, [(R(!0), z(L, null, I(s.value.suggestions, (e) => (R(), z("option", {
 				key: e,
 				value: e
-			}, null, 8, xN))), 128))])) : W("", !0)], 64))]))])) : W("", !0),
-			c.value ? (R(), z("div", SN, k(c.value), 1)) : W("", !0)
+			}, null, 8, SN))), 128))])) : W("", !0)], 64))]))])) : W("", !0),
+			c.value ? (R(), z("div", CN, k(c.value), 1)) : W("", !0)
 		]));
 	}
-}), wN = { class: "trigger" }, TN = {
+}), TN = { class: "trigger" }, EN = {
 	key: 1,
 	class: "always faint small"
-}, EN = {
+}, DN = {
 	key: 0,
 	class: "rule-join xs faint"
-}, DN = { class: "btn ghost add picker" }, ON = ["aria-label"], kN = ["label"], AN = ["value"], jN = /* @__PURE__ */ F({
+}, ON = { class: "btn ghost add picker" }, kN = ["aria-label"], AN = ["label"], jN = ["value"], MN = /* @__PURE__ */ F({
 	__name: "TriggerEditor",
 	props: /*@__PURE__*/ ui({ preset: {} }, {
 		modelValue: { required: !0 },
@@ -19845,7 +19876,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 	}),
 	emits: ["update:modelValue"],
 	setup(e) {
-		let t = e, n = hi(e, "modelValue"), r = G(() => mM(t.preset)), i = /* @__PURE__ */ j(null), a = G(() => [{
+		let t = e, n = hi(e, "modelValue"), r = G(() => hM(t.preset)), i = /* @__PURE__ */ j(null), a = G(() => [{
 			value: "all",
 			label: Y("um.match.all")
 		}, {
@@ -19853,22 +19884,22 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			label: Y("um.match.any")
 		}]);
 		function o(e) {
-			e && (n.value.rules.push(bM(t.preset, e)), i.value && (i.value.value = ""));
+			e && (n.value.rules.push(xM(t.preset, e)), i.value && (i.value.value = ""));
 		}
 		let s = (e, t) => {
 			n.value.rules.splice(e, 1, t);
 		}, c = (e) => {
 			n.value.rules.splice(e, 1);
 		};
-		return (t, l) => (R(), z("div", wN, [
-			n.value.rules.length > 1 ? (R(), B(jj, {
+		return (t, l) => (R(), z("div", TN, [
+			n.value.rules.length > 1 ? (R(), B(Mj, {
 				key: 0,
 				modelValue: n.value.match,
 				"onUpdate:modelValue": l[0] ||= (e) => n.value.match = e,
 				options: a.value
 			}, null, 8, ["modelValue", "options"])) : W("", !0),
-			n.value.rules.length ? W("", !0) : (R(), z("div", TN, k(M(Y)("um.always")), 1)),
-			(R(!0), z(L, null, I(n.value.rules, (t, r) => (R(), z(L, { key: r }, [r > 0 ? (R(), z("div", EN, k(n.value.match === "any" ? M(Y)("um.match.anyJoin") : M(Y)("um.match.allJoin")), 1)) : W("", !0), H(CN, {
+			n.value.rules.length ? W("", !0) : (R(), z("div", EN, k(M(Y)("um.always")), 1)),
+			(R(!0), z(L, null, I(n.value.rules, (t, r) => (R(), z(L, { key: r }, [r > 0 ? (R(), z("div", DN, k(n.value.match === "any" ? M(Y)("um.match.anyJoin") : M(Y)("um.match.allJoin")), 1)) : W("", !0), H(wN, {
 				"model-value": t,
 				preset: e.preset,
 				"onUpdate:modelValue": (e) => s(r, e),
@@ -19879,8 +19910,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				"onUpdate:modelValue",
 				"onRemove"
 			])], 64))), 128)),
-			V("label", DN, [
-				H(M(sO)),
+			V("label", ON, [
+				H(M(cO)),
 				U(k(M(Y)("um.addRule")) + " ", 1),
 				V("select", {
 					ref_key: "picker",
@@ -19898,27 +19929,27 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				}, [(R(!0), z(L, null, I(e.subjects, (e) => (R(), z("option", {
 					key: e.id,
 					value: e.id
-				}, k(e.label), 9, AN))), 128))], 8, kN))), 128))], 40, ON)
+				}, k(e.label), 9, jN))), 128))], 8, AN))), 128))], 40, kN)
 			])
 		]));
 	}
-}), MN = { class: "um-entry-head" }, NN = { class: "um-var-label grow ellipsis" }, PN = {
+}), NN = { class: "um-entry-head" }, PN = { class: "um-var-label grow ellipsis" }, FN = {
 	key: 0,
 	class: "um-warn xs"
-}, FN = ["placeholder"], IN = [
+}, IN = ["placeholder"], LN = [
 	"value",
 	"placeholder",
 	"onInput"
-], LN = { class: "um-var-pair-head" }, RN = [
+], RN = { class: "um-var-pair-head" }, zN = [
 	"onUpdate:modelValue",
 	"list",
 	"placeholder",
 	"onChange"
-], zN = [
+], BN = [
 	"value",
 	"placeholder",
 	"onInput"
-], BN = ["id"], VN = ["value"], HN = /* @__PURE__ */ F({
+], VN = ["id"], HN = ["value"], UN = /* @__PURE__ */ F({
 	__name: "VarUpdateEditor",
 	props: {
 		preset: {},
@@ -19950,26 +19981,26 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			lost: a.value,
 			off: !M(Qd)(e.update)
 		}]) }, [
-			V("div", MN, [
-				H($A, {
+			V("div", NN, [
+				H(ej, {
 					"model-value": M(Qd)(e.update),
 					label: M(Y)("panel.enabled"),
 					"onUpdate:modelValue": n[0] ||= (t) => M(ef)(e.update, t)
 				}, null, 8, ["model-value", "label"]),
-				V("span", NN, k(o.value), 1),
-				H(vk, {
+				V("span", PN, k(o.value), 1),
+				H(yk, {
 					text: s.value,
 					align: "end"
 				}, null, 8, ["text"]),
 				H(Q, {
-					icon: M(jO),
+					icon: M(MO),
 					label: M(Y)("um.removeEntry"),
 					small: "",
 					align: "end",
 					onClick: n[1] ||= (e) => r("remove")
 				}, null, 8, ["icon", "label"])
 			]),
-			a.value ? (R(), z("div", PN, [H(M(wO)), U(k(M(Y)("um.bv.lost")), 1)])) : W("", !0),
+			a.value ? (R(), z("div", FN, [H(M(TO)), U(k(M(Y)("um.bv.lost")), 1)])) : W("", !0),
 			e.update.type === "string" ? P((R(), z("textarea", {
 				key: 1,
 				"onUpdate:modelValue": n[2] ||= (t) => e.update.text = t,
@@ -19977,11 +20008,11 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				rows: "3",
 				spellcheck: "false",
 				placeholder: M(Y)("um.bv.append")
-			}, null, 8, FN)), [[as, e.update.text]]) : e.update.type === "list" ? (R(!0), z(L, { key: 2 }, I(e.update.items, (t, n) => (R(), z("div", {
+			}, null, 8, IN)), [[as, e.update.text]]) : e.update.type === "list" ? (R(!0), z(L, { key: 2 }, I(e.update.items, (t, n) => (R(), z("div", {
 				key: n,
 				class: O(["um-var-row", { off: !M(Qd)(t) }])
 			}, [
-				H($A, {
+				H(ej, {
 					"model-value": M(Qd)(t),
 					label: M(Y)("panel.enabled"),
 					small: "",
@@ -19998,9 +20029,9 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					spellcheck: "false",
 					placeholder: M(Y)("um.bv.item"),
 					onInput: (e) => d(n, e.target.value, M(Qd)(t))
-				}, null, 40, IN),
+				}, null, 40, LN),
 				H(Q, {
-					icon: M(jO),
+					icon: M(MO),
 					label: M(Y)("um.removeEntry"),
 					small: "",
 					align: "end",
@@ -20013,8 +20044,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			], 2))), 128)) : (R(), z(L, { key: 3 }, [(R(!0), z(L, null, I(e.update.items, (t, n) => (R(), z("div", {
 				key: n,
 				class: O(["um-var-pair", { off: !M(Qd)(t) }])
-			}, [V("div", LN, [
-				H($A, {
+			}, [V("div", RN, [
+				H(ej, {
 					"model-value": M(Qd)(t),
 					label: M(Y)("panel.enabled"),
 					small: "",
@@ -20031,9 +20062,9 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					spellcheck: "false",
 					placeholder: M(Y)("um.bv.key"),
 					onChange: (e) => u(t)
-				}, null, 40, RN), [[as, t.key]]),
+				}, null, 40, zN), [[as, t.key]]),
 				H(Q, {
-					icon: M(jO),
+					icon: M(MO),
 					label: M(Y)("um.removeEntry"),
 					small: "",
 					align: "end",
@@ -20050,32 +20081,32 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				spellcheck: "false",
 				placeholder: c.value.has(t.key.trim()) ? M(Y)("um.bv.removes") : M(Y)("um.bv.value"),
 				onInput: (e) => t.value = e.target.value
-			}, null, 40, zN)], 2))), 128)), V("datalist", { id: l.value }, [(R(!0), z(L, null, I(c.value, ([e]) => (R(), z("option", {
+			}, null, 40, BN)], 2))), 128)), V("datalist", { id: l.value }, [(R(!0), z(L, null, I(c.value, ([e]) => (R(), z("option", {
 				key: e,
 				value: e
-			}, null, 8, VN))), 128))], 8, BN)], 64)),
+			}, null, 8, HN))), 128))], 8, VN)], 64)),
 			e.update.type === "string" ? W("", !0) : (R(), z("button", {
 				key: 4,
 				type: "button",
 				class: "btn ghost add um-var-add",
 				onClick: f
-			}, [H(M(sO)), U(k(e.update.type === "dict" ? M(Y)("um.bv.addKey") : M(Y)("um.bv.addItem")), 1)]))
+			}, [H(M(cO)), U(k(e.update.type === "dict" ? M(Y)("um.bv.addKey") : M(Y)("um.bv.addItem")), 1)]))
 		], 2));
 	}
-}), UN = { class: "um-editor" }, WN = { class: "um-head" }, GN = ["placeholder", "aria-label"], KN = { class: "um-entry-head" }, qN = ["onUpdate:modelValue", "aria-label"], JN = ["value"], YN = ["value"], XN = [
+}), WN = { class: "um-editor" }, GN = { class: "um-head" }, KN = ["placeholder", "aria-label"], qN = { class: "um-entry-head" }, JN = ["onUpdate:modelValue", "aria-label"], YN = ["value"], XN = ["value"], ZN = [
 	"value",
 	"aria-label",
 	"onChange"
-], ZN = ["value"], QN = {
+], QN = ["value"], $N = {
 	key: 0,
 	class: "um-warn xs"
-}, $N = ["onUpdate:modelValue", "placeholder"], eP = {
+}, eP = ["onUpdate:modelValue", "placeholder"], tP = {
 	key: 1,
 	class: "rule-error xs pre"
-}, tP = {
+}, nP = {
 	key: 0,
 	class: "btn ghost add picker"
-}, nP = ["aria-label"], rP = ["value"], iP = { class: "um-foot" }, aP = ["title"], oP = ["title"], sP = ["title"], cP = /* @__PURE__ */ F({
+}, rP = ["aria-label"], iP = ["value"], aP = { class: "um-foot" }, oP = ["title"], sP = ["title"], cP = ["title"], lP = /* @__PURE__ */ F({
 	__name: "UserModuleEditor",
 	props: {
 		preset: {},
@@ -20144,8 +20175,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			e && r("open", e.id);
 		}
 		let x = () => QS(`${n.preset.id}.${$S(n.module.name)}.ap-modules.json`, rg(n.preset, [n.module.id]));
-		return (t, n) => (R(), z("div", UN, [
-			V("header", WN, [
+		return (t, n) => (R(), z("div", WN, [
+			V("header", GN, [
 				H(Q, {
 					icon: M(eD),
 					label: M(Y)("um.back"),
@@ -20159,14 +20190,14 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					class: "input bare um-name grow",
 					placeholder: M(Y)("um.untitled"),
 					"aria-label": M(Y)("um.name")
-				}, null, 8, GN), [[as, e.module.name]]),
-				H($A, {
+				}, null, 8, KN), [[as, e.module.name]]),
+				H(ej, {
 					modelValue: e.module.enabled,
 					"onUpdate:modelValue": n[2] ||= (t) => e.module.enabled = t,
 					label: M(Y)("panel.enabled")
 				}, null, 8, ["modelValue", "label"])
 			]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("um.content"),
 				help: M(Y)("um.content.help")
 			}, {
@@ -20177,8 +20208,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						off: !M(Qd)(t)
 					}])
 				}, [
-					V("div", KN, [
-						H($A, {
+					V("div", qN, [
+						H(ej, {
 							"model-value": M(Qd)(t),
 							label: M(Y)("panel.enabled"),
 							"onUpdate:modelValue": (e) => M(ef)(t, e)
@@ -20194,12 +20225,12 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						}, [(R(!0), z(L, null, I(a.value, (e) => (R(), z("option", {
 							key: e.id,
 							value: e.id
-						}, k(e.label), 9, JN))), 128)), s(t) ? (R(), z("option", {
+						}, k(e.label), 9, YN))), 128)), s(t) ? (R(), z("option", {
 							key: 0,
 							value: t.point,
 							disabled: ""
-						}, k(M(Y)("um.pointMissing", { id: t.point })), 9, YN)) : W("", !0)], 8, qN), [[cs, t.point]]),
-						H(vk, {
+						}, k(M(Y)("um.pointMissing", { id: t.point })), 9, XN)) : W("", !0)], 8, JN), [[cs, t.point]]),
+						H(yk, {
 							text: o(t)?.description,
 							align: "end"
 						}, null, 8, ["text"]),
@@ -20211,10 +20242,10 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						}, [(R(), z(L, null, I(c, (e) => V("option", {
 							key: e,
 							value: e
-						}, k(M(Y)(`um.role.${e || "merge"}`)), 9, ZN)), 64))], 40, XN),
+						}, k(M(Y)(`um.role.${e || "merge"}`)), 9, QN)), 64))], 40, ZN),
 						e.module.entries.length > 1 || e.module.vars.length ? (R(), B(Q, {
 							key: 0,
-							icon: M(jO),
+							icon: M(MO),
 							label: M(Y)("um.removeEntry"),
 							small: "",
 							align: "end",
@@ -20225,29 +20256,29 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 							"onClick"
 						])) : W("", !0)
 					]),
-					s(t) ? (R(), z("div", QN, [H(M(wO)), U(k(M(Y)("um.pointLost")), 1)])) : W("", !0),
+					s(t) ? (R(), z("div", $N, [H(M(TO)), U(k(M(Y)("um.pointLost")), 1)])) : W("", !0),
 					P(V("textarea", {
 						"onUpdate:modelValue": (e) => t.text = e,
 						class: "input um-text",
 						rows: "4",
 						spellcheck: "false",
 						placeholder: M(Y)("um.text.placeholder")
-					}, null, 8, $N), [[as, t.text]]),
-					u(t).length ? (R(), z("div", eP, k(d(t)), 1)) : W("", !0)
+					}, null, 8, eP), [[as, t.text]]),
+					u(t).length ? (R(), z("div", tP, k(d(t)), 1)) : W("", !0)
 				], 2))), 128)), a.value.length ? (R(), z("button", {
 					key: 0,
 					type: "button",
 					class: "btn ghost add",
 					onClick: f
-				}, [H(M(sO)), U(k(M(Y)("um.addEntry")), 1)])) : W("", !0)]),
+				}, [H(M(cO)), U(k(M(Y)("um.addEntry")), 1)])) : W("", !0)]),
 				_: 1
 			}, 8, ["title", "help"]),
-			m.value.length || e.module.vars.length ? (R(), B(xk, {
+			m.value.length || e.module.vars.length ? (R(), B(Sk, {
 				key: 0,
 				title: M(Y)("um.bv"),
 				help: M(Y)("um.bv.help")
 			}, {
-				default: N(() => [(R(!0), z(L, null, I(e.module.vars, (t, n) => (R(), B(HN, {
+				default: N(() => [(R(!0), z(L, null, I(e.module.vars, (t, n) => (R(), B(UN, {
 					key: t.var,
 					preset: e.preset,
 					update: t,
@@ -20256,8 +20287,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					"preset",
 					"update",
 					"onRemove"
-				]))), 128)), h.value.length ? (R(), z("label", tP, [
-					H(M(sO)),
+				]))), 128)), h.value.length ? (R(), z("label", nP, [
+					H(M(cO)),
 					U(k(M(Y)("um.bv.add")) + " ", 1),
 					V("select", {
 						ref_key: "varPicker",
@@ -20272,54 +20303,54 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					}, null, -1), (R(!0), z(L, null, I(h.value, (e) => (R(), z("option", {
 						key: e.id,
 						value: e.id
-					}, k(e.label), 9, rP))), 128))], 40, nP)
+					}, k(e.label), 9, iP))), 128))], 40, rP)
 				])) : W("", !0)]),
 				_: 1
 			}, 8, ["title", "help"])) : W("", !0),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("um.trigger"),
 				help: M(Y)("um.trigger.help")
 			}, {
-				default: N(() => [H(jN, {
+				default: N(() => [H(MN, {
 					modelValue: e.module.trigger,
 					"onUpdate:modelValue": n[4] ||= (t) => e.module.trigger = t,
 					preset: e.preset
 				}, null, 8, ["modelValue", "preset"])]),
 				_: 1
 			}, 8, ["title", "help"]),
-			V("footer", iP, [
+			V("footer", aP, [
 				V("button", {
 					type: "button",
 					class: "btn ghost",
 					title: M(Y)("um.export"),
 					onClick: x
-				}, [H(M(kD)), V("span", null, k(M(Y)("um.export")), 1)], 8, aP),
+				}, [H(M(kD)), V("span", null, k(M(Y)("um.export")), 1)], 8, oP),
 				V("button", {
 					type: "button",
 					class: "btn ghost",
 					title: M(Y)("um.duplicate"),
 					onClick: b
-				}, [H(M(TD)), V("span", null, k(M(Y)("um.duplicate")), 1)], 8, oP),
+				}, [H(M(TD)), V("span", null, k(M(Y)("um.duplicate")), 1)], 8, sP),
 				n[6] ||= V("span", { class: "grow" }, null, -1),
 				V("button", {
 					type: "button",
 					class: O(["btn ghost danger", { armed: v.value }]),
 					title: M(Y)("common.delete"),
 					onClick: y
-				}, [H(M(CO)), V("span", null, k(v.value ? M(Y)("um.confirmDelete") : M(Y)("common.delete")), 1)], 10, sP)
+				}, [H(M(wO)), V("span", null, k(v.value ? M(Y)("um.confirmDelete") : M(Y)("common.delete")), 1)], 10, cP)
 			])
 		]));
 	}
-}), lP = {
+}), uP = {
 	key: 0,
 	class: "module-row"
-}, uP = { class: "grow" }, dP = { class: "ellipsis" }, fP = ["aria-label"], pP = ["aria-checked", "onClick"], mP = { class: "grow" }, hP = { class: "grow" }, gP = { class: "ellipsis" }, _P = {
+}, dP = { class: "grow" }, fP = { class: "ellipsis" }, pP = ["aria-label"], mP = ["aria-checked", "onClick"], hP = { class: "grow" }, gP = { class: "grow" }, _P = { class: "ellipsis" }, vP = {
 	key: 0,
 	class: "empty"
-}, vP = /* @__PURE__ */ F({
+}, yP = /* @__PURE__ */ F({
 	__name: "ModulesTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Ej(), i = G(() => t.value && n.value ? cd(t.value, n.value) : {}), a = G(() => {
+		let { preset: t, config: n, update: r } = Dj(), i = G(() => t.value && n.value ? cd(t.value, n.value) : {}), a = G(() => {
 			let e = t.value;
 			if (!e) return [];
 			let n = e.modules.filter((e) => e.toggle === "user");
@@ -20377,12 +20408,12 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 		}
 		return gr(() => t.value?.id, () => {
 			h.value = null;
-		}), (e, r) => !M(t) || !M(n) ? (R(), B(Oj, { key: 0 })) : _.value ? (R(), z("div", {
+		}), (e, r) => !M(t) || !M(n) ? (R(), B(kj, { key: 0 })) : _.value ? (R(), z("div", {
 			key: 1,
 			ref_key: "root",
 			ref: g,
 			class: "col tab-col"
-		}, [(R(), B(cP, {
+		}, [(R(), B(lP, {
 			key: _.value.id,
 			preset: M(t),
 			module: _.value,
@@ -20394,19 +20425,19 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			ref: g,
 			class: "col tab-col"
 		}, [
-			H(BM, {
+			H(VM, {
 				preset: M(t),
 				onOpen: b
 			}, null, 8, ["preset"]),
-			(R(!0), z(L, null, I(a.value, (e) => (R(), B(xk, {
+			(R(!0), z(L, null, I(a.value, (e) => (R(), B(Sk, {
 				key: e.id,
 				title: e.label,
 				help: e.help
 			}, ni({
-				default: N(() => [(R(!0), z(L, null, I(e.sets, (t) => (R(), z(L, { key: t.key }, [t.label ? (R(), z("div", lP, [V("span", uP, [V("span", dP, k(t.label), 1), H(vk, {
+				default: N(() => [(R(!0), z(L, null, I(e.sets, (t) => (R(), z(L, { key: t.key }, [t.label ? (R(), z("div", uP, [V("span", dP, [V("span", fP, k(t.label), 1), H(yk, {
 					text: t.help,
 					align: "start"
-				}, null, 8, ["text"])]), t.optional ? (R(), B($A, {
+				}, null, 8, ["text"])]), t.optional ? (R(), B(ej, {
 					key: 0,
 					"model-value": c(t) !== null,
 					label: t.label,
@@ -20429,18 +20460,18 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					onClick: (n) => p(t, e.id)
 				}, [
 					r[0] ||= V("span", { class: "radio" }, null, -1),
-					V("span", mP, k(o(e)), 1),
-					H(vk, {
+					V("span", hP, k(o(e)), 1),
+					H(yk, {
 						text: s(e),
 						align: "end"
 					}, null, 8, ["text"])
-				], 10, pP))), 128))], 10, fP)) : W("", !0)], 64))), 128)), (R(!0), z(L, null, I(e.toggles, (e) => (R(), z("div", {
+				], 10, mP))), 128))], 10, pP)) : W("", !0)], 64))), 128)), (R(!0), z(L, null, I(e.toggles, (e) => (R(), z("div", {
 					key: e.id,
 					class: "module-row"
-				}, [V("span", hP, [V("span", gP, k(o(e)), 1), H(vk, {
+				}, [V("span", gP, [V("span", _P, k(o(e)), 1), H(yk, {
 					text: s(e),
 					align: "start"
-				}, null, 8, ["text"])]), H($A, {
+				}, null, 8, ["text"])]), H(ej, {
 					"model-value": i.value[e.id],
 					label: o(e),
 					"onUpdate:modelValue": (t) => u(e, t)
@@ -20452,7 +20483,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				_: 2
 			}, [e.header ? {
 				name: "actions",
-				fn: N(() => [H($A, {
+				fn: N(() => [H(ej, {
 					"model-value": c(e.header) !== null,
 					label: e.label,
 					"onUpdate:modelValue": (t) => m(e.header, t)
@@ -20463,30 +20494,30 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				])]),
 				key: "0"
 			} : void 0]), 1032, ["title", "help"]))), 128)),
-			a.value.length ? W("", !0) : (R(), z("div", _P, k(M(Y)("modules.none")), 1))
+			a.value.length ? W("", !0) : (R(), z("div", vP, k(M(Y)("modules.none")), 1))
 		], 512));
 	}
-}), yP = ["value", "onChange"], bP = ["value"], xP = {
+}), bP = ["value", "onChange"], xP = ["value"], SP = {
 	key: 2,
 	class: "unit"
-}, SP = [
+}, CP = [
 	"min",
 	"max",
 	"value",
 	"placeholder",
 	"onChange"
-], CP = {
+], wP = {
 	key: 0,
 	class: "small muted"
-}, wP = [
+}, TP = [
 	"list",
 	"value",
 	"placeholder",
 	"onChange"
-], TP = ["id"], EP = ["value"], DP = /* @__PURE__ */ F({
+], EP = ["id"], DP = ["value"], OP = /* @__PURE__ */ F({
 	__name: "WritingTab",
 	setup(e) {
-		let { preset: t, config: n, update: r } = Ej(), i = G(() => {
+		let { preset: t, config: n, update: r } = Dj(), i = G(() => {
 			let e = t.value;
 			return e ? [...new Set(e.params.map((e) => e.group ?? ""))].map((t) => ({
 				id: t,
@@ -20500,11 +20531,11 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 		}), u = (e) => c(e), d = (e, t) => r((n) => {
 			n.params[e.id] = [...t];
 		}), f = (e) => `ap-param-${e.id}`;
-		return (e, r) => !M(t) || !M(n) ? (R(), B(Oj, { key: 0 })) : (R(!0), z(L, { key: 1 }, I(i.value, (e) => (R(), B(xk, {
+		return (e, r) => !M(t) || !M(n) ? (R(), B(kj, { key: 0 })) : (R(!0), z(L, { key: 1 }, I(i.value, (e) => (R(), B(Sk, {
 			key: e.id,
 			title: e.label,
 			help: e.help,
-			icon: M(vO)
+			icon: M(yO)
 		}, {
 			default: N(() => [(R(!0), z(L, null, I(e.params, (e) => (R(), B($, {
 				key: e.id,
@@ -20519,7 +20550,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				}, [(R(!0), z(L, null, I(e.options, (t) => (R(), z("option", {
 					key: String(t.value),
 					value: t.value
-				}, k(s(e, t.value, t.label)), 9, bP))), 128))], 40, yP)) : e.type === "list" ? (R(), B(WM, {
+				}, k(s(e, t.value, t.label)), 9, xP))), 128))], 40, bP)) : e.type === "list" ? (R(), B(GM, {
 					key: 1,
 					literal: "",
 					"model-value": u(e),
@@ -20531,7 +20562,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					"remove-label",
 					"placeholder",
 					"onUpdate:modelValue"
-				])) : e.type === "number" ? (R(), z("div", xP, [V("input", {
+				])) : e.type === "number" ? (R(), z("div", SP, [V("input", {
 					class: "input",
 					type: "number",
 					min: e.min,
@@ -20539,19 +20570,19 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					value: c(e),
 					placeholder: e.unset,
 					onChange: (t) => l(e, t.target.value)
-				}, null, 40, SP), e.unit ? (R(), z("span", CP, k(e.unit), 1)) : W("", !0)])) : (R(), z(L, { key: 3 }, [V("input", {
+				}, null, 40, CP), e.unit ? (R(), z("span", wP, k(e.unit), 1)) : W("", !0)])) : (R(), z(L, { key: 3 }, [V("input", {
 					class: "input",
 					list: e.options?.length ? f(e) : void 0,
 					value: c(e),
 					placeholder: e.unset,
 					onChange: (t) => l(e, t.target.value)
-				}, null, 40, wP), e.options?.length ? (R(), z("datalist", {
+				}, null, 40, TP), e.options?.length ? (R(), z("datalist", {
 					key: 0,
 					id: f(e)
 				}, [(R(!0), z(L, null, I(e.options, (t) => (R(), z("option", {
 					key: String(t.value),
 					value: t.value
-				}, k(s(e, t.value, t.label)), 9, EP))), 128))], 8, TP)) : W("", !0)], 64))]),
+				}, k(s(e, t.value, t.label)), 9, DP))), 128))], 8, EP)) : W("", !0)], 64))]),
 				_: 2
 			}, 1032, ["label", "help"]))), 128))]),
 			_: 2
@@ -20561,22 +20592,22 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			"icon"
 		]))), 128));
 	}
-}), OP = { class: "kv" }, kP = {
+}), kP = { class: "kv" }, AP = {
 	key: 0,
 	class: "kv-row"
-}, AP = { class: "kv-key ellipsis" }, jP = { class: "kv-value pre small" }, MP = {
+}, jP = { class: "kv-key ellipsis" }, MP = { class: "kv-value pre small" }, NP = {
 	key: 0,
 	class: "kv-actions"
-}, NP = {
+}, PP = {
 	key: 1,
 	class: "kv-edit col"
-}, PP = ["placeholder"], FP = ["placeholder"], IP = { class: "row end" }, LP = {
+}, FP = ["placeholder"], IP = ["placeholder"], LP = { class: "row end" }, RP = {
 	key: 0,
 	class: "kv-edit col"
-}, RP = ["placeholder"], zP = ["placeholder"], BP = { class: "row end" }, VP = {
+}, zP = ["placeholder"], BP = ["placeholder"], VP = { class: "row end" }, HP = {
 	key: 1,
 	class: "faint small kv-empty"
-}, HP = /* @__PURE__ */ F({
+}, UP = /* @__PURE__ */ F({
 	__name: "KvEditor",
 	props: {
 		entries: {},
@@ -20594,21 +20625,21 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			let e = a.value.trim();
 			e && (i.value && i.value !== e && r("remove", i.value), r("set", e, o.value), i.value = null);
 		}
-		return (t, n) => (R(), z("div", OP, [
-			(R(!0), z(L, null, I(e.entries, (t, l) => (R(), z(L, { key: l }, [i.value === l ? (R(), z("div", NP, [
+		return (t, n) => (R(), z("div", kP, [
+			(R(!0), z(L, null, I(e.entries, (t, l) => (R(), z(L, { key: l }, [i.value === l ? (R(), z("div", PP, [
 				P(V("input", {
 					"onUpdate:modelValue": n[0] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: e.keyPlaceholder ?? M(Y)("memory.key")
-				}, null, 8, PP), [[as, a.value]]),
+				}, null, 8, FP), [[as, a.value]]),
 				P(V("textarea", {
 					"onUpdate:modelValue": n[1] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: e.valuePlaceholder ?? M(Y)("memory.content")
-				}, null, 8, FP), [[as, o.value]]),
-				V("div", IP, [H(Q, {
-					icon: M(jO),
+				}, null, 8, IP), [[as, o.value]]),
+				V("div", LP, [H(Q, {
+					icon: M(MO),
 					label: M(Y)("common.cancel"),
 					onClick: n[2] ||= (e) => i.value = null
 				}, null, 8, ["icon", "label"]), H(Q, {
@@ -20617,11 +20648,11 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					active: "",
 					onClick: c
 				}, null, 8, ["icon", "label"])])
-			])) : (R(), z("div", kP, [
-				V("div", AP, k(l), 1),
-				V("div", jP, k(t), 1),
-				e.readonly ? W("", !0) : (R(), z("div", MP, [H(Q, {
-					icon: M(oO),
+			])) : (R(), z("div", AP, [
+				V("div", jP, k(l), 1),
+				V("div", MP, k(t), 1),
+				e.readonly ? W("", !0) : (R(), z("div", NP, [H(Q, {
+					icon: M(sO),
 					label: M(Y)("common.edit"),
 					small: "",
 					align: "end",
@@ -20631,7 +20662,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					"label",
 					"onClick"
 				]), H(Q, {
-					icon: M(CO),
+					icon: M(wO),
 					label: M(Y)("common.delete"),
 					small: "",
 					danger: "",
@@ -20643,20 +20674,20 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					"onClick"
 				])]))
 			]))], 64))), 128)),
-			i.value === "" ? (R(), z("div", LP, [
+			i.value === "" ? (R(), z("div", RP, [
 				P(V("input", {
 					"onUpdate:modelValue": n[3] ||= (e) => a.value = e,
 					class: "input",
 					placeholder: e.keyPlaceholder ?? M(Y)("memory.key")
-				}, null, 8, RP), [[as, a.value]]),
+				}, null, 8, zP), [[as, a.value]]),
 				P(V("textarea", {
 					"onUpdate:modelValue": n[4] ||= (e) => o.value = e,
 					class: "input",
 					rows: "3",
 					placeholder: e.valuePlaceholder ?? M(Y)("memory.content")
-				}, null, 8, zP), [[as, o.value]]),
-				V("div", BP, [H(Q, {
-					icon: M(jO),
+				}, null, 8, BP), [[as, o.value]]),
+				V("div", VP, [H(Q, {
+					icon: M(MO),
 					label: M(Y)("common.cancel"),
 					onClick: n[5] ||= (e) => i.value = null
 				}, null, 8, ["icon", "label"]), H(Q, {
@@ -20666,28 +20697,28 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					onClick: c
 				}, null, 8, ["icon", "label"])])
 			])) : W("", !0),
-			!Object.keys(e.entries).length && i.value === null ? (R(), z("div", VP, k(M(Y)("memory.empty")), 1)) : W("", !0),
+			!Object.keys(e.entries).length && i.value === null ? (R(), z("div", HP, k(M(Y)("memory.empty")), 1)) : W("", !0),
 			!e.readonly && i.value === null ? (R(), z("button", {
 				key: 2,
 				type: "button",
 				class: "btn ghost add",
 				onClick: n[6] ||= (e) => s(null)
-			}, [H(M(sO)), U(k(M(Y)("common.add")), 1)])) : W("", !0)
+			}, [H(M(cO)), U(k(M(Y)("common.add")), 1)])) : W("", !0)
 		]));
 	}
-}), UP = {
+}), WP = {
 	key: 1,
 	class: "faint small"
-}, WP = {
+}, GP = {
 	key: 0,
 	class: "badge neutral"
-}, GP = ["placeholder"], KP = {
+}, KP = ["placeholder"], qP = {
 	key: 1,
 	class: "faint small"
-}, qP = /* @__PURE__ */ F({
+}, JP = /* @__PURE__ */ F({
 	__name: "MemoryTab",
 	setup(t) {
-		let { preset: n } = Ej(), r = G(() => n.value ? Mm(n.value) : null), i = G(() => (X.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = () => dE.value ? j_() : void 0, o = G(() => (X.chatRev, i.value ? ym(Infinity, a()) : {})), s = G(() => r.value ? Sm(r.value) : {}), c = G(() => (X.chatRev, i.value ? bm(Infinity, a()) : null));
+		let { preset: n } = Dj(), r = G(() => n.value ? Mm(n.value) : null), i = G(() => (X.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = () => dE.value ? j_() : void 0, o = G(() => (X.chatRev, i.value ? ym(Infinity, a()) : {})), s = G(() => r.value ? Sm(r.value) : {}), c = G(() => (X.chatRev, i.value ? bm(Infinity, a()) : null));
 		async function l(e, t) {
 			await xm({
 				type: "memory.replace",
@@ -20716,31 +20747,31 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				source: "user"
 			}), aS();
 		}
-		return (e, t) => !M(n) || !r.value ? (R(), B(Oj, { key: 0 })) : (R(), z(L, { key: 1 }, [
-			H(xk, {
+		return (e, t) => !M(n) || !r.value ? (R(), B(kj, { key: 0 })) : (R(), z(L, { key: 1 }, [
+			H(Sk, {
 				title: M(Y)("memory.chat"),
-				icon: M(ZD),
+				icon: M(QD),
 				help: M(Y)("memory.chat.hint")
 			}, {
-				default: N(() => [i.value ? (R(), B(HP, {
+				default: N(() => [i.value ? (R(), B(UP, {
 					key: 0,
 					entries: o.value,
 					onSet: l,
 					onRemove: u
-				}, null, 8, ["entries"])) : (R(), z("div", UP, k(M(Y)("memory.noChat")), 1))]),
+				}, null, 8, ["entries"])) : (R(), z("div", WP, k(M(Y)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
 				"icon",
 				"help"
 			]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("memory.global"),
 				icon: M(BD),
 				help: M(Y)("memory.global.hint")
 			}, {
 				actions: N(() => [H(Q, {
-					icon: M(TO),
+					icon: M(EO),
 					label: M(Y)("common.undo"),
 					small: "",
 					align: "end",
@@ -20751,7 +20782,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					"label",
 					"disabled"
 				]), H(Q, {
-					icon: M(lO),
+					icon: M(uO),
 					label: M(Y)("common.redo"),
 					small: "",
 					align: "end",
@@ -20762,7 +20793,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					"label",
 					"disabled"
 				])]),
-				default: N(() => [H(HP, {
+				default: N(() => [H(UP, {
 					entries: s.value,
 					onSet: d,
 					onRemove: f
@@ -20773,12 +20804,12 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				"icon",
 				"help"
 			]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("memory.recap"),
-				icon: M(mO),
+				icon: M(hO),
 				help: M(Y)("memory.recap.hint")
 			}, {
-				actions: N(() => [c.value ? (R(), z("span", WP, "#0–" + k(c.value.coversUpTo), 1)) : W("", !0), i.value ? (R(), B(Q, {
+				actions: N(() => [c.value ? (R(), z("span", GP, "#0–" + k(c.value.coversUpTo), 1)) : W("", !0), i.value ? (R(), B(Q, {
 					key: 1,
 					icon: M(cD),
 					label: M(Y)("common.save"),
@@ -20798,7 +20829,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					class: "input",
 					rows: "6",
 					placeholder: M(Y)("memory.recap.empty")
-				}, null, 8, GP)), [[as, p.value]]) : (R(), z("div", KP, k(M(Y)("memory.noChat")), 1))]),
+				}, null, 8, KP)), [[as, p.value]]) : (R(), z("div", qP, k(M(Y)("memory.noChat")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
@@ -20807,49 +20838,117 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			])
 		], 64));
 	}
-}), JP = { class: "row tight xs muted" }, YP = { class: "row" }, XP = {
+}), YP = /img:[A-Za-z0-9-]+/g, XP = 6e5;
+async function ZP(t, n) {
+	let r = await S(t, {
+		method: "POST",
+		headers: e().getRequestHeaders(),
+		body: JSON.stringify(n)
+	});
+	if (!r.ok) throw Error(`${t}: HTTP ${r.status}`);
+	return r.text();
+}
+var QP = (e, t) => {
+	for (let n of e.matchAll(YP)) t.add(n[0]);
+};
+function $P(e, t) {
+	let n = JSON.parse(e);
+	if (!Array.isArray(n)) throw Error(`${t}: unreadable chat`);
+	return e;
+}
+async function eF(t) {
+	let n = /* @__PURE__ */ new Set();
+	QP(JSON.stringify(e().chat ?? []), n);
+	let r = [], i = JSON.parse(await ZP("/api/characters/all", {}));
+	for (let e of i) {
+		if (!e.avatar) continue;
+		let t = JSON.parse(await ZP("/api/characters/chats", {
+			avatar_url: e.avatar,
+			simple: !0
+		}));
+		if (Array.isArray(t)) for (let i of t) {
+			let t = String(i.file_name ?? "").replace(/\.jsonl$/, "");
+			t && r.push(async () => QP($P(await ZP("/api/chats/get", {
+				ch_name: e.name,
+				file_name: t,
+				avatar_url: e.avatar
+			}), t), n));
+		}
+	}
+	let a = JSON.parse(await ZP("/api/groups/all", {}));
+	for (let e of a) for (let t of e.chats ?? []) r.push(async () => QP($P(await ZP("/api/chats/group/get", { id: t }), t), n));
+	let o = 0;
+	t?.({
+		done: o,
+		total: r.length
+	});
+	for (let e of r) await e(), t?.({
+		done: ++o,
+		total: r.length
+	});
+	return n;
+}
+async function tF(e) {
+	let t = await eF(e), n = (await dx("img:")).length, r = await fx("img:", t, XP);
+	return {
+		removed: r,
+		kept: n - r
+	};
+}
+//#endregion
+//#region src/ui/panel/tabs/DebugTab.vue?vue&type=script&setup=true&lang.ts
+var nF = { class: "row tight xs muted" }, rF = { class: "row" }, iF = {
 	key: 0,
 	class: "xs text-danger"
-}, ZP = { class: "row wrap xs muted" }, QP = { class: "badge neutral" }, $P = {
+}, aF = { class: "row wrap xs muted" }, oF = { class: "badge neutral" }, sF = {
 	key: 0,
 	class: "badge neutral"
-}, eF = { class: "badge neutral" }, tF = {
+}, cF = { class: "badge neutral" }, lF = {
 	key: 1,
 	class: "badge warn"
-}, nF = ["title"], rF = ["title"], iF = {
+}, uF = ["title"], dF = ["title"], fF = {
 	key: 0,
 	class: "row wrap xs muted"
-}, aF = { class: "grow" }, oF = { key: 0 }, sF = ["onClick"], cF = { class: "grow mono" }, lF = { class: "xs muted" }, uF = { class: "row xs muted" }, dF = { class: "badge neutral" }, fF = { class: "pre mono scroll" }, pF = {
+}, pF = { class: "grow" }, mF = { key: 0 }, hF = ["onClick"], gF = { class: "grow mono" }, _F = { class: "xs muted" }, vF = { class: "row xs muted" }, yF = { class: "badge neutral" }, bF = { class: "pre mono scroll" }, xF = {
 	key: 0,
 	class: "xs faint region-msg"
-}, mF = { key: 1 }, hF = ["onClick"], gF = { class: "grow mono" }, _F = { class: "xs muted" }, vF = {
+}, SF = { key: 1 }, CF = ["onClick"], wF = { class: "grow mono" }, TF = { class: "xs muted" }, EF = {
 	key: 0,
 	class: "region-msg"
-}, yF = { class: "pre mono scroll" }, bF = {
+}, DF = { class: "pre mono scroll" }, OF = {
 	key: 0,
 	class: "xs faint"
-}, xF = {
+}, kF = {
 	key: 2,
 	class: "xs text-warning"
-}, SF = {
+}, AF = {
 	key: 1,
 	class: "faint small"
-}, CF = ["onClick"], wF = { class: "mono grow ellipsis" }, TF = {
+}, jF = ["onClick"], MF = { class: "mono grow ellipsis" }, NF = {
 	key: 0,
 	class: "badge warn"
-}, EF = { class: "xs muted" }, DF = { class: "xs muted" }, OF = { class: "row xs muted" }, kF = { class: "grow" }, AF = { class: "mono scroll" }, jF = { class: "row xs muted" }, MF = { class: "grow" }, NF = { class: "mono scroll" }, PF = {
+}, PF = { class: "xs muted" }, FF = { class: "xs muted" }, IF = { class: "row xs muted" }, LF = { class: "grow" }, RF = { class: "mono scroll" }, zF = { class: "row xs muted" }, BF = { class: "grow" }, VF = { class: "mono scroll" }, HF = {
 	key: 0,
 	class: "faint small"
-}, FF = { class: "row xs" }, IF = { class: "badge neutral" }, LF = { class: "muted" }, RF = { class: "mono scroll" }, zF = {
+}, UF = { class: "row xs" }, WF = { class: "badge neutral" }, GF = { class: "muted" }, KF = { class: "mono scroll" }, qF = {
 	key: 0,
 	class: "faint small"
-}, BF = { class: "row xs" }, VF = { class: "badge neutral" }, HF = {
+}, JF = { class: "row" }, YF = ["disabled"], XF = {
+	key: 0,
+	class: "xs muted"
+}, ZF = {
+	key: 1,
+	class: "xs muted"
+}, QF = {
+	key: 2,
+	class: "xs text-danger"
+}, $F = { class: "row xs" }, eI = { class: "badge neutral" }, tI = {
 	key: 0,
 	class: "badge neutral"
-}, UF = { class: "grow muted" }, WF = { class: "small" }, GF = {
+}, nI = { class: "grow muted" }, rI = { class: "small" }, iI = {
 	key: 0,
 	class: "faint small"
-}, KF = { class: "xs faint mono build" }, qF = /* @__PURE__ */ F({
+}, aI = { class: "xs faint mono build" }, oI = /* @__PURE__ */ F({
 	__name: "DebugTab",
 	setup(t) {
 		let n = G(() => og.log.find((e) => e.kind === "assembly")?.data), r = G(() => og.log.find((e) => e.kind === "assembly" && e.data.cache)?.data?.cache ?? void 0), i = /* @__PURE__ */ pn(/* @__PURE__ */ new Set()), a = (e) => i.has(e) ? i.delete(e) : i.add(e), o = /* @__PURE__ */ pn({});
@@ -20914,16 +21013,41 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				});
 			}
 			return t;
-		});
+		}), b = G(() => !!(sS.value?.image || Xb().image.connections.length)), x = /* @__PURE__ */ j({ running: !1 });
+		async function S() {
+			if (!x.value.running && await y(`<p>${v(Y("debug.images.confirm"))}</p>`, Y("common.delete"), Y("common.cancel"))) {
+				x.value = { running: !0 };
+				try {
+					let e = await tF((e) => {
+						x.value = {
+							running: !0,
+							progress: e
+						};
+					});
+					x.value = {
+						running: !1,
+						result: Y("debug.images.done", {
+							removed: e.removed,
+							kept: e.kept
+						})
+					};
+				} catch (e) {
+					x.value = {
+						running: !1,
+						error: Y("debug.images.failed", { error: e instanceof Error ? e.message : String(e) })
+					};
+				}
+			}
+		}
 		return (e, t) => (R(), z(L, null, [
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("debug.dev"),
-				icon: M(hO),
+				icon: M(gO),
 				help: M(Y)("debug.dev.hint")
 			}, {
-				actions: N(() => [V("span", JP, [V("span", { class: O(["dot status-dot", M(cC).status]) }, null, 2), U(k(M(Y)(`debug.dev.${M(cC).status}`)), 1)])]),
+				actions: N(() => [V("span", nF, [V("span", { class: O(["dot status-dot", M(cC).status]) }, null, 2), U(k(M(Y)(`debug.dev.${M(cC).status}`)), 1)])]),
 				default: N(() => [H($, { label: M(Y)("debug.dev.url") }, {
-					default: N(() => [V("div", YP, [P(V("input", {
+					default: N(() => [V("div", rF, [P(V("input", {
 						"onUpdate:modelValue": t[0] ||= (e) => h.value = e,
 						class: "input grow",
 						type: "url",
@@ -20933,47 +21057,47 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						h.value,
 						void 0,
 						{ lazy: !0 }
-					]]), H($A, {
+					]]), H(ej, {
 						modelValue: m.value,
 						"onUpdate:modelValue": t[1] ||= (e) => m.value = e,
 						label: M(Y)("debug.dev")
 					}, null, 8, ["modelValue", "label"])])]),
 					_: 1
-				}, 8, ["label"]), M(cC).error ? (R(), z("span", XP, k(M(cC).error), 1)) : W("", !0)]),
+				}, 8, ["label"]), M(cC).error ? (R(), z("span", iF, k(M(cC).error), 1)) : W("", !0)]),
 				_: 1
 			}, 8, [
 				"title",
 				"icon",
 				"help"
 			]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("debug.assembly"),
 				icon: M(ID),
 				collapsible: ""
 			}, {
 				default: N(() => [n.value ? (R(), z(L, { key: 0 }, [
-					V("div", ZP, [
-						V("span", QP, k(M(Y)(`transport.${n.value.transport}`)), 1),
-						n.value.workflow ? (R(), z("span", $P, k(n.value.workflow), 1)) : W("", !0),
-						V("span", eF, k(n.value.origin), 1),
-						n.value.dryRun ? (R(), z("span", tF, "dry run")) : W("", !0),
+					V("div", aF, [
+						V("span", oF, k(M(Y)(`transport.${n.value.transport}`)), 1),
+						n.value.workflow ? (R(), z("span", sF, k(n.value.workflow), 1)) : W("", !0),
+						V("span", cF, k(n.value.origin), 1),
+						n.value.dryRun ? (R(), z("span", lF, "dry run")) : W("", !0),
 						n.value.input ? (R(), z("span", {
 							key: 2,
 							class: "badge neutral",
 							title: n.value.input.shaped ? `${n.value.input.chars} ch` : void 0
-						}, k(M(Y)(n.value.input.shaped ? `debug.input.${n.value.input.mode}` : "debug.input.none")), 9, nF)) : W("", !0),
+						}, k(M(Y)(n.value.input.shaped ? `debug.input.${n.value.input.mode}` : "debug.input.none")), 9, uF)) : W("", !0),
 						n.value.storyline ? (R(), z("span", {
 							key: 3,
 							class: "badge neutral",
 							title: n.value.storyline.groups.join(" → ") + (n.value.storyline.hidden ? ` · −${n.value.storyline.hidden}` : "")
-						}, k(n.value.storyline.main ? M(Y)("storylines.main") : n.value.storyline.name) + k(n.value.storyline.if ? " · if" : "") + k(n.value.storyline.new ? " · new" : "") + k(n.value.storyline.frozen ? " · frozen" : ""), 9, rF)) : W("", !0),
+						}, k(n.value.storyline.main ? M(Y)("storylines.main") : n.value.storyline.name) + k(n.value.storyline.if ? " · if" : "") + k(n.value.storyline.new ? " · new" : "") + k(n.value.storyline.frozen ? " · frozen" : ""), 9, dF)) : W("", !0),
 						t[3] ||= V("span", { class: "grow" }, null, -1),
 						U(k(u(n.value.at)), 1)
 					]),
-					r.value ? (R(), z("div", iF, [
+					r.value ? (R(), z("div", fF, [
 						V("span", { class: O(["badge", r.value.reason ? "warn" : "neutral"]) }, k(r.value.reason ? M(Y)(`debug.cache.flush.${r.value.reason}`) : M(Y)("debug.cache.kept")), 3),
-						V("span", aF, k(p(r.value)), 1),
-						r.value === n.value.cache ? W("", !0) : (R(), z("span", oF, k(u(r.value.at)), 1))
+						V("span", pF, k(p(r.value)), 1),
+						r.value === n.value.cache ? W("", !0) : (R(), z("span", mF, k(u(r.value.at)), 1))
 					])) : W("", !0),
 					V("div", null, [(R(!0), z(L, null, I(n.value.regions, (e) => (R(), z("div", {
 						key: e.id,
@@ -20983,13 +21107,13 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						onClick: (t) => a(e.id)
 					}, [
 						H(M(dD), { class: O(["faint caret", { open: i.has(e.id) }]) }, null, 8, ["class"]),
-						V("span", cF, k(e.id), 1),
-						V("span", lF, k(e.messages.length) + " · " + k(o[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + k(o[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
-					], 8, sF), i.has(e.id) ? (R(), z(L, { key: 0 }, [(R(!0), z(L, null, I(e.messages, (e, t) => (R(), z("div", {
+						V("span", gF, k(e.id), 1),
+						V("span", _F, k(e.messages.length) + " · " + k(o[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + k(o[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
+					], 8, hF), i.has(e.id) ? (R(), z(L, { key: 0 }, [(R(!0), z(L, null, I(e.messages, (e, t) => (R(), z("div", {
 						key: t,
 						class: "region-msg"
-					}, [V("div", uF, [V("span", dF, k(e.role), 1), U(k(e.chars) + " ch", 1)]), V("div", fF, k(e.content), 1)]))), 128)), e.messages.length ? W("", !0) : (R(), z("div", pF, k(M(Y)("debug.emptyRegion")), 1))], 64)) : W("", !0)]))), 128))]),
-					n.value.vars?.length ? (R(), z("div", mF, [(R(!0), z(L, null, I(n.value.vars, (e) => (R(), z("div", {
+					}, [V("div", vF, [V("span", yF, k(e.role), 1), U(k(e.chars) + " ch", 1)]), V("div", bF, k(e.content), 1)]))), 128)), e.messages.length ? W("", !0) : (R(), z("div", xF, k(M(Y)("debug.emptyRegion")), 1))], 64)) : W("", !0)]))), 128))]),
+					n.value.vars?.length ? (R(), z("div", SF, [(R(!0), z(L, null, I(n.value.vars, (e) => (R(), z("div", {
 						key: e.id,
 						class: "region"
 					}, [V("div", {
@@ -20997,14 +21121,14 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						onClick: (t) => a(`var:${e.id}`)
 					}, [
 						H(M(dD), { class: O(["faint caret", { open: i.has(`var:${e.id}`) }]) }, null, 8, ["class"]),
-						V("span", gF, k(e.id), 1),
-						V("span", _F, k(e.text.length) + " ch", 1)
-					], 8, hF), i.has(`var:${e.id}`) ? (R(), z("div", vF, [V("div", yF, k(e.text), 1), e.text ? W("", !0) : (R(), z("div", bF, k(M(Y)("debug.emptyRegion")), 1))])) : W("", !0)]))), 128))])) : W("", !0),
-					n.value.warnings.length ? (R(), z("div", xF, k(n.value.warnings.join(" · ")), 1)) : W("", !0)
-				], 64)) : (R(), z("div", SF, k(M(Y)("debug.noAssembly")), 1))]),
+						V("span", wF, k(e.id), 1),
+						V("span", TF, k(e.text.length) + " ch", 1)
+					], 8, CF), i.has(`var:${e.id}`) ? (R(), z("div", EF, [V("div", DF, k(e.text), 1), e.text ? W("", !0) : (R(), z("div", OF, k(M(Y)("debug.emptyRegion")), 1))])) : W("", !0)]))), 128))])) : W("", !0),
+					n.value.warnings.length ? (R(), z("div", kF, k(n.value.warnings.join(" · ")), 1)) : W("", !0)
+				], 64)) : (R(), z("div", AF, k(M(Y)("debug.noAssembly")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("debug.requests"),
 				icon: M(CD),
 				collapsible: ""
@@ -21016,12 +21140,12 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 					class: "row small clickable",
 					onClick: (e) => s.value = s.value === t ? null : t
 				}, [
-					V("span", wF, k(e.genId) + " · #" + k(e.step), 1),
-					e.error ? (R(), z("span", TF, k(M(Y)("debug.error")), 1)) : W("", !0),
-					V("span", EF, k(f(e.usage)), 1),
-					V("span", DF, k(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
-				], 8, CF), s.value === t ? (R(), z(L, { key: 0 }, [
-					V("div", OF, [V("span", kF, k(M(Y)("debug.request")), 1), H(Q, {
+					V("span", MF, k(e.genId) + " · #" + k(e.step), 1),
+					e.error ? (R(), z("span", NF, k(M(Y)("debug.error")), 1)) : W("", !0),
+					V("span", PF, k(f(e.usage)), 1),
+					V("span", FF, k(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
+				], 8, jF), s.value === t ? (R(), z(L, { key: 0 }, [
+					V("div", IF, [V("span", LF, k(M(Y)("debug.request")), 1), H(Q, {
 						icon: M(ED),
 						label: M(Y)("common.copy"),
 						small: "",
@@ -21032,8 +21156,8 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						"label",
 						"onClick"
 					])]),
-					V("pre", AF, k(c(e.request)), 1),
-					V("div", jF, [V("span", MF, k(M(Y)("debug.response")), 1), H(Q, {
+					V("pre", RF, k(c(e.request)), 1),
+					V("div", zF, [V("span", BF, k(M(Y)("debug.response")), 1), H(Q, {
 						icon: M(ED),
 						label: M(Y)("common.copy"),
 						small: "",
@@ -21044,18 +21168,18 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 						"label",
 						"onClick"
 					])]),
-					V("pre", NF, k(e.error ?? c(e.response ?? "")), 1)
-				], 64)) : W("", !0)]))), 128)), M(og).requests.length ? W("", !0) : (R(), z("div", PF, k(M(Y)("debug.noRequests")), 1))]),
+					V("pre", VF, k(e.error ?? c(e.response ?? "")), 1)
+				], 64)) : W("", !0)]))), 128)), M(og).requests.length ? W("", !0) : (R(), z("div", HF, k(M(Y)("debug.noRequests")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("debug.log"),
-				icon: M(mO),
+				icon: M(hO),
 				collapsible: "",
 				open: !1
 			}, {
 				actions: N(() => [H(Q, {
-					icon: M(CO),
+					icon: M(wO),
 					label: M(Y)("common.clear"),
 					small: "",
 					align: "end",
@@ -21064,16 +21188,39 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				default: N(() => [(R(!0), z(L, null, I(g.value, (e, n) => (R(), z("div", {
 					key: n,
 					class: "req"
-				}, [V("div", FF, [
-					V("span", IF, k(e.kind), 1),
+				}, [V("div", UF, [
+					V("span", WF, k(e.kind), 1),
 					t[4] ||= V("span", { class: "grow" }, null, -1),
-					V("span", LF, k(u(e.at)), 1)
-				]), V("pre", RF, k(c(e.data)), 1)]))), 128)), g.value.length ? W("", !0) : (R(), z("div", zF, k(M(Y)("debug.noLog")), 1))]),
+					V("span", GF, k(u(e.at)), 1)
+				]), V("pre", KF, k(c(e.data)), 1)]))), 128)), g.value.length ? W("", !0) : (R(), z("div", qF, k(M(Y)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H(xk, {
+			b.value ? (R(), B(Sk, {
+				key: 0,
+				title: M(Y)("debug.images"),
+				icon: M(HD),
+				help: M(Y)("debug.images.hint"),
+				collapsible: "",
+				open: !1
+			}, {
+				default: N(() => [V("div", JF, [V("button", {
+					type: "button",
+					class: "btn",
+					disabled: x.value.running,
+					onClick: S
+				}, [H(M(wO)), U(k(M(Y)("debug.images.clean")), 1)], 8, YF), x.value.running ? (R(), z("span", XF, k(x.value.progress ? M(Y)("debug.images.scanning", {
+					done: x.value.progress.done,
+					total: x.value.progress.total
+				}) : "…"), 1)) : x.value.result ? (R(), z("span", ZF, k(x.value.result), 1)) : x.value.error ? (R(), z("span", QF, k(x.value.error), 1)) : W("", !0)])]),
+				_: 1
+			}, 8, [
+				"title",
+				"icon",
+				"help"
+			])) : W("", !0),
+			H(Sk, {
 				title: M(Y)("debug.annotations"),
-				icon: M(QD),
+				icon: M($D),
 				help: M(Y)("debug.annotations.hint"),
 				collapsible: "",
 				open: !1
@@ -21081,39 +21228,39 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				default: N(() => [(R(!0), z(L, null, I(_.value, (e, t) => (R(), z("div", {
 					key: t,
 					class: "req"
-				}, [V("div", BF, [
-					V("span", VF, "#" + k(e.mesId), 1),
-					e.speech ? (R(), z("span", HF, k(M(Y)("debug.orphanSpeech")), 1)) : W("", !0),
-					V("span", UF, "“" + k(e.quote) + "”", 1)
-				]), V("div", WF, k(e.comment), 1)]))), 128)), _.value.length ? W("", !0) : (R(), z("div", GF, k(M(Y)("debug.noOrphans")), 1))]),
+				}, [V("div", $F, [
+					V("span", eI, "#" + k(e.mesId), 1),
+					e.speech ? (R(), z("span", tI, k(M(Y)("debug.orphanSpeech")), 1)) : W("", !0),
+					V("span", nI, "“" + k(e.quote) + "”", 1)
+				]), V("div", rI, k(e.comment), 1)]))), 128)), _.value.length ? W("", !0) : (R(), z("div", iI, k(M(Y)("debug.noOrphans")), 1))]),
 				_: 1
 			}, 8, [
 				"title",
 				"icon",
 				"help"
 			]),
-			V("div", KF, "Advanced Preset " + k(M("1.11.2")) + " · " + k(M("b1206a0ca5e63a96")), 1)
+			V("div", aI, "Advanced Preset " + k(M("1.11.2")) + " · " + k(M("7b72083d4d445ee8")), 1)
 		], 64));
 	}
-}), JF = {
+}), sI = {
 	key: 1,
 	class: "empty"
-}, YF = { class: "row storylines-head" }, XF = { class: "xs muted grow" }, ZF = ["aria-expanded", "onClick"], QF = { class: "card-title grow ellipsis" }, $F = ["title", "aria-label"], eI = {
+}, cI = { class: "row storylines-head" }, lI = { class: "xs muted grow" }, uI = ["aria-expanded", "onClick"], dI = { class: "card-title grow ellipsis" }, fI = ["title", "aria-label"], pI = {
 	key: 1,
 	class: "badge warn"
-}, tI = { class: "xs faint" }, nI = {
+}, mI = { class: "xs faint" }, hI = {
 	key: 0,
 	class: "card-body col"
-}, rI = ["aria-label"], iI = {
+}, gI = ["aria-label"], _I = {
 	key: 1,
 	class: "faint small"
-}, aI = {
+}, vI = {
 	key: 2,
 	class: "storyline-floors"
-}, oI = ["title", "onClick"], sI = { class: "badge neutral mono" }, cI = { class: "xs muted" }, lI = { class: "grow ellipsis" }, uI = /* @__PURE__ */ F({
+}, yI = ["title", "onClick"], bI = { class: "badge neutral mono" }, xI = { class: "xs muted" }, SI = { class: "grow ellipsis" }, CI = /* @__PURE__ */ F({
 	__name: "StorylinesTab",
 	setup(t) {
-		let { preset: n } = Ej(), r = G(() => (X.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), i = G(() => Object.values(n.value?.structures ?? {}).find((e) => e.kind === "synopsis")?.id), a = G(() => r.value && n.value?.storylines ? _E(i.value) : []), o = /* @__PURE__ */ j(/* @__PURE__ */ new Set()), s = (e) => {
+		let { preset: n } = Dj(), r = G(() => (X.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), i = G(() => Object.values(n.value?.structures ?? {}).find((e) => e.kind === "synopsis")?.id), a = G(() => r.value && n.value?.storylines ? _E(i.value) : []), o = /* @__PURE__ */ j(/* @__PURE__ */ new Set()), s = (e) => {
 			let t = new Set(o.value);
 			t.has(e) ? t.delete(e) : t.add(e), o.value = t;
 		};
@@ -21142,7 +21289,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			if (r === "invalid") return x("warning", Y("storylines.invalidName"), Y("app.name"));
 			r !== "unchanged" && (!e.main && o.value.has(e.key) && (o.value = new Set([...o.value].map((t) => t === e.key ? n : t))), l());
 		}
-		return (e, t) => M(n) ? r.value ? (R(), z(L, { key: 2 }, [V("div", YF, [V("span", XF, k(M(Y)("storylines.count", { n: a.value.length })), 1), H(vk, {
+		return (e, t) => M(n) ? r.value ? (R(), z(L, { key: 2 }, [V("div", cI, [V("span", lI, k(M(Y)("storylines.count", { n: a.value.length })), 1), H(yk, {
 			text: M(Y)("storylines.help"),
 			align: "end"
 		}, null, 8, ["text"])]), (R(!0), z(L, null, I(a.value, (e) => (R(), z("section", {
@@ -21156,29 +21303,29 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 			"aria-expanded": o.value.has(e.key),
 			onClick: (t) => s(e.key)
 		}, [
-			(R(), B($r(e.main ? M(DD) : e.if ? M(bO) : M(RD)), {
+			(R(), B($r(e.main ? M(DD) : e.if ? M(xO) : M(RD)), {
 				class: "section-icon",
 				"aria-hidden": "true"
 			})),
-			V("span", QF, k(c(e)), 1),
+			V("span", dI, k(c(e)), 1),
 			e.current ? (R(), z("span", {
 				key: 0,
 				class: "storyline-dot",
 				title: M(Y)("storylines.current"),
 				"aria-label": M(Y)("storylines.current")
-			}, null, 8, $F)) : W("", !0),
-			e.if ? (R(), z("span", eI, "if")) : W("", !0),
+			}, null, 8, fI)) : W("", !0),
+			e.if ? (R(), z("span", pI, "if")) : W("", !0),
 			e.hidden ? (R(), B(M(jD), {
 				key: 2,
 				class: "storyline-flag",
 				"aria-label": M(Y)("storylines.hidden")
 			}, null, 8, ["aria-label"])) : W("", !0),
-			V("span", tI, k(M(Y)("storylines.floors", { n: e.floors.length })), 1),
+			V("span", mI, k(M(Y)("storylines.floors", { n: e.floors.length })), 1),
 			H(M(lD), {
 				class: O(["chevron", { flipped: o.value.has(e.key) }]),
 				"aria-hidden": "true"
 			}, null, 8, ["class"])
-		], 8, ZF), o.value.has(e.key) ? (R(), z("div", nI, [e.pending ? W("", !0) : (R(), z("div", {
+		], 8, uI), o.value.has(e.key) ? (R(), z("div", hI, [e.pending ? W("", !0) : (R(), z("div", {
 			key: 0,
 			class: O(["storyline-toolbar", { solo: e.main }]),
 			role: "toolbar",
@@ -21186,7 +21333,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 		}, [
 			e.main ? W("", !0) : (R(), z(L, { key: 0 }, [
 				H(Q, {
-					icon: M(bO),
+					icon: M(xO),
 					label: M(Y)("storylines.ifLine.toggle"),
 					pressed: e.if,
 					small: "",
@@ -21215,7 +21362,7 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				}, null, -1)
 			], 64)),
 			H(Q, {
-				icon: M(aO),
+				icon: M(oO),
 				label: e.main && !e.name ? M(Y)("storylines.nameMain") : M(Y)("common.rename"),
 				small: "",
 				onClick: (t) => p(e)
@@ -21235,40 +21382,40 @@ var EM = ["aria-label"], DM = { class: "um-picker-head" }, OM = { class: "small 
 				"label",
 				"onClick"
 			]))
-		], 10, rI)), e.floors.length ? (R(), z("ul", aI, [(R(!0), z(L, null, I(e.floors, (e) => (R(), z("li", {
+		], 10, gI)), e.floors.length ? (R(), z("ul", vI, [(R(!0), z(L, null, I(e.floors, (e) => (R(), z("li", {
 			key: e.index,
 			class: "row tight small clickable",
 			title: M(Y)("storylines.jump"),
 			onClick: (t) => M(vE)(e.index)
 		}, [
-			V("span", sI, "#" + k(e.index), 1),
-			V("span", cI, k(e.user ? M(Y)("storylines.user") : M(Y)("storylines.narrator")), 1),
-			V("span", lI, k(e.title || "…"), 1)
-		], 8, oI))), 128))])) : (R(), z("div", iI, k(M(Y)("storylines.empty")), 1))])) : W("", !0)], 2))), 128))], 64)) : (R(), z("div", JF, [H(M(RD), { "aria-hidden": "true" }), V("span", null, k(M(Y)("memory.noChat")), 1)])) : (R(), B(Oj, { key: 0 }));
+			V("span", bI, "#" + k(e.index), 1),
+			V("span", xI, k(e.user ? M(Y)("storylines.user") : M(Y)("storylines.narrator")), 1),
+			V("span", SI, k(e.title || "…"), 1)
+		], 8, yI))), 128))])) : (R(), z("div", _I, k(M(Y)("storylines.empty")), 1))])) : W("", !0)], 2))), 128))], 64)) : (R(), z("div", sI, [H(M(RD), { "aria-hidden": "true" }), V("span", null, k(M(Y)("memory.noChat")), 1)])) : (R(), B(kj, { key: 0 }));
 	}
-}), dI = (e) => !!e?.image, fI = (e) => !!e?.speech, pI = (e) => dI(e) || fI(e);
+}), wI = (e) => !!e?.image, TI = (e) => !!e?.speech, EI = (e) => wI(e) || TI(e);
 //#endregion
 //#region src/media/image/refs.ts
-function mI(e) {
+function DI(e) {
 	let t = new Set(e.map((e) => e.id)), n = 1;
 	for (; t.has(`ref${n}`);) n++;
 	return `ref${n}`;
 }
-async function hI() {
+async function OI() {
 	await fx("ref:", new Set(Xb().image.connections.flatMap((e) => e.refs.map((e) => e.blob)))).catch((e) => console.warn("[AP] media gc failed", e));
 }
 //#endregion
 //#region src/ui/panel/media/ConnectionBar.vue?vue&type=script&setup=true&lang.ts
-var gI = {
+var kI = {
 	key: 0,
 	class: "row tight"
-}, _I = ["aria-label"], vI = {
+}, AI = ["aria-label"], jI = {
 	key: 1,
 	class: "row tight"
-}, yI = ["value", "aria-label"], bI = ["value"], xI = {
+}, MI = ["value", "aria-label"], NI = ["value"], PI = {
 	key: 1,
 	class: "grow faint small"
-}, SI = /* @__PURE__ */ F({
+}, FI = /* @__PURE__ */ F({
 	__name: "ConnectionBar",
 	props: {
 		connections: {},
@@ -21291,15 +21438,15 @@ var gI = {
 			let e = a.value.trim();
 			e && n.active && r("rename", n.active, e), i.value = !1;
 		}
-		return (t, n) => i.value ? (R(), z("div", gI, [
+		return (t, n) => i.value ? (R(), z("div", kI, [
 			P(V("input", {
 				"onUpdate:modelValue": n[0] ||= (e) => a.value = e,
 				class: "input grow",
 				"aria-label": M(Y)("common.rename"),
 				onKeydown: [_s(s, ["enter"]), n[1] ||= _s((e) => i.value = !1, ["esc"])]
-			}, null, 40, _I), [[as, a.value]]),
+			}, null, 40, AI), [[as, a.value]]),
 			H(Q, {
-				icon: M(jO),
+				icon: M(MO),
 				label: M(Y)("common.cancel"),
 				onClick: n[2] ||= (e) => i.value = !1
 			}, null, 8, ["icon", "label"]),
@@ -21309,7 +21456,7 @@ var gI = {
 				active: "",
 				onClick: s
 			}, null, 8, ["icon", "label"])
-		])) : (R(), z("div", vI, [
+		])) : (R(), z("div", jI, [
 			e.connections.length ? (R(), z("select", {
 				key: 0,
 				class: "input grow",
@@ -21319,9 +21466,9 @@ var gI = {
 			}, [(R(!0), z(L, null, I(e.connections, (t) => (R(), z("option", {
 				key: t.id,
 				value: t.id
-			}, k(t.name) + " · " + k(e.apiLabel(t.api)), 9, bI))), 128))], 40, yI)) : (R(), z("span", xI, k(M(Y)("media.noConnection")), 1)),
+			}, k(t.name) + " · " + k(e.apiLabel(t.api)), 9, NI))), 128))], 40, MI)) : (R(), z("span", PI, k(M(Y)("media.noConnection")), 1)),
 			H(Q, {
-				icon: M(sO),
+				icon: M(cO),
 				label: M(Y)("media.addConnection"),
 				onClick: n[4] ||= (e) => r("add")
 			}, null, 8, ["icon", "label"]),
@@ -21332,12 +21479,12 @@ var gI = {
 					onClick: n[5] ||= (t) => r("copy", e.active)
 				}, null, 8, ["icon", "label"]),
 				H(Q, {
-					icon: M(oO),
+					icon: M(sO),
 					label: M(Y)("common.rename"),
 					onClick: o
 				}, null, 8, ["icon", "label"]),
 				H(Q, {
-					icon: M(CO),
+					icon: M(wO),
 					label: M(Y)("common.delete"),
 					danger: "",
 					align: "end",
@@ -21346,13 +21493,13 @@ var gI = {
 			], 64)) : W("", !0)
 		]));
 	}
-}), CI = { class: "media-advanced" }, wI = ["aria-expanded"], TI = {
+}), II = { class: "media-advanced" }, LI = ["aria-expanded"], RI = {
 	key: 0,
 	class: "col"
-}, EI = ["placeholder"], DI = {
+}, zI = ["placeholder"], BI = {
 	key: 0,
 	class: "xs text-danger"
-}, OI = /* @__PURE__ */ F({
+}, VI = /* @__PURE__ */ F({
 	__name: "AdvancedRequest",
 	props: {
 		connection: {},
@@ -21378,18 +21525,18 @@ var gI = {
 		function l() {
 			o.value || (n.connection.body = a.value, r("changed"));
 		}
-		return (t, n) => (R(), z("div", CI, [V("button", {
+		return (t, n) => (R(), z("div", II, [V("button", {
 			type: "button",
 			class: "btn ghost sm-btn media-advanced-toggle",
 			"aria-expanded": i.value,
 			onClick: n[0] ||= (e) => i.value = !i.value
-		}, [V("span", null, k(M(Y)("media.advanced")), 1), H(M(lD), { class: O(["chevron", { flipped: i.value }]) }, null, 8, ["class"])], 8, wI), i.value ? (R(), z("div", TI, [
+		}, [V("span", null, k(M(Y)("media.advanced")), 1), H(M(lD), { class: O(["chevron", { flipped: i.value }]) }, null, 8, ["class"])], 8, LI), i.value ? (R(), z("div", RI, [
 			ri(t.$slots, "default"),
 			H($, {
 				label: M(Y)("media.headers"),
 				help: M(Y)("media.headers.hint")
 			}, {
-				default: N(() => [H(HP, {
+				default: N(() => [H(UP, {
 					entries: e.connection.headers,
 					"key-placeholder": M(Y)("media.headers.name"),
 					"value-placeholder": M(Y)("media.headers.value"),
@@ -21413,20 +21560,20 @@ var gI = {
 					spellcheck: "false",
 					placeholder: e.bodyPlaceholder ?? "{ }",
 					onChange: l
-				}, null, 40, EI), [[as, a.value]]), o.value ? (R(), z("span", DI, k(o.value), 1)) : W("", !0)]),
+				}, null, 40, zI), [[as, a.value]]), o.value ? (R(), z("span", BI, k(o.value), 1)) : W("", !0)]),
 				_: 1
 			}, 8, ["label", "help"])
 		])) : W("", !0)]));
 	}
-}), kI = ["value", "placeholder"], AI = ["value"], jI = [
+}), HI = ["value", "placeholder"], UI = ["value"], WI = [
 	"list",
 	"value",
 	"placeholder"
-], MI = ["id"], NI = ["value"], PI = ["value", "placeholder"], FI = ["value", "placeholder"], II = { class: "col media-refs" }, LI = { class: "badge neutral mono" }, RI = [
+], GI = ["id"], KI = ["value"], qI = ["value", "placeholder"], JI = ["value", "placeholder"], YI = { class: "col media-refs" }, XI = { class: "badge neutral mono" }, ZI = [
 	"value",
 	"placeholder",
 	"onChange"
-], zI = ["value"], BI = /* @__PURE__ */ F({
+], QI = ["value"], $I = /* @__PURE__ */ F({
 	__name: "ImageSettings",
 	setup(e) {
 		let t = G(() => Xb().image), n = G(() => tx(t.value)), r = {
@@ -21467,7 +21614,7 @@ var gI = {
 			t.value.connections.push(n), t.value.active = n.id, Zb();
 		}
 		function u(e) {
-			t.value.connections = t.value.connections.filter((t) => t.id !== e.id), t.value.active === e.id && (t.value.active = t.value.connections[0]?.id ?? null), Zb(), hI();
+			t.value.connections = t.value.connections.filter((t) => t.id !== e.id), t.value.active === e.id && (t.value.active = t.value.connections[0]?.id ?? null), Zb(), OI();
 		}
 		let d = (e) => {
 			t.value.active = e, Zb();
@@ -21483,7 +21630,7 @@ var gI = {
 					if (!e.type.startsWith("image/")) continue;
 					let n = await cx(e, { prefix: "ref:" });
 					t.refs.push({
-						id: mI(t.refs),
+						id: DI(t.refs),
 						description: e.name.replace(/\.[^.]+$/, ""),
 						blob: n
 					});
@@ -21497,11 +21644,11 @@ var gI = {
 			let [i] = r.refs.splice(e, 1);
 			Zb(), i && !t.value.connections.some((e) => e.refs.some((e) => e.blob === i.blob)) && ux(i.blob);
 		}
-		return (e, _) => (R(), B(xk, {
+		return (e, _) => (R(), B(Sk, {
 			title: M(Y)("media.image"),
-			icon: M(WD)
+			icon: M(GD)
 		}, {
-			actions: N(() => [H($A, {
+			actions: N(() => [H(ej, {
 				"model-value": t.value.enabled,
 				label: M(Y)("media.image"),
 				"onUpdate:modelValue": _[0] ||= (e) => o("enabled", e)
@@ -21512,13 +21659,13 @@ var gI = {
 					help: M(Y)("media.image.auto.hint"),
 					inline: ""
 				}, {
-					default: N(() => [H($A, {
+					default: N(() => [H(ej, {
 						"model-value": t.value.auto,
 						"onUpdate:modelValue": _[1] ||= (e) => o("auto", e)
 					}, null, 8, ["model-value"])]),
 					_: 1
 				}, 8, ["label", "help"]),
-				H(SI, {
+				H(FI, {
 					connections: t.value.connections,
 					active: n.value,
 					"api-label": i,
@@ -21532,7 +21679,7 @@ var gI = {
 					key: n.value.id,
 					class: "col media-conn"
 				}, [
-					H(jj, {
+					H(Mj, {
 						"model-value": n.value.api,
 						options: M(a),
 						"onUpdate:modelValue": _[2] ||= (e) => p(e)
@@ -21544,7 +21691,7 @@ var gI = {
 							placeholder: M(qb)[n.value.api].baseUrl,
 							spellcheck: "false",
 							onChange: _[3] ||= (e) => s("baseUrl", e.target.value.trim())
-						}, null, 40, kI)]),
+						}, null, 40, HI)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, { label: M(Y)("media.apiKey") }, {
@@ -21554,7 +21701,7 @@ var gI = {
 							autocomplete: "off",
 							value: n.value.apiKey,
 							onChange: _[4] ||= (e) => s("apiKey", e.target.value.trim())
-						}, null, 40, AI)]),
+						}, null, 40, UI)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, { label: M(Y)("media.model") }, {
@@ -21565,10 +21712,10 @@ var gI = {
 							placeholder: M(qb)[n.value.api].model,
 							spellcheck: "false",
 							onChange: _[5] ||= (e) => s("model", e.target.value.trim())
-						}, null, 40, jI), V("datalist", { id: `ap-image-models-${n.value.api}` }, [(R(!0), z(L, null, I(r[n.value.api], (e) => (R(), z("option", {
+						}, null, 40, WI), V("datalist", { id: `ap-image-models-${n.value.api}` }, [(R(!0), z(L, null, I(r[n.value.api], (e) => (R(), z("option", {
 							key: e,
 							value: e
-						}, null, 8, NI))), 128))], 8, MI)]),
+						}, null, 8, KI))), 128))], 8, GI)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, {
@@ -21581,7 +21728,7 @@ var gI = {
 							value: n.value.style,
 							placeholder: M(Y)(n.value.api === "novelai" ? "media.image.style.tags" : "media.image.style.nl"),
 							onChange: _[6] ||= (e) => s("style", e.target.value)
-						}, null, 40, PI)]),
+						}, null, 40, qI)]),
 						_: 1
 					}, 8, ["label", "help"]),
 					n.value.api === "novelai" ? (R(), B($, {
@@ -21594,7 +21741,7 @@ var gI = {
 							value: n.value.negative ?? "",
 							placeholder: M(Y)("media.image.negative.placeholder"),
 							onChange: _[7] ||= (e) => s("negative", e.target.value)
-						}, null, 40, FI)]),
+						}, null, 40, JI)]),
 						_: 1
 					}, 8, ["label"])) : W("", !0),
 					H($, {
@@ -21602,7 +21749,7 @@ var gI = {
 						help: M(Y)("media.image.nsfwBlock.hint"),
 						inline: ""
 					}, {
-						default: N(() => [H($A, {
+						default: N(() => [H(ej, {
 							"model-value": n.value.nsfwBlock,
 							"onUpdate:modelValue": _[8] ||= (e) => s("nsfwBlock", e)
 						}, null, 8, ["model-value"])]),
@@ -21613,17 +21760,17 @@ var gI = {
 						label: M(Y)("media.image.refs"),
 						help: M(Y)("media.image.refs.hint")
 					}, {
-						default: N(() => [V("div", II, [
+						default: N(() => [V("div", YI, [
 							(R(!0), z(L, null, I(n.value.refs, (e, t) => (R(), z("div", {
 								key: e.blob,
 								class: "media-ref"
 							}, [
-								H(vA, {
+								H(yA, {
 									"blob-key": e.blob,
 									class: "media-ref-thumb",
 									alt: e.description
 								}, null, 8, ["blob-key", "alt"]),
-								V("span", LI, k(e.id), 1),
+								V("span", XI, k(e.id), 1),
 								V("input", {
 									class: "input grow",
 									value: e.description,
@@ -21631,9 +21778,9 @@ var gI = {
 									onChange: (t) => {
 										e.description = t.target.value, M(Zb)();
 									}
-								}, null, 40, RI),
+								}, null, 40, ZI),
 								H(Q, {
-									icon: M(CO),
+									icon: M(wO),
 									label: M(Y)("common.delete"),
 									small: "",
 									danger: "",
@@ -21649,7 +21796,7 @@ var gI = {
 								type: "button",
 								class: "btn ghost add",
 								onClick: _[9] ||= (e) => m.value?.click()
-							}, [H(M(UD)), U(k(M(Y)("media.image.refs.add")), 1)]),
+							}, [H(M(WD)), U(k(M(Y)("media.image.refs.add")), 1)]),
 							V("input", {
 								ref_key: "fileInput",
 								ref: m,
@@ -21662,7 +21809,7 @@ var gI = {
 						])]),
 						_: 1
 					}, 8, ["label", "help"])) : W("", !0),
-					H(OI, {
+					H(VI, {
 						connection: n.value,
 						onChanged: _[11] ||= (e) => M(Zb)()
 					}, {
@@ -21674,7 +21821,7 @@ var gI = {
 								class: "input",
 								value: n.value.endpoint ?? "interactions",
 								onChange: _[10] ||= (e) => s("endpoint", e.target.value)
-							}, [..._[12] ||= [V("option", { value: "interactions" }, "Interactions", -1), V("option", { value: "generateContent" }, "generateContent", -1)]], 40, zI)]),
+							}, [..._[12] ||= [V("option", { value: "interactions" }, "Interactions", -1), V("option", { value: "generateContent" }, "generateContent", -1)]], 40, QI)]),
 							_: 1
 						}, 8, ["label"])) : W("", !0)]),
 						_: 1
@@ -21684,17 +21831,17 @@ var gI = {
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), VI = /* @__PURE__ */ F({
+}), eL = /* @__PURE__ */ F({
 	__name: "SpeechSettings",
 	setup(e) {
 		let t = G(() => Xb().speech), n = (e, n) => {
 			t.value[e] = n, Zb();
 		};
-		return (e, r) => (R(), B(xk, {
+		return (e, r) => (R(), B(Sk, {
 			title: M(Y)("media.speech"),
 			icon: M(tD)
 		}, {
-			actions: N(() => [H($A, {
+			actions: N(() => [H(ej, {
 				"model-value": t.value.enabled,
 				label: M(Y)("media.speech"),
 				"onUpdate:modelValue": r[0] ||= (e) => n("enabled", e)
@@ -21703,7 +21850,7 @@ var gI = {
 				label: M(Y)("media.auto"),
 				inline: ""
 			}, {
-				default: N(() => [H($A, {
+				default: N(() => [H(ej, {
 					"model-value": t.value.auto,
 					"onUpdate:modelValue": r[1] ||= (e) => n("auto", e)
 				}, null, 8, ["model-value"])]),
@@ -21712,7 +21859,7 @@ var gI = {
 				label: M(Y)("media.speech.narrator"),
 				inline: ""
 			}, {
-				default: N(() => [H($A, {
+				default: N(() => [H(ej, {
 					"model-value": t.value.narrator,
 					"onUpdate:modelValue": r[2] ||= (e) => n("narrator", e)
 				}, null, 8, ["model-value"])]),
@@ -21721,10 +21868,10 @@ var gI = {
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), HI = ["value"], UI = /* @__PURE__ */ F({
+}), tL = ["value"], nL = /* @__PURE__ */ F({
 	__name: "MediaTab",
 	setup(e) {
-		let { preset: n } = Ej(), r = G(() => Xb().cors), i = [
+		let { preset: n } = Dj(), r = G(() => Xb().cors), i = [
 			"auto",
 			"on",
 			"off"
@@ -21745,18 +21892,18 @@ var gI = {
 			r.value[e] = t, Zb();
 		}
 		return (e, t) => M(n) ? (R(), z(L, { key: 1 }, [
-			H(xk, {
+			H(Sk, {
 				title: M(Y)("media.cors"),
-				icon: M(tO),
+				icon: M(nO),
 				collapsible: "",
 				open: r.value.mode !== "auto" || r.value.proxy !== "host"
 			}, {
-				default: N(() => [H(jj, {
+				default: N(() => [H(Mj, {
 					"model-value": r.value.mode,
 					options: M(i),
 					"onUpdate:modelValue": t[0] ||= (e) => o("mode", e)
 				}, null, 8, ["model-value", "options"]), r.value.mode === "off" ? W("", !0) : (R(), z(L, { key: 0 }, [H($, { label: M(Y)("media.proxy") }, {
-					default: N(() => [H(jj, {
+					default: N(() => [H(Mj, {
 						"model-value": r.value.proxy,
 						options: a.value,
 						"onUpdate:modelValue": t[1] ||= (e) => o("proxy", e)
@@ -21772,7 +21919,7 @@ var gI = {
 						placeholder: "https://proxy.example/?url={url}",
 						spellcheck: "false",
 						onChange: t[2] ||= (e) => o("customUrl", e.target.value.trim())
-					}, null, 40, HI)]),
+					}, null, 40, tL)]),
 					_: 1
 				}, 8, ["label"])) : W("", !0)], 64))]),
 				_: 1
@@ -21781,59 +21928,59 @@ var gI = {
 				"icon",
 				"open"
 			]),
-			M(dI)(M(n)) ? (R(), B(BI, { key: 0 })) : W("", !0),
-			M(fI)(M(n)) ? (R(), B(VI, { key: 1 })) : W("", !0)
-		], 64)) : (R(), B(Oj, { key: 0 }));
+			M(wI)(M(n)) ? (R(), B($I, { key: 0 })) : W("", !0),
+			M(TI)(M(n)) ? (R(), B(eL, { key: 1 })) : W("", !0)
+		], 64)) : (R(), B(kj, { key: 0 }));
 	}
-}), WI = ["aria-label"], GI = { class: "panel-head" }, KI = { class: "panel-logo" }, qI = { class: "grow" }, JI = { class: "panel-title ellipsis" }, YI = { class: "panel-sub ellipsis" }, XI = [
+}), rL = ["aria-label"], iL = { class: "panel-head" }, aL = { class: "panel-logo" }, oL = { class: "grow" }, sL = { class: "panel-title ellipsis" }, cL = { class: "panel-sub ellipsis" }, lL = [
 	"title",
 	"aria-selected",
 	"onClick"
-], ZI = { class: "panel-body scroll" }, QI = /* @__PURE__ */ F({
+], uL = { class: "panel-body scroll" }, dL = /* @__PURE__ */ F({
 	__name: "Panel",
 	setup(e) {
 		let t = [
 			{
 				id: "presets",
-				icon: rO,
-				view: wj
+				icon: iO,
+				view: Tj
 			},
 			{
 				id: "config",
-				icon: _O,
-				view: uM
+				icon: vO,
+				view: dM
 			},
 			{
 				id: "modules",
 				icon: rD,
-				view: vP
+				view: yP
 			},
 			{
 				id: "writing",
-				icon: aO,
-				view: DP
+				icon: oO,
+				view: OP
 			},
 			{
 				id: "memory",
 				icon: iD,
-				view: qP
+				view: JP
 			},
 			{
 				id: "storylines",
 				icon: RD,
-				view: uI
+				view: CI
 			},
 			{
 				id: "media",
 				icon: hD,
-				view: UI
+				view: nL
 			},
 			{
 				id: "debug",
 				icon: aD,
-				view: qF
+				view: oI
 			}
-		], n = G(() => t.filter((e) => (e.id !== "storylines" || dE.value) && (e.id !== "media" || pI(sS.value)))), r = G(() => n.value.find((e) => e.id === X.tab) ?? n.value[0]), i = G({
+		], n = G(() => t.filter((e) => (e.id !== "storylines" || dE.value) && (e.id !== "media" || EI(sS.value)))), r = G(() => n.value.find((e) => e.id === X.tab) ?? n.value[0]), i = G({
 			get: () => K().enabled,
 			set: (e) => {
 				K().enabled = e, q();
@@ -21858,16 +22005,16 @@ var gI = {
 				role: "dialog",
 				"aria-label": M(Y)("app.name")
 			}, [
-				V("header", GI, [
-					V("div", KI, [H(M(KD))]),
-					V("div", qI, [V("div", JI, k(M(sS) ? M(Pp)(M(sS)) : M(Y)("app.name")), 1), V("div", YI, k(a.value), 1)]),
-					H($A, {
+				V("header", iL, [
+					V("div", aL, [H(M(qD))]),
+					V("div", oL, [V("div", sL, k(M(sS) ? M(Pp)(M(sS)) : M(Y)("app.name")), 1), V("div", cL, k(a.value), 1)]),
+					H(ej, {
 						modelValue: i.value,
 						"onUpdate:modelValue": t[0] ||= (e) => i.value = e,
 						label: M(Y)("panel.enabled")
 					}, null, 8, ["modelValue", "label"]),
 					H(Q, {
-						icon: M(jO),
+						icon: M(MO),
 						label: M(Y)("common.close"),
 						align: "end",
 						below: "",
@@ -21885,19 +22032,19 @@ var gI = {
 					title: M(Y)(`tab.${e.id}`),
 					"aria-selected": e.id === M(X).tab,
 					onClick: (t) => M(X).tab = e.id
-				}, [(R(), B($r(e.icon))), V("span", null, k(M(Y)(`tab.${e.id}`)), 1)], 10, XI))), 128))], 2),
-				V("main", ZI, [(R(), B(Hr, null, [(R(), B($r(r.value.view), { key: r.value.id }))], 1024))])
-			], 8, WI)) : W("", !0)]),
+				}, [(R(), B($r(e.icon))), V("span", null, k(M(Y)(`tab.${e.id}`)), 1)], 10, lL))), 128))], 2),
+				V("main", uL, [(R(), B(Hr, null, [(R(), B($r(r.value.view), { key: r.value.id }))], 1024))])
+			], 8, rL)) : W("", !0)]),
 			_: 1
 		}));
 	}
-}), $I = { class: "inline-drawer" }, eL = { class: "inline-drawer-toggle inline-drawer-header" }, tL = { class: "inline-drawer-content" }, nL = { class: "flex-container alignItemsCenter spaceBetween" }, rL = {
+}), fL = { class: "inline-drawer" }, pL = { class: "inline-drawer-toggle inline-drawer-header" }, mL = { class: "inline-drawer-content" }, hL = { class: "flex-container alignItemsCenter spaceBetween" }, gL = {
 	class: "checkbox_label flex1",
 	for: "ap_settings_enabled"
-}, iL = { key: 0 }, aL = { class: "text_muted" }, oL = {
+}, _L = { key: 0 }, vL = { class: "text_muted" }, yL = {
 	key: 1,
 	class: "text_muted"
-}, sL = /* @__PURE__ */ F({
+}, bL = /* @__PURE__ */ F({
 	__name: "SettingsDrawer",
 	setup(e) {
 		let t = G({
@@ -21906,8 +22053,8 @@ var gI = {
 				K().enabled = e, q();
 			}
 		});
-		return (e, n) => (R(), z("div", $I, [V("div", eL, [V("b", null, k(M(Y)("app.name")), 1), n[3] ||= V("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), V("div", tL, [
-			V("div", nL, [V("label", rL, [P(V("input", {
+		return (e, n) => (R(), z("div", fL, [V("div", pL, [V("b", null, k(M(Y)("app.name")), 1), n[3] ||= V("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), V("div", mL, [
+			V("div", hL, [V("label", gL, [P(V("input", {
 				id: "ap_settings_enabled",
 				"onUpdate:modelValue": n[0] ||= (e) => t.value = e,
 				type: "checkbox"
@@ -21920,18 +22067,18 @@ var gI = {
 			}, [n[4] ||= V("i", { class: "fa-solid fa-layer-group" }, null, -1), V("span", null, k(M(Y)("panel.open")), 1)], 32)]),
 			n[5] ||= V("hr", null, null, -1),
 			V("h4", null, k(M(Y)("settings.preset")), 1),
-			M(sS) ? (R(), z("div", iL, [U(k(M(Pp)(M(sS))) + " ", 1), V("span", aL, "v" + k(M(sS).version) + " · " + k(M(cS).config), 1)])) : (R(), z("i", oL, k(M(Y)("settings.inactive")), 1))
+			M(sS) ? (R(), z("div", _L, [U(k(M(Pp)(M(sS))) + " ", 1), V("span", vL, "v" + k(M(sS).version) + " · " + k(M(cS).config), 1)])) : (R(), z("i", yL, k(M(Y)("settings.inactive")), 1))
 		])]));
 	}
-}), cL = {
+}), xL = {
 	key: 0,
 	class: "preset-banner"
-}, lL = { class: "preset-banner-text" }, uL = /* @__PURE__ */ F({
+}, SL = { class: "preset-banner-text" }, CL = /* @__PURE__ */ F({
 	__name: "PresetBanner",
 	setup(e) {
-		return (e, t) => M(sS) ? (R(), z("div", cL, [
-			H(M(KD), { class: "preset-banner-icon" }),
-			V("span", lL, k(M(Y)("banner.usesAp")), 1),
+		return (e, t) => M(sS) ? (R(), z("div", xL, [
+			H(M(qD), { class: "preset-banner-icon" }),
+			V("span", SL, k(M(Y)("banner.usesAp")), 1),
 			V("button", {
 				type: "button",
 				class: "btn primary",
@@ -21942,14 +22089,14 @@ var gI = {
 });
 //#endregion
 //#region src/ui/index.ts
-function dL() {
+function wL() {
 	let e = document.getElementById("extensions_settings2") ?? document.getElementById("extensions_settings");
 	if (!e || e.querySelector("#advanced_preset_settings")) return;
 	let t = document.createElement("div");
-	t.id = "advanced_preset_settings", e.append(t), xs(sL).mount(t);
+	t.id = "advanced_preset_settings", e.append(t), xs(bL).mount(t);
 }
-function fL() {
-	jw("ap-stages", XO, ["mesid"]), jw("ap-cards", VA, ["mesid"]), jw("ap-top-cards", VA, ["mesid", "position"]), jw("ap-dock", KA), jw("ap-storyline", XA, ["mesid"]), jw("ap-panel", QI), jw("ap-preset-banner", uL), kw(), oS();
+function TL() {
+	jw("ap-stages", ZO, ["mesid"]), jw("ap-cards", HA, ["mesid"]), jw("ap-top-cards", HA, ["mesid", "position"]), jw("ap-dock", qA), jw("ap-storyline", ZA, ["mesid"]), jw("ap-panel", dL), jw("ap-preset-banner", CL), kw(), oS();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.OAI_PRESET_CHANGED_AFTER,
@@ -21957,13 +22104,13 @@ function fL() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, oS);
-	WE(), dL(), PE(), uE();
+	WE(), wL(), PE(), uE();
 }
 //#endregion
 //#region src/index.ts
-var pL = {
+var EL = {
 	version: "1.11.2",
-	buildId: "b1206a0ca5e63a96",
+	buildId: "7b72083d4d445ee8",
 	nextGeneration: (e) => hh(e),
 	listPresets: () => yp().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -21979,21 +22126,21 @@ var pL = {
 	annotations: BS,
 	speech: KS
 };
-globalThis.advancedPresetInterceptor = jv, window.AdvancedPreset = pL;
-function mL(e, t) {
+globalThis.advancedPresetInterceptor = jv, window.AdvancedPreset = EL;
+function DL(e, t) {
 	let n;
 	return (...r) => {
 		clearTimeout(n), n = setTimeout(() => e(...r), t);
 	};
 }
-async function hL() {
+async function OL() {
 	for (let { preset: e } of yp()) try {
 		await sh(e);
 	} catch (t) {
 		console.error("[AP] carrier sync failed", e.id, t);
 	}
 }
-async function gL() {
+async function kL() {
 	let { eventSource: t, eventTypes: n } = e();
 	K(), Fb(), yC(), ew(), zS(), GS(), jS(), await i(), await _p();
 	let r = KC();
@@ -22007,13 +22154,13 @@ async function gL() {
 	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => dv(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => Ib(e)), Kb(), Av(), t.on(n.MESSAGE_RECEIVED, (e, t) => PS(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		Eh.setPending(null), Eh.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => Eh.sweep());
-	let a = mL(() => {
+	let a = DL(() => {
 		let e = nh(), t = e ? Cp(e) : void 0;
 		t && ph(t);
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, a), t.on(n.OAI_PRESET_CHANGED_AFTER, a), t.on(n.OAI_PRESET_CHANGED_AFTER, ow);
 	let o = async () => {
-		await Promise.race([pC(), new Promise((e) => setTimeout(e, 3e3))]), await hL();
+		await Promise.race([pC(), new Promise((e) => setTimeout(e, 3e3))]), await OL();
 		for (let e of r) x("info", Y("presets.backToBuiltin", { version: e.version }), Pp(e));
 		(async () => {
 			await GC();
@@ -22021,13 +22168,13 @@ async function gL() {
 			await aw(), await WC();
 		})(), Wb({ reload: !0 }), fw(), Cb();
 	};
-	t.on(n.APP_READY, () => void o()), fL(), cg("init", {
+	t.on(n.APP_READY, () => void o()), TL(), cg("init", {
 		version: "1.11.2",
-		build: "b1206a0ca5e63a96",
+		build: "7b72083d4d445ee8",
 		enabled: K().enabled
 	});
 }
-var _L = wb, vL = oE;
-gL().catch((e) => console.error("[AP] init failed", e));
+var AL = wb, jL = oE;
+kL().catch((e) => console.error("[AP] init failed", e));
 //#endregion
-export { _L as advancedPresetOnUpdate, vL as advancedPresetRegisterChatSurface };
+export { AL as advancedPresetOnUpdate, jL as advancedPresetRegisterChatSurface };
