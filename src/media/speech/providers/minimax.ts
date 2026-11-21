@@ -86,13 +86,8 @@ export const minimax: SpeechProvider = {
     const form = new FormData();
     form.append('purpose', 'voice_clone');
     form.append('file', audio, `reference.${EXT[audio.type.split(';')[0]!.trim()] ?? 'wav'}`);
-    let raw: string;
-    try {
-      raw = await (await ensureOk(await env.fetch(joinUrl(base, 'files/upload'), { method: 'POST', headers: auth(conn, false), body: form, signal }))).text();
-    } catch (e) {
-      if ((e as Error)?.name === 'AbortError') throw e;
-      throw new SpeechError(`Reference audio upload failed (${(e as Error)?.message ?? e}). Uploads need a direct connection or a CORS proxy that forwards file uploads.`);
-    }
+    // Multipart: a proxy that cannot forward it throws ProxyError('body') (shown by the UI).
+    const raw = await (await ensureOk(await env.fetch(joinUrl(base, 'files/upload'), { method: 'POST', headers: auth(conn, false), body: form, signal }))).text();
     check(JSON.parse(raw) as BaseResp);
     // `file_id` is an int64 that may exceed Number precision: keep its digits verbatim.
     const fileId = /"file_id"\s*:\s*"?(\d+)/.exec(raw)?.[1];

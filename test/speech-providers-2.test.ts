@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ProxyError } from '@/media/net';
 import { speechFormat, speechProvider, speechTags } from '@/media/speech/providers';
 import { chunked, conn, drain, env } from './speech-helpers';
 
@@ -77,10 +78,10 @@ describe('minimax', () => {
     expect(clone!.init.body).toBe(`{"file_id":123456789012345678,"voice_id":"${id}"}`);
   });
 
-  it('explains failed uploads and clone errors', async () => {
+  it('passes proxy errors through and reports clone errors', async () => {
     const blobs = { ref: new Blob([pcm]) };
-    await expect(p.createClone!(env(() => { throw new TypeError('Failed to fetch'); }, blobs), conn('minimax'), { kind: 'clone', audio: 'ref' }))
-      .rejects.toThrow(/upload failed \(Failed to fetch\).*file uploads/);
+    await expect(p.createClone!(env(() => { throw new ProxyError('body'); }, blobs), conn('minimax'), { kind: 'clone', audio: 'ref' }))
+      .rejects.toBeInstanceOf(ProxyError);
     const e = env((call) => call.url.endsWith('files/upload')
       ? json({ file: { file_id: 1 }, base_resp: { status_code: 0 } })
       : json({ base_resp: { status_code: 2038, status_msg: 'no cloning permission' } }), blobs);
