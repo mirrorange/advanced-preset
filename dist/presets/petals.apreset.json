@@ -2,11 +2,11 @@
   "formatVersion": 3,
   "id": "petals",
   "name": "Petals Preset",
-  "version": "7.11.2",
+  "version": "7.12.0",
   "author": "mirrorange",
   "description": "Write stories with Freesia! Freesia writes, Petals gives suggestions — a dual-character driven workflow.",
-  "minAdvancedPreset": "1.11.1",
-  "hash": "910dc1dafd53ffaa",
+  "minAdvancedPreset": "1.12.0",
+  "hash": "c0e999e78615be5e",
   "actors": {
     "narrator": {
       "name": "Freesia",
@@ -131,6 +131,8 @@
     "separator": "<!-- Start of Storyline {{storyline}} -->",
     "mainSeparator": "<!-- Start of the main storyline -->"
   },
+  "image": {},
+  "speech": {},
   "params": [
     {
       "id": "language",
@@ -609,6 +611,49 @@
       }
     },
     {
+      "id": "illustrations",
+      "name": "Illustrations",
+      "toggle": "always",
+      "default": true,
+      "structures": [
+        "image"
+      ],
+      "vars": [],
+      "source": "modules/features/illustrations.md",
+      "group": "features",
+      "when": {
+        "t": "bin",
+        "op": "&&",
+        "l": {
+          "t": "bin",
+          "op": "&&",
+          "l": {
+            "t": "var",
+            "path": "image.on"
+          },
+          "r": {
+            "t": "not",
+            "e": {
+              "t": "var",
+              "path": "meta.pure"
+            }
+          }
+        },
+        "r": {
+          "t": "bin",
+          "op": "!=",
+          "l": {
+            "t": "var",
+            "path": "gen.type"
+          },
+          "r": {
+            "t": "lit",
+            "v": "impersonate"
+          }
+        }
+      }
+    },
+    {
       "id": "native-reasoning",
       "name": "Native reasoning",
       "toggle": "user",
@@ -686,6 +731,49 @@
           "e": {
             "t": "var",
             "path": "meta.pure"
+          }
+        },
+        "r": {
+          "t": "bin",
+          "op": "!=",
+          "l": {
+            "t": "var",
+            "path": "gen.type"
+          },
+          "r": {
+            "t": "lit",
+            "v": "impersonate"
+          }
+        }
+      }
+    },
+    {
+      "id": "voice",
+      "name": "Voice",
+      "toggle": "always",
+      "default": true,
+      "structures": [
+        "speech"
+      ],
+      "vars": [],
+      "source": "modules/features/voice.md",
+      "group": "features",
+      "when": {
+        "t": "bin",
+        "op": "&&",
+        "l": {
+          "t": "bin",
+          "op": "&&",
+          "l": {
+            "t": "var",
+            "path": "speech.on"
+          },
+          "r": {
+            "t": "not",
+            "e": {
+              "t": "var",
+              "path": "meta.pure"
+            }
           }
         },
         "r": {
@@ -2306,6 +2394,210 @@
           "pieces": [
             {
               "text": "## User Options\n\nGenerate several diverse options for {{ap::name::user}}'s next input to advance the story.\n\nFor each option, provide a brief **Title** (reply type/direction, under 5 words) and the **Reply Content**.\n\n### Format\n\n{{ap::structure::options}}\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "illustrations/main",
+      "module": "illustrations",
+      "region": "guidelines",
+      "order": 1150,
+      "content": [
+        {
+          "pieces": [
+            {
+              "text": "## Illustrations\n\nAfter the story content, {{ap::name::narrator}} writes a prompt for one illustration of this segment, which an image model draws for the reader.\n\n- Pick the most vivid, visually clear moment: a striking scene, a character's entrance, an emotional peak. If nothing in this segment is worth illustrating, output no illustration.\n- The image model knows nothing about the story: describe every character's appearance in full each time, and never use pronouns or names alone to identify them.\n"
+            },
+            {
+              "text": "- Do not illustrate sexual, explicit or graphically violent moments; choose a safe moment of the segment instead, or output no illustration.\n",
+              "when": {
+                "t": "var",
+                "path": "image.sfw"
+              }
+            },
+            {
+              "text": "- Write the prompt as comma-separated Danbooru-style tags in English, no sentences, in this order: character count (`1girl`, `2boys`…), each character's appearance, outfit, expression and pose, then composition and camera angle, background, lighting.\n",
+              "when": {
+                "t": "bin",
+                "op": "==",
+                "l": {
+                  "t": "var",
+                  "path": "image.api"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": "novelai"
+                }
+              }
+            },
+            {
+              "text": "- Leave out artist, style and quality tags: the reader's own style tags are added automatically.\n",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "bin",
+                  "op": "==",
+                  "l": {
+                    "t": "var",
+                    "path": "image.api"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": "novelai"
+                  }
+                },
+                "r": {
+                  "t": "var",
+                  "path": "image.style"
+                }
+              }
+            },
+            {
+              "text": "- End with artist, style and quality tags that suit the story's tone.\n",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "bin",
+                  "op": "==",
+                  "l": {
+                    "t": "var",
+                    "path": "image.api"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": "novelai"
+                  }
+                },
+                "r": {
+                  "t": "not",
+                  "e": {
+                    "t": "var",
+                    "path": "image.style"
+                  }
+                }
+              }
+            },
+            {
+              "text": "- Write the prompt as one detailed paragraph in English: the subject and action, each character's appearance, outfit and expression, the setting, composition and camera angle, lighting and mood.\n",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": "==",
+                  "l": {
+                    "t": "var",
+                    "path": "image.api"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": "novelai"
+                  }
+                }
+              }
+            },
+            {
+              "text": "- Do not describe the art style or medium: the reader's own style is added automatically.\n",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": "==",
+                    "l": {
+                      "t": "var",
+                      "path": "image.api"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": "novelai"
+                    }
+                  }
+                },
+                "r": {
+                  "t": "var",
+                  "path": "image.style"
+                }
+              }
+            },
+            {
+              "text": "- State an art style and medium that suit the story's tone.\n",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": "==",
+                    "l": {
+                      "t": "var",
+                      "path": "image.api"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": "novelai"
+                    }
+                  }
+                },
+                "r": {
+                  "t": "not",
+                  "e": {
+                    "t": "var",
+                    "path": "image.style"
+                  }
+                }
+              }
+            },
+            {
+              "text": "- Reference images of recurring characters, places and styles are available. List the ids of those that appear in this illustration, so they stay consistent; use only these ids:\n\n{{ap::image::refs}}\n",
+              "when": {
+                "t": "var",
+                "path": "image.refs"
+              }
+            },
+            {
+              "text": "\n### Format\n\n{{ap::structure::image}}\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "voice/main",
+      "module": "voice",
+      "region": "guidelines",
+      "order": 1160,
+      "content": [
+        {
+          "pieces": [
+            {
+              "text": "## Voice\n\nThe story is read aloud, each character in their own voice. Mark every line a character speaks aloud in the story text.\n\n- One tag per uninterrupted utterance of one character. Keep quotation marks and dialogue tags (“she said”) outside the tag, so only the spoken words are inside.\n- `character` is the character's name as used in the story, written the same way every time.\n"
+            },
+            {
+              "text": "- These characters have their own voices; use exactly these names for them: {{ap::speech::characters}}.\n",
+              "when": {
+                "t": "var",
+                "path": "speech.characters"
+              }
+            },
+            {
+              "text": "- Only words spoken aloud: no thoughts, narration, or sounds described in narration. Never nest tags, and never use them outside the story text.\n"
+            },
+            {
+              "text": "- Everything outside the tags is read by the narrator's voice, so keep the narration free of symbols and notes that do not read well aloud.\n",
+              "when": {
+                "t": "var",
+                "path": "speech.narrator"
+              }
+            },
+            {
+              "text": "\n### Format\n\n{{ap::structure::speech}}\n\n{{ap::speech::format}}\n"
             }
           ]
         }
@@ -4936,6 +5228,35 @@
         "field": "Put the generated reply (acting as {{ap::name::user}}) in the `{{field}}` field."
       },
       "description": "{{ap::name::user}}'s next reply, ghostwritten by {{ap::name::narrator}} in {{ap::name::user}}'s voice."
+    },
+    "image": {
+      "id": "image",
+      "kind": "image",
+      "tag": "Freesia_Illustration",
+      "field": "illustrations",
+      "formatPrompt": {
+        "tag": "After the story content (leave out optional tags you do not need):\n\n<Freesia_Illustration>\n  <prompt>...</prompt>\n  <refs>id, id</refs>\n  <ratio>3:4</ratio>\n  <caption>...</caption>\n</Freesia_Illustration>",
+        "field": "Fill the `{{field}}` field with up to one item `{ \"prompt\", \"refs\", \"ratio\", \"caption\" }`, or leave it empty."
+      },
+      "description": "Prompt(s) for illustrations of this story segment, drawn by an image model; empty when nothing is worth illustrating.",
+      "properties": {
+        "prompt": "The image prompt, self-contained (the image model knows nothing about the story).",
+        "refs": "Ids of the reference images that appear in the illustration.",
+        "ratio": "Aspect ratio: `1:1`, `3:4`, `4:3`, `9:16` or `16:9`.",
+        "caption": "A short caption in the story's language, under 10 words."
+      },
+      "count": 1
+    },
+    "speech": {
+      "id": "speech",
+      "kind": "speech",
+      "tag": "speech",
+      "field": "speech",
+      "formatPrompt": {
+        "tag": "Spoken lines are written inside the story text as `<speech character=\"Name\">words</speech>`; the tags are removed from the text shown to the reader.\n\nExample: “<speech character=\"Lena\">Don't go,</speech>” Lena whispered. “<speech character=\"Lena\">Not tonight.</speech>”",
+        "field": "Spoken lines are written inside the story text as `<speech character=\"Name\">words</speech>`; the tags are removed from the text shown to the reader.\n\nExample: “<speech character=\"Lena\">Don't go,</speech>” Lena whispered. “<speech character=\"Lena\">Not tonight.</speech>”"
+      },
+      "history": 0
     }
   },
   "regex": [
