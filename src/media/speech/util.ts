@@ -18,11 +18,7 @@ export { joinUrl, ensureOk };
 export const baseOf = (conn: SpeechConnection, fallback: string) => conn.baseUrl.trim() || fallback;
 
 /** Built-in body ⊕ connection body (`null` removes a field); invalid JSON is an error, not ignored. */
-export function mergeBody<T extends Record<string, unknown>>(conn: SpeechConnection, body: T): T {
-  let over: Record<string, unknown>;
-  try { over = bodyOverride(conn); } catch (e) { throw new SpeechError(`Request body override: ${e instanceof Error ? e.message : String(e)}`); }
-  return deepMerge(body, over);
-}
+export const mergeBody = <T extends Record<string, unknown>>(conn: SpeechConnection, body: T): T => deepMerge(body, bodyOverride(conn));
 
 /** Built-in headers ⊕ connection headers (case-insensitive override; an empty value removes the header). */
 export function mergeHeaders(conn: SpeechConnection, headers: Record<string, string>): Record<string, string> {

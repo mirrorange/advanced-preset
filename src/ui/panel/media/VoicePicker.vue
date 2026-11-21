@@ -11,6 +11,7 @@ import { putBlob } from '@/store/media-db';
 import { speechProvider } from '@/media/speech/providers';
 import { env, gcVoices, previewVoice } from '@/media/speech/service';
 import type { SpeechConnection, VoiceOption, VoiceRef } from '@/media/speech/types';
+import { mediaErrorText } from '../../media/errors';
 import IconButton from '../../components/IconButton.vue';
 
 const props = defineProps<{ connection: SpeechConnection; modelValue: VoiceRef | null; placeholder?: string; label: string }>();
@@ -44,7 +45,7 @@ async function search() {
   busy.value = true;
   error.value = '';
   try { results.value = await p.search(env, props.connection, query.value, ctrl.signal); }
-  catch (e) { if (!(e instanceof DOMException && e.name === 'AbortError')) error.value = e instanceof Error ? e.message : String(e); }
+  catch (e) { if (!(e instanceof DOMException && e.name === 'AbortError')) error.value = mediaErrorText(e); }
   finally { busy.value = false; }
 }
 function toggleSearch() {
@@ -57,7 +58,7 @@ async function pick(o: VoiceOption) {
   if (o.owner && p?.adopt) {
     busy.value = true;
     try { id = await p.adopt(env, props.connection, o); }
-    catch (e) { error.value = e instanceof Error ? e.message : String(e); return; }
+    catch (e) { error.value = mediaErrorText(e); return; }
     finally { busy.value = false; }
   }
   emit('update:modelValue', { kind: 'voice', id, name: o.name });

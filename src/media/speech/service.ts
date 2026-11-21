@@ -14,6 +14,7 @@ import { getPreset } from '@/store/presets';
 import { getSidecar } from '@/store/sidecar';
 import { speechOf } from '@/app/speech';
 import { t } from '@/i18n';
+import { mediaErrorText } from '@/ui/media/errors';
 import { Clip, type ClipState } from './clip';
 import { pausePlayback, Playback, resumePlayback } from './player';
 import { speechFormat, speechProvider, speechTags } from './providers';
@@ -136,7 +137,7 @@ export async function probeCache(segs: Segment[]): Promise<void> {
 function report(e: unknown): void {
   if (e instanceof DOMException && e.name === 'AbortError') return;
   console.error('[AP] speech synthesis failed', e);
-  toast('error', e instanceof Error ? e.message : String(e), t('media.speech'));
+  toast('error', mediaErrorText(e), t('media.speech'));
 }
 
 // ---- playback -----------------------------------------------------------------------------------
