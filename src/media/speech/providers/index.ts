@@ -1,10 +1,13 @@
 /** Speech provider registry. */
 import type { SpeechApi, SpeechProvider } from '../types';
+import { deepseek } from './deepseek';
 import { elevenlabs } from './elevenlabs';
 import { fish } from './fish';
+import { gemini } from './gemini';
+import { minimax } from './minimax';
 import { openai } from './openai';
 
-const PROVIDERS: Partial<Record<SpeechApi, SpeechProvider>> = { fish, elevenlabs, openai };
+const PROVIDERS: Partial<Record<SpeechApi, SpeechProvider>> = { fish, elevenlabs, minimax, gemini, openai, deepseek };
 
 export const SPEECH_APIS: SpeechApi[] = ['fish', 'elevenlabs', 'minimax', 'gemini', 'openai', 'deepseek'];
 
