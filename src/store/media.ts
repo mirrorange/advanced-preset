@@ -3,9 +3,11 @@
  * speech synthesis connections. Global, not per preset; binaries live in IndexedDB (`media-db.ts`).
  */
 import type { ImageApi, SpeechApi } from '@advanced-preset/protocol';
+import type { SpeechConnection, VoiceRef } from '@/media/speech/types';
 import { settings, save } from './settings';
 
 export { IMAGE_APIS, SPEECH_APIS, type ImageApi, type SpeechApi } from '@advanced-preset/protocol';
+export type { SpeechConnection, VoiceRef };
 
 export type CorsMode = 'auto' | 'on' | 'off';
 export interface CorsSettings { mode: CorsMode; proxy: 'host' | 'custom'; customUrl: string }
@@ -37,16 +39,6 @@ export interface ImageConnection extends ConnectionBase {
   refs: StoredRef[];
   /** Gemini only: request shape (default `interactions`). */
   endpoint?: 'interactions' | 'generateContent';
-}
-
-export type VoiceRef =
-  | { kind: 'voice'; id: string }
-  | { kind: 'clone'; audio: string; text?: string; id?: string };
-
-export interface SpeechConnection extends ConnectionBase {
-  api: SpeechApi;
-  narrator: VoiceRef | null;
-  bindings: { character: string; voice: VoiceRef }[];
 }
 
 export interface MediaSettings {

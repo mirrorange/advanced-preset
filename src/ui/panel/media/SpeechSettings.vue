@@ -1,23 +1,114 @@
 <script setup lang="ts">
-/** Speech synthesis settings (connections and speaker bindings follow). */
+/** Speech synthesis settings: switches, connections (API, endpoint, key, model, voices, character bindings) and request overrides. */
 import { computed } from 'vue';
-import { AudioLines } from 'lucide-vue-next';
+import { AudioLines, Plus, Trash2 } from 'lucide-vue-next';
 import { t } from '@/i18n';
-import { mediaSettings, saveMedia } from '@/store/media';
+import { activeConnection, copyConnection, mediaSettings, saveMedia, SPEECH_APIS, type SpeechApi, type SpeechConnection, type VoiceRef } from '@/store/media';
+import { changeSpeechApi, newSpeechConnection } from '@/media/speech/connections';
+import { speechProvider } from '@/media/speech/providers';
+import { gcVoices } from '@/media/speech/service';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
+import IconButton from '../../components/IconButton.vue';
+import ConnectionBar from './ConnectionBar.vue';
+import AdvancedRequest from './AdvancedRequest.vue';
+import VoicePicker from './VoicePicker.vue';
 
 const speech = computed(() => mediaSettings().speech);
+const conn = computed(() => activeConnection(speech.value));
+const provider = computed(() => (conn.value ? speechProvider(conn.value.api) : undefined));
+
+const apiLabel = (api: string) => t(`media.api.${api}`);
 const set = (k: 'enabled' | 'auto' | 'narrator', v: boolean) => { speech.value[k] = v; saveMedia(); };
+
+function edit<K extends keyof SpeechConnection>(k: K, v: SpeechConnection[K]) {
+  const c = conn.value;
+  if (!c) return;
+  c[k] = v;
+  saveMedia();
+}
+
+function add() {
+  const c = newSpeechConnection('fish', t('media.connection.default', { n: speech.value.connections.length + 1 }));
+  speech.value.connections.push(c);
+  speech.value.active = c.id;
+  saveMedia();
+}
+function copy(c: SpeechConnection) {
+  const n = copyConnection(c, t('media.connection.copyName', { name: c.name }));
+  speech.value.connections.push(n);
+  speech.value.active = n.id;
+  saveMedia();
+}
+function remove(c: SpeechConnection) {
+  speech.value.connections = speech.value.connections.filter((x) => x.id !== c.id);
+  if (speech.value.active === c.id) speech.value.active = speech.value.connections[0]?.id ?? null;
+  saveMedia();
+  void gcVoices();
+}
+const select = (id: string) => { speech.value.active = id; saveMedia(); };
+const rename = (c: SpeechConnection, name: string) => { c.name = name; saveMedia(); };
+const setApi = (api: SpeechApi) => { if (conn.value) { changeSpeechApi(conn.value, api); saveMedia(); void gcVoices(); } };
+
+function addBinding() {
+  conn.value?.bindings.push({ character: '', voice: null });
+  saveMedia();
+}
+function setBinding(i: number, patch: Partial<{ character: string; voice: VoiceRef | null }>) {
+  const b = conn.value?.bindings[i];
+  if (!b) return;
+  Object.assign(b, patch);
+  saveMedia();
+}
+function removeBinding(i: number) {
+  conn.value?.bindings.splice(i, 1);
+  saveMedia();
+  void gcVoices();
+}
 </script>
 
 <template>
   <Section :title="t('media.speech')" :icon="AudioLines">
     <template #actions><Switch :model-value="speech.enabled" :label="t('media.speech')" @update:model-value="set('enabled', $event)" /></template>
     <template v-if="speech.enabled">
-      <Field :label="t('media.auto')" inline><Switch :model-value="speech.auto" @update:model-value="set('auto', $event)" /></Field>
-      <Field :label="t('media.speech.narrator')" inline><Switch :model-value="speech.narrator" @update:model-value="set('narrator', $event)" /></Field>
+      <Field :label="t('media.auto')" :help="t('media.speech.auto.hint')" inline><Switch :model-value="speech.auto" @update:model-value="set('auto', $event)" /></Field>
+      <Field :label="t('media.speech.narrator')" :help="t('media.speech.narrator.hint')" inline><Switch :model-value="speech.narrator" @update:model-value="set('narrator', $event)" /></Field>
+      <ConnectionBar :connections="speech.connections" :active="conn" :api-label="apiLabel" @select="select" @add="add" @copy="copy" @remove="remove" @rename="rename" />
+      <div v-if="conn" :key="conn.id" class="col media-conn">
+        <Field :label="t('media.speech.api')">
+          <select class="input" :value="conn.api" @change="setApi(($event.target as HTMLSelectElement).value as SpeechApi)">
+            <option v-for="a in SPEECH_APIS" :key="a" :value="a">{{ apiLabel(a) }}</option>
+          </select>
+        </Field>
+        <Field :label="t('media.baseUrl')">
+          <input class="input" :value="conn.baseUrl" :placeholder="provider?.defaults.baseUrl" spellcheck="false" @change="edit('baseUrl', ($event.target as HTMLInputElement).value.trim())" />
+        </Field>
+        <Field :label="t('media.apiKey')">
+          <input class="input" type="password" autocomplete="off" :value="conn.apiKey" @change="edit('apiKey', ($event.target as HTMLInputElement).value.trim())" />
+        </Field>
+        <Field :label="t('media.model')">
+          <input class="input" :list="`ap-speech-models-${conn.api}`" :value="conn.model" :placeholder="provider?.defaults.model" spellcheck="false" @change="edit('model', ($event.target as HTMLInputElement).value.trim())" />
+          <datalist :id="`ap-speech-models-${conn.api}`"><option v-for="m in provider?.models ?? []" :key="m" :value="m" /></datalist>
+        </Field>
+        <Field :label="t('media.speech.voice')" :help="t('media.speech.voice.hint')">
+          <VoicePicker :connection="conn" :model-value="conn.voice" :label="t('media.speech.voice')" @update:model-value="edit('voice', $event)" />
+        </Field>
+        <Field v-if="speech.narrator" :label="t('media.speech.narratorVoice')">
+          <VoicePicker :connection="conn" :model-value="conn.narrator" :label="t('media.speech.narratorVoice')" :placeholder="t('media.speech.sameAsDefault')" @update:model-value="edit('narrator', $event)" />
+        </Field>
+        <Field :label="t('media.speech.bindings')" :help="t('media.speech.bindings.hint')">
+          <div class="col">
+            <div v-for="(b, i) in conn.bindings" :key="i" class="speech-binding">
+              <input class="input" :value="b.character" :placeholder="t('media.speech.character')" @change="setBinding(i, { character: ($event.target as HTMLInputElement).value.trim() })" />
+              <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(i, { voice: $event })" />
+              <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeBinding(i)" />
+            </div>
+            <button type="button" class="btn ghost add" @click="addBinding"><Plus />{{ t('media.speech.addBinding') }}</button>
+          </div>
+        </Field>
+        <AdvancedRequest :connection="conn" @changed="saveMedia()" />
+      </div>
     </template>
   </Section>
 </template>

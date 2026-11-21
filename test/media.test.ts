@@ -60,7 +60,7 @@ describe('speech history', () => {
   });
 
   it('applies only while speech is on and requested', () => {
-    const preset = { ...petals, speech: {}, structures: { ...petals.structures, voice: { ...SPEECH, history: 3 } }, modules: [...petals.modules, { id: 'v', name: 'v', toggle: 'always', default: true, structures: ['voice'], vars: [] }] } as typeof petals;
+    const preset = { ...petals, speech: {}, structures: { ...Object.fromEntries(Object.entries(petals.structures).filter(([, d]) => d.kind !== 'speech')), voice: { ...SPEECH, history: 3 } }, modules: [...petals.modules, { id: 'v', name: 'v', toggle: 'always', default: true, structures: ['voice'], vars: [] }] } as typeof petals;
     const config = petals.configurationDefaults;
     expect(speechHistory(preset, config, { speech: { ...SPEECH_OFF, on: true } })).toEqual({ depth: 3, tag: 'speech' });
     expect(speechHistory(preset, config, { speech: SPEECH_OFF })).toBeUndefined();
