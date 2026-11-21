@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Settings panel (§16.5): header with preset + enable switch and seven tabs, overlaid on ST's AI Response Configuration drawer. */
 import { computed, onBeforeUnmount, onMounted, watch, type Component } from 'vue';
-import { Blocks, Brain, Bug, GitBranch, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
+import { Blocks, Brain, Bug, Clapperboard, GitBranch, Layers, Package, PenLine, SlidersHorizontal, X } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
 import { presetName, t } from '@/i18n';
 import { activePreset, presetSummary, ui, type PanelTab } from '../state';
@@ -15,7 +15,9 @@ import WritingTab from './tabs/WritingTab.vue';
 import MemoryTab from './tabs/MemoryTab.vue';
 import DebugTab from './tabs/DebugTab.vue';
 import StorylinesTab from './tabs/StorylinesTab.vue';
+import MediaTab from './tabs/MediaTab.vue';
 import { storylinesActive } from '../storylines';
+import { declaresMedia } from '@/media/decl';
 
 const tabs: { id: PanelTab; icon: Component; view: Component }[] = [
   { id: 'presets', icon: Package, view: PresetsTab },
@@ -24,10 +26,11 @@ const tabs: { id: PanelTab; icon: Component; view: Component }[] = [
   { id: 'writing', icon: PenLine, view: WritingTab },
   { id: 'memory', icon: Brain, view: MemoryTab },
   { id: 'storylines', icon: GitBranch, view: StorylinesTab },
+  { id: 'media', icon: Clapperboard, view: MediaTab },
   { id: 'debug', icon: Bug, view: DebugTab },
 ];
-/** The storylines tab only while the preset declares storylines and they are switched on. */
-const shown = computed(() => tabs.filter((x) => x.id !== 'storylines' || storylinesActive.value));
+/** The storylines tab only while the preset declares storylines and they are switched on; media only when it declares image / speech. */
+const shown = computed(() => tabs.filter((x) => (x.id !== 'storylines' || storylinesActive.value) && (x.id !== 'media' || declaresMedia(activePreset.value))));
 const current = computed(() => shown.value.find((x) => x.id === ui.tab) ?? shown.value[0]!);
 
 const enabled = computed({ get: () => settings().enabled, set: (v: boolean) => { settings().enabled = v; save(); } });

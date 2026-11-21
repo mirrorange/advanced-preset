@@ -5,7 +5,7 @@ import { Check, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import IconButton from './IconButton.vue';
 import { t } from '@/i18n';
 
-const props = defineProps<{ entries: Record<string, string>; readonly?: boolean }>();
+const props = defineProps<{ entries: Record<string, string>; readonly?: boolean; keyPlaceholder?: string; valuePlaceholder?: string }>();
 const emit = defineEmits<{ set: [key: string, value: string]; remove: [key: string] }>();
 
 const editing = ref<string | null>(null);
@@ -38,8 +38,8 @@ function commit() {
         </div>
       </div>
       <div v-else class="kv-edit col">
-        <input v-model="draftKey" class="input" :placeholder="t('memory.key')" />
-        <textarea v-model="draftValue" class="input" rows="3" :placeholder="t('memory.content')" />
+        <input v-model="draftKey" class="input" :placeholder="keyPlaceholder ?? t('memory.key')" />
+        <textarea v-model="draftValue" class="input" rows="3" :placeholder="valuePlaceholder ?? t('memory.content')" />
         <div class="row end">
           <IconButton :icon="X" :label="t('common.cancel')" @click="editing = null" />
           <IconButton :icon="Check" :label="t('common.save')" active @click="commit" />
@@ -47,8 +47,8 @@ function commit() {
       </div>
     </template>
     <div v-if="editing === ''" class="kv-edit col">
-      <input v-model="draftKey" class="input" :placeholder="t('memory.key')" />
-      <textarea v-model="draftValue" class="input" rows="3" :placeholder="t('memory.content')" />
+      <input v-model="draftKey" class="input" :placeholder="keyPlaceholder ?? t('memory.key')" />
+      <textarea v-model="draftValue" class="input" rows="3" :placeholder="valuePlaceholder ?? t('memory.content')" />
       <div class="row end">
         <IconButton :icon="X" :label="t('common.cancel')" @click="editing = null" />
         <IconButton :icon="Check" :label="t('common.save')" active @click="commit" />
