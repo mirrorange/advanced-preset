@@ -2,7 +2,7 @@
  * GenerationContext (§5.1): one per generation, created by the interceptor or at PROMPT_READY
  * (whichever comes first) and carried through FetchGate → Orchestrator → sidecar via `id`.
  */
-import type { APreset, Assembly, Configuration, Stage, StructureDecl, Transport, Workflow } from '@advanced-preset/protocol';
+import type { APreset, Assembly, Configuration, SpeechCleaner, Stage, StructureDecl, Transport, Workflow } from '@advanced-preset/protocol';
 import type { KeywordTexts, MetaParse } from '@advanced-preset/protocol';
 import type { CacheState, StickyEntry } from './cache';
 import type { StorylineTurn } from './storylines';
@@ -42,6 +42,8 @@ export interface GenerationContext {
   inputShaped?: boolean;
   /** Storylines (presets that declare them, switched on): the current storyline and the history groups. */
   storylines?: StorylineTurn;
+  /** Display cleaner of inline speech lines, fixed for the turn (`null`: the default). */
+  speechCleaner?: SpeechCleaner | null;
   /** A backend rejected the built-in thought signature: later requests leave it out. */
   signatureFallback?: boolean;
   /** Set once FetchGate took over the request. */

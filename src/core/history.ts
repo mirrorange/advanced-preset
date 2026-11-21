@@ -3,7 +3,7 @@
  * script path (§9.2). Pure functions over a minimal message shape; the real chat is never touched.
  */
 import {
-  activeModules, annotationDepth, fillHistoryTemplate, formatSynopsisLine, hasStructureValue, historyContentKey, historyEchoOf, historyPlacement, injectAnnotations, insertPieces, parseMeta, resolverOf, test,
+  activeModules, annotationDepth, speechDepth, injectSpeech, fillHistoryTemplate, formatSynopsisLine, hasStructureValue, historyContentKey, historyEchoOf, historyPlacement, injectAnnotations, insertPieces, parseMeta, resolverOf, test,
   type APreset, type Configuration, type PlacedPiece, type StructureKind, type Synopsis, type TokenSavingConfig, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import type { Sidecar } from '@/store/sidecar';
@@ -36,6 +36,8 @@ export interface RewriteOptions {
   currentInput: number;
   /** Re-inject inline annotations as CriticMarkup into the last `depth` assistant messages (I-80). */
   annotations?: { depth: number };
+  /** Re-inject speech lines as speech tags (`tag`) into the last `depth` assistant messages. */
+  speech?: { depth: number; tag: string };
   /** Item index of the assistant message being continued: it never carries structures. */
   continuing?: number;
   /**
@@ -76,31 +78,33 @@ export interface RenderMode {
   max?: number;
   /** Inline annotations re-injected as CriticMarkup. */
   annotations?: boolean;
+  /** Speech lines re-injected as speech tags. */
+  speech?: boolean;
   /** Full assistant text that also carries these structures (structure history, I-139), in rule order. */
   echo?: string[];
 }
 
 /**
- * Compact form stored between requests: `f` / `s` / `x` / `t<max>`, then `a` (annotations) and
- * `+<id>` per carried structure. `y` (synopsis, before 1.10) is still read.
+ * Compact form stored between requests: `f` / `s` / `x` / `t<max>`, then `a` (annotations), `v`
+ * (speech) and `+<id>` per carried structure. `y` (synopsis, before 1.10) is still read.
  */
 export function encodeMode(m: RenderMode): string {
   const body = m.body === 'full' ? 'f' : m.body === 'synopsis' ? 's' : m.body === 'drop' ? 'x' : `t${m.max ?? 0}`;
   if (m.body !== 'full') return body;
-  return body + (m.annotations ? 'a' : '') + (m.echo ?? []).map((id) => `+${id}`).join('');
+  return body + (m.annotations ? 'a' : '') + (m.speech ? 'v' : '') + (m.echo ?? []).map((id) => `+${id}`).join('');
 }
 
 /** `synopsisId`: the structure a legacy `y` refers to. */
 export function decodeMode(code: string | undefined, synopsisId?: string): RenderMode | undefined {
-  const m = code ? /^(?:(f)(y?)(a?)((?:\+[^+]+)*)|(s)|(x)|t(\d+))$/.exec(code) : null;
+  const m = code ? /^(?:(f)(y?)(a?)(v?)((?:\+[^+]+)*)|(s)|(x)|t(\d+))$/.exec(code) : null;
   if (!m) return undefined;
   if (m[1]) {
-    const echo = [...(m[2] && synopsisId ? [synopsisId] : []), ...(m[4] ? m[4].slice(1).split('+') : [])];
-    return { body: 'full', ...(m[3] ? { annotations: true } : {}), ...(echo.length ? { echo } : {}) };
+    const echo = [...(m[2] && synopsisId ? [synopsisId] : []), ...(m[5] ? m[5].slice(1).split('+') : [])];
+    return { body: 'full', ...(m[3] ? { annotations: true } : {}), ...(m[4] ? { speech: true } : {}), ...(echo.length ? { echo } : {}) };
   }
-  if (m[5]) return { body: 'synopsis' };
-  if (m[6]) return { body: 'drop' };
-  return { body: 'truncate', max: Number(m[7]) };
+  if (m[6]) return { body: 'synopsis' };
+  if (m[7]) return { body: 'drop' };
+  return { body: 'truncate', max: Number(m[8]) };
 }
 
 const sidecarOf = (m: HistoryItem): Sidecar | undefined => {
@@ -200,6 +204,10 @@ export function planHistory(items: HistoryItem[], o: RewriteOptions): PlannedIte
   for (const p of recentAssistants(o.annotations?.depth ?? 0)) {
     if (p.fresh!.body === 'full' && sidecarOf(p.item)?.annotations?.length) p.fresh!.annotations = true;
   }
+  // 4b. Speech lines, the same way (the message being continued keeps its clean text).
+  for (const p of recentAssistants(o.speech?.depth ?? 0)) {
+    if (p.fresh!.body === 'full' && p.index !== o.continuing && sidecarOf(p.item)?.speech?.length) p.fresh!.speech = true;
+  }
 
   // 5. Structure history (I-139): the last `depth` assistant messages keep their text and also carry
   //    the structure (e.g. a synopsis keeps a time/place reference while older turns are verbatim).
@@ -232,6 +240,9 @@ export function renderItem(p: PlannedItem, mode: RenderMode | null, o: RewriteOp
       let mes = item.mes;
       if (item.is_user) return mes;
       const list = mode.annotations ? sidecarOf(item)?.annotations : undefined;
+      const lines = mode.speech ? sidecarOf(item)?.speech : undefined;
+      // Speech first: its spans are anchored in the clean text, which annotation markup would change.
+      if (lines?.length) mes = injectSpeech(mes, lines, o.speech?.tag);
       if (list?.length) mes = injectAnnotations(mes, list);
       if (mode.echo?.length && o.echoes) mes = insertEchoes(mes, item, mode.echo, o.echoes);
       return mes;
@@ -274,6 +285,18 @@ export function annotationHistory(preset: APreset, config: Configuration): { dep
   if (!depth) return undefined;
   const requested = activeModules(preset, config).some((m) => m.structures.includes(decl!.id));
   return requested ? { depth } : undefined;
+}
+
+/**
+ * Speech re-injection for the preset: the speech structure has a numeric `history`, a switched-on
+ * module requests it and speech synthesis is on this turn (`vars.speech.on`).
+ */
+export function speechHistory(preset: APreset, config: Configuration, vars: Pick<Vars, 'speech'> | undefined): { depth: number; tag: string } | undefined {
+  const decl = Object.values(preset.structures).find((s) => s.kind === 'speech');
+  const depth = decl ? speechDepth(decl) : 0;
+  if (!depth || !preset.speech || !vars?.speech?.on) return undefined;
+  const requested = activeModules(preset, config).some((m) => m.structures.includes(decl!.id));
+  return requested ? { depth, tag: decl!.tag } : undefined;
 }
 
 /** Synopsis options for {@link rewriteHistory}: the token-saving replacement template and the structure. */

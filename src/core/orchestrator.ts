@@ -4,8 +4,8 @@
  * a synthesised response that only carries story content (D1, D2, D20).
  */
 import {
-  applyPatches, parseAnnotations, partialTagTail, replyToPlainText, stripComments, terminalContentIndex,
-  type Annotation, type MemoryOp, type PatchResult, type TurnResult,
+  applyPatches, parseAnnotations, parseSpeech, parseSpeechWith, partialTagTail, replyToPlainText, stripComments, terminalContentIndex,
+  type Annotation, type MemoryOp, type PatchResult, type SpeechCleaner, type SpeechSpan, type TurnResult,
 } from '@advanced-preset/protocol';
 import { nativeFetch, st, streamContextOf, toast, toolCallingIssue } from '@/st/host';
 import { planMemoryOps, type ChatEvent, type PendingGlobalOp } from '@/store/eventlog';
@@ -21,6 +21,16 @@ import { live, startLive, updateLive, type LiveGeneration } from './live';
 import { recordRequest } from './debug';
 import { commitCache } from './sticky';
 import { addUsage } from './usage';
+import { speechRuntime } from './media-vars';
+import type { StructureDecl } from '@advanced-preset/protocol';
+
+/** Inline speech of this turn: tag name and display cleaner (`undefined` when not requested). */
+function speechOptions(ctx: GenerationContext): { tag: string; cleaner?: SpeechCleaner } | undefined {
+  const decl: StructureDecl | undefined = ctx.structures.find((s) => s.kind === 'speech');
+  if (!decl) return undefined;
+  ctx.speechCleaner ??= speechRuntime(ctx.preset).cleaner ?? null;
+  return { tag: decl.tag, ...(ctx.speechCleaner ? { cleaner: ctx.speechCleaner } : {}) };
+}
 
 export const GENERATE_URL = '/api/backends/chat-completions/generate';
 
@@ -132,7 +142,11 @@ async function run(
   // Only the terminal content of a story turn streams into the message; drafts and patched text stay in the UI.
   const gate = ctx.origin === 'story' && !caller.schema && !hasPatch && terminalId !== null;
   // Inline annotations (I-81): only the clean text that can no longer change is streamed.
-  const clean = ctx.structures.some((s) => s.kind === 'annotations') ? (s: string) => parseAnnotations(s, { final: false }).text : (s: string) => s;
+  // Inline speech: its markup never shows either.
+  const annotating = ctx.structures.some((s) => s.kind === 'annotations');
+  const speech = speechOptions(ctx);
+  const cleanAnno = annotating ? (s: string) => parseAnnotations(s, { final: false }).text : (s: string) => s;
+  const clean = speech ? (s: string) => parseSpeech(cleanAnno(s), { ...speech, final: false }).text : cleanAnno;
   const maxSteps = ctx.transport === 'tool-multi' ? Math.max(1, ctx.config.connection.maxSteps) : 1;
   const started = Date.now();
   let reasoning = '';
@@ -260,6 +274,26 @@ function finish(
       annotationVersions = { draft: d.annotations, patched: annotations ?? [] };
     }
   }
+  // Inline speech: parsed from the annotation-clean text; annotations are moved onto the speech-clean text.
+  let speech: SpeechSpan[] | undefined;
+  let speechVersions: Sidecar['speechVersions'];
+  const speechOpts = speechOptions(ctx);
+  if (speechOpts) {
+    if (content) {
+      const r = parseSpeechWith(content, annotations, speechOpts);
+      warnings.push(...r.warnings);
+      content = r.text;
+      speech = r.spans;
+      annotations = r.anchors;
+    }
+    if (draft !== undefined && patched !== undefined) {
+      const d = parseSpeechWith(draft, annotationVersions?.draft, speechOpts);
+      draft = d.text;
+      patched = content;
+      speechVersions = { draft: d.spans, patched: speech ?? [] };
+      if (annotationVersions) annotationVersions = { draft: d.anchors ?? [], patched: annotations ?? [] };
+    }
+  }
 
   const kindOf = (k: string) => Object.values(preset.structures).find((s) => s.kind === k);
   const replyDecl = kindOf('reply');
@@ -319,6 +353,8 @@ function finish(
     ...(draft !== undefined ? { draft, patched } : {}),
     ...(annotations?.length ? { annotations } : {}),
     ...(annotationVersions && (annotationVersions.draft.length || annotationVersions.patched.length) ? { annotationVersions } : {}),
+    ...(speech?.length ? { speech } : {}),
+    ...(speechVersions && (speechVersions.draft.length || speechVersions.patched.length) ? { speechVersions } : {}),
     patchesApplied: draft !== undefined,
     structures: turn.structures,
     events,
