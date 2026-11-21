@@ -90,6 +90,12 @@ warn  preset.yaml:41 groups: module `x` has no group
 | `--storyline-switch` | 模拟 `#!`：本轮把当前故事线设为主线（`storyline.switching` 与 `storyline.main` 为真）；与 `--storyline ?` 一起为 `#!?` |
 | `--storyline-naming-main` | 与 `--storyline-switch` 一起：原主线没有名称，由 AI 命名（`storyline.namingMain`，请求 `previous_main`） |
 | `--storyline-grouped` | 在主线上模拟分组的历史（`storyline.grouped` 为真；给了 `--storyline` 时总为真） |
+| `--image <api>` | 模拟开启图像生成（预设声明了 `image` 时）：`image.on` 为真，`image.api` 为 `openai` / `gemini` / `novelai`，请求 `image` 结构。摘要中有一行 `image: …` |
+| `--image-auto` / `--image-style` / `--image-sfw` | 与 `--image` 一起：`image.auto` / `image.style` / `image.sfw` 为真 |
+| `--image-refs` | 与 `--image` 一起：当前连接有参考图（`image.refs` 为真，`{{ap::image::refs}}` 为两条占位参考图 `ref1` / `ref2`，Schema 中有 `refs`）；`novelai` 没有参考图 |
+| `--speech <api>` | 模拟开启语音合成（预设声明了 `speech` 时）：`speech.on` 为真，`speech.api` 为 `fish` / `elevenlabs` / `minimax` / `gemini` / `openai` / `deepseek`，`{{ap::speech::format}}` 为占位文字，请求 `speech` 结构。摘要中有一行 `speech: …` |
+| `--speech-auto` / `--speech-narrator` | 与 `--speech` 一起：`speech.auto` / `speech.narrator` 为真 |
+| `--speech-characters` | 与 `--speech` 一起：有已绑定说话人的角色（`speech.characters` 为真，`{{ap::speech::characters}}` 为占位名） |
 | `--lang <lang>` | 按该面板语言选用随预设安装的用户模组与模板的翻译 |
 | `--json` | 输出 JSON：`vars`、`buildVars`、`skipped`、`modules`、`structures`、`stages`、`regions`、`historyInput`（`--input` 时历史中那条消息的样子，提取时为 `null`），以及 `schema`（structured）或 `tools`（工具传输） |
 | `--out <file>` | 写入文件而不是标准输出 |
@@ -103,6 +109,7 @@ warn  preset.yaml:41 groups: module `x` has no group
 - 元指令文本为占位符 `(meta text)`；`meta.task` 为 `null`；
 - 没有 `--input` 时没有本次输入，`input.shaped` 为假；
 - 没有聊天历史，所以看不到故事线的分组与分隔消息；`{{ap::storyline::main}}` 为空。
+- 图像生成与语音合成默认关闭；`--meta pure` 时即使给了 `--image` / `--speech` 也关闭（任务轮）。
 
 常用的预览矩阵：每种传输方式各一次；`--meta pure`；每个推荐配置；关键模组开 / 关；关键参数设置 / 未设置（`--param`）。
 
