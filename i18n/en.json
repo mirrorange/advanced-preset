@@ -541,5 +541,6 @@
   "debug.images.confirm": "Scan all chats and delete generated images none of them uses? This cannot be undone.",
   "debug.images.scanning": "Scanning chats {done} / {total}",
   "debug.images.done": "Removed {removed} images; {kept} kept.",
-  "debug.images.failed": "Nothing was deleted: {error}"
+  "debug.images.failed": "Nothing was deleted: {error}",
+  "media.image.missing": "Image not found on this device"
 }
