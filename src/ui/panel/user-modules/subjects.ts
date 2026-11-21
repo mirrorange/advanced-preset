@@ -38,6 +38,8 @@ function fixed(preset: APreset): Record<string, VarInfo> {
     'recap.present': { kind: 'bool', label: t('um.var.recap') },
     // Only presets that shape the input have the signal worth offering.
     ...(preset.inputShaping ? { 'input.shaped': { kind: 'bool' as const, label: t('um.var.inputShaped') } } : {}),
+    ...(preset.image ? { 'image.on': { kind: 'bool' as const, label: t('um.var.imageOn') } } : {}),
+    ...(preset.speech ? { 'speech.on': { kind: 'bool' as const, label: t('um.var.speechOn') } } : {}),
   };
 }
 
@@ -51,7 +53,7 @@ export function subjectGroups(preset: APreset): SubjectGroup[] {
   if (preset.params.length) presetSubjects.push({ id: 'param', label: t('um.var.param') });
   return [
     { label: t('um.group.chat'), subjects: [{ id: 'keyword', label: t('um.keyword') }, ...pick(['chat.group', 'memory.hasChat', 'memory.hasGlobal', 'recap.present'])] },
-    { label: t('um.group.generation'), subjects: pick(['gen.type', 'gen.origin', 'meta.present', 'meta.pure', 'input.shaped']) },
+    { label: t('um.group.generation'), subjects: pick(['gen.type', 'gen.origin', 'meta.present', 'meta.pure', 'input.shaped', 'image.on', 'speech.on']) },
     { label: t('um.group.preset'), subjects: [...presetSubjects, ...pick(['transport', 'style', 'workflow', 'features.tokenSaving'])] },
     { label: t('um.group.advanced'), subjects: [...(preset.regex.length ? [{ id: 'flag', label: t('um.var.flag') }] : []), { id: 'expr', label: t('um.expr') }] },
   ].filter((g) => g.subjects.length);

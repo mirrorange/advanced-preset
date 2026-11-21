@@ -27,7 +27,7 @@
 6. [条件：让提示词随情况变化](06-conditions.md)
 7. [两种写法与五种传输方式](07-styles-and-transports.md)
 8. [工作流：让模型分步骤思考与写作](08-workflows.md)
-9. [内置功能：元指令、记忆、总结、代写、选项与事件摘要](09-built-in-features.md)
+9. [内置功能：元指令、记忆、总结、代写、选项、事件摘要、图像与语音](09-built-in-features.md)
 10. [构建变量：让模组一起拼出一份清单](10-build-variables.md)
 11. [推荐配置、插入点、快速回复与界面翻译](11-configs-and-extension.md)
 12. [测试、发布与更新](12-test-and-release.md)

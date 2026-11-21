@@ -24,7 +24,7 @@ Advanced Preset（下文简称 **AP**）是一个 SillyTavern 扩展：预设作
 6. [条件：让提示词随情况变化](guide/06-conditions.md)
 7. [两种写法与五种传输方式](guide/07-styles-and-transports.md)
 8. [工作流：让模型分步骤思考与写作](guide/08-workflows.md)
-9. [内置功能：元指令、记忆、总结、代写、选项与事件摘要](guide/09-built-in-features.md)
+9. [内置功能：元指令、记忆、总结、代写、选项、事件摘要、图像与语音](guide/09-built-in-features.md)
 10. [构建变量：让模组一起拼出一份清单](guide/10-build-variables.md)
 11. [推荐配置、插入点、快速回复与界面翻译](guide/11-configs-and-extension.md)
 12. [测试、发布与更新](guide/12-test-and-release.md)
