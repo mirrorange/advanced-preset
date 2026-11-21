@@ -34,7 +34,7 @@ beforeEach(() => {
   popup.mockClear();
   updateForPreset.mockReset();
   updateForPreset.mockResolvedValue(false);
-  vi.stubGlobal('__AP_VERSION__', '1.11.2');
+  vi.stubGlobal('__AP_VERSION__', '1.12.0');
   vi.stubGlobal('localStorage', { getItem: () => 'en' });
   vi.stubGlobal('sessionStorage', { getItem: (k: string) => session.get(k) ?? null, setItem: (k: string, v: string) => void session.set(k, v), removeItem: (k: string) => void session.delete(k) });
   vi.stubGlobal('fetch', vi.fn(async (url: string) => {
@@ -120,11 +120,11 @@ describe('checking for updates at startup', () => {
 describe('presets that need a newer Advanced Preset', () => {
   it('updates AP and installs the preset after the reload', async () => {
     updateForPreset.mockResolvedValue(true);
-    await expect(installArtifact(preset({ minAdvancedPreset: '1.12.0' }), 'https://example.com/mine.json')).rejects.toBeInstanceOf(ApUpdating);
-    expect(updateForPreset).toHaveBeenCalledWith('1.12.0', 'Mine');
+    await expect(installArtifact(preset({ minAdvancedPreset: '1.13.0' }), 'https://example.com/mine.json')).rejects.toBeInstanceOf(ApUpdating);
+    expect(updateForPreset).toHaveBeenCalledWith('1.13.0', 'Mine');
     expect(settings().installed.mine).toBeUndefined();
 
-    vi.stubGlobal('__AP_VERSION__', '1.12.0');
+    vi.stubGlobal('__AP_VERSION__', '1.13.0');
     await resumePendingInstall();
     expect(getPresetEntry('mine')?.source).toBe('installed');
     expect(settings().sources.mine).toBe('https://example.com/mine.json');
@@ -139,7 +139,7 @@ describe('presets that need a newer Advanced Preset', () => {
 
   it('an update found at startup goes the same way', async () => {
     await installArtifact(preset({ updateUrl: 'https://example.com/mine.json' }));
-    served['https://example.com/mine.json'] = preset({ version: '2.0.0', hash: 'h2', minAdvancedPreset: '1.12.0' });
+    served['https://example.com/mine.json'] = preset({ version: '2.0.0', hash: 'h2', minAdvancedPreset: '1.13.0' });
     updateForPreset.mockResolvedValue(true);
     await checkPresetUpdates();
     expect(getPresetEntry('mine')?.preset.version).toBe('1.0.0');
