@@ -10,7 +10,7 @@ import { pt } from '@/i18n';
 import { activeCarrierPresetId } from '@/store/carrier';
 import { getSidecar, type Sidecar } from '@/store/sidecar';
 
-export type PanelTab = 'presets' | 'config' | 'modules' | 'writing' | 'memory' | 'storylines' | 'debug';
+export type PanelTab = 'presets' | 'config' | 'modules' | 'writing' | 'memory' | 'storylines' | 'media' | 'debug';
 
 export const ui = reactive({
   chatRev: 0,
