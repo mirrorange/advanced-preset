@@ -20,6 +20,16 @@ export interface SidecarStage {
   status: 'done' | 'interrupted' | 'missing';
 }
 
+/** Images generated for one image prompt. */
+export interface SidecarImage {
+  /** Media store keys (`img:`), oldest first. */
+  keys: string[];
+  /** Index of the image shown (default: the newest). */
+  shown?: number;
+  /** The prompt as the user edited it (absent: the model's prompt). */
+  prompt?: string;
+}
+
 export interface Sidecar {
   v: 1;
   presetId: string;
@@ -44,6 +54,8 @@ export interface Sidecar {
   /** Patched workflows: speech lines of the draft and of the patched text (swapped with `patchesApplied`). */
   speechVersions?: { draft: SpeechSpan[]; patched: SpeechSpan[] };
   structures: Record<string, unknown>;
+  /** Generated images by image structure id, one entry per prompt (same index as the structure's `images`). */
+  images?: Record<string, SidecarImage[]>;
   events: ChatEvent[];
   /** Meta segments of the user input of this turn (for `recent_meta`). */
   metaInput?: string[];

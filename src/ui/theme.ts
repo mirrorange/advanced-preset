@@ -8,6 +8,7 @@ import tokensCss from './styles/tokens.css?inline';
 import baseCss from './styles/base.css?inline';
 import messageCss from './styles/message.css?inline';
 import panelCss from './styles/panel.css?inline';
+import mediaCss from './styles/media.css?inline';
 import { settings } from '@/store/settings';
 import { activePreset } from './state';
 
@@ -15,7 +16,7 @@ export type Mode = 'light' | 'dark';
 export const theme = reactive({ mode: 'light' as Mode });
 
 const staticSheet = new CSSStyleSheet();
-staticSheet.replaceSync([tokensCss, baseCss, messageCss, panelCss].join('\n'));
+staticSheet.replaceSync([tokensCss, baseCss, messageCss, panelCss, mediaCss].join('\n'));
 const paletteSheet = new CSSStyleSheet();
 export const sheets = [staticSheet, paletteSheet];
 
