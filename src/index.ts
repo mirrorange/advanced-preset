@@ -17,6 +17,7 @@ import { debugLog } from '@/core/debug';
 import { onMessageReceived } from '@/app/receive';
 import { installMemorySync, syncGlobalRefs } from '@/app/memory-sync';
 import { annotationsApi, installAnnotations } from '@/app/annotations';
+import { installSpeech, speechApi } from '@/app/speech';
 import { installVariableGuard } from '@/app/variable-guard';
 import { checkStaleBundle, onExtensionUpdated, updateExtension } from '@/app/updater';
 import { startDevSource } from '@/app/dev-source';
@@ -50,6 +51,8 @@ const api = {
   togglePanel: (open?: boolean) => { ui.panelOpen = open ?? !ui.panelOpen; },
   /** Inline annotations of messages (I-83). */
   annotations: annotationsApi,
+  /** Inline speech lines of messages (presets with speech synthesis). */
+  speech: speechApi,
 };
 
 // Must exist synchronously: ST resolves the interceptor by name when generating.
@@ -74,6 +77,7 @@ async function init(): Promise<void> {
   installImpersonate();
   installPresetIo();
   installAnnotations();
+  installSpeech();
   await loadHostModules();
   await loadBuiltins();
   // A built-in the user had installed by hand, now shipped in a newer version: back to the built-in.

@@ -1465,3 +1465,68 @@ describe('preset file (I-170)', () => {
     expect(bare.extensions.tavern_helper).toBeUndefined();
   });
 });
+
+describe('media (image generation / speech synthesis)', () => {
+  const STRUCTS = `
+  pic: { kind: image, tag: Pic, count: 2, properties: { prompt: Describe the scene }, formatPrompt: { tag: "<Pic>…</Pic>", field: "{{field}}" } }
+  voice: { kind: speech, history: 2, formatPrompt: { tag: "Wrap lines in <speech character=\\"…\\">." } }
+`;
+  const withMedia = (decl: string, min = 'minAdvancedPreset: 1.12.0\n', body = 'Draw.<!-- @if image.refs -->\n{{ap::image::refs}}<!-- @end --><!-- @if speech.on -->\n{{ap::speech::format}} {{ap::speech::characters}}<!-- @end -->', structures = STRUCTS) => {
+    const manifest = MANIFEST.replace('version: 1.0.0', `version: 1.0.0\n${min}`).replace('structures:\n', `structures:${structures}`) + decl;
+    const t = tree({ 'preset.yaml': manifest });
+    t.set('modules/media.md', `---\nid: media\ntoggle: always\nregion: task\nwhen: image.on || speech.on\nstructures: [pic, voice]\n---\n${body}\n`);
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+
+  it('is absent unless declared (hash unchanged)', () => {
+    const plain = build(tree());
+    expect('image' in plain.preset!).toBe(false);
+    expect('speech' in plain.preset!).toBe(false);
+  });
+
+  it('compiles the flags and structures', () => {
+    const r = build(withMedia('image: true\nspeech: {}\n'));
+    expect(r.diag.errors).toEqual([]);
+    expect(messages(r)).not.toMatch(/image|speech|voice|pic/i);
+    expect(r.preset!.image).toEqual({});
+    expect(r.preset!.speech).toEqual({});
+    expect(r.preset!.structures.pic).toMatchObject({ kind: 'image', tag: 'Pic', count: 2, properties: { prompt: 'Describe the scene' } });
+    expect(r.preset!.structures.voice).toMatchObject({ kind: 'speech', tag: 'speech', history: 2, formatPrompt: { tag: 'Wrap lines in <speech character="…">.', field: 'Wrap lines in <speech character="…">.' } });
+  });
+
+  it('flags bad declarations, undeclared use and old AP versions', () => {
+    expect(messages(build(withMedia('image: yes\nspeech: true\n')))).toMatch(/image must be `true` or a mapping/);
+    expect(messages(build(withMedia('image: { tag: x }\nspeech: true\n')))).toMatch(/image: unknown key `tag`/);
+    const undeclared = messages(build(withMedia('')));
+    expect(undeclared).toMatch(/image\.\* variables and \{\{ap::image::…\}\} are always off/);
+    expect(undeclared).toMatch(/structure voice: speech structures are never requested/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', '')))).toMatch(/image generation needs Advanced Preset 1\.12\.0[\s\S]*speech synthesis needs/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '{{ap::image::nope}} {{ap::speech::x}}')))).toMatch(/expected refs[\s\S]*expected format \| characters/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '<!-- @if image.api == "dalle" -->x<!-- @end -->')))).toMatch(/`image.api` is never "dalle"/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('history: 2', 'history: { depth: 2 }'))))).toMatch(/speech takes a number/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('count: 2', 'count: 0'))))).toMatch(/must be a positive integer/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('tag: Pic', 'tag: speech'))))).toMatch(/share tag `speech`/);
+    const lonely = withMedia('image: true\nspeech: true\n');
+    lonely.set('modules/media.md', lonely.get('modules/media.md')!.replace('structures: [pic, voice]', 'structures: [pic]'));
+    expect(messages(build(lonely))).toMatch(/declares speech but no module requests a speech structure/);
+  });
+
+  it('previews the media variables with placeholder macros', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withMedia('image: true\nspeech: true\n')).preset!;
+    const off = preview(p, {});
+    expect(off).toMatch(/image: off\nspeech: off\n/);
+    expect(off).not.toMatch(/Draw\./);
+    const on = preview(p, { image: { api: 'gemini', refs: true, sfw: true }, speech: { api: 'fish', characters: true } });
+    expect(on).toMatch(/image: gemini · sfw · refs\nspeech: fish · characters/);
+    expect(on).toMatch(/- ref1: \(reference image 1\)/);
+    expect(on).toMatch(/\(speech format notes of the API\) \(character 1\), \(character 2\)/);
+    expect(on).toMatch(/structures: [^\n]*pic, voice/);
+    const json = JSON.parse(preview(p, { image: { api: 'novelai', refs: true }, json: true, transport: 'structured' }));
+    expect(json.vars.image).toEqual({ on: true, auto: false, api: 'novelai', style: false, sfw: false, refs: false });
+    const field = Object.values(json.schema.value.properties as Record<string, { type: string; items?: { properties: object } }>).find((x) => x.type === 'array' && x.items)!;
+    expect(Object.keys(field.items!.properties)).toEqual(['prompt', 'ratio', 'caption']);
+    expect(preview(build(withMedia('')).preset!, { image: { api: 'openai' } })).toMatch(/image: off \(the preset declares no image\)/);
+  });
+});

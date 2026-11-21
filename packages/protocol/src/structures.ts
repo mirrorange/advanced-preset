@@ -4,6 +4,7 @@
  */
 import { isInlineStructure, type StructureDecl, type StructureKind } from './types';
 import { childText, findTags, removeBlocks, unescapeXml } from './tags';
+import { IMAGE_FIELDS, IMAGE_RATIOS, normalizeImages, type ImagePrompt } from './media';
 
 export type JsonSchema = Record<string, unknown>;
 
@@ -59,6 +60,8 @@ export const STRUCTURE_PROPERTIES: Record<StructureKind, readonly string[]> = {
   storyline: STORYLINE_NAMING_FIELDS,
   custom: [],
   annotations: [],
+  image: IMAGE_FIELDS,
+  speech: [],
 };
 
 /**
@@ -129,7 +132,28 @@ export function structureFieldSchema(decl: StructureDecl, expand: (text: string)
       });
     }
     case 'annotations':
+    case 'speech':
       return withDesc({ type: 'string' });
+    case 'image': {
+      // `requested` (runtime): reference ids are only asked for while the connection has references.
+      const fields = IMAGE_FIELDS.filter((k) => !decl.requested || decl.requested.includes(k));
+      const shapes: Record<(typeof IMAGE_FIELDS)[number], JsonSchema> = {
+        prompt: { type: 'string' },
+        refs: { type: 'array', items: { type: 'string' } },
+        ratio: { type: 'string', enum: [...IMAGE_RATIOS] },
+        caption: { type: 'string' },
+      };
+      return withDesc({
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: Object.fromEntries(fields.map((k) => [k, sub(k, shapes[k])])),
+          required: fields,
+          additionalProperties: false,
+        },
+        maxItems: decl.count && decl.count > 0 ? decl.count : 1,
+      });
+    }
     case 'custom':
       return decl.shape === 'kv' ? withDesc({ type: 'object', additionalProperties: { type: 'string' } }) : withDesc({ type: 'string' });
   }
@@ -174,7 +198,10 @@ export function normalizeStructure(kind: StructureKind, value: unknown, decl?: S
   if (value === undefined) return undefined;
   switch (kind) {
     case 'annotations':
+    case 'speech':
       return undefined;
+    case 'image':
+      return normalizeImages(value, decl?.count ?? 1);
     case 'reply':
     case 'impersonate': {
       const s = asString(value).trim();
@@ -257,7 +284,14 @@ function parseTagBlocks(decl: StructureDecl, blocks: ReturnType<typeof findTags>
   if (!last) return undefined;
   switch (decl.kind) {
     case 'annotations':
+    case 'speech':
       return undefined;
+    case 'image':
+      // One block per image: `<tag><prompt>…</prompt><refs>a, b</refs><ratio>3:4</ratio><caption>…</caption></tag>`.
+      return normalizeImages(blocks.filter((b) => !b.open).map((b): Partial<ImagePrompt> | string => {
+        if (!/<[A-Za-z_]/.test(b.inner)) return unescapeXml(b.inner).trim();
+        return { prompt: childText(b.inner, 'prompt'), refs: childText(b.inner, 'refs') as never, ratio: childText(b.inner, 'ratio') as never, caption: childText(b.inner, 'caption') };
+      }), decl.count ?? 1);
     case 'reply':
     case 'impersonate':
       return normalizeStructure(decl.kind, unescapeXml(last.inner));

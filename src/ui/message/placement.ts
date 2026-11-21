@@ -17,6 +17,9 @@ export const BUILTIN_CARDS: Record<StructureKind, { position: CardPosition; orde
   // The storyline badge shows the storyline (I-151); the names are applied when the reply is received.
   storyline: null,
   annotations: null,
+  // Images right after the message text; speech lines are marked in the text (inline).
+  image: { position: 'bottom', order: 50 },
+  speech: null,
 };
 
 export interface CardSlot { decl: StructureDecl; position: CardPosition; order: number; index: number }

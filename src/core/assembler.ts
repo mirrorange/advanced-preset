@@ -18,7 +18,7 @@ import { settings } from '@/store/settings';
 import { keywordTexts, userModules } from '@/store/user-modules';
 import { classify, metaEnabled, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
-import { alignHistory, annotationHistory, historyEchoes, rewriteHistory, synopsisOptions, type HistoryItem } from './history';
+import { alignHistory, annotationHistory, historyEchoes, rewriteHistory, speechHistory, synopsisOptions, type HistoryItem } from './history';
 import { debugLog } from './debug';
 import { markerOf, messageKey, stickyRewrite } from './cache';
 import { applySticky, stripMarkers, type CacheReport } from './sticky';
@@ -26,6 +26,7 @@ import { cacheState, currentChatKey, storylineCacheKey } from '@/store/cache-sta
 import { storylineMeta, storylinesOn } from '@/store/storylines';
 import { arrangeTurn, inBackground, placeLines, planTurn, takeLineMarks, type StorylineTurn } from './storylines';
 import { INPUT_SLOT, applyInput, locateInput, markInput, stripInputMarks } from './input-shaping';
+import { imageRuntime, speechRuntime } from './media-vars';
 
 export const ANCHOR_RE = /⟦ap:region:([\w.-]+)⟧/g;
 
@@ -104,6 +105,10 @@ export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined
   // Without a storyline turn (preview, storylines off) the main storyline.
   const mainName = storylinesOn(preset, config) ? storylineMeta().main ?? '' : '';
   const transport = ctx.transport;
+  // Media (I-170): only story turns of presets that declare the feature; values come from the settings layer.
+  const story = ctx.origin === 'story';
+  const image = story ? imageRuntime(preset) : imageRuntime({});
+  const speech = story ? speechRuntime(preset) : speechRuntime({});
   const vars = defaultVars(preset, config, {
     transport,
     style: preset.styles[transport],
@@ -117,6 +122,8 @@ export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined
     input: { shaped: Boolean(ctx.inputShaped) },
     last: Object.fromEntries(Object.values(preset.structures).filter((x) => x.kind === 'custom' || x.kind === 'status').map((x) => [x.id, x.id in last])),
     storyline: ctx.storylines?.vars ?? { ...MAIN_STORYLINE_VARS, name: mainName },
+    image: image.vars,
+    speech: speech.vars,
   });
   const data: MacroData = {
     metaText: ctx.meta.segments.join('\n\n'),
@@ -127,6 +134,8 @@ export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined
     // The text is only known once the history is final: a slot, filled in after the cache step.
     inputText: ctx.inputShaped ? INPUT_SLOT : '',
     storyline: { name: ctx.storylines?.vars.name ?? mainName, main: ctx.storylines?.mainName ?? mainName },
+    image: { refs: image.refs },
+    speech: { format: speech.format, characters: speech.characters },
   };
   return { vars, data };
 }
@@ -159,16 +168,18 @@ function backfill(ctx: GenerationContext, list: (ChatMessage & { __anchor?: stri
     ctx.storylines = a.turn;
   }
   const turn = ctx.storylines;
+  const early = buildVarsAndData(ctx, pickWorkflow(preset, config, ctx.origin)).vars;
   const options = {
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
     tokenSaving: config.tokenSaving,
     ...synopsisOptions(preset),
-    echoes: historyEchoes(preset, config, buildVarsAndData(ctx, pickWorkflow(preset, config, ctx.origin)).vars, pickWorkflow(preset, config, 'story')),
+    echoes: historyEchoes(preset, config, early, pickWorkflow(preset, config, 'story')),
     recap: currentRecap(Infinity, storylineViewOf(turn)),
     realIndex: (i: number) => real[i] ?? -1,
     currentInput: -1,
     annotations: annotationHistory(preset, config),
+    speech: speechHistory(preset, config, early),
     ...(turn ? { background: (i: number) => inBackground(turn, groupOf[i]) } : {}),
   };
   const keep = new Map<number, string>();

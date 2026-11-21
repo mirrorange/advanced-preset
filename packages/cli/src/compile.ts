@@ -30,6 +30,7 @@ import {
   CARD_POSITIONS, CONTENT_STAGE_REF, DEFAULT_ORDER_PREFIX, type CardPosition, type StructureOrder, type StructureUi,
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
   DEFAULT_STORYLINES, STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, type StorylineFreeze, type StorylinesDecl,
+  DEFAULT_SPEECH_TAG,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
@@ -459,9 +460,9 @@ export function compile(tree: SourceTree): CompileResult {
     const src = o.history;
     if (src === undefined || src === null) return undefined;
     const isDepth = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0;
-    if (kind === 'annotations') {
+    if (kind === 'annotations' || kind === 'speech') {
       if (isDepth(src)) return src;
-      diag.error('annotations take a number: `history: N` re-injects the last N messages\' annotations', where);
+      diag.error(kind === 'speech' ? 'speech takes a number: `history: N` re-injects the speech tags of the last N messages' : 'annotations take a number: `history: N` re-injects the last N messages\' annotations', where);
       return undefined;
     }
     if (typeof src === 'number') {
@@ -514,7 +515,7 @@ export function compile(tree: SourceTree): CompileResult {
     const decl: StructureDecl = {
       id: sid,
       kind,
-      tag: str(o.tag, sid),
+      tag: str(o.tag, kind === 'speech' ? DEFAULT_SPEECH_TAG : sid),
       field,
       formatPrompt: { tag: text(str(fp.tag), where), field: fieldText(fp.field, 'formatPrompt.field') },
     };
@@ -540,7 +541,12 @@ export function compile(tree: SourceTree): CompileResult {
       decl.shape = o.shape === 'kv' ? 'kv' : 'text';
       decl.display = o.display === 'hidden' ? 'hidden' : 'card';
     }
-    if (kind === 'annotations') {
+    if (kind === 'image' && decl.count !== undefined && !(Number.isInteger(decl.count) && decl.count >= 1)) {
+      diag.error('`count` of an image structure must be a positive integer (most images per turn)', { ...where, path: `${where.path}.count` });
+      delete decl.count;
+    }
+    if (kind === 'speech' && o.tag !== undefined && !/^[A-Za-z][\w-]*$/.test(decl.tag)) diag.error(`speech tag \`${decl.tag}\` must be a plain element name`, where);
+    if (inline) {
       // Inline: the same instructions apply to every transport, so one text may serve both.
       if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
       if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
@@ -639,6 +645,17 @@ export function compile(tree: SourceTree): CompileResult {
       if (!storylines.separator.includes('{{storyline}}')) diag.warn('storylines.separator has no {{storyline}}: storylines cannot be told apart in the history', { file: M, path: 'storylines.separator' });
     }
   }
+  // Media (image generation / speech synthesis): `true` or a mapping (reserved); absent keeps the artifact (and its hash) as before.
+  const mediaFlag = (key: 'image' | 'speech'): Record<string, never> | undefined => {
+    const v = raw[key];
+    if (v === undefined || v === null || v === false) return undefined;
+    if (v === true) return {};
+    if (!isObj(v)) { diag.error(`${key} must be \`true\` or a mapping`, { file: M, path: key }); return undefined; }
+    for (const k of Object.keys(v)) diag.warn(`${key}: unknown key \`${k}\``, { file: M, path: `${key}.${k}` });
+    return {};
+  };
+  const image = mediaFlag('image');
+  const speech = mediaFlag('speech');
   const syntheticTurns: SyntheticTurn[] = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s: unknown, i: number) => {
     const o = isObj(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
@@ -904,6 +921,8 @@ export function compile(tree: SourceTree): CompileResult {
     workflowRegion: str(raw.workflowRegion, anchors.tail ?? ''),
     ...(inputShaping ? { inputShaping } : {}),
     ...(storylines ? { storylines } : {}),
+    ...(image ? { image } : {}),
+    ...(speech ? { speech } : {}),
     params,
     groups,
     modules,
