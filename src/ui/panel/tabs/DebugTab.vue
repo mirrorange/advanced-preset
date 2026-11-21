@@ -10,6 +10,7 @@ import { st } from '@/st/host';
 import { t } from '@/i18n';
 import { devSource } from '@/app/dev-source';
 import { annotationsOf } from '@/app/annotations';
+import { speechOf } from '@/app/speech';
 import { ui } from '../../state';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
@@ -60,13 +61,14 @@ const devUrl = computed({ get: () => settings().dev.url, set: (v: string) => { s
 const version = __AP_VERSION__;
 const build = __AP_BUILD_ID__;
 const logEntries = computed(() => debugState.log.filter((e) => e.kind !== 'assembly'));
-/** Orphaned inline annotations of the current chat (I-86: shown only here). */
+/** Orphaned inline annotations and speech lines of the current chat (I-86: shown only here). */
 const orphans = computed(() => {
   void ui.chatRev;
-  const out: { mesId: number; quote: string; comment: string }[] = [];
+  const out: { mesId: number; quote: string; comment: string; speech?: true }[] = [];
   const chat = st().chat ?? [];
   for (let i = 0; i < chat.length; i++) {
     for (const a of annotationsOf(i)) if (a.orphan) out.push({ mesId: i, quote: a.quote, comment: a.comment });
+    for (const s of speechOf(i)) if (s.orphan) out.push({ mesId: i, quote: s.quote, comment: s.character, speech: true });
   }
   return out;
 });
@@ -163,7 +165,7 @@ const orphans = computed(() => {
 
   <Section :title="t('debug.annotations')" :icon="MessageSquareDashed" :help="t('debug.annotations.hint')" collapsible :open="false">
     <div v-for="(o, i) in orphans" :key="i" class="req">
-      <div class="row xs"><span class="badge neutral">#{{ o.mesId }}</span><span class="grow muted">“{{ o.quote }}”</span></div>
+      <div class="row xs"><span class="badge neutral">#{{ o.mesId }}</span><span v-if="o.speech" class="badge neutral">{{ t('debug.orphanSpeech') }}</span><span class="grow muted">“{{ o.quote }}”</span></div>
       <div class="small">{{ o.comment }}</div>
     </div>
     <div v-if="!orphans.length" class="faint small">{{ t('debug.noOrphans') }}</div>
