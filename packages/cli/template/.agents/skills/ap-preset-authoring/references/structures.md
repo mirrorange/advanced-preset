@@ -455,7 +455,7 @@ structures:
 
 ### image
 
-插图提示词。预设声明 [`image`](manifest.md#图像生成与语音合成-image--speech) 后，用户在面板的「多模态」页配置图像连接（OpenAI / Gemini / NovelAI）；开启且选好连接时 `image.on` 为真，请求 `image` 结构的模组生效。AP 在回复完成后按提示词生成图片（`image.auto`），或在卡片上显示提示词与生成按钮，图片显示在正文之后。
+插图提示词。预设声明 [`image`](manifest.md#图像生成与语音合成-image--speech) 后，用户在面板的「多模态」页配置图像连接（OpenAI / Gemini / NovelAI / OpenRouter）；开启且选好连接时 `image.on` 为真，请求 `image` 结构的模组生效。AP 在回复完成后按提示词生成图片（`image.auto`），或在卡片上显示提示词与生成按钮，图片显示在正文之后。
 
 ```yaml
 structures:
@@ -476,7 +476,7 @@ structures:
 - 提示词的写法由预设按 `image.prompt` 决定：`tags` 写逗号分隔的标签，`description` 写一整段英文描述，`instruction` 写指令式的自然语言（可直接提要求，不限英文）；
 - 用户的**风格提示词**由 AP 附加到请求上，不交给预设；`image.style` 为真时提示词不应再描述画风；
 - `image.sfw` 为真（用户开着 NSFW 屏蔽）时，预设应要求模型不为 NSFW 场景写提示词（可以不写，值为空时不生成）；
-- 参考图（OpenAI / Gemini）：参考图分为全局的和绑定到角色卡的，只有全局参考图与当前聊天角色卡（群聊为所有成员）的参考图交给预设。`{{ap::image::refs}}` 列出 `- <id>: <描述>`，`refs` 子字段填所选的 id，AP 把对应图片随请求发送（不在当前聊天范围内的 id 被忽略）；`image.refs` 为假时 Schema 中没有 `refs`；
+- 参考图（OpenAI / Gemini / OpenRouter）：参考图分为全局的和绑定到角色卡的，只有全局参考图与当前聊天角色卡（群聊为所有成员）的参考图交给预设。`{{ap::image::refs}}` 列出 `- <id>: <描述>`，`refs` 子字段填所选的 id，AP 把对应图片随请求发送（不在当前聊天范围内的 id 被忽略）；`image.refs` 为假时 Schema 中没有 `refs`；
 - 宽松解析见 [宽松解析](#宽松解析)；`count` 之外的提示词丢弃。
 
 ### speech
