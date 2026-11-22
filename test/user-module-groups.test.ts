@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cloneData, type APreset, type UserModule, type UserModuleSource } from '@advanced-preset/protocol';
-import { applyBundledSync, planBundledSync } from '@/store/bundled-modules';
+import { applyBundledSync, planBundledSync, planIsEmpty, presetWithUserModules } from '@/store/bundled-modules';
 import { presetState } from '@/store/config';
 import {
   createUserModule, createUserModuleFromTemplate, createUserModuleGroup, duplicateUserModule, exportUserModuleGroup, exportUserModules,
@@ -196,5 +196,82 @@ describe('user module groups (store)', () => {
     applyBundledSync(next, plan, ['one']);
     expect(names(next)).toEqual(['two', 'one', 'grouped']);
     expect(byName(next, 'one')).toMatchObject({ group: g.id, entries: [{ text: 'v2' }] });
+  });
+});
+
+describe('user module groups shipped with a preset', () => {
+  const src = (id: string, over: Partial<UserModuleSource> = {}): UserModuleSource => ({ id, name: id, entries: [{ point: 'writing-style', text: id }], vars: [], trigger: { match: 'all', rules: [] }, ...over });
+  const sync = (p: APreset, lang = 'en') => {
+    const s = presetState(p);
+    const plan = planBundledSync(p, userModules(p), s.bundledModules, lang, { list: userModuleGroups(p), records: s.bundledGroups });
+    const empty = planIsEmpty(plan, s.bundledModules, s.bundledGroups);
+    applyBundledSync(p, plan, plan.conflicts.map((c) => c.id));
+    return empty;
+  };
+  const layout = (p: APreset) => userModules(p).map((m) => `${m.name}${m.group ? `@${m.group}` : ''}${m.enabled ? '' : '(off)'}`);
+  function shipped(): APreset {
+    const p = preset();
+    p.userModuleGroups = [{ id: 'styles', name: 'Styles', mode: 'single' }, { id: 'extras', name: 'Extras', mode: 'multi', collapsed: true }];
+    p.locales = { ...p.locales, 'zh-cn': { ...p.locales['zh-cn'], userModuleGroups: { styles: { name: '文风' } } } };
+    p.userModules = [src('plain', { group: 'styles' }), src('ornate', { group: 'styles', enabled: false }), src('loose'), src('note', { group: 'extras' })];
+    return p;
+  }
+
+  it('installs groups and puts new modules into them, after the user\'s own', () => {
+    const p = shipped();
+    createUserModule(p, 'mine');
+    const g = createUserModuleGroup(p, 'Mine');
+    createUserModule(p, 'in-mine', g.id);
+    expect(sync(p, 'zh-cn')).toBe(false);
+    expect(userModuleGroups(p)).toEqual([{ id: g.id, name: 'Mine', mode: 'multi' }, { id: 'styles', name: '文风', mode: 'single' }, { id: 'extras', name: 'Extras', mode: 'multi', collapsed: true }]);
+    expect(layout(p)).toEqual(['mine', 'loose', `in-mine@${g.id}`, 'plain@styles', 'ornate@styles(off)', 'note@extras']);
+    expect(presetState(p).bundledGroups).toEqual(['styles', 'extras']);
+    expect(sync(p)).toBe(true);
+  });
+
+  it('leaves installed groups and positions to the user; deleted groups stay deleted', () => {
+    const p = shipped();
+    sync(p);
+    renameUserModuleGroup(p, 'styles', 'My styles');
+    setUserModuleGroupMode(p, 'extras', 'single');
+    moveUserModule(p, 'plain', null, 0);
+    removeUserModuleGroup(p, 'extras', { withModules: false });
+    const next: APreset = {
+      ...p, version: '2.0.0',
+      userModuleGroups: [...p.userModuleGroups!, { id: 'more', name: 'More', mode: 'multi' }],
+      userModules: [src('plain', { group: 'extras', entries: [{ point: 'writing-style', text: 'v2' }] }), src('ornate', { group: 'styles', enabled: false }), src('loose'), src('note', { group: 'extras' }), src('late', { group: 'extras' }), src('fresh', { group: 'more' }), src('pick', { group: 'styles' })],
+    };
+    sync(next);
+    expect(userModuleGroups(next).map((g) => g.name)).toEqual(['My styles', 'More']);
+    // `plain` took the new version but stayed where the user put it; `late` goes ungrouped (its
+    // group was deleted); `pick` is the only one on in its single group.
+    expect(byName(next, 'plain').entries[0]!.text).toBe('v2');
+    expect(layout(next)).toEqual(['plain', 'loose', 'note', 'late', 'ornate@styles(off)', 'pick@styles', 'fresh@more']);
+    expect(sync({ ...next, version: '2.0.1' })).toBe(true);
+    // A new module of a single group that has one on starts off (the user's choice wins).
+    const third: APreset = { ...next, version: '3.0.0', userModules: [...next.userModules, src('later', { group: 'styles' })] };
+    sync(third);
+    expect(layout(third).slice(-3)).toEqual(['pick@styles', 'later@styles(off)', 'fresh@more']);
+  });
+
+  it('exports the groups of the chosen modules; unchanged groups keep their source', () => {
+    const p = shipped();
+    sync(p, 'zh-cn');
+    const g = createUserModuleGroup(p, 'Mine', 'single');
+    createUserModule(p, 'own', g.id);
+    const chosen = userModules(p).filter((m) => m.name !== 'note');
+    const out = presetWithUserModules(p, chosen, 'zh-cn', userModuleGroups(p));
+    expect(out.userModuleGroups).toEqual([{ id: 'styles', name: 'Styles', mode: 'single' }, { id: g.id, name: 'Mine', mode: 'single' }]);
+    expect(out.userModules.map((m) => [m.id, m.group])).toEqual([['loose', undefined], ['plain', 'styles'], ['ornate', 'styles'], [byName(p, 'own').id, g.id]]);
+    expect(out.locales['zh-cn']!.userModuleGroups).toEqual({ styles: { name: '文风' } });
+    // Renamed or moved: the user's state wins.
+    renameUserModuleGroup(p, 'styles', 'Mine too');
+    moveUserModule(p, 'loose', 'styles', 0);
+    const again = presetWithUserModules(p, userModules(p), 'zh-cn', userModuleGroups(p));
+    expect(again.userModuleGroups![0]).toEqual({ id: 'styles', name: 'Mine too', mode: 'single' });
+    expect(again.locales['zh-cn']!.userModuleGroups).toEqual({});
+    expect(p.locales['zh-cn']!.userModuleGroups).toEqual({ styles: { name: '文风' } });
+    expect(again.userModules.find((m) => m.id === 'loose')).toMatchObject({ group: 'styles', enabled: false });
+    expect(presetWithUserModules(p, userModules(p).filter((m) => !m.group), 'en', userModuleGroups(p))).not.toHaveProperty('userModuleGroups');
   });
 });
