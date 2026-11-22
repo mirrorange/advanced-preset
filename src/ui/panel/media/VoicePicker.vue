@@ -9,7 +9,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { AudioLines, FileAudio, LoaderCircle, Volume2, X } from 'lucide-vue-next';
 import { t } from '@/i18n';
 import { putBlob } from '@/store/media-db';
-import { speechProvider } from '@/media/speech/providers';
+import { providerFor } from '@/media/speech/providers';
 import { env, gcVoices, previewVoice } from '@/media/speech/service';
 import type { SpeechConnection, VoiceOption, VoiceRef } from '@/media/speech/types';
 import { mediaErrorText } from '../../media/errors';
@@ -19,7 +19,7 @@ import IconButton from '../../components/IconButton.vue';
 const props = defineProps<{ connection: SpeechConnection; modelValue: VoiceRef | null; placeholder?: string; label: string }>();
 const emit = defineEmits<{ 'update:modelValue': [v: VoiceRef | null] }>();
 
-const provider = computed(() => speechProvider(props.connection.api));
+const provider = computed(() => providerFor(props.connection));
 const v = computed(() => props.modelValue);
 const shown = computed(() => (v.value?.kind === 'voice' ? v.value.name || provider.value?.voices.find((x) => x.id === v.value!.id)?.name || v.value.id : ''));
 
@@ -67,8 +67,8 @@ function schedule() {
   clearTimeout(timer);
   timer = setTimeout(() => void search(query.value), 300);
 }
-// Another API or account: earlier results no longer apply.
-watch(() => [props.connection.api, props.connection.baseUrl, props.connection.apiKey], () => {
+// Another API, model or account: earlier results no longer apply.
+watch(() => [props.connection.api, props.connection.model, props.connection.baseUrl, props.connection.apiKey], () => {
   ctrl?.abort();
   searched = null;
   results.value = null;

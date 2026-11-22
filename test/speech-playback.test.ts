@@ -130,15 +130,15 @@ describe('speakable lines', async () => {
   const { changeSpeechApi } = await import('@/media/speech/connections');
 
   it('uses the clean line when the provider has no tags', () => {
-    expect(speakableLine('openai', '[whispering] "Anyone there?"', '"Anyone there?"')).toBe('"Anyone there?"');
-    expect(speakableLine('deepseek', '<sigh> Fine.', 'Fine.')).toBe('Fine.');
+    expect(speakableLine({ api: 'openai', model: '' }, '[whispering] "Anyone there?"', '"Anyone there?"')).toBe('"Anyone there?"');
+    expect(speakableLine({ api: 'deepseek', model: '' }, '<sigh> Fine.', 'Fine.')).toBe('Fine.');
   });
 
   it('keeps own tags and drops other providers\' tags', () => {
-    expect(speakableLine('fish', '[whispering] Hi', 'Hi')).toBe('[whispering] Hi');
-    expect(speakableLine('minimax', 'Oh(sighs) <#0.5#> no', 'Oh no')).toBe('Oh(sighs) <#0.5#> no');
-    expect(speakableLine('minimax', '[whispering] Oh(sighs) no', 'Oh no')).toBe('Oh(sighs) no');
-    expect(speakableLine('gemini', '[whispering] Wait <sigh> no', 'Wait no')).toBe('Wait <sigh> no');
+    expect(speakableLine({ api: 'fish', model: '' }, '[whispering] Hi', 'Hi')).toBe('[whispering] Hi');
+    expect(speakableLine({ api: 'minimax', model: '' }, 'Oh(sighs) <#0.5#> no', 'Oh no')).toBe('Oh(sighs) <#0.5#> no');
+    expect(speakableLine({ api: 'minimax', model: '' }, '[whispering] Oh(sighs) no', 'Oh no')).toBe('Oh(sighs) no');
+    expect(speakableLine({ api: 'gemini', model: '' }, '[whispering] Wait <sigh> no', 'Wait no')).toBe('Wait <sigh> no');
   });
 
   it('switching API keeps the characters and their cards and clears voices', () => {

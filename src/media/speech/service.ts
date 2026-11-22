@@ -19,7 +19,7 @@ import { mediaErrorText } from '@/ui/media/errors';
 import type { ChatCard } from '@/st/cards';
 import { Clip, type ClipState } from './clip';
 import { pausePlayback, Playback, resumePlayback } from './player';
-import { speakableLine, speechFormat, speechProvider, speechTags } from './providers';
+import { providerFor, speakableLine, speechFormat, speechTags } from './providers';
 import { bindingOf, clipKey, norm, scopedBindings, segmentsOf, voiceFor, type Segment } from './segments';
 import type { SpeechConnection, SpeechEnv, VoiceRef } from './types';
 import { pcmToWav, wavToPcm } from './wav';
@@ -50,7 +50,7 @@ export function messageSegments(mesId: number): Segment[] {
   if (!msg || msg.is_user || !conn) return [];
   const sc = getSidecar(msg);
   if (!sc || !declaresSpeech(getPreset(sc.presetId))) return [];
-  return segmentsOf(msg.mes, speechOf(mesId), mediaSettings().speech.narrator, (text, quote) => speakableLine(conn.api, text, quote));
+  return segmentsOf(msg.mes, speechOf(mesId), mediaSettings().speech.narrator, (text, quote) => speakableLine(conn, text, quote));
 }
 
 // ---- voices -------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ const creating = new Map<string, Promise<string>>();
 /** A voice the provider can use: clones get their provider-side id (created once, stored in the settings). */
 async function usableVoice(conn: SpeechConnection, voice: VoiceRef | null, signal: AbortSignal): Promise<VoiceRef | null> {
   if (voice?.kind !== 'clone' || voice.id) return voice;
-  const provider = speechProvider(conn.api);
+  const provider = providerFor(conn);
   if (!provider?.createClone) return voice;
   const k = `${conn.id}:${voice.audio}:${voice.consent ?? ''}`;
   let p = creating.get(k);
@@ -172,7 +172,7 @@ async function newClip(conn: SpeechConnection, voice: VoiceRef | null, text: str
     speech.clips[key] = 'ready';
     return remember(key, Clip.of(pcm.pcm, pcm.sampleRate));
   }
-  const provider = speechProvider(conn.api);
+  const provider = providerFor(conn);
   if (!provider) throw new Error(`Unknown speech API ${conn.api}`);
   speech.clips[key] = 'loading';
   const clip = new Clip(async (signal) => {
@@ -393,10 +393,10 @@ function runtime(): SpeechRuntime {
   const s = mediaSettings().speech;
   const conn = speechConnection();
   const api: SpeechRuntime['vars']['api'] = conn?.api ?? '';
-  const tags = speechTags(api);
+  const tags = speechTags(conn);
   return {
     vars: { on: Boolean(conn), auto: s.auto, api, narrator: s.narrator, characters: false },
-    format: speechFormat(api),
+    format: speechFormat(conn),
     characters: conn ? boundCharacters(conn) : [],
     ...(tags ? { cleaner: tags } : {}),
   };
