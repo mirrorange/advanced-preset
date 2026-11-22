@@ -25,6 +25,25 @@ export function place(anchor: DOMRect, size: { width: number; height: number }, 
   return { left: Math.round(left), top: Math.round(top), side };
 }
 
+/**
+ * When a tooltip shows: while a mouse hovers it, or while it has keyboard focus (`:focus-visible`).
+ * A touch tap or a focus moved by script (a dialog opening) shows nothing. `toggle` (Help) pins it
+ * open or closed on a click, so a tap shows it on touch screens; leaving the focus unpins it.
+ */
+export function useTipTriggers(open: Ref<boolean>) {
+  let hover = false;
+  let focus = false;
+  let pinned = false;
+  const sync = () => { open.value = hover || focus || pinned; };
+  return {
+    onPointerenter: (e: PointerEvent) => { if (e.pointerType === 'mouse') { hover = true; sync(); } },
+    onPointerleave: () => { hover = false; sync(); },
+    onFocusin: (e: FocusEvent) => { focus = (e.target as Element | null)?.matches?.(':focus-visible') === true; sync(); },
+    onFocusout: () => { focus = false; pinned = false; sync(); },
+    toggle: () => { pinned = !open.value; sync(); },
+  };
+}
+
 export function useBubble(anchor: Ref<HTMLElement | null>, opts: () => { align?: Align; below?: boolean }) {
   const open = ref(false);
   const bubble = ref<HTMLElement | null>(null);

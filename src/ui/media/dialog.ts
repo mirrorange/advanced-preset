@@ -1,7 +1,7 @@
 /**
- * The media dialog: one modal popup on `document.body` (outside the AP panel) for the speech and
- * image panels of a message. Opening another one replaces the content; focus returns to where it
- * was when the first one opened.
+ * The media dialog: one popup on `document.body` (outside the AP panel) for the speech and image
+ * panels of a message. Opening another one replaces the content; focus returns to where it was when
+ * the first one opened (not when a click elsewhere closed it: the focus went there).
  */
 import { markRaw, reactive, type Component } from 'vue';
 import { defineHost } from '../host';
@@ -35,12 +35,12 @@ export function openMediaDialog(content: MediaDialogContent): void {
   mediaDialog.current = { ...content, component: markRaw(content.component), id: ++next };
 }
 
-export function closeMediaDialog(): void {
+export function closeMediaDialog(restoreFocus = true): void {
   if (!mediaDialog.current) return;
   mediaDialog.current = null;
   const el = returnFocus;
   returnFocus = null;
-  if (el?.isConnected) el.focus({ preventScroll: true });
+  if (restoreFocus && el?.isConnected) el.focus({ preventScroll: true });
 }
 
 export function installMediaDialog(): void {
