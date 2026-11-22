@@ -12547,7 +12547,7 @@ function Kb(e) {
 }
 async function qb() {
 	let e = await Gb();
-	e && e !== "da4a0bbe1d82621b" && sessionStorage.getItem(Wb) !== e && Kb(e);
+	e && e !== "b8c415af2d5401ef" && sessionStorage.getItem(Wb) !== e && Kb(e);
 }
 async function Jb() {
 	await qb();
@@ -12568,7 +12568,7 @@ async function Qb() {
 	let e = u().replace(/^third-party\//, ""), t = await nx(e, !1);
 	if (t.status === 404 && (t = await nx(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Gb();
-	return r && r !== "da4a0bbe1d82621b" ? (Kb(r), {
+	return r && r !== "b8c415af2d5401ef" ? (Kb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -18746,7 +18746,7 @@ var Ek = (e) => {
 			p.value = -1;
 		});
 		function ne() {
-			d.value = !0, x(m.value);
+			d.value || (d.value = !0, x(m.value));
 		}
 		function re(e) {
 			f.value = e.target.value, d.value = !0, S();
@@ -18763,8 +18763,12 @@ var Ek = (e) => {
 			ae(), ie();
 		}
 		function w(e) {
+			if (!d.value) {
+				ne();
+				return;
+			}
 			let t = ee.value.length;
-			t && (d.value = !0, p.value = (p.value + 1 + e + t + 1) % (t + 1) - 1, Xn(() => u.value?.querySelector(".voice-option.on")?.scrollIntoView({ block: "nearest" })));
+			t && (p.value = (p.value + 1 + e + t + 1) % (t + 1) - 1, Xn(() => u.value?.querySelector(".voice-option.on")?.scrollIntoView({ block: "nearest" })));
 		}
 		function se(e) {
 			if (!e.isComposing) {
@@ -18885,7 +18889,7 @@ var Ek = (e) => {
 				"aria-controls": c,
 				"aria-activedescendant": C.value && p.value >= 0 ? `${c}-${p.value}` : void 0,
 				placeholder: e.placeholder ?? (i.value?.voices[0]?.name || M(J)(te.value ? "media.speech.voiceSearch" : "media.speech.voiceId")),
-				onFocus: ne,
+				onClick: ne,
 				onBlur: oe,
 				onInput: re,
 				onChange: ie,
@@ -24711,7 +24715,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				"icon",
 				"help"
 			]),
-			V("div", uV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("da4a0bbe1d82621b")), 1)
+			V("div", uV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("b8c415af2d5401ef")), 1)
 		], 64));
 	}
 }), fV = {
@@ -25912,7 +25916,7 @@ function HH() {
 //#region src/index.ts
 var UH = {
 	version: "1.12.0",
-	buildId: "da4a0bbe1d82621b",
+	buildId: "b8c415af2d5401ef",
 	nextGeneration: (e) => wh(e),
 	listPresets: () => Op().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -25972,7 +25976,7 @@ async function KH() {
 	};
 	t.on(n.APP_READY, () => void o()), HH(), Mg("init", {
 		version: "1.12.0",
-		build: "da4a0bbe1d82621b",
+		build: "b8c415af2d5401ef",
 		enabled: G().enabled
 	});
 }
