@@ -12256,7 +12256,7 @@ function Cb(e) {
 }
 async function wb() {
 	let e = await Sb();
-	e && e !== "cca70335900bdd3e" && sessionStorage.getItem(xb) !== e && Cb(e);
+	e && e !== "2d6e0f3a54c3de27" && sessionStorage.getItem(xb) !== e && Cb(e);
 }
 async function Tb() {
 	await wb();
@@ -12277,7 +12277,7 @@ async function kb() {
 	let e = u().replace(/^third-party\//, ""), t = await Nb(e, !1);
 	if (t.status === 404 && (t = await Nb(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Sb();
-	return r && r !== "cca70335900bdd3e" ? (Cb(r), {
+	return r && r !== "2d6e0f3a54c3de27" ? (Cb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -22714,7 +22714,7 @@ var XI = { class: "row tight xs muted" }, ZI = { class: "row" }, QI = {
 				"icon",
 				"help"
 			]),
-			V("div", $L, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("cca70335900bdd3e")), 1)
+			V("div", $L, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("2d6e0f3a54c3de27")), 1)
 		], 64));
 	}
 }), tR = {
@@ -24046,7 +24046,7 @@ function Jz() {
 //#region src/index.ts
 var Yz = {
 	version: "1.12.0",
-	buildId: "cca70335900bdd3e",
+	buildId: "2d6e0f3a54c3de27",
 	nextGeneration: (e) => gh(e),
 	listPresets: () => bp().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -24106,7 +24106,7 @@ async function Qz() {
 	};
 	t.on(n.APP_READY, () => void o()), Jz(), lg("init", {
 		version: "1.12.0",
-		build: "cca70335900bdd3e",
+		build: "2d6e0f3a54c3de27",
 		enabled: K().enabled
 	});
 }
