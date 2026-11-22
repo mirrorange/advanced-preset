@@ -160,3 +160,48 @@ describe('connections', () => {
     expect(chatRefs({ refs }, [{ key: 'ann.png', name: 'Ann' }, { key: 'bob.png', name: 'Bob' }]).map((r) => r.id)).toEqual(['ref1', 'ref2', 'ref3']);
   });
 });
+
+describe('OpenRouter', () => {
+  const SVG = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>');
+
+  it('new connections: instruction prompts, NSFW blocking, reference images', async () => {
+    const c = conn('openrouter');
+    expect(c).toMatchObject({ baseUrl: 'https://openrouter.ai/api/v1', model: 'google/gemini-nano-banana-2.1', promptType: 'instruction', nsfwBlock: true });
+    const { supportsRefs } = await import('@/store/media');
+    expect(supportsRefs('openrouter')).toBe(true);
+    const n = conn('novelai');
+    changeImageApi(n, 'openrouter');
+    expect(n).toMatchObject({ baseUrl: 'https://openrouter.ai/api/v1', model: 'google/gemini-nano-banana-2.1', promptType: 'instruction', nsfwBlock: true });
+  });
+
+  it('POSTs /images with the aspect ratio (auto without one)', async () => {
+    const { url, headers, body } = await bodyOf(conn('openrouter', { style: 'ink' }), job({ ratio: '9:16' }));
+    expect(url).toBe('https://openrouter.ai/api/v1/images');
+    expect(headers.get('Authorization')).toBe('Bearer KEY');
+    expect(body).toEqual({ model: 'google/gemini-nano-banana-2.1', prompt: 'a cat on a roof\n\nink', n: 1, aspect_ratio: '9:16' });
+    expect((await bodyOf(conn('openrouter'), job())).body.aspect_ratio).toBe('auto');
+  });
+
+  it('sends references as input_references, described in the prompt in order', async () => {
+    const refs = [
+      { id: 'ref2', description: 'the inn', blob: new Blob([PNG], { type: 'image/png' }) },
+      { id: 'ref5', description: '', blob: new Blob([PNG], { type: 'image/png' }) },
+    ];
+    const { body } = await bodyOf(conn('openrouter', { model: 'openai/gpt-image-2', body: '{"quality":"high"}' }), job({ refs }));
+    expect(body.model).toBe('openai/gpt-image-2');
+    expect(body.prompt).toBe('Reference image 1 (ref2): the inn\nReference image 2 (ref5)\n\na cat on a roof');
+    expect(body.input_references).toEqual([
+      { type: 'image_url', image_url: { url: `data:image/png;base64,${b64(PNG)}` } },
+      { type: 'image_url', image_url: { url: `data:image/png;base64,${b64(PNG)}` } },
+    ]);
+    expect(body.quality).toBe('high');
+  });
+
+  it('reads b64_json with media_type (SVG too)', async () => {
+    const res = new Response(JSON.stringify({ data: [{ b64_json: b64(PNG), media_type: 'image/png' }, { b64_json: b64(SVG), media_type: 'image/svg+xml' }] }));
+    const [png, svg] = await readImages(conn('openrouter'), res);
+    expect(png!.type).toBe('image/png');
+    expect(svg!.type).toBe('image/svg+xml');
+    await expect(readImages(conn('openrouter'), new Response(JSON.stringify({ data: [] })))).rejects.toThrow('No image in the response');
+  });
+});

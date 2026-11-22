@@ -58,10 +58,11 @@ export const IMAGE_DEFAULTS: Record<ImageApi, { baseUrl: string; model: string; 
   openai: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-image-2.6-flare', nsfwBlock: true, promptType: defaultImagePromptType('openai') },
   gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-nano-banana-2.1', nsfwBlock: true, promptType: defaultImagePromptType('gemini') },
   novelai: { baseUrl: 'https://image.novelai.net', model: 'nai-diffusion-4-5-full', nsfwBlock: false, promptType: defaultImagePromptType('novelai') },
+  openrouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'google/gemini-nano-banana-2.1', nsfwBlock: true, promptType: defaultImagePromptType('openrouter') },
 };
 
 /** Reference images are only sent to these APIs. */
-export const supportsRefs = (api: ImageApi): boolean => api === 'openai' || api === 'gemini';
+export const supportsRefs = (api: ImageApi): boolean => api !== 'novelai';
 
 const defaults = (): MediaSettings => ({
   cors: { mode: 'auto', proxy: 'host', customUrl: '' },
