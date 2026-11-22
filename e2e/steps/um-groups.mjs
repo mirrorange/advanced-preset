@@ -167,6 +167,8 @@ export default async function (page, shots) {
   check(s.modules[0].name === 'Gamma' && s.modules[0].group === null, `dragged out of the group: ${JSON.stringify(s.modules)}`);
 
   // switch the whole group off: Alpha (on inside it) leaves the request, Gamma stays; switching on restores it
+  await row(page, 'Gamma').locator('.switch').click(); // it came out of the single group switched off
+  await page.waitForTimeout(200);
   let sent = await send(page, 'Group switch, on.');
   check(sent.includes('Alpha text.') && sent.includes('Gamma text.') && !sent.includes('Beta text.'), `group on: Alpha and Gamma sent, not Beta`);
   await group(page, 0).locator('.um-group-switch').click();
