@@ -12279,7 +12279,7 @@ function Tb(e) {
 }
 async function Eb() {
 	let e = await wb();
-	e && e !== "09da8a655283ef61" && sessionStorage.getItem(Cb) !== e && Tb(e);
+	e && e !== "8b087012da20d165" && sessionStorage.getItem(Cb) !== e && Tb(e);
 }
 async function Db() {
 	await Eb();
@@ -12300,7 +12300,7 @@ async function jb() {
 	let e = u().replace(/^third-party\//, ""), t = await Fb(e, !1);
 	if (t.status === 404 && (t = await Fb(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await wb();
-	return r && r !== "09da8a655283ef61" ? (Tb(r), {
+	return r && r !== "8b087012da20d165" ? (Tb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -22768,7 +22768,7 @@ var rL = { class: "row tight xs muted" }, iL = { class: "row" }, aL = {
 				"icon",
 				"help"
 			]),
-			V("div", oR, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("09da8a655283ef61")), 1)
+			V("div", oR, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("8b087012da20d165")), 1)
 		], 64));
 	}
 }), cR = {
@@ -24132,7 +24132,7 @@ function rB() {
 //#region src/index.ts
 var iB = {
 	version: "1.12.0",
-	buildId: "09da8a655283ef61",
+	buildId: "8b087012da20d165",
 	nextGeneration: (e) => vh(e),
 	listPresets: () => Sp().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -24192,7 +24192,7 @@ async function sB() {
 	};
 	t.on(n.APP_READY, () => void o()), rB(), dg("init", {
 		version: "1.12.0",
-		build: "09da8a655283ef61",
+		build: "8b087012da20d165",
 		enabled: K().enabled
 	});
 }
