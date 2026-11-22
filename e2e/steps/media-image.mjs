@@ -121,14 +121,14 @@ export default async function (page, shots) {
   console.log('manual: requests after click', mediaLog().length - before);
 
   // The image panel: edit the prompt, ratio and caption, then save and generate (the panel stays open).
-  await lastFigure().locator('button[aria-label="Edit in the image panel"]').click();
+  await lastFigure().locator('button[aria-label="Edit"]').click();
   await imagePanel.waitFor({ timeout: 5000 });
   await imagePanel.locator('textarea').fill('A lighthouse keeper on a spiral staircase, lantern in hand');
   await imagePanel.locator('.field', { hasText: 'Aspect ratio' }).locator('select').selectOption('16:9');
   await imagePanel.locator('.field', { hasText: 'Caption' }).locator('input').fill('The keeper');
   await shot('8-panel-edit');
   const beforeEdit = mediaLog().length;
-  await imagePanel.locator('button', { hasText: 'Save and generate' }).click();
+  await imagePanel.locator('.image-panel-generate').click();
   await imagePanel.locator('.image-version').nth(1).waitFor({ timeout: 30000 });
   await page.waitForTimeout(400);
   await shot('9-panel-versions');
@@ -182,14 +182,14 @@ export default async function (page, shots) {
     console.log(v.name, JSON.stringify({ error: err, requests: got.map((r) => ({ url: r.url, cors: r.cors, images: r.body.images?.length, input: r.body.input?.length, keys: Object.keys(r.body) })) }));
     if (v.name === 'refs') {
       // Pick the reference image by hand in the panel (or drop it when the model picked it).
-      await lastFigure().locator('button[aria-label="Edit in the image panel"]').click();
+      await lastFigure().locator('button[aria-label="Edit"]').click();
       await imagePanel.waitFor({ timeout: 5000 });
       const box = imagePanel.locator('.image-panel-ref[data-ref="ref1"] input[type=checkbox]');
       const was = await box.isChecked();
       await box.click();
       await shot('11-refs-panel');
       const m = mediaLog().length;
-      await imagePanel.locator('button', { hasText: 'Save and generate' }).click();
+      await imagePanel.locator('.image-panel-generate').click();
       for (let i = 0; i < 60 && mediaLog().length === m; i++) await page.waitForTimeout(250);
       await page.waitForTimeout(500);
       await page.keyboard.press('Escape');
