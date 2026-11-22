@@ -7620,8 +7620,10 @@ var MACRO_HEADS = {
 // ../protocol/src/media.ts
 var MEDIA_SINCE = "1.12.0";
 var IMAGE_APIS = ["openai", "gemini", "novelai"];
+var IMAGE_PROMPT_TYPES = ["tags", "description", "instruction"];
+var defaultImagePromptType = (api) => api === "novelai" ? "tags" : "instruction";
 var SPEECH_APIS = ["fish", "elevenlabs", "minimax", "gemini", "openai", "deepseek"];
-var IMAGE_OFF = { on: false, auto: false, api: "", style: false, sfw: false, refs: false };
+var IMAGE_OFF = { on: false, auto: false, api: "", prompt: "", style: false, sfw: false, refs: false };
 var SPEECH_OFF = { on: false, auto: false, api: "", narrator: false, characters: false };
 var imageRefsText = (refs) => (refs ?? []).map((r) => `- ${r.id}: ${r.description}`.trimEnd()).join("\n");
 var IMAGE_RATIOS = ["1:1", "3:4", "4:3", "9:16", "16:9"];
@@ -11283,6 +11285,7 @@ var FIXED_VARS = {
   "image.on": null,
   "image.auto": null,
   "image.api": IMAGE_APIS,
+  "image.prompt": IMAGE_PROMPT_TYPES,
   "image.style": null,
   "image.sfw": null,
   "image.refs": null,
@@ -11799,7 +11802,7 @@ function previewMedia(preset, o) {
   const refs = i?.refs && i.api !== "novelai" ? PREVIEW_IMAGE_REFS : [];
   const characters = s?.characters ? PREVIEW_SPEECH_CHARACTERS : [];
   return {
-    image: i ? { on: true, auto: Boolean(i.auto), api: i.api, style: Boolean(i.style), sfw: Boolean(i.sfw), refs: refs.length > 0 } : { ...IMAGE_OFF },
+    image: i ? { on: true, auto: Boolean(i.auto), api: i.api, prompt: i.prompt ?? defaultImagePromptType(i.api), style: Boolean(i.style), sfw: Boolean(i.sfw), refs: refs.length > 0 } : { ...IMAGE_OFF },
     speech: s ? { on: true, auto: Boolean(s.auto), api: s.api, narrator: Boolean(s.narrator), characters: characters.length > 0 } : { ...SPEECH_OFF },
     data: { image: { refs }, speech: { format: s ? PREVIEW_SPEECH_FORMAT : "", characters } }
   };
@@ -11898,7 +11901,7 @@ function preview(source, o) {
   } else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
   if (preset.image || o.image) {
     const v = vars.image;
-    lines.push(`image: ${!preset.image ? "off (the preset declares no image)" : v.on ? [v.api, v.auto ? "auto" : "", v.style ? "style" : "", v.sfw ? "sfw" : "", v.refs ? "refs" : ""].filter(Boolean).join(" \xB7 ") : pure && o.image ? "off (task turn)" : "off"}`);
+    lines.push(`image: ${!preset.image ? "off (the preset declares no image)" : v.on ? [v.api, v.prompt, v.auto ? "auto" : "", v.style ? "style" : "", v.sfw ? "sfw" : "", v.refs ? "refs" : ""].filter(Boolean).join(" \xB7 ") : pure && o.image ? "off (task turn)" : "off"}`);
   }
   if (preset.speech || o.speech) {
     const v = vars.speech;
@@ -12085,8 +12088,8 @@ Usage
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
                    [--storyline name|?] [--storyline-new] [--storyline-grouped]
                    [--storyline-switch] [--storyline-naming-main]
-                   [--image openai|gemini|novelai] [--image-auto] [--image-style]
-                   [--image-sfw] [--image-refs]
+                   [--image openai|gemini|novelai] [--image-prompt tags|description|instruction]
+                   [--image-auto] [--image-style] [--image-sfw] [--image-refs]
                    [--speech fish|elevenlabs|minimax|gemini|openai|deepseek]
                    [--speech-auto] [--speech-narrator] [--speech-characters]
                    [--user-modules file]
@@ -12126,6 +12129,7 @@ async function main(argv) {
       "storyline-switch": { type: "boolean" },
       "storyline-naming-main": { type: "boolean" },
       image: { type: "string" },
+      "image-prompt": { type: "string" },
       "image-auto": { type: "boolean" },
       "image-style": { type: "boolean" },
       "image-sfw": { type: "boolean" },
@@ -12195,11 +12199,15 @@ async function main(argv) {
         console.error(`--image: expected ${IMAGE_APIS.join(" | ")}`);
         return 1;
       }
+      if (values["image-prompt"] !== void 0 && !IMAGE_PROMPT_TYPES.includes(values["image-prompt"])) {
+        console.error(`--image-prompt: expected ${IMAGE_PROMPT_TYPES.join(" | ")}`);
+        return 1;
+      }
       if (values.speech !== void 0 && !SPEECH_APIS.includes(values.speech)) {
         console.error(`--speech: expected ${SPEECH_APIS.join(" | ")}`);
         return 1;
       }
-      const image = values.image ? { api: values.image, auto: Boolean(values["image-auto"]), style: Boolean(values["image-style"]), sfw: Boolean(values["image-sfw"]), refs: Boolean(values["image-refs"]) } : void 0;
+      const image = values.image ? { api: values.image, prompt: values["image-prompt"], auto: Boolean(values["image-auto"]), style: Boolean(values["image-style"]), sfw: Boolean(values["image-sfw"]), refs: Boolean(values["image-refs"]) } : void 0;
       const speech = values.speech ? { api: values.speech, auto: Boolean(values["speech-auto"]), narrator: Boolean(values["speech-narrator"]), characters: Boolean(values["speech-characters"]) } : void 0;
       const ids = (v) => v.split(",").map((x) => x.trim()).filter(Boolean);
       const bundled = bundledModules(preset, values["bundled-modules"] !== void 0 ? ids(values["bundled-modules"]) : void 0, values.lang);
