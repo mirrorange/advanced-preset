@@ -91,6 +91,17 @@ describe('segments', () => {
     for (const s of segs) expect(mes.slice(s.start, s.end)).toContain(s.kind === 'speech' ? mes.slice(s.start, s.end) : s.text.slice(0, 3));
   });
 
+  it('applies the user\'s edits by segment id and keeps the model\'s text', () => {
+    const segs = segmentsOf(mes, spans, true, undefined, { s1: '[sighs] Don\'t move ', n0: ' She leans in. ', gone: 'x', s2: '' });
+    expect(segs.map((s) => [s.id, s.text, s.original])).toEqual([
+      ['n0', 'She leans in.', undefined],
+      ['s1', '[sighs] Don\'t move', 'Don\'t move'],
+      ['n26', ', she says.', undefined],
+      ['n39', 'The wind rises.', undefined],
+      ['s2', '[shouting] Run!', undefined],
+    ]);
+  });
+
   it('skips orphans, overlaps and unspeakable narration', () => {
     expect(segmentsOf('— …', [], true)).toEqual([]);
     expect(segmentsOf(mes, [{ ...spans[1]!, orphan: true }], false)).toEqual([]);

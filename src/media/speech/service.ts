@@ -11,7 +11,8 @@ import { deleteBlob, gc, getBlob, hasBlob, putBlob } from '@/store/media-db';
 import { provideMedia, type SpeechRuntime } from '@/core/media-vars';
 import { activeConnection, mediaSettings, saveMedia } from '@/store/media';
 import { getPreset } from '@/store/presets';
-import { getSidecar } from '@/store/sidecar';
+import { getSidecar, writeSidecar } from '@/store/sidecar';
+import { bumpChat } from '@/ui/state';
 import { speechOf } from '@/app/speech';
 import { chatCards } from '@/st/cards';
 import { t } from '@/i18n';
@@ -50,7 +51,27 @@ export function messageSegments(mesId: number): Segment[] {
   if (!msg || msg.is_user || !conn) return [];
   const sc = getSidecar(msg);
   if (!sc || !declaresSpeech(getPreset(sc.presetId))) return [];
-  return segmentsOf(msg.mes, speechOf(mesId), mediaSettings().speech.narrator, (text, quote) => speakableLine(conn.api, text, quote));
+  return segmentsOf(msg.mes, speechOf(mesId), mediaSettings().speech.narrator, (text, quote) => speakableLine(conn.api, text, quote), sc.speechText);
+}
+
+/**
+ * Set what a segment sends to the speech service (provider inline tags included); '' or the
+ * model's text reverts to the model's text. The old audio of the segment is deleted.
+ */
+export async function setSegmentText(mesId: number, segId: string, text: string): Promise<void> {
+  const seg = messageSegments(mesId).find((s) => s.id === segId);
+  const sc = getSidecar(st().chat[mesId]);
+  if (!seg || !sc) return;
+  const next = text.trim();
+  if (next === seg.text) return;
+  await deleteAudio(mesId, [segId]);
+  const edits = { ...sc.speechText };
+  if (!next || next === (seg.original ?? seg.text)) delete edits[segId];
+  else edits[segId] = next;
+  const { speechText: _old, ...rest } = sc;
+  writeSidecar(mesId, Object.keys(edits).length ? { ...rest, speechText: edits } : rest);
+  bumpChat();
+  await st().saveChat();
 }
 
 // ---- voices -------------------------------------------------------------------------------------
@@ -327,6 +348,22 @@ export async function generateMessage(mesId: number): Promise<void> {
     report(e);
   } finally {
     delete speech.generating[mesId];
+  }
+}
+
+/** Synthesize one segment without playing it. */
+export async function generateLine(mesId: number, segId: string): Promise<void> {
+  const conn = speechConnection();
+  const seg = messageSegments(mesId).find((s) => s.id === segId);
+  if (!conn || !seg) return;
+  try {
+    const [voicedSeg] = await voiced(conn, [seg]);
+    if (!voicedSeg) return;
+    const clip = await clipOf(conn, voicedSeg);
+    await clip.done;
+    if (clip.state === 'error') throw clip.error;
+  } catch (e) {
+    report(e);
   }
 }
 

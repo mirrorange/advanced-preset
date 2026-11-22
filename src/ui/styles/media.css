@@ -76,6 +76,24 @@
 .speech-seg.on { height: 8px; background: var(--ap-primary); opacity: 1; }
 .speech-seg:hover { height: 8px; }
 .speech-who { flex: 0 1 auto; max-width: 8em; }
+/* Speech panel (media dialog): whole-message bar, then one block per segment. */
+.speech-panel { display: flex; flex-direction: column; gap: var(--ap-space-2); }
+.speech-panel-bar { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.speech-panel-bar > .btn { margin-right: 4px; }
+.speech-panel-format { display: flex; align-items: center; gap: 4px; margin: 0; }
+.speech-panel-list { display: flex; flex-direction: column; gap: var(--ap-space-2); margin: 0; padding: 0; list-style: none; }
+.speech-panel-seg { display: flex; flex-direction: column; gap: 4px; padding: 4px var(--ap-space-2) var(--ap-space-2); border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md); transition: border-color 0.15s, background 0.15s; }
+.speech-panel-seg.narration { background: var(--ap-surface-2); }
+.speech-panel-seg.playing { border-color: color-mix(in srgb, var(--ap-primary) 55%, transparent); background: var(--ap-tint); }
+.speech-panel-seg.error { border-color: color-mix(in srgb, var(--ap-danger) 45%, transparent); }
+.speech-panel-head { display: flex; align-items: center; gap: var(--ap-space-2); min-width: 0; margin-left: -4px; }
+.speech-panel-who { flex: 0 1 auto; max-width: 12em; }
+.speech-panel-state { flex: none; }
+.speech-panel-display { margin: 0; white-space: pre-wrap; }
+.speech-panel-text { field-sizing: content; min-height: 2.6em; max-height: 14em; font-family: var(--monoFontFamily, ui-monospace, SFMono-Regular, Menlo, monospace); }
+.speech-panel-seg.edited .speech-panel-text { border-color: color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border)); }
+.speech-panel-actions { display: flex; align-items: center; gap: 4px; min-height: 1.9em; margin-right: -4px; }
+.speech-panel-actions .btn { min-height: 1.9em; padding: 0 0.8em; font-size: var(--ap-font-size-sm); }
 .voice-ask { width: min(26em, calc(100vw - 2em)); padding: var(--ap-space-3); border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md);
   color: var(--ap-text); background: var(--ap-panel-bg-solid); box-shadow: var(--ap-shadow); }
 .voice-ask::backdrop { background: rgb(0 0 0 / 40%); }

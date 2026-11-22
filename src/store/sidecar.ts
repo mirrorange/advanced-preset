@@ -59,6 +59,8 @@ export interface Sidecar {
   speech?: SpeechSpan[];
   /** Patched workflows: speech lines of the draft and of the patched text (swapped with `patchesApplied`). */
   speechVersions?: { draft: SpeechSpan[]; patched: SpeechSpan[] };
+  /** Speech text as the user edited it, by speech segment id (what is sent to the speech service). */
+  speechText?: Record<string, string>;
   structures: Record<string, unknown>;
   /** Generated images by image structure id, one entry per prompt (same index as the structure's `images`). */
   images?: Record<string, SidecarImage[]>;
