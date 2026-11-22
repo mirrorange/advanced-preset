@@ -50,8 +50,12 @@
 .speech-seg.on { height: 8px; background: var(--ap-primary); opacity: 1; }
 .speech-seg:hover { height: 8px; }
 .speech-who { flex: 0 1 auto; max-width: 8em; }
+.voice-ask { width: min(26em, calc(100vw - 2em)); padding: var(--ap-space-3); border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md);
+  color: var(--ap-text); background: var(--ap-panel-bg-solid); box-shadow: var(--ap-shadow); }
+.voice-ask::backdrop { background: rgb(0 0 0 / 40%); }
 .speech-binding { display: flex; align-items: flex-start; gap: var(--ap-space-2); min-width: 0; }
 .speech-binding > .input:first-child { flex: 0 1 9em; min-width: 5em; }
+.speech-binding > .speech-scope { flex: 0 1 7em; min-width: 4em; }
 .speech-voice { flex: 1 1 auto; display: flex; align-items: center; gap: 4px; min-width: 0; }
 .speech-voice > .input { flex: 1 1 auto; min-width: 0; }
 .speech-results { display: flex; flex-direction: column; max-height: 14em; overflow: auto; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); }

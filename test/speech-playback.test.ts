@@ -97,12 +97,23 @@ describe('segments', () => {
     expect(spokenText('<b>Hi</b> [link](http://x) **there**')).toBe('Hi link there');
   });
 
-  it('picks bound voices, the default and the narrator', () => {
-    const c = conn('fish', { voice: { kind: 'voice', id: 'def' }, bindings: [{ character: ' mia ', voice: { kind: 'voice', id: 'mia' } }] });
-    expect(voiceFor(c, { kind: 'speech', character: 'Mia' })).toEqual({ kind: 'voice', id: 'mia' });
-    expect(voiceFor(c, { kind: 'speech', character: 'Bob' })).toEqual({ kind: 'voice', id: 'def' });
-    expect(voiceFor(c, { kind: 'narration', character: '' })).toEqual({ kind: 'voice', id: 'def' });
-    expect(voiceFor({ ...c, narrator: { kind: 'voice', id: 'n' } }, { kind: 'narration', character: '' })).toEqual({ kind: 'voice', id: 'n' });
+  it('picks bound voices (a card\'s over a global one), the narrator, and none for unbound characters', () => {
+    const v = (id: string) => ({ kind: 'voice', id }) as const;
+    const c = conn('fish', { narrator: v('n'), bindings: [
+      { character: ' mia ', voice: v('mia') },
+      { character: 'Mia', voice: v('mia-card'), card: 'a.png' },
+      { character: 'Bob', voice: v('bob'), card: 'b.png' },
+      { character: 'Ann', voice: null },
+    ] });
+    const line = (character: string) => ({ kind: 'speech', character }) as const;
+    expect(voiceFor(c, line('Mia'), [])).toEqual(v('mia'));
+    expect(voiceFor(c, line('Mia'), ['a.png'])).toEqual(v('mia-card'));
+    expect(voiceFor(c, line('Bob'), ['a.png'])).toBeUndefined();
+    expect(voiceFor(c, line('Bob'), ['a.png', 'b.png'])).toEqual(v('bob'));
+    expect(voiceFor(c, line('Ann'), [])).toBeUndefined();
+    expect(voiceFor(c, { kind: 'narration', character: '' }, [])).toEqual(v('n'));
+    expect(voiceFor(c, line(' '), [])).toEqual(v('n'));
+    expect(voiceFor({ ...c, narrator: null }, { kind: 'narration', character: '' }, [])).toBeNull();
   });
 
   it('keys clips by what changes the audio', () => {
@@ -130,11 +141,11 @@ describe('speakable lines', async () => {
     expect(speakableLine('gemini', '[whispering] Wait <sigh> no', 'Wait no')).toBe('Wait <sigh> no');
   });
 
-  it('switching API keeps the characters and clears voices', () => {
-    const c = conn('fish', { voice: { kind: 'voice', id: 'a' }, bindings: [{ character: 'Mia', voice: { kind: 'voice', id: 'b' } }] });
+  it('switching API keeps the characters and their cards and clears voices', () => {
+    const c = conn('fish', { narrator: { kind: 'voice', id: 'a' }, bindings: [{ character: 'Mia', voice: { kind: 'voice', id: 'b' } }, { character: 'Bob', voice: { kind: 'voice', id: 'c' }, card: 'bob.png' }] });
     changeSpeechApi(c, 'openai');
-    expect(c.bindings).toEqual([{ character: 'Mia', voice: null }]);
-    expect(c.voice).toBeNull();
+    expect(c.bindings).toEqual([{ character: 'Mia', voice: null }, { character: 'Bob', voice: null, card: 'bob.png' }]);
+    expect(c.narrator).toBeNull();
     expect(c.baseUrl).toBe('https://api.openai.com/v1');
   });
 });

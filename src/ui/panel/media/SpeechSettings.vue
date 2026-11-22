@@ -1,9 +1,15 @@
 <script setup lang="ts">
-/** Speech synthesis settings: switches, connections (API, endpoint, key, model, voices, character bindings) and request overrides. */
-import { computed } from 'vue';
+/**
+ * Speech synthesis settings: switches, connections (API, endpoint, key, model, narrator voice,
+ * character voices) and request overrides. Character voices are global or belong to a character
+ * card; only the global ones and those of the current chat's cards are shown.
+ */
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { AudioLines, Plus, Trash2 } from 'lucide-vue-next';
 import { t } from '@/i18n';
-import { activeConnection, copyConnection, mediaSettings, saveMedia, SPEECH_APIS, type SpeechApi, type SpeechConnection, type VoiceRef } from '@/store/media';
+import { activeConnection, copyConnection, mediaSettings, saveMedia, SPEECH_APIS, type SpeechApi, type SpeechConnection, type VoiceBinding, type VoiceRef } from '@/store/media';
+import { st } from '@/st/host';
+import { chatCards, type ChatCard } from '@/st/cards';
 import { changeSpeechApi, newSpeechConnection } from '@/media/speech/connections';
 import { speechProvider } from '@/media/speech/providers';
 import { gcVoices } from '@/media/speech/service';
@@ -51,18 +57,38 @@ const select = (id: string) => { speech.value.active = id; saveMedia(); };
 const rename = (c: SpeechConnection, name: string) => { c.name = name; saveMedia(); };
 const setApi = (api: SpeechApi) => { if (conn.value) { changeSpeechApi(conn.value, api); saveMedia(); void gcVoices(); } };
 
-function addBinding() {
-  conn.value?.bindings.push({ character: '', voice: null });
+// The current chat's cards (re-read when the chat changes).
+const cards = ref<ChatCard[]>(chatCards());
+const onChat = () => { cards.value = chatCards(); };
+const { eventSource, eventTypes: E } = st();
+if (E.CHAT_CHANGED) eventSource.on(E.CHAT_CHANGED, onChat);
+onBeforeUnmount(() => { if (E.CHAT_CHANGED) eventSource.removeListener(E.CHAT_CHANGED, onChat); });
+
+/** Binding groups: global, then one per card of the chat. */
+const groups = computed(() => {
+  const c = conn.value;
+  if (!c) return [];
+  const scopes: { card: string; name: string }[] = [{ card: '', name: t('media.speech.global') }, ...cards.value.map((x) => ({ card: x.key, name: x.name }))];
+  return scopes.map((g) => ({ ...g, bindings: c.bindings.filter((b) => (b.card ?? '') === g.card) }));
+});
+
+function addBinding(card: string) {
+  conn.value?.bindings.push({ character: '', voice: null, ...(card ? { card } : {}) });
   saveMedia();
 }
-function setBinding(i: number, patch: Partial<{ character: string; voice: VoiceRef | null }>) {
-  const b = conn.value?.bindings[i];
-  if (!b) return;
+function setBinding(b: VoiceBinding, patch: Partial<{ character: string; voice: VoiceRef | null }>) {
   Object.assign(b, patch);
   saveMedia();
 }
-function removeBinding(i: number) {
-  conn.value?.bindings.splice(i, 1);
+function moveBinding(b: VoiceBinding, card: string) {
+  if (card) b.card = card;
+  else delete b.card;
+  saveMedia();
+}
+function removeBinding(b: VoiceBinding) {
+  const c = conn.value;
+  if (!c) return;
+  c.bindings = c.bindings.filter((x) => x !== b);
   saveMedia();
   void gcVoices();
 }
@@ -91,20 +117,23 @@ function removeBinding(i: number) {
           <input class="input" :list="`ap-speech-models-${conn.api}`" :value="conn.model" :placeholder="provider?.defaults.model" spellcheck="false" @change="edit('model', ($event.target as HTMLInputElement).value.trim())" />
           <datalist :id="`ap-speech-models-${conn.api}`"><option v-for="m in provider?.models ?? []" :key="m" :value="m" /></datalist>
         </Field>
-        <Field :label="t('media.speech.voice')" :help="t('media.speech.voice.hint')">
-          <VoicePicker :connection="conn" :model-value="conn.voice" :label="t('media.speech.voice')" @update:model-value="edit('voice', $event)" />
-        </Field>
         <Field v-if="speech.narrator" :label="t('media.speech.narratorVoice')">
-          <VoicePicker :connection="conn" :model-value="conn.narrator" :label="t('media.speech.narratorVoice')" :placeholder="t('media.speech.sameAsDefault')" @update:model-value="edit('narrator', $event)" />
+          <VoicePicker :connection="conn" :model-value="conn.narrator" :label="t('media.speech.narratorVoice')" :placeholder="t('media.speech.providerDefault')" @update:model-value="edit('narrator', $event)" />
         </Field>
         <Field :label="t('media.speech.bindings')" :help="t('media.speech.bindings.hint')">
           <div class="col">
-            <div v-for="(b, i) in conn.bindings" :key="i" class="speech-binding">
-              <input class="input" :value="b.character" :placeholder="t('media.speech.character')" @change="setBinding(i, { character: ($event.target as HTMLInputElement).value.trim() })" />
-              <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(i, { voice: $event })" />
-              <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeBinding(i)" />
+            <div v-for="g in groups" :key="g.card" class="col tight">
+              <span v-if="groups.length > 1" class="xs muted ellipsis">{{ g.name }}</span>
+              <div v-for="(b, i) in g.bindings" :key="i" class="speech-binding">
+                <input class="input" :value="b.character" :placeholder="t('media.speech.character')" @change="setBinding(b, { character: ($event.target as HTMLInputElement).value.trim() })" />
+                <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(b, { voice: $event })" />
+                <select v-if="groups.length > 1" class="input speech-scope" :value="g.card" :aria-label="t('media.speech.scope')" @change="moveBinding(b, ($event.target as HTMLSelectElement).value)">
+                  <option v-for="o in groups" :key="o.card" :value="o.card">{{ o.name }}</option>
+                </select>
+                <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeBinding(b)" />
+              </div>
+              <button type="button" class="btn ghost add" @click="addBinding(g.card)"><Plus />{{ t('media.speech.addBinding') }}</button>
             </div>
-            <button type="button" class="btn ghost add" @click="addBinding"><Plus />{{ t('media.speech.addBinding') }}</button>
           </div>
         </Field>
         <AdvancedRequest :connection="conn" @changed="saveMedia()" />

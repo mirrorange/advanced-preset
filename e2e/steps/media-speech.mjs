@@ -24,10 +24,9 @@ export default async function (page, shots) {
   await h.field('API', sec).locator('select').selectOption('openai');
   await h.set(h.field('Base URL', sec).locator('input'), 'http://127.0.0.1:5055/v1');
   await h.set(h.field('API key', sec).locator('input'), 'sk-mock');
-  await h.set(h.field('Default voice', sec).locator('input').first(), 'alloy');
   const bindings = h.field('Character voices', sec);
   for (const [name, voice] of [['Mira', 'nova'], ['Keeper', 'onyx']]) {
-    await bindings.locator('button', { hasText: 'Add character' }).click();
+    await bindings.locator('button', { hasText: 'Add character' }).first().click();
     const row = bindings.locator('.speech-binding').last();
     await h.set(row.locator('input').first(), name);
     await h.set(row.locator('input').nth(1), voice);
@@ -97,14 +96,13 @@ export default async function (page, shots) {
   await h.switchTo(h.field('Generate automatically', sec).locator('.switch'), true);
   await h.field('API', sec).locator('select').selectOption('fish');
   await h.set(h.field('Base URL', sec).locator('input'), 'http://127.0.0.1:5055');
-  await h.set(h.field('Default voice', sec).locator('input').first(), 'ref-default');
   // Switching the API keeps the characters and clears their voices (voices are per provider).
   const kept = await bindings.locator('.speech-binding > input').evaluateAll((xs) => xs.map((x) => x.value));
   console.log('bindings after API switch', JSON.stringify(kept));
   for (const [name, voice] of [['Mira', 'ref-mira'], ['Keeper', 'ref-keeper']]) {
     let i = kept.indexOf(name);
     if (i < 0) {
-      await bindings.locator('button', { hasText: 'Add character' }).click();
+      await bindings.locator('button', { hasText: 'Add character' }).first().click();
       i = (await bindings.locator('.speech-binding').count()) - 1;
       await h.set(bindings.locator('.speech-binding').nth(i).locator('input').first(), name);
     }

@@ -2,7 +2,7 @@
  * What to speak for one message: its speech spans in text order and, with narration on, the text
  * between them. Each segment is one synthesis request (and one cache entry).
  */
-import type { SpeechConnection, VoiceRef } from './types';
+import type { SpeechConnection, VoiceBinding, VoiceRef } from './types';
 
 /** The parts of a speech span (protocol `SpeechSpan`) used here. */
 export interface SpanLike {
@@ -67,13 +67,28 @@ export function segmentsOf(mes: string, spans: SpanLike[], narration: boolean, s
   return out;
 }
 
-const norm = (s: string) => s.normalize('NFKC').trim().toLowerCase();
+export const norm = (s: string) => s.normalize('NFKC').trim().toLowerCase();
 
-/** Voice of a segment: the character's binding, else the connection's default; narration uses the narrator voice. */
-export function voiceFor(conn: SpeechConnection, seg: Pick<Segment, 'kind' | 'character'>): VoiceRef | null {
-  if (seg.kind === 'narration') return conn.narrator ?? conn.voice;
-  const name = norm(seg.character);
-  return conn.bindings.find((b) => norm(b.character) === name)?.voice ?? conn.voice;
+/** Bindings that apply in a chat with these cards (avatar keys): the global ones and those of its cards. */
+export function scopedBindings(conn: SpeechConnection, cards: readonly string[]): VoiceBinding[] {
+  return conn.bindings.filter((b) => !b.card || cards.includes(b.card));
+}
+
+/** The voiced binding of a character: a card's binding wins over a global one. */
+export function bindingOf(bindings: readonly VoiceBinding[], character: string): VoiceBinding | undefined {
+  const name = norm(character);
+  const hits = bindings.filter((b) => b.voice && norm(b.character) === name);
+  return hits.find((b) => b.card) ?? hits[0];
+}
+
+/**
+ * Voice of a segment in a chat with these cards: narration uses the narrator voice (`null`: the
+ * provider's default), and so do lines without a character; a line its character's bound voice,
+ * `undefined` when the character has none.
+ */
+export function voiceFor(conn: SpeechConnection, seg: Pick<Segment, 'kind' | 'character'>, cards: readonly string[]): VoiceRef | null | undefined {
+  if (seg.kind === 'narration' || !seg.character.trim()) return conn.narrator;
+  return bindingOf(scopedBindings(conn, cards), seg.character)?.voice ?? undefined;
 }
 
 /** Stable identity of a voice for cache keys (a clone is its audio, whatever its provider id). */
