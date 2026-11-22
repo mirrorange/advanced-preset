@@ -1,7 +1,9 @@
 // Groups in "My modules" (needs `ap dev --port 4747` on a Petals copy, like `um`): create a group,
-// drag modules into it, single choice keeps one on, a collapsed group takes a drop, drag a module
-// back out, export the group and import it again, reorder groups, delete a group with its modules.
+// drag modules into it, single choice keeps one on, a collapsed group shows only its switch and
+// takes a drop, drag a module back out, switch the whole group off (its modules leave the request)
+// and on again, export the group and import it again, reorder groups, delete a group with its modules.
 import fs from 'node:fs';
+const reqFile = new URL('../mock-requests.jsonl', import.meta.url).pathname;
 const en = JSON.parse(fs.readFileSync(new URL('../../i18n/en.json', import.meta.url), 'utf8'));
 const P = (s) => `ap-panel ${s}`;
 const btn = (label) => `button[aria-label="${label}"]`;
@@ -9,7 +11,7 @@ const btn = (label) => `button[aria-label="${label}"]`;
 const stored = (page) => page.evaluate(() => {
   const s = SillyTavern.getContext().extensionSettings.advancedPreset ?? SillyTavern.getContext().extensionSettings.advanced_preset;
   const st = s?.presets?.petals ?? {};
-  return { modules: (st.userModules ?? []).map((m) => ({ name: m.name, group: m.group ?? null, on: m.enabled })), groups: (st.userModuleGroups ?? []).map((g) => ({ id: g.id, name: g.name, mode: g.mode, collapsed: !!g.collapsed })) };
+  return { modules: (st.userModules ?? []).map((m) => ({ name: m.name, group: m.group ?? null, on: m.enabled })), groups: (st.userModuleGroups ?? []).map((g) => ({ id: g.id, name: g.name, mode: g.mode, collapsed: !!g.collapsed, on: g.enabled !== false })) };
 });
 const shot = async (page, shots, name) => {
   const box = await page.locator(P('.panel-head')).evaluate((h) => { const r = h.parentElement.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; });
@@ -31,6 +33,21 @@ async function dragTo(page, from, to, at = 'middle') {
   await page.mouse.up();
   await page.waitForTimeout(250);
 }
+/** Send `text` with the panel closed; the texts of the first request the mock saw. */
+async function send(page, text) {
+  await page.evaluate(() => window.AdvancedPreset.togglePanel(false));
+  await page.waitForTimeout(400);
+  fs.writeFileSync(reqFile, '');
+  await page.fill('#send_textarea', text);
+  await page.evaluate(() => document.getElementById('send_but').click());
+  await page.waitForTimeout(1500);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#mes_stop')).display === 'none', null, { timeout: 90000 });
+  await page.waitForTimeout(800);
+  const reqs = fs.readFileSync(reqFile, 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l)).filter((r) => !r.media);
+  await page.evaluate(() => window.AdvancedPreset.togglePanel(true));
+  await page.waitForTimeout(400);
+  return (reqs[0]?.body.messages ?? []).map((m) => String(m.content)).join('\n');
+}
 const row = (page, name) => page.locator(P('.um-row'), { has: page.locator('.um-row-name', { hasText: new RegExp(`^${name}$`) }) });
 const group = (page, i) => page.locator(P('.um-group')).nth(i);
 
@@ -45,6 +62,11 @@ async function newModule(page, name, inGroup) {
 }
 
 export default async function (page, shots) {
+  fs.writeFileSync(new URL('../mock.json', import.meta.url).pathname, JSON.stringify({ delay: 5 }));
+  if (!(await page.evaluate(() => SillyTavern.getContext().characterId !== undefined))) {
+    await page.evaluate(() => document.querySelector('.character_select')?.click());
+    await page.waitForTimeout(2500);
+  }
   if (!(await page.locator(P('.panel-head')).isVisible().catch(() => false))) {
     await page.evaluate(() => window.AdvancedPreset.togglePanel());
     await page.waitForTimeout(400);
@@ -68,6 +90,7 @@ export default async function (page, shots) {
 
   // start clean
   while (await page.locator(P('.um-group')).count()) {
+    if (await group(page, 0).locator(btn(en['um.grp.expand'])).count()) await group(page, 0).locator(btn(en['um.grp.expand'])).click();
     await group(page, 0).locator(btn(en['um.grp.delete'])).click();
     if (await page.locator(P('.um-delete-all')).count()) await page.locator(P('.um-delete-all')).click();
     await page.waitForTimeout(200);
@@ -120,6 +143,8 @@ export default async function (page, shots) {
   s = await stored(page);
   check(s.groups[0].collapsed && s.modules.map((m) => `${m.name}:${m.group === g}:${m.on}`).join() === 'Beta:true:false,Alpha:true:true,Gamma:true:false', `dropped on a collapsed group: ${JSON.stringify(s.modules)}`);
   check((await group(page, 0).locator('.um-group-count').textContent()).trim() === '3', 'count shows 3');
+  const hidden = await Promise.all(['um.grp.single', 'um.grp.multi', 'um.grp.addModule', 'um.grp.export', 'um.grp.delete'].map((k) => group(page, 0).locator(btn(en[k])).count()));
+  check(hidden.every((n) => n === 0) && await group(page, 0).locator('.um-group-switch').isVisible(), `collapsed head: only the switch, no mode / new / export / delete (${hidden})`);
   await shot(page, shots, '3-collapsed');
   await group(page, 0).locator(btn(en['um.grp.expand'])).click();
   await page.waitForTimeout(200);
@@ -141,17 +166,36 @@ export default async function (page, shots) {
   s = await stored(page);
   check(s.modules[0].name === 'Gamma' && s.modules[0].group === null, `dragged out of the group: ${JSON.stringify(s.modules)}`);
 
-  // export the group, import it back as a copy
+  // switch the whole group off: Alpha (on inside it) leaves the request, Gamma stays; switching on restores it
+  let sent = await send(page, 'Group switch, on.');
+  check(sent.includes('Alpha text.') && sent.includes('Gamma text.') && !sent.includes('Beta text.'), `group on: Alpha and Gamma sent, not Beta`);
+  await group(page, 0).locator('.um-group-switch').click();
+  await page.waitForTimeout(200);
+  s = await stored(page);
+  check(!s.groups[0].on && s.modules.find((m) => m.name === 'Alpha').on && await group(page, 0).evaluate((el) => el.classList.contains('off')), `group off, Alpha keeps its switch: ${JSON.stringify(s)}`);
+  await shot(page, shots, '4b-group-off');
+  sent = await send(page, 'Group switch, off.');
+  check(!sent.includes('Alpha text.') && !sent.includes('Beta text.') && sent.includes('Gamma text.'), 'group off: none of its modules sent, Gamma still sent');
+  await group(page, 0).locator('.um-group-switch').click();
+  await page.waitForTimeout(200);
+  s = await stored(page);
+  check(s.groups[0].on && s.modules.map((m) => `${m.name}:${m.on}`).join() === 'Gamma:true,Beta:false,Alpha:true', `group on again, choices restored: ${JSON.stringify(s.modules)}`);
+  sent = await send(page, 'Group switch, on again.');
+  check(sent.includes('Alpha text.'), 'group on again: Alpha sent');
+
+  // export the group (switched off), import it back as a copy: the copy is off too
+  await group(page, 0).locator('.um-group-switch').click();
+  await page.waitForTimeout(200);
   const [dl] = await Promise.all([page.waitForEvent('download'), group(page, 0).locator(btn(en['um.grp.export'])).click()]);
   const file = `${shots}/um-groups-export.json`;
   await dl.saveAs(file);
   const exported = JSON.parse(fs.readFileSync(file, 'utf8'));
-  check(dl.suggestedFilename() === 'petals.Styles.ap-modules.json' && exported.groups?.length === 1 && exported.modules.length === 2, `exported ${dl.suggestedFilename()}: ${exported.groups?.length} group, ${exported.modules.length} modules`);
+  check(dl.suggestedFilename() === 'petals.Styles.ap-modules.json' && exported.groups?.length === 1 && exported.groups[0].enabled === false && exported.modules.length === 2, `exported ${dl.suggestedFilename()}: ${exported.groups?.length} group, ${exported.modules.length} modules`);
   await page.locator(P('input[type=file][accept*=json]')).last().setInputFiles(file);
   await page.waitForTimeout(800);
   console.log('toasts', await page.evaluate(() => [...document.querySelectorAll('#toast-container .toast')].map((t) => t.textContent).join(' | ')));
   s = await stored(page);
-  check(s.groups.length === 2 && s.groups[1].name === 'Styles' && s.groups[1].id !== g && s.modules.filter((m) => m.group === s.groups[1].id).length === 2, `imported as a new group: ${JSON.stringify(s.groups)}`);
+  check(s.groups.length === 2 && s.groups[1].name === 'Styles' && s.groups[1].id !== g && !s.groups[1].on && s.modules.filter((m) => m.group === s.groups[1].id).length === 2, `imported as a new group: ${JSON.stringify(s.groups)}`);
   await group(page, 1).locator('.um-group-name').fill('Imported');
   await page.waitForTimeout(200);
 
