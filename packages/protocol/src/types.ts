@@ -7,6 +7,7 @@
  */
 import type { Expr } from './expr';
 import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
+import type { UserModuleGroup } from './user-modules';
 import type { InputShaping } from './input-shaping';
 import type { StorylineConfig, StorylinesDecl } from './storylines';
 import type { RegexScript } from './regex-scripts';
@@ -551,6 +552,7 @@ export interface LocaleTable {
   structures?: Record<string, { title?: string }>;
   insertionPoints?: Record<string, { label?: string; description?: string }>;
   userModules?: Record<string, { name?: string }>;
+  userModuleGroups?: Record<string, { name?: string }>;
   userModuleTemplates?: Record<string, { name?: string; description?: string }>;
   vars?: Record<string, { label?: string; description?: string }>;
   /** Quick Reply sets by set id: `qrList.<reply id>` → `label` `title` `message`. */
@@ -614,6 +616,11 @@ export interface APreset {
   userModules: UserModuleSource[];
   /** Example user modules offered when creating one (`user-module-templates/`; absent → `[]`). */
   userModuleTemplates: UserModuleTemplate[];
+  /**
+   * Groups the bundled modules and templates may name (`preset.yaml#userModuleGroups`, in display
+   * order; absent → none). Installed into the user's list like bundled modules.
+   */
+  userModuleGroups?: UserModuleGroup[];
   /** Build variables, in declaration order. */
   vars: BuildVarDecl[];
   workflows: Workflow[];

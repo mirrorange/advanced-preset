@@ -35,6 +35,8 @@ export interface PresetState {
   userModuleGroups?: UserModuleGroup[];
   /** Bundled user modules last synced, by id (see `bundled-modules.ts`). */
   bundledModules?: Record<string, BundledRecord>;
+  /** Ids of the preset's user module groups synced so far (a deleted one is not added again). */
+  bundledGroups?: string[];
   /**
    * Custom structure components (I-137): whether the user enabled them, and the code fingerprint
    * (`structureUiHash`) they trusted. A different fingerprint counts as not enabled.
