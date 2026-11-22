@@ -13,7 +13,7 @@ vi.mock('@/store/media-db', () => ({
 let preset: Record<string, unknown> = { id: 'p', speech: {} };
 vi.mock('@/store/presets', () => ({ getPreset: () => preset }));
 
-const { deleteAudio, generateMessage, messageAudio, messageSegments, regenerate, setVoiceAsker, speech } = await import('@/media/speech/service');
+const { deleteAudio, generateLine, generateMessage, messageAudio, messageSegments, regenerate, setSegmentText, setVoiceAsker, speech } = await import('@/media/speech/service');
 const { mediaRuntime, resetMedia } = await import('@/core/media-vars');
 const { installSpeechRuntime } = await import('@/media/speech/service');
 const { mediaSettings } = await import('@/store/media');
@@ -143,6 +143,35 @@ describe('speech runtime', () => {
     await deleteAudio(0);
     expect(tts()).toHaveLength(0);
     expect(Object.keys(speech.clips)).toHaveLength(0);
+  });
+
+  it('generates one line without playing it', async () => {
+    await generateLine(0, 's1');
+    expect(requests.map((r) => r.body.input)).toEqual(['Don\'t move']);
+    expect(asked).toEqual([]);
+    expect(Object.values(speech.clips)).toEqual(['ready']);
+  });
+
+  it('edits what a segment speaks: stored in the sidecar, old audio deleted, reverted with the model\'s text', async () => {
+    await generateMessage(0);
+    const tts = () => [...stored.keys()].filter((k) => k.startsWith('tts:'));
+    await setSegmentText(0, 's2', ' Run, now! ');
+    const sc = () => ctx.chat[0].extra.advanced_preset;
+    expect(sc().speechText).toEqual({ s2: 'Run, now!' });
+    expect(messageSegments(0).map((s) => [s.text, s.original])).toEqual([['Don\'t move', undefined], ['Run, now!', 'Run!']]);
+    expect(tts()).toHaveLength(1);
+    await generateMessage(0);
+    expect(requests.map((r) => r.body.input)).toEqual(['Don\'t move', 'Run!', 'Run, now!']);
+    // Same text again: nothing changes; the model's text (or '') removes the edit.
+    await setSegmentText(0, 's2', 'Run, now!');
+    expect(tts()).toHaveLength(2);
+    await setSegmentText(0, 's2', 'Run!');
+    expect(sc().speechText).toBeUndefined();
+    expect(messageSegments(0)[1]).toMatchObject({ text: 'Run!' });
+    expect(messageSegments(0)[1]!.original).toBeUndefined();
+    await setSegmentText(0, 's1', 'Hold still.');
+    await setSegmentText(0, 's1', '');
+    expect(sc().speechText).toBeUndefined();
   });
 
   it('creates a clone once and keeps its id on the connection', async () => {

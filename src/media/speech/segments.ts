@@ -21,8 +21,10 @@ export interface Segment {
   id: string;
   kind: 'speech' | 'narration';
   character: string;
-  /** Text sent to the provider. */
+  /** Text sent to the provider (the user's edit when there is one). */
   text: string;
+  /** With a user edit: the text as the model wrote it (what "revert" goes back to). */
+  original?: string;
   /** Text as shown (speech lines without provider tags). */
   display: string;
   /** `[start, end)` in `mes`. */
@@ -41,8 +43,13 @@ export function spokenText(raw: string): string {
   return /[\p{L}\p{N}]/u.test(s) ? s : '';
 }
 
-/** `speak(text, quote)`: the line as the current provider should get it (default: as written). */
-export function segmentsOf(mes: string, spans: SpanLike[], narration: boolean, speak: (text: string, quote: string) => string = (t) => t): Segment[] {
+/**
+ * `speak(text, quote)`: the line as the current provider should get it (default: as written).
+ * `edits`: the user's text by segment id (edits of segments that no longer exist are ignored).
+ */
+export function segmentsOf(
+  mes: string, spans: SpanLike[], narration: boolean, speak: (text: string, quote: string) => string = (t) => t, edits: Record<string, string> = {},
+): Segment[] {
   const sorted = spans.filter((s) => !s.orphan && s.end > s.start).sort((a, b) => a.start - b.start);
   const out: Segment[] = [];
   let at = 0;
@@ -64,6 +71,10 @@ export function segmentsOf(mes: string, spans: SpanLike[], narration: boolean, s
     at = s.end;
   }
   narrate(at, mes.length);
+  for (const seg of out) {
+    const edit = edits[seg.id]?.trim();
+    if (edit && edit !== seg.text) { seg.original = seg.text; seg.text = edit; }
+  }
   return out;
 }
 
