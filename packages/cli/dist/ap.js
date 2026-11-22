@@ -7619,10 +7619,10 @@ var MACRO_HEADS = {
 
 // ../protocol/src/media.ts
 var MEDIA_SINCE = "1.12.0";
-var IMAGE_APIS = ["openai", "gemini", "novelai"];
+var IMAGE_APIS = ["openai", "gemini", "novelai", "openrouter"];
 var IMAGE_PROMPT_TYPES = ["tags", "description", "instruction"];
 var defaultImagePromptType = (api) => api === "novelai" ? "tags" : "instruction";
-var SPEECH_APIS = ["fish", "elevenlabs", "minimax", "gemini", "openai", "deepseek"];
+var SPEECH_APIS = ["fish", "elevenlabs", "minimax", "gemini", "openai", "deepseek", "openrouter"];
 var IMAGE_OFF = { on: false, auto: false, api: "", prompt: "", style: false, sfw: false, refs: false };
 var SPEECH_OFF = { on: false, auto: false, api: "", narrator: false, characters: false };
 var imageRefsText = (refs) => (refs ?? []).map((r) => `- ${r.id}: ${r.description}`.trimEnd()).join("\n");
