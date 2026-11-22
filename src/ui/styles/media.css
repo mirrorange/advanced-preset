@@ -4,6 +4,9 @@
 .media-advanced-toggle { align-self: flex-start; gap: 4px; color: var(--ap-muted); }
 .media-refs { gap: var(--ap-space-2); }
 .media-ref { display: flex; align-items: center; gap: var(--ap-space-2); min-width: 0; }
+.media-ref-group { gap: var(--ap-space-2); }
+.media-ref-group-title { font-size: 0.85em; font-weight: 600; color: var(--ap-muted); }
+.media-ref-scope { flex: 0 1 auto; width: auto; max-width: 8em; }
 .media-ref-thumb { flex: none; width: 2.6em; height: 2.6em; object-fit: cover; border-radius: var(--ap-radius-sm); background: var(--ap-surface-2); }
 .blob-placeholder { display: inline-block; background: var(--ap-surface-2); }
 

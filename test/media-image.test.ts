@@ -2,7 +2,7 @@ import { deflateRawSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { buildImageRequest, geminiImages, readImages, styledPrompt, type ImageJob } from '@/media/image/providers';
 import { sniffImage, unzip } from '@/media/image/zip';
-import { nextRefId } from '@/media/image/refs';
+import { chatRefs, nextRefId } from '@/media/image/refs';
 import { changeImageApi, newImageConnection, type ImageConnection } from '@/store/media';
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4]);
@@ -16,10 +16,10 @@ const bodyOf = async (c: ImageConnection, j: ImageJob) => {
 };
 
 describe('style prompt', () => {
-  it('appends a sentence for natural language and tags for NovelAI', () => {
-    expect(styledPrompt({ api: 'openai', style: 'Watercolor.' }, 'A cat. ')).toBe('A cat.\n\nWatercolor.');
-    expect(styledPrompt({ api: 'novelai', style: ', watercolor' }, '1girl, smile,')).toBe('1girl, smile, watercolor');
-    expect(styledPrompt({ api: 'gemini', style: ' ' }, 'x')).toBe('x');
+  it('appends a paragraph for natural language and tags for tag prompts', () => {
+    expect(styledPrompt({ promptType: 'instruction', style: 'Watercolor.' }, 'A cat. ')).toBe('A cat.\n\nWatercolor.');
+    expect(styledPrompt({ promptType: 'tags', style: ', watercolor' }, '1girl, smile,')).toBe('1girl, smile, watercolor');
+    expect(styledPrompt({ promptType: 'description', style: ' ' }, 'x')).toBe('x');
   });
 });
 
@@ -138,8 +138,25 @@ describe('connections', () => {
     changeImageApi(c, 'gemini');
     expect(c).toMatchObject({ api: 'gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'my-model', nsfwBlock: true });
   });
+  it('prompt type defaults per API and follows API switches until changed', () => {
+    expect(newImageConnection('openai', 'c').promptType).toBe('instruction');
+    expect(newImageConnection('gemini', 'c').promptType).toBe('instruction');
+    const c = newImageConnection('novelai', 'c');
+    expect(c.promptType).toBe('tags');
+    changeImageApi(c, 'openai');
+    expect(c.promptType).toBe('instruction');
+    c.promptType = 'description';
+    changeImageApi(c, 'novelai');
+    expect(c.promptType).toBe('description');
+  });
   it('reference ids', () => {
     expect(nextRefId([])).toBe('ref1');
     expect(nextRefId([{ id: 'ref1' }, { id: 'ref3' }])).toBe('ref2');
+  });
+  it('reference scopes: global and the chat\'s cards', () => {
+    const refs = [{ id: 'ref1', description: 'a', blob: 'b1' }, { id: 'ref2', description: 'b', blob: 'b2', card: 'ann.png' }, { id: 'ref3', description: 'c', blob: 'b3', card: 'bob.png' }];
+    expect(chatRefs({ refs }, []).map((r) => r.id)).toEqual(['ref1']);
+    expect(chatRefs({ refs }, [{ key: 'ann.png', name: 'Ann' }]).map((r) => r.id)).toEqual(['ref1', 'ref2']);
+    expect(chatRefs({ refs }, [{ key: 'ann.png', name: 'Ann' }, { key: 'bob.png', name: 'Bob' }]).map((r) => r.id)).toEqual(['ref1', 'ref2', 'ref3']);
   });
 });

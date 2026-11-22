@@ -12,6 +12,7 @@ import { getSidecar, SIDECAR_KEY, writeSidecar, type Sidecar, type SidecarImage 
 import { activeConnection, mediaSettings, supportsRefs, type ImageConnection } from '@/store/media';
 import { deleteBlob, getBlob, putBlob } from '@/store/media-db';
 import { requestImages, type JobRef } from '@/media/image/providers';
+import { chatRefs } from '@/media/image/refs';
 import { bumpChat } from '@/ui/state';
 
 export type ImageJobState = { status: 'running'; abort: AbortController } | { status: 'error'; error: unknown };
@@ -31,9 +32,9 @@ export function imageSettingsRuntime() {
   const m = mediaSettings().image;
   const c = imageConnection();
   if (!c) return { vars: { ...IMAGE_OFF }, refs: [] };
-  const refs = supportsRefs(c.api) ? c.refs.map((r) => ({ id: r.id, description: r.description })) : [];
+  const refs = supportsRefs(c.api) ? chatRefs(c).map((r) => ({ id: r.id, description: r.description })) : [];
   return {
-    vars: { on: true, auto: m.auto, api: c.api, style: Boolean(c.style.trim()), sfw: c.nsfwBlock, refs: refs.length > 0 },
+    vars: { on: true, auto: m.auto, api: c.api, prompt: c.promptType, style: Boolean(c.style.trim()), sfw: c.nsfwBlock, refs: refs.length > 0 },
     refs,
   };
 }
@@ -94,12 +95,13 @@ const slot = (images: Record<string, SidecarImage[]>, id: string, index: number)
   return list[index]!;
 };
 
-/** Reference images a prompt picked that the connection has (openai / gemini). */
+/** Reference images a prompt picked that the connection offers in this chat (openai / gemini). */
 async function jobRefs(c: ImageConnection, ids: string[] | undefined): Promise<JobRef[]> {
   if (!supportsRefs(c.api) || !ids?.length) return [];
+  const offered = chatRefs(c);
   const out: JobRef[] = [];
   for (const id of ids) {
-    const r = c.refs.find((x) => x.id === id);
+    const r = offered.find((x) => x.id === id);
     const blob = r && (await getBlob(r.blob));
     if (r && blob) out.push({ id: r.id, description: r.description, blob });
   }

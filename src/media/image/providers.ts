@@ -22,12 +22,12 @@ export interface BuiltRequest { url: string; init: RequestInit & { headers: Head
 
 type Obj = Record<string, unknown>;
 
-/** The prompt with the connection's style prompt appended (a sentence for natural language, tags for NovelAI). */
-export function styledPrompt(c: Pick<ImageConnection, 'api' | 'style'>, prompt: string): string {
+/** The prompt with the connection's style prompt appended (as tags for tag prompts, else as a paragraph). */
+export function styledPrompt(c: Pick<ImageConnection, 'promptType' | 'style'>, prompt: string): string {
   const p = prompt.trim();
   const style = c.style.trim();
   if (!style) return p;
-  if (c.api === 'novelai') return `${p.replace(/[,\s]+$/, '')}, ${style.replace(/^[,\s]+/, '')}`;
+  if (c.promptType === 'tags') return `${p.replace(/[,\s]+$/, '')}, ${style.replace(/^[,\s]+/, '')}`;
   return `${p}\n\n${style}`;
 }
 
