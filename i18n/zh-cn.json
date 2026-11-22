@@ -500,6 +500,7 @@
   "media.speech.openrouterModel": "模型的能力（内联标签、语音克隆、默认声音）按模型 id 中的提供者判断，例如 elevenlabs/eleven-v3、fish-audio/s2.1-pro。声音列表按模型获取。",
   "media.image": "图像生成",
   "media.image.auto.hint": "关闭时，点击“生成”后才生成图像。",
+  "media.image.api": "接口",
   "media.image.promptType": "提示词类型",
   "media.image.promptType.tags": "标签",
   "media.image.promptType.tags.hint": "逗号分隔的 Danbooru 风格标签（NovelAI 等）",
