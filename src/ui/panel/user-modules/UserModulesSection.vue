@@ -139,7 +139,7 @@ function follow(e: PointerEvent) {
   if (!zone) return;
   const target = zone.dataset.zone || null;
   const rows = [...zone.querySelectorAll<HTMLElement>('.um-row')].filter((r) => r.dataset.id !== d.id);
-  moveUserModule(props.preset, d.id, target, zone.dataset.collapsed ? Infinity : above(rows, e.clientY));
+  moveUserModule(props.preset, d.id, target, zone.dataset.collapsed !== undefined ? Infinity : above(rows, e.clientY));
 }
 function drop() {
   drag.value = null;
