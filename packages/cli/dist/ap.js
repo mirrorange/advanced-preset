@@ -9218,6 +9218,27 @@ function ruleError(rule) {
   }
   return null;
 }
+function normalizeUserModuleGroups(modules, groups = []) {
+  const seen = /* @__PURE__ */ new Set();
+  const outGroups = groups.filter((g) => g.id && !seen.has(g.id) && seen.add(g.id));
+  const index = new Map(outGroups.map((g, i) => [g.id, i]));
+  const buckets = [[], ...outGroups.map(() => [])];
+  for (const m of modules) {
+    const at = m.group === void 0 ? void 0 : index.get(m.group);
+    if (at === void 0) {
+      if (m.group === void 0) buckets[0].push(m);
+      else {
+        const { group: _gone, ...rest } = m;
+        buckets[0].push(rest);
+      }
+      continue;
+    }
+    const bucket = buckets[at + 1];
+    const taken = outGroups[at].mode === "single" && m.enabled && bucket.some((x) => x.enabled);
+    bucket.push(taken ? { ...m, enabled: false } : m);
+  }
+  return { modules: buckets.flat(), groups: outGroups };
+}
 function findPoint(preset, id) {
   return (preset.insertionPoints ?? []).find((p) => p.id === id);
 }
@@ -9334,7 +9355,7 @@ function normalizeUserModule(raw) {
     if (e.enabled === false) entry.enabled = false;
     return [entry];
   });
-  return {
+  const m = {
     id: str(raw.id),
     name: str(raw.name),
     enabled: raw.enabled !== false,
@@ -9345,20 +9366,37 @@ function normalizeUserModule(raw) {
       rules: Array.isArray(trigger.rules) ? trigger.rules.map(normalizeRule).filter((r) => Boolean(r)) : []
     }
   };
+  if (typeof raw.group === "string" && raw.group) m.group = raw.group;
+  return m;
+}
+function normalizeUserModuleGroup(raw) {
+  if (!isObj2(raw) || typeof raw.id !== "string" || !raw.id) return null;
+  const g = { id: raw.id, name: str(raw.name), mode: raw.mode === "single" ? "single" : "multi" };
+  if (raw.collapsed === true) g.collapsed = true;
+  return g;
 }
 function parseUserModuleFile(raw) {
   if (isObj2(raw) && raw.format === USER_MODULES_FORMAT) {
     if (raw.version !== 1) throw new Error(`unsupported user module file version ${String(raw.version)}`);
     const modules = (Array.isArray(raw.modules) ? raw.modules : []).map(normalizeUserModule).filter((m) => Boolean(m));
+    const seen = /* @__PURE__ */ new Set();
+    const groups = (Array.isArray(raw.groups) ? raw.groups : []).map(normalizeUserModuleGroup).filter((g) => Boolean(g) && !seen.has(g.id) && Boolean(seen.add(g.id)));
+    for (const m of modules) if (m.group !== void 0 && !seen.has(m.group)) delete m.group;
     const preset = isObj2(raw.preset) && typeof raw.preset.id === "string" ? { id: raw.preset.id, version: str(raw.preset.version) } : void 0;
-    return { preset, modules };
+    return { preset, modules, groups };
   }
   const single = normalizeUserModule(raw);
-  if (single) return { modules: [single] };
+  if (single) {
+    delete single.group;
+    return { modules: [single], groups: [] };
+  }
   throw new Error("not a user module file");
 }
 
 // ../protocol/src/preset-user-modules.ts
+function presetUserModuleGroups(preset) {
+  return Array.isArray(preset.userModuleGroups) ? preset.userModuleGroups : [];
+}
 function presetUserModules(preset) {
   return Array.isArray(preset.userModules) ? preset.userModules : [];
 }
@@ -9380,7 +9418,8 @@ function userModuleFromSource(body, id, opts = {}) {
     enabled: opts.enabled ?? true,
     entries: body.entries.map((e, i) => ({ id: `e${i + 1}`, ...cloneData(e) })),
     vars: cloneData(body.vars ?? []),
-    trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger()
+    trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger(),
+    ...opts.group ? { group: opts.group } : {}
   };
 }
 
@@ -9691,7 +9730,13 @@ function compileBody(file, src, ctx, id, kind, translation) {
     else if (typeof fm.enabled !== "boolean") diag.error("`enabled` must be true or false", { ...where, path: "enabled" });
     else out.enabled = fm.enabled;
   }
-  const known = /* @__PURE__ */ new Set(["id", "name", "description", "enabled", "point", "role", "vars", "when", "trigger"]);
+  if (fm.group !== void 0) {
+    const at = { ...where, path: "group" };
+    if (translation) diag.warn("`group` comes from the source file; it is ignored in translations", at);
+    else if (typeof fm.group !== "string" || !ctx.userModuleGroups.some((g) => g.id === fm.group)) diag.error(`unknown user module group \`${String(fm.group)}\` (declare it in preset.yaml#userModuleGroups)`, at);
+    else out.group = fm.group;
+  }
+  const known = /* @__PURE__ */ new Set(["id", "name", "description", "enabled", "point", "role", "vars", "when", "trigger", "group"]);
   for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a ${noun}`, { ...where, path: k });
   return out;
 }
@@ -9713,8 +9758,12 @@ function compileUserModuleSources(tree, ctx, kind) {
     }
     const body = compileBody(file, tree.get(file), ctx, m[1], kind, false);
     if (!body) continue;
-    const { enabled, ...rest } = body;
-    sources.push({ id: m[1], ...enabled === false ? { enabled } : {}, ...rest });
+    const { enabled, group, ...rest } = body;
+    sources.push({ id: m[1], ...enabled === false ? { enabled } : {}, ...group ? { group } : {}, ...rest });
+    if (kind === "module" && group && enabled !== false && ctx.userModuleGroups.find((g) => g.id === group)?.mode === "single") {
+      const other = sources.find((x) => x.id !== m[1] && x.group === group && x.enabled !== false);
+      if (other) ctx.diag.error(`single user module group \`${group}\` already has \`${other.id}\` enabled; set \`enabled: false\` here or there`, { file, path: "enabled" });
+    }
   }
   for (const { file, id, lang } of translations) {
     const src = sources.find((x) => x.id === id);
@@ -9724,7 +9773,7 @@ function compileUserModuleSources(tree, ctx, kind) {
     }
     const body = compileBody(file, tree.get(file), ctx, id, kind, true);
     if (body) {
-      const { enabled: _ignored, ...rest } = body;
+      const { enabled: _ignored, group: _source, ...rest } = body;
       (src.locales ??= {})[lang] = rest;
     }
   }
@@ -10424,6 +10473,19 @@ function compile(tree) {
     if (o.description !== void 0) point.description = str2(o.description).trim();
     insertionPoints.push(point);
   });
+  const userModuleGroups = [];
+  if (raw.userModuleGroups !== void 0 && !Array.isArray(raw.userModuleGroups)) diag.error("userModuleGroups must be a list", { file: M, path: "userModuleGroups" });
+  (Array.isArray(raw.userModuleGroups) ? raw.userModuleGroups : []).forEach((r, i) => {
+    const where = { file: M, path: `userModuleGroups[${i}]` };
+    if (!isObj5(r)) return diag.error("a user module group is a mapping `{ id, name, mode }`", where);
+    const gid = str2(r.id);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(gid)) return diag.error("user module group id must be lower-case kebab-case", where);
+    if (userModuleGroups.some((x) => x.id === gid)) return diag.error(`duplicate user module group \`${gid}\``, where);
+    if (r.mode !== void 0 && r.mode !== "single" && r.mode !== "multi") diag.error("mode must be single | multi", where);
+    if (r.collapsed !== void 0 && typeof r.collapsed !== "boolean") diag.error("collapsed must be true or false", where);
+    for (const k of Object.keys(r)) if (!["id", "name", "mode", "collapsed"].includes(k)) diag.warn(`unknown user module group key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    userModuleGroups.push({ id: gid, name: str2(r.name, gid), mode: r.mode === "single" ? "single" : "multi", ...r.collapsed === true ? { collapsed: true } : {} });
+  });
   const vars = [];
   if (raw.vars !== void 0 && !isObj5(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
   for (const [vid, v] of Object.entries(isObj5(raw.vars) ? raw.vars : {})) {
@@ -10836,6 +10898,7 @@ function compile(tree) {
   const sourceCtx = {
     diag,
     insertionPoints,
+    userModuleGroups,
     expr,
     content,
     varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
@@ -11009,6 +11072,8 @@ function compile(tree) {
     insertionPoints,
     userModules,
     userModuleTemplates,
+    // Only when present, so that other artifacts keep their hash.
+    ...userModuleGroups.length ? { userModuleGroups } : {},
     vars,
     workflows,
     structures,
@@ -11706,6 +11771,7 @@ function validate(p, map, diag) {
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
       userModules: new Set((p.userModules ?? []).map((x) => x.id)),
+      userModuleGroups: new Set((p.userModuleGroups ?? []).map((x) => x.id)),
       userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys()),
       quickReplySets: new Set((p.quickReplySets ?? []).map((x) => x.id))
@@ -11824,7 +11890,8 @@ function bundledModules(preset, ids, lang) {
   const picked = ids ? pick(all, ids, "bundled user module") : all.filter((m) => m.enabled !== false);
   if (typeof picked === "string") return picked;
   const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : void 0;
-  return picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id));
+  const modules = picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id, { group: m.group }));
+  return normalizeUserModuleGroups(modules, presetUserModuleGroups(preset)).modules;
 }
 function parseParamArg(preset, arg) {
   const eq = arg.indexOf("=");
@@ -12164,7 +12231,7 @@ async function main(argv) {
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ""}`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleGroups?.length ? `, ${preset.userModuleGroups.length} user module groups` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ""}`);
         return 0;
       }
       const installer = installerFlag ?? build?.installer ?? true;
@@ -12216,7 +12283,10 @@ async function main(argv) {
         return 1;
       }
       const userModules = [...bundled];
-      if (values["user-modules"]) userModules.push(...parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules);
+      if (values["user-modules"]) {
+        const file = parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8")));
+        userModules.push(...normalizeUserModuleGroups(file.modules, file.groups).modules);
+      }
       if (values["user-module-templates"]) {
         const picked = templateModules(preset, ids(values["user-module-templates"]), values.lang);
         if (typeof picked === "string") {
