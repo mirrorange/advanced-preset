@@ -46,7 +46,7 @@ function createBlank(g: string | null) {
 }
 function createFrom(g: string | null, tpl: UserModuleTemplate) {
   pickFor.value = undefined;
-  emit('open', createUserModuleFromTemplate(props.preset, localSource(props.preset, tpl, 'userModuleTemplates'), group(g)).id);
+  emit('open', createUserModuleFromTemplate(props.preset, localSource(props.preset, tpl, 'userModuleTemplates'), group(g) ?? tpl.group).id);
 }
 /** "New": straight to a blank module, or the inline picker when there are templates. */
 function create(g: string | null) {
