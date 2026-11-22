@@ -18,7 +18,7 @@ import Segmented from '../../components/Segmented.vue';
 import IconButton from '../../components/IconButton.vue';
 import BlobImage from '../../components/BlobImage.vue';
 import ConnectionBar from './ConnectionBar.vue';
-import ScopeSelect from './ScopeSelect.vue';
+import ScopeToggle from './ScopeToggle.vue';
 import AdvancedRequest from './AdvancedRequest.vue';
 
 const image = computed(() => mediaSettings().image);
@@ -143,7 +143,7 @@ function removeRef(r: StoredRef) {
                 <BlobImage :blob-key="r.blob" class="media-ref-thumb" :alt="r.description" />
                 <span class="badge neutral mono">{{ r.id }}</span>
                 <input class="input grow" :value="r.description" :placeholder="t('media.image.refs.description')" @change="r.description = ($event.target as HTMLInputElement).value; saveMedia()" />
-                <ScopeSelect v-if="scopes.length > 1" :model-value="r.card ?? ''" :options="scopeOptions" :label="t('media.image.refs.scope')" @update:model-value="moveRef(r, $event)" />
+                <ScopeToggle v-if="scopes.length > 1" :model-value="r.card ?? ''" :options="scopeOptions" @update:model-value="moveRef(r, $event)" />
                 <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeRef(r)" />
               </div>
               <button type="button" class="btn ghost add" @click="pickRefs(g.key)"><ImagePlus />{{ t('media.image.refs.add') }}</button>

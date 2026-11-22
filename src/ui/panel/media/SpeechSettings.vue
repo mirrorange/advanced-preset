@@ -18,7 +18,7 @@ import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
 import IconButton from '../../components/IconButton.vue';
 import ConnectionBar from './ConnectionBar.vue';
-import ScopeSelect from './ScopeSelect.vue';
+import ScopeToggle from './ScopeToggle.vue';
 import AdvancedRequest from './AdvancedRequest.vue';
 import VoicePicker from './VoicePicker.vue';
 
@@ -126,7 +126,7 @@ function removeBinding(b: VoiceBinding) {
               <div v-for="(b, i) in g.bindings" :key="i" class="speech-binding">
                 <input class="input" :value="b.character" :placeholder="t('media.speech.character')" @change="setBinding(b, { character: ($event.target as HTMLInputElement).value.trim() })" />
                 <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(b, { voice: $event })" />
-                <ScopeSelect v-if="groups.length > 1" :model-value="g.card" :options="scopeOptions" :label="t('media.speech.scope')" @update:model-value="moveBinding(b, $event)" />
+                <ScopeToggle v-if="groups.length > 1" :model-value="g.card" :options="scopeOptions" @update:model-value="moveBinding(b, $event)" />
                 <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeBinding(b)" />
               </div>
               <button type="button" class="btn ghost add" @click="addBinding(g.card)"><Plus />{{ t('media.speech.addBinding') }}</button>
