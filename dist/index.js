@@ -7708,16 +7708,16 @@ var Ip = (e) => wp.has(e), Lp = (e) => wp.get(e), Rp = {
 	"media.speech.panel.open": "Speech panel",
 	"media.speech.panel.title": "Speech",
 	"media.speech.panel.off": "Speech synthesis is off.",
-	"media.speech.panel.empty": "This message has nothing to speak.",
+	"media.speech.panel.empty": "Nothing to speak.",
 	"media.speech.panel.playAll": "Play all",
 	"media.speech.panel.count": "{n} segments",
-	"media.speech.panel.tags": "Inline tags this service understands",
+	"media.speech.panel.tags": "Inline tags",
 	"media.speech.panel.voice": "Voice",
-	"media.speech.panel.noVoice": "No voice yet (asked when played)",
+	"media.speech.panel.noVoice": "No voice",
 	"media.speech.panel.text": "Text spoken for {who}",
 	"media.speech.panel.edited": "Edited",
 	"media.speech.panel.save": "Save",
-	"media.speech.panel.revert": "Revert to the model's text",
+	"media.speech.panel.revert": "Revert",
 	"media.speech.panel.generate": "Generate",
 	"media.speech.state.none": "Not generated",
 	"media.speech.state.loading": "Generating",
@@ -7728,26 +7728,26 @@ var Ip = (e) => wp.has(e), Lp = (e) => wp.get(e), Rp = {
 	"media.image.generating": "Generating…",
 	"media.image.previous": "Previous",
 	"media.image.next": "Next",
-	"media.image.prompt": "Image prompt",
+	"media.image.prompt": "Prompt",
 	"media.image.generate": "Generate",
 	"media.image.retry": "Retry",
 	"media.image.regenerate": "Regenerate",
-	"media.image.openPanel": "Edit in the image panel",
+	"media.image.openPanel": "Edit",
 	"media.image.panel": "Image",
-	"media.image.which": "Image prompt of this message",
+	"media.image.which": "Image",
 	"media.image.nth": "Image {n}",
 	"media.image.ratio": "Aspect ratio",
 	"media.image.ratio.auto": "Auto",
 	"media.image.caption": "Caption",
-	"media.image.refs.unsupported": "The current image connection does not use reference images.",
-	"media.image.refs.empty": "No reference images in this chat (add them in the Media tab).",
-	"media.image.refs.unavailable": "Not available in this chat",
+	"media.image.refs.unsupported": "This connection has no reference images.",
+	"media.image.refs.empty": "No reference images in this chat.",
+	"media.image.refs.unavailable": "Unavailable",
 	"media.image.versions": "Versions",
 	"media.image.versions.empty": "No images yet.",
 	"media.image.show": "Show version {n}",
-	"media.image.restore": "Restore the AI's prompt",
-	"media.image.saveGenerate": "Save and generate",
-	"media.image.gone": "This image prompt is no longer in the message (it was swiped or regenerated).",
+	"media.image.restore": "Revert",
+	"media.image.saveGenerate": "Generate",
+	"media.image.gone": "This image is no longer in the message.",
 	"media.image.download": "Download",
 	"media.error.proxy.disabled": "SillyTavern’s CORS proxy is off. Set enableCorsProxy: true in config.yaml and restart, or use a custom proxy.",
 	"media.error.proxy.unsupported": "This TauriTavern version has no CORS proxy. Update TauriTavern or use a custom proxy.",
@@ -8328,16 +8328,16 @@ var Ip = (e) => wp.has(e), Lp = (e) => wp.get(e), Rp = {
 		"media.speech.panel.open": "语音面板",
 		"media.speech.panel.title": "语音",
 		"media.speech.panel.off": "语音合成未开启。",
-		"media.speech.panel.empty": "这条消息没有可朗读的内容。",
+		"media.speech.panel.empty": "没有可朗读的内容。",
 		"media.speech.panel.playAll": "全部播放",
-		"media.speech.panel.count": "{n} 个分块",
-		"media.speech.panel.tags": "该服务支持的内联标签",
+		"media.speech.panel.count": "{n} 段",
+		"media.speech.panel.tags": "可用标签",
 		"media.speech.panel.voice": "声音",
-		"media.speech.panel.noVoice": "尚未设置声音（播放时询问）",
+		"media.speech.panel.noVoice": "未设置声音",
 		"media.speech.panel.text": "{who} 的语音提示",
 		"media.speech.panel.edited": "已修改",
 		"media.speech.panel.save": "保存",
-		"media.speech.panel.revert": "还原为模型原文",
+		"media.speech.panel.revert": "还原",
 		"media.speech.panel.generate": "生成",
 		"media.speech.state.none": "未生成",
 		"media.speech.state.loading": "生成中",
@@ -8348,26 +8348,26 @@ var Ip = (e) => wp.has(e), Lp = (e) => wp.get(e), Rp = {
 		"media.image.generating": "生成中…",
 		"media.image.previous": "上一张",
 		"media.image.next": "下一张",
-		"media.image.prompt": "图像提示词",
+		"media.image.prompt": "提示词",
 		"media.image.generate": "生成",
 		"media.image.retry": "重试",
 		"media.image.regenerate": "重新生成",
-		"media.image.openPanel": "在图像面板中编辑",
+		"media.image.openPanel": "编辑",
 		"media.image.panel": "图像",
-		"media.image.which": "本条消息的图像提示",
+		"media.image.which": "图像",
 		"media.image.nth": "图像 {n}",
 		"media.image.ratio": "比例",
 		"media.image.ratio.auto": "自动",
 		"media.image.caption": "标题",
-		"media.image.refs.unsupported": "当前图像连接不使用参考图。",
-		"media.image.refs.empty": "本聊天没有可用的参考图（在「多模态」页添加）。",
-		"media.image.refs.unavailable": "本聊天中不可用",
+		"media.image.refs.unsupported": "当前连接不支持参考图。",
+		"media.image.refs.empty": "本聊天没有参考图。",
+		"media.image.refs.unavailable": "不可用",
 		"media.image.versions": "版本",
-		"media.image.versions.empty": "还没有图像。",
+		"media.image.versions.empty": "暂无图像。",
 		"media.image.show": "显示第 {n} 个版本",
-		"media.image.restore": "还原为 AI 的提示",
-		"media.image.saveGenerate": "保存并生成",
-		"media.image.gone": "这条图像提示已不在消息中（消息已切换或重新生成）。",
+		"media.image.restore": "还原",
+		"media.image.saveGenerate": "生成",
+		"media.image.gone": "该图像已不在当前消息中。",
 		"media.image.download": "下载",
 		"media.error.proxy.disabled": "SillyTavern 的 CORS 代理未开启。请在 config.yaml 中设置 enableCorsProxy: true 并重启，或改用自定义代理。",
 		"media.error.proxy.unsupported": "当前 TauriTavern 版本没有 CORS 代理。请更新 TauriTavern，或改用自定义代理。",
@@ -12549,7 +12549,7 @@ function Kb(e) {
 }
 async function qb() {
 	let e = await Gb();
-	e && e !== "3d2278eedd319292" && sessionStorage.getItem(Wb) !== e && Kb(e);
+	e && e !== "10c2009a82c88d98" && sessionStorage.getItem(Wb) !== e && Kb(e);
 }
 async function Jb() {
 	await qb();
@@ -12570,7 +12570,7 @@ async function Qb() {
 	let e = u().replace(/^third-party\//, ""), t = await nx(e, !1);
 	if (t.status === 404 && (t = await nx(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Gb();
-	return r && r !== "3d2278eedd319292" ? (Kb(r), {
+	return r && r !== "10c2009a82c88d98" ? (Kb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -15797,7 +15797,7 @@ function sD() {
 }
 //#endregion
 //#region src/ui/styles/tokens.css?inline
-var cD = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-panel-bg-solid:#faf5fc;--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-panel-bg-solid:#1c1420;--ap-shadow:0 8px 28px #00000073}@supports (color:rgb(from red r g b)){:host,:host([data-ap-theme=dark]){--ap-panel-bg-solid:rgb(from var(--ap-panel-bg) r g b / 1)}}", lD = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg-solid);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.switch.sm{width:1.8em;height:1.05em}.switch.sm .thumb{width:.75em;height:.75em;top:.15em;left:.15em}.switch.sm input:checked~.thumb{transform:translate(.75em)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.icon-badge{gap:.3em}.badge.icon-badge svg{width:1.1em;height:1.1em}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", uD = ":host(ap-cards),:host(ap-top-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.cards.cards-top{margin:0 0 var(--ap-space-2);gap:4px}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-head{align-items:flex-start;gap:var(--ap-space-2);display:flex}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.synopsis-edit{opacity:0;flex:none;margin:-2px -6px -4px 0;transition:opacity .15s;display:inline-flex}.synopsis:hover .synopsis-edit,.synopsis-edit:focus-within{opacity:1}@media (hover:none){.synopsis-edit{opacity:.7}}.synopsis-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.synopsis-fields{grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:6px;display:grid}.synopsis-field{min-width:0;display:block;position:relative}.synopsis-field svg.lucide{pointer-events:none;width:1em;height:1em;position:absolute;top:50%;left:.6em;transform:translateY(-50%)}.synopsis-field .input{padding-left:2em}.synopsis-event-input{font-weight:600}.synopsis-editor textarea.input{resize:none;min-height:3.4em;max-height:18em;overflow-y:auto}.synopsis-actions{align-items:center;gap:6px;margin-top:2px;display:flex}.synopsis-actions .btn svg.lucide{width:1em;height:1em}@media (hover:none){.synopsis-keys{visibility:hidden}}.row.tight{white-space:nowrap;gap:4px}.structure-component{flex-direction:column;gap:2px;display:flex}.structure-component .xs{color:var(--ap-danger)}.status-bar{align-items:flex-start;gap:var(--ap-space-2);padding:3px var(--ap-space-3);color:var(--ap-muted);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);display:flex}.status-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.status-line>.row{max-width:100%}.status-location{min-width:0;overflow:hidden}.status-bar:hover .synopsis-edit{opacity:1}.status-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.status-fields{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;display:grid}.status-fields>:nth-child(-n+3),.status-fields>:nth-child(5){grid-column:span 2}.status-fields>:nth-child(4){grid-column:span 4}@media (max-width:480px){.status-fields>*{grid-column:span 3!important}.status-fields>:nth-child(4){grid-column:span 6!important}}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.anno-bubble{--actor:var(--ap-primary);z-index:2147483000;width:max-content;max-width:min(320px,100vw - 16px);max-height:min(50vh,24em);padding:var(--ap-space-2) var(--ap-space-3);border:1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--ap-text);box-shadow:var(--ap-shadow);font-size:var(--ap-font-size-sm);text-align:left;overflow-wrap:anywhere;margin:0;line-height:1.55;position:fixed;inset:0 auto auto 0;overflow:auto}.anno-author{font-weight:700;font-size:var(--ap-font-size-xs);color:var(--actor);letter-spacing:.02em;margin-bottom:2px}:host(ap-storyline){padding-right:var(--mes-right-spacing,30px);display:block}.storyline-badge{border:1px solid color-mix(in srgb, var(--ap-primary) 30%, var(--ap-border));border-radius:var(--ap-radius-pill);background:color-mix(in srgb, var(--ap-primary) 8%, transparent);max-width:100%;min-height:1.6em;color:var(--ap-muted);font-size:var(--ap-font-size-xs);cursor:pointer;align-items:center;gap:4px;margin:2px 0 4px;padding:1px 8px;display:inline-flex}.storyline-badge:hover{color:var(--ap-text);border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent)}.storyline-badge svg.lucide{width:1.1em;height:1.1em;color:var(--ap-primary);flex:none}.storyline-badge .storyline-name{text-overflow:ellipsis;white-space:nowrap;font-weight:600;overflow:hidden}.storyline-badge .storyline-if{border-radius:var(--ap-radius-pill);background:color-mix(in srgb, var(--ap-warning) 18%, transparent);color:var(--ap-warning);padding:0 5px;font-weight:600}.storyline-badge.if-line{border-style:dashed}.storyline-badge svg.lucide.storyline-hidden{color:var(--ap-muted)}", dD = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;color:var(--ap-text);background:0 0;flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden;container:ap-panel/inline-size}:host(ap-panel[data-ap-standalone]) .panel{--ap-blur:blur(var(--SmartThemeBlurStrength,10px));background:var(--ap-panel-bg-solid);-webkit-backdrop-filter:var(--ap-blur);backdrop-filter:var(--ap-blur)}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.tab span{text-overflow:ellipsis;white-space:nowrap;max-width:100%;overflow:hidden}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice-list.nested{padding-left:var(--ap-space-2);border-left:1px solid var(--ap-border);margin-left:.5em}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}.tab-col{gap:var(--ap-space-3)}.input.bare{background-color:#0000;border-color:#0000;width:auto;min-width:0;padding-left:.35em}.input.bare:hover{border-color:var(--ap-border)}.input.bare:focus{border-color:var(--ap-primary)}.chip.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint);color:var(--ap-primary)}.um-list{margin:0 calc(-1 * var(--ap-space-2));flex-direction:column;gap:2px;display:flex}.um-row{min-height:2.6em;padding:0 var(--ap-space-2);border-radius:var(--ap-radius-sm);align-items:center;gap:4px;transition:background .15s,opacity .15s;display:flex}.um-row:hover{background:var(--ap-surface-2)}.um-row.dragging{background:var(--ap-tint)}.um-row.off .um-open{opacity:.55}.um-grip{color:var(--ap-faint);cursor:grab;touch-action:none;margin-left:-4px;display:inline-flex}.um-row.dragging .um-grip{cursor:grabbing;color:var(--ap-primary)}.um-open{text-align:left;cursor:pointer;background:0 0;border:0;flex-direction:column;flex:auto;align-items:flex-start;gap:0;min-width:0;padding:4px 0;display:flex}.um-row-name{max-width:100%}.um-row-meta{max-width:100%;line-height:1.3}.um-flag{width:1em;height:1em;margin:0 2px}.um-zap{color:var(--ap-primary)}.um-new{border:1px dashed var(--ap-border);border-radius:var(--ap-radius-md);width:100%;min-height:2.6em;color:var(--ap-muted);cursor:pointer;background:0 0;justify-content:center;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s;display:flex}.um-picker{margin-bottom:var(--ap-space-2);padding:4px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface-2);flex-direction:column;gap:2px;display:flex}.um-picker-head{justify-content:space-between;align-items:center;gap:var(--ap-space-2);display:flex}.um-choice{align-items:flex-start;gap:var(--ap-space-2);width:100%;padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);color:inherit;text-align:left;cursor:pointer;background:0 0;border:0;transition:background .15s;display:flex}.um-choice:hover,.um-choice:focus-visible{background:var(--ap-tint)}.um-choice>svg.lucide{width:1.1em;height:1.1em;color:var(--ap-primary);flex:none;margin-top:.15em}.um-choice-text{flex-direction:column;min-width:0;line-height:1.35;display:flex}.um-choice-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.um-new:hover{color:var(--ap-primary);border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.um-groups{gap:var(--ap-space-2);flex-direction:column;display:flex}.um-groups.um-dragging,.um-groups.um-dragging *{cursor:grabbing;-webkit-user-select:none;user-select:none}.um-group{padding:2px var(--ap-space-2) 4px;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:background .15s,border-color .15s;display:flex}.um-group.collapsed{padding-bottom:2px}.um-group.dragging{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.um-group-head{align-items:center;gap:2px;min-height:2.2em;margin-left:-4px;display:flex}.um-group-head>.um-grip{margin-left:0}.um-chevron svg.lucide{transition:transform .15s}.um-chevron.open svg.lucide{transform:rotate(90deg)}.um-group-name{text-overflow:ellipsis;flex:6em;font-weight:600}.um-group-count{background:var(--ap-surface-2);text-align:center;border-radius:999px;flex:none;min-width:1.6em;padding:0 .4em;line-height:1.6}.um-group-confirm{align-items:center;gap:2px var(--ap-space-2);padding:4px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 8%, transparent);flex-wrap:wrap;display:flex}.um-group-confirm>span{flex:100%}.um-group-confirm .btn.danger{color:var(--ap-danger)}.um-group .um-list{margin:0 calc(-1 * var(--ap-space-2) + 1px)}.um-group .um-picker{margin:2px 0 4px}.um-drop{min-height:2.4em;margin:0 var(--ap-space-2);border:1px dashed var(--ap-border);border-radius:var(--ap-radius-sm);justify-content:center;align-items:center;display:flex}.um-radio{cursor:pointer;background:0 0;border:0;place-items:center;width:2.2em;height:1.6em;padding:0;display:inline-grid}.um-radio .radio{border:1.5px solid var(--ap-faint);border-radius:50%;place-items:center;width:1.05em;height:1.05em;transition:border-color .15s;display:grid}.um-radio:hover .radio,.um-radio.on .radio{border-color:var(--ap-primary)}.um-radio.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.52em;height:.52em}.um-move{max-width:12em;position:relative;overflow:hidden}.um-move select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}.um-editor{gap:var(--ap-space-3);flex-direction:column;display:flex}.um-head{align-items:center;gap:var(--ap-space-2);margin-left:-6px;display:flex}.um-name{font-size:var(--ap-font-size-lg);flex:auto;font-weight:600}.um-entry{flex-direction:column;gap:6px;display:flex}.um-entry>*,.um-entry-head>*{transition:opacity .15s}.um-entry+.um-entry{padding-top:var(--ap-space-3);border-top:1px solid var(--ap-border)}.um-entry-head{flex-wrap:wrap;align-items:center;gap:2px;min-width:0;display:flex}.um-entry-head>.switch{margin-right:6px}.um-entry.off .um-entry-head>:not(.switch),.um-entry.off>:not(.um-entry-head){opacity:.55}.um-entry-head select.grow{text-overflow:ellipsis;flex:8em;min-width:0;font-weight:600}.um-entry.lost .um-entry-head select.grow{color:var(--ap-warning)}.um-role{field-sizing:content;text-overflow:ellipsis;min-width:0;color:var(--ap-muted);font-size:var(--ap-font-size-sm);flex:none}.um-text,.um-var-key,.um-var-value{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-sm)}.um-text{field-sizing:content;min-height:5.5em;max-height:24em}.um-warn{color:var(--ap-warning);align-items:center;gap:6px;display:flex}.um-warn svg.lucide{width:1.1em;height:1.1em}.um-var-label{flex:8em;min-width:0;padding:0 .35em;font-weight:600}.um-entry.lost .um-var-label{color:var(--ap-warning)}.um-var-row{grid-template-columns:auto 1fr auto;align-items:start;gap:4px;display:grid}.um-var-row>.switch{margin:calc(.375em + 1px) 4px 0 0}.um-var-pair{padding:2px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:2px;display:flex}.um-var-pair-head{align-items:center;gap:2px;margin-right:-6px;display:flex}.um-var-key{text-overflow:ellipsis;flex:auto;min-width:0;font-weight:600}.um-var-row>*,.um-var-pair>*,.um-var-pair-head>*{transition:opacity .15s}.um-var-row.off>:not(.switch),.um-var-pair.off>:not(.um-var-pair-head),.um-var-pair.off .um-var-pair-head>:not(.switch){opacity:.55}.um-var-key::-webkit-calendar-picker-indicator{display:none!important}textarea.input.um-var-value{field-sizing:content;resize:none;min-width:0;min-height:0;max-height:12em}.um-var-add{align-self:flex-start}.um-foot{flex-wrap:wrap;align-items:center;gap:2px;margin:0 -.5em;display:flex}.um-foot .btn{color:var(--ap-muted)}.um-foot .btn:hover:not(:disabled){color:var(--ap-text);background:var(--ap-surface-2)}.um-foot .btn.danger:hover:not(:disabled),.um-foot .btn.armed{color:var(--ap-danger)}.um-foot .btn.armed{background:color-mix(in srgb, var(--ap-danger) 10%, transparent)}.trigger{gap:var(--ap-space-2);flex-direction:column;display:flex}.always{padding:2px 0}.rule{padding:6px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.rule-head{align-items:center;gap:2px;min-width:0;margin-left:-.35em;display:flex}.rule-subject{field-sizing:content;text-overflow:ellipsis;flex:none;min-width:0;max-width:60%;font-weight:600}.rule-target{text-overflow:ellipsis;flex:auto;min-width:0}.rule-body{flex-direction:column;gap:6px;display:flex}.rule-op{color:var(--ap-muted);align-self:flex-start;margin-left:-.35em}.rule-cmp{flex:none;width:4.2em}.rule-scope{flex:10em}.rule-join{text-transform:uppercase;letter-spacing:.04em;align-self:center;margin:-4px 0}.rule-error{color:var(--ap-danger)}.option-chips{gap:4px}.option-chips .chip{cursor:pointer}.depth{width:3.6em;padding-right:.2em}.kw-words{align-items:flex-start;gap:4px}.chips-input{cursor:text;flex-wrap:wrap;align-items:center;gap:4px;min-height:2.1em;padding:3px 4px;display:flex}.chips-input .chip{background:var(--ap-tint);color:var(--ap-primary);border-color:#0000;gap:2px;padding-right:2px}.chips-input .chip.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.chip-x{width:1.3em;height:1.3em;color:inherit;cursor:pointer;opacity:.7;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:inline-grid}.chip-x:hover{opacity:1;background:color-mix(in srgb, var(--ap-primary) 16%, transparent)}.chip-x svg.lucide{width:.85em;height:.85em}.chips-draft{background:0 0;border:0;outline:none;flex:5em;min-width:5em;padding:2px 4px}.btn.add.picker{position:relative;overflow:hidden}.btn.add.picker select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}@container ap-panel (width<=420px){.tabs.many .tab span{display:none}.tabs.many .tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tabs.many .tab svg.lucide{width:1.35em;height:1.35em}}@container ap-panel (width<=340px){.tab span{display:none}.tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tab svg.lucide{width:1.35em;height:1.35em}.panel-head{padding-left:var(--ap-space-3)}.panel-body{padding-left:var(--ap-space-3);padding-right:var(--ap-space-3)}.segmented{grid-template-columns:repeat(auto-fit,minmax(4.6em,1fr));grid-auto-flow:row}.segmented.dense button{padding:0 .4em}.um-foot .btn:not(.armed)>span{display:none}.um-role{order:1;margin-left:calc(2.51429em + 8px)}}.preset-banner{align-items:center;gap:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:var(--ap-tint);border:1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);font-size:var(--ap-font-size-sm);flex-wrap:wrap;margin-top:6px;margin-bottom:4px;padding:5px 5px 5px 10px;line-height:1.35;display:flex}.preset-banner-icon{color:var(--ap-primary)}.preset-banner-text{flex:11em;min-width:0}.preset-banner .btn{min-height:1.8em;margin-left:auto;padding:0 .7em}.custom-ui-list{flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;display:flex}.custom-ui-list .grow{flex:auto;min-width:0}.storylines-head{gap:var(--ap-space-2);min-height:1.6em;padding:0 var(--ap-space-1) 0 var(--ap-space-3)}.storyline-card.current{border-color:color-mix(in srgb, var(--ap-primary) 45%, var(--ap-border))}.storyline-card.hidden .card-title{color:var(--ap-muted)}.storyline-dot{background:var(--ap-primary);border-radius:50%;flex:none;width:.5em;height:.5em}.storyline-flag{width:1.05em;height:1.05em;color:var(--ap-faint);flex:none}.storyline-toolbar{margin-bottom:var(--ap-space-1);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);align-self:flex-start;align-items:center;gap:2px;padding:2px;display:flex}.storyline-toolbar .icon-btn[aria-pressed=true]{background:var(--ap-tint)}.storyline-toolbar.solo{padding:0}.storyline-toolbar.solo .icon-btn.sm{width:calc(1.6em - 2px);height:calc(1.6em - 2px)}.storyline-toolbar-sep{background:var(--ap-border);align-self:stretch;width:1px;margin:3px 2px}.storyline-floors{flex-direction:column;gap:2px;max-height:22em;margin:0;padding:0;list-style:none;display:flex;overflow-y:auto}.storyline-floors li{border-radius:var(--ap-radius-sm);padding:2px 4px}.storyline-floors li:hover{background:var(--ap-surface-2)}", fD = ".media-conn{gap:var(--ap-space-3)}.media-advanced{gap:var(--ap-space-3);flex-direction:column;display:flex}.media-advanced-toggle{color:var(--ap-muted);align-self:flex-start;gap:4px}.media-refs{gap:var(--ap-space-2)}.media-ref{align-items:center;gap:var(--ap-space-2);min-width:0;display:flex}.media-ref-group{gap:var(--ap-space-2)}.media-ref-group-title{color:var(--ap-muted);font-size:.85em;font-weight:600}.media-ref-thumb{object-fit:cover;border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);flex:none;width:2.6em;height:2.6em}.blob-placeholder{background:var(--ap-surface-2);display:inline-block}.image-card{gap:var(--ap-space-2);display:grid}.image-card.multi{grid-template-columns:repeat(auto-fill,minmax(min(100%,14em),1fr))}.image-figure{flex-direction:column;gap:4px;min-width:0;margin:0;display:flex}.image-frame{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);position:relative;overflow:hidden}.image-frame.empty{border:1px dashed var(--ap-border);background:0 0;max-height:22em}.image-open{cursor:zoom-in;background:0 0;border:0;width:100%;padding:0;display:block}.image-open img{object-fit:contain;width:100%;height:auto;max-height:70vh;display:block}.image-empty{justify-content:center;align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3);text-align:center;flex-direction:column;display:flex;position:absolute;inset:0}.image-empty>svg.lucide{width:1.6em;height:1.6em}.image-prompt{-webkit-line-clamp:6;white-space:pre-wrap;-webkit-box-orient:vertical;max-height:100%;margin:0;display:-webkit-box;overflow:hidden}.image-busy{justify-content:center;align-items:center;gap:var(--ap-space-2);color:var(--ap-text);background:color-mix(in srgb, var(--ap-panel-bg-solid) 70%, transparent);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);display:flex;position:absolute;inset:0}.image-pager{border-radius:var(--ap-radius-pill);color:#fff;background:#00000073;align-items:center;gap:2px;padding:0 4px;display:flex;position:absolute;bottom:6px;right:6px}.image-pager .icon-btn{color:inherit}.image-foot{align-items:center;gap:var(--ap-space-2);min-height:1.9em;display:flex}.image-error{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.image-tools{flex:none}.image-panel{gap:var(--ap-space-3)}.image-panel-prompt{resize:vertical;min-height:6em}.image-panel-ref{cursor:pointer}.image-panel-row{align-items:flex-start;gap:var(--ap-space-3);flex-wrap:wrap}.image-panel-row>.field:first-child{flex:none}.image-panel-row>.field.grow{flex:12em;min-width:0}.image-versions{gap:var(--ap-space-2);grid-template-columns:repeat(auto-fill,minmax(7em,1fr));display:grid}.image-version{flex-direction:column;gap:2px;min-width:0;display:flex}.image-version-pick{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);cursor:pointer;aspect-ratio:1;border:2px solid #0000;padding:0;display:block;overflow:hidden}.image-version-pick img,.image-version-pick .blob-placeholder{object-fit:cover;width:100%;height:100%;display:block}.image-version.on .image-version-pick{border-color:var(--ap-primary)}.image-version-tools{justify-content:space-between;display:flex}.image-panel-status{align-items:center}.image-panel-actions{flex-wrap:wrap}.image-panel-restore{margin-inline-end:auto}.image-viewer{color:#fff;background:0 0;border:0;flex-direction:column;justify-content:center;align-items:center;width:100vw;max-width:100vw;height:100vh;max-height:100vh;margin:0;padding:0;display:flex}.image-viewer:not([open]){display:none}.image-viewer::backdrop{background:#000000d1}.image-viewer-img{object-fit:contain;-webkit-user-select:none;user-select:none;max-width:96vw;max-height:calc(100vh - 4.5em)}.image-viewer-bar{align-items:center;gap:var(--ap-space-2);width:min(96vw,60em);padding:var(--ap-space-2);display:flex}.image-viewer-bar .icon-btn{color:#fff}.image-viewer-caption{opacity:.85}.media-dialog{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);width:min(44em,100vw - 2em);max-height:calc(100dvh - 2em);color:var(--ap-text);background:var(--ap-panel-bg-solid);box-shadow:var(--ap-shadow);padding:0;overflow:hidden}.media-dialog:not([open]){display:none}.media-dialog::backdrop{background:#00000073}.media-dialog-box{max-height:inherit;flex-direction:column;display:flex}.media-dialog-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-2) var(--ap-space-2) var(--ap-space-2) var(--ap-space-3);border-bottom:1px solid var(--ap-border);display:flex}.media-dialog-body{min-height:0;padding:var(--ap-space-3);flex:auto;overflow:auto}@media (max-width:600px){.media-dialog{border:0;border-radius:0;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0}.media-dialog-box{height:100%}}.speech-card{align-items:center;gap:var(--ap-space-2);min-height:2em;padding:0 var(--ap-space-1,4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--ap-primary) 5%, transparent);display:flex}.speech-track{flex:auto;align-items:center;gap:2px;min-width:3em;height:1.4em;display:flex}.speech-seg{background:var(--ap-border);cursor:pointer;border:0;border-radius:2px;flex:1 1 0;min-width:3px;height:4px;padding:0;transition:height .12s,background .12s}.speech-seg.narration{opacity:.6}.speech-seg.ready{background:color-mix(in srgb, var(--ap-primary) 45%, transparent)}.speech-seg.loading{background:color-mix(in srgb, var(--ap-primary) 30%, transparent);animation:1.2s ease-in-out infinite ap-pulse}.speech-seg.error{background:var(--ap-danger)}.speech-seg.on{background:var(--ap-primary);opacity:1;height:8px}.speech-seg:hover{height:8px}.speech-who{flex:0 auto;max-width:8em}.speech-panel{gap:var(--ap-space-2);flex-direction:column;display:flex}.speech-panel-bar{flex-wrap:wrap;align-items:center;gap:4px;display:flex}.speech-panel-bar>.btn{margin-right:4px}.speech-panel-format{align-items:center;gap:4px;margin:0;display:flex}.speech-panel-list{gap:var(--ap-space-2);flex-direction:column;margin:0;padding:0;list-style:none;display:flex}.speech-panel-seg{padding:4px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);flex-direction:column;gap:4px;transition:border-color .15s,background .15s;display:flex}.speech-panel-seg.narration{background:var(--ap-surface-2)}.speech-panel-seg.playing{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.speech-panel-seg.error{border-color:color-mix(in srgb, var(--ap-danger) 45%, transparent)}.speech-panel-head{align-items:center;gap:var(--ap-space-2);min-width:0;margin-left:-4px;display:flex}.speech-panel-who{flex:0 auto;max-width:12em}.speech-panel-state{flex:none}.speech-panel-display{white-space:pre-wrap;margin:0}.speech-panel-text{field-sizing:content;min-height:2.6em;max-height:14em;font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.speech-panel-seg.edited .speech-panel-text{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.speech-panel-actions{align-items:center;gap:4px;min-height:1.9em;margin-right:-4px;display:flex}.speech-panel-actions .btn{min-height:1.9em;font-size:var(--ap-font-size-sm);padding:0 .8em}.voice-ask{width:min(26em,100vw - 2em);padding:var(--ap-space-3);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);color:var(--ap-text);background:var(--ap-panel-bg-solid);box-shadow:var(--ap-shadow)}.voice-ask::backdrop{background:#0006}.speech-binding{align-items:flex-start;gap:var(--ap-space-2);min-width:0;display:flex}.speech-binding>.input:first-child{flex:0 9em;min-width:5em}.speech-voice{flex:auto;align-items:center;gap:4px;min-width:0;display:flex}.speech-voice>.input{flex:auto;min-width:0}.voice-menu{z-index:2147482000;border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-panel-bg-solid);max-height:min(16em,50vh);color:var(--ap-text);box-shadow:var(--ap-shadow);margin:0;padding:4px;position:fixed;inset:0 auto auto 0;overflow:auto}.voice-option{align-items:center;gap:var(--ap-space-2);min-height:2em;padding:2px var(--ap-space-2);border-radius:var(--ap-radius-sm);cursor:pointer;display:flex}.voice-option.on{background:var(--ap-surface-2)}.voice-option .col{gap:0;line-height:1.3}.voice-menu-note{padding:4px var(--ap-space-2);align-items:center;display:flex}.image-open .blob-placeholder{width:100%;min-height:8em;display:block}", pD = /* @__PURE__ */ fn({ mode: "light" }), mD = new CSSStyleSheet();
+var cD = ":host{--ap-primary-50:#fdf4ff;--ap-primary-100:#fae8ff;--ap-primary-200:#f5d0fe;--ap-primary-300:#f0abfc;--ap-primary-400:#e879f9;--ap-primary-500:#d946ef;--ap-primary-600:#c026d3;--ap-primary-700:#a21caf;--ap-primary-800:#86198f;--ap-primary-900:#701a75;--ap-accent-50:#faf5ff;--ap-accent-100:#f3e8ff;--ap-accent-200:#e9d5ff;--ap-accent-300:#d8b4fe;--ap-accent-400:#c084fc;--ap-accent-500:#a855f7;--ap-accent-600:#9333ea;--ap-accent-700:#7e22ce;--ap-accent-800:#6b21a8;--ap-accent-900:#581c87;--ap-radius-sm:6px;--ap-radius-md:10px;--ap-radius-lg:14px;--ap-radius-pill:999px;--ap-space-1:4px;--ap-space-2:8px;--ap-space-3:12px;--ap-space-4:16px;--ap-space-5:24px;--ap-font-size-xs:.75em;--ap-font-size-sm:.875em;--ap-font-size-md:1em;--ap-font-size-lg:1.125em;--ap-text:var(--SmartThemeBodyColor,#1f1724);--ap-muted:color-mix(in srgb, var(--ap-text) 58%, transparent);--ap-faint:color-mix(in srgb, var(--ap-text) 36%, transparent);--ap-border:color-mix(in srgb, var(--ap-text) 14%, transparent);--ap-surface:color-mix(in srgb, var(--ap-text) 4%, transparent);--ap-surface-2:color-mix(in srgb, var(--ap-text) 8%, transparent);--ap-primary:var(--ap-primary-600);--ap-accent:var(--ap-accent-600);--ap-on-primary:#fff;--ap-tint:color-mix(in srgb, var(--ap-primary-500) 10%, transparent);--ap-danger:#dc2626;--ap-success:#16a34a;--ap-warning:#d97706;--ap-panel-bg:var(--SmartThemeBlurTintColor,#faf5fceb);--ap-panel-bg-solid:#faf5fc;--ap-shadow:0 8px 28px #0f05142e;--ap-ring:0 0 0 2px color-mix(in srgb, var(--ap-primary-500) 45%, transparent);color:var(--ap-text);font:inherit;line-height:1.5}:host([data-ap-theme=dark]){--ap-text:var(--SmartThemeBodyColor,#f3eaf6);--ap-primary:var(--ap-primary-400);--ap-accent:var(--ap-accent-400);--ap-on-primary:#1a0b1f;--ap-tint:color-mix(in srgb, var(--ap-primary-400) 14%, transparent);--ap-danger:#f87171;--ap-success:#4ade80;--ap-warning:#fbbf24;--ap-panel-bg:var(--SmartThemeBlurTintColor,#1c1420eb);--ap-panel-bg-solid:#1c1420;--ap-shadow:0 8px 28px #00000073}@supports (color:rgb(from red r g b)){:host,:host([data-ap-theme=dark]){--ap-panel-bg-solid:rgb(from var(--ap-panel-bg) r g b / 1)}}", lD = "*,:before,:after{box-sizing:border-box}:host{display:block}:host([hidden]){display:none}svg.lucide{stroke-width:2px;flex:none;width:1.1em;height:1.1em}button,input,select,textarea{font:inherit;color:inherit}p{margin:0}.muted{color:var(--ap-muted)}.faint{color:var(--ap-faint)}.row{align-items:center;gap:var(--ap-space-2);display:flex}.col{gap:var(--ap-space-2);flex-direction:column;display:flex}.grow{flex:auto;min-width:0}.wrap{flex-wrap:wrap}.ellipsis{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-xs)}.pre{white-space:pre-wrap;word-break:break-word}.small{font-size:var(--ap-font-size-sm)}.xs{font-size:var(--ap-font-size-xs)}.btn{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);cursor:pointer;white-space:nowrap;justify-content:center;align-items:center;gap:6px;min-height:2em;padding:0 .8em;transition:background .15s,border-color .15s,color .15s;display:inline-flex}.btn:hover:not(:disabled){background:var(--ap-surface-2);border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.btn:focus-visible,.icon-btn:focus-visible,.input:focus-visible{box-shadow:var(--ap-ring);outline:none}.btn:disabled,.icon-btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--ap-primary);color:var(--ap-on-primary);border-color:#0000}.btn.primary:hover:not(:disabled){background:color-mix(in srgb, var(--ap-primary) 88%, var(--ap-text))}.btn.ghost{background:0 0;border-color:#0000}.btn.danger:hover:not(:disabled){color:var(--ap-danger);border-color:color-mix(in srgb, var(--ap-danger) 50%, transparent)}.icon-btn{border-radius:var(--ap-radius-sm);width:2em;height:2em;color:var(--ap-muted);cursor:pointer;background:0 0;border:0;flex:none;justify-content:center;align-items:center;transition:background .15s,color .15s;display:inline-flex}.icon-btn:hover:not(:disabled){background:var(--ap-surface-2);color:var(--ap-text)}.icon-btn.active{color:var(--ap-primary)}.icon-btn.danger:hover:not(:disabled){color:var(--ap-danger)}.icon-btn.sm{width:1.6em;height:1.6em}.input{border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);outline:none;width:100%;min-height:2em;padding:.3em .6em;transition:border-color .15s}.input:hover{border-color:color-mix(in srgb, var(--ap-text) 24%, transparent)}.input:focus{border-color:var(--ap-primary)}textarea.input{resize:vertical;min-height:4.5em;line-height:1.45}select.input{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,#0000 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,#0000 50%);background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat;background-size:5px 5px;padding-right:1.8em}select.input option{background:var(--ap-panel-bg-solid);color:var(--ap-text)}input[type=number].input{font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--ap-primary)}.switch{cursor:pointer;flex:none;width:2.2em;height:1.25em;display:inline-flex;position:relative}.switch input{opacity:0;cursor:pointer;margin:0;position:absolute;inset:0}.switch .track{border-radius:var(--ap-radius-pill);background:var(--ap-surface-2);border:1px solid var(--ap-border);width:100%;height:100%;transition:background .15s}.switch .thumb{background:var(--ap-muted);border-radius:50%;width:.9em;height:.9em;transition:transform .18s,background .15s;position:absolute;top:.18em;left:.18em}.switch input:checked+.track{background:var(--ap-primary);border-color:#0000}.switch input:checked~.thumb{background:var(--ap-on-primary);transform:translate(.95em)}.switch input:focus-visible+.track{box-shadow:var(--ap-ring)}.switch.sm{width:1.8em;height:1.05em}.switch.sm .thumb{width:.75em;height:.75em;top:.15em;left:.15em}.switch.sm input:checked~.thumb{transform:translate(.75em)}.segmented{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:2px;padding:2px;display:grid}.segmented button{border-radius:calc(var(--ap-radius-md) - 2px);min-width:0;min-height:1.9em;color:var(--ap-muted);cursor:pointer;white-space:nowrap;text-overflow:ellipsis;background:0 0;border:0;justify-content:center;align-items:center;gap:6px;padding:0 .4em;display:inline-flex;overflow:hidden}.segmented.dense button{font-size:var(--ap-font-size-sm);padding:0 2px}.segmented button:hover{color:var(--ap-text)}.segmented button.on{background:var(--ap-panel-bg);color:var(--ap-primary);font-weight:600;box-shadow:0 1px 3px #0000001f}.card{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface)}.card-head{align-items:center;gap:var(--ap-space-2);min-height:2.25em;padding:0 var(--ap-space-2) 0 var(--ap-space-3);display:flex}.card-head.clickable{cursor:pointer;-webkit-user-select:none;user-select:none}.card-title{text-overflow:ellipsis;white-space:nowrap;flex:auto;min-width:0;font-weight:600;overflow:hidden}.card-body{padding:0 var(--ap-space-3) var(--ap-space-3)}.card>.card-body:empty{display:none}.chip{border:1px solid var(--ap-border);border-radius:var(--ap-radius-pill);background:var(--ap-surface);max-width:100%;min-height:1.75em;font-size:var(--ap-font-size-sm);white-space:nowrap;cursor:default;align-items:center;gap:5px;padding:0 .65em;display:inline-flex}button.chip{cursor:pointer}.chip:is(button):hover{background:var(--ap-surface-2)}.badge{border-radius:var(--ap-radius-pill);min-height:1.45em;font-size:var(--ap-font-size-xs);background:var(--ap-tint);color:var(--ap-primary);white-space:nowrap;align-items:center;padding:0 .5em;font-weight:600;display:inline-flex}.badge.neutral{background:var(--ap-surface-2);color:var(--ap-muted)}.badge.icon-badge{gap:.3em}.badge.icon-badge svg{width:1.1em;height:1.1em}.badge.warn{background:color-mix(in srgb, var(--ap-warning) 16%, transparent);color:var(--ap-warning)}.dot{background:currentColor;border-radius:50%;flex:none;width:.5em;height:.5em}.divider{background:var(--ap-border);height:1px;margin:var(--ap-space-2) 0}.empty{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-5) var(--ap-space-3);color:var(--ap-faint);text-align:center;flex-direction:column;display:flex}.empty svg.lucide{width:1.8em;height:1.8em}.tip{display:inline-flex;position:relative}.tip-bubble{z-index:2147483000;border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-text) 92%, transparent);width:max-content;max-width:min(280px,100vw - 16px);color:var(--ap-panel-bg-solid,#fff);font-size:var(--ap-font-size-xs);white-space:pre-line;overflow-wrap:anywhere;text-align:left;pointer-events:none;box-shadow:var(--ap-shadow);border:0;margin:0;padding:.45em .7em;font-weight:400;line-height:1.45;position:fixed;inset:0 auto auto 0;overflow:visible}:host([data-ap-theme=dark]) .tip-bubble{color:#160d1a}@keyframes ap-spin{to{transform:rotate(360deg)}}@keyframes ap-pulse{50%{opacity:.45}}.spin{animation:1s linear infinite ap-spin}.pulse{animation:1.4s ease-in-out infinite ap-pulse}@media (prefers-reduced-motion:reduce){.spin,.pulse{animation:none}}.scroll{scrollbar-width:thin;scrollbar-color:var(--ap-border) transparent;overflow:auto}", uD = ":host(ap-cards),:host(ap-top-cards),:host(ap-stages){padding-right:var(--mes-right-spacing,30px)}.stages{--actor:var(--ap-primary);gap:var(--ap-space-2);margin:2px 0 var(--ap-space-2);flex-direction:column;display:flex}.stage-bar{flex-wrap:wrap;align-items:center;gap:6px;display:flex}.stage-chip{--c:var(--actor);max-width:16em;color:var(--ap-muted);border-color:color-mix(in srgb, var(--c) 28%, var(--ap-border))}.stage-chip svg.lucide{color:var(--c)}.stage-chip:hover{color:var(--ap-text)}.stage-chip.open{color:var(--ap-text);background:color-mix(in srgb, var(--c) 14%, transparent);border-color:color-mix(in srgb, var(--c) 55%, transparent)}.stage-chip.pending{opacity:.5}.stage-chip.streaming{color:var(--ap-text)}.stage-chip.missing{opacity:.55;border-style:dashed}.stage-chip.interrupted{border-style:dashed}.stage-chip.error{--c:var(--ap-danger);color:var(--ap-danger);max-width:100%}.stage-body{border-left:2px solid color-mix(in srgb, var(--actor) 65%, transparent);padding:2px 0 2px var(--ap-space-3);background:linear-gradient(90deg, color-mix(in srgb, var(--actor) 7%, transparent), transparent 70%);border-radius:0 var(--ap-radius-sm) var(--ap-radius-sm) 0}.stage-text{max-height:18em;font-size:var(--ap-font-size-sm);color:color-mix(in srgb, var(--ap-text) 86%, transparent);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0}.stage-empty{padding:var(--ap-space-1) 0}.patches{gap:var(--ap-space-2);padding:var(--ap-space-1) var(--ap-space-2) var(--ap-space-1) 0;flex-direction:column;display:flex}.patch{font-size:var(--ap-font-size-sm);gap:2px;display:grid}.patch-old{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 10%, transparent);text-decoration:line-through;-webkit-text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);text-decoration-color:color-mix(in srgb, var(--ap-danger) 60%, transparent);padding:2px 6px}.patch-new{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-success) 11%, transparent);padding:2px 6px}.patch-arrow{width:.9em;height:.9em;color:var(--ap-faint);margin-left:6px}.patch.failed{opacity:.5}.patch.failed .patch-old,.patch.failed .patch-new{background:var(--ap-surface-2);text-decoration:none}.patch-status{color:var(--ap-muted);align-items:center;gap:4px;display:inline-flex}.cards{gap:var(--ap-space-2);margin:var(--ap-space-2) 0 2px;flex-direction:column;display:flex}.cards.cards-top{margin:0 0 var(--ap-space-2);gap:4px}.section-icon{color:var(--ap-primary)}.chevron{color:var(--ap-faint);transition:transform .18s}.chevron.flipped{transform:rotate(180deg)}.mini-card .card-body{font-size:var(--ap-font-size-sm)}.sm-btn{min-height:1.8em;font-size:var(--ap-font-size-sm);padding:0 .65em}.reply-card{--actor:var(--ap-primary);padding:var(--ap-space-2) var(--ap-space-3) var(--ap-space-2) calc(var(--ap-space-3) + 4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--actor) 7%, transparent);position:relative}.reply-card:before{content:\"\";background:var(--actor);border-radius:3px;width:3px;position:absolute;top:8px;bottom:8px;left:0}.reply-name{color:var(--actor);letter-spacing:.02em;margin-bottom:2px;font-weight:700}.rich p{margin:0 0 .6em}.rich p:last-child{margin-bottom:0}.rich p.special{border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-accent) 12%, transparent);color:var(--ap-text);padding:.35em .7em}.rich blockquote{border-left:2px solid var(--ap-border);color:var(--ap-muted);margin:0 0 .6em;padding:.1em 0 .1em .8em}.rich ul,.rich ol{margin:0 0 .6em;padding-left:1.3em}.rich code{font-family:var(--monoFontFamily,ui-monospace, monospace);background:var(--ap-surface-2);border-radius:4px;padding:0 .3em;font-size:.9em}.options-grid{gap:var(--ap-space-2);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}@media (max-width:560px){.options-grid{grid-template-columns:1fr}}.option{padding:var(--ap-space-2) var(--ap-space-3);text-align:left;cursor:pointer;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:border-color .15s,background .15s;display:flex}.option:hover{border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.option-label{font-weight:600}.option-content{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.memory-ops{flex-wrap:wrap;gap:6px;display:flex}.memory-chip{max-width:20em;padding-right:.3em}.memory-chip .op-icon{width:.9em;height:.9em;color:var(--ap-primary)}.memory-chip.delete .op-icon{color:var(--ap-danger)}.memory-chip.undone{opacity:.45;text-decoration:line-through}.memory-chip .icon-btn.sm{width:1.4em;height:1.4em}.synopsis{padding:4px var(--ap-space-3);border-radius:var(--ap-radius-sm);cursor:pointer;color:var(--ap-muted)}.synopsis:hover{background:var(--ap-surface)}.synopsis-head{align-items:flex-start;gap:var(--ap-space-2);display:flex}.synopsis-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.synopsis-line>.row{text-overflow:ellipsis;max-width:100%;overflow:hidden}.synopsis-event{color:var(--ap-text)}.synopsis-summary{margin-top:4px}.synopsis-edit{opacity:0;flex:none;margin:-2px -6px -4px 0;transition:opacity .15s;display:inline-flex}.synopsis:hover .synopsis-edit,.synopsis-edit:focus-within{opacity:1}@media (hover:none){.synopsis-edit{opacity:.7}}.synopsis-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.synopsis-fields{grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:6px;display:grid}.synopsis-field{min-width:0;display:block;position:relative}.synopsis-field svg.lucide{pointer-events:none;width:1em;height:1em;position:absolute;top:50%;left:.6em;transform:translateY(-50%)}.synopsis-field .input{padding-left:2em}.synopsis-event-input{font-weight:600}.synopsis-editor textarea.input{resize:none;min-height:3.4em;max-height:18em;overflow-y:auto}.synopsis-actions{align-items:center;gap:6px;margin-top:2px;display:flex}.synopsis-actions .btn svg.lucide{width:1em;height:1em}@media (hover:none){.synopsis-keys{visibility:hidden}}.row.tight{white-space:nowrap;gap:4px}.structure-component{flex-direction:column;gap:2px;display:flex}.structure-component .xs{color:var(--ap-danger)}.status-bar{align-items:flex-start;gap:var(--ap-space-2);padding:3px var(--ap-space-3);color:var(--ap-muted);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);display:flex}.status-line{align-items:center;gap:2px var(--ap-space-3);flex-wrap:wrap;flex:auto;min-width:0;display:flex}.status-line>.row{max-width:100%}.status-location{min-width:0;overflow:hidden}.status-bar:hover .synopsis-edit{opacity:1}.status-editor{padding:var(--ap-space-2) var(--ap-space-3);font-size:var(--ap-font-size-sm);border:1px solid color-mix(in srgb, var(--ap-primary) 32%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.status-fields{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;display:grid}.status-fields>:nth-child(-n+3),.status-fields>:nth-child(5){grid-column:span 2}.status-fields>:nth-child(4){grid-column:span 4}@media (max-width:480px){.status-fields>*{grid-column:span 3!important}.status-fields>:nth-child(4){grid-column:span 6!important}}.row.end{justify-content:flex-end}.kv-list{gap:4px var(--ap-space-3);grid-template-columns:max-content 1fr;margin:0;display:grid}.kv-list dt{color:var(--ap-muted)}.kv-list dd{margin:0}.dock{margin:var(--ap-space-2) var(--ap-space-3);padding:var(--ap-space-2) var(--ap-space-3);border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);border:1px solid var(--ap-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.anno-bubble{--actor:var(--ap-primary);z-index:2147483000;width:max-content;max-width:min(320px,100vw - 16px);max-height:min(50vh,24em);padding:var(--ap-space-2) var(--ap-space-3);border:1px solid color-mix(in srgb, var(--actor) 30%, var(--ap-border));border-radius:var(--ap-radius-md);background:var(--ap-panel-bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--ap-text);box-shadow:var(--ap-shadow);font-size:var(--ap-font-size-sm);text-align:left;overflow-wrap:anywhere;margin:0;line-height:1.55;position:fixed;inset:0 auto auto 0;overflow:auto}.anno-author{font-weight:700;font-size:var(--ap-font-size-xs);color:var(--actor);letter-spacing:.02em;margin-bottom:2px}:host(ap-storyline){padding-right:var(--mes-right-spacing,30px);display:block}.storyline-badge{border:1px solid color-mix(in srgb, var(--ap-primary) 30%, var(--ap-border));border-radius:var(--ap-radius-pill);background:color-mix(in srgb, var(--ap-primary) 8%, transparent);max-width:100%;min-height:1.6em;color:var(--ap-muted);font-size:var(--ap-font-size-xs);cursor:pointer;align-items:center;gap:4px;margin:2px 0 4px;padding:1px 8px;display:inline-flex}.storyline-badge:hover{color:var(--ap-text);border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent)}.storyline-badge svg.lucide{width:1.1em;height:1.1em;color:var(--ap-primary);flex:none}.storyline-badge .storyline-name{text-overflow:ellipsis;white-space:nowrap;font-weight:600;overflow:hidden}.storyline-badge .storyline-if{border-radius:var(--ap-radius-pill);background:color-mix(in srgb, var(--ap-warning) 18%, transparent);color:var(--ap-warning);padding:0 5px;font-weight:600}.storyline-badge.if-line{border-style:dashed}.storyline-badge svg.lucide.storyline-hidden{color:var(--ap-muted)}", dD = ":host(ap-panel){border-radius:inherit}.panel{z-index:100;border-radius:inherit;color:var(--ap-text);background:0 0;flex-direction:column;display:flex;position:absolute;inset:0;overflow:hidden;container:ap-panel/inline-size}:host(ap-panel[data-ap-standalone]) .panel{--ap-blur:blur(var(--SmartThemeBlurStrength,10px));background:var(--ap-panel-bg-solid);-webkit-backdrop-filter:var(--ap-blur);backdrop-filter:var(--ap-blur)}.panel-enter-active,.panel-leave-active{transition:transform .2s,opacity .2s}.panel-enter-from,.panel-leave-to{opacity:0;transform:translateY(8px)}.panel-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3) var(--ap-space-3) var(--ap-space-2) var(--ap-space-4);flex:none;display:flex}.panel-logo{border-radius:var(--ap-radius-md);background:linear-gradient(135deg, var(--ap-primary-500), var(--ap-accent-500));color:#fff;flex:none;place-items:center;width:2.1em;height:2.1em;display:grid}.panel-title{font-weight:700;font-size:var(--ap-font-size-lg);line-height:1.2}.panel-sub{font-size:var(--ap-font-size-xs);color:var(--ap-muted)}.tabs{padding:0 var(--ap-space-3);border-bottom:1px solid var(--ap-border);scrollbar-width:none;flex:none;gap:2px;display:flex;overflow-x:auto}.tab{min-width:3.6em;padding:var(--ap-space-2) 4px;color:var(--ap-muted);cursor:pointer;font-size:var(--ap-font-size-xs);background:0 0;border:0;flex-direction:column;flex:1 1 0;align-items:center;gap:2px;display:flex;position:relative}.tab:hover{color:var(--ap-text)}.tab.on{color:var(--ap-primary);font-weight:600}.tab.on:after{content:\"\";background:var(--ap-primary);border-radius:2px;height:2px;position:absolute;bottom:-1px;left:20%;right:20%}.tab svg.lucide{width:1.25em;height:1.25em}.tab span{text-overflow:ellipsis;white-space:nowrap;max-width:100%;overflow:hidden}.panel-body{min-height:0;padding:var(--ap-space-3) var(--ap-space-4) var(--ap-space-5);gap:var(--ap-space-3);flex-direction:column;flex:auto;display:flex}.section .card-body{gap:var(--ap-space-3);flex-direction:column;display:flex}.toolbar{align-items:center;gap:var(--ap-space-2);flex-wrap:wrap;display:flex}.field{flex-direction:column;gap:4px;min-width:0;display:flex}.field.inline{justify-content:space-between;align-items:center;gap:var(--ap-space-3);flex-direction:row}.field.inline .field-control{flex:none;justify-content:flex-end;display:flex}.field.inline .field-control .input{width:8em}.field-label{min-width:0;font-size:var(--ap-font-size-sm);color:var(--ap-muted);align-items:center;gap:4px;display:flex}.field.inline .field-label{color:var(--ap-text);font-size:var(--ap-font-size-md)}.field-label .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.dot.modified{color:var(--ap-primary)}.field-grid{gap:var(--ap-space-3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid}.slider{align-items:center;gap:var(--ap-space-2);grid-template-columns:1fr 5.2em;display:grid}.slider .input{text-align:right;padding:.2em .4em}.unit{align-items:center;gap:6px;display:flex}.preset-list{gap:var(--ap-space-2);flex-direction:column;display:flex}.preset-item{gap:var(--ap-space-3);padding:var(--ap-space-3);text-align:left;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);cursor:pointer;align-items:flex-start;width:100%;transition:border-color .15s,background .15s;display:flex}.preset-item:hover{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.preset-item.on{border-color:var(--ap-primary);background:var(--ap-tint)}.preset-mark{border:1.5px solid var(--ap-border);width:1.3em;height:1.3em;color:var(--ap-on-primary);border-radius:50%;flex:none;place-items:center;margin-top:2px;display:grid}.preset-item.on .preset-mark{background:var(--ap-primary);border-color:var(--ap-primary)}.preset-mark svg.lucide{stroke-width:3px;width:.85em;height:.85em}.preset-name{font-weight:600}.preset-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.module-row{align-items:center;gap:var(--ap-space-2);min-height:2em;display:flex}.module-row .grow{align-items:center;gap:4px;display:flex}.module-row .icon-btn.sm{width:1.4em;height:1.4em;color:var(--ap-faint)}.choice-list{flex-direction:column;gap:4px;display:flex}.choice-list.nested{padding-left:var(--ap-space-2);border-left:1px solid var(--ap-border);margin-left:.5em}.choice{align-items:center;gap:var(--ap-space-2);padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);text-align:left;cursor:pointer;background:0 0;border:1px solid #0000;width:100%;display:flex}.choice:hover{background:var(--ap-surface-2)}.choice.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.choice .radio{border:1.5px solid var(--ap-faint);border-radius:50%;flex:none;place-items:center;width:1em;height:1em;display:grid}.choice.on .radio{border-color:var(--ap-primary)}.choice.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.5em;height:.5em}.kv{flex-direction:column;gap:2px;display:flex}.kv-row{gap:var(--ap-space-2);border-bottom:1px solid var(--ap-border);grid-template-columns:minmax(5em,32%) 1fr auto;align-items:start;padding:6px 0;display:grid}.kv-row:last-of-type{border-bottom:0}.kv-key{font-weight:600;font-size:var(--ap-font-size-sm);padding-top:2px}.kv-actions{opacity:.4;transition:opacity .15s;display:flex}.kv-row:hover .kv-actions,.kv-row:focus-within .kv-actions{opacity:1}.kv-edit,.kv-empty{padding:var(--ap-space-2) 0}.btn.add{color:var(--ap-primary);align-self:flex-start;padding-left:.3em}.region{border-bottom:1px solid var(--ap-border)}.region:last-child{border-bottom:0}.region-head{align-items:center;gap:var(--ap-space-2);cursor:pointer;padding:6px 0;display:flex}.region-msg{padding:4px 0 8px}.region-msg .pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:14em;padding:6px 8px}.req{border-bottom:1px solid var(--ap-border);padding:6px 0}.req:last-child{border-bottom:0}.req pre{border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);max-height:18em;margin:6px 0 0;padding:6px 8px}.status-dot.online{color:var(--ap-success)}.status-dot.error{color:var(--ap-danger)}.status-dot.connecting{color:var(--ap-warning)}.status-dot.off{color:var(--ap-faint)}.swatches{align-items:center;gap:6px;display:flex}.swatch{border:2px solid var(--ap-border);cursor:pointer;border-radius:50%;width:1.6em;height:1.6em;padding:0;overflow:hidden}.swatch input{opacity:0;cursor:pointer;width:100%;height:100%}.preset-info{gap:2px}.preset-head{gap:6px}.preset-actions{gap:0}.text-danger{color:var(--ap-danger)}.text-warning{color:var(--ap-warning)}.clickable{cursor:pointer}.caret{transition:transform .15s}.caret.open{transform:rotate(90deg)}.build{text-align:center;padding-top:var(--ap-space-2)}.tab-col{gap:var(--ap-space-3)}.input.bare{background-color:#0000;border-color:#0000;width:auto;min-width:0;padding-left:.35em}.input.bare:hover{border-color:var(--ap-border)}.input.bare:focus{border-color:var(--ap-primary)}.chip.on{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint);color:var(--ap-primary)}.um-list{margin:0 calc(-1 * var(--ap-space-2));flex-direction:column;gap:2px;display:flex}.um-row{min-height:2.6em;padding:0 var(--ap-space-2);border-radius:var(--ap-radius-sm);align-items:center;gap:4px;transition:background .15s,opacity .15s;display:flex}.um-row:hover{background:var(--ap-surface-2)}.um-row.dragging{background:var(--ap-tint)}.um-row.off .um-open{opacity:.55}.um-grip{color:var(--ap-faint);cursor:grab;touch-action:none;margin-left:-4px;display:inline-flex}.um-row.dragging .um-grip{cursor:grabbing;color:var(--ap-primary)}.um-open{text-align:left;cursor:pointer;background:0 0;border:0;flex-direction:column;flex:auto;align-items:flex-start;gap:0;min-width:0;padding:4px 0;display:flex}.um-row-name{max-width:100%}.um-row-meta{max-width:100%;line-height:1.3}.um-flag{width:1em;height:1em;margin:0 2px}.um-zap{color:var(--ap-primary)}.um-new{border:1px dashed var(--ap-border);border-radius:var(--ap-radius-md);width:100%;min-height:2.6em;color:var(--ap-muted);cursor:pointer;background:0 0;justify-content:center;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s;display:flex}.um-picker{margin-bottom:var(--ap-space-2);padding:4px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface-2);flex-direction:column;gap:2px;display:flex}.um-picker-head{justify-content:space-between;align-items:center;gap:var(--ap-space-2);display:flex}.um-choice{align-items:flex-start;gap:var(--ap-space-2);width:100%;padding:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);color:inherit;text-align:left;cursor:pointer;background:0 0;border:0;transition:background .15s;display:flex}.um-choice:hover,.um-choice:focus-visible{background:var(--ap-tint)}.um-choice>svg.lucide{width:1.1em;height:1.1em;color:var(--ap-primary);flex:none;margin-top:.15em}.um-choice-text{flex-direction:column;min-width:0;line-height:1.35;display:flex}.um-choice-desc{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.um-new:hover{color:var(--ap-primary);border-color:color-mix(in srgb, var(--ap-primary) 50%, transparent);background:var(--ap-tint)}.um-groups{gap:var(--ap-space-2);flex-direction:column;display:flex}.um-groups.um-dragging,.um-groups.um-dragging *{cursor:grabbing;-webkit-user-select:none;user-select:none}.um-group{padding:2px var(--ap-space-2) 4px;border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);background:var(--ap-surface);flex-direction:column;gap:2px;transition:background .15s,border-color .15s;display:flex}.um-group.collapsed{padding-bottom:2px}.um-group.dragging{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.um-group-head{align-items:center;gap:2px;min-height:2.2em;margin-left:-4px;display:flex}.um-group-head>.um-grip{margin-left:0}.um-chevron svg.lucide{transition:transform .15s}.um-chevron.open svg.lucide{transform:rotate(90deg)}.um-group-name{text-overflow:ellipsis;flex:6em;font-weight:600}.um-group-count{background:var(--ap-surface-2);text-align:center;border-radius:999px;flex:none;min-width:1.6em;padding:0 .4em;line-height:1.6}.um-group-confirm{align-items:center;gap:2px var(--ap-space-2);padding:4px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:color-mix(in srgb, var(--ap-danger) 8%, transparent);flex-wrap:wrap;display:flex}.um-group-confirm>span{flex:100%}.um-group-confirm .btn.danger{color:var(--ap-danger)}.um-group .um-list{margin:0 calc(-1 * var(--ap-space-2) + 1px)}.um-group .um-picker{margin:2px 0 4px}.um-drop{min-height:2.4em;margin:0 var(--ap-space-2);border:1px dashed var(--ap-border);border-radius:var(--ap-radius-sm);justify-content:center;align-items:center;display:flex}.um-radio{cursor:pointer;background:0 0;border:0;place-items:center;width:2.2em;height:1.6em;padding:0;display:inline-grid}.um-radio .radio{border:1.5px solid var(--ap-faint);border-radius:50%;place-items:center;width:1.05em;height:1.05em;transition:border-color .15s;display:grid}.um-radio:hover .radio,.um-radio.on .radio{border-color:var(--ap-primary)}.um-radio.on .radio:after{content:\"\";background:var(--ap-primary);border-radius:50%;width:.52em;height:.52em}.um-move{max-width:12em;position:relative;overflow:hidden}.um-move select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}.um-editor{gap:var(--ap-space-3);flex-direction:column;display:flex}.um-head{align-items:center;gap:var(--ap-space-2);margin-left:-6px;display:flex}.um-name{font-size:var(--ap-font-size-lg);flex:auto;font-weight:600}.um-entry{flex-direction:column;gap:6px;display:flex}.um-entry>*,.um-entry-head>*{transition:opacity .15s}.um-entry+.um-entry{padding-top:var(--ap-space-3);border-top:1px solid var(--ap-border)}.um-entry-head{flex-wrap:wrap;align-items:center;gap:2px;min-width:0;display:flex}.um-entry-head>.switch{margin-right:6px}.um-entry.off .um-entry-head>:not(.switch),.um-entry.off>:not(.um-entry-head){opacity:.55}.um-entry-head select.grow{text-overflow:ellipsis;flex:8em;min-width:0;font-weight:600}.um-entry.lost .um-entry-head select.grow{color:var(--ap-warning)}.um-role{field-sizing:content;text-overflow:ellipsis;min-width:0;color:var(--ap-muted);font-size:var(--ap-font-size-sm);flex:none}.um-text,.um-var-key,.um-var-value{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace);font-size:var(--ap-font-size-sm)}.um-text{field-sizing:content;min-height:5.5em;max-height:24em}.um-warn{color:var(--ap-warning);align-items:center;gap:6px;display:flex}.um-warn svg.lucide{width:1.1em;height:1.1em}.um-var-label{flex:8em;min-width:0;padding:0 .35em;font-weight:600}.um-entry.lost .um-var-label{color:var(--ap-warning)}.um-var-row{grid-template-columns:auto 1fr auto;align-items:start;gap:4px;display:grid}.um-var-row>.switch{margin:calc(.375em + 1px) 4px 0 0}.um-var-pair{padding:2px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:2px;display:flex}.um-var-pair-head{align-items:center;gap:2px;margin-right:-6px;display:flex}.um-var-key{text-overflow:ellipsis;flex:auto;min-width:0;font-weight:600}.um-var-row>*,.um-var-pair>*,.um-var-pair-head>*{transition:opacity .15s}.um-var-row.off>:not(.switch),.um-var-pair.off>:not(.um-var-pair-head),.um-var-pair.off .um-var-pair-head>:not(.switch){opacity:.55}.um-var-key::-webkit-calendar-picker-indicator{display:none!important}textarea.input.um-var-value{field-sizing:content;resize:none;min-width:0;min-height:0;max-height:12em}.um-var-add{align-self:flex-start}.um-foot{flex-wrap:wrap;align-items:center;gap:2px;margin:0 -.5em;display:flex}.um-foot .btn{color:var(--ap-muted)}.um-foot .btn:hover:not(:disabled){color:var(--ap-text);background:var(--ap-surface-2)}.um-foot .btn.danger:hover:not(:disabled),.um-foot .btn.armed{color:var(--ap-danger)}.um-foot .btn.armed{background:color-mix(in srgb, var(--ap-danger) 10%, transparent)}.trigger{gap:var(--ap-space-2);flex-direction:column;display:flex}.always{padding:2px 0}.rule{padding:6px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface);flex-direction:column;gap:6px;display:flex}.rule-head{align-items:center;gap:2px;min-width:0;margin-left:-.35em;display:flex}.rule-subject{field-sizing:content;text-overflow:ellipsis;flex:none;min-width:0;max-width:60%;font-weight:600}.rule-target{text-overflow:ellipsis;flex:auto;min-width:0}.rule-body{flex-direction:column;gap:6px;display:flex}.rule-op{color:var(--ap-muted);align-self:flex-start;margin-left:-.35em}.rule-cmp{flex:none;width:4.2em}.rule-scope{flex:10em}.rule-join{text-transform:uppercase;letter-spacing:.04em;align-self:center;margin:-4px 0}.rule-error{color:var(--ap-danger)}.option-chips{gap:4px}.option-chips .chip{cursor:pointer}.depth{width:3.6em;padding-right:.2em}.kw-words{align-items:flex-start;gap:4px}.chips-input{cursor:text;flex-wrap:wrap;align-items:center;gap:4px;min-height:2.1em;padding:3px 4px;display:flex}.chips-input .chip{background:var(--ap-tint);color:var(--ap-primary);border-color:#0000;gap:2px;padding-right:2px}.chips-input .chip.mono{font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.chip-x{width:1.3em;height:1.3em;color:inherit;cursor:pointer;opacity:.7;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:inline-grid}.chip-x:hover{opacity:1;background:color-mix(in srgb, var(--ap-primary) 16%, transparent)}.chip-x svg.lucide{width:.85em;height:.85em}.chips-draft{background:0 0;border:0;outline:none;flex:5em;min-width:5em;padding:2px 4px}.btn.add.picker{position:relative;overflow:hidden}.btn.add.picker select{opacity:0;cursor:pointer;width:100%;position:absolute;inset:0}@container ap-panel (width<=420px){.tabs.many .tab span{display:none}.tabs.many .tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tabs.many .tab svg.lucide{width:1.35em;height:1.35em}}@container ap-panel (width<=340px){.tab span{display:none}.tab{min-width:2.4em;padding:var(--ap-space-2) 2px}.tab svg.lucide{width:1.35em;height:1.35em}.panel-head{padding-left:var(--ap-space-3)}.panel-body{padding-left:var(--ap-space-3);padding-right:var(--ap-space-3)}.segmented{grid-template-columns:repeat(auto-fit,minmax(4.6em,1fr));grid-auto-flow:row}.segmented.dense button{padding:0 .4em}.um-foot .btn:not(.armed)>span{display:none}.um-role{order:1;margin-left:calc(2.51429em + 8px)}}.preset-banner{align-items:center;gap:6px var(--ap-space-2);border-radius:var(--ap-radius-sm);background:var(--ap-tint);border:1px solid color-mix(in srgb, var(--ap-primary) 28%, transparent);font-size:var(--ap-font-size-sm);flex-wrap:wrap;margin-top:6px;margin-bottom:4px;padding:5px 5px 5px 10px;line-height:1.35;display:flex}.preset-banner-icon{color:var(--ap-primary)}.preset-banner-text{flex:11em;min-width:0}.preset-banner .btn{min-height:1.8em;margin-left:auto;padding:0 .7em}.custom-ui-list{flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;display:flex}.custom-ui-list .grow{flex:auto;min-width:0}.storylines-head{gap:var(--ap-space-2);min-height:1.6em;padding:0 var(--ap-space-1) 0 var(--ap-space-3)}.storyline-card.current{border-color:color-mix(in srgb, var(--ap-primary) 45%, var(--ap-border))}.storyline-card.hidden .card-title{color:var(--ap-muted)}.storyline-dot{background:var(--ap-primary);border-radius:50%;flex:none;width:.5em;height:.5em}.storyline-flag{width:1.05em;height:1.05em;color:var(--ap-faint);flex:none}.storyline-toolbar{margin-bottom:var(--ap-space-1);border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);align-self:flex-start;align-items:center;gap:2px;padding:2px;display:flex}.storyline-toolbar .icon-btn[aria-pressed=true]{background:var(--ap-tint)}.storyline-toolbar.solo{padding:0}.storyline-toolbar.solo .icon-btn.sm{width:calc(1.6em - 2px);height:calc(1.6em - 2px)}.storyline-toolbar-sep{background:var(--ap-border);align-self:stretch;width:1px;margin:3px 2px}.storyline-floors{flex-direction:column;gap:2px;max-height:22em;margin:0;padding:0;list-style:none;display:flex;overflow-y:auto}.storyline-floors li{border-radius:var(--ap-radius-sm);padding:2px 4px}.storyline-floors li:hover{background:var(--ap-surface-2)}", fD = ".media-conn{gap:var(--ap-space-3)}.media-advanced{gap:var(--ap-space-3);flex-direction:column;display:flex}.media-advanced-toggle{color:var(--ap-muted);align-self:flex-start;gap:4px}.media-refs{gap:var(--ap-space-2)}.media-ref{align-items:center;gap:var(--ap-space-2);min-width:0;display:flex}.media-ref-group{gap:var(--ap-space-2)}.media-ref-group-title{color:var(--ap-muted);font-size:.85em;font-weight:600}.media-ref-thumb{object-fit:cover;border-radius:var(--ap-radius-sm);background:var(--ap-surface-2);flex:none;width:2.6em;height:2.6em}.blob-placeholder{background:var(--ap-surface-2);display:inline-block}.image-card{gap:var(--ap-space-2);display:grid}.image-card.multi{grid-template-columns:repeat(auto-fill,minmax(min(100%,14em),1fr))}.image-figure{flex-direction:column;gap:4px;min-width:0;margin:0;display:flex}.image-frame{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);position:relative;overflow:hidden}.image-frame.empty{border:1px dashed var(--ap-border);background:0 0;max-height:22em}.image-open{cursor:zoom-in;background:0 0;border:0;width:100%;padding:0;display:block}.image-open img{object-fit:contain;width:100%;height:auto;max-height:70vh;display:block}.image-empty{justify-content:center;align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-3);text-align:center;flex-direction:column;display:flex;position:absolute;inset:0}.image-empty>svg.lucide{width:1.6em;height:1.6em}.image-prompt{-webkit-line-clamp:6;white-space:pre-wrap;-webkit-box-orient:vertical;max-height:100%;margin:0;display:-webkit-box;overflow:hidden}.image-busy{justify-content:center;align-items:center;gap:var(--ap-space-2);color:var(--ap-text);background:color-mix(in srgb, var(--ap-panel-bg-solid) 70%, transparent);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);display:flex;position:absolute;inset:0}.image-pager{border-radius:var(--ap-radius-pill);color:#fff;background:#00000073;align-items:center;gap:2px;padding:0 4px;display:flex;position:absolute;bottom:6px;right:6px}.image-pager .icon-btn{color:inherit}.image-foot{align-items:center;gap:var(--ap-space-2);min-height:1.9em;display:flex}.image-error{-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.image-tools{flex:none}.image-panel{gap:var(--ap-space-3)}@media (max-width:600px){.image-panel{gap:var(--ap-space-2)}.image-versions{grid-template-columns:repeat(auto-fill,minmax(5.5em,1fr))}}.image-panel-prompt{resize:vertical;field-sizing:content;min-height:5em;max-height:40vh}.image-panel-ref{cursor:pointer}.image-panel-row{align-items:flex-start;gap:var(--ap-space-2);flex-wrap:nowrap}.image-panel-row>.field:first-child{flex:none}.image-panel-row>.field.grow{flex:auto;min-width:0}.image-versions{gap:var(--ap-space-2);grid-template-columns:repeat(auto-fill,minmax(7em,1fr));display:grid}.image-version{flex-direction:column;gap:2px;min-width:0;display:flex}.image-version-pick{border-radius:var(--ap-radius-md);background:var(--ap-surface-2);cursor:pointer;aspect-ratio:1;border:2px solid #0000;padding:0;display:block;overflow:hidden}.image-version-pick img,.image-version-pick .blob-placeholder{object-fit:cover;width:100%;height:100%;display:block}.image-version.on .image-version-pick{border-color:var(--ap-primary)}.image-version-tools{justify-content:space-between;display:flex}.image-panel-status{align-items:center}.image-panel-actions{flex-wrap:nowrap}.image-panel-actions>.btn{white-space:nowrap;flex:none}.image-panel-restore{margin-inline-end:auto}.image-viewer{color:#fff;background:0 0;border:0;flex-direction:column;justify-content:center;align-items:center;width:100vw;max-width:100vw;height:100vh;max-height:100vh;margin:0;padding:0;display:flex}.image-viewer:not([open]){display:none}.image-viewer::backdrop{background:#000000d1}.image-viewer-img{object-fit:contain;-webkit-user-select:none;user-select:none;max-width:96vw;max-height:calc(100vh - 4.5em)}.image-viewer-bar{align-items:center;gap:var(--ap-space-2);width:min(96vw,60em);padding:var(--ap-space-2);display:flex}.image-viewer-bar .icon-btn{color:#fff}.image-viewer-caption{opacity:.85}.media-dialog-layer{top:var(--topBarBlockSize,0px);height:calc(100dvh - var(--topBarBlockSize,0px));z-index:2147481000;overscroll-behavior:contain;background:#00000073;place-items:center;padding:1em;display:grid;position:fixed;left:0;right:0}.media-dialog{border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);width:min(44em,100%);max-height:100%;color:var(--ap-text);background:var(--ap-panel-bg-solid);box-shadow:var(--ap-shadow);outline:none;flex-direction:column;display:flex;overflow:hidden}.media-dialog-head{align-items:center;gap:var(--ap-space-2);padding:var(--ap-space-2) var(--ap-space-2) var(--ap-space-2) var(--ap-space-3);border-bottom:1px solid var(--ap-border);display:flex}.media-dialog-body{min-height:0;padding:var(--ap-space-3);flex:auto;overflow:auto}@media (max-width:600px){.media-dialog-layer{padding:0}.media-dialog{border:0;border-top:1px solid var(--ap-border);width:100%;height:100%;box-shadow:none;border-radius:0}}.speech-card{align-items:center;gap:var(--ap-space-2);min-height:2em;padding:0 var(--ap-space-1,4px);border-radius:var(--ap-radius-md);background:color-mix(in srgb, var(--ap-primary) 5%, transparent);display:flex}.speech-track{flex:auto;align-items:center;gap:2px;min-width:3em;height:1.4em;display:flex}.speech-seg{background:var(--ap-border);cursor:pointer;border:0;border-radius:2px;flex:1 1 0;min-width:3px;height:4px;padding:0;transition:height .12s,background .12s}.speech-seg.narration{opacity:.6}.speech-seg.ready{background:color-mix(in srgb, var(--ap-primary) 45%, transparent)}.speech-seg.loading{background:color-mix(in srgb, var(--ap-primary) 30%, transparent);animation:1.2s ease-in-out infinite ap-pulse}.speech-seg.error{background:var(--ap-danger)}.speech-seg.on{background:var(--ap-primary);opacity:1;height:8px}.speech-seg:hover{height:8px}.speech-who{flex:0 auto;max-width:8em}.speech-panel{gap:var(--ap-space-2);flex-direction:column;display:flex}.speech-panel-bar{flex-wrap:wrap;align-items:center;gap:4px;display:flex}.speech-panel-bar>.btn{margin-right:4px}.speech-panel-format{align-items:center;gap:4px;margin:0;display:flex}.speech-panel-list{gap:var(--ap-space-2);flex-direction:column;margin:0;padding:0;list-style:none;display:flex}.speech-panel-seg{padding:4px var(--ap-space-2) var(--ap-space-2);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);flex-direction:column;gap:4px;transition:border-color .15s,background .15s;display:flex}.speech-panel-seg.narration{background:var(--ap-surface-2)}.speech-panel-seg.playing{border-color:color-mix(in srgb, var(--ap-primary) 55%, transparent);background:var(--ap-tint)}.speech-panel-seg.error{border-color:color-mix(in srgb, var(--ap-danger) 45%, transparent)}.speech-panel-head{align-items:center;gap:var(--ap-space-2);min-width:0;margin-left:-4px;display:flex}.speech-panel-who{flex:0 auto;max-width:12em}.speech-panel-state{flex:none}.speech-panel-display{white-space:pre-wrap;margin:0}.speech-panel-text{field-sizing:content;min-height:2.6em;max-height:14em;font-family:var(--monoFontFamily,ui-monospace, SFMono-Regular, Menlo, monospace)}.speech-panel-seg.edited .speech-panel-text{border-color:color-mix(in srgb, var(--ap-primary) 40%, var(--ap-border))}.speech-panel-actions{justify-content:flex-end;align-items:center;gap:4px;min-height:1.9em;display:flex}.speech-panel-head>.icon-btn:last-child{margin-right:-4px}.speech-panel-edited{background:var(--ap-primary);border-radius:50%;flex:none;width:6px;height:6px}@media (max-width:600px){.speech-panel-voice{display:none}.speech-panel-head>.speech-panel-who{flex:auto;max-width:none}}.speech-panel-actions .btn{min-height:1.9em;font-size:var(--ap-font-size-sm);padding:0 .8em}.voice-ask{width:min(26em,100vw - 2em);padding:var(--ap-space-3);border:1px solid var(--ap-border);border-radius:var(--ap-radius-md);color:var(--ap-text);background:var(--ap-panel-bg-solid);box-shadow:var(--ap-shadow)}.voice-ask::backdrop{background:#0006}.speech-binding{align-items:flex-start;gap:var(--ap-space-2);min-width:0;display:flex}.speech-binding>.input:first-child{flex:0 9em;min-width:5em}.speech-voice{flex:auto;align-items:center;gap:4px;min-width:0;display:flex}.speech-voice>.input{flex:auto;min-width:0}.voice-menu{z-index:2147482000;border:1px solid var(--ap-border);border-radius:var(--ap-radius-sm);background:var(--ap-panel-bg-solid);max-height:min(16em,50vh);color:var(--ap-text);box-shadow:var(--ap-shadow);margin:0;padding:4px;position:fixed;inset:0 auto auto 0;overflow:auto}.voice-option{align-items:center;gap:var(--ap-space-2);min-height:2em;padding:2px var(--ap-space-2);border-radius:var(--ap-radius-sm);cursor:pointer;display:flex}.voice-option.on{background:var(--ap-surface-2)}.voice-option .col{gap:0;line-height:1.3}.voice-menu-note{padding:4px var(--ap-space-2);align-items:center;display:flex}.image-open .blob-placeholder{width:100%;min-height:8em;display:block}", pD = /* @__PURE__ */ fn({ mode: "light" }), mD = new CSSStyleSheet();
 mD.replaceSync([
 	cD,
 	lD,
@@ -16493,7 +16493,29 @@ function NO(e, t, n, r = "center", i = !1) {
 		side: s
 	};
 }
-function PO(e, t) {
+function PO(e) {
+	let t = !1, n = !1, r = !1, i = () => {
+		e.value = t || n || r;
+	};
+	return {
+		onPointerenter: (e) => {
+			e.pointerType === "mouse" && (t = !0, i());
+		},
+		onPointerleave: () => {
+			t = !1, i();
+		},
+		onFocusin: (e) => {
+			n = e.target?.matches?.(":focus-visible") === !0, i();
+		},
+		onFocusout: () => {
+			n = !1, r = !1, i();
+		},
+		toggle: () => {
+			r = !e.value, i();
+		}
+	};
+}
+function FO(e, t) {
 	let n = /* @__PURE__ */ j(!1), r = /* @__PURE__ */ j(null);
 	function i() {
 		let n = e.value, i = r.value;
@@ -16531,10 +16553,10 @@ function PO(e, t) {
 }
 //#endregion
 //#region src/ui/annotations/AnnoBubble.vue?vue&type=script&setup=true&lang.ts
-var FO = {
+var IO = {
 	key: 0,
 	class: "anno-author"
-}, IO = ["innerHTML"], LO = /* @__PURE__ */ F({
+}, LO = ["innerHTML"], RO = /* @__PURE__ */ F({
 	__name: "AnnoBubble",
 	setup(e) {
 		let t = /* @__PURE__ */ j(null);
@@ -16576,20 +16598,20 @@ var FO = {
 			style: Ie({ "--actor": M(sO).color || "var(--ap-primary)" }),
 			onMouseenter: n[0] ||= (...e) => M(gO) && M(gO)(...e),
 			onMouseleave: n[1] ||= (...e) => M(_O) && M(_O)(...e)
-		}, [M(sO).author ? (R(), z("div", FO, A(M(sO).author), 1)) : U("", !0), V("div", {
+		}, [M(sO).author ? (R(), z("div", IO, A(M(sO).author), 1)) : U("", !0), V("div", {
 			class: "rich anno-text",
 			innerHTML: M(sO).html
-		}, null, 8, IO)], 36)) : U("", !0);
+		}, null, 8, LO)], 36)) : U("", !0);
 	}
-}), RO = /* @__PURE__ */ new Set();
-function zO(e) {
+}), zO = /* @__PURE__ */ new Set();
+function BO(e) {
 	return $w(e).length ? CC(e).filter((e) => !e.orphan) : [];
 }
-function BO(e) {
+function VO(e) {
 	let t = e.documentElement?.dataset.apAnnotations ?? e.body?.dataset.apAnnotations;
 	return t === "off" || t === "manual";
 }
-var VO = () => G().ui.annotations?.show !== !1, HO = class {
+var HO = () => G().ui.annotations?.show !== !1, UO = class {
 	el;
 	fallbackId;
 	observer;
@@ -16601,7 +16623,7 @@ var VO = () => G().ui.annotations?.show !== !1, HO = class {
 			childList: !0,
 			subtree: !0,
 			characterData: !0
-		}), RO.add(this), this.schedule(0);
+		}), zO.add(this), this.schedule(0);
 	}
 	get mesId() {
 		let e = this.el.closest(".mes")?.getAttribute("mesid"), t = e == null ? NaN : Number(e);
@@ -16650,12 +16672,12 @@ var VO = () => G().ui.annotations?.show !== !1, HO = class {
 			return;
 		}
 		this.syncFrames();
-		let t = this.mesId, n = e().chat[t], r = kb.current, i = r?.status === "running" && r.mesId === t, a = !(!n || n.is_user || i), o = a && VO() ? _C(t).filter((e) => !e.orphan) : [], s = a ? zO(t) : [], c = n?.mes ?? "", l = (e, n, r, i, a) => e.paint(this, r, t, n.length ? () => VD(i, c, n) : null, a);
+		let t = this.mesId, n = e().chat[t], r = kb.current, i = r?.status === "running" && r.mesId === t, a = !(!n || n.is_user || i), o = a && HO() ? _C(t).filter((e) => !e.orphan) : [], s = a ? BO(t) : [], c = n?.mes ?? "", l = (e, n, r, i, a) => e.paint(this, r, t, n.length ? () => VD(i, c, n) : null, a);
 		l(wO, o, document, this.el, !YD(document)), l(AO, s, document, this.el, !YD(document));
 		for (let e of this.frames.values()) {
 			let t = e.doc;
 			if (!t?.body || !t.defaultView) continue;
-			let n = BO(t);
+			let n = VO(t);
 			l(wO, n ? [] : o, t, t.body, !1), l(AO, n ? [] : s, t, t.body, !1), e.observer?.takeRecords();
 		}
 		this.observer.takeRecords();
@@ -16664,58 +16686,58 @@ var VO = () => G().ui.annotations?.show !== !1, HO = class {
 		if (!this.disposed) {
 			this.disposed = !0, clearTimeout(this.timer), this.observer.disconnect();
 			for (let [e, t] of this.frames) e.removeEventListener("load", t.onLoad), t.observer?.disconnect();
-			this.frames.clear(), this.clear(), RO.delete(this);
+			this.frames.clear(), this.clear(), zO.delete(this);
 		}
 	}
 };
-function UO(e, t) {
-	for (let n of RO) (e === void 0 || n.mesId === e) && n.schedule(t);
-}
-function WO() {
-	for (let e of RO) e.hasFrames && e.schedule(0);
+function WO(e, t) {
+	for (let n of zO) (e === void 0 || n.mesId === e) && n.schedule(t);
 }
 function GO() {
-	for (let e of RO) e.el.isConnected || e.dispose();
+	for (let e of zO) e.hasFrames && e.schedule(0);
 }
-var KO = /* @__PURE__ */ new WeakMap();
-function qO(e) {
-	let t = KO.get(e);
-	(!t || t.disposed) && KO.set(e, new HO(e));
+function KO() {
+	for (let e of zO) e.el.isConnected || e.dispose();
+}
+var qO = /* @__PURE__ */ new WeakMap();
+function JO(e) {
+	let t = qO.get(e);
+	(!t || t.disposed) && qO.set(e, new UO(e));
 }
 //#endregion
 //#region src/ui/annotations/index.ts
-var JO = () => window.__TAURITAVERN__?.api?.chatSurface, YO = (() => {
+var YO = () => window.__TAURITAVERN__?.api?.chatSurface, XO = (() => {
 	let e;
 	return () => e ??= (() => {
 		try {
-			return JO()?.isManagedOwnershipRequired?.() === !0;
+			return YO()?.isManagedOwnershipRequired?.() === !0;
 		} catch {
 			return !1;
 		}
 	})();
-})(), XO = !1;
-function ZO() {
-	let t = JO();
-	!XO && t && YO() && (t.protocolVersion === 1 ? (XO = !0, t.registerParticipant({
+})(), ZO = !1;
+function QO() {
+	let t = YO();
+	!ZO && t && XO() && (t.protocolVersion === 1 ? (ZO = !0, t.registerParticipant({
 		id: "advanced-preset/annotations",
 		protocolVersion: 1,
 		didCommitContent({ mesid: t, content: n }) {
 			let r = Number(t);
 			if (e().chat[r]?.is_user) return;
-			let i = new HO(n, r);
+			let i = new UO(n, r);
 			return () => i.dispose();
 		}
 	})) : console.warn("[AP] unsupported ChatSurface protocol", t.protocolVersion));
 }
-function QO(e, t) {
-	t && !YO() && qO(e);
+function $O(e, t) {
+	t && !XO() && JO(e);
 }
-var $O = null;
-function ek() {
-	return (!$O || !$O.isConnected) && ($O = document.createElement("ap-anno-bubble"), document.body.append($O)), $O;
-}
+var ek = null;
 function tk() {
-	ED("ap-anno-bubble", LO), ek(), xO(() => $O), DO(document), hr(() => {
+	return (!ek || !ek.isConnected) && (ek = document.createElement("ap-anno-bubble"), document.body.append(ek)), ek;
+}
+function nk() {
+	ED("ap-anno-bubble", RO), tk(), xO(() => ek), DO(document), hr(() => {
 		let e = G().ui, t = RS.value?.theme?.[pD.mode]?.accent;
 		TO(e.annotations?.color || e.accent || t || (pD.mode === "dark" ? "#c084fc" : "#9333ea")), AO.restyle();
 	}), P(() => {
@@ -16726,43 +16748,43 @@ function tk() {
 			e.narrator,
 			e.connections.length
 		];
-	}, () => UO(void 0, 0)), P(() => X.playing && `${X.playing.mesId}:${X.playing.segId}`, () => {
+	}, () => WO(void 0, 0)), P(() => X.playing && `${X.playing.mesId}:${X.playing.segId}`, () => {
 		let e = X.playing;
 		AO.mark(e ? (t, n) => t === e.mesId && n.id === e.segId : null);
-	}), EC.on("change", (e) => UO(e)), P(VO, () => {
-		pO(), UO(void 0, 0);
-	}), P(() => kb.current?.status, () => UO()), bC.on("change", (e) => UO(e));
+	}), EC.on("change", (e) => WO(e)), P(HO, () => {
+		pO(), WO(void 0, 0);
+	}), P(() => kb.current?.status, () => WO()), bC.on("change", (e) => WO(e));
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [n.CHAT_CHANGED, n.MORE_MESSAGES_LOADED]) e && t.on(e, () => {
-		pO(), GO();
+		pO(), KO();
 	});
-	t.on("message_iframe_render_ended", () => WO()), addEventListener("resize", () => pO());
+	t.on("message_iframe_render_ended", () => GO()), addEventListener("resize", () => pO());
 }
 //#endregion
 //#region src/ui/storylines.ts
-var nk = W(() => {
+var rk = W(() => {
 	Y.chatRev;
 	let e = RS.value;
 	return !!(e && X_(e, Wm(e)));
-}), rk = null;
-function ik() {
+}), ik = null;
+function ak() {
 	let t = e().chat ?? [];
-	return (!rk || rk.rev !== Y.chatRev || rk.chat !== t || rk.len !== t.length) && (rk = {
+	return (!ik || ik.rev !== Y.chatRev || ik.chat !== t || ik.len !== t.length) && (ik = {
 		rev: Y.chatRev,
 		chat: t,
 		len: t.length,
 		keys: $_(t)
-	}), rk.keys;
+	}), ik.keys;
 }
-var ak = () => {
-	rk = null;
-}, ok = 60, sk = (e) => {
+var ok = () => {
+	ik = null;
+}, sk = 60, ck = (e) => {
 	let t = e.replace(/\s+/g, " ").trim();
-	return t.length > ok ? `${t.slice(0, ok)}…` : t;
+	return t.length > sk ? `${t.slice(0, sk)}…` : t;
 };
-function ck(t) {
+function lk(t) {
 	Y.chatRev;
-	let n = e().chat ?? [], r = ik(), i = Z_(), a = ["", ...r.filter((e, t) => e && r.indexOf(e) === t)], o = r.length ? r[r.length - 1] : "";
+	let n = e().chat ?? [], r = ak(), i = Z_(), a = ["", ...r.filter((e, t) => e && r.indexOf(e) === t)], o = r.length ? r[r.length - 1] : "";
 	return a.map((e) => {
 		let a = [];
 		return r.forEach((r, i) => {
@@ -16772,7 +16794,7 @@ function ck(t) {
 			a.push({
 				index: i,
 				user: o.is_user,
-				title: sk(s?.event || om(o))
+				title: ck(s?.event || om(o))
 			});
 		}), {
 			key: e,
@@ -16786,7 +16808,7 @@ function ck(t) {
 		};
 	}).filter((e) => e.main || e.floors.length);
 }
-async function lk(t) {
+async function uk(t) {
 	let n = e(), r = document.querySelector(`#chat > .mes[mesid="${t}"]`);
 	r ? r.scrollIntoView({
 		behavior: "smooth",
@@ -16795,11 +16817,11 @@ async function lk(t) {
 }
 //#endregion
 //#region src/ui/storyline-tag.ts
-var uk = "data-ap-storyline-tag", dk = "ap-storyline-tag-hidden";
-function fk(e, t, n) {
-	let r = e.querySelectorAll(`[${uk}]`);
+var dk = "data-ap-storyline-tag", fk = "ap-storyline-tag-hidden";
+function pk(e, t, n) {
+	let r = e.querySelectorAll(`[${dk}]`);
 	if (r.length) {
-		for (let e of r) e.classList.toggle(dk, n);
+		for (let e of r) e.classList.toggle(fk, n);
 		return;
 	}
 	if (!n || !t?.is_user) return;
@@ -16810,65 +16832,65 @@ function fk(e, t, n) {
 	if (!s) return;
 	let c = s.parentElement, l = s.textContent ?? "", u = a.slice(1);
 	if (c && c !== e && /^H[1-6]$/.test(c.tagName) && c.textContent?.trim() === u) {
-		c.setAttribute(uk, ""), c.classList.add(dk);
+		c.setAttribute(dk, ""), c.classList.add(fk);
 		return;
 	}
 	let d = l.trimEnd();
 	if (!d.endsWith(a)) return;
 	let f = d.length - a.length, p = s.splitText(f), m = document.createElement("span");
-	m.setAttribute(uk, ""), m.className = dk, p.replaceWith(m), m.append(p);
+	m.setAttribute(dk, ""), m.className = fk, p.replaceWith(m), m.append(p);
 }
 //#endregion
 //#region src/ui/mounts.ts
-var pk = "ap-hidden", mk = [
+var mk = "ap-hidden", hk = [
 	"meta-pure",
 	"impersonate",
 	"summary"
 ];
-function hk(e, t) {
+function gk(e, t) {
 	let n = document.createElement(e);
 	return n.setAttribute("mesid", String(t)), n;
 }
-function gk(t) {
+function _k(t) {
 	let n = Number(t.getAttribute("mesid")), r = t.querySelector(":scope > .mes_block"), i = r?.querySelector(":scope > .mes_text");
 	if (!r || !i || Number.isNaN(n)) return;
 	let a = e().chat[n], o = gm(a), s = !!Nb(n, a);
-	a && !a.is_user && QO(i, !!(o?.annotations?.length || o?.speech?.length || s));
-	let c = nk.value;
-	fk(i, a, c);
+	a && !a.is_user && $O(i, !!(o?.annotations?.length || o?.speech?.length || s));
+	let c = rk.value;
+	pk(i, a, c);
 	let l = !(!a || a.is_user || !o && !s), u = r.querySelector(":scope > ap-stages"), d = r.querySelector(":scope > ap-top-cards"), f = r.querySelector(":scope > ap-cards");
-	l ? ((!d || d.nextElementSibling !== i) && (d?.remove(), d = hk("ap-top-cards", n), d.setAttribute("position", "top"), i.before(d)), (!u || u.nextElementSibling !== d) && (u?.remove(), u = hk("ap-stages", n), d.before(u)), (!f || f.previousElementSibling !== i) && (f?.remove(), f = hk("ap-cards", n), i.after(f)), u.getAttribute("mesid") !== String(n) && u.setAttribute("mesid", String(n)), d.getAttribute("mesid") !== String(n) && d.setAttribute("mesid", String(n)), f.getAttribute("mesid") !== String(n) && f.setAttribute("mesid", String(n)), i.classList.toggle(pk, !!(!s && o && mk.includes(o.turn))), _k(r, i, n, c)) : (u?.remove(), d?.remove(), f?.remove(), i.classList.remove(pk), _k(r, i, n, c));
+	l ? ((!d || d.nextElementSibling !== i) && (d?.remove(), d = gk("ap-top-cards", n), d.setAttribute("position", "top"), i.before(d)), (!u || u.nextElementSibling !== d) && (u?.remove(), u = gk("ap-stages", n), d.before(u)), (!f || f.previousElementSibling !== i) && (f?.remove(), f = gk("ap-cards", n), i.after(f)), u.getAttribute("mesid") !== String(n) && u.setAttribute("mesid", String(n)), d.getAttribute("mesid") !== String(n) && d.setAttribute("mesid", String(n)), f.getAttribute("mesid") !== String(n) && f.setAttribute("mesid", String(n)), i.classList.toggle(mk, !!(!s && o && hk.includes(o.turn))), vk(r, i, n, c)) : (u?.remove(), d?.remove(), f?.remove(), i.classList.remove(mk), vk(r, i, n, c));
 }
-function _k(e, t, n, r) {
+function vk(e, t, n, r) {
 	let i = e.querySelector(":scope > ap-storyline");
-	if (!r || !ik()[n]) {
+	if (!r || !ak()[n]) {
 		i?.remove();
 		return;
 	}
 	let a = e.querySelector(":scope > ap-stages") ?? e.querySelector(":scope > ap-top-cards") ?? t;
-	i ||= hk("ap-storyline", n), i.nextElementSibling !== a && a.before(i), i.getAttribute("mesid") !== String(n) && i.setAttribute("mesid", String(n));
+	i ||= gk("ap-storyline", n), i.nextElementSibling !== a && a.before(i), i.getAttribute("mesid") !== String(n) && i.setAttribute("mesid", String(n));
 }
-function vk(e = document) {
-	for (let t of e.querySelectorAll("#chat > .mes[mesid]")) gk(t);
+function yk(e = document) {
+	for (let t of e.querySelectorAll("#chat > .mes[mesid]")) _k(t);
 }
-function yk() {
+function bk() {
 	let e = document.getElementById("chat");
 	if (!e) return;
 	let t = e.querySelector(":scope > ap-dock");
 	t ? t.nextElementSibling && e.append(t) : (t = document.createElement("ap-dock"), e.append(t));
 }
-var bk = 0, xk = /* @__PURE__ */ new Set(), Sk = !1;
-function Ck(e) {
-	e ? xk.add(e) : Sk = !0, !bk && (bk = requestAnimationFrame(() => {
-		if (bk = 0, ak(), Sk) vk();
-		else for (let e of xk) e.isConnected && gk(e);
-		xk.clear(), Sk = !1, yk(), GO();
+var xk = 0, Sk = /* @__PURE__ */ new Set(), Ck = !1;
+function wk(e) {
+	e ? Sk.add(e) : Ck = !0, !xk && (xk = requestAnimationFrame(() => {
+		if (xk = 0, ok(), Ck) yk();
+		else for (let e of Sk) e.isConnected && _k(e);
+		Sk.clear(), Ck = !1, bk(), KO();
 	}));
 }
-function wk() {
-	IS(), Ck();
-}
 function Tk() {
+	IS(), wk();
+}
+function Ek() {
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.CHAT_CHANGED,
@@ -16881,43 +16903,43 @@ function Tk() {
 		n.CHARACTER_MESSAGE_RENDERED,
 		n.USER_MESSAGE_RENDERED,
 		"advanced_preset_message_updated"
-	]) e && t.on(e, wk);
+	]) e && t.on(e, Tk);
 	let r = () => {
 		let e = document.getElementById("chat");
 		if (!e) return void setTimeout(r, 500);
 		new MutationObserver((t) => {
 			for (let n of t) {
 				if (n.target === e) {
-					for (let e of n.addedNodes) e instanceof Element && e.matches(".mes[mesid]") && Ck(e);
+					for (let e of n.addedNodes) e instanceof Element && e.matches(".mes[mesid]") && wk(e);
 					continue;
 				}
 				let t = n.target.closest?.("#chat > .mes[mesid]");
-				t && n.target === t.querySelector(":scope > .mes_block") && Ck(t);
+				t && n.target === t.querySelector(":scope > .mes_block") && wk(t);
 			}
 		}).observe(e, {
 			childList: !0,
 			subtree: !0
-		}), Ck();
+		}), wk();
 	};
-	r(), P(() => nk.value, () => wk());
+	r(), P(() => rk.value, () => Tk());
 	let i;
 	P(() => kb.current && kb.current.status === "running" && kb.current.streaming && kb.current.mesId === null, (t) => {
 		clearInterval(i), t && (i = setInterval(() => {
 			let t = kb.current, n = e().streamingProcessor?.messageId;
 			if (!t || t.status !== "running") return clearInterval(i);
-			typeof n == "number" && n >= 0 && (Mb(t, n), clearInterval(i), wk());
+			typeof n == "number" && n >= 0 && (Mb(t, n), clearInterval(i), Tk());
 		}, 100));
-	}), P(() => kb.current?.status, () => Ck());
+	}), P(() => kb.current?.status, () => wk());
 }
 //#endregion
 //#region node_modules/.pnpm/lucide-vue-next@1.0.0_vue@3.5.44_typescript@5.9.3_/node_modules/lucide-vue-next/dist/esm/shared/src/utils/hasA11yProp.js
-var Ek = (e) => {
+var Dk = (e) => {
 	for (let t in e) if (t.startsWith("aria-") || t === "role" || t === "title") return !0;
 	return !1;
-}, Dk = (e) => e === "", Ok = (...e) => e.filter((e, t, n) => !!e && e.trim() !== "" && n.indexOf(e) === t).join(" ").trim(), kk = (e) => e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), Ak = (e) => e.replace(/^([A-Z])|[\s-_]+(\w)/g, (e, t, n) => n ? n.toUpperCase() : t.toLowerCase()), jk = (e) => {
-	let t = Ak(e);
+}, Ok = (e) => e === "", kk = (...e) => e.filter((e, t, n) => !!e && e.trim() !== "" && n.indexOf(e) === t).join(" ").trim(), Ak = (e) => e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), jk = (e) => e.replace(/^([A-Z])|[\s-_]+(\w)/g, (e, t, n) => n ? n.toUpperCase() : t.toLowerCase()), Mk = (e) => {
+	let t = jk(e);
 	return t.charAt(0).toUpperCase() + t.slice(1);
-}, Mk = {
+}, Nk = {
 	xmlns: "http://www.w3.org/2000/svg",
 	width: 24,
 	height: 24,
@@ -16927,33 +16949,33 @@ var Ek = (e) => {
 	"stroke-width": 2,
 	"stroke-linecap": "round",
 	"stroke-linejoin": "round"
-}, Nk = ({ name: e, iconNode: t, absoluteStrokeWidth: n, "absolute-stroke-width": r, strokeWidth: i, "stroke-width": a, size: o = Mk.width, color: s = Mk.stroke, ...c }, { slots: l }) => qa("svg", {
-	...Mk,
+}, Pk = ({ name: e, iconNode: t, absoluteStrokeWidth: n, "absolute-stroke-width": r, strokeWidth: i, "stroke-width": a, size: o = Nk.width, color: s = Nk.stroke, ...c }, { slots: l }) => qa("svg", {
+	...Nk,
 	...c,
 	width: o,
 	height: o,
 	stroke: s,
-	"stroke-width": Dk(n) || Dk(r) || n === !0 || r === !0 ? Number(i || a || Mk["stroke-width"]) * 24 / Number(o) : i || a || Mk["stroke-width"],
-	class: Ok("lucide", c.class, ...e ? [`lucide-${kk(jk(e))}-icon`, `lucide-${kk(e)}`] : ["lucide-icon"]),
-	...!l.default && !Ek(c) && { "aria-hidden": "true" }
-}, [...t.map((e) => qa(...e)), ...l.default ? [l.default()] : []]), Z = (e, t) => (n, { slots: r, attrs: i }) => qa(Nk, {
+	"stroke-width": Ok(n) || Ok(r) || n === !0 || r === !0 ? Number(i || a || Nk["stroke-width"]) * 24 / Number(o) : i || a || Nk["stroke-width"],
+	class: kk("lucide", c.class, ...e ? [`lucide-${Ak(Mk(e))}-icon`, `lucide-${Ak(e)}`] : ["lucide-icon"]),
+	...!l.default && !Dk(c) && { "aria-hidden": "true" }
+}, [...t.map((e) => qa(...e)), ...l.default ? [l.default()] : []]), Z = (e, t) => (n, { slots: r, attrs: i }) => qa(Pk, {
 	...i,
 	...n,
 	iconNode: t,
 	name: e
-}, r), Pk = Z("arrow-down", [["path", {
+}, r), Fk = Z("arrow-down", [["path", {
 	d: "M12 5v14",
 	key: "s699le"
 }], ["path", {
 	d: "m19 12-7 7-7-7",
 	key: "1idqje"
-}]]), Fk = Z("arrow-left", [["path", {
+}]]), Ik = Z("arrow-left", [["path", {
 	d: "m12 19-7-7 7-7",
 	key: "1l729n"
 }], ["path", {
 	d: "M19 12H5",
 	key: "x3x0zl"
-}]]), Ik = Z("audio-lines", [
+}]]), Lk = Z("audio-lines", [
 	["path", {
 		d: "M2 10v3",
 		key: "1fnikh"
@@ -16978,7 +17000,7 @@ var Ek = (e) => {
 		d: "M22 10v3",
 		key: "154ddg"
 	}]
-]), Lk = Z("ban", [["circle", {
+]), Rk = Z("ban", [["circle", {
 	cx: "12",
 	cy: "12",
 	r: "10",
@@ -16986,7 +17008,7 @@ var Ek = (e) => {
 }], ["path", {
 	d: "M4.929 4.929 19.07 19.071",
 	key: "196cmz"
-}]]), Rk = Z("blocks", [["path", {
+}]]), zk = Z("blocks", [["path", {
 	d: "M10 22V7a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H2",
 	key: "1ah6g2"
 }], ["rect", {
@@ -16996,7 +17018,7 @@ var Ek = (e) => {
 	height: "8",
 	rx: "1",
 	key: "88lufb"
-}]]), zk = Z("brain", [
+}]]), Bk = Z("brain", [
 	["path", {
 		d: "M12 18V5",
 		key: "adv99a"
@@ -17029,7 +17051,7 @@ var Ek = (e) => {
 		d: "M6.003 5.125a4 4 0 0 0-2.526 5.77",
 		key: "q97ue3"
 	}]
-]), Bk = Z("bug", [
+]), Vk = Z("bug", [
 	["path", {
 		d: "M12 20v-9",
 		key: "1qisl0"
@@ -17074,7 +17096,7 @@ var Ek = (e) => {
 		d: "M9 7.13V6a3 3 0 1 1 6 0v1.13",
 		key: "1vgav8"
 	}]
-]), Vk = Z("cable", [
+]), Hk = Z("cable", [
 	["path", {
 		d: "M17 19a1 1 0 0 1-1-1v-2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a1 1 0 0 1-1 1z",
 		key: "trhst0"
@@ -17103,7 +17125,7 @@ var Ek = (e) => {
 		d: "M7 5V3",
 		key: "1t1388"
 	}]
-]), Hk = Z("calendar-days", [
+]), Uk = Z("calendar-days", [
 	["path", {
 		d: "M8 2v4",
 		key: "1cmpym"
@@ -17148,19 +17170,19 @@ var Ek = (e) => {
 		d: "M16 18h.01",
 		key: "kzsmim"
 	}]
-]), Uk = Z("check", [["path", {
+]), Wk = Z("check", [["path", {
 	d: "M20 6 9 17l-5-5",
 	key: "1gmf2c"
-}]]), Wk = Z("chevron-down", [["path", {
+}]]), Gk = Z("chevron-down", [["path", {
 	d: "m6 9 6 6 6-6",
 	key: "qrunsl"
-}]]), Gk = Z("chevron-left", [["path", {
+}]]), Kk = Z("chevron-left", [["path", {
 	d: "m15 18-6-6 6-6",
 	key: "1wnfg3"
-}]]), Kk = Z("chevron-right", [["path", {
+}]]), qk = Z("chevron-right", [["path", {
 	d: "m9 18 6-6-6-6",
 	key: "mthhwq"
-}]]), qk = Z("circle-dashed", [
+}]]), Jk = Z("circle-dashed", [
 	["path", {
 		d: "M10.1 2.182a10 10 0 0 1 3.8 0",
 		key: "5ilxe3"
@@ -17193,7 +17215,7 @@ var Ek = (e) => {
 		d: "M6.391 20.279a10 10 0 0 1-2.69-2.7",
 		key: "1fvljs"
 	}]
-]), Jk = Z("circle-dot", [["circle", {
+]), Yk = Z("circle-dot", [["circle", {
 	cx: "12",
 	cy: "12",
 	r: "10",
@@ -17203,7 +17225,7 @@ var Ek = (e) => {
 	cy: "12",
 	r: "1",
 	key: "41hilf"
-}]]), Yk = Z("circle-question-mark", [
+}]]), Xk = Z("circle-question-mark", [
 	["circle", {
 		cx: "12",
 		cy: "12",
@@ -17218,7 +17240,7 @@ var Ek = (e) => {
 		d: "M12 17h.01",
 		key: "p32p05"
 	}]
-]), Xk = Z("circle-slash", [["circle", {
+]), Zk = Z("circle-slash", [["circle", {
 	cx: "12",
 	cy: "12",
 	r: "10",
@@ -17229,7 +17251,7 @@ var Ek = (e) => {
 	y1: "15",
 	y2: "9",
 	key: "1dfufj"
-}]]), Zk = Z("clapperboard", [
+}]]), Qk = Z("clapperboard", [
 	["path", {
 		d: "m12.296 3.464 3.02 3.956",
 		key: "qash78"
@@ -17246,7 +17268,7 @@ var Ek = (e) => {
 		d: "m6.18 5.276 3.1 3.899",
 		key: "zjj9t3"
 	}]
-]), Qk = Z("clock", [["circle", {
+]), $k = Z("clock", [["circle", {
 	cx: "12",
 	cy: "12",
 	r: "10",
@@ -17254,7 +17276,7 @@ var Ek = (e) => {
 }], ["path", {
 	d: "M12 6v6l4 2",
 	key: "mmk7yg"
-}]]), $k = Z("cloud-fog", [
+}]]), eA = Z("cloud-fog", [
 	["path", {
 		d: "M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242",
 		key: "1pljnt"
@@ -17267,13 +17289,13 @@ var Ek = (e) => {
 		d: "M17 21H9",
 		key: "1u2q02"
 	}]
-]), eA = Z("cloud-lightning", [["path", {
+]), tA = Z("cloud-lightning", [["path", {
 	d: "M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973",
 	key: "1cez44"
 }], ["path", {
 	d: "m13 12-3 5h4l-3 5",
 	key: "1t22er"
-}]]), tA = Z("cloud-rain", [
+}]]), nA = Z("cloud-rain", [
 	["path", {
 		d: "M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242",
 		key: "1pljnt"
@@ -17290,7 +17312,7 @@ var Ek = (e) => {
 		d: "M12 16v6",
 		key: "c8a4gj"
 	}]
-]), nA = Z("cloud-sun", [
+]), rA = Z("cloud-sun", [
 	["path", {
 		d: "M12 2v2",
 		key: "tus03m"
@@ -17315,10 +17337,10 @@ var Ek = (e) => {
 		d: "M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z",
 		key: "s09mg5"
 	}]
-]), rA = Z("cloud", [["path", {
+]), iA = Z("cloud", [["path", {
 	d: "M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z",
 	key: "p7xjir"
-}]]), iA = Z("code-xml", [
+}]]), aA = Z("code-xml", [
 	["path", {
 		d: "m18 16 4-4-4-4",
 		key: "1inbqp"
@@ -17331,13 +17353,13 @@ var Ek = (e) => {
 		d: "m14.5 4-5 16",
 		key: "e7oirm"
 	}]
-]), aA = Z("code", [["path", {
+]), oA = Z("code", [["path", {
 	d: "m16 18 6-6-6-6",
 	key: "eg8j8"
 }], ["path", {
 	d: "m8 6-6 6 6 6",
 	key: "ppft3o"
-}]]), oA = Z("coins", [
+}]]), sA = Z("coins", [
 	["path", {
 		d: "M13.744 17.736a6 6 0 1 1-7.48-7.48",
 		key: "bq4yh3"
@@ -17356,7 +17378,7 @@ var Ek = (e) => {
 		r: "6",
 		key: "14bfc9"
 	}]
-]), sA = Z("copy-plus", [
+]), cA = Z("copy-plus", [
 	["line", {
 		x1: "15",
 		x2: "15",
@@ -17384,7 +17406,7 @@ var Ek = (e) => {
 		d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",
 		key: "zix9uf"
 	}]
-]), cA = Z("copy", [["rect", {
+]), lA = Z("copy", [["rect", {
 	width: "14",
 	height: "14",
 	x: "8",
@@ -17395,13 +17417,13 @@ var Ek = (e) => {
 }], ["path", {
 	d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",
 	key: "zix9uf"
-}]]), lA = Z("crown", [["path", {
+}]]), uA = Z("crown", [["path", {
 	d: "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
 	key: "1vdc57"
 }], ["path", {
 	d: "M5 21h14",
 	key: "11awu3"
-}]]), uA = Z("database-zap", [
+}]]), dA = Z("database-zap", [
 	["ellipse", {
 		cx: "12",
 		cy: "5",
@@ -17425,7 +17447,7 @@ var Ek = (e) => {
 		d: "M3 12A9 3 0 0 0 14.59 14.87",
 		key: "1y4wr8"
 	}]
-]), dA = Z("download", [
+]), fA = Z("download", [
 	["path", {
 		d: "M12 15V3",
 		key: "m9g1x1"
@@ -17438,7 +17460,7 @@ var Ek = (e) => {
 		d: "m7 10 5 5 5-5",
 		key: "brsn70"
 	}]
-]), fA = Z("drama", [
+]), pA = Z("drama", [
 	["path", {
 		d: "M10 11h.01",
 		key: "d2at3l"
@@ -17471,7 +17493,7 @@ var Ek = (e) => {
 		d: "M9.1 16.5c.3-1.1 1.4-1.7 2.4-1.4",
 		key: "1mr6wy"
 	}]
-]), pA = Z("eye-off", [
+]), mA = Z("eye-off", [
 	["path", {
 		d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
 		key: "ct8e1f"
@@ -17488,7 +17510,7 @@ var Ek = (e) => {
 		d: "m2 2 20 20",
 		key: "1ooewy"
 	}]
-]), mA = Z("eye", [["path", {
+]), hA = Z("eye", [["path", {
 	d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
 	key: "1nclc0"
 }], ["circle", {
@@ -17496,7 +17518,7 @@ var Ek = (e) => {
 	cy: "12",
 	r: "3",
 	key: "1v7zrd"
-}]]), hA = Z("feather", [
+}]]), gA = Z("feather", [
 	["path", {
 		d: "M12.67 19a2 2 0 0 0 1.416-.588l6.154-6.172a6 6 0 0 0-8.49-8.49L5.586 9.914A2 2 0 0 0 5 11.328V18a1 1 0 0 0 1 1z",
 		key: "18jl4k"
@@ -17509,7 +17531,7 @@ var Ek = (e) => {
 		d: "M17.5 15H9",
 		key: "1oz8nu"
 	}]
-]), gA = Z("file-down", [
+]), _A = Z("file-down", [
 	["path", {
 		d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
 		key: "1oefj6"
@@ -17526,7 +17548,7 @@ var Ek = (e) => {
 		d: "m9 15 3 3 3-3",
 		key: "1npd3o"
 	}]
-]), _A = Z("file-headphone", [
+]), vA = Z("file-headphone", [
 	["path", {
 		d: "M4 6.835V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-.343",
 		key: "1vfytu"
@@ -17539,7 +17561,7 @@ var Ek = (e) => {
 		d: "M2 19a2 2 0 0 1 4 0v1a2 2 0 0 1-4 0v-4a6 6 0 0 1 12 0v4a2 2 0 0 1-4 0v-1a2 2 0 0 1 4 0",
 		key: "1etmh7"
 	}]
-]), vA = Z("file-plus", [
+]), yA = Z("file-plus", [
 	["path", {
 		d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
 		key: "1oefj6"
@@ -17556,7 +17578,7 @@ var Ek = (e) => {
 		d: "M12 18v-6",
 		key: "17g6i2"
 	}]
-]), yA = Z("file-stack", [
+]), bA = Z("file-stack", [
 	["path", {
 		d: "M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1",
 		key: "likhh7"
@@ -17569,7 +17591,7 @@ var Ek = (e) => {
 		d: "M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z",
 		key: "1hyeo0"
 	}]
-]), bA = Z("folder-plus", [
+]), xA = Z("folder-plus", [
 	["path", {
 		d: "M12 10v6",
 		key: "1bos4e"
@@ -17582,16 +17604,16 @@ var Ek = (e) => {
 		d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z",
 		key: "1kt360"
 	}]
-]), xA = Z("folder", [["path", {
+]), SA = Z("folder", [["path", {
 	d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z",
 	key: "1kt360"
-}]]), SA = Z("gauge", [["path", {
+}]]), CA = Z("gauge", [["path", {
 	d: "m12 14 4-4",
 	key: "9kzdfg"
 }], ["path", {
 	d: "M3.34 19a10 10 0 1 1 17.32 0",
 	key: "19p75a"
-}]]), CA = Z("git-branch", [
+}]]), wA = Z("git-branch", [
 	["path", {
 		d: "M15 6a9 9 0 0 0-9 9V3",
 		key: "1cii5b"
@@ -17608,7 +17630,7 @@ var Ek = (e) => {
 		r: "3",
 		key: "fqmcym"
 	}]
-]), wA = Z("git-compare-arrows", [
+]), TA = Z("git-compare-arrows", [
 	["circle", {
 		cx: "5",
 		cy: "6",
@@ -17637,7 +17659,7 @@ var Ek = (e) => {
 		d: "m9 15 3 3-3 3",
 		key: "1m3kbl"
 	}]
-]), TA = Z("globe", [
+]), EA = Z("globe", [
 	["circle", {
 		cx: "12",
 		cy: "12",
@@ -17652,7 +17674,7 @@ var Ek = (e) => {
 		d: "M2 12h20",
 		key: "9i4pu4"
 	}]
-]), EA = Z("grip-vertical", [
+]), DA = Z("grip-vertical", [
 	["circle", {
 		cx: "9",
 		cy: "12",
@@ -17689,7 +17711,7 @@ var Ek = (e) => {
 		r: "1",
 		key: "f4zoj3"
 	}]
-]), DA = Z("hard-drive", [
+]), OA = Z("hard-drive", [
 	["path", {
 		d: "M10 16h.01",
 		key: "1bzywj"
@@ -17706,7 +17728,7 @@ var Ek = (e) => {
 		d: "M6 16h.01",
 		key: "1pmjb7"
 	}]
-]), OA = Z("image-off", [
+]), kA = Z("image-off", [
 	["line", {
 		x1: "2",
 		x2: "22",
@@ -17740,7 +17762,7 @@ var Ek = (e) => {
 		d: "M21 15V5a2 2 0 0 0-2-2H9",
 		key: "43el77"
 	}]
-]), kA = Z("image-plus", [
+]), AA = Z("image-plus", [
 	["path", {
 		d: "M16 5h6",
 		key: "1vod17"
@@ -17763,7 +17785,7 @@ var Ek = (e) => {
 		r: "2",
 		key: "af1f0g"
 	}]
-]), AA = Z("images", [
+]), jA = Z("images", [
 	["path", {
 		d: "m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16",
 		key: "9kzy35"
@@ -17787,7 +17809,7 @@ var Ek = (e) => {
 		rx: "2",
 		key: "1gvhby"
 	}]
-]), jA = Z("info", [
+]), MA = Z("info", [
 	["circle", {
 		cx: "12",
 		cy: "12",
@@ -17802,7 +17824,7 @@ var Ek = (e) => {
 		d: "M12 8h.01",
 		key: "e9boi3"
 	}]
-]), MA = Z("layers", [
+]), NA = Z("layers", [
 	["path", {
 		d: "M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z",
 		key: "zw3jo"
@@ -17815,7 +17837,7 @@ var Ek = (e) => {
 		d: "M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17",
 		key: "kqbvx6"
 	}]
-]), NA = Z("layout-template", [
+]), PA = Z("layout-template", [
 	["rect", {
 		width: "18",
 		height: "7",
@@ -17840,13 +17862,13 @@ var Ek = (e) => {
 		rx: "1",
 		key: "q5h2i8"
 	}]
-]), PA = Z("link", [["path", {
+]), FA = Z("link", [["path", {
 	d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71",
 	key: "1cjeqo"
 }], ["path", {
 	d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
 	key: "19qd67"
-}]]), FA = Z("list-music", [
+}]]), IA = Z("list-music", [
 	["path", {
 		d: "M16 5H3",
 		key: "m91uny"
@@ -17869,10 +17891,10 @@ var Ek = (e) => {
 		r: "3",
 		key: "1hluhg"
 	}]
-]), IA = Z("loader-circle", [["path", {
+]), LA = Z("loader-circle", [["path", {
 	d: "M21 12a9 9 0 1 1-6.219-8.56",
 	key: "13zald"
-}]]), LA = Z("map-pin", [["path", {
+}]]), RA = Z("map-pin", [["path", {
 	d: "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0",
 	key: "1r0f0z"
 }], ["circle", {
@@ -17880,10 +17902,10 @@ var Ek = (e) => {
 	cy: "10",
 	r: "3",
 	key: "ilqhr7"
-}]]), RA = Z("message-circle", [["path", {
+}]]), zA = Z("message-circle", [["path", {
 	d: "M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719",
 	key: "1sd12s"
-}]]), zA = Z("message-square-dashed", [
+}]]), BA = Z("message-square-dashed", [
 	["path", {
 		d: "M14 3h2",
 		key: "1d12a5"
@@ -17924,16 +17946,16 @@ var Ek = (e) => {
 		d: "M8 3h2",
 		key: "ysbsee"
 	}]
-]), BA = Z("messages-square", [["path", {
+]), VA = Z("messages-square", [["path", {
 	d: "M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
 	key: "1n2ejm"
 }], ["path", {
 	d: "M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1",
 	key: "1qfcsi"
-}]]), VA = Z("moon", [["path", {
+}]]), HA = Z("moon", [["path", {
 	d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401",
 	key: "kfwtm"
-}]]), HA = Z("network", [
+}]]), UA = Z("network", [
 	["rect", {
 		x: "16",
 		y: "16",
@@ -17966,7 +17988,7 @@ var Ek = (e) => {
 		d: "M12 12V8",
 		key: "2874zd"
 	}]
-]), UA = Z("notebook-pen", [
+]), WA = Z("notebook-pen", [
 	["path", {
 		d: "M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4",
 		key: "re6nr2"
@@ -17991,7 +18013,7 @@ var Ek = (e) => {
 		d: "M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z",
 		key: "pqwjuv"
 	}]
-]), WA = Z("package", [
+]), GA = Z("package", [
 	["path", {
 		d: "M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z",
 		key: "1a0edw"
@@ -18008,7 +18030,7 @@ var Ek = (e) => {
 		d: "m7.5 4.27 9 5.15",
 		key: "1c824w"
 	}]
-]), GA = Z("palette", [
+]), KA = Z("palette", [
 	["path", {
 		d: "M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z",
 		key: "e79jfc"
@@ -18041,7 +18063,7 @@ var Ek = (e) => {
 		fill: "currentColor",
 		key: "fotxhn"
 	}]
-]), KA = Z("pause", [["rect", {
+]), qA = Z("pause", [["rect", {
 	x: "14",
 	y: "3",
 	width: "5",
@@ -18055,37 +18077,37 @@ var Ek = (e) => {
 	height: "18",
 	rx: "1",
 	key: "1wsw3u"
-}]]), qA = Z("pen-line", [["path", {
+}]]), JA = Z("pen-line", [["path", {
 	d: "M13 21h8",
 	key: "1jsn5i"
 }], ["path", {
 	d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
 	key: "1a8usu"
-}]]), JA = Z("pencil", [["path", {
+}]]), YA = Z("pencil", [["path", {
 	d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
 	key: "1a8usu"
 }], ["path", {
 	d: "m15 5 4 4",
 	key: "1mk7zo"
-}]]), YA = Z("play", [["path", {
+}]]), XA = Z("play", [["path", {
 	d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z",
 	key: "10ikf1"
-}]]), XA = Z("plus", [["path", {
+}]]), ZA = Z("plus", [["path", {
 	d: "M5 12h14",
 	key: "1ays0h"
 }], ["path", {
 	d: "M12 5v14",
 	key: "s699le"
-}]]), ZA = Z("puzzle", [["path", {
+}]]), QA = Z("puzzle", [["path", {
 	d: "M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z",
 	key: "w46dr5"
-}]]), QA = Z("redo-2", [["path", {
+}]]), $A = Z("redo-2", [["path", {
 	d: "m15 14 5-5-5-5",
 	key: "12vg1m"
 }], ["path", {
 	d: "M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13",
 	key: "6uklza"
-}]]), $A = Z("refresh-cw", [
+}]]), ej = Z("refresh-cw", [
 	["path", {
 		d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8",
 		key: "v9h5vc"
@@ -18102,7 +18124,7 @@ var Ek = (e) => {
 		d: "M8 16H3v5",
 		key: "1cv678"
 	}]
-]), ej = Z("regex", [
+]), tj = Z("regex", [
 	["path", {
 		d: "M17 3v10",
 		key: "15fgeh"
@@ -18119,13 +18141,13 @@ var Ek = (e) => {
 		d: "M9 17a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2z",
 		key: "swwfx4"
 	}]
-]), tj = Z("rotate-ccw", [["path", {
+]), nj = Z("rotate-ccw", [["path", {
 	d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
 	key: "1357e3"
 }], ["path", {
 	d: "M3 3v5h5",
 	key: "1xhq8a"
-}]]), nj = Z("save", [
+}]]), rj = Z("save", [
 	["path", {
 		d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
 		key: "1c8476"
@@ -18138,7 +18160,7 @@ var Ek = (e) => {
 		d: "M7 3v4a1 1 0 0 0 1 1h7",
 		key: "t51u73"
 	}]
-]), rj = Z("scroll-text", [
+]), ij = Z("scroll-text", [
 	["path", {
 		d: "M15 12h-5",
 		key: "r7krc0"
@@ -18155,7 +18177,7 @@ var Ek = (e) => {
 		d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3",
 		key: "1ph1d7"
 	}]
-]), ij = Z("server", [
+]), aj = Z("server", [
 	["rect", {
 		width: "20",
 		height: "8",
@@ -18188,7 +18210,7 @@ var Ek = (e) => {
 		y2: "18",
 		key: "nzw8ys"
 	}]
-]), aj = Z("shapes", [
+]), oj = Z("shapes", [
 	["path", {
 		d: "M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z",
 		key: "1bo67w"
@@ -18207,7 +18229,7 @@ var Ek = (e) => {
 		r: "3.5",
 		key: "w3z12y"
 	}]
-]), oj = Z("sliders-horizontal", [
+]), sj = Z("sliders-horizontal", [
 	["path", {
 		d: "M10 5H3",
 		key: "1qgfaw"
@@ -18244,7 +18266,7 @@ var Ek = (e) => {
 		d: "M8 12H3",
 		key: "a7s4jb"
 	}]
-]), sj = Z("sliders-vertical", [
+]), cj = Z("sliders-vertical", [
 	["path", {
 		d: "M10 8h4",
 		key: "1sr2af"
@@ -18281,7 +18303,7 @@ var Ek = (e) => {
 		d: "M5 21v-7",
 		key: "1w1uti"
 	}]
-]), cj = Z("snowflake", [
+]), lj = Z("snowflake", [
 	["path", {
 		d: "m10 20-1.25-2.5L6 18",
 		key: "18frcb"
@@ -18330,7 +18352,7 @@ var Ek = (e) => {
 		d: "m7 3 3 6h4",
 		key: "1otusx"
 	}]
-]), lj = Z("sparkles", [
+]), uj = Z("sparkles", [
 	["path", {
 		d: "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z",
 		key: "1s2grr"
@@ -18349,7 +18371,7 @@ var Ek = (e) => {
 		r: "2",
 		key: "6kqj1y"
 	}]
-]), uj = Z("split", [
+]), dj = Z("split", [
 	["path", {
 		d: "M16 3h5v5",
 		key: "1806ms"
@@ -18366,14 +18388,14 @@ var Ek = (e) => {
 		d: "m15 9 6-6",
 		key: "ko1vev"
 	}]
-]), dj = Z("square", [["rect", {
+]), fj = Z("square", [["rect", {
 	width: "18",
 	height: "18",
 	x: "3",
 	y: "3",
 	rx: "2",
 	key: "afitv7"
-}]]), fj = Z("sun", [
+}]]), pj = Z("sun", [
 	["circle", {
 		cx: "12",
 		cy: "12",
@@ -18412,7 +18434,7 @@ var Ek = (e) => {
 		d: "m19.07 4.93-1.41 1.41",
 		key: "1shlcs"
 	}]
-]), pj = Z("text-cursor-input", [
+]), mj = Z("text-cursor-input", [
 	["path", {
 		d: "M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6",
 		key: "1528k5"
@@ -18433,7 +18455,7 @@ var Ek = (e) => {
 		d: "M9 6v12",
 		key: "velyjx"
 	}]
-]), mj = Z("trash-2", [
+]), hj = Z("trash-2", [
 	["path", {
 		d: "M10 11v6",
 		key: "nco0om"
@@ -18454,7 +18476,7 @@ var Ek = (e) => {
 		d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
 		key: "e791ji"
 	}]
-]), hj = Z("triangle-alert", [
+]), gj = Z("triangle-alert", [
 	["path", {
 		d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
 		key: "wmoenq"
@@ -18467,13 +18489,13 @@ var Ek = (e) => {
 		d: "M12 17h.01",
 		key: "p32p05"
 	}]
-]), gj = Z("undo-2", [["path", {
+]), _j = Z("undo-2", [["path", {
 	d: "M9 14 4 9l5-5",
 	key: "102s5s"
 }], ["path", {
 	d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11",
 	key: "f3b9sd"
-}]]), _j = Z("upload", [
+}]]), vj = Z("upload", [
 	["path", {
 		d: "M12 3v12",
 		key: "1x0j5s"
@@ -18486,7 +18508,7 @@ var Ek = (e) => {
 		d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
 		key: "ih7n3h"
 	}]
-]), vj = Z("user-pen", [
+]), yj = Z("user-pen", [
 	["path", {
 		d: "M11.5 15H7a4 4 0 0 0-4 4v2",
 		key: "15lzij"
@@ -18501,7 +18523,7 @@ var Ek = (e) => {
 		r: "4",
 		key: "e45bow"
 	}]
-]), yj = Z("user-round", [["circle", {
+]), bj = Z("user-round", [["circle", {
 	cx: "12",
 	cy: "8",
 	r: "5",
@@ -18509,7 +18531,7 @@ var Ek = (e) => {
 }], ["path", {
 	d: "M20 21a8 8 0 0 0-16 0",
 	key: "rfgkzh"
-}]]), bj = Z("volume-2", [
+}]]), xj = Z("volume-2", [
 	["path", {
 		d: "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
 		key: "uqj9uw"
@@ -18522,7 +18544,7 @@ var Ek = (e) => {
 		d: "M19.364 18.364a9 9 0 0 0 0-12.728",
 		key: "ijwkga"
 	}]
-]), xj = Z("wand-sparkles", [
+]), Sj = Z("wand-sparkles", [
 	["path", {
 		d: "m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72",
 		key: "ul74o6"
@@ -18555,7 +18577,7 @@ var Ek = (e) => {
 		d: "M11 3H9",
 		key: "1obp7u"
 	}]
-]), Sj = Z("wind", [
+]), Cj = Z("wind", [
 	["path", {
 		d: "M12.8 19.6A2 2 0 1 0 14 16H2",
 		key: "148xed"
@@ -18568,7 +18590,7 @@ var Ek = (e) => {
 		d: "M9.8 4.4A2 2 0 1 1 11 8H2",
 		key: "75valh"
 	}]
-]), Cj = Z("workflow", [
+]), wj = Z("workflow", [
 	["rect", {
 		width: "8",
 		height: "8",
@@ -18589,16 +18611,16 @@ var Ek = (e) => {
 		rx: "2",
 		key: "1cgmvn"
 	}]
-]), wj = Z("x", [["path", {
+]), Tj = Z("x", [["path", {
 	d: "M18 6 6 18",
 	key: "1bl5f8"
 }], ["path", {
 	d: "m6 6 12 12",
 	key: "d8bk6v"
-}]]), Tj = Z("zap", [["path", {
+}]]), Ej = Z("zap", [["path", {
 	d: "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z",
 	key: "1xq2db"
-}]]), Ej = /* @__PURE__ */ F({
+}]]), Dj = /* @__PURE__ */ F({
 	__name: "Tip",
 	props: {
 		text: {},
@@ -18606,15 +18628,15 @@ var Ek = (e) => {
 		below: { type: Boolean }
 	},
 	setup(e) {
-		let t = e, n = /* @__PURE__ */ j(null), { open: r, bubble: i } = PO(n, () => t);
-		return (t, a) => (R(), z("span", {
+		let t = e, n = /* @__PURE__ */ j(null), { open: r, bubble: i } = FO(n, () => t), a = PO(r);
+		return (t, o) => (R(), z("span", {
 			ref_key: "anchor",
 			ref: n,
 			class: "tip",
-			onMouseenter: a[0] ||= (e) => r.value = !0,
-			onMouseleave: a[1] ||= (e) => r.value = !1,
-			onFocusin: a[2] ||= (e) => r.value = !0,
-			onFocusout: a[3] ||= (e) => r.value = !1
+			onPointerenter: o[0] ||= (...e) => M(a).onPointerenter && M(a).onPointerenter(...e),
+			onPointerleave: o[1] ||= (...e) => M(a).onPointerleave && M(a).onPointerleave(...e),
+			onFocusin: o[2] ||= (...e) => M(a).onFocusin && M(a).onFocusin(...e),
+			onFocusout: o[3] ||= (...e) => M(a).onFocusout && M(a).onFocusout(...e)
 		}, [ri(t.$slots, "default"), M(r) && e.text ? (R(), z("span", {
 			key: 0,
 			ref_key: "bubble",
@@ -18624,7 +18646,7 @@ var Ek = (e) => {
 			role: "tooltip"
 		}, A(e.text), 513)) : U("", !0)], 544));
 	}
-}), Dj = [
+}), Oj = [
 	"disabled",
 	"aria-label",
 	"aria-pressed"
@@ -18643,7 +18665,7 @@ var Ek = (e) => {
 	},
 	emits: ["click"],
 	setup(e) {
-		return (t, n) => (R(), B(Ej, {
+		return (t, n) => (R(), B(Dj, {
 			text: e.label,
 			align: e.align,
 			below: e.below
@@ -18659,7 +18681,7 @@ var Ek = (e) => {
 				"aria-label": e.label,
 				"aria-pressed": e.pressed === void 0 ? void 0 : e.pressed,
 				onClick: n[0] ||= (e) => t.$emit("click", e)
-			}, [(R(), B($r(e.icon)))], 10, Dj)]),
+			}, [(R(), B($r(e.icon)))], 10, Oj)]),
 			_: 1
 		}, 8, [
 			"text",
@@ -18667,33 +18689,33 @@ var Ek = (e) => {
 			"below"
 		]));
 	}
-}), Oj = { class: "col tight" }, kj = { class: "speech-voice" }, Aj = ["title"], jj = { class: "ellipsis" }, Mj = [
+}), kj = { class: "col tight" }, Aj = { class: "speech-voice" }, jj = ["title"], Mj = { class: "ellipsis" }, Nj = [
 	"value",
 	"aria-label",
 	"aria-expanded",
 	"aria-activedescendant",
 	"placeholder"
-], Nj = ["aria-label"], Pj = [
+], Pj = ["aria-label"], Fj = [
 	"id",
 	"aria-selected",
 	"onMouseenter",
 	"onClick"
-], Fj = { class: "col grow" }, Ij = { class: "ellipsis" }, Lj = {
+], Ij = { class: "col grow" }, Lj = { class: "ellipsis" }, Rj = {
 	key: 0,
 	class: "xs faint ellipsis"
-}, Rj = {
+}, zj = {
 	key: 0,
 	class: "voice-menu-note faint"
-}, zj = {
+}, Bj = {
 	key: 1,
 	class: "voice-menu-note xs text-danger"
-}, Bj = {
+}, Vj = {
 	key: 2,
 	class: "voice-menu-note faint small"
-}, Vj = ["value", "placeholder"], Hj = {
+}, Hj = ["value", "placeholder"], Uj = {
 	key: 1,
 	class: "speech-voice"
-}, Uj = 0, Wj = /* @__PURE__ */ F({
+}, Wj = 0, Gj = /* @__PURE__ */ F({
 	__name: "VoicePicker",
 	props: {
 		connection: {},
@@ -18713,7 +18735,7 @@ var Ek = (e) => {
 				id: n?.id ?? t
 			});
 		}
-		let c = `ap-voice-menu-${++Uj}`, l = /* @__PURE__ */ j(null), u = /* @__PURE__ */ j(null), d = /* @__PURE__ */ j(!1), f = /* @__PURE__ */ j(null), p = /* @__PURE__ */ j(-1), m = W(() => (f.value ?? "").trim()), h = /* @__PURE__ */ j(!1), g = /* @__PURE__ */ j(null), _ = /* @__PURE__ */ j(""), v = null, y = null, b;
+		let c = `ap-voice-menu-${++Wj}`, l = /* @__PURE__ */ j(null), u = /* @__PURE__ */ j(null), d = /* @__PURE__ */ j(!1), f = /* @__PURE__ */ j(null), p = /* @__PURE__ */ j(-1), m = W(() => (f.value ?? "").trim()), h = /* @__PURE__ */ j(!1), g = /* @__PURE__ */ j(null), _ = /* @__PURE__ */ j(""), v = null, y = null, b;
 		async function x(e) {
 			let t = i.value;
 			if (!t?.search || e === v) return;
@@ -18869,12 +18891,12 @@ var Ek = (e) => {
 		function me() {
 			r("update:modelValue", null), AT();
 		}
-		return (t, n) => (R(), z("div", Oj, [V("div", kj, [
+		return (t, n) => (R(), z("div", kj, [V("div", Aj, [
 			a.value?.kind === "clone" ? (R(), z(L, { key: 0 }, [V("span", {
 				class: "chip grow",
 				title: a.value.audio
-			}, [H(M(_A), { class: "faint" }), V("span", jj, A(a.value.name || M(J)("media.speech.clone")), 1)], 8, Aj), H(Q, {
-				icon: M(wj),
+			}, [H(M(vA), { class: "faint" }), V("span", Mj, A(a.value.name || M(J)("media.speech.clone")), 1)], 8, jj), H(Q, {
+				icon: M(Tj),
 				label: M(J)("common.delete"),
 				small: "",
 				onClick: me
@@ -18896,7 +18918,7 @@ var Ek = (e) => {
 				onInput: re,
 				onChange: ie,
 				onKeydown: se
-			}, null, 40, Mj), C.value ? (R(), z("div", {
+			}, null, 40, Nj), C.value ? (R(), z("div", {
 				key: 0,
 				id: c,
 				ref_key: "menu",
@@ -18914,9 +18936,9 @@ var Ek = (e) => {
 				"aria-selected": t === p.value,
 				onMouseenter: (e) => p.value = t,
 				onClick: (t) => ce(e)
-			}, [V("span", Fj, [V("span", Ij, A(e.name), 1), e.description ? (R(), z("span", Lj, A(e.description), 1)) : U("", !0)]), e.preview ? (R(), B(Q, {
+			}, [V("span", Ij, [V("span", Lj, A(e.name), 1), e.description ? (R(), z("span", Rj, A(e.description), 1)) : U("", !0)]), e.preview ? (R(), B(Q, {
 				key: 0,
-				icon: M(bj),
+				icon: M(xj),
 				label: M(J)("media.speech.test"),
 				small: "",
 				align: "end",
@@ -18925,16 +18947,16 @@ var Ek = (e) => {
 				"icon",
 				"label",
 				"onClick"
-			])) : U("", !0)], 42, Pj))), 128)), h.value ? (R(), z("div", Rj, [H(M(IA), { class: "spin" })])) : _.value ? (R(), z("div", zj, A(_.value), 1)) : ee.value.length ? U("", !0) : (R(), z("div", Bj, A(M(J)("media.speech.search.none")), 1))], 40, Nj)) : U("", !0)], 64)),
+			])) : U("", !0)], 42, Fj))), 128)), h.value ? (R(), z("div", zj, [H(M(LA), { class: "spin" })])) : _.value ? (R(), z("div", Bj, A(_.value), 1)) : ee.value.length ? U("", !0) : (R(), z("div", Vj, A(M(J)("media.speech.search.none")), 1))], 40, Pj)) : U("", !0)], 64)),
 			i.value?.clone && a.value?.kind !== "clone" ? (R(), B(Q, {
 				key: 2,
-				icon: M(Ik),
+				icon: M(Lk),
 				label: M(J)("media.speech.clone"),
 				small: "",
 				onClick: n[1] ||= (e) => fe.value?.click()
 			}, null, 8, ["icon", "label"])) : U("", !0),
 			H(Q, {
-				icon: M(bj),
+				icon: M(xj),
 				label: M(J)("media.speech.test"),
 				small: "",
 				align: "end",
@@ -18955,11 +18977,11 @@ var Ek = (e) => {
 			value: a.value.text ?? "",
 			placeholder: M(J)("media.speech.clone.text"),
 			onChange: n[4] ||= (e) => pe(e.target.value)
-		}, null, 40, Vj)), i.value?.clone?.consent ? (R(), z("div", Hj, [V("button", {
+		}, null, 40, Hj)), i.value?.clone?.consent ? (R(), z("div", Uj, [V("button", {
 			type: "button",
 			class: "btn ghost sm-btn",
 			onClick: n[5] ||= (e) => D.value?.click()
-		}, [H(M(_A)), ba(A(a.value.consent ? M(J)("media.speech.clone.consentSet") : M(J)("media.speech.clone.consent")), 1)]), V("input", {
+		}, [H(M(vA)), ba(A(a.value.consent ? M(J)("media.speech.clone.consentSet") : M(J)("media.speech.clone.consent")), 1)]), V("input", {
 			ref_key: "consentInput",
 			ref: D,
 			type: "file",
@@ -18968,15 +18990,15 @@ var Ek = (e) => {
 			onChange: n[6] ||= (e) => O(e, "consent")
 		}, null, 544)])) : U("", !0)], 64)) : U("", !0)]));
 	}
-}), Gj = ["aria-label"], Kj = { class: "col" }, qj = ["aria-label"], Jj = ["value"], Yj = { value: "" }, Xj = { class: "row end" }, Zj = ["disabled"], Qj = /* @__PURE__ */ F({
+}), Kj = ["aria-label"], qj = { class: "col" }, Jj = ["aria-label"], Yj = ["value"], Xj = { value: "" }, Zj = { class: "row end" }, Qj = ["disabled"], $j = /* @__PURE__ */ F({
 	__name: "VoiceAsk",
 	setup(e) {
 		let t = /* @__PURE__ */ j(), n = /* @__PURE__ */ j(null), r = /* @__PURE__ */ j("");
-		P(() => $j.request, async (e) => {
+		P(() => eM.request, async (e) => {
 			n.value = null, r.value = (e?.cards.find((t) => Hw(t.name) === Hw(e.character)) ?? e?.cards[0])?.key ?? "", e && (await Xn(), t.value?.open || t.value?.showModal());
 		}, { immediate: !0 }), Xr(kT(() => [n.value]));
 		function i(e) {
-			let i = $j.request;
+			let i = eM.request;
 			if (!i) return;
 			t.value?.close();
 			let a = n.value ? /* @__PURE__ */ bn(n.value) : null;
@@ -18985,36 +19007,36 @@ var Ek = (e) => {
 				...r.value ? { card: r.value } : {}
 			} : null);
 		}
-		return (e, a) => M($j).request ? (R(), z("dialog", {
+		return (e, a) => M(eM).request ? (R(), z("dialog", {
 			key: 0,
 			ref_key: "dialog",
 			ref: t,
 			class: "voice-ask",
-			"aria-label": M(J)("media.speech.ask", { name: M($j).request.character }),
+			"aria-label": M(J)("media.speech.ask", { name: M(eM).request.character }),
 			onCancel: a[4] ||= gs((e) => i(!1), ["prevent"]),
 			onKeydown: a[5] ||= gs(() => {}, ["stop"])
-		}, [V("div", Kj, [
-			V("strong", null, A(M(J)("media.speech.ask", { name: M($j).request.character })), 1),
-			H(Wj, {
-				connection: M($j).request.conn,
+		}, [V("div", qj, [
+			V("strong", null, A(M(J)("media.speech.ask", { name: M(eM).request.character })), 1),
+			H(Gj, {
+				connection: M(eM).request.conn,
 				"model-value": n.value,
-				label: M($j).request.character,
+				label: M(eM).request.character,
 				"onUpdate:modelValue": a[0] ||= (e) => n.value = e
 			}, null, 8, [
 				"connection",
 				"model-value",
 				"label"
 			]),
-			M($j).request.cards.length ? ur((R(), z("select", {
+			M(eM).request.cards.length ? ur((R(), z("select", {
 				key: 0,
 				"onUpdate:modelValue": a[1] ||= (e) => r.value = e,
 				class: "input",
 				"aria-label": M(J)("media.speech.scope")
-			}, [(R(!0), z(L, null, I(M($j).request.cards, (e) => (R(), z("option", {
+			}, [(R(!0), z(L, null, I(M(eM).request.cards, (e) => (R(), z("option", {
 				key: e.key,
 				value: e.key
-			}, A(e.name), 9, Jj))), 128)), V("option", Yj, A(M(J)("media.speech.global")), 1)], 8, qj)), [[ls, r.value]]) : U("", !0),
-			V("div", Xj, [V("button", {
+			}, A(e.name), 9, Yj))), 128)), V("option", Xj, A(M(J)("media.speech.global")), 1)], 8, Jj)), [[ls, r.value]]) : U("", !0),
+			V("div", Zj, [V("button", {
 				type: "button",
 				class: "btn",
 				onClick: a[2] ||= (e) => i(!1)
@@ -19023,106 +19045,130 @@ var Ek = (e) => {
 				class: "btn primary",
 				disabled: !n.value,
 				onClick: a[3] ||= (e) => i(!0)
-			}, A(M(J)("common.save")), 9, Zj)])
-		])], 40, Gj)) : U("", !0);
+			}, A(M(J)("common.save")), 9, Qj)])
+		])], 40, Kj)) : U("", !0);
 	}
-}), $j = /* @__PURE__ */ fn({ request: null }), eM = (e, t, n) => (document.querySelector("ap-voice-ask") || document.body.append(document.createElement("ap-voice-ask")), new Promise((r) => {
-	$j.request = {
+}), eM = /* @__PURE__ */ fn({ request: null }), tM = (e, t, n) => (document.querySelector("ap-voice-ask") || document.body.append(document.createElement("ap-voice-ask")), new Promise((r) => {
+	eM.request = {
 		conn: e,
 		character: t,
 		cards: n,
 		done: (e) => {
-			$j.request = null, r(e);
+			eM.request = null, r(e);
 		}
 	};
 }));
-function tM() {
-	ED("ap-voice-ask", Qj), iT(eM);
+function nM() {
+	ED("ap-voice-ask", $j), iT(tM);
 }
 //#endregion
 //#region src/ui/media/MediaDialog.vue?vue&type=script&setup=true&lang.ts
-var nM = ["aria-label"], rM = { class: "media-dialog-box" }, iM = { class: "media-dialog-head" }, aM = { class: "grow ellipsis" }, oM = { class: "media-dialog-body" }, sM = /* @__PURE__ */ F({
+var rM = ["aria-label"], iM = { class: "media-dialog-head" }, aM = { class: "grow ellipsis" }, oM = { class: "media-dialog-body" }, sM = "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex=\"-1\"])", cM = /* @__PURE__ */ F({
 	__name: "MediaDialog",
 	setup(e) {
 		let t = /* @__PURE__ */ j();
-		P(() => cM.current?.id, async (e) => {
-			e === void 0 ? t.value?.close() : (await Xn(), t.value?.open || t.value?.showModal());
-		}, { immediate: !0 });
-		let n = !1, r = (e) => {
-			n = e.target === t.value;
-		}, i = (e) => {
-			n && e.target === t.value && pM(), n = !1;
+		function n(e) {
+			let n = t.value;
+			if (!n) return;
+			let r = [...n.querySelectorAll(sM)].filter((e) => e.getClientRects().length > 0);
+			if (!r.length) {
+				e.preventDefault(), n.focus();
+				return;
+			}
+			let i = n.getRootNode().activeElement, a = r[0], o = r[r.length - 1];
+			e.shiftKey && (i === a || i === n) ? (e.preventDefault(), o.focus()) : !e.shiftKey && i === o && (e.preventDefault(), a.focus());
+		}
+		function r(e) {
+			e.stopPropagation(), !e.isComposing && (e.key === "Escape" && !e.defaultPrevented ? (e.preventDefault(), mM()) : e.key === "Tab" && n(e));
+		}
+		function i(e) {
+			e.target !== document.body && e.target !== document.documentElement || e.isComposing || (e.stopPropagation(), e.key === "Escape" ? (e.preventDefault(), mM()) : e.key === "Tab" && (e.preventDefault(), t.value?.focus()));
+		}
+		function a(e) {
+			e.composedPath().some((e) => e instanceof Element && (e.localName === "ap-media-dialog" || e.localName === "dialog" || e.id === "toast-container")) || mM(!1);
+		}
+		function o(e) {
+			let t = e ? addEventListener : removeEventListener;
+			t("keydown", i, !0), t("click", a, !0);
+		}
+		P(() => lM.current?.id, async (e) => {
+			o(e !== void 0), e !== void 0 && (await Xn(), t.value?.focus({ preventScroll: !0 }));
+		}, { immediate: !0 }), Xr(() => o(!1));
+		let s = !1, c = (e) => {
+			s = e.target === e.currentTarget;
+		}, l = (e) => {
+			s && e.target === e.currentTarget && mM(), s = !1;
 		};
-		return (e, n) => M(cM).current ? (R(), z("dialog", {
+		return (e, n) => M(lM).current ? (R(), z("div", {
 			key: 0,
-			ref_key: "dialog",
+			class: "media-dialog-layer",
+			onPointerdown: c,
+			onClick: l
+		}, [V("div", {
+			ref_key: "box",
 			ref: t,
 			class: "media-dialog",
-			"aria-label": M(cM).current.title,
-			onCancel: n[0] ||= gs((...e) => M(pM) && M(pM)(...e), ["prevent"]),
-			onKeydown: n[1] ||= gs(() => {}, ["stop"]),
-			onKeyup: n[2] ||= gs(() => {}, ["stop"]),
-			onPointerdown: r,
-			onClick: i
-		}, [V("div", rM, [V("header", iM, [V("strong", aM, A(M(cM).current.title), 1), H(Q, {
-			icon: M(wj),
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-label": M(lM).current.title,
+			tabindex: "-1",
+			onKeydown: r,
+			onKeyup: n[2] ||= gs(() => {}, ["stop"])
+		}, [V("header", iM, [V("strong", aM, A(M(lM).current.title), 1), H(Q, {
+			icon: M(Tj),
 			label: M(J)("common.close"),
 			align: "end",
-			onClick: M(pM)
-		}, null, 8, [
-			"icon",
-			"label",
-			"onClick"
-		])]), V("div", oM, [(R(), B($r(M(cM).current.component), wa({ key: M(cM).current.id }, M(cM).current.props ?? {}, { onClose: M(pM) }), null, 16, ["onClose"]))])])], 40, nM)) : U("", !0);
+			onClick: n[0] ||= (e) => M(mM)()
+		}, null, 8, ["icon", "label"])]), V("div", oM, [(R(), B($r(M(lM).current.component), wa({ key: M(lM).current.id }, M(lM).current.props ?? {}, { onClose: n[1] ||= (e) => M(mM)() }), null, 16))])], 40, rM)], 32)) : U("", !0);
 	}
-}), cM = /* @__PURE__ */ fn({ current: null }), lM = 0, uM = null;
-function dM() {
+}), lM = /* @__PURE__ */ fn({ current: null }), uM = 0, dM = null;
+function fM() {
 	let e = document.activeElement;
 	for (; e?.shadowRoot?.activeElement;) e = e.shadowRoot.activeElement;
 	return e instanceof HTMLElement ? e : null;
 }
-function fM(e) {
-	document.querySelector("ap-media-dialog") || document.body.append(document.createElement("ap-media-dialog")), cM.current || (uM = dM()), cM.current = {
+function pM(e) {
+	document.querySelector("ap-media-dialog") || document.body.append(document.createElement("ap-media-dialog")), lM.current || (dM = fM()), lM.current = {
 		...e,
 		component: xn(e.component),
-		id: ++lM
+		id: ++uM
 	};
 }
-function pM() {
-	if (!cM.current) return;
-	cM.current = null;
-	let e = uM;
-	uM = null, e?.isConnected && e.focus({ preventScroll: !0 });
+function mM(e = !0) {
+	if (!lM.current) return;
+	lM.current = null;
+	let t = dM;
+	dM = null, e && t?.isConnected && t.focus({ preventScroll: !0 });
 }
-function mM() {
-	ED("ap-media-dialog", sM);
+function hM() {
+	ED("ap-media-dialog", cM);
 }
 //#endregion
 //#region src/ui/entry.ts
-var hM = "left-nav-panel", gM = "ap-preset-banner";
-function _M() {
-	return document.getElementById(hM);
-}
+var gM = "left-nav-panel", _M = "ap-preset-banner";
 function vM() {
-	let e = _M();
-	e && !e.classList.contains("openDrawer") && (e.parentElement?.querySelector(":scope > .drawer-toggle"))?.click();
+	return document.getElementById(gM);
 }
 function yM() {
-	let e = document.getElementById("settings_preset_openai")?.parentElement;
-	e && e.nextElementSibling?.localName !== gM && e.after(document.createElement(gM));
+	let e = vM();
+	e && !e.classList.contains("openDrawer") && (e.parentElement?.querySelector(":scope > .drawer-toggle"))?.click();
 }
-var bM = ["[data-preset-manager-rename=\"openai\"]", "#new_oai_preset"];
-function xM() {
+function bM() {
+	let e = document.getElementById("settings_preset_openai")?.parentElement;
+	e && e.nextElementSibling?.localName !== _M && e.after(document.createElement(_M));
+}
+var xM = ["[data-preset-manager-rename=\"openai\"]", "#new_oai_preset"];
+function SM() {
 	P(() => Y.presetId, (e) => {
-		for (let t of document.querySelectorAll(bM.join(","))) t.classList.toggle("ap-carrier-hidden", !!e);
+		for (let t of document.querySelectorAll(xM.join(","))) t.classList.toggle("ap-carrier-hidden", !!e);
 	}, { immediate: !0 });
 }
-function SM(e) {
-	let t = _M();
+function CM(e) {
+	let t = vM();
 	t && t.querySelector(":scope > ap-panel") && t.classList.toggle("ap-panel-covering", e);
 }
-function CM() {
-	let e = _M();
+function wM() {
+	let e = vM();
 	if (!e) {
 		if (!document.querySelector("ap-panel")) {
 			let e = document.createElement("ap-panel");
@@ -19133,11 +19179,11 @@ function CM() {
 	let t = document.querySelector("ap-panel");
 	t?.parentElement !== e && (t?.remove(), e.append(document.createElement("ap-panel")));
 }
-function wM() {
-	yM(), xM(), CM(), P(() => Y.panelOpen, (e) => {
-		e && vM();
+function TM() {
+	bM(), SM(), wM(), P(() => Y.panelOpen, (e) => {
+		e && yM();
 	});
-	let e = _M();
+	let e = vM();
 	e && new MutationObserver(() => {
 		e.classList.contains("openDrawer") || (Y.panelOpen = !1);
 	}).observe(e, {
@@ -19147,16 +19193,16 @@ function wM() {
 }
 //#endregion
 //#region src/ui/message/StageBody.vue?vue&type=script&setup=true&lang.ts
-var TM = {
+var EM = {
 	key: 0,
 	class: "patches"
-}, EM = { class: "patch-old pre" }, DM = { class: "patch-new pre" }, OM = {
+}, DM = { class: "patch-old pre" }, OM = { class: "patch-new pre" }, kM = {
 	key: 0,
 	class: "patch-status xs"
-}, kM = {
+}, AM = {
 	key: 2,
 	class: "faint small stage-empty"
-}, AM = /* @__PURE__ */ F({
+}, jM = /* @__PURE__ */ F({
 	__name: "StageBody",
 	props: {
 		stage: {},
@@ -19174,25 +19220,25 @@ var TM = {
 		return (t, i) => (R(), z("div", {
 			class: "stage-body",
 			style: Ie({ "--actor": e.stage.color })
-		}, [e.stage.kind === "patch" && e.stage.patches?.length ? (R(), z("div", TM, [(R(!0), z(L, null, I(e.stage.patches, (e, t) => (R(), z("div", {
+		}, [e.stage.kind === "patch" && e.stage.patches?.length ? (R(), z("div", EM, [(R(!0), z(L, null, I(e.stage.patches, (e, t) => (R(), z("div", {
 			key: t,
 			class: k(["patch", { failed: r(e.status) }])
 		}, [
-			V("div", EM, A(e.old_string), 1),
-			H(M(Pk), { class: "patch-arrow" }),
-			V("div", DM, A(e.new_string), 1),
-			r(e.status) ? (R(), z("div", OM, [H(M(Lk)), ba(A(M(J)(`patch.${e.status}`)), 1)])) : U("", !0)
+			V("div", DM, A(e.old_string), 1),
+			H(M(Fk), { class: "patch-arrow" }),
+			V("div", OM, A(e.new_string), 1),
+			r(e.status) ? (R(), z("div", kM, [H(M(Rk)), ba(A(M(J)(`patch.${e.status}`)), 1)])) : U("", !0)
 		], 2))), 128))])) : e.stage.text ? (R(), z("div", {
 			key: 1,
 			ref_key: "box",
 			ref: n,
 			class: "stage-text pre scroll"
-		}, A(e.stage.text), 513)) : (R(), z("div", kM, A(M(J)(`stage.${e.stage.status}`)), 1))], 4));
+		}, A(e.stage.text), 513)) : (R(), z("div", AM, A(M(J)(`stage.${e.stage.status}`)), 1))], 4));
 	}
 });
 //#endregion
 //#region src/ui/actions.ts
-async function jM(t) {
+async function MM(t) {
 	let n = e().chat[t], r = gm(n);
 	if (!n || !r || r.draft === void 0 || r.patched === void 0) return;
 	let i = !r.patchesApplied;
@@ -19203,19 +19249,19 @@ async function jM(t) {
 	};
 	r.annotationVersions && (a.annotations = i ? r.annotationVersions.patched : r.annotationVersions.draft), r.speechVersions && (a.speech = i ? r.speechVersions.patched : r.speechVersions.draft), vm(t, a), e().updateMessageBlock(t, n), await e().saveChat(), await e().eventSource.emit(e().eventTypes.MESSAGE_EDITED, t), IS();
 }
-async function MM(t, n, r) {
+async function NM(t, n, r) {
 	let i = e().chat[t], a = gm(i);
 	return !i || !a ? !1 : (vm(t, _m(a, n, r)), IS(), await e().saveChat(), !0);
 }
 //#endregion
 //#region src/ui/message/Stages.vue?vue&type=script&setup=true&lang.ts
-var NM = { class: "stage-bar" }, PM = ["onClick"], FM = { class: "ellipsis" }, IM = {
+var PM = { class: "stage-bar" }, FM = ["onClick"], IM = { class: "ellipsis" }, LM = {
 	key: 0,
 	class: "chip stage-chip error"
-}, LM = { class: "ellipsis" }, RM = { class: "badge warn" }, zM = {
+}, RM = { class: "ellipsis" }, zM = { class: "badge warn" }, BM = {
 	class: "icon-btn sm faint",
 	tabindex: "0"
-}, BM = /* @__PURE__ */ F({
+}, VM = /* @__PURE__ */ F({
 	__name: "Stages",
 	props: { mesid: {} },
 	setup(e) {
@@ -19232,10 +19278,10 @@ var NM = { class: "stage-bar" }, PM = ["onClick"], FM = { class: "ellipsis" }, I
 			i.value = !0, r.value = s.value === e.id ? null : e.id;
 		}
 		let u = {
-			text: UA,
-			content: hA,
-			patch: wA
-		}, d = (e) => e.status === "streaming" ? IA : e.status === "interrupted" ? Xk : e.status === "missing" ? qk : u[e.kind], f = W(() => n.value?.sidecar?.diagnostics?.warnings ?? []), p = W(() => n.value?.sidecar?.draft === void 0 ? null : n.value.sidecar), m = W(() => {
+			text: WA,
+			content: gA,
+			patch: TA
+		}, d = (e) => e.status === "streaming" ? LA : e.status === "interrupted" ? Zk : e.status === "missing" ? Jk : u[e.kind], f = W(() => n.value?.sidecar?.diagnostics?.warnings ?? []), p = W(() => n.value?.sidecar?.draft === void 0 ? null : n.value.sidecar), m = W(() => {
 			let e = n.value;
 			if (!e) return "";
 			let t = e.sidecar?.diagnostics, r = [`${J(`transport.${e.transport}`)} · ${e.workflow}`];
@@ -19244,47 +19290,47 @@ var NM = { class: "stage-bar" }, PM = ["onClick"], FM = { class: "ellipsis" }, I
 		return (t, r) => M(n) && (o.value.length || M(n).error) ? (R(), z("div", {
 			key: 0,
 			class: k(["stages", { live: M(n).running }])
-		}, [V("div", NM, [
+		}, [V("div", PM, [
 			(R(!0), z(L, null, I(o.value, (e) => (R(), z("button", {
 				key: e.id,
 				type: "button",
 				class: k(["chip stage-chip", [e.status, { open: s.value === e.id }]]),
 				style: Ie({ "--actor": e.color }),
 				onClick: (t) => l(e)
-			}, [(R(), B($r(d(e)), { class: k({ spin: e.status === "streaming" }) }, null, 8, ["class"])), V("span", FM, A(e.label), 1)], 14, PM))), 128)),
-			M(n).error ? (R(), z("span", IM, [H(M(hj)), V("span", LM, A(M(n).error), 1)])) : U("", !0),
+			}, [(R(), B($r(d(e)), { class: k({ spin: e.status === "streaming" }) }, null, 8, ["class"])), V("span", IM, A(e.label), 1)], 14, FM))), 128)),
+			M(n).error ? (R(), z("span", LM, [H(M(gj)), V("span", RM, A(M(n).error), 1)])) : U("", !0),
 			r[1] ||= V("span", { class: "grow" }, null, -1),
-			f.value.length ? (R(), B(Ej, {
+			f.value.length ? (R(), B(Dj, {
 				key: 1,
 				text: f.value.join("\n"),
 				align: "end"
 			}, {
-				default: N(() => [V("span", RM, [H(M(hj)), ba(A(f.value.length), 1)])]),
+				default: N(() => [V("span", zM, [H(M(gj)), ba(A(f.value.length), 1)])]),
 				_: 1
 			}, 8, ["text"])) : U("", !0),
 			p.value ? (R(), B(Q, {
 				key: 2,
 				small: "",
 				align: "end",
-				icon: p.value.patchesApplied ? M(gj) : M(QA),
+				icon: p.value.patchesApplied ? M(_j) : M($A),
 				label: p.value.patchesApplied ? M(J)("stages.revertDraft") : M(J)("stages.reapplyPatches"),
-				onClick: r[0] ||= (t) => M(jM)(e.mesid)
+				onClick: r[0] ||= (t) => M(MM)(e.mesid)
 			}, null, 8, ["icon", "label"])) : U("", !0),
-			M(n).running ? U("", !0) : (R(), B(Ej, {
+			M(n).running ? U("", !0) : (R(), B(Dj, {
 				key: 3,
 				text: m.value,
 				align: "end"
 			}, {
-				default: N(() => [V("span", zM, [H(M(jA))])]),
+				default: N(() => [V("span", BM, [H(M(MA))])]),
 				_: 1
 			}, 8, ["text"]))
-		]), c.value ? (R(), B(AM, {
+		]), c.value ? (R(), B(jM, {
 			key: c.value.id,
 			stage: c.value,
 			follow: M(n).running && !i.value
 		}, null, 8, ["stage", "follow"])) : U("", !0)], 2)) : U("", !0);
 	}
-}), VM = {
+}), HM = {
 	status: {
 		position: "top",
 		order: 100
@@ -19325,16 +19371,16 @@ var NM = { class: "stage-bar" }, PM = ["onClick"], FM = { class: "ellipsis" }, I
 	},
 	speech: null
 };
-function HM(e) {
-	let t = VM[e.kind];
+function UM(e) {
+	let t = HM[e.kind];
 	return t ? {
 		position: e.ui?.position ?? t.position,
 		order: e.ui?.order ?? t.order
 	} : null;
 }
-function UM(e, t) {
+function WM(e, t) {
 	return e.flatMap((e, n) => {
-		let r = HM(e);
+		let r = UM(e);
 		return r && r.position === t ? [{
 			decl: e,
 			...r,
@@ -19344,7 +19390,7 @@ function UM(e, t) {
 }
 //#endregion
 //#region src/ui/message/cards/ReplyCard.vue?vue&type=script&setup=true&lang.ts
-var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F({
+var GM = { class: "reply-name xs" }, KM = ["innerHTML"], qM = /* @__PURE__ */ F({
 	__name: "ReplyCard",
 	props: {
 		text: {},
@@ -19356,29 +19402,29 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 		return (t, r) => (R(), z("div", {
 			class: "reply-card",
 			style: Ie({ "--actor": e.color })
-		}, [V("div", WM, A(e.name), 1), V("div", {
+		}, [V("div", GM, A(e.name), 1), V("div", {
 			class: "rich",
 			innerHTML: n.value
-		}, null, 8, GM)], 4));
+		}, null, 8, KM)], 4));
 	}
-}), qM = { class: "card mini-card" }, JM = { class: "card-head" }, YM = { class: "card-title" }, XM = { class: "card-body pre" }, ZM = /* @__PURE__ */ F({
+}), JM = { class: "card mini-card" }, YM = { class: "card-head" }, XM = { class: "card-title" }, ZM = { class: "card-body pre" }, QM = /* @__PURE__ */ F({
 	__name: "ImpersonateCard",
 	props: {
 		text: {},
 		mesid: {}
 	},
 	setup(e) {
-		return (t, n) => (R(), z("div", qM, [V("header", JM, [
-			H(M(vj), { class: "section-icon" }),
-			V("span", YM, A(M(J)("cards.impersonate")), 1),
+		return (t, n) => (R(), z("div", JM, [V("header", YM, [
+			H(M(yj), { class: "section-icon" }),
+			V("span", XM, A(M(J)("cards.impersonate")), 1),
 			V("button", {
 				type: "button",
 				class: "btn primary sm-btn",
 				onClick: n[0] ||= (t) => M(dE)(e.text, !1, e.mesid)
-			}, [H(M(pj)), ba(A(M(J)("cards.fillInput")), 1)])
-		]), V("div", XM, A(e.text), 1)]));
+			}, [H(M(mj)), ba(A(M(J)("cards.fillInput")), 1)])
+		]), V("div", ZM, A(e.text), 1)]));
 	}
-}), QM = ["aria-label"], $M = ["title", "onClick"], eN = { class: "option-label" }, tN = { class: "option-content small muted" }, nN = /* @__PURE__ */ F({
+}), $M = ["aria-label"], eN = ["title", "onClick"], tN = { class: "option-label" }, nN = { class: "option-content small muted" }, rN = /* @__PURE__ */ F({
 	__name: "OptionsCard",
 	props: {
 		options: {},
@@ -19397,12 +19443,12 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 			class: "option",
 			title: M(J)("cards.optionHint"),
 			onClick: (t) => n(e, t)
-		}, [V("span", eN, A(e.label), 1), V("span", tN, A(e.content), 1)], 8, $M))), 128))], 8, QM));
+		}, [V("span", tN, A(e.label), 1), V("span", nN, A(e.content), 1)], 8, eN))), 128))], 8, $M));
 	}
-}), rN = {
+}), iN = {
 	key: 0,
 	class: "memory-ops"
-}, iN = { class: "ellipsis" }, aN = ["aria-label", "onClick"], oN = /* @__PURE__ */ F({
+}, aN = { class: "ellipsis" }, oN = ["aria-label", "onClick"], sN = /* @__PURE__ */ F({
 	__name: "MemoryCard",
 	props: {
 		events: {},
@@ -19442,27 +19488,27 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 		function r(e) {
 			e.id !== void 0 && Lm(Vm(t.preset), e.id);
 		}
-		return (e, t) => n.value.length ? (R(), z("div", rN, [(R(!0), z(L, null, I(n.value, (e, t) => (R(), B(Ej, {
+		return (e, t) => n.value.length ? (R(), z("div", iN, [(R(!0), z(L, null, I(n.value, (e, t) => (R(), B(Dj, {
 			key: t,
 			text: e.op === "delete" ? M(J)("memory.deleted") : e.content,
 			align: "start"
 		}, {
 			default: N(() => [V("span", { class: k(["chip memory-chip", [e.op, { undone: e.undone }]]) }, [
-				(R(), B($r(e.scope === "global" ? M(TA) : M(RA)), { class: "faint" })),
-				V("span", iN, A(e.key), 1),
-				(R(), B($r(e.op === "delete" ? M(mj) : M(JA)), { class: "op-icon" })),
+				(R(), B($r(e.scope === "global" ? M(EA) : M(zA)), { class: "faint" })),
+				V("span", aN, A(e.key), 1),
+				(R(), B($r(e.op === "delete" ? M(hj) : M(YA)), { class: "op-icon" })),
 				e.scope === "global" && !e.undone ? (R(), z("button", {
 					key: 0,
 					type: "button",
 					class: "icon-btn sm",
 					"aria-label": M(J)("common.undo"),
 					onClick: (t) => r(e)
-				}, [H(M(gj))], 8, aN)) : U("", !0)
+				}, [H(M(_j))], 8, oN)) : U("", !0)
 			], 2)]),
 			_: 2
 		}, 1032, ["text"]))), 128))])) : U("", !0);
 	}
-}), sN = ["aria-label"], cN = /* @__PURE__ */ F({
+}), cN = ["aria-label"], lN = /* @__PURE__ */ F({
 	__name: "Help",
 	props: {
 		text: {},
@@ -19470,21 +19516,22 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 		below: { type: Boolean }
 	},
 	setup(e) {
-		let t = e, n = /* @__PURE__ */ j(null), { open: r, bubble: i } = PO(n, () => t);
-		return (t, a) => e.text ? (R(), z("span", {
+		let t = e, n = /* @__PURE__ */ j(null), { open: r, bubble: i } = FO(n, () => t), a = PO(r);
+		return (t, o) => e.text ? (R(), z("span", {
 			key: 0,
 			ref_key: "anchor",
 			ref: n,
 			class: "tip help",
-			onMouseenter: a[2] ||= (e) => r.value = !0,
-			onMouseleave: a[3] ||= (e) => r.value = !1
+			onPointerenter: o[1] ||= (...e) => M(a).onPointerenter && M(a).onPointerenter(...e),
+			onPointerleave: o[2] ||= (...e) => M(a).onPointerleave && M(a).onPointerleave(...e),
+			onFocusin: o[3] ||= (...e) => M(a).onFocusin && M(a).onFocusin(...e),
+			onFocusout: o[4] ||= (...e) => M(a).onFocusout && M(a).onFocusout(...e)
 		}, [V("button", {
 			type: "button",
 			class: "icon-btn sm",
 			"aria-label": e.text,
-			onClick: a[0] ||= gs((e) => r.value = !M(r), ["stop"]),
-			onBlur: a[1] ||= (e) => r.value = !1
-		}, [H(M(Yk))], 40, sN), M(r) ? (R(), z("span", {
+			onClick: o[0] ||= gs((...e) => M(a).toggle && M(a).toggle(...e), ["stop"])
+		}, [H(M(Xk))], 8, cN), M(r) ? (R(), z("span", {
 			key: 0,
 			ref_key: "bubble",
 			ref: i,
@@ -19493,10 +19540,10 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 			role: "tooltip"
 		}, A(e.text), 513)) : U("", !0)], 544)) : U("", !0);
 	}
-}), lN = { class: "card-title" }, uN = {
+}), uN = { class: "card-title" }, dN = {
 	key: 0,
 	class: "card-body"
-}, dN = /* @__PURE__ */ F({
+}, fN = /* @__PURE__ */ F({
 	__name: "Section",
 	props: {
 		title: {},
@@ -19516,8 +19563,8 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 				key: 0,
 				class: "section-icon"
 			})) : U("", !0),
-			V("span", lN, A(e.title), 1),
-			H(cN, {
+			V("span", uN, A(e.title), 1),
+			H(lN, {
 				text: e.help,
 				align: "end"
 			}, null, 8, ["text"]),
@@ -19525,46 +19572,46 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 				class: "row",
 				onClick: r[0] ||= gs(() => {}, ["stop"])
 			}, [ri(n.$slots, "actions")]),
-			e.collapsible ? (R(), B(M(Wk), {
+			e.collapsible ? (R(), B(M(Gk), {
 				key: 1,
 				class: k(["chevron", { flipped: t.value }])
 			}, null, 8, ["class"])) : U("", !0)
-		], 2), !e.collapsible || t.value ? (R(), z("div", uN, [ri(n.$slots, "default")])) : U("", !0)], 2));
+		], 2), !e.collapsible || t.value ? (R(), z("div", dN, [ri(n.$slots, "default")])) : U("", !0)], 2));
 	}
-}), fN = {
+}), pN = {
 	key: 0,
 	class: "badge neutral"
-}, pN = { class: "pre small" }, mN = /* @__PURE__ */ F({
+}, mN = { class: "pre small" }, hN = /* @__PURE__ */ F({
 	__name: "RecapCard",
 	props: {
 		text: {},
 		coversUpTo: {}
 	},
 	setup(e) {
-		return (t, n) => (R(), B(dN, {
+		return (t, n) => (R(), B(fN, {
 			title: M(J)("cards.recap"),
-			icon: M(rj),
+			icon: M(ij),
 			collapsible: "",
 			open: !1
 		}, {
-			actions: N(() => [e.coversUpTo === void 0 ? U("", !0) : (R(), z("span", fN, "#0–" + A(e.coversUpTo), 1))]),
-			default: N(() => [V("div", pN, A(e.text), 1)]),
+			actions: N(() => [e.coversUpTo === void 0 ? U("", !0) : (R(), z("span", pN, "#0–" + A(e.coversUpTo), 1))]),
+			default: N(() => [V("div", mN, A(e.text), 1)]),
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), hN = { class: "synopsis-fields" }, gN = { class: "synopsis-field" }, _N = ["placeholder", "aria-label"], vN = { class: "synopsis-field" }, yN = ["placeholder", "aria-label"], bN = ["placeholder", "aria-label"], xN = ["placeholder", "aria-label"], SN = { class: "synopsis-actions" }, CN = { class: "xs faint grow synopsis-keys" }, wN = {
+}), gN = { class: "synopsis-fields" }, _N = { class: "synopsis-field" }, vN = ["placeholder", "aria-label"], yN = { class: "synopsis-field" }, bN = ["placeholder", "aria-label"], xN = ["placeholder", "aria-label"], SN = ["placeholder", "aria-label"], CN = { class: "synopsis-actions" }, wN = { class: "xs faint grow synopsis-keys" }, TN = {
 	type: "submit",
 	class: "btn primary sm-btn"
-}, TN = { class: "synopsis-head" }, EN = { class: "synopsis-line small" }, DN = {
+}, EN = { class: "synopsis-head" }, DN = { class: "synopsis-line small" }, ON = {
 	key: 0,
 	class: "row tight"
-}, ON = {
+}, kN = {
 	key: 1,
 	class: "row tight"
-}, kN = { class: "synopsis-event ellipsis" }, AN = {
+}, AN = { class: "synopsis-event ellipsis" }, jN = {
 	key: 0,
 	class: "small muted pre synopsis-summary"
-}, jN = /* @__PURE__ */ F({
+}, MN = /* @__PURE__ */ F({
 	__name: "SynopsisCard",
 	props: {
 		synopsis: {},
@@ -19615,17 +19662,17 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 			onTouchmovePassive: n[6] ||= gs(() => {}, ["stop"]),
 			onTouchendPassive: n[7] ||= gs(() => {}, ["stop"])
 		}, [
-			V("div", hN, [V("label", gN, [H(M(Qk), { class: "faint" }), ur(V("input", {
+			V("div", gN, [V("label", _N, [H(M($k), { class: "faint" }), ur(V("input", {
 				"onUpdate:modelValue": n[0] ||= (e) => o.time = e,
 				class: "input",
 				placeholder: M(J)("cards.synopsis.time"),
 				"aria-label": M(J)("cards.synopsis.time")
-			}, null, 8, _N), [[os, o.time]])]), V("label", vN, [H(M(LA), { class: "faint" }), ur(V("input", {
+			}, null, 8, vN), [[os, o.time]])]), V("label", yN, [H(M(RA), { class: "faint" }), ur(V("input", {
 				"onUpdate:modelValue": n[1] ||= (e) => o.location = e,
 				class: "input",
 				placeholder: M(J)("cards.synopsis.location"),
 				"aria-label": M(J)("cards.synopsis.location")
-			}, null, 8, yN), [[os, o.location]])])]),
+			}, null, 8, bN), [[os, o.location]])])]),
 			ur(V("input", {
 				ref_key: "eventInput",
 				ref: s,
@@ -19633,7 +19680,7 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 				class: "input synopsis-event-input",
 				placeholder: M(J)("cards.synopsis.event"),
 				"aria-label": M(J)("cards.synopsis.event")
-			}, null, 8, bN), [[os, o.event]]),
+			}, null, 8, xN), [[os, o.event]]),
 			ur(V("textarea", {
 				ref_key: "summaryInput",
 				ref: c,
@@ -19643,60 +19690,60 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 				placeholder: M(J)("cards.synopsis.summary"),
 				"aria-label": M(J)("cards.synopsis.summary"),
 				onInput: f
-			}, null, 40, xN), [[os, o.summary]]),
-			V("div", SN, [
-				V("span", CN, A(M(J)("cards.synopsis.keys")), 1),
+			}, null, 40, SN), [[os, o.summary]]),
+			V("div", CN, [
+				V("span", wN, A(M(J)("cards.synopsis.keys")), 1),
 				V("button", {
 					type: "button",
 					class: "btn ghost sm-btn",
 					onClick: m
 				}, A(M(J)("common.cancel")), 1),
-				V("button", wN, [H(M(Uk)), ba(A(M(J)("common.save")), 1)])
+				V("button", TN, [H(M(Wk)), ba(A(M(J)("common.save")), 1)])
 			])
 		], 32)) : (R(), z("div", {
 			key: 1,
 			class: k(["synopsis", { open: i.value }]),
 			onClick: n[9] ||= (e) => i.value = !i.value
-		}, [V("div", TN, [V("div", EN, [
-			e.synopsis.time ? (R(), z("span", DN, [H(M(Qk), { class: "faint" }), ba(A(e.synopsis.time), 1)])) : U("", !0),
-			e.synopsis.location ? (R(), z("span", ON, [H(M(LA), { class: "faint" }), ba(A(e.synopsis.location), 1)])) : U("", !0),
-			V("span", kN, A(e.synopsis.event), 1)
+		}, [V("div", EN, [V("div", DN, [
+			e.synopsis.time ? (R(), z("span", ON, [H(M($k), { class: "faint" }), ba(A(e.synopsis.time), 1)])) : U("", !0),
+			e.synopsis.location ? (R(), z("span", kN, [H(M(RA), { class: "faint" }), ba(A(e.synopsis.location), 1)])) : U("", !0),
+			V("span", AN, A(e.synopsis.event), 1)
 		]), e.editable ? (R(), z("span", {
 			key: 0,
 			class: "synopsis-edit",
 			onClick: n[8] ||= gs(() => {}, ["stop"])
 		}, [H(Q, {
-			icon: M(JA),
+			icon: M(YA),
 			label: M(J)("cards.synopsis.edit"),
 			small: "",
 			align: "end",
 			onClick: p
-		}, null, 8, ["icon", "label"])])) : U("", !0)]), i.value && e.synopsis.summary ? (R(), z("div", AN, A(e.synopsis.summary), 1)) : U("", !0)], 2));
+		}, null, 8, ["icon", "label"])])) : U("", !0)]), i.value && e.synopsis.summary ? (R(), z("div", jN, A(e.synopsis.summary), 1)) : U("", !0)], 2));
 	}
-}), MN = { class: "status-fields" }, NN = [
+}), NN = { class: "status-fields" }, PN = [
 	"onUpdate:modelValue",
 	"placeholder",
 	"aria-label"
-], PN = { class: "synopsis-actions" }, FN = { class: "xs faint grow synopsis-keys" }, IN = {
+], FN = { class: "synopsis-actions" }, IN = { class: "xs faint grow synopsis-keys" }, LN = {
 	type: "submit",
 	class: "btn primary sm-btn"
-}, LN = {
+}, RN = {
 	key: 1,
 	class: "status-bar small",
 	role: "status"
-}, RN = { class: "status-line" }, zN = {
+}, zN = { class: "status-line" }, BN = {
 	key: 0,
 	class: "row tight"
-}, BN = {
+}, VN = {
 	key: 1,
 	class: "row tight"
-}, VN = {
+}, HN = {
 	key: 2,
 	class: "row tight status-location"
-}, HN = { class: "ellipsis" }, UN = {
+}, UN = { class: "ellipsis" }, WN = {
 	key: 3,
 	class: "row tight"
-}, WN = /* @__PURE__ */ F({
+}, GN = /* @__PURE__ */ F({
 	__name: "StatusCard",
 	props: {
 		status: {},
@@ -19711,15 +19758,15 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 			location: "",
 			weather: ""
 		}), o = /* @__PURE__ */ j(), s = (e) => (n.status[e] ?? "").trim(), c = W(() => [s("date"), s("weekday")].filter(Boolean).join(" ")), l = [
-			[/雷|thunder|storm|lightning/i, eA],
-			[/雪|snow|sleet|blizzard/i, cj],
-			[/雨|rain|drizzle|shower/i, tA],
-			[/雾|霾|fog|mist|haze|smog/i, $k],
-			[/风|wind|gale|breez/i, Sj],
-			[/阴|云|cloud|overcast/i, rA],
-			[/夜|月|night|moon/i, VA],
-			[/晴|sun|clear|fair/i, fj]
-		], u = W(() => l.find(([e]) => e.test(s("weather")))?.[1] ?? nA), d = () => Object.fromEntries(Bc.map((e) => [e, a[e].trim()])), f = W(() => Bc.some((e) => d()[e] !== s(e)));
+			[/雷|thunder|storm|lightning/i, tA],
+			[/雪|snow|sleet|blizzard/i, lj],
+			[/雨|rain|drizzle|shower/i, nA],
+			[/雾|霾|fog|mist|haze|smog/i, eA],
+			[/风|wind|gale|breez/i, Cj],
+			[/阴|云|cloud|overcast/i, iA],
+			[/夜|月|night|moon/i, HA],
+			[/晴|sun|clear|fair/i, pj]
+		], u = W(() => l.find(([e]) => e.test(s("weather")))?.[1] ?? rA), d = () => Object.fromEntries(Bc.map((e) => [e, a[e].trim()])), f = W(() => Bc.some((e) => d()[e] !== s(e)));
 		async function p() {
 			for (let e of Bc) a[e] = n.status[e] ?? "";
 			i.value = !0, await Xn(), o.value?.querySelector("input")?.focus();
@@ -19734,11 +19781,11 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 			e.stopPropagation(), !e.isComposing && (e.key === "Escape" ? (e.preventDefault(), m()) : e.key === "Enter" && (e.preventDefault(), h()));
 		}
 		let _ = {
-			date: Hk,
-			weekday: Hk,
-			time: Qk,
-			location: LA,
-			weather: nA
+			date: Uk,
+			weekday: Uk,
+			time: $k,
+			location: RA,
+			weather: rA
 		};
 		return (t, n) => i.value ? (R(), z("form", {
 			key: 0,
@@ -19751,7 +19798,7 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 			onTouchstartPassive: n[1] ||= gs(() => {}, ["stop"]),
 			onTouchmovePassive: n[2] ||= gs(() => {}, ["stop"]),
 			onTouchendPassive: n[3] ||= gs(() => {}, ["stop"])
-		}, [V("div", MN, [(R(!0), z(L, null, I(M(Bc), (e) => (R(), z("label", {
+		}, [V("div", NN, [(R(!0), z(L, null, I(M(Bc), (e) => (R(), z("label", {
 			key: e,
 			class: "synopsis-field"
 		}, [(R(), B($r(_[e]), { class: "faint" })), ur(V("input", {
@@ -19759,35 +19806,35 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 			class: "input",
 			placeholder: M(J)(`cards.status.${e}`),
 			"aria-label": M(J)(`cards.status.${e}`)
-		}, null, 8, NN), [[os, a[e]]])]))), 128))]), V("div", PN, [
-			V("span", FN, A(M(J)("cards.status.keys")), 1),
+		}, null, 8, PN), [[os, a[e]]])]))), 128))]), V("div", FN, [
+			V("span", IN, A(M(J)("cards.status.keys")), 1),
 			V("button", {
 				type: "button",
 				class: "btn ghost sm-btn",
 				onClick: m
 			}, A(M(J)("common.cancel")), 1),
-			V("button", IN, [H(M(Uk)), ba(A(M(J)("common.save")), 1)])
-		])], 544)) : (R(), z("div", LN, [V("div", RN, [
-			c.value ? (R(), z("span", zN, [H(M(Hk), { class: "faint" }), ba(A(c.value), 1)])) : U("", !0),
-			s("time") ? (R(), z("span", BN, [H(M(Qk), { class: "faint" }), ba(A(s("time")), 1)])) : U("", !0),
-			s("location") ? (R(), z("span", VN, [H(M(LA), { class: "faint" }), V("span", HN, A(s("location")), 1)])) : U("", !0),
-			s("weather") ? (R(), z("span", UN, [(R(), B($r(u.value), { class: "faint" })), ba(A(s("weather")), 1)])) : U("", !0)
+			V("button", LN, [H(M(Wk)), ba(A(M(J)("common.save")), 1)])
+		])], 544)) : (R(), z("div", RN, [V("div", zN, [
+			c.value ? (R(), z("span", BN, [H(M(Uk), { class: "faint" }), ba(A(c.value), 1)])) : U("", !0),
+			s("time") ? (R(), z("span", VN, [H(M($k), { class: "faint" }), ba(A(s("time")), 1)])) : U("", !0),
+			s("location") ? (R(), z("span", HN, [H(M(RA), { class: "faint" }), V("span", UN, A(s("location")), 1)])) : U("", !0),
+			s("weather") ? (R(), z("span", WN, [(R(), B($r(u.value), { class: "faint" })), ba(A(s("weather")), 1)])) : U("", !0)
 		]), e.editable ? (R(), z("span", {
 			key: 0,
 			class: "synopsis-edit",
 			onClick: n[4] ||= gs(() => {}, ["stop"])
 		}, [H(Q, {
-			icon: M(JA),
+			icon: M(YA),
 			label: M(J)("cards.status.edit"),
 			small: "",
 			align: "end",
 			onClick: p
 		}, null, 8, ["icon", "label"])])) : U("", !0)]));
 	}
-}), GN = ["innerHTML"], KN = {
+}), KN = ["innerHTML"], qN = {
 	key: 1,
 	class: "kv-list small"
-}, qN = { class: "pre" }, JN = /* @__PURE__ */ F({
+}, JN = { class: "pre" }, YN = /* @__PURE__ */ F({
 	__name: "CustomCard",
 	props: {
 		title: {},
@@ -19795,9 +19842,9 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 	},
 	setup(e) {
 		let t = e, n = W(() => typeof t.value == "string" ? rO(t.value) : "");
-		return (t, r) => (R(), B(dN, {
+		return (t, r) => (R(), B(fN, {
 			title: e.title,
-			icon: M(aj),
+			icon: M(oj),
 			collapsible: "",
 			open: !1
 		}, {
@@ -19805,34 +19852,34 @@ var WM = { class: "reply-name xs" }, GM = ["innerHTML"], KM = /* @__PURE__ */ F(
 				key: 0,
 				class: "rich small",
 				innerHTML: n.value
-			}, null, 8, GN)) : (R(), z("dl", KN, [(R(!0), z(L, null, I(e.value, (e, t) => (R(), z(L, { key: t }, [V("dt", null, A(t), 1), V("dd", qN, A(e), 1)], 64))), 128))]))]),
+			}, null, 8, KN)) : (R(), z("dl", qN, [(R(!0), z(L, null, I(e.value, (e, t) => (R(), z(L, { key: t }, [V("dt", null, A(t), 1), V("dd", JN, A(e), 1)], 64))), 128))]))]),
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), YN = /* @__PURE__ */ new Map();
-function XN(e) {
-	let t = YN.get(e);
+}), XN = /* @__PURE__ */ new Map();
+function ZN(e) {
+	let t = XN.get(e);
 	if (!t) {
 		let n = URL.createObjectURL(new Blob([e], { type: "text/javascript" }));
 		t = import(
 			/* @vite-ignore */
 			n
-).finally(() => URL.revokeObjectURL(n)), t.catch(() => YN.delete(e)), YN.set(e, t);
+).finally(() => URL.revokeObjectURL(n)), t.catch(() => XN.delete(e)), XN.set(e, t);
 	}
 	return t;
 }
-function ZN(e) {
+function QN(e) {
 	let t = e.default;
 	if (typeof e.mount == "function") return e.mount;
 	if (typeof t == "function") return t;
 	if (t && typeof t == "object" && typeof t.mount == "function") return t.mount.bind(t);
 }
-function QN(e) {
+function $N(e) {
 	if (!e) return null;
 	let t = document.createElement("style");
 	return t.textContent = e, t;
 }
-var $N = (e) => ({
+var eP = (e) => ({
 	value: e.value,
 	structure: e.structure,
 	structures: e.structures,
@@ -19840,12 +19887,12 @@ var $N = (e) => ({
 	preset: e.preset,
 	lang: e.lang
 });
-async function eP(e, t, n) {
+async function tP(e, t, n) {
 	let r = n;
 	if (e.mode === "template") {
 		let n = () => {
-			let n = Zl(e.code, $N(r));
-			t.replaceChildren(...[QN(e.style)].filter((e) => !!e));
+			let n = Zl(e.code, eP(r));
+			t.replaceChildren(...[$N(e.style)].filter((e) => !!e));
 			let i = document.createElement("div");
 			i.className = "ap-component", i.innerHTML = n, t.append(i);
 		}, i = (e) => {
@@ -19863,10 +19910,10 @@ async function eP(e, t, n) {
 			}
 		};
 	}
-	let i = ZN(await XN(e.code));
+	let i = QN(await ZN(e.code));
 	if (!i) throw Error("the module exports no mount(root, context)");
 	let a, o = async () => {
-		t.replaceChildren(...[QN(e.style)].filter((e) => !!e)), a = await i(t, r);
+		t.replaceChildren(...[$N(e.style)].filter((e) => !!e)), a = await i(t, r);
 	}, s = () => {
 		try {
 			typeof a == "function" ? a() : a?.unmount?.();
@@ -19886,10 +19933,10 @@ async function eP(e, t, n) {
 }
 //#endregion
 //#region src/ui/message/cards/ComponentCard.vue?vue&type=script&setup=true&lang.ts
-var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
+var nP = { class: "structure-component" }, rP = ["data-structure"], iP = {
 	key: 0,
 	class: "xs"
-}, iP = /* @__PURE__ */ F({
+}, aP = /* @__PURE__ */ F({
 	__name: "ComponentCard",
 	props: {
 		component: {},
@@ -19910,14 +19957,14 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 			if (!e) return;
 			let r = e.shadowRoot ?? e.attachShadow({ mode: "open" });
 			s(async () => {
-				i = await eP(t.component, r, t.context);
+				i = await tP(t.component, r, t.context);
 			});
 		}), P(() => t.context, (e) => s(async () => {
 			await i?.update(e);
 		})), P(() => t.component, (e) => s(async () => {
 			i?.unmount(), i = null;
 			let r = n.value?.shadowRoot;
-			r && (i = await eP(e, r, t.context));
+			r && (i = await tP(e, r, t.context));
 		})), Xr(() => {
 			o = !1;
 			try {
@@ -19926,36 +19973,33 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 				console.error("[Advanced Preset] structure component", t.component.id, e);
 			}
 			i = null;
-		}), (t, i) => (R(), z("div", tP, [V("div", {
+		}), (t, i) => (R(), z("div", nP, [V("div", {
 			ref_key: "host",
 			ref: n,
 			class: "structure-component-host",
 			"data-structure": e.component.id
-		}, null, 8, nP), r.value ? (R(), z("div", rP, A(M(J)("cards.custom.error", { error: r.value })), 1)) : U("", !0)]));
+		}, null, 8, rP), r.value ? (R(), z("div", iP, A(M(J)("cards.custom.error", { error: r.value })), 1)) : U("", !0)]));
 	}
-}), aP = { class: "speech-panel" }, oP = {
+}), oP = { class: "speech-panel" }, sP = {
 	key: 0,
 	class: "muted small"
-}, sP = {
+}, cP = {
 	key: 1,
 	class: "muted small"
-}, cP = { class: "speech-panel-bar" }, lP = { class: "grow xs muted ellipsis" }, uP = {
+}, lP = { class: "speech-panel-bar" }, uP = { class: "grow xs muted ellipsis speech-panel-meta" }, dP = {
 	key: 0,
 	class: "speech-panel-format xs muted"
-}, dP = { class: "speech-panel-list" }, fP = ["data-seg"], pP = { class: "speech-panel-head" }, mP = { class: "speech-panel-who ellipsis" }, hP = ["title"], gP = {
+}, fP = { class: "speech-panel-list" }, pP = ["data-seg"], mP = { class: "speech-panel-head" }, hP = ["title"], gP = ["title", "aria-label"], _P = ["title"], vP = {
 	key: 0,
 	class: "speech-panel-display small muted"
-}, _P = [
+}, yP = [
 	"value",
 	"aria-label",
 	"onInput",
 	"onKeydown"
-], vP = { class: "speech-panel-actions" }, yP = {
-	key: 0,
-	class: "xs muted grow"
-}, bP = {
+], bP = {
 	key: 1,
-	class: "grow"
+	class: "speech-panel-actions"
 }, xP = ["onClick"], SP = ["onClick"], CP = /* @__PURE__ */ F({
 	__name: "SpeechPanel",
 	props: { mesid: {} },
@@ -19999,24 +20043,24 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 			let e = await NT(t.mesid);
 			e && qT(e, `speech-${t.mesid}.wav`);
 		}
-		return (t, i) => (R(), z("div", aP, [n.value ? r.value.length ? (R(), z(L, { key: 2 }, [
-			V("div", cP, [
+		return (t, i) => (R(), z("div", oP, [n.value ? r.value.length ? (R(), z(L, { key: 2 }, [
+			V("div", lP, [
 				V("button", {
 					type: "button",
 					class: k(["btn", { primary: !d.value }]),
 					onClick: ne
-				}, [(R(), B($r(d.value && !M(X).paused ? M(KA) : M(YA)))), V("span", null, A(d.value && !M(X).paused ? M(J)("media.speech.pause") : M(J)("media.speech.panel.playAll")), 1)], 2),
+				}, [(R(), B($r(d.value && !M(X).paused ? M(qA) : M(XA)))), V("span", null, A(d.value && !M(X).paused ? M(J)("media.speech.pause") : M(J)("media.speech.panel.playAll")), 1)], 2),
 				u.value ? (R(), B(Q, {
 					key: 0,
-					icon: M(dj),
+					icon: M(fj),
 					label: M(J)("media.speech.stop"),
 					small: "",
 					onClick: i[0] ||= (e) => M(ST)()
 				}, null, 8, ["icon", "label"])) : U("", !0),
-				V("span", lP, A(n.value.name) + " · " + A(M(J)("media.speech.panel.count", { n: r.value.length })), 1),
+				V("span", uP, A(n.value.name) + " · " + A(M(J)("media.speech.panel.count", { n: r.value.length })), 1),
 				c.value ? U("", !0) : (R(), B(Q, {
 					key: 1,
-					icon: s.value ? M(IA) : M(lj),
+					icon: s.value ? M(LA) : M(uj),
 					class: k({ spin: s.value }),
 					label: M(J)("media.speech.generateAll"),
 					disabled: s.value,
@@ -20030,7 +20074,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 				])),
 				l.value ? (R(), B(Q, {
 					key: 2,
-					icon: M(tj),
+					icon: M(nj),
 					label: M(J)("media.speech.regenerateAll"),
 					disabled: s.value,
 					small: "",
@@ -20042,7 +20086,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 				])) : U("", !0),
 				l.value ? (R(), B(Q, {
 					key: 3,
-					icon: M(mj),
+					icon: M(hj),
 					label: M(J)("media.speech.deleteAll"),
 					disabled: s.value,
 					danger: "",
@@ -20054,7 +20098,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 					"disabled"
 				])) : U("", !0),
 				H(Q, {
-					icon: M(dA),
+					icon: M(fA),
 					label: M(J)("media.speech.download"),
 					disabled: s.value,
 					small: "",
@@ -20066,11 +20110,11 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 					"disabled"
 				])
 			]),
-			a.value ? (R(), z("p", uP, [V("span", null, A(M(J)("media.speech.panel.tags")), 1), H(cN, {
+			a.value ? (R(), z("p", dP, [V("span", null, A(M(J)("media.speech.panel.tags")), 1), H(lN, {
 				text: a.value,
 				align: "start"
 			}, null, 8, ["text"])])) : U("", !0),
-			V("ol", dP, [(R(!0), z(L, null, I(r.value, (t, n) => (R(), z("li", {
+			V("ol", fP, [(R(!0), z(L, null, I(r.value, (t, n) => (R(), z("li", {
 				key: t.id,
 				class: k(["speech-panel-seg", [
 					t.kind,
@@ -20079,9 +20123,9 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 				]]),
 				"data-seg": t.id
 			}, [
-				V("div", pP, [
+				V("div", mP, [
 					H(Q, {
-						icon: f(t) && !M(X).paused ? M(KA) : p(t, n) === "loading" ? M(IA) : M(YA),
+						icon: f(t) && !M(X).paused ? M(qA) : p(t, n) === "loading" ? M(LA) : M(XA),
 						class: k([{ spin: p(t, n) === "loading" && !f(t) }, "speech-panel-play"]),
 						label: f(t) && !M(X).paused ? M(J)("media.speech.pause") : M(J)("media.speech.play"),
 						active: f(t),
@@ -20095,17 +20139,67 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 						"active",
 						"onClick"
 					]),
-					V("strong", mP, A(g(t)), 1),
+					V("strong", {
+						class: "speech-panel-who ellipsis",
+						title: h(t)
+					}, A(g(t)), 9, hP),
+					t.original === void 0 ? U("", !0) : (R(), z("span", {
+						key: 0,
+						class: "speech-panel-edited",
+						title: M(J)("media.speech.panel.edited"),
+						"aria-label": M(J)("media.speech.panel.edited")
+					}, null, 8, gP)),
 					V("span", {
-						class: "xs muted ellipsis grow",
+						class: "xs muted ellipsis grow speech-panel-voice",
 						title: M(J)("media.speech.panel.voice")
-					}, A(h(t)), 9, hP),
+					}, A(h(t)), 9, _P),
 					V("span", { class: k(["badge speech-panel-state", {
 						neutral: p(t, n) === "none" || p(t, n) === "loading",
 						warn: p(t, n) === "error"
-					}]) }, A(M(J)(`media.speech.state.${p(t, n)}`)), 3)
+					}]) }, A(M(J)(`media.speech.state.${p(t, n)}`)), 3),
+					y(t) ? U("", !0) : (R(), z(L, { key: 1 }, [
+						t.original === void 0 ? U("", !0) : (R(), B(Q, {
+							key: 0,
+							icon: M(_j),
+							label: M(J)("media.speech.panel.revert"),
+							small: "",
+							class: "speech-panel-revert",
+							onClick: (e) => ee(t)
+						}, null, 8, [
+							"icon",
+							"label",
+							"onClick"
+						])),
+						H(Q, {
+							icon: o.value[n] ? M(nj) : M(uj),
+							label: o.value[n] ? M(J)("media.speech.regenerateLine") : M(J)("media.speech.panel.generate"),
+							disabled: p(t, n) === "loading",
+							small: "",
+							class: "speech-panel-regen",
+							onClick: (r) => o.value[n] ? te(t) : M(MT)(e.mesid, t.id)
+						}, null, 8, [
+							"icon",
+							"label",
+							"disabled",
+							"onClick"
+						]),
+						o.value[n] === "ready" || o.value[n] === "error" ? (R(), B(Q, {
+							key: 1,
+							icon: M(hj),
+							label: M(J)("media.speech.deleteLine"),
+							danger: "",
+							small: "",
+							align: "end",
+							class: "speech-panel-delete",
+							onClick: (n) => M(PT)(e.mesid, [t.id])
+						}, null, 8, [
+							"icon",
+							"label",
+							"onClick"
+						])) : U("", !0)
+					], 64))
 				]),
-				t.kind === "speech" && t.display !== v(t) ? (R(), z("p", gP, A(t.display), 1)) : U("", !0),
+				t.kind === "speech" && t.display !== v(t) ? (R(), z("p", vP, A(t.display), 1)) : U("", !0),
 				V("textarea", {
 					class: "input small speech-panel-text",
 					rows: "2",
@@ -20114,8 +20208,8 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 					spellcheck: "false",
 					onInput: (e) => b(t, e),
 					onKeydown: (e) => C(t, e)
-				}, null, 40, _P),
-				V("div", vP, [t.original !== void 0 && !y(t) ? (R(), z("span", yP, A(M(J)("media.speech.panel.edited")), 1)) : (R(), z("span", bP)), y(t) ? (R(), z(L, { key: 2 }, [V("button", {
+				}, null, 40, yP),
+				y(t) ? (R(), z("div", bP, [V("button", {
 					type: "button",
 					class: "btn ghost",
 					onClick: (e) => S(t)
@@ -20123,49 +20217,9 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 					type: "button",
 					class: "btn primary speech-panel-save",
 					onClick: (e) => x(t)
-				}, A(M(J)("media.speech.panel.save")), 9, SP)], 64)) : (R(), z(L, { key: 3 }, [
-					t.original === void 0 ? U("", !0) : (R(), B(Q, {
-						key: 0,
-						icon: M(gj),
-						label: M(J)("media.speech.panel.revert"),
-						small: "",
-						class: "speech-panel-revert",
-						onClick: (e) => ee(t)
-					}, null, 8, [
-						"icon",
-						"label",
-						"onClick"
-					])),
-					H(Q, {
-						icon: o.value[n] ? M(tj) : M(lj),
-						label: o.value[n] ? M(J)("media.speech.regenerateLine") : M(J)("media.speech.panel.generate"),
-						disabled: p(t, n) === "loading",
-						small: "",
-						class: "speech-panel-regen",
-						onClick: (r) => o.value[n] ? te(t) : M(MT)(e.mesid, t.id)
-					}, null, 8, [
-						"icon",
-						"label",
-						"disabled",
-						"onClick"
-					]),
-					o.value[n] === "ready" || o.value[n] === "error" ? (R(), B(Q, {
-						key: 1,
-						icon: M(mj),
-						label: M(J)("media.speech.deleteLine"),
-						danger: "",
-						small: "",
-						align: "end",
-						class: "speech-panel-delete",
-						onClick: (n) => M(PT)(e.mesid, [t.id])
-					}, null, 8, [
-						"icon",
-						"label",
-						"onClick"
-					])) : U("", !0)
-				], 64))])
-			], 10, fP))), 128))])
-		], 64)) : (R(), z("div", sP, A(M(J)("media.speech.panel.empty")), 1)) : (R(), z("div", oP, A(M(J)("media.speech.panel.off")), 1))]));
+				}, A(M(J)("media.speech.panel.save")), 9, SP)])) : U("", !0)
+			], 10, pP))), 128))])
+		], 64)) : (R(), z("div", cP, A(M(J)("media.speech.panel.empty")), 1)) : (R(), z("div", sP, A(M(J)("media.speech.panel.off")), 1))]));
 	}
 }), wP = { class: "speech-card" }, TP = ["aria-label"], EP = [
 	"aria-label",
@@ -20188,7 +20242,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 		function u() {
 			n.value ? CT() : ET(t.mesid);
 		}
-		let d = () => fM({
+		let d = () => pM({
 			component: CP,
 			props: { mesid: t.mesid },
 			title: J("media.speech.panel.title")
@@ -20199,7 +20253,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 		}
 		return (t, p) => (R(), z("div", wP, [
 			H(Q, {
-				icon: n.value && !M(X).paused ? M(KA) : M(YA),
+				icon: n.value && !M(X).paused ? M(qA) : M(XA),
 				label: n.value && !M(X).paused ? M(J)("media.speech.pause") : M(J)("media.speech.play"),
 				active: !!n.value,
 				onClick: u
@@ -20227,12 +20281,12 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 			}, null, 14, EP))), 128))], 8, TP),
 			l.value ? (R(), z("span", DP, A(l.value), 1)) : U("", !0),
 			c.value && !o.value ? (R(), z(L, { key: 1 }, [H(Q, {
-				icon: M(tj),
+				icon: M(nj),
 				label: M(J)("media.speech.regenerateLine"),
 				small: "",
 				onClick: p[0] ||= (t) => M(FT)(e.mesid, c.value.id)
 			}, null, 8, ["icon", "label"]), H(Q, {
-				icon: M(mj),
+				icon: M(hj),
 				label: M(J)("media.speech.deleteLine"),
 				small: "",
 				danger: "",
@@ -20240,19 +20294,19 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 			}, null, 8, ["icon", "label"])], 64)) : U("", !0),
 			M(X).playing?.mesId === e.mesid ? (R(), B(Q, {
 				key: 2,
-				icon: M(dj),
+				icon: M(fj),
 				label: M(J)("media.speech.stop"),
 				small: "",
 				onClick: p[2] ||= (e) => M(ST)()
 			}, null, 8, ["icon", "label"])) : (R(), z(L, { key: 3 }, [a.value ? (R(), B(Q, {
 				key: 1,
-				icon: M(dA),
+				icon: M(fA),
 				label: M(J)("media.speech.download"),
 				small: "",
 				onClick: f
 			}, null, 8, ["icon", "label"])) : (R(), B(Q, {
 				key: 0,
-				icon: o.value ? M(IA) : M(lj),
+				icon: o.value ? M(LA) : M(uj),
 				class: k({ spin: o.value }),
 				label: M(J)("media.speech.generateAll"),
 				disabled: o.value,
@@ -20264,12 +20318,12 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 				"label",
 				"disabled"
 			])), s.value && !o.value ? (R(), z(L, { key: 2 }, [H(Q, {
-				icon: M(tj),
+				icon: M(nj),
 				label: M(J)("media.speech.regenerateAll"),
 				small: "",
 				onClick: p[4] ||= (t) => M(FT)(e.mesid)
 			}, null, 8, ["icon", "label"]), H(Q, {
-				icon: M(mj),
+				icon: M(hj),
 				label: M(J)("media.speech.deleteAll"),
 				small: "",
 				danger: "",
@@ -20277,7 +20331,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 				onClick: p[5] ||= (t) => M(PT)(e.mesid)
 			}, null, 8, ["icon", "label"])], 64)) : U("", !0)], 64)),
 			H(Q, {
-				icon: M(FA),
+				icon: M(IA),
 				label: M(J)("media.speech.panel.open"),
 				small: "",
 				align: "end",
@@ -20301,7 +20355,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 		return (t, n) => (R(), z("div", { class: k(["field", { inline: e.inline }]) }, [V("div", kP, [
 			V("span", AP, A(e.label), 1),
 			e.modified ? (R(), z("span", jP)) : U("", !0),
-			H(cN, {
+			H(lN, {
 				text: e.help,
 				align: "start"
 			}, null, 8, ["text"])
@@ -20372,20 +20426,20 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 		}, null, 8, ["blob-key", "alt"]), V("div", LP, [
 			e.keys.length > 1 ? (R(), z(L, { key: 0 }, [
 				H(Q, {
-					icon: M(Gk),
+					icon: M(Kk),
 					label: M(J)("media.image.previous"),
 					onClick: n[0] ||= (e) => o(-1)
 				}, null, 8, ["icon", "label"]),
 				V("span", RP, A(a.value + 1) + " / " + A(e.keys.length), 1),
 				H(Q, {
-					icon: M(Kk),
+					icon: M(qk),
 					label: M(J)("media.image.next"),
 					onClick: n[1] ||= (e) => o(1)
 				}, null, 8, ["icon", "label"])
 			], 64)) : U("", !0),
 			e.caption ? (R(), z("span", zP, A(e.caption), 1)) : U("", !0),
 			H(Q, {
-				icon: M(wj),
+				icon: M(Tj),
 				label: M(J)("common.close"),
 				align: "end",
 				onClick: n[2] ||= (e) => i.value?.close()
@@ -20594,7 +20648,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 					"alt",
 					"onMissing"
 				])], 8, aF), V("div", oF, [H(Q, {
-					icon: M(mA),
+					icon: M(hA),
 					label: M(J)("media.image.view"),
 					small: "",
 					onClick: (e) => w.value = t
@@ -20603,7 +20657,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 					"label",
 					"onClick"
 				]), H(Q, {
-					icon: M(mj),
+					icon: M(hj),
 					label: M(J)("common.delete"),
 					small: "",
 					danger: "",
@@ -20617,13 +20671,13 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 				_: 1
 			}, 8, ["label"]),
 			ce.value ? (R(), z("div", sF, [
-				H(M(IA), {
+				H(M(LA), {
 					class: "spin",
 					"aria-hidden": "true"
 				}),
 				V("span", cF, A(M(J)("media.image.generating")), 1),
 				H(Q, {
-					icon: M(wj),
+					icon: M(Tj),
 					label: M(J)("common.cancel"),
 					small: "",
 					onClick: de
@@ -20635,30 +20689,25 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 					class: "btn ghost sm-btn image-panel-restore",
 					disabled: !v.value,
 					onClick: y
-				}, [H(M(tj)), ba(A(M(J)("media.image.restore")), 1)], 8, dF),
-				V("button", {
-					type: "button",
-					class: "btn ghost sm-btn",
-					onClick: t[4] ||= (e) => r("close")
-				}, A(M(J)("common.cancel")), 1),
+				}, [H(M(nj)), ba(A(M(J)("media.image.restore")), 1)], 8, dF),
 				V("button", {
 					type: "submit",
-					class: "btn sm-btn",
+					class: "btn sm-btn image-panel-save",
 					disabled: !_.value
 				}, A(M(J)("common.save")), 9, fF),
 				V("button", {
 					type: "button",
-					class: "btn primary sm-btn",
+					class: "btn primary sm-btn image-panel-generate",
 					disabled: ce.value || !h.prompt.trim(),
 					onClick: ue
-				}, [H(M(xj)), ba(A(M(J)("media.image.saveGenerate")), 1)], 8, pF)
+				}, [H(M(Sj)), ba(A(M(J)("media.image.saveGenerate")), 1)], 8, pF)
 			]),
 			w.value !== null && re.value.length ? (R(), B(BP, {
 				key: 3,
 				keys: re.value,
 				start: Math.min(w.value, re.value.length - 1),
 				caption: f.value?.caption ?? f.value?.prompt,
-				onClose: t[5] ||= (e) => w.value = null
+				onClose: t[4] ||= (e) => w.value = null
 			}, null, 8, [
 				"keys",
 				"start",
@@ -20670,7 +20719,7 @@ var tP = { class: "structure-component" }, nP = ["data-structure"], rP = {
 //#endregion
 //#region src/ui/media/image-panel.ts
 function hF(e, t, n) {
-	fM({
+	pM({
 		component: mF,
 		props: {
 			mesid: e,
@@ -20746,7 +20795,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 					alt: l.value || c.value,
 					onMissing: n[0] ||= (e) => r.add(o.value)
 				}, null, 8, ["blob-key", "alt"])], 8, _F)) : (R(), z("div", vF, [
-					!d.value && !f.value ? (R(), B(M(OA), {
+					!d.value && !f.value ? (R(), B(M(kA), {
 						key: 0,
 						class: "faint",
 						"aria-hidden": "true"
@@ -20755,13 +20804,13 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 					V("p", bF, A(c.value), 1)
 				])),
 				d.value ? (R(), z("div", xF, [
-					H(M(IA), {
+					H(M(LA), {
 						class: "spin",
 						"aria-hidden": "true"
 					}),
 					V("span", SF, A(M(J)("media.image.generating")), 1),
 					H(Q, {
-						icon: M(wj),
+						icon: M(Tj),
 						label: M(J)("common.cancel"),
 						small: "",
 						onClick: h
@@ -20769,14 +20818,14 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 				])) : U("", !0),
 				o.value && i.value.length > 1 && !d.value ? (R(), z("div", CF, [
 					H(Q, {
-						icon: M(Gk),
+						icon: M(Kk),
 						label: M(J)("media.image.previous"),
 						small: "",
 						onClick: n[2] ||= (e) => g(-1)
 					}, null, 8, ["icon", "label"]),
 					V("span", wF, A(a.value + 1) + " / " + A(i.value.length), 1),
 					H(Q, {
-						icon: M(Kk),
+						icon: M(qk),
 						label: M(J)("media.image.next"),
 						small: "",
 						onClick: n[3] ||= (e) => g(1)
@@ -20793,31 +20842,31 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 					type: "button",
 					class: "btn sm-btn",
 					onClick: m
-				}, [H(M(xj)), ba(A(M(J)(f.value ? "media.image.retry" : "media.image.generate")), 1)])) : U("", !0),
+				}, [H(M(Sj)), ba(A(M(J)(f.value ? "media.image.retry" : "media.image.generate")), 1)])) : U("", !0),
 				o.value && !d.value ? (R(), B(Q, {
 					key: 1,
-					icon: M($A),
+					icon: M(ej),
 					label: M(J)("media.image.regenerate"),
 					small: "",
 					onClick: m
 				}, null, 8, ["icon", "label"])) : U("", !0),
 				e.editable ? (R(), B(Q, {
 					key: 2,
-					icon: M(JA),
+					icon: M(YA),
 					label: M(J)("media.image.openPanel"),
 					small: "",
 					onClick: y
 				}, null, 8, ["icon", "label"])) : U("", !0),
 				o.value ? (R(), B(Q, {
 					key: 3,
-					icon: M(dA),
+					icon: M(fA),
 					label: M(J)("media.image.download"),
 					small: "",
 					onClick: v
 				}, null, 8, ["icon", "label"])) : U("", !0),
 				o.value && e.editable && !d.value ? (R(), B(Q, {
 					key: 4,
-					icon: M(mj),
+					icon: M(hj),
 					label: M(J)("common.delete"),
 					small: "",
 					danger: "",
@@ -20892,7 +20941,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 				}
 			});
 			let c = [], l = hE(r), u = !(!i || e.live), d = q(o);
-			for (let { decl: n } of UM(s, t.position)) {
+			for (let { decl: n } of WM(s, t.position)) {
 				let a = o[n.id];
 				switch (n.kind) {
 					case "reply":
@@ -20990,7 +21039,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 									version: r.version
 								},
 								lang: Bp(),
-								setValue: async (e) => u ? MM(f, s, e) : !1,
+								setValue: async (e) => u ? NM(f, s, e) : !1,
 								fillInput: (e, t) => dE(String(e ?? ""), !!t, f)
 							}
 						});
@@ -21014,7 +21063,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 			key: 0,
 			mesid: e.mesid,
 			segments: i.value
-		}, null, 8, ["mesid", "segments"])) : U("", !0), (R(!0), z(L, null, I(r.value ? r.value.items : [], (t) => (R(), z(L, { key: t.id }, [t.type === "reply" ? (R(), B(KM, {
+		}, null, 8, ["mesid", "segments"])) : U("", !0), (R(!0), z(L, null, I(r.value ? r.value.items : [], (t) => (R(), z(L, { key: t.id }, [t.type === "reply" ? (R(), B(qM, {
 			key: 0,
 			text: t.text,
 			name: r.value.narrator,
@@ -21023,45 +21072,45 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 			"text",
 			"name",
 			"color"
-		])) : t.type === "impersonate" ? (R(), B(ZM, {
+		])) : t.type === "impersonate" ? (R(), B(QM, {
 			key: 1,
 			text: t.text,
 			mesid: e.mesid
-		}, null, 8, ["text", "mesid"])) : t.type === "options" ? (R(), B(nN, {
+		}, null, 8, ["text", "mesid"])) : t.type === "options" ? (R(), B(rN, {
 			key: 2,
 			options: t.options,
 			mesid: e.mesid
-		}, null, 8, ["options", "mesid"])) : t.type === "synopsis" ? (R(), B(jN, {
+		}, null, 8, ["options", "mesid"])) : t.type === "synopsis" ? (R(), B(MN, {
 			key: 3,
 			synopsis: t.synopsis,
 			editable: r.value.editable,
-			onSave: (n) => M(MM)(e.mesid, t.id, n)
+			onSave: (n) => M(NM)(e.mesid, t.id, n)
 		}, null, 8, [
 			"synopsis",
 			"editable",
 			"onSave"
-		])) : t.type === "status" ? (R(), B(WN, {
+		])) : t.type === "status" ? (R(), B(GN, {
 			key: 4,
 			status: t.status,
 			editable: r.value.editable,
-			onSave: (n) => M(MM)(e.mesid, t.id, n)
+			onSave: (n) => M(NM)(e.mesid, t.id, n)
 		}, null, 8, [
 			"status",
 			"editable",
 			"onSave"
-		])) : t.type === "memory" ? (R(), B(oN, {
+		])) : t.type === "memory" ? (R(), B(sN, {
 			key: 5,
 			events: t.events,
 			preset: r.value.preset
-		}, null, 8, ["events", "preset"])) : t.type === "recap" ? (R(), B(mN, {
+		}, null, 8, ["events", "preset"])) : t.type === "recap" ? (R(), B(hN, {
 			key: 6,
 			text: t.text,
 			"covers-up-to": t.coversUpTo
-		}, null, 8, ["text", "covers-up-to"])) : t.type === "custom" ? (R(), B(JN, {
+		}, null, 8, ["text", "covers-up-to"])) : t.type === "custom" ? (R(), B(YN, {
 			key: 7,
 			title: t.title,
 			value: t.value
-		}, null, 8, ["title", "value"])) : t.type === "component" ? (R(), B(iP, {
+		}, null, 8, ["title", "value"])) : t.type === "component" ? (R(), B(aP, {
 			key: 8,
 			component: t.component,
 			context: t.context
@@ -21102,14 +21151,14 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 			}));
 		}), r = W(() => n.value.find((e) => e.status === "streaming") ?? [...n.value].reverse().find((e) => e.text));
 		return (e, i) => t.value ? (R(), z("div", MF, [V("div", NF, [
-			H(M(IA), { class: "spin faint" }),
+			H(M(LA), { class: "spin faint" }),
 			(R(!0), z(L, null, I(n.value, (e) => (R(), z("span", {
 				key: e.id,
 				class: k(["chip stage-chip", [e.status, { open: r.value?.id === e.id }]]),
 				style: Ie({ "--actor": e.color })
 			}, [V("span", PF, A(e.label), 1)], 6))), 128)),
 			n.value.length ? U("", !0) : (R(), z("span", FF, A(M(J)("stages.waiting")), 1))
-		]), r.value ? (R(), B(AM, {
+		]), r.value ? (R(), B(jM, {
 			key: 0,
 			stage: r.value,
 			follow: ""
@@ -21123,8 +21172,8 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 	props: { mesid: {} },
 	setup(e) {
 		let t = e, n = W(() => {
-			if (Y.chatRev, !nk.value) return null;
-			let e = ik()[t.mesid];
+			if (Y.chatRev, !rk.value) return null;
+			let e = ak()[t.mesid];
 			if (!e) return null;
 			let n = Z_();
 			return {
@@ -21141,13 +21190,13 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 			title: M(J)("storylines.openTab"),
 			onClick: t[0] ||= (e) => M(HS)(n.value.key)
 		}, [
-			H(M(CA), {
+			H(M(wA), {
 				class: "lucide",
 				"aria-hidden": "true"
 			}),
 			V("span", RF, A(n.value.name), 1),
 			n.value.if ? (R(), z("span", zF, A(M(J)("storylines.ifLine")), 1)) : U("", !0),
-			n.value.hidden ? (R(), B(M(pA), {
+			n.value.hidden ? (R(), B(M(mA), {
 				key: 1,
 				class: "lucide storyline-hidden",
 				"aria-label": M(J)("storylines.hidden")
@@ -21210,9 +21259,9 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 				s().color = e || void 0, K();
 			}
 		});
-		return (e, t) => (R(), B(dN, {
+		return (e, t) => (R(), B(fN, {
 			title: M(J)("appearance.title"),
-			icon: M(GA),
+			icon: M(KA),
 			collapsible: "",
 			open: !1
 		}, {
@@ -21250,7 +21299,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 							{ lazy: !0 }
 						]])], 12, KF),
 						H(Q, {
-							icon: M(tj),
+							icon: M(nj),
 							label: M(J)("common.reset"),
 							small: "",
 							align: "end",
@@ -21303,7 +21352,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 						void 0,
 						{ lazy: !0 }
 					]])], 12, JF), H(Q, {
-						icon: M(tj),
+						icon: M(nj),
 						label: M(J)("common.reset"),
 						small: "",
 						align: "end",
@@ -21359,15 +21408,15 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 					class: "btn",
 					disabled: r.value === "file",
 					onClick: s[0] ||= (e) => o.value?.click()
-				}, [H(M(_j)), ba(A(M(J)("presets.importFile")), 1)], 8, ZF),
+				}, [H(M(vj)), ba(A(M(J)("presets.importFile")), 1)], 8, ZF),
 				V("button", {
 					type: "button",
 					class: k(["btn", { primary: i.value }]),
 					onClick: s[1] ||= (e) => i.value = !i.value
-				}, [H(M(PA)), ba(A(M(J)("presets.importUrl")), 1)], 2),
+				}, [H(M(FA)), ba(A(M(J)("presets.importUrl")), 1)], 2),
 				s[4] ||= V("span", { class: "grow" }, null, -1),
 				H(Q, {
-					icon: r.value === "ext" ? M(IA) : M($A),
+					icon: r.value === "ext" ? M(LA) : M(ej),
 					label: M(J)("presets.checkUpdates"),
 					align: "end",
 					disabled: r.value === "ext",
@@ -21400,10 +21449,10 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 				type: "submit",
 				class: "btn primary",
 				disabled: r.value === "url"
-			}, [r.value === "url" ? (R(), B(M(IA), {
+			}, [r.value === "url" ? (R(), B(M(LA), {
 				key: 0,
 				class: "spin"
-			})) : (R(), B(M(dA), { key: 1 })), ba(A(M(J)("common.install")), 1)], 8, QF)], 32)) : U("", !0),
+			})) : (R(), B(M(fA), { key: 1 })), ba(A(M(J)("common.install")), 1)], 8, QF)], 32)) : U("", !0),
 			V("div", $F, [(R(!0), z(L, null, I(t.value, (e) => (R(), z("div", {
 				key: e.preset.id,
 				class: k(["preset-item", { on: M(RS)?.id === e.preset.id }]),
@@ -21412,10 +21461,10 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 				onClick: (t) => c(e),
 				onKeydown: vs((t) => c(e), ["enter"])
 			}, [
-				V("span", tI, [r.value === `select:${e.preset.id}` ? (R(), B(M(IA), {
+				V("span", tI, [r.value === `select:${e.preset.id}` ? (R(), B(M(LA), {
 					key: 0,
 					class: "spin"
-				})) : M(RS)?.id === e.preset.id ? (R(), B(M(Uk), { key: 1 })) : U("", !0)]),
+				})) : M(RS)?.id === e.preset.id ? (R(), B(M(Wk), { key: 1 })) : U("", !0)]),
 				V("div", nI, [
 					V("div", rI, [
 						V("span", iI, A(M(Up)(e.preset)), 1),
@@ -21424,11 +21473,11 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 							key: 0,
 							class: k(["badge", { warn: e.source === "dev" }])
 						}, A(M(J)(`presets.source.${e.source}`)), 3)),
-						n(e) ? (R(), B(Ej, {
+						n(e) ? (R(), B(Dj, {
 							key: 1,
 							text: M(J)("presets.templates.help")
 						}, {
-							default: N(() => [V("span", oI, [H(M(iA)), ba(A(M(J)("presets.templates")), 1)])]),
+							default: N(() => [V("span", oI, [H(M(aA)), ba(A(M(J)("presets.templates")), 1)])]),
 							_: 1
 						}, 8, ["text"])) : U("", !0)
 					]),
@@ -21440,7 +21489,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 					onClick: s[3] ||= gs(() => {}, ["stop"])
 				}, [
 					H(Q, {
-						icon: M(gA),
+						icon: M(_A),
 						label: M(J)("presets.export"),
 						align: "end",
 						small: "",
@@ -21452,7 +21501,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 					]),
 					M(LE)(e.preset.id) ? (R(), B(Q, {
 						key: 0,
-						icon: M($A),
+						icon: M(ej),
 						label: M(J)("presets.update"),
 						align: "end",
 						small: "",
@@ -21464,7 +21513,7 @@ var gF = { class: "image-figure" }, _F = ["aria-label"], vF = {
 					])) : U("", !0),
 					e.source === "installed" ? (R(), B(Q, {
 						key: 1,
-						icon: M(mj),
+						icon: M(hj),
 						label: M(J)("common.delete"),
 						align: "end",
 						small: "",
@@ -21499,7 +21548,7 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 	__name: "NoPreset",
 	setup(e) {
 		return (e, t) => (R(), z("div", pI, [
-			H(M(WA)),
+			H(M(GA)),
 			V("span", null, A(M(J)("panel.noPreset")), 1),
 			V("button", {
 				type: "button",
@@ -21780,34 +21829,34 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 					}, A(e.name), 9, wI))), 128))], 8, CI)) : U("", !0)], 8, bI), [[ls, a.value]]),
 					u.value && l.value ? (R(), B(Q, {
 						key: 0,
-						icon: M(nj),
+						icon: M(rj),
 						label: M(J)("config.overwrite"),
 						align: "end",
 						onClick: _
 					}, null, 8, ["icon", "label"])) : U("", !0),
 					H(Q, {
-						icon: M(XA),
+						icon: M(ZA),
 						label: M(J)("config.saveAs"),
 						align: "end",
 						onClick: r[1] ||= (e) => p("new")
 					}, null, 8, ["icon", "label"]),
 					u.value ? (R(), B(Q, {
 						key: 1,
-						icon: M(JA),
+						icon: M(YA),
 						label: M(J)("common.rename"),
 						align: "end",
 						onClick: r[2] ||= (e) => p("rename")
 					}, null, 8, ["icon", "label"])) : U("", !0),
 					u.value ? (R(), B(Q, {
 						key: 2,
-						icon: M(mj),
+						icon: M(hj),
 						label: M(J)("common.delete"),
 						align: "end",
 						danger: "",
 						onClick: g
 					}, null, 8, ["icon", "label"])) : U("", !0),
 					H(Q, {
-						icon: M(tj),
+						icon: M(nj),
 						label: M(J)("config.reset"),
 						align: "end",
 						disabled: !l.value,
@@ -21830,13 +21879,13 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 						autofocus: ""
 					}, null, 8, TI), [[os, f.value]]),
 					H(Q, {
-						icon: M(wj),
+						icon: M(Tj),
 						label: M(J)("common.cancel"),
 						align: "end",
 						onClick: r[4] ||= (e) => d.value = null
 					}, null, 8, ["icon", "label"]),
 					H(Q, {
-						icon: M(Uk),
+						icon: M(Wk),
 						label: M(J)("common.save"),
 						align: "end",
 						active: "",
@@ -21845,9 +21894,9 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				], 32)) : U("", !0),
 				l.value ? (R(), z("span", EI, [r[29] ||= V("span", { class: "dot modified" }, null, -1), ba(A(M(J)("config.modified")), 1)])) : U("", !0)
 			]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("config.connection"),
-				icon: M(Vk)
+				icon: M(Hk)
 			}, {
 				default: N(() => [
 					H($, {
@@ -21978,10 +22027,10 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			S.value.length > 1 ? (R(), B(dN, {
+			S.value.length > 1 ? (R(), B(fN, {
 				key: 0,
 				title: M(J)("config.workflow"),
-				icon: M(Cj),
+				icon: M(wj),
 				help: te.value
 			}, {
 				default: N(() => [H(_I, {
@@ -21995,9 +22044,9 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			])) : U("", !0),
-			H(dN, {
+			H(fN, {
 				title: M(J)("writing.actors"),
-				icon: M(fA),
+				icon: M(pA),
 				collapsible: "",
 				open: !1
 			}, {
@@ -22023,9 +22072,9 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				}, 1032, ["label"])]))), 128))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("writing.meta"),
-				icon: M(BA),
+				icon: M(VA),
 				help: M(J)("writing.meta.hint")
 			}, {
 				actions: N(() => [H(UF, {
@@ -22055,10 +22104,10 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			]),
-			M(t).storylines ? (R(), B(dN, {
+			M(t).storylines ? (R(), B(fN, {
 				key: 1,
 				title: M(J)("storylines.enabled"),
-				icon: M(CA),
+				icon: M(wA),
 				help: M(J)("storylines.config.hint")
 			}, {
 				actions: N(() => [H(UF, {
@@ -22084,9 +22133,9 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			])) : U("", !0),
-			H(dN, {
+			H(fN, {
 				title: M(J)("writing.tokenSaving"),
-				icon: M(oA),
+				icon: M(sA),
 				help: M(J)("writing.tokenSaving.hint")
 			}, {
 				actions: N(() => [H(UF, {
@@ -22142,9 +22191,9 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("writing.cache"),
-				icon: M(uA),
+				icon: M(dA),
 				help: M(J)("writing.cache.hint")
 			}, {
 				actions: N(() => [H(UF, {
@@ -22185,10 +22234,10 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			]),
-			o.value.length ? (R(), B(dN, {
+			o.value.length ? (R(), B(fN, {
 				key: 2,
 				title: M(J)("config.customUi"),
-				icon: M(ZA),
+				icon: M(QA),
 				help: M(J)("config.customUi.hint")
 			}, {
 				actions: N(() => [H(UF, {
@@ -22206,9 +22255,9 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				"icon",
 				"help"
 			])) : U("", !0),
-			H(dN, {
+			H(fN, {
 				title: M(J)("config.sampling"),
-				icon: M(SA),
+				icon: M(CA),
 				collapsible: "",
 				open: !1
 			}, {
@@ -22298,7 +22347,7 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 			onKeydown: i[2] ||= vs(gs((e) => n("cancel"), ["stop"]), ["esc"])
 		}, [
 			V("div", QI, [V("span", $I, A(M(J)("um.startFrom")), 1), H(Q, {
-				icon: M(wj),
+				icon: M(Tj),
 				label: M(J)("common.cancel"),
 				small: "",
 				align: "end",
@@ -22308,14 +22357,14 @@ var pI = { class: "empty" }, mI = /* @__PURE__ */ F({
 				type: "button",
 				class: "um-choice",
 				onClick: i[1] ||= (e) => n("blank")
-			}, [H(M(vA)), V("span", eL, [V("span", null, A(M(J)("um.blank")), 1), V("span", tL, A(M(J)("um.blank.desc")), 1)])]),
+			}, [H(M(yA)), V("span", eL, [V("span", null, A(M(J)("um.blank")), 1), V("span", tL, A(M(J)("um.blank.desc")), 1)])]),
 			(R(!0), z(L, null, I(e.templates, (e) => (R(), z("button", {
 				key: e.tpl.id,
 				type: "button",
 				class: "um-choice",
 				"data-template": e.tpl.id,
 				onClick: (t) => n("template", e.tpl)
-			}, [H(M(NA)), V("span", rL, [V("span", null, A(e.body.name), 1), e.body.description ? (R(), z("span", iL, A(e.body.description), 1)) : U("", !0)])], 8, nL))), 128))
+			}, [H(M(PA)), V("span", rL, [V("span", null, A(e.body.name), 1), e.body.description ? (R(), z("span", iL, A(e.body.description), 1)) : U("", !0)])], 8, nL))), 128))
 		], 40, ZI));
 	}
 }), oL = [
@@ -22649,29 +22698,29 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				class: "um-grip",
 				"aria-label": M(J)("um.reorder"),
 				onPointerdown: n[0] ||= (e) => r("grab", e)
-			}, [H(M(EA))], 40, SL)) : U("", !0),
+			}, [H(M(DA))], 40, SL)) : U("", !0),
 			V("button", {
 				type: "button",
 				class: "um-open",
 				onClick: n[1] ||= (e) => r("open")
 			}, [V("span", CL, A(e.module.name || M(J)("um.untitled")), 1), V("span", wL, A(o(e.module) || M(J)("um.noEntries")), 1)]),
-			s(e.module).length ? (R(), B(Ej, {
+			s(e.module).length ? (R(), B(Dj, {
 				key: 1,
 				text: M(J)("um.lostHint", { points: s(e.module).join(", ") }),
 				align: "end"
 			}, {
-				default: N(() => [H(M(hj), {
+				default: N(() => [H(M(gj), {
 					class: "text-warning um-flag",
 					tabindex: "0"
 				})]),
 				_: 1
 			}, 8, ["text"])) : U("", !0),
-			c(e.module) ? (R(), B(Ej, {
+			c(e.module) ? (R(), B(Dj, {
 				key: 2,
 				text: M(bL)(e.preset, e.module.trigger),
 				align: "end"
 			}, {
-				default: N(() => [H(M(Tj), {
+				default: N(() => [H(M(Ej), {
 					class: "um-flag um-zap",
 					tabindex: "0"
 				})]),
@@ -22802,14 +22851,14 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 		}
 		Xr(le);
 		let ue = (e) => w.value?.kind === "module" && w.value.id === e;
-		return (t, n) => (R(), B(dN, {
+		return (t, n) => (R(), B(fN, {
 			title: M(J)("um.title"),
 			help: M(J)("um.help")
 		}, {
 			actions: N(() => [
 				s.value ? (R(), B(Q, {
 					key: 0,
-					icon: M(_j),
+					icon: M(vj),
 					label: M(J)("um.import"),
 					small: "",
 					align: "end",
@@ -22817,7 +22866,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				}, null, 8, ["icon", "label"])) : U("", !0),
 				c.value ? U("", !0) : (R(), B(Q, {
 					key: 1,
-					icon: M(dA),
+					icon: M(fA),
 					label: M(J)("um.exportAll"),
 					small: "",
 					align: "end",
@@ -22825,7 +22874,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				}, null, 8, ["icon", "label"])),
 				s.value ? (R(), B(Q, {
 					key: 2,
-					icon: M(bA),
+					icon: M(xA),
 					label: M(J)("um.grp.new"),
 					small: "",
 					align: "end",
@@ -22833,7 +22882,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				}, null, 8, ["icon", "label"])) : U("", !0),
 				s.value && !c.value ? (R(), B(Q, {
 					key: 3,
-					icon: M(XA),
+					icon: M(ZA),
 					label: M(J)("um.new"),
 					active: f.value === null,
 					small: "",
@@ -22858,7 +22907,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					type: "button",
 					class: "um-new",
 					onClick: n[8] ||= (e) => g(null)
-				}, [H(M(XA)), ba(A(M(J)("um.new")), 1)])) : s.value ? U("", !0) : (R(), z("div", BL, A(M(J)("um.noPoints")), 1)) : (R(), z("div", {
+				}, [H(M(ZA)), ba(A(M(J)("um.new")), 1)])) : s.value ? U("", !0) : (R(), z("div", BL, A(M(J)("um.noPoints")), 1)) : (R(), z("div", {
 					key: 1,
 					ref_key: "root",
 					ref: _,
@@ -22896,9 +22945,9 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 							class: "um-grip",
 							"aria-label": M(J)("um.grp.reorder"),
 							onPointerdown: (e) => se(e, "group", t.id)
-						}, [H(M(EA))], 40, jL)) : U("", !0),
+						}, [H(M(DA))], 40, jL)) : U("", !0),
 						H(Q, {
-							icon: M(Kk),
+							icon: M(qk),
 							label: M(J)(t.collapsed ? "um.grp.expand" : "um.grp.collapse"),
 							class: k(["um-chevron", { open: !t.collapsed }]),
 							small: "",
@@ -22922,7 +22971,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 							title: M(J)("um.grp.count", { n: i.length })
 						}, A(i.length), 9, NL),
 						H(Q, {
-							icon: M(Jk),
+							icon: M(Yk),
 							label: M(J)(t.mode === "single" ? "um.grp.single" : "um.grp.multi"),
 							pressed: t.mode === "single",
 							small: "",
@@ -22937,7 +22986,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 						]),
 						s.value ? (R(), B(Q, {
 							key: 1,
-							icon: M(XA),
+							icon: M(ZA),
 							label: M(J)("um.grp.addModule"),
 							active: f.value === t.id,
 							small: "",
@@ -22951,7 +23000,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 							"onClick"
 						])) : U("", !0),
 						H(Q, {
-							icon: M(dA),
+							icon: M(fA),
 							label: M(J)("um.grp.export"),
 							small: "",
 							align: "end",
@@ -22963,7 +23012,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 							"onClick"
 						]),
 						H(Q, {
-							icon: M(mj),
+							icon: M(hj),
 							label: M(J)("um.grp.delete"),
 							active: C.value === t.id,
 							danger: "",
@@ -23099,7 +23148,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 			class: "chip-x",
 			"aria-label": e.removeLabel,
 			onClick: gs((e) => c(n), ["stop"])
-		}, [H(M(wj))], 8, UL)], 2))), 128)), ur(V("input", {
+		}, [H(M(Tj))], 8, UL)], 2))), 128)), ur(V("input", {
 			ref_key: "input",
 			ref: i,
 			"onUpdate:modelValue": l[0] ||= (e) => r.value = e,
@@ -23218,7 +23267,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					disabled: ""
 				}, A(o.value), 9, eR))], 40, QL)) : (R(), z("span", tR)),
 				H(Q, {
-					icon: M(wj),
+					icon: M(Tj),
 					label: M(J)("um.removeRule"),
 					small: "",
 					align: "end",
@@ -23260,7 +23309,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				"remove-label",
 				"placeholder"
 			]), H(Q, {
-				icon: M(ej),
+				icon: M(tj),
 				label: M(J)("um.kw.regex"),
 				active: n.value.regex,
 				align: "end",
@@ -23373,7 +23422,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				"onRemove"
 			])], 64))), 128)),
 			V("label", OR, [
-				H(M(XA)),
+				H(M(ZA)),
 				ba(A(M(J)("um.addRule")) + " ", 1),
 				V("select", {
 					ref_key: "picker",
@@ -23450,19 +23499,19 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					"onUpdate:modelValue": n[0] ||= (t) => M(af)(e.update, t)
 				}, null, 8, ["model-value", "label"]),
 				V("span", PR, A(o.value), 1),
-				H(cN, {
+				H(lN, {
 					text: s.value,
 					align: "end"
 				}, null, 8, ["text"]),
 				H(Q, {
-					icon: M(wj),
+					icon: M(Tj),
 					label: M(J)("um.removeEntry"),
 					small: "",
 					align: "end",
 					onClick: n[1] ||= (e) => r("remove")
 				}, null, 8, ["icon", "label"])
 			]),
-			a.value ? (R(), z("div", FR, [H(M(hj)), ba(A(M(J)("um.bv.lost")), 1)])) : U("", !0),
+			a.value ? (R(), z("div", FR, [H(M(gj)), ba(A(M(J)("um.bv.lost")), 1)])) : U("", !0),
 			e.update.type === "string" ? ur((R(), z("textarea", {
 				key: 1,
 				"onUpdate:modelValue": n[2] ||= (t) => e.update.text = t,
@@ -23493,7 +23542,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					onInput: (e) => d(n, e.target.value, M(nf)(t))
 				}, null, 40, LR),
 				H(Q, {
-					icon: M(wj),
+					icon: M(Tj),
 					label: M(J)("um.removeEntry"),
 					small: "",
 					align: "end",
@@ -23526,7 +23575,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					onChange: (e) => u(t)
 				}, null, 40, zR), [[os, t.key]]),
 				H(Q, {
-					icon: M(wj),
+					icon: M(Tj),
 					label: M(J)("um.removeEntry"),
 					small: "",
 					align: "end",
@@ -23552,7 +23601,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				type: "button",
 				class: "btn ghost add um-var-add",
 				onClick: f
-			}, [H(M(XA)), ba(A(e.update.type === "dict" ? M(J)("um.bv.addKey") : M(J)("um.bv.addItem")), 1)]))
+			}, [H(M(ZA)), ba(A(e.update.type === "dict" ? M(J)("um.bv.addKey") : M(J)("um.bv.addItem")), 1)]))
 		], 2));
 	}
 }), WR = { class: "um-editor" }, GR = { class: "um-head" }, KR = ["placeholder", "aria-label"], qR = { class: "um-entry-head" }, JR = ["onUpdate:modelValue", "aria-label"], YR = ["value"], XR = ["value"], ZR = [
@@ -23640,7 +23689,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 		return (t, n) => (R(), z("div", WR, [
 			V("header", GR, [
 				H(Q, {
-					icon: M(Fk),
+					icon: M(Ik),
 					label: M(J)("um.back"),
 					align: "start",
 					onClick: n[0] ||= (e) => r("close")
@@ -23659,7 +23708,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					"onUpdate:modelValue": n[2] ||= (t) => M(vg)(e.preset, e.module.id, t)
 				}, null, 8, ["model-value", "label"])
 			]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("um.content"),
 				help: M(J)("um.content.help")
 			}, {
@@ -23692,7 +23741,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 							value: t.point,
 							disabled: ""
 						}, A(M(J)("um.pointMissing", { id: t.point })), 9, XR)) : U("", !0)], 8, JR), [[ls, t.point]]),
-						H(cN, {
+						H(lN, {
 							text: o(t)?.description,
 							align: "end"
 						}, null, 8, ["text"]),
@@ -23707,7 +23756,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 						}, A(M(J)(`um.role.${e || "merge"}`)), 9, QR)), 64))], 40, ZR),
 						e.module.entries.length > 1 || e.module.vars.length ? (R(), B(Q, {
 							key: 0,
-							icon: M(wj),
+							icon: M(Tj),
 							label: M(J)("um.removeEntry"),
 							small: "",
 							align: "end",
@@ -23718,7 +23767,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 							"onClick"
 						])) : U("", !0)
 					]),
-					s(t) ? (R(), z("div", $R, [H(M(hj)), ba(A(M(J)("um.pointLost")), 1)])) : U("", !0),
+					s(t) ? (R(), z("div", $R, [H(M(gj)), ba(A(M(J)("um.pointLost")), 1)])) : U("", !0),
 					ur(V("textarea", {
 						"onUpdate:modelValue": (e) => t.text = e,
 						class: "input um-text",
@@ -23732,10 +23781,10 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					type: "button",
 					class: "btn ghost add",
 					onClick: f
-				}, [H(M(XA)), ba(A(M(J)("um.addEntry")), 1)])) : U("", !0)]),
+				}, [H(M(ZA)), ba(A(M(J)("um.addEntry")), 1)])) : U("", !0)]),
 				_: 1
 			}, 8, ["title", "help"]),
-			m.value.length || e.module.vars.length ? (R(), B(dN, {
+			m.value.length || e.module.vars.length ? (R(), B(fN, {
 				key: 0,
 				title: M(J)("um.bv"),
 				help: M(J)("um.bv.help")
@@ -23750,7 +23799,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					"update",
 					"onRemove"
 				]))), 128)), h.value.length ? (R(), z("label", nz, [
-					H(M(XA)),
+					H(M(ZA)),
 					ba(A(M(J)("um.bv.add")) + " ", 1),
 					V("select", {
 						ref_key: "varPicker",
@@ -23769,7 +23818,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				])) : U("", !0)]),
 				_: 1
 			}, 8, ["title", "help"])) : U("", !0),
-			H(dN, {
+			H(fN, {
 				title: M(J)("um.trigger"),
 				help: M(J)("um.trigger.help")
 			}, {
@@ -23786,19 +23835,19 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					class: "btn ghost",
 					title: M(J)("um.export"),
 					onClick: ee
-				}, [H(M(dA)), V("span", null, A(M(J)("um.export")), 1)], 8, oz),
+				}, [H(M(fA)), V("span", null, A(M(J)("um.export")), 1)], 8, oz),
 				V("button", {
 					type: "button",
 					class: "btn ghost",
 					title: M(J)("um.duplicate"),
 					onClick: b
-				}, [H(M(sA)), V("span", null, A(M(J)("um.duplicate")), 1)], 8, sz),
+				}, [H(M(cA)), V("span", null, A(M(J)("um.duplicate")), 1)], 8, sz),
 				x.value.length ? (R(), z("label", {
 					key: 0,
 					class: "btn ghost picker um-move",
 					title: M(J)("um.grp.moveTo")
 				}, [
-					H(M(xA)),
+					H(M(SA)),
 					V("span", lz, A(x.value.find((t) => t.id === e.module.group)?.name || M(J)("um.grp.none")), 1),
 					V("select", {
 						value: e.module.group ?? "",
@@ -23815,7 +23864,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					class: k(["btn ghost danger", { armed: v.value }]),
 					title: M(J)("common.delete"),
 					onClick: y
-				}, [H(M(mj)), V("span", null, A(v.value ? M(J)("um.confirmDelete") : M(J)("common.delete")), 1)], 10, pz)
+				}, [H(M(hj)), V("span", null, A(v.value ? M(J)("um.confirmDelete") : M(J)("common.delete")), 1)], 10, pz)
 			])
 		]));
 	}
@@ -23907,12 +23956,12 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				preset: M(t),
 				onOpen: b
 			}, null, 8, ["preset"]),
-			(R(!0), z(L, null, I(a.value, (e) => (R(), B(dN, {
+			(R(!0), z(L, null, I(a.value, (e) => (R(), B(fN, {
 				key: e.id,
 				title: e.label,
 				help: e.help
 			}, ni({
-				default: N(() => [(R(!0), z(L, null, I(e.sets, (t) => (R(), z(L, { key: t.key }, [t.label ? (R(), z("div", hz, [V("span", gz, [V("span", _z, A(t.label), 1), H(cN, {
+				default: N(() => [(R(!0), z(L, null, I(e.sets, (t) => (R(), z(L, { key: t.key }, [t.label ? (R(), z("div", hz, [V("span", gz, [V("span", _z, A(t.label), 1), H(lN, {
 					text: t.help,
 					align: "start"
 				}, null, 8, ["text"])]), t.optional ? (R(), B(UF, {
@@ -23939,14 +23988,14 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				}, [
 					r[0] ||= V("span", { class: "radio" }, null, -1),
 					V("span", bz, A(o(e)), 1),
-					H(cN, {
+					H(lN, {
 						text: s(e),
 						align: "end"
 					}, null, 8, ["text"])
 				], 10, yz))), 128))], 10, vz)) : U("", !0)], 64))), 128)), (R(!0), z(L, null, I(e.toggles, (e) => (R(), z("div", {
 					key: e.id,
 					class: "module-row"
-				}, [V("span", xz, [V("span", Sz, A(o(e)), 1), H(cN, {
+				}, [V("span", xz, [V("span", Sz, A(o(e)), 1), H(lN, {
 					text: s(e),
 					align: "start"
 				}, null, 8, ["text"])]), H(UF, {
@@ -24009,11 +24058,11 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 		}), u = (e) => c(e), d = (e, t) => r((n) => {
 			n.params[e.id] = [...t];
 		}), f = (e) => `ap-param-${e.id}`;
-		return (e, r) => !M(t) || !M(n) ? (R(), B(mI, { key: 0 })) : (R(!0), z(L, { key: 1 }, I(i.value, (e) => (R(), B(dN, {
+		return (e, r) => !M(t) || !M(n) ? (R(), B(mI, { key: 0 })) : (R(!0), z(L, { key: 1 }, I(i.value, (e) => (R(), B(fN, {
 			key: e.id,
 			title: e.label,
 			help: e.help,
-			icon: M(sj)
+			icon: M(cj)
 		}, {
 			default: N(() => [(R(!0), z(L, null, I(e.params, (e) => (R(), B($, {
 				key: e.id,
@@ -24117,11 +24166,11 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					placeholder: e.valuePlaceholder ?? M(J)("memory.content")
 				}, null, 8, Vz), [[os, o.value]]),
 				V("div", Hz, [H(Q, {
-					icon: M(wj),
+					icon: M(Tj),
 					label: M(J)("common.cancel"),
 					onClick: n[2] ||= (e) => i.value = null
 				}, null, 8, ["icon", "label"]), H(Q, {
-					icon: M(Uk),
+					icon: M(Wk),
 					label: M(J)("common.save"),
 					active: "",
 					onClick: c
@@ -24130,7 +24179,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				V("div", Iz, A(l), 1),
 				V("div", Lz, A(t), 1),
 				e.readonly ? U("", !0) : (R(), z("div", Rz, [H(Q, {
-					icon: M(JA),
+					icon: M(YA),
 					label: M(J)("common.edit"),
 					small: "",
 					align: "end",
@@ -24140,7 +24189,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					"label",
 					"onClick"
 				]), H(Q, {
-					icon: M(mj),
+					icon: M(hj),
 					label: M(J)("common.delete"),
 					small: "",
 					danger: "",
@@ -24165,11 +24214,11 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					placeholder: e.valuePlaceholder ?? M(J)("memory.content")
 				}, null, 8, Gz), [[os, o.value]]),
 				V("div", Kz, [H(Q, {
-					icon: M(wj),
+					icon: M(Tj),
 					label: M(J)("common.cancel"),
 					onClick: n[5] ||= (e) => i.value = null
 				}, null, 8, ["icon", "label"]), H(Q, {
-					icon: M(Uk),
+					icon: M(Wk),
 					label: M(J)("common.save"),
 					active: "",
 					onClick: c
@@ -24181,7 +24230,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				type: "button",
 				class: "btn ghost add",
 				onClick: n[6] ||= (e) => s(null)
-			}, [H(M(XA)), ba(A(M(J)("common.add")), 1)])) : U("", !0)
+			}, [H(M(ZA)), ba(A(M(J)("common.add")), 1)])) : U("", !0)
 		]));
 	}
 }), Yz = {
@@ -24196,7 +24245,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 }, $z = /* @__PURE__ */ F({
 	__name: "MemoryTab",
 	setup(t) {
-		let { preset: n } = fI(), r = W(() => n.value ? Vm(n.value) : null), i = W(() => (Y.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = () => nk.value ? tv() : void 0, o = W(() => (Y.chatRev, i.value ? Om(Infinity, a()) : {})), s = W(() => r.value ? jm(r.value) : {}), c = W(() => (Y.chatRev, i.value ? km(Infinity, a()) : null));
+		let { preset: n } = fI(), r = W(() => n.value ? Vm(n.value) : null), i = W(() => (Y.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), a = () => rk.value ? tv() : void 0, o = W(() => (Y.chatRev, i.value ? Om(Infinity, a()) : {})), s = W(() => r.value ? jm(r.value) : {}), c = W(() => (Y.chatRev, i.value ? km(Infinity, a()) : null));
 		async function l(e, t) {
 			await Am({
 				type: "memory.replace",
@@ -24226,9 +24275,9 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 			}), IS();
 		}
 		return (e, t) => !M(n) || !r.value ? (R(), B(mI, { key: 0 })) : (R(), z(L, { key: 1 }, [
-			H(dN, {
+			H(fN, {
 				title: M(J)("memory.chat"),
-				icon: M(RA),
+				icon: M(zA),
 				help: M(J)("memory.chat.hint")
 			}, {
 				default: N(() => [i.value ? (R(), B(Jz, {
@@ -24243,13 +24292,13 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				"icon",
 				"help"
 			]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("memory.global"),
-				icon: M(TA),
+				icon: M(EA),
 				help: M(J)("memory.global.hint")
 			}, {
 				actions: N(() => [H(Q, {
-					icon: M(gj),
+					icon: M(_j),
 					label: M(J)("common.undo"),
 					small: "",
 					align: "end",
@@ -24260,7 +24309,7 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 					"label",
 					"disabled"
 				]), H(Q, {
-					icon: M(QA),
+					icon: M($A),
 					label: M(J)("common.redo"),
 					small: "",
 					align: "end",
@@ -24282,14 +24331,14 @@ var xL = ["data-id"], SL = ["aria-label"], CL = { class: "um-row-name ellipsis" 
 				"icon",
 				"help"
 			]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("memory.recap"),
-				icon: M(rj),
+				icon: M(ij),
 				help: M(J)("memory.recap.hint")
 			}, {
 				actions: N(() => [c.value ? (R(), z("span", Xz, "#0–" + A(c.value.coversUpTo), 1)) : U("", !0), i.value ? (R(), B(Q, {
 					key: 1,
-					icon: M(Uk),
+					icon: M(Wk),
 					label: M(J)("common.save"),
 					small: "",
 					align: "end",
@@ -24518,9 +24567,9 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			}
 		}
 		return (e, t) => (R(), z(L, null, [
-			H(dN, {
+			H(fN, {
 				title: M(J)("debug.dev"),
-				icon: M(ij),
+				icon: M(aj),
 				help: M(J)("debug.dev.hint")
 			}, {
 				actions: N(() => [V("span", sB, [V("span", { class: k(["dot status-dot", M(rE).status]) }, null, 2), ba(A(M(J)(`debug.dev.${M(rE).status}`)), 1)])]),
@@ -24548,9 +24597,9 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				"icon",
 				"help"
 			]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("debug.assembly"),
-				icon: M(yA),
+				icon: M(bA),
 				collapsible: ""
 			}, {
 				default: N(() => [n.value ? (R(), z(L, { key: 0 }, [
@@ -24584,7 +24633,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 						class: "region-head",
 						onClick: (t) => a(e.id)
 					}, [
-						H(M(Kk), { class: k(["faint caret", { open: i.has(e.id) }]) }, null, 8, ["class"]),
+						H(M(qk), { class: k(["faint caret", { open: i.has(e.id) }]) }, null, 8, ["class"]),
 						V("span", xB, A(e.id), 1),
 						V("span", SB, A(e.messages.length) + " · " + A(o[`${n.value.genId}:${e.id}`] ?? e.messages.reduce((e, t) => e + t.chars, 0)) + A(o[`${n.value.genId}:${e.id}`] === void 0 ? " ch" : " tok"), 1)
 					], 8, bB), i.has(e.id) ? (R(), z(L, { key: 0 }, [(R(!0), z(L, null, I(e.messages, (e, t) => (R(), z("div", {
@@ -24598,7 +24647,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 						class: "region-head",
 						onClick: (t) => a(`var:${e.id}`)
 					}, [
-						H(M(Kk), { class: k(["faint caret", { open: i.has(`var:${e.id}`) }]) }, null, 8, ["class"]),
+						H(M(qk), { class: k(["faint caret", { open: i.has(`var:${e.id}`) }]) }, null, 8, ["class"]),
 						V("span", kB, A(e.id), 1),
 						V("span", AB, A(e.text.length) + " ch", 1)
 					], 8, OB), i.has(`var:${e.id}`) ? (R(), z("div", jB, [V("div", MB, A(e.text), 1), e.text ? U("", !0) : (R(), z("div", NB, A(M(J)("debug.emptyRegion")), 1))])) : U("", !0)]))), 128))])) : U("", !0),
@@ -24606,9 +24655,9 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				], 64)) : (R(), z("div", FB, A(M(J)("debug.noAssembly")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("debug.requests"),
-				icon: M(aA),
+				icon: M(oA),
 				collapsible: ""
 			}, {
 				default: N(() => [(R(!0), z(L, null, I(M(Ag).requests, (e, t) => (R(), z("div", {
@@ -24624,7 +24673,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 					V("span", BB, A(e.durationMs === void 0 ? "…" : `${(e.durationMs / 1e3).toFixed(1)}s`), 1)
 				], 8, IB), s.value === t ? (R(), z(L, { key: 0 }, [
 					V("div", VB, [V("span", HB, A(M(J)("debug.request")), 1), H(Q, {
-						icon: M(cA),
+						icon: M(lA),
 						label: M(J)("common.copy"),
 						small: "",
 						align: "end",
@@ -24636,7 +24685,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 					])]),
 					V("pre", UB, A(c(e.request)), 1),
 					V("div", WB, [V("span", GB, A(M(J)("debug.response")), 1), H(Q, {
-						icon: M(cA),
+						icon: M(lA),
 						label: M(J)("common.copy"),
 						small: "",
 						align: "end",
@@ -24650,14 +24699,14 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				], 64)) : U("", !0)]))), 128)), M(Ag).requests.length ? U("", !0) : (R(), z("div", qB, A(M(J)("debug.noRequests")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			H(dN, {
+			H(fN, {
 				title: M(J)("debug.log"),
-				icon: M(rj),
+				icon: M(ij),
 				collapsible: "",
 				open: !1
 			}, {
 				actions: N(() => [H(Q, {
-					icon: M(mj),
+					icon: M(hj),
 					label: M(J)("common.clear"),
 					small: "",
 					align: "end",
@@ -24673,10 +24722,10 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				]), V("pre", ZB, A(c(e.data)), 1)]))), 128)), g.value.length ? U("", !0) : (R(), z("div", QB, A(M(J)("debug.noLog")), 1))]),
 				_: 1
 			}, 8, ["title", "icon"]),
-			b.value ? (R(), B(dN, {
+			b.value ? (R(), B(fN, {
 				key: 0,
 				title: M(J)("debug.images"),
-				icon: M(DA),
+				icon: M(OA),
 				help: M(J)("debug.images.hint"),
 				collapsible: "",
 				open: !1
@@ -24686,7 +24735,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 					class: "btn",
 					disabled: x.value.running,
 					onClick: S
-				}, [H(M(mj)), ba(A(M(J)("debug.images.clean")), 1)], 8, eV), x.value.running ? (R(), z("span", tV, A(x.value.progress ? M(J)("debug.images.scanning", {
+				}, [H(M(hj)), ba(A(M(J)("debug.images.clean")), 1)], 8, eV), x.value.running ? (R(), z("span", tV, A(x.value.progress ? M(J)("debug.images.scanning", {
 					done: x.value.progress.done,
 					total: x.value.progress.total
 				}) : "…"), 1)) : x.value.result ? (R(), z("span", nV, A(x.value.result), 1)) : x.value.error ? (R(), z("span", rV, A(x.value.error), 1)) : U("", !0)])]),
@@ -24696,9 +24745,9 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				"icon",
 				"help"
 			])) : U("", !0),
-			H(dN, {
+			H(fN, {
 				title: M(J)("debug.annotations"),
-				icon: M(zA),
+				icon: M(BA),
 				help: M(J)("debug.annotations.hint"),
 				collapsible: "",
 				open: !1
@@ -24717,7 +24766,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				"icon",
 				"help"
 			]),
-			V("div", uV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("3d2278eedd319292")), 1)
+			V("div", uV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("10c2009a82c88d98")), 1)
 		], 64));
 	}
 }), fV = {
@@ -24738,7 +24787,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 }, wV = ["title", "onClick"], TV = { class: "badge neutral mono" }, EV = { class: "xs muted" }, DV = { class: "grow ellipsis" }, OV = /* @__PURE__ */ F({
 	__name: "StorylinesTab",
 	setup(t) {
-		let { preset: n } = fI(), r = W(() => (Y.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), i = W(() => Object.values(n.value?.structures ?? {}).find((e) => e.kind === "synopsis")?.id), a = W(() => r.value && n.value?.storylines ? ck(i.value) : []), o = /* @__PURE__ */ j(/* @__PURE__ */ new Set()), s = (e) => {
+		let { preset: n } = fI(), r = W(() => (Y.chatRev, !(!e().chatMetadata || e().characterId === void 0 && !e().groupId))), i = W(() => Object.values(n.value?.structures ?? {}).find((e) => e.kind === "synopsis")?.id), a = W(() => r.value && n.value?.storylines ? lk(i.value) : []), o = /* @__PURE__ */ j(/* @__PURE__ */ new Set()), s = (e) => {
 			let t = new Set(o.value);
 			t.has(e) ? t.delete(e) : t.add(e), o.value = t;
 		};
@@ -24746,7 +24795,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			e !== null && (o.value = /* @__PURE__ */ new Set([...o.value, e]), Y.storylineFocus = null);
 		}, { immediate: !0 });
 		let c = (e) => e.main ? e.name ? J("storylines.mainNamed", { name: e.name }) : J("storylines.main") : e.name || J("storylines.unnamed"), l = () => {
-			IS(), wk();
+			IS(), Tk();
 		};
 		async function u(e) {
 			await iv(e.key, !e.if), l();
@@ -24767,7 +24816,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			if (r === "invalid") return x("warning", J("storylines.invalidName"), J("app.name"));
 			r !== "unchanged" && (!e.main && o.value.has(e.key) && (o.value = new Set([...o.value].map((t) => t === e.key ? n : t))), l());
 		}
-		return (e, t) => M(n) ? r.value ? (R(), z(L, { key: 2 }, [V("div", pV, [V("span", mV, A(M(J)("storylines.count", { n: a.value.length })), 1), H(cN, {
+		return (e, t) => M(n) ? r.value ? (R(), z(L, { key: 2 }, [V("div", pV, [V("span", mV, A(M(J)("storylines.count", { n: a.value.length })), 1), H(lN, {
 			text: M(J)("storylines.help"),
 			align: "end"
 		}, null, 8, ["text"])]), (R(!0), z(L, null, I(a.value, (e) => (R(), z("section", {
@@ -24781,7 +24830,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			"aria-expanded": o.value.has(e.key),
 			onClick: (t) => s(e.key)
 		}, [
-			(R(), B($r(e.main ? M(lA) : e.if ? M(uj) : M(CA)), {
+			(R(), B($r(e.main ? M(uA) : e.if ? M(dj) : M(wA)), {
 				class: "section-icon",
 				"aria-hidden": "true"
 			})),
@@ -24793,13 +24842,13 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				"aria-label": M(J)("storylines.current")
 			}, null, 8, _V)) : U("", !0),
 			e.if ? (R(), z("span", vV, "if")) : U("", !0),
-			e.hidden ? (R(), B(M(pA), {
+			e.hidden ? (R(), B(M(mA), {
 				key: 2,
 				class: "storyline-flag",
 				"aria-label": M(J)("storylines.hidden")
 			}, null, 8, ["aria-label"])) : U("", !0),
 			V("span", yV, A(M(J)("storylines.floors", { n: e.floors.length })), 1),
-			H(M(Wk), {
+			H(M(Gk), {
 				class: k(["chevron", { flipped: o.value.has(e.key) }]),
 				"aria-hidden": "true"
 			}, null, 8, ["class"])
@@ -24811,7 +24860,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 		}, [
 			e.main ? U("", !0) : (R(), z(L, { key: 0 }, [
 				H(Q, {
-					icon: M(uj),
+					icon: M(dj),
 					label: M(J)("storylines.ifLine.toggle"),
 					pressed: e.if,
 					small: "",
@@ -24823,7 +24872,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 					"onClick"
 				]),
 				H(Q, {
-					icon: e.hidden ? M(pA) : M(mA),
+					icon: e.hidden ? M(mA) : M(hA),
 					label: M(J)("storylines.visible.toggle"),
 					pressed: !e.hidden,
 					small: "",
@@ -24840,7 +24889,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				}, null, -1)
 			], 64)),
 			H(Q, {
-				icon: M(qA),
+				icon: M(JA),
 				label: e.main && !e.name ? M(J)("storylines.nameMain") : M(J)("common.rename"),
 				small: "",
 				onClick: (t) => p(e)
@@ -24851,7 +24900,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			]),
 			e.main ? U("", !0) : (R(), B(Q, {
 				key: 1,
-				icon: M(lA),
+				icon: M(uA),
 				label: M(J)("storylines.makeMain"),
 				small: "",
 				onClick: (t) => f(e)
@@ -24864,12 +24913,12 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			key: e.index,
 			class: "row tight small clickable",
 			title: M(J)("storylines.jump"),
-			onClick: (t) => M(lk)(e.index)
+			onClick: (t) => M(uk)(e.index)
 		}, [
 			V("span", TV, "#" + A(e.index), 1),
 			V("span", EV, A(e.user ? M(J)("storylines.user") : M(J)("storylines.narrator")), 1),
 			V("span", DV, A(e.title || "…"), 1)
-		], 8, wV))), 128))])) : (R(), z("div", SV, A(M(J)("storylines.empty")), 1))])) : U("", !0)], 2))), 128))], 64)) : (R(), z("div", fV, [H(M(CA), { "aria-hidden": "true" }), V("span", null, A(M(J)("memory.noChat")), 1)])) : (R(), B(mI, { key: 0 }));
+		], 8, wV))), 128))])) : (R(), z("div", SV, A(M(J)("storylines.empty")), 1))])) : U("", !0)], 2))), 128))], 64)) : (R(), z("div", fV, [H(M(wA), { "aria-hidden": "true" }), V("span", null, A(M(J)("memory.noChat")), 1)])) : (R(), B(mI, { key: 0 }));
 	}
 }), kV = {
 	key: 0,
@@ -24921,12 +24970,12 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				onKeydown: [vs(c, ["enter"]), n[1] ||= vs((e) => a.value = !1, ["esc"])]
 			}, null, 40, AV), [[os, o.value]]),
 			H(Q, {
-				icon: M(wj),
+				icon: M(Tj),
 				label: M(J)("common.cancel"),
 				onClick: n[2] ||= (e) => a.value = !1
 			}, null, 8, ["icon", "label"]),
 			H(Q, {
-				icon: M(Uk),
+				icon: M(Wk),
 				label: M(J)("common.save"),
 				active: "",
 				onClick: c
@@ -24946,26 +24995,26 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				value: e.id
 			}, A(e.name), 9, PV))), 128))], 8, NV))), 128))], 40, MV)) : (R(), z("span", FV, A(M(J)("media.noConnection")), 1)),
 			H(Q, {
-				icon: M(XA),
+				icon: M(ZA),
 				label: M(J)("media.addConnection"),
 				small: "",
 				onClick: n[4] ||= (e) => r("add")
 			}, null, 8, ["icon", "label"]),
 			e.active ? (R(), z(L, { key: 2 }, [
 				H(Q, {
-					icon: M(cA),
+					icon: M(lA),
 					label: M(J)("common.copy"),
 					small: "",
 					onClick: n[5] ||= (t) => r("copy", e.active)
 				}, null, 8, ["icon", "label"]),
 				H(Q, {
-					icon: M(JA),
+					icon: M(YA),
 					label: M(J)("common.rename"),
 					small: "",
 					onClick: s
 				}, null, 8, ["icon", "label"]),
 				H(Q, {
-					icon: M(mj),
+					icon: M(hj),
 					label: M(J)("common.delete"),
 					small: "",
 					danger: "",
@@ -24989,7 +25038,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 		}));
 		return (t, n) => (R(), B(Q, {
 			class: "scope-toggle",
-			icon: e.modelValue ? M(yj) : M(TA),
+			icon: e.modelValue ? M(bj) : M(EA),
 			active: !!e.modelValue,
 			label: i.value,
 			small: "",
@@ -25038,7 +25087,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			class: "btn ghost sm-btn media-advanced-toggle",
 			"aria-expanded": i.value,
 			onClick: n[0] ||= (e) => i.value = !i.value
-		}, [V("span", null, A(M(J)("media.advanced")), 1), H(M(Wk), { class: k(["chevron", { flipped: i.value }]) }, null, 8, ["class"])], 8, zV), i.value ? (R(), z("div", BV, [
+		}, [V("span", null, A(M(J)("media.advanced")), 1), H(M(Gk), { class: k(["chevron", { flipped: i.value }]) }, null, 8, ["class"])], 8, zV), i.value ? (R(), z("div", BV, [
 			ri(t.$slots, "default"),
 			H($, {
 				label: M(J)("media.headers"),
@@ -25184,9 +25233,9 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			let r = n.value;
 			r && (r.refs = r.refs.filter((t) => t !== e), xx(), t.value.connections.some((t) => t.refs.some((t) => t.blob === e.blob)) || Fx(e.blob));
 		}
-		return (e, m) => (R(), B(dN, {
+		return (e, m) => (R(), B(fN, {
 			title: M(J)("media.image"),
-			icon: M(AA)
+			icon: M(jA)
 		}, {
 			actions: N(() => [H(UF, {
 				"model-value": t.value.enabled,
@@ -25348,7 +25397,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 									"onUpdate:modelValue"
 								])) : U("", !0),
 								H(Q, {
-									icon: M(mj),
+									icon: M(hj),
 									label: M(J)("common.delete"),
 									small: "",
 									danger: "",
@@ -25364,7 +25413,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 								type: "button",
 								class: "btn ghost add",
 								onClick: (t) => b(e.key)
-							}, [H(M(kA)), ba(A(M(J)("media.image.refs.add")), 1)], 8, rH)
+							}, [H(M(AA)), ba(A(M(J)("media.image.refs.add")), 1)], 8, rH)
 						]))), 128)), V("input", {
 							ref_key: "fileInput",
 							ref: v,
@@ -25498,9 +25547,9 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 			let t = n.value;
 			t && (t.bindings = t.bindings.filter((t) => t !== e), xx(), AT());
 		}
-		return (e, p) => (R(), B(dN, {
+		return (e, p) => (R(), B(fN, {
 			title: M(J)("media.speech"),
-			icon: M(Ik)
+			icon: M(Lk)
 		}, {
 			actions: N(() => [H(UF, {
 				"model-value": t.value.enabled,
@@ -25596,7 +25645,7 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 						key: 0,
 						label: M(J)("media.speech.narratorVoice")
 					}, {
-						default: N(() => [H(Wj, {
+						default: N(() => [H(Gj, {
 							connection: n.value,
 							"model-value": n.value.narrator,
 							label: M(J)("media.speech.narratorVoice"),
@@ -25627,7 +25676,7 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 								value: t.character,
 								placeholder: M(J)("media.speech.character"),
 								onChange: (e) => _(t, { character: e.target.value.trim() })
-							}, null, 40, _H), H(Wj, {
+							}, null, 40, _H), H(Gj, {
 								class: "grow",
 								connection: n.value,
 								"model-value": t.voice,
@@ -25644,7 +25693,7 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 									"options",
 									"onUpdate:modelValue"
 								])) : U("", !0), H(Q, {
-									icon: M(mj),
+									icon: M(hj),
 									label: M(J)("common.delete"),
 									small: "",
 									danger: "",
@@ -25666,7 +25715,7 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 								type: "button",
 								class: "btn ghost add",
 								onClick: (t) => g(e.card)
-							}, [H(M(XA)), ba(A(M(J)("media.speech.addBinding")), 1)], 8, vH)
+							}, [H(M(ZA)), ba(A(M(J)("media.speech.addBinding")), 1)], 8, vH)
 						]))), 128))])]),
 						_: 1
 					}, 8, ["label", "help"]),
@@ -25703,9 +25752,9 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 			r.value[e] = t, xx();
 		}
 		return (e, t) => M(n) ? (R(), z(L, { key: 1 }, [
-			H(dN, {
+			H(fN, {
 				title: M(J)("media.cors"),
-				icon: M(HA),
+				icon: M(UA),
 				collapsible: "",
 				open: r.value.mode !== "auto" || r.value.proxy !== "host"
 			}, {
@@ -25753,45 +25802,45 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 		let t = [
 			{
 				id: "presets",
-				icon: WA,
+				icon: GA,
 				view: uI
 			},
 			{
 				id: "config",
-				icon: oj,
+				icon: sj,
 				view: XI
 			},
 			{
 				id: "modules",
-				icon: Rk,
+				icon: zk,
 				view: wz
 			},
 			{
 				id: "writing",
-				icon: qA,
+				icon: JA,
 				view: Nz
 			},
 			{
 				id: "memory",
-				icon: zk,
+				icon: Bk,
 				view: $z
 			},
 			{
 				id: "storylines",
-				icon: CA,
+				icon: wA,
 				view: OV
 			},
 			{
 				id: "media",
-				icon: Zk,
+				icon: Qk,
 				view: xH
 			},
 			{
 				id: "debug",
-				icon: Bk,
+				icon: Vk,
 				view: dV
 			}
-		], n = W(() => t.filter((e) => (e.id !== "storylines" || nk.value) && (e.id !== "media" || kC(RS.value)))), r = W(() => n.value.find((e) => e.id === Y.tab) ?? n.value[0]), i = W({
+		], n = W(() => t.filter((e) => (e.id !== "storylines" || rk.value) && (e.id !== "media" || kC(RS.value)))), r = W(() => n.value.find((e) => e.id === Y.tab) ?? n.value[0]), i = W({
 			get: () => G().enabled,
 			set: (e) => {
 				G().enabled = e, K();
@@ -25803,12 +25852,12 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 			e.key === "Escape" && Y.panelOpen && (Y.panelOpen = !1);
 		};
 		return Jr(() => document.addEventListener("keydown", o)), Xr(() => {
-			document.removeEventListener("keydown", o), SM(!1);
+			document.removeEventListener("keydown", o), CM(!1);
 		}), P(() => Y.panelOpen, (e) => {
-			e && SM(!0);
+			e && CM(!0);
 		}, { immediate: !0 }), (e, t) => (R(), B(co, {
 			name: "panel",
-			onAfterLeave: t[2] ||= (e) => M(SM)(!1)
+			onAfterLeave: t[2] ||= (e) => M(CM)(!1)
 		}, {
 			default: N(() => [M(Y).panelOpen ? (R(), z("aside", {
 				key: 0,
@@ -25817,7 +25866,7 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 				"aria-label": M(J)("app.name")
 			}, [
 				V("header", CH, [
-					V("div", wH, [H(M(MA))]),
+					V("div", wH, [H(M(NA))]),
 					V("div", TH, [V("div", EH, A(M(RS) ? M(Up)(M(RS)) : M(J)("app.name")), 1), V("div", DH, A(a.value), 1)]),
 					H(UF, {
 						modelValue: i.value,
@@ -25825,7 +25874,7 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 						label: M(J)("panel.enabled")
 					}, null, 8, ["modelValue", "label"]),
 					H(Q, {
-						icon: M(wj),
+						icon: M(Tj),
 						label: M(J)("common.close"),
 						align: "end",
 						below: "",
@@ -25888,7 +25937,7 @@ var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"
 	__name: "PresetBanner",
 	setup(e) {
 		return (e, t) => M(RS) ? (R(), z("div", BH, [
-			H(M(MA), { class: "preset-banner-icon" }),
+			H(M(NA), { class: "preset-banner-icon" }),
 			V("span", VH, A(M(J)("banner.usesAp")), 1),
 			V("button", {
 				type: "button",
@@ -25907,7 +25956,7 @@ function UH() {
 	t.id = "advanced_preset_settings", e.append(t), Ss(zH).mount(t);
 }
 function WH() {
-	ED("ap-stages", BM, ["mesid"]), ED("ap-cards", jF, ["mesid"]), ED("ap-top-cards", jF, ["mesid", "position"]), ED("ap-dock", IF), ED("ap-storyline", BF, ["mesid"]), ED("ap-panel", AH), ED("ap-preset-banner", HH), wD(), LS();
+	ED("ap-stages", VM, ["mesid"]), ED("ap-cards", jF, ["mesid"]), ED("ap-top-cards", jF, ["mesid", "position"]), ED("ap-dock", IF), ED("ap-storyline", BF, ["mesid"]), ED("ap-panel", AH), ED("ap-preset-banner", HH), wD(), LS();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.OAI_PRESET_CHANGED_AFTER,
@@ -25915,13 +25964,13 @@ function WH() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, LS);
-	wM(), UH(), Tk(), tk(), tM(), mM();
+	TM(), UH(), Ek(), nk(), nM(), hM();
 }
 //#endregion
 //#region src/index.ts
 var GH = {
 	version: "1.12.0",
-	buildId: "3d2278eedd319292",
+	buildId: "10c2009a82c88d98",
 	nextGeneration: (e) => wh(e),
 	listPresets: () => Op().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -25981,11 +26030,11 @@ async function JH() {
 	};
 	t.on(n.APP_READY, () => void o()), WH(), Mg("init", {
 		version: "1.12.0",
-		build: "3d2278eedd319292",
+		build: "10c2009a82c88d98",
 		enabled: G().enabled
 	});
 }
-var YH = Jb, XH = ZO;
+var YH = Jb, XH = QO;
 JH().catch((e) => console.error("[AP] init failed", e));
 //#endregion
 export { YH as advancedPresetOnUpdate, XH as advancedPresetRegisterChatSurface };
