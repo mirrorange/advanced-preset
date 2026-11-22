@@ -7576,7 +7576,7 @@ var jp = (e) => yp.has(e), Mp = (e) => yp.get(e), Np = {
 	"media.image.promptType.instruction": "Instruction",
 	"media.image.promptType.instruction.hint": "Direct requirements in natural language, any language (multimodal models such as GPT Image, Nano Banana)",
 	"media.image.refs.global": "Global",
-	"media.image.refs.move": "Move to",
+	"media.image.refs.scope": "Applies to",
 	"media.image.style": "Style prompt",
 	"media.image.style.hint": "Appended to every image prompt. The preset is told a style is set, so the AI leaves style out.",
 	"media.image.style.nl": "e.g. Soft watercolor illustration, muted palette",
@@ -8137,7 +8137,7 @@ var jp = (e) => yp.has(e), Mp = (e) => yp.get(e), Np = {
 		"media.image.promptType.instruction": "指令",
 		"media.image.promptType.instruction.hint": "直接提出图像要求的自然语言，不限语言（GPT Image、Nano Banana 等多模态模型）",
 		"media.image.refs.global": "全局",
-		"media.image.refs.move": "移动到",
+		"media.image.refs.scope": "适用于",
 		"media.image.style": "风格提示词",
 		"media.image.style.hint": "附加到每条图像提示词后。预设会知道已设置风格，AI 不再写风格。",
 		"media.image.style.nl": "例如：柔和的水彩插画，低饱和配色",
@@ -12289,7 +12289,7 @@ function Eb(e) {
 }
 async function Db() {
 	let e = await Tb();
-	e && e !== "7299efaf977c1072" && sessionStorage.getItem(wb) !== e && Eb(e);
+	e && e !== "560a45ac20a448c2" && sessionStorage.getItem(wb) !== e && Eb(e);
 }
 async function Ob() {
 	await Db();
@@ -12310,7 +12310,7 @@ async function Mb() {
 	let e = u().replace(/^third-party\//, ""), t = await Ib(e, !1);
 	if (t.status === 404 && (t = await Ib(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Tb();
-	return r && r !== "7299efaf977c1072" ? (Eb(r), {
+	return r && r !== "560a45ac20a448c2" ? (Eb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -16292,6 +16292,7 @@ function zO() {
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.CHAT_CHANGED,
+		n.GROUP_UPDATED,
 		n.MORE_MESSAGES_LOADED,
 		n.MESSAGE_UPDATED,
 		n.MESSAGE_EDITED,
@@ -18266,7 +18267,7 @@ var BO = (e) => {
 	setup(e) {
 		let t = /* @__PURE__ */ A(), n = /* @__PURE__ */ A(null), r = /* @__PURE__ */ A("");
 		_r(() => fj.request, async (e) => {
-			n.value = null, r.value = e?.cards[0]?.key ?? "", e && (await Zn(), t.value?.open || t.value?.showModal());
+			n.value = null, r.value = (e?.cards.find((t) => aw(t.name) === aw(e.character)) ?? e?.cards[0])?.key ?? "", e && (await Zn(), t.value?.open || t.value?.showModal());
 		}, { immediate: !0 }), Zr(Gw(() => [n.value]));
 		function i(e) {
 			let i = fj.request;
@@ -23172,7 +23173,7 @@ var XL = { class: "row tight xs muted" }, ZL = { class: "row" }, QL = {
 				"icon",
 				"help"
 			]),
-			B("div", $R, "Advanced Preset " + k(j("1.12.0")) + " · " + k(j("7299efaf977c1072")), 1)
+			B("div", $R, "Advanced Preset " + k(j("1.12.0")) + " · " + k(j("560a45ac20a448c2")), 1)
 		], 64));
 	}
 }), tz = {
@@ -23515,7 +23516,6 @@ var XL = { class: "row tight xs muted" }, ZL = { class: "row" }, QL = {
 	"onChange"
 ], Uz = [
 	"value",
-	"title",
 	"aria-label",
 	"onChange"
 ], Wz = ["value"], Gz = ["onClick"], Kz = ["value"], qz = /* @__PURE__ */ P({
@@ -23758,8 +23758,7 @@ var XL = { class: "row tight xs muted" }, ZL = { class: "row" }, QL = {
 									key: 0,
 									class: "input media-ref-scope",
 									value: e.card ?? "",
-									title: j(J)("media.image.refs.move"),
-									"aria-label": j(J)("media.image.refs.move"),
+									"aria-label": j(J)("media.image.refs.scope"),
 									onChange: (t) => S(e, t.target.value)
 								}, [(L(!0), R(I, null, F(g.value, (e) => (L(), R("option", {
 									key: e.key ?? "",
@@ -24339,7 +24338,7 @@ function PB() {
 //#region src/index.ts
 var FB = {
 	version: "1.12.0",
-	buildId: "7299efaf977c1072",
+	buildId: "560a45ac20a448c2",
 	nextGeneration: (e) => yh(e),
 	listPresets: () => Cp().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -24399,7 +24398,7 @@ async function RB() {
 	};
 	t.on(n.APP_READY, () => void o()), PB(), fg("init", {
 		version: "1.12.0",
-		build: "7299efaf977c1072",
+		build: "560a45ac20a448c2",
 		enabled: G().enabled
 	});
 }
