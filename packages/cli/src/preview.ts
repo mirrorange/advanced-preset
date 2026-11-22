@@ -1,9 +1,9 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
   TRANSPORTS, assemble, freezeMode, freezesStoryline, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
-  IMAGE_OFF, SPEECH_OFF,
+  IMAGE_OFF, SPEECH_OFF, defaultImagePromptType,
   type APreset, type Configuration, type StorylineVars, type ParamValue, type Transport, type UserModule, type UserModuleSource,
-  type ImageApi, type ImageVars, type MacroData, type SpeechApi, type SpeechVars,
+  type ImageApi, type ImagePromptType, type ImageVars, type MacroData, type SpeechApi, type SpeechVars,
 } from '@advanced-preset/protocol';
 
 export interface PreviewOptions {
@@ -28,8 +28,11 @@ export interface PreviewOptions {
   storylineNamingMain?: boolean;
   /** `storyline.grouped` on the main storyline (a side storyline is always grouped in the preview). */
   storylineGrouped?: boolean;
-  /** Image generation on (`--image <api>`; presets with `image`), with placeholder reference images for `refs`. */
-  image?: { api: ImageApi; auto?: boolean; style?: boolean; sfw?: boolean; refs?: boolean };
+  /**
+   * Image generation on (`--image <api>`; presets with `image`), with placeholder reference images
+   * for `refs`. `prompt`: the prompt type (default: the API's default, like a new connection).
+   */
+  image?: { api: ImageApi; prompt?: ImagePromptType; auto?: boolean; style?: boolean; sfw?: boolean; refs?: boolean };
   /** Speech synthesis on (`--speech <api>`; presets with `speech`), with placeholder characters for `characters`. */
   speech?: { api: SpeechApi; auto?: boolean; narrator?: boolean; characters?: boolean };
   /** User modules merged in (keyword rules see empty chat text). */
@@ -64,7 +67,7 @@ function previewMedia(preset: APreset, o: PreviewOptions): { image: ImageVars; s
   const refs = i?.refs && i.api !== 'novelai' ? PREVIEW_IMAGE_REFS : [];
   const characters = s?.characters ? PREVIEW_SPEECH_CHARACTERS : [];
   return {
-    image: i ? { on: true, auto: Boolean(i.auto), api: i.api, style: Boolean(i.style), sfw: Boolean(i.sfw), refs: refs.length > 0 } : { ...IMAGE_OFF },
+    image: i ? { on: true, auto: Boolean(i.auto), api: i.api, prompt: i.prompt ?? defaultImagePromptType(i.api), style: Boolean(i.style), sfw: Boolean(i.sfw), refs: refs.length > 0 } : { ...IMAGE_OFF },
     speech: s ? { on: true, auto: Boolean(s.auto), api: s.api, narrator: Boolean(s.narrator), characters: characters.length > 0 } : { ...SPEECH_OFF },
     data: { image: { refs }, speech: { format: s ? PREVIEW_SPEECH_FORMAT : '', characters } },
   };
@@ -188,7 +191,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
   else if (o.storyline) lines.push('storyline: main (the preset declares no storylines)');
   if (preset.image || o.image) {
     const v = vars.image;
-    lines.push(`image: ${!preset.image ? 'off (the preset declares no image)' : v.on ? [v.api, v.auto ? 'auto' : '', v.style ? 'style' : '', v.sfw ? 'sfw' : '', v.refs ? 'refs' : ''].filter(Boolean).join(' · ') : pure && o.image ? 'off (task turn)' : 'off'}`);
+    lines.push(`image: ${!preset.image ? 'off (the preset declares no image)' : v.on ? [v.api, v.prompt, v.auto ? 'auto' : '', v.style ? 'style' : '', v.sfw ? 'sfw' : '', v.refs ? 'refs' : ''].filter(Boolean).join(' · ') : pure && o.image ? 'off (task turn)' : 'off'}`);
   }
   if (preset.speech || o.speech) {
     const v = vars.speech;

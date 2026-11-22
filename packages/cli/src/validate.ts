@@ -3,7 +3,7 @@ import {
   isInlineStructure,
   INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
   SIGNATURE_CHANNELS_SINCE, THOUGHT_SIGNATURE_CHANNELS, CALLER_SCHEMA_DIRECT_SINCE,
-  MEDIA_SINCE, IMAGE_APIS, SPEECH_APIS,
+  MEDIA_SINCE, IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -42,6 +42,7 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'image.on': null,
   'image.auto': null,
   'image.api': IMAGE_APIS,
+  'image.prompt': IMAGE_PROMPT_TYPES,
   'image.style': null,
   'image.sfw': null,
   'image.refs': null,
