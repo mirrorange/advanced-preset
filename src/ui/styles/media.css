@@ -6,7 +6,9 @@
 .media-ref { display: flex; align-items: center; gap: var(--ap-space-2); min-width: 0; }
 .media-ref-group { gap: var(--ap-space-2); }
 .media-ref-group-title { font-size: 0.85em; font-weight: 600; color: var(--ap-muted); }
-.media-ref-scope { flex: 0 1 auto; width: auto; max-width: 8em; }
+.scope-select { position: relative; }
+.scope-select > select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.scope-select:focus-within { box-shadow: var(--ap-ring); }
 .media-ref-thumb { flex: none; width: 2.6em; height: 2.6em; object-fit: cover; border-radius: var(--ap-radius-sm); background: var(--ap-surface-2); }
 .blob-placeholder { display: inline-block; background: var(--ap-surface-2); }
 
@@ -55,7 +57,6 @@
 .voice-ask::backdrop { background: rgb(0 0 0 / 40%); }
 .speech-binding { display: flex; align-items: flex-start; gap: var(--ap-space-2); min-width: 0; }
 .speech-binding > .input:first-child { flex: 0 1 9em; min-width: 5em; }
-.speech-binding > .speech-scope { flex: 0 1 7em; min-width: 4em; }
 .speech-voice { flex: 1 1 auto; display: flex; align-items: center; gap: 4px; min-width: 0; }
 .speech-voice > .input { flex: 1 1 auto; min-width: 0; }
 .speech-results { display: flex; flex-direction: column; max-height: 14em; overflow: auto; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-sm); }

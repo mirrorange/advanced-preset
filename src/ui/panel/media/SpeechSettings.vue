@@ -18,6 +18,7 @@ import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
 import IconButton from '../../components/IconButton.vue';
 import ConnectionBar from './ConnectionBar.vue';
+import ScopeSelect from './ScopeSelect.vue';
 import AdvancedRequest from './AdvancedRequest.vue';
 import VoicePicker from './VoicePicker.vue';
 
@@ -67,6 +68,8 @@ const groups = computed(() => {
   const scopes: { card: string; name: string }[] = [{ card: '', name: t('media.speech.global') }, ...cards.value.map((x) => ({ card: x.key, name: x.name }))];
   return scopes.map((g) => ({ ...g, bindings: c.bindings.filter((b) => (b.card ?? '') === g.card) }));
 });
+
+const scopeOptions = computed(() => groups.value.map((g) => ({ value: g.card, label: g.name })));
 
 function addBinding(card: string) {
   conn.value?.bindings.push({ character: '', voice: null, ...(card ? { card } : {}) });
@@ -123,9 +126,7 @@ function removeBinding(b: VoiceBinding) {
               <div v-for="(b, i) in g.bindings" :key="i" class="speech-binding">
                 <input class="input" :value="b.character" :placeholder="t('media.speech.character')" @change="setBinding(b, { character: ($event.target as HTMLInputElement).value.trim() })" />
                 <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(b, { voice: $event })" />
-                <select v-if="groups.length > 1" class="input speech-scope" :value="g.card" :aria-label="t('media.speech.scope')" @change="moveBinding(b, ($event.target as HTMLSelectElement).value)">
-                  <option v-for="o in groups" :key="o.card" :value="o.card">{{ o.name }}</option>
-                </select>
+                <ScopeSelect v-if="groups.length > 1" :model-value="g.card" :options="scopeOptions" :label="t('media.speech.scope')" @update:model-value="moveBinding(b, $event)" />
                 <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeBinding(b)" />
               </div>
               <button type="button" class="btn ghost add" @click="addBinding(g.card)"><Plus />{{ t('media.speech.addBinding') }}</button>
