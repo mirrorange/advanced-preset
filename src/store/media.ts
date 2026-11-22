@@ -82,6 +82,8 @@ export function mediaSettings(): MediaSettings {
     if (!cur || typeof cur !== 'object' || Array.isArray(cur)) { m[k] = section; continue; }
     for (const [kk, v] of Object.entries(section)) if (!(kk in cur)) cur[kk] = v;
   }
+  // Connections saved before prompt types existed (dev builds).
+  for (const c of s.media.image.connections) if (!c.promptType) c.promptType = defaultImagePromptType(c.api);
   return s.media;
 }
 
