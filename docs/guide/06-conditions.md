@@ -57,6 +57,8 @@
 | `storyline.main` / `storyline.if` / `storyline.new` / `storyline.name` / `storyline.grouped` | 当前是主线 / 是 if 线 / 新开的线 / 故事线名称 / 历史按故事线分组（需声明[故事线](09-built-in-features.md#故事线)） | 告诉模型历史怎么分组、正在写哪条线 |
 | `storyline.naming` / `storyline.namingMain` / `storyline.switching` | AI 为新故事线起名 / 为原主线起名 / 本轮切换主线 | 请求 `storyline` 结构、说明新主线 |
 | `storyline.frozen` | 本轮的变量更新被阻止（用户的“阻止支线变量更新”设置） | 告诉模型不要更新状态 |
+| `image.on` / `image.prompt` / `image.style` / `image.sfw` / `image.refs` | 图像生成开着 / 提示词类型（标签、描述、指令） / 用户有风格提示词 / 打开了 NSFW 屏蔽 / 有参考图（需声明[图像生成](09-built-in-features.md#图像生成与语音合成)） | 按提示词类型选写法，不重复画风，不为 NSFW 场景出图 |
+| `speech.on` / `speech.api` / `speech.narrator` / `speech.characters` | 语音合成开着 / 用哪种 API / 旁白也朗读 / 有绑定了说话人的角色（需声明[语音合成](09-built-in-features.md#图像生成与语音合成)） | 只在开着时要求标出台词，列出角色名 |
 
 ## 用 `@if` 控制一小段
 

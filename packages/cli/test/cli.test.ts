@@ -748,6 +748,92 @@ On.
     expect(out).toContain('## My style');
     expect(out).not.toContain('Be quiet.');
   });
+
+  const GROUPS = `
+userModuleGroups:
+  - { id: styles, name: Styles, mode: single }
+  - { id: extras, collapsed: true }
+`;
+  const one = (name: string, fm = '') => `---\nname: ${name}\npoint: guide\n${fm}---\n${name} text.\n`;
+
+  it('compiles user module groups and the group of bundled modules and templates', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS,
+      'locales/zh-cn.yaml': 'userModuleGroups:\n  styles: { name: 文风 }\n  nope: { name: x }\n',
+      'user-modules/a-plain.md': one('Plain', 'group: styles\n'),
+      'user-modules/b-ornate.md': one('Ornate', 'group: styles\nenabled: false\n'),
+      'user-modules/b-ornate.zh-cn.md': one('华丽', 'group: extras\n'),
+      'user-modules/c-loose.md': one('Loose'),
+      'user-module-templates/mine.md': one('Mine', 'group: extras\n'),
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.userModuleGroups).toEqual([{ id: 'styles', name: 'Styles', mode: 'single' }, { id: 'extras', name: 'extras', mode: 'multi', collapsed: true }]);
+    expect(preset!.userModules.map((m) => [m.id, m.group])).toEqual([['a-plain', 'styles'], ['b-ornate', 'styles'], ['c-loose', undefined]]);
+    expect(preset!.userModules[1]!.locales?.['zh-cn']).not.toHaveProperty('group');
+    expect(preset!.userModuleTemplates[0]!.group).toBe('extras');
+    const warns = diag.warnings.map((w) => `${w.file}: ${w.message}`).join('\n');
+    expect(warns).toMatch(/b-ornate\.zh-cn\.md: `group` comes from the source file/);
+    expect(warns).toMatch(/userModuleGroups\.nope does not exist/);
+    expect(warns).not.toMatch(/userModuleGroups\.styles/);
+  });
+
+  it('artifacts without groups have no userModuleGroups field', () => {
+    const { preset } = build(tree({ 'preset.yaml': MANIFEST + EXTRA, 'user-modules/x.md': one('X') }));
+    expect(preset).not.toHaveProperty('userModuleGroups');
+  });
+
+  it('reports bad groups, unknown groups and several enabled modules in a single group', () => {
+    const { diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS + '  - { id: Bad_Id }\n  - { id: styles }\n  - { id: odd, mode: radio, collapsed: maybe, enabled: sure, color: red }\n',
+      'user-modules/a.md': one('A', 'group: styles\n'),
+      'user-modules/b.md': one('B', 'group: styles\n'),
+      'user-modules/c.md': one('C', 'group: extras\n'),
+      'user-modules/d.md': one('D', 'group: extras\n'),
+      'user-modules/e.md': one('E', 'group: gone\n'),
+      'user-module-templates/t.md': one('T', 'group: [x]\n'),
+    }));
+    const errors = diag.errors.map((e) => `${e.file}: ${e.message}`).join('\n');
+    expect(errors).toMatch(/preset\.yaml: user module group id must be lower-case kebab-case/);
+    expect(errors).toMatch(/preset\.yaml: duplicate user module group `styles`/);
+    expect(errors).toMatch(/preset\.yaml: mode must be single \| multi/);
+    expect(errors).toMatch(/preset\.yaml: collapsed must be true or false/);
+    expect(errors).toMatch(/preset\.yaml: enabled must be true or false/);
+    expect(errors).toMatch(/user-modules\/b\.md: single user module group `styles` already has `a` enabled/);
+    expect(errors).not.toMatch(/user-modules\/d\.md/);
+    expect(errors).toMatch(/user-modules\/e\.md: unknown user module group `gone`/);
+    expect(errors).toMatch(/user-module-templates\/t\.md: unknown user module group/);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/unknown user module group key `color`/);
+  });
+
+  it('compiles a group\'s switch; previews leave out the modules of a group switched off', async () => {
+    const { bundledModules, preview } = await import('../src/preview');
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS.replace('mode: single }', 'mode: single, enabled: false }') + '  - { id: on, enabled: true }\n',
+      'user-modules/a.md': one('A', 'group: styles\n'),
+      'user-modules/c.md': one('C'),
+      'user-modules/d.md': one('D', 'group: on\n'),
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.userModuleGroups).toEqual([{ id: 'styles', name: 'Styles', mode: 'single', enabled: false }, { id: 'extras', name: 'extras', mode: 'multi', collapsed: true }, { id: 'on', name: 'on', mode: 'multi' }]);
+    expect((bundledModules(preset!) as UserModule[]).map((m) => m.id)).toEqual(['c', 'd']);
+    const out = preview(preset!, { config: 'fast', userModules: bundledModules(preset!, ['all']) as UserModule[] });
+    expect(out).toContain('C text.');
+    expect(out).toContain('D text.');
+    expect(out).not.toContain('A text.');
+  });
+
+  it('previews bundled modules in install order, one per single group', async () => {
+    const { bundledModules } = await import('../src/preview');
+    const { preset } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS,
+      'user-modules/a.md': one('A', 'group: styles\n'),
+      'user-modules/b.md': one('B', 'group: styles\nenabled: false\n'),
+      'user-modules/c.md': one('C'),
+    }));
+    expect((bundledModules(preset!) as UserModule[]).map((m) => [m.id, m.group, m.enabled])).toEqual([['c', undefined, true], ['a', 'styles', true]]);
+    expect((bundledModules(preset!, ['all']) as UserModule[]).map((m) => [m.id, m.enabled])).toEqual([['c', true], ['a', true], ['b', false]]);
+    expect((bundledModules(preset!, ['b']) as UserModule[]).map((m) => [m.id, m.enabled])).toEqual([['b', true]]);
+  });
 });
 
 describe('build variables', () => {
@@ -1463,5 +1549,73 @@ describe('preset file (I-170)', () => {
     for (const [k, v] of Object.entries(resolveConfiguration(preset!, preset!.defaultConfiguration, undefined).sampling)) expect(json[k]).toEqual(v);
     const bare = JSON.parse(await read(await writePresetFile(preset!, dir, { installer: false }), 'utf8'));
     expect(bare.extensions.tavern_helper).toBeUndefined();
+  });
+});
+
+describe('media (image generation / speech synthesis)', () => {
+  const STRUCTS = `
+  pic: { kind: image, tag: Pic, count: 2, properties: { prompt: Describe the scene }, formatPrompt: { tag: "<Pic>…</Pic>", field: "{{field}}" } }
+  voice: { kind: speech, history: 2, formatPrompt: { tag: "Wrap lines in <speech character=\\"…\\">." } }
+`;
+  const withMedia = (decl: string, min = 'minAdvancedPreset: 1.12.0\n', body = 'Draw.<!-- @if image.refs -->\n{{ap::image::refs}}<!-- @end --><!-- @if speech.on -->\n{{ap::speech::format}} {{ap::speech::characters}}<!-- @end -->', structures = STRUCTS) => {
+    const manifest = MANIFEST.replace('version: 1.0.0', `version: 1.0.0\n${min}`).replace('structures:\n', `structures:${structures}`) + decl;
+    const t = tree({ 'preset.yaml': manifest });
+    t.set('modules/media.md', `---\nid: media\ntoggle: always\nregion: task\nwhen: image.on || speech.on\nstructures: [pic, voice]\n---\n${body}\n`);
+    return t;
+  };
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message).join('\n');
+
+  it('is absent unless declared (hash unchanged)', () => {
+    const plain = build(tree());
+    expect('image' in plain.preset!).toBe(false);
+    expect('speech' in plain.preset!).toBe(false);
+  });
+
+  it('compiles the flags and structures', () => {
+    const r = build(withMedia('image: true\nspeech: {}\n'));
+    expect(r.diag.errors).toEqual([]);
+    expect(messages(r)).not.toMatch(/image|speech|voice|pic/i);
+    expect(r.preset!.image).toEqual({});
+    expect(r.preset!.speech).toEqual({});
+    expect(r.preset!.structures.pic).toMatchObject({ kind: 'image', tag: 'Pic', count: 2, properties: { prompt: 'Describe the scene' } });
+    expect(r.preset!.structures.voice).toMatchObject({ kind: 'speech', tag: 'speech', history: 2, formatPrompt: { tag: 'Wrap lines in <speech character="…">.', field: 'Wrap lines in <speech character="…">.' } });
+  });
+
+  it('flags bad declarations, undeclared use and old AP versions', () => {
+    expect(messages(build(withMedia('image: yes\nspeech: true\n')))).toMatch(/image must be `true` or a mapping/);
+    expect(messages(build(withMedia('image: { tag: x }\nspeech: true\n')))).toMatch(/image: unknown key `tag`/);
+    const undeclared = messages(build(withMedia('')));
+    expect(undeclared).toMatch(/image\.\* variables and \{\{ap::image::…\}\} are always off/);
+    expect(undeclared).toMatch(/structure voice: speech structures are never requested/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', '')))).toMatch(/image generation needs Advanced Preset 1\.12\.0[\s\S]*speech synthesis needs/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '{{ap::image::nope}} {{ap::speech::x}}')))).toMatch(/expected refs[\s\S]*expected format \| characters/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '<!-- @if image.api == "dalle" -->x<!-- @end -->')))).toMatch(/`image.api` is never "dalle"/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '<!-- @if image.prompt == "natural" -->x<!-- @end -->')))).toMatch(/`image.prompt` is never "natural" \(expected tags \| description \| instruction\)/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '<!-- @if image.prompt == "tags" -->x<!-- @end -->')))).not.toMatch(/image.prompt/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('history: 2', 'history: { depth: 2 }'))))).toMatch(/speech takes a number/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('count: 2', 'count: 0'))))).toMatch(/must be a positive integer/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('tag: Pic', 'tag: speech'))))).toMatch(/share tag `speech`/);
+    const lonely = withMedia('image: true\nspeech: true\n');
+    lonely.set('modules/media.md', lonely.get('modules/media.md')!.replace('structures: [pic, voice]', 'structures: [pic]'));
+    expect(messages(build(lonely))).toMatch(/declares speech but no module requests a speech structure/);
+  });
+
+  it('previews the media variables with placeholder macros', async () => {
+    const { preview } = await import('../src/preview');
+    const p = build(withMedia('image: true\nspeech: true\n')).preset!;
+    const off = preview(p, {});
+    expect(off).toMatch(/image: off\nspeech: off\n/);
+    expect(off).not.toMatch(/Draw\./);
+    const on = preview(p, { image: { api: 'gemini', refs: true, sfw: true }, speech: { api: 'fish', characters: true } });
+    expect(on).toMatch(/image: gemini · instruction · sfw · refs\nspeech: fish · characters/);
+    expect(preview(p, { image: { api: 'gemini', prompt: 'description' } })).toMatch(/image: gemini · description\n/);
+    expect(on).toMatch(/- ref1: \(reference image 1\)/);
+    expect(on).toMatch(/\(speech format notes of the API\) \(character 1\), \(character 2\)/);
+    expect(on).toMatch(/structures: [^\n]*pic, voice/);
+    const json = JSON.parse(preview(p, { image: { api: 'novelai', refs: true }, json: true, transport: 'structured' }));
+    expect(json.vars.image).toEqual({ on: true, auto: false, api: 'novelai', prompt: 'tags', style: false, sfw: false, refs: false });
+    const field = Object.values(json.schema.value.properties as Record<string, { type: string; items?: { properties: object } }>).find((x) => x.type === 'array' && x.items)!;
+    expect(Object.keys(field.items!.properties)).toEqual(['prompt', 'ratio', 'caption']);
+    expect(preview(build(withMedia('')).preset!, { image: { api: 'openai' } })).toMatch(/image: off \(the preset declares no image\)/);
   });
 });

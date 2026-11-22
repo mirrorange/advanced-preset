@@ -1,4 +1,4 @@
-# 9. 内置功能：元指令、记忆、总结、代写、选项、事件摘要、故事线、状态栏与行内批注
+# 9. 内置功能：元指令、记忆、总结、代写、选项、事件摘要、故事线、状态栏、行内批注、图像与语音
 
 AP 内置了一批角色扮演和写作中常用的功能。它们的“机制”由 AP 负责：识别、解析、显示成卡片、保存数据；**说法**由你负责：功能叫什么、模型要怎样输出、什么时候启用。
 
@@ -16,6 +16,8 @@ AP 内置了一批角色扮演和写作中常用的功能。它们的“机制�
 | 选项（options） | 几条供用户选择的下一步输入 | `<options>` |
 | 状态栏（status） | 故事日期（或第 N 天）、星期、时间、地点、天气，显示在消息顶部 | `<status>` |
 | 行内批注（annotations） | 写在正文里、针对某段文字的批注 | `annotations`（用于“Freesia 的评论”） |
+| 插图（image） | 图像提示词，AP 生成图像并显示在正文下方 | `<Freesia_Illustration>` |
+| 语音（speech） | 写在正文里、标出谁说了哪句话，AP 为台词配音 | `<speech character="…">` |
 | 自定义（custom） | 任何你想要的块，可以带自己的卡片组件 | — |
 
 在 `preset.yaml` 里，你为每个结构写好：
@@ -273,6 +275,151 @@ AP 怎么排历史：在主线上，所有支线的内容挪到前面，主线�
 - 默认历史里只有干净正文；结构的 `history: N` 可把最近 N 条消息的批注重新放回历史，代价是 token。
 
 批注最好**少而精**。建议把**语法**写在结构的 `formatPrompt` 里（与用途无关，可被不同模组复用），把**写什么、写多少、用谁的口吻**写在模组里。花瓣就是这样做的：结构 `annotations` 只说明标记语法；模组“Freesia 的评论”（默认关闭）让 Freesia 以自己的口吻在正文上留下至多三条评论，而且只在她本来就会回复时发送（开启“始终请求元回复”，或输入中含混合元指令）。语法与字段见 [结构参考](../reference/structures.md#annotations)。
+
+## 图像生成与语音合成
+
+AP 1.12 起，预设可以让模型为故事配插图、为角色的台词配音。请求由 AP 在浏览器里直接发出，连接（API 类型、Key、模型、提示词类型、风格提示词、参考图、角色与说话人的绑定）都由用户在面板的「多模态」页设置。预设只管**让模型写什么**：插图的提示词、哪些话是谁说的。用户那边开没开、提示词要写成哪一类，预设通过条件变量知道。
+
+和故事线一样，这是预设级的声明，不声明就没有这项功能：
+
+```yaml
+# manifest/behavior.yaml
+image: true      # 支持图像生成
+speech: true     # 支持语音合成
+```
+
+声明后，「多模态」页才会出现对应的分区。用户没有打开功能或没有可用连接时，`image.on` / `speech.on` 为假，对应的结构也不会向模型请求。旧版 AP 不认识这些字段，所以用到它们的预设应把 `minAdvancedPreset` 设为 `1.12.0`，否则 `ap check` 会给出警告。`image` / `speech` 目前只接受 `true`（预留了映射写法，但还没有可写的键）。
+
+### 插图：image 结构
+
+插图是一个普通结构（`kind: image`），排在正文之后。模型给出一到几条图像提示词，AP 生成图像，显示在消息正文下方：可以切换版本、看大图、重新生成、下载、删除。用户打开“自动生成”时回复一结束就开始生成，关闭时卡片上只显示提示词和生成按钮。
+
+卡片上的铅笔按钮打开**图像面板**（独立的弹窗，不在 AP 主面板中；同一条消息有多张图时可以在顶部切换）：
+
+- 修改提示词、勾选参考图（当前图像连接在本聊天可用的参考图；连接不使用参考图时给出提示）、比例与标题。修改只覆盖模型给的值，保存在这一条消息中（不改动结构的原值），与模型原值相同的项不保存；「还原」恢复模型的值。之后的生成都使用修改后的值。
+- 查看全部版本：点缩略图切换卡片上显示的版本，也可以看大图或删除某个版本。
+- 「保存」保存并关闭；「生成」保存后立即生成新版本，面板保持打开，生成中可以取消，出错时显示原因；Ctrl/⌘+Enter 同「生成」。Esc、关闭按钮或点击遮罩关闭面板（未保存的修改丢弃）。
+
+```yaml
+# manifest/structures.yaml（花瓣）
+image:
+  kind: image
+  tag: Freesia_Illustration       # 对话式：每张图一个块
+  field: illustrations            # 指令式：一个数组字段
+  count: 1                        # 每轮最多几张，默认 1
+  properties:
+    prompt: The image prompt, self-contained (the image model knows nothing about the story).
+    refs: Ids of the reference images that appear in the illustration.
+    ratio: "Aspect ratio: `1:1`, `3:4`, `4:3`, `9:16` or `16:9`."
+    caption: A short caption in the story's language, under 10 words.
+  formatPrompt:
+    tag: |-
+      After the story content (leave out optional tags you do not need):
+      <Freesia_Illustration>
+        <prompt>...</prompt>
+        <refs>id, id</refs>
+        <ratio>3:4</ratio>
+        <caption>...</caption>
+      </Freesia_Illustration>
+    field: Fill the `{{field}}` field with up to one item `{ "prompt", "refs", "ratio", "caption" }`, or leave it empty.
+```
+
+每张图包含四项：`prompt`（必填）、`refs`（选用的参考图 id）、`ratio`（画幅）、`caption`（图下的标题）。参考图分为全局的和绑定到某张角色卡的（用户可以在两类之间移动），预设只会看到全局参考图和当前聊天角色卡（群聊为所有成员）的参考图，不相干的角色不会互相干扰。没有可用的参考图时（`image.refs` 为假），AP 不再要求模型填 `refs`，指令式的 Schema 里也没有这个字段。模型这一轮不输出插图也是可以的。
+
+### 语音：行内 speech 结构
+
+语音和[行内批注](#行内批注)一样写在正文里：模型用 `<speech character="名字">台词</speech>` 包住角色说出口的话，标签名取结构的 `tag`（默认 `speech`）。AP 去掉标记，正文只留下台词原文，并记住每句台词的位置和角色：
+
+```yaml
+speech:
+  kind: speech
+  formatPrompt:
+    tag: |-
+      Spoken lines are written inside the story text as `<speech character="Name">words</speech>`; the tags are removed from the text shown to the reader.
+
+      Example: “<speech character="Lena">Don't go,</speech>” Lena whispered.
+```
+
+- 台词的下划线样式与批注不同，两者可以同时存在；点一下台词生成或播放这一句。正文上方有一个全文播放框，可以生成全部、播放、暂停、查看进度，按顺序朗读；
+- 标签外的文字都是旁白。用户打开“旁白语音”时，旁白也会朗读（`speech.narrator` 为真）；
+- 角色名到说话人的绑定按连接保存在用户那里，分为全局绑定和按角色卡的绑定：只有全局绑定和当前聊天角色卡（群聊时为所有成员卡）的绑定生效，同名时角色卡的优先。`{{ap::speech::characters}}` 列出这些已绑定的角色名，让模型按同样的写法称呼他们；模型也可以写出未绑定的角色，生成这些台词前 AP 会请用户为该角色选择声音（可存为全局或当前角色卡），取消则这次跳过；
+- 旁白使用旁白声音，未设置时为语音 API 的默认声音；
+- 生成的语音可以在播放框里删除或重新生成，整条消息或正在播放的一句；播放框上的「语音面板」按钮打开该消息的语音面板（独立弹窗）：列出全部分块（角色 / 旁白、使用的声音、未生成 / 生成中 / 已生成 / 失败 / 播放中），每块可以试听、生成或重新生成、删除语音，并可直接编辑发给语音服务的语音提示（可写该服务支持的内联标签，面板里有说明）。修改保存在消息里，只影响这一块（原来的语音随之删除，下次生成使用修改后的文字），可一键还原为模型原文；消息被编辑或滑动后，对应分块不存在的修改不再生效；
+- 有的 API 支持在台词里写语气、停顿标签（如 Fish Audio 的 `<whisper>`、Gemini 的 `<sigh>`）。这些标签交给语音合成，但不显示在正文里。`{{ap::speech::format}}` 是 AP 为当前 API 维护的一小段英文说明，列出可用的标签；API 没有这类标签时为空。OpenRouter 连接按模型 id 中的提供者决定（例如 `elevenlabs/eleven-v3` 用 ElevenLabs 的标签，`openai/…` 没有标签），所以同为 `speech.api == "openrouter"`，格式说明也可能不同。预设不需要自己写这些标签；
+- 和批注一样：流式时标记不会闪现，编辑正文后台词会跟随原文，默认历史里只有干净的正文；`history: N` 可以在最近 N 条消息中把 `<speech>` 标记放回去。
+
+### 条件变量与宏
+
+| 写法 | 意思 |
+| --- | --- |
+| `image.on` / `speech.on` | 预设声明了这项功能，用户打开了它，并且选中了可用的连接 |
+| `image.auto` / `speech.auto` | 用户打开了自动生成 |
+| `image.api` | 当前连接的 API：`openai` `gemini` `novelai` `openrouter`（关闭时为空） |
+| `image.prompt` | 当前连接的提示词类型：`tags`（标签）`description`（描述）`instruction`（指令），关闭时为空。由用户选择，新建或切换 API 时 OpenAI / Gemini / OpenRouter 默认指令，NovelAI 默认标签 |
+| `image.style` | 连接有自己的风格提示词，AP 会把它附加到每次请求中（提示词本身不交给预设） |
+| `image.sfw` | 打开了 NSFW 屏蔽（OpenAI / Gemini / OpenRouter 默认打开，NovelAI 默认关闭） |
+| `image.refs` | 有可用的参考图：全局的，或属于当前聊天角色卡的（OpenAI / Gemini / OpenRouter） |
+| `speech.api` | `fish` `elevenlabs` `minimax` `gemini` `openai` `deepseek` `openrouter`（关闭时为空） |
+| `speech.narrator` | 旁白也要朗读 |
+| `speech.characters` | 当前聊天有已绑定说话人的角色（`{{ap::speech::characters}}` 非空） |
+| `{{ap::image::refs}}` | 参考图清单，每行 `- <id>: <描述>` |
+| `{{ap::speech::format}}` | 当前语音 API 的标签说明 |
+| `{{ap::speech::characters}}` | 当前聊天中已绑定说话人的角色名（全局与当前角色卡），逗号分隔 |
+
+功能关闭时，这些宏都为空。
+
+### 推荐写法
+
+**语法**写在结构的 `formatPrompt` 里，**写什么、怎么写**写在模组里。花瓣用两个始终生效的模组 `illustrations` 和 `voice`，靠条件出现（纯元指令和代写时不出现）：
+
+```markdown
+---
+id: illustrations
+toggle: always
+region: guidelines
+when: 'image.on && !meta.pure && gen.type != "impersonate"'
+structures: [image]
+---
+## Illustrations
+
+- The image model knows nothing about the story: describe every character's appearance in full each time.
+<!-- @if image.sfw -->
+- Do not illustrate sexual, explicit or graphically violent moments.
+<!-- @end -->
+<!-- @if image.prompt == "tags" -->
+- Write the prompt as comma-separated Danbooru-style tags…
+<!-- @end -->
+<!-- @if image.prompt == "description" -->
+- Write the prompt as one detailed paragraph in English…
+<!-- @end -->
+<!-- @if image.prompt == "instruction" -->
+- Write the prompt as direct instructions to the image model, in the language of your reply…
+<!-- @end -->
+<!-- @if !image.style -->
+- State an art style that suits the story's tone.
+<!-- @end -->
+<!-- @if image.refs -->
+- List the ids of the reference images that appear in this illustration; use only these ids:
+
+{{ap::image::refs}}
+<!-- @end -->
+
+### Format
+
+{{ap::structure::image}}
+```
+
+要点：
+
+- **按 `image.prompt` 区分写法**：`tags` 用逗号分隔的标签（NovelAI 等），`description` 用一整段英文描述（SD、Midjourney 类模型），`instruction` 可以直接、指令式地提出要求，也不必用英文（GPT Image、Nano Banana 等多模态模型理解力很强）；
+- **`image.style` 为真时不要写画风**：用户的风格提示词会自动附加，再写一遍只会互相打架；
+- **`image.sfw` 为真时不为 NSFW 场景出图**：换一个安全的画面，或者这一轮不出图；
+- **提示词要自成一体**：图像模型不知道故事，每次都要完整描述人物外貌，不能只写名字；
+- **语音模组**说清楚哪些话要包、哪些不要：只包说出口的话，引号和“她说”放在标签外，同一个角色每次用同样的名字，不嵌套，不在正文以外使用；`speech.characters` 时列出 `{{ap::speech::characters}}`，`speech.narrator` 时提醒旁白里不要有不适合朗读的符号；结尾放上 `{{ap::structure::speech}}` 和 `{{ap::speech::format}}`。
+
+完整的模组见花瓣的 `modules/features/illustrations.md` 与 `voice.md`。
+
+用 `ap preview` 检查各种组合：`--image openai|gemini|novelai|openrouter` 打开图像生成并指定 API，`--image-prompt tags|description|instruction` 指定提示词类型（默认随 API），`--image-auto` `--image-style` `--image-sfw` `--image-refs` 打开对应的变量；`--speech <api>` 打开语音合成，`--speech-auto` `--speech-narrator` `--speech-characters` 同理。参考图、角色名和语音格式说明用占位示例。声明见 [清单参考](../reference/manifest.md#图像生成与语音合成-image--speech)，字段与解析规则见结构参考的 [image](../reference/structures.md#image) 与 [speech](../reference/structures.md#speech)，变量与宏见 [条件变量](../reference/expressions.md#条件变量) 和 [宏](../reference/macros.md#图像与语音)，预览选项见 [ap preview](../reference/cli.md#ap-preview)。
 
 ## 状态栏
 

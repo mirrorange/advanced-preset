@@ -2,7 +2,7 @@
 import { parseArgs } from 'node:util';
 import { basename, resolve } from 'node:path';
 import { readFile, writeFile } from 'node:fs/promises';
-import { parseUserModuleFile, tavernHelperScriptCount, type ParamValue } from '@advanced-preset/protocol';
+import { IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, activeUserModules, normalizeUserModuleGroups, parseUserModuleFile, tavernHelperScriptCount, type ImageApi, type ImagePromptType, type ParamValue, type SpeechApi } from '@advanced-preset/protocol';
 import { buildDir, writePresetFile } from './io';
 import { report } from './diagnostics';
 import { bundledModules, parseParamArg, preview, templateModules } from './preview';
@@ -25,6 +25,10 @@ Usage
                    [--enable a,b] [--disable c] [--param id=value …] [--input text]
                    [--storyline name|?] [--storyline-new] [--storyline-grouped]
                    [--storyline-switch] [--storyline-naming-main]
+                   [--image openai|gemini|novelai] [--image-prompt tags|description|instruction]
+                   [--image-auto] [--image-style] [--image-sfw] [--image-refs]
+                   [--speech fish|elevenlabs|minimax|gemini|openai|deepseek]
+                   [--speech-auto] [--speech-narrator] [--speech-characters]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -62,6 +66,16 @@ async function main(argv: string[]): Promise<number> {
       'storyline-grouped': { type: 'boolean' },
       'storyline-switch': { type: 'boolean' },
       'storyline-naming-main': { type: 'boolean' },
+      image: { type: 'string' },
+      'image-prompt': { type: 'string' },
+      'image-auto': { type: 'boolean' },
+      'image-style': { type: 'boolean' },
+      'image-sfw': { type: 'boolean' },
+      'image-refs': { type: 'boolean' },
+      speech: { type: 'string' },
+      'speech-auto': { type: 'boolean' },
+      'speech-narrator': { type: 'boolean' },
+      'speech-characters': { type: 'boolean' },
       'user-modules': { type: 'string' },
       'bundled-modules': { type: 'string' },
       'user-module-templates': { type: 'string' },
@@ -86,7 +100,7 @@ async function main(argv: string[]): Promise<number> {
       const failed = !diag.ok || (values.strict && diag.warnings.length > 0);
       if (failed || !preset) return 1;
       if (command === 'check') {
-        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ''}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ''}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ''}`);
+        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleGroups?.length ? `, ${preset.userModuleGroups.length} user module groups` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ''}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ''}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ''}`);
         return 0;
       }
       const installer = installerFlag ?? build?.installer ?? true;
@@ -110,18 +124,26 @@ async function main(argv: string[]): Promise<number> {
         params[parsed.id] = parsed.value;
       }
       const meta = values.meta === 'pure' || values.meta === 'mixed' ? values.meta : undefined;
+      if (values.image !== undefined && !(IMAGE_APIS as readonly string[]).includes(values.image)) { console.error(`--image: expected ${IMAGE_APIS.join(' | ')}`); return 1; }
+      if (values['image-prompt'] !== undefined && !(IMAGE_PROMPT_TYPES as readonly string[]).includes(values['image-prompt'])) { console.error(`--image-prompt: expected ${IMAGE_PROMPT_TYPES.join(' | ')}`); return 1; }
+      if (values.speech !== undefined && !(SPEECH_APIS as readonly string[]).includes(values.speech)) { console.error(`--speech: expected ${SPEECH_APIS.join(' | ')}`); return 1; }
+      const image = values.image ? { api: values.image as ImageApi, prompt: values['image-prompt'] as ImagePromptType | undefined, auto: Boolean(values['image-auto']), style: Boolean(values['image-style']), sfw: Boolean(values['image-sfw']), refs: Boolean(values['image-refs']) } : undefined;
+      const speech = values.speech ? { api: values.speech as SpeechApi, auto: Boolean(values['speech-auto']), narrator: Boolean(values['speech-narrator']), characters: Boolean(values['speech-characters']) } : undefined;
       const ids = (v: string) => v.split(',').map((x) => x.trim()).filter(Boolean);
       // A fresh install: the preset's bundled modules first, then any file / templates on top.
       const bundled = bundledModules(preset, values['bundled-modules'] !== undefined ? ids(values['bundled-modules']) : undefined, values.lang);
       if (typeof bundled === 'string') { console.error(bundled); return 1; }
       const userModules = [...bundled];
-      if (values['user-modules']) userModules.push(...parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8'))).modules);
+      if (values['user-modules']) {
+        const file = parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8')));
+        userModules.push(...activeUserModules(normalizeUserModuleGroups(file.modules, file.groups).modules, file.groups));
+      }
       if (values['user-module-templates']) {
         const picked = templateModules(preset, ids(values['user-module-templates']), values.lang);
         if (typeof picked === 'string') { console.error(picked); return 1; }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values['storyline-new'], storylineGrouped: values['storyline-grouped'], storylineSwitch: values['storyline-switch'], storylineNamingMain: values['storyline-naming-main'], userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values['storyline-new'], storylineGrouped: values['storyline-grouped'], storylineSwitch: values['storyline-switch'], storylineNamingMain: values['storyline-naming-main'], image, speech, userModules, json: values.json });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);
       return 0;

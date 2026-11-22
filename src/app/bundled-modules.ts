@@ -8,7 +8,7 @@ import { confirmPopup, toast } from '@/st/host';
 import { presetState } from '@/store/config';
 import { getPreset } from '@/store/presets';
 import { applyBundledSync, planBundledSync, planIsEmpty, presetWithUserModules, type BundledConflict } from '@/store/bundled-modules';
-import { userModules } from '@/store/user-modules';
+import { userModuleGroups, userModules } from '@/store/user-modules';
 import { downloadJson, fileSlug } from '@/ui/download';
 import { locale, presetName, t } from '@/i18n';
 
@@ -71,8 +71,8 @@ export interface SyncOptions {
 
 async function sync(preset: APreset, o: SyncOptions): Promise<void> {
   const state = presetState(preset);
-  const plan = planBundledSync(preset, userModules(preset), state.bundledModules, locale());
-  if (planIsEmpty(plan, state.bundledModules)) return;
+  const plan = planBundledSync(preset, userModules(preset), state.bundledModules, locale(), { list: userModuleGroups(preset), records: state.bundledGroups });
+  if (planIsEmpty(plan, state.bundledModules, state.bundledGroups)) return;
   const take = o.auto ? plan.conflicts.filter((c) => !c.modified).map((c) => c.id) : [];
   const ask = plan.conflicts.filter((c) => !take.includes(c.id));
   if (ask.length) take.push(...(await chooseIncoming(preset, ask)));
@@ -145,7 +145,7 @@ export async function exportPreset(preset: APreset): Promise<boolean> {
   if (!(await confirmPopup(root, t('um.bundled.export'), t('common.cancel')))) return false;
   const ids = picked();
   const chosen = list.filter((m) => ids.includes(m.id));
-  const artifact = presetWithUserModules(preset, chosen, locale());
+  const artifact = presetWithUserModules(preset, chosen, locale(), userModuleGroups(preset));
   const sampling = resolveConfiguration(artifact, artifact.defaultConfiguration, undefined).sampling;
   downloadJson(`${fileSlug(preset.id)}.apreset.json`, presetFile(artifact, { installer: installer.box.checked, sampling }));
   return true;

@@ -12,7 +12,7 @@ import { st, toast, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
 import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
-import { annotationHistory, historyEchoes, rewriteHistoryIndexed, synopsisOptions } from './history';
+import { annotationHistory, historyEchoes, rewriteHistoryIndexed, speechHistory, synopsisOptions } from './history';
 import { buildVarsAndData, storylineViewOf } from './assembler';
 import { keywordTexts } from '@/store/user-modules';
 import { detachRegeneratingSidecar } from '@/store/sidecar';
@@ -91,6 +91,7 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     realIndex: (i: number) => realIndexOf[i] ?? -1,
     currentInput,
     annotations: annotationHistory(preset, config),
+    speech: speechHistory(preset, config, vars),
     continuing: stType === 'continue' && chat[last] && !chat[last]!.is_user ? last : undefined,
     ...(storylines ? { background: (i: number) => inBackground(storylines!, groupOf[i]) } : {}),
   };

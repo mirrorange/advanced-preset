@@ -1,0 +1,103 @@
+<script setup lang="ts">
+/**
+ * One image prompt of a message: the image (with its earlier versions), or the prompt and a Generate
+ * button. Toolbar: previous / next version, regenerate, open the image panel (edit the prompt,
+ * reference images, ratio, caption; versions), download, delete; click the image to view it full size.
+ */
+import { computed, reactive, ref, watch } from 'vue';
+import { ChevronLeft, ChevronRight, Download, ImageOff, LoaderCircle, Pencil, RefreshCw, Trash2, WandSparkles, X } from 'lucide-vue-next';
+import type { ImagePrompt } from '@advanced-preset/protocol';
+import { t } from '@/i18n';
+import type { SidecarImage } from '@/store/sidecar';
+import { getBlob, hasBlob } from '@/store/media-db';
+import { cancelImage, deleteImage, generateImage, imageJobs, jobKey, showImage } from '@/app/images';
+import { downloadBlob } from '../../download';
+import { mediaErrorText } from '../../media/errors';
+import { openImagePanel } from '../../media/image-panel';
+import IconButton from '../../components/IconButton.vue';
+import BlobImage from '../../components/BlobImage.vue';
+import ImageViewer from './ImageViewer.vue';
+
+const props = defineProps<{ mesid: number; genId: string; structure: string; index: number; prompt: ImagePrompt; record?: SidecarImage; editable: boolean }>();
+
+const stored = computed(() => props.record?.keys ?? []);
+/** Images no longer in the media store (other browser profile, cleaned up): skipped like deleted ones. */
+const missing = reactive(new Set<string>());
+watch(stored, async (list) => {
+  for (const k of list) if (!missing.has(k) && !(await hasBlob(k).catch(() => true))) missing.add(k);
+}, { immediate: true });
+const keys = computed(() => stored.value.filter((k) => !missing.has(k)));
+/** Position in `keys` of the image shown (the record's choice when it is still there, else the newest). */
+const shown = computed(() => {
+  const chosen = stored.value[props.record?.shown ?? -1];
+  const at = chosen ? keys.value.indexOf(chosen) : -1;
+  return at >= 0 ? at : keys.value.length - 1;
+});
+const current = computed(() => keys.value[shown.value]);
+const lost = computed(() => !keys.value.length && stored.value.length > 0);
+const promptText = computed(() => props.record?.prompt ?? props.prompt.prompt);
+const caption = computed(() => props.record?.caption ?? props.prompt.caption ?? '');
+const job = computed(() => imageJobs.get(jobKey(props.genId, props.structure, props.index)));
+const running = computed(() => job.value?.status === 'running');
+const error = computed(() => (job.value?.status === 'error' ? mediaErrorText(job.value.error) : ''));
+const ratio = computed(() => (props.record?.ratio ?? props.prompt.ratio ?? '3:4').replace(':', ' / '));
+
+const generate = () => generateImage(props.mesid, props.structure, props.index);
+const cancel = () => cancelImage(props.genId, props.structure, props.index);
+const step = (d: number) => {
+  const n = keys.value.length;
+  if (n > 1) void showImage(props.mesid, props.structure, props.index, stored.value.indexOf(keys.value[(shown.value + d + n) % n]!));
+};
+const remove = () => { if (current.value) void deleteImage(props.mesid, props.structure, props.index, current.value); };
+
+async function download() {
+  const key = current.value;
+  const blob = key ? await getBlob(key) : undefined;
+  if (!blob) return;
+  const ext = (blob.type.split('/')[1] ?? 'png').replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+  downloadBlob(`image-${props.mesid}-${props.index + 1}-${shown.value + 1}.${ext}`, blob);
+}
+
+const openPanel = () => openImagePanel(props.mesid, props.structure, props.index);
+
+const viewing = ref(false);
+</script>
+
+<template>
+  <figure class="image-figure">
+    <div class="image-frame" :class="{ empty: !current }" :style="current ? undefined : { aspectRatio: ratio }">
+      <button v-if="current" type="button" class="image-open" :aria-label="t('media.image.view')" @click="viewing = true">
+        <BlobImage :blob-key="current" :alt="caption || promptText" @missing="missing.add(current)" />
+      </button>
+      <div v-else class="image-empty">
+        <ImageOff v-if="!running && !error" class="faint" aria-hidden="true" />
+        <span v-if="lost && !running" class="xs faint">{{ t('media.image.missing') }}</span>
+        <p class="image-prompt small muted">{{ promptText }}</p>
+      </div>
+      <div v-if="running" class="image-busy" role="status">
+        <LoaderCircle class="spin" aria-hidden="true" />
+        <span class="small">{{ t('media.image.generating') }}</span>
+        <IconButton :icon="X" :label="t('common.cancel')" small @click="cancel" />
+      </div>
+      <div v-if="current && keys.length > 1 && !running" class="image-pager">
+        <IconButton :icon="ChevronLeft" :label="t('media.image.previous')" small @click="step(-1)" />
+        <span class="xs">{{ shown + 1 }} / {{ keys.length }}</span>
+        <IconButton :icon="ChevronRight" :label="t('media.image.next')" small @click="step(1)" />
+      </div>
+    </div>
+
+    <figcaption class="image-foot">
+      <span v-if="error" class="xs text-danger grow image-error" :title="error">{{ error }}</span>
+      <span v-else class="xs muted grow ellipsis">{{ caption }}</span>
+      <div class="row tight image-tools">
+        <button v-if="!current && !running" type="button" class="btn sm-btn" @click="generate"><WandSparkles />{{ t(error ? 'media.image.retry' : 'media.image.generate') }}</button>
+        <IconButton v-if="current && !running" :icon="RefreshCw" :label="t('media.image.regenerate')" small @click="generate" />
+        <IconButton v-if="editable" :icon="Pencil" :label="t('media.image.openPanel')" small @click="openPanel" />
+        <IconButton v-if="current" :icon="Download" :label="t('media.image.download')" small @click="download" />
+        <IconButton v-if="current && editable && !running" :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="remove" />
+      </div>
+    </figcaption>
+
+    <ImageViewer v-if="viewing && current" :keys="keys" :start="shown" :caption="caption || promptText" @close="viewing = false" />
+  </figure>
+</template>

@@ -9,7 +9,7 @@
  * ordinary, fully editable user module; a whole file may be translated per UI locale.
  */
 import { cloneData } from './clone';
-import { emptyTrigger, normalizeVarUpdate, type Trigger, type UserEntry, type UserModule, type UserVarUpdate } from './user-modules';
+import { emptyTrigger, normalizeVarUpdate, type Trigger, type UserEntry, type UserModule, type UserModuleGroup, type UserVarUpdate } from './user-modules';
 import type { APreset } from './types';
 
 /** An entry of a source: a user module entry without its id. */
@@ -31,6 +31,11 @@ export interface UserModuleSource extends UserModuleSourceBody {
   id: string;
   /** Bundled modules: whether the installed copy starts enabled (default `true`). */
   enabled?: boolean;
+  /**
+   * Id of one of the preset's `userModuleGroups`: bundled modules are installed into it, modules
+   * made from a template are created in it (when the user has that group).
+   */
+  group?: string;
   /** Whole-file translations by locale (`<id>.<lang>.md`). */
   locales?: Record<string, UserModuleSourceBody>;
 }
@@ -40,6 +45,19 @@ export type UserModuleTemplate = UserModuleSource;
 
 /** Locale labels (`locales/<lang>.yaml#userModules.<id>` / `#userModuleTemplates.<id>`). */
 export interface UserModuleSourceLabels { name?: unknown; description?: unknown }
+
+/** Locale labels of a user module group (`locales/<lang>.yaml#userModuleGroups.<id>`). */
+export interface UserModuleGroupLabels { name?: unknown }
+
+/** Groups of user modules the preset declares (`preset.yaml#userModuleGroups`; absent → none). */
+export function presetUserModuleGroups(preset: Pick<APreset, 'userModuleGroups'>): UserModuleGroup[] {
+  return Array.isArray(preset.userModuleGroups) ? preset.userModuleGroups : [];
+}
+
+/** A preset's group with its name for the UI language (from locale labels). */
+export function localizeUserModuleGroup(group: UserModuleGroup, labels?: UserModuleGroupLabels): UserModuleGroup {
+  return typeof labels?.name === 'string' && labels.name ? { ...cloneData(group), name: labels.name } : cloneData(group);
+}
 
 /** User modules the preset installs into the user's list (absent → none). */
 export function presetUserModules(preset: Pick<APreset, 'userModules'>): UserModuleSource[] {
@@ -65,7 +83,7 @@ export function localizeUserModuleSource(src: UserModuleSource, lang?: string, l
 }
 
 /** A new user module (entry ids `e1`, `e2`, …) copied from a source body. */
-export function userModuleFromSource(body: UserModuleSourceBody, id: string, opts: { name?: string; enabled?: boolean } = {}): UserModule {
+export function userModuleFromSource(body: UserModuleSourceBody, id: string, opts: { name?: string; enabled?: boolean; group?: string } = {}): UserModule {
   return {
     id,
     name: opts.name ?? body.name,
@@ -73,6 +91,7 @@ export function userModuleFromSource(body: UserModuleSourceBody, id: string, opt
     entries: body.entries.map((e, i) => ({ id: `e${i + 1}`, ...cloneData(e) })),
     vars: cloneData(body.vars ?? []),
     trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger(),
+    ...(opts.group ? { group: opts.group } : {}),
   };
 }
 
@@ -82,6 +101,7 @@ export function userModuleToSource(m: UserModule): UserModuleSource {
     id: m.id,
     name: m.name,
     ...(m.enabled ? {} : { enabled: false }),
+    ...(m.group !== undefined ? { group: m.group } : {}),
     entries: m.entries.map(({ point, role, text, enabled }) => ({ point, ...(role ? { role } : {}), text, ...(enabled === false ? { enabled } : {}) })),
     vars: cloneData(m.vars ?? []),
     trigger: cloneData(m.trigger),

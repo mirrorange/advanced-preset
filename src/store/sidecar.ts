@@ -3,7 +3,7 @@
  * stages, structures, events and diagnostics live here.
  */
 import { cloneData } from '@advanced-preset/protocol';
-import type { Annotation, PatchResult, StageKind, Transport } from '@advanced-preset/protocol';
+import type { Annotation, ImageRatio, PatchResult, SpeechSpan, StageKind, Transport } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
 import type { ChatEvent } from './eventlog';
 import { STORYLINE_KEY } from '@/core/storylines';
@@ -18,6 +18,22 @@ export interface SidecarStage {
   text?: string;
   patches?: PatchResult[];
   status: 'done' | 'interrupted' | 'missing';
+}
+
+/**
+ * Images generated for one image prompt, and the user's edits of the prompt. An edited field
+ * overrides the model's value; absent: the model's value is used.
+ */
+export interface SidecarImage {
+  /** Media store keys (`img:`), oldest first. */
+  keys: string[];
+  /** Index of the image shown (default: the newest). */
+  shown?: number;
+  prompt?: string;
+  /** Reference image ids (`[]`: none, even when the model picked some). */
+  refs?: string[];
+  ratio?: ImageRatio;
+  caption?: string;
 }
 
 export interface Sidecar {
@@ -39,7 +55,15 @@ export interface Sidecar {
   annotations?: Annotation[];
   /** Patched workflows: annotations of the draft and of the patched text (swapped with `patchesApplied`). */
   annotationVersions?: { draft: Annotation[]; patched: Annotation[] };
+  /** Inline speech lines anchored in `mes`. */
+  speech?: SpeechSpan[];
+  /** Patched workflows: speech lines of the draft and of the patched text (swapped with `patchesApplied`). */
+  speechVersions?: { draft: SpeechSpan[]; patched: SpeechSpan[] };
+  /** Speech text as the user edited it, by speech segment id (what is sent to the speech service). */
+  speechText?: Record<string, string>;
   structures: Record<string, unknown>;
+  /** Generated images by image structure id, one entry per prompt (same index as the structure's `images`). */
+  images?: Record<string, SidecarImage[]>;
   events: ChatEvent[];
   /** Meta segments of the user input of this turn (for `recent_meta`). */
   metaInput?: string[];

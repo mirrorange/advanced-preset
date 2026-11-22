@@ -7,11 +7,13 @@
  */
 import type { Expr } from './expr';
 import type { UserModuleSource, UserModuleTemplate } from './preset-user-modules';
+import type { UserModuleGroup } from './user-modules';
 import type { InputShaping } from './input-shaping';
 import type { StorylineConfig, StorylinesDecl } from './storylines';
 import type { RegexScript } from './regex-scripts';
 import type { QuickReplySetDecl, QuickReplySetLocale } from './quick-replies';
 import type { TavernHelperScriptTree } from './tavern-helper';
+import type { ImageDecl, SpeechDecl } from './media';
 
 /**
  * 3: build variables (`APreset.vars`, `Module.vars`) replace the built-in questions; stages no longer
@@ -260,10 +262,12 @@ export type StructureOrder = number | { before: string } | { after: string };
 /** Reference to the terminal content stage in {@link StructureOrder}. */
 export const CONTENT_STAGE_REF = '@content';
 
-export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'storyline' | 'custom' | 'annotations';
-export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'storyline', 'custom', 'annotations'];
+export type StructureKind = 'reply' | 'memory' | 'recap' | 'impersonate' | 'synopsis' | 'options' | 'status' | 'storyline' | 'custom' | 'annotations' | 'image' | 'speech';
+export const STRUCTURE_KINDS: readonly StructureKind[] = ['reply', 'memory', 'recap', 'impersonate', 'synopsis', 'options', 'status', 'storyline', 'custom', 'annotations', 'image', 'speech'];
 /** Kinds written inside the story content rather than as a tag block / field (I-77). */
-export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations'];
+export const INLINE_STRUCTURE_KINDS: readonly StructureKind[] = ['annotations', 'speech'];
+/** Kinds only requested while the matching media feature is on (`image.on` / `speech.on`). */
+export const MEDIA_STRUCTURE_KINDS: readonly StructureKind[] = ['image', 'speech'];
 export const isInlineStructure = (s: { kind: StructureKind }): boolean => INLINE_STRUCTURE_KINDS.includes(s.kind);
 
 export interface StructureDecl {
@@ -275,14 +279,14 @@ export interface StructureDecl {
   description?: string;
   /** Descriptions of the kind's sub-fields (e.g. memory `key`, synopsis `time`), keyed by the fixed sub-field name. */
   properties?: Record<string, string>;
-  /** options: number of options requested */
+  /** options: number of options requested; image: most images per turn (default 1) */
   count?: number;
   /** custom only */
   shape?: 'text' | 'kv';
   display?: 'card' | 'hidden';
   /**
    * Recent history: the last N assistant messages carry this structure again.
-   * - A number: annotations re-injected as CriticMarkup (I-80); legacy synopsis history (I-88,
+   * - A number: annotations re-injected as CriticMarkup (I-80), speech lines as speech tags; legacy synopsis history (I-88,
    *   artifacts before 1.10) appended via `historyTemplate`. 0 = off.
    * - An object (I-139, any non-inline kind): text rendered from `template` and inserted before /
    *   after the message text or at a sort key, when `when` holds.
@@ -548,6 +552,7 @@ export interface LocaleTable {
   structures?: Record<string, { title?: string }>;
   insertionPoints?: Record<string, { label?: string; description?: string }>;
   userModules?: Record<string, { name?: string }>;
+  userModuleGroups?: Record<string, { name?: string }>;
   userModuleTemplates?: Record<string, { name?: string; description?: string }>;
   vars?: Record<string, { label?: string; description?: string }>;
   /** Quick Reply sets by set id: `qrList.<reply id>` → `label` `title` `message`. */
@@ -596,6 +601,10 @@ export interface APreset {
   inputShaping?: InputShaping;
   /** Storylines (absent = the preset does not support them): separators of the storyline groups in the history. */
   storylines?: StorylinesDecl;
+  /** Image generation (absent = the preset does not support it): `image.*` variables, image structures. */
+  image?: ImageDecl;
+  /** Speech synthesis (absent = the preset does not support it): `speech.*` variables, inline speech lines. */
+  speech?: SpeechDecl;
 
   params: Param[];
   groups: Record<string, Group>;
@@ -607,6 +616,11 @@ export interface APreset {
   userModules: UserModuleSource[];
   /** Example user modules offered when creating one (`user-module-templates/`; absent → `[]`). */
   userModuleTemplates: UserModuleTemplate[];
+  /**
+   * Groups the bundled modules and templates may name (`preset.yaml#userModuleGroups`, in display
+   * order; absent → none). Installed into the user's list like bundled modules.
+   */
+  userModuleGroups?: UserModuleGroup[];
   /** Build variables, in declaration order. */
   vars: BuildVarDecl[];
   workflows: Workflow[];

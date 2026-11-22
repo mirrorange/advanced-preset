@@ -9,14 +9,14 @@
  * and macros included) because the user edits it in the panel; it is only compiled here to report
  * errors and to feed `ap check`.
  *
- * Frontmatter: `name`, `point` / `role` (first entry), `vars`, `when` or `trigger`; `enabled`
- * (bundled modules) and `description` (templates). Further entries start with
+ * Frontmatter: `name`, `point` / `role` (first entry), `vars`, `when` or `trigger`, `group` (one
+ * of `preset.yaml#userModuleGroups`); `enabled` (bundled modules) and `description` (templates). Further entries start with
  * `<!-- @entry point=<id> role=<role> -->` on a line of its own (`enabled=false`: switched off).
  * In `vars`, the YAML tag `!off` switches off a whole update, a dict key or a list item.
  */
 import {
   compileTrigger, listItem, normalizeUserModule, parseAttributes, ruleError, tokenizeDirectives,
-  type BuildVarUpdate, type Content, type Expr, type InsertionPoint, type Role, type Token, type Trigger,
+  type BuildVarUpdate, type Content, type Expr, type InsertionPoint, type Role, type Token, type Trigger, type UserModuleGroup,
   type UserModuleSource, type UserModuleSourceBody, type UserModuleSourceEntry, type UserVarUpdate,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -34,6 +34,8 @@ const FENCE_RE = /^\s*(```|~~~)/;
 export interface SourceContext {
   diag: Diagnostics;
   insertionPoints: InsertionPoint[];
+  /** `preset.yaml#userModuleGroups`. */
+  userModuleGroups: UserModuleGroup[];
   expr: (src: unknown, where: Where) => Expr | undefined;
   content: (tokens: Token[], where: Where) => Content;
   varUpdates: (src: unknown, where: Where) => BuildVarUpdate[];
@@ -128,7 +130,7 @@ function parseTrigger(fm: Record<string, unknown>, ctx: SourceContext, where: Wh
   return trigger;
 }
 
-interface Compiled extends UserModuleSourceBody { enabled?: boolean }
+interface Compiled extends UserModuleSourceBody { enabled?: boolean; group?: string }
 
 const OFF = '!off';
 /** `!off` on any node keeps its value; the marks are read from the document. */
@@ -244,7 +246,13 @@ function compileBody(file: string, src: string, ctx: SourceContext, id: string, 
     else if (typeof fm.enabled !== 'boolean') diag.error('`enabled` must be true or false', { ...where, path: 'enabled' });
     else out.enabled = fm.enabled;
   }
-  const known = new Set(['id', 'name', 'description', 'enabled', 'point', 'role', 'vars', 'when', 'trigger']);
+  if (fm.group !== undefined) {
+    const at = { ...where, path: 'group' };
+    if (translation) diag.warn('`group` comes from the source file; it is ignored in translations', at);
+    else if (typeof fm.group !== 'string' || !ctx.userModuleGroups.some((g) => g.id === fm.group)) diag.error(`unknown user module group \`${String(fm.group)}\` (declare it in preset.yaml#userModuleGroups)`, at);
+    else out.group = fm.group;
+  }
+  const known = new Set(['id', 'name', 'description', 'enabled', 'point', 'role', 'vars', 'when', 'trigger', 'group']);
   for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a ${noun}`, { ...where, path: k });
   return out;
 }
@@ -265,14 +273,18 @@ export function compileUserModuleSources(tree: Map<string, string>, ctx: SourceC
     if (m[2]) { translations.push({ file, id: m[1]!, lang: m[2].toLowerCase() }); continue; }
     const body = compileBody(file, tree.get(file)!, ctx, m[1]!, kind, false);
     if (!body) continue;
-    const { enabled, ...rest } = body;
-    sources.push({ id: m[1]!, ...(enabled === false ? { enabled } : {}), ...rest });
+    const { enabled, group, ...rest } = body;
+    sources.push({ id: m[1]!, ...(enabled === false ? { enabled } : {}), ...(group ? { group } : {}), ...rest });
+    if (kind === 'module' && group && enabled !== false && ctx.userModuleGroups.find((g) => g.id === group)?.mode === 'single') {
+      const other = sources.find((x) => x.id !== m[1] && x.group === group && x.enabled !== false);
+      if (other) ctx.diag.error(`single user module group \`${group}\` already has \`${other.id}\` enabled; set \`enabled: false\` here or there`, { file, path: 'enabled' });
+    }
   }
   for (const { file, id, lang } of translations) {
     const src = sources.find((x) => x.id === id);
     if (!src) { ctx.diag.error(`translation of unknown ${NOUN[kind]} \`${id}\` (add ${dir}/${id}.md)`, { file }); continue; }
     const body = compileBody(file, tree.get(file)!, ctx, id, kind, true);
-    if (body) { const { enabled: _ignored, ...rest } = body; (src.locales ??= {})[lang] = rest; }
+    if (body) { const { enabled: _ignored, group: _source, ...rest } = body; (src.locales ??= {})[lang] = rest; }
   }
   return sources;
 }

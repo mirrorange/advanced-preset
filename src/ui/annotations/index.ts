@@ -8,6 +8,10 @@ import { st } from '@/st/host';
 import { live } from '@/core/live';
 import { settings } from '@/store/settings';
 import { annotationsApi } from '@/app/annotations';
+import { speechApi } from '@/app/speech';
+import { mediaSettings } from '@/store/media';
+import { speech } from '@/media/speech/service';
+import { speechLayer } from '../speech/layer';
 import { defineHost } from '../host';
 import { activePreset } from '../state';
 import { theme } from '../theme';
@@ -75,7 +79,15 @@ export function installAnnotationUi(): void {
     const ui = settings().ui;
     const preset = activePreset.value?.theme?.[theme.mode]?.accent;
     setAnnotationColor(ui.annotations?.color || ui.accent || preset || (theme.mode === 'dark' ? '#c084fc' : '#9333ea'));
+    speechLayer.restyle();
   });
+  // Speech lines follow the speech settings and the player.
+  watch(() => { const s = mediaSettings().speech; return [s.enabled, s.active, s.narrator, s.connections.length]; }, () => refreshViews(undefined, 0));
+  watch(() => speech.playing && `${speech.playing.mesId}:${speech.playing.segId}`, () => {
+    const p = speech.playing;
+    speechLayer.mark(p ? (mesId, s) => mesId === p.mesId && s.id === p.segId : null);
+  });
+  speechApi.on('change', (id) => refreshViews(id));
   watch(annotationsShown, () => { hideBubble(); refreshViews(undefined, 0); });
   watch(() => live.current?.status, () => refreshViews());
 

@@ -3,6 +3,7 @@ import {
   isInlineStructure,
   INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
   SIGNATURE_CHANNELS_SINCE, THOUGHT_SIGNATURE_CHANNELS, CALLER_SCHEMA_DIRECT_SINCE,
+  MEDIA_SINCE, IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -38,6 +39,18 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'storyline.namingMain': null,
   'storyline.switching': null,
   'storyline.frozen': null,
+  'image.on': null,
+  'image.auto': null,
+  'image.api': IMAGE_APIS,
+  'image.prompt': IMAGE_PROMPT_TYPES,
+  'image.style': null,
+  'image.sfw': null,
+  'image.refs': null,
+  'speech.on': null,
+  'speech.auto': null,
+  'speech.api': SPEECH_APIS,
+  'speech.narrator': null,
+  'speech.characters': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
@@ -77,8 +90,14 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     checkLiterals(e.r, where);
   };
   let storylineUses = 0;
+  const mediaUses = { image: 0, speech: 0 };
   for (const { expr, where } of map.exprs) {
-    for (const v of variables(expr)) { checkVar(v, where); if (v.startsWith('storyline.')) storylineUses++; }
+    for (const v of variables(expr)) {
+      checkVar(v, where);
+      if (v.startsWith('storyline.')) storylineUses++;
+      if (v.startsWith('image.')) mediaUses.image++;
+      if (v.startsWith('speech.')) mediaUses.speech++;
+    }
     checkLiterals(expr, where);
   }
 
@@ -136,6 +155,14 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
           storylineUses++;
           if (a !== undefined && a !== 'main') bad('expected no argument (current storyline) or `main`');
           break;
+        case 'image':
+          mediaUses.image++;
+          if (a !== 'refs') bad('expected refs');
+          break;
+        case 'speech':
+          mediaUses.speech++;
+          if (a !== 'format' && a !== 'characters') bad('expected format | characters');
+          break;
         case 'var': {
           const decl = varDecls.get(a!);
           const sel = rest[1];
@@ -160,6 +187,8 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     const code = templateCode(source).join('\n');
     if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
     if (/(?<![\w$.])storyline\s*\.|\bmacro\(\s*(['"`])storyline\1/.test(code)) storylineUses++;
+    if (/(?<![\w$.])image\s*\.|\bmacro\(\s*(['"`])image\1/.test(code)) mediaUses.image++;
+    if (/(?<![\w$.])speech\s*\.|\bmacro\(\s*(['"`])speech\1/.test(code)) mediaUses.speech++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -189,6 +218,21 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     diag.warn('no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names', { file: M, path: 'storylines' });
   if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
     diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: 'minAdvancedPreset' });
+
+  // ── media (image generation / speech synthesis) ──────────────────────────────
+  for (const key of ['image', 'speech'] as const) {
+    const decls = Object.values(p.structures).filter((s) => s.kind === key);
+    const what = key === 'image' ? 'image generation' : 'speech synthesis';
+    if (!p[key] && mediaUses[key]) diag.warn(`${key}.* variables and {{ap::${key}::…}} are always off / empty: the preset does not declare ${key} (${what})`, { file: M, path: key });
+    if (!p[key] && decls.length) diag.warn(`structure ${decls[0]!.id}: ${key} structures are never requested, the preset does not declare ${key}`, { file: M, path: `structures.${decls[0]!.id}` });
+    if (p[key] && !decls.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
+      diag.warn(`the preset declares ${key} but no module requests a${key === 'image' ? 'n image' : ' speech'} structure: nothing is ${key === 'image' ? 'generated' : 'marked for synthesis'}`, { file: M, path: key });
+    if (p[key] && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, MEDIA_SINCE) < 0))
+      diag.warn(`${what} needs Advanced Preset ${MEDIA_SINCE}: set minAdvancedPreset to ${MEDIA_SINCE} or later (older versions ignore it)`, { file: M, path: 'minAdvancedPreset' });
+  }
+  const speechDecl = Object.values(p.structures).find((s) => s.kind === 'speech');
+  const tagClash = speechDecl && Object.values(p.structures).find((s) => s !== speechDecl && !isInlineStructure(s) && s.tag === speechDecl.tag);
+  if (speechDecl && tagClash) diag.error(`structures ${speechDecl.id} and ${tagClash.id} share tag \`${speechDecl.tag}\``, { file: M, path: `structures.${speechDecl.id}.tag` });
 
   // ── SillyTavern regex scripts & Quick Reply sets ───────────────────────────
   const below = (since: string) => !p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, since) < 0;
@@ -436,6 +480,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
       userModules: new Set((p.userModules ?? []).map((x) => x.id)),
+      userModuleGroups: new Set((p.userModuleGroups ?? []).map((x) => x.id)),
       userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys()),
       quickReplySets: new Set((p.quickReplySets ?? []).map((x) => x.id)),

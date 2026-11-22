@@ -5,7 +5,7 @@
  * may move them (`ui.position` / `ui.order`). The top area also shows live values while streaming.
  */
 import { computed } from 'vue';
-import { actorName, cloneData, structureComponent, type CardPosition, type StructureComponent, type StatusBar, type StructureDecl, type Synopsis, type UserOption } from '@advanced-preset/protocol';
+import { actorName, cloneData, normalizeImages, structureComponent, type ImagePrompt, type CardPosition, type StructureComponent, type StatusBar, type StructureDecl, type Synopsis, type UserOption } from '@advanced-preset/protocol';
 import { activeConfiguration } from '@/store/config';
 import { live } from '@/core/live';
 import type { ChatEvent } from '@/store/eventlog';
@@ -25,6 +25,10 @@ import SynopsisCard from './cards/SynopsisCard.vue';
 import StatusCard from './cards/StatusCard.vue';
 import CustomCard from './cards/CustomCard.vue';
 import ComponentCard from './cards/ComponentCard.vue';
+import SpeechCard from './cards/SpeechCard.vue';
+import { messageSegments } from '@/media/speech/service';
+import ImageCard from './cards/ImageCard.vue';
+import type { SidecarImage } from '@/store/sidecar';
 
 const props = withDefaults(defineProps<{ mesid: number; position?: CardPosition }>(), { position: 'bottom' });
 const view = useMessageView(() => props.mesid);
@@ -38,7 +42,8 @@ type Item =
   | { type: 'memory'; id: string; events: ChatEvent[] }
   | { type: 'recap'; id: string; text: string; coversUpTo: number }
   | { type: 'custom'; id: string; title: string; value: string | Record<string, string> }
-  | { type: 'component'; id: string; component: StructureComponent; context: ComponentContext };
+  | { type: 'component'; id: string; component: StructureComponent; context: ComponentContext }
+  | { type: 'image'; id: string; prompts: ImagePrompt[]; records: SidecarImage[] };
 
 const data = computed(() => {
   const v = view.value;
@@ -83,6 +88,12 @@ const data = computed(() => {
         if (recap?.type === 'recap.set') items.push({ type: 'recap', id: d.id, text: recap.text, coversUpTo: recap.coversUpTo });
         break;
       }
+      case 'image': {
+        // Stored turns only; prompts of presets that no longer declare `image` stay hidden.
+        const prompts = sc && !v.live && preset.image ? normalizeImages(value)?.images : undefined;
+        if (prompts?.length) items.push({ type: 'image', id: d.id, prompts, records: sc!.images?.[d.id] ?? [] });
+        break;
+      }
       case 'custom': {
         if (d.display === 'hidden' || value === undefined) break;
         const title = pt(preset, 'structures', d.id, 'title', d.title || d.id);
@@ -108,26 +119,32 @@ const data = computed(() => {
   }
   return {
     preset,
+    genId: v.genId,
     editable,
     narrator: actorName(preset, activeConfiguration(preset), preset.narrator),
     color: colorOf(preset, preset.narrator),
     items,
   };
 });
+
+// The message player leads the top area once the turn is stored.
+const segments = computed(() => (props.position === 'top' && view.value && !view.value.live ? messageSegments(props.mesid) : []));
 </script>
 
 <template>
-  <div v-if="data?.items.length" class="cards" :class="`cards-${position}`">
-    <template v-for="c in data.items" :key="c.id">
-      <ReplyCard v-if="c.type === 'reply'" :text="c.text" :name="data.narrator" :color="data.color" />
+  <div v-if="data?.items.length || segments.length" class="cards" :class="`cards-${position}`">
+    <SpeechCard v-if="segments.length" :mesid="mesid" :segments="segments" />
+    <template v-for="c in data ? data.items : []" :key="c.id">
+      <ReplyCard v-if="c.type === 'reply'" :text="c.text" :name="data!.narrator" :color="data!.color" />
       <ImpersonateCard v-else-if="c.type === 'impersonate'" :text="c.text" :mesid="mesid" />
       <OptionsCard v-else-if="c.type === 'options'" :options="c.options" :mesid="mesid" />
-      <SynopsisCard v-else-if="c.type === 'synopsis'" :synopsis="c.synopsis" :editable="data.editable" @save="(v) => setStructure(mesid, c.id, v)" />
-      <StatusCard v-else-if="c.type === 'status'" :status="c.status" :editable="data.editable" @save="(v) => setStructure(mesid, c.id, v)" />
-      <MemoryCard v-else-if="c.type === 'memory'" :events="c.events" :preset="data.preset" />
+      <SynopsisCard v-else-if="c.type === 'synopsis'" :synopsis="c.synopsis" :editable="data!.editable" @save="(v) => setStructure(mesid, c.id, v)" />
+      <StatusCard v-else-if="c.type === 'status'" :status="c.status" :editable="data!.editable" @save="(v) => setStructure(mesid, c.id, v)" />
+      <MemoryCard v-else-if="c.type === 'memory'" :events="c.events" :preset="data!.preset" />
       <RecapCard v-else-if="c.type === 'recap'" :text="c.text" :covers-up-to="c.coversUpTo" />
       <CustomCard v-else-if="c.type === 'custom'" :title="c.title" :value="c.value" />
       <ComponentCard v-else-if="c.type === 'component'" :component="c.component" :context="c.context" />
+      <ImageCard v-else-if="c.type === 'image'" :mesid="mesid" :gen-id="data!.genId" :structure="c.id" :prompts="c.prompts" :records="c.records" :editable="data!.editable" />
     </template>
   </div>
 </template>

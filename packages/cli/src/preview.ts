@@ -1,7 +1,9 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, freezeMode, freezesStoryline, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  TRANSPORTS, activeUserModules, assemble, freezeMode, freezesStoryline, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, normalizeUserModuleGroups, presetUserModuleGroups, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  IMAGE_OFF, SPEECH_OFF, defaultImagePromptType,
   type APreset, type Configuration, type StorylineVars, type ParamValue, type Transport, type UserModule, type UserModuleSource,
+  type ImageApi, type ImagePromptType, type ImageVars, type MacroData, type SpeechApi, type SpeechVars,
 } from '@advanced-preset/protocol';
 
 export interface PreviewOptions {
@@ -26,6 +28,13 @@ export interface PreviewOptions {
   storylineNamingMain?: boolean;
   /** `storyline.grouped` on the main storyline (a side storyline is always grouped in the preview). */
   storylineGrouped?: boolean;
+  /**
+   * Image generation on (`--image <api>`; presets with `image`), with placeholder reference images
+   * for `refs`. `prompt`: the prompt type (default: the API's default, like a new connection).
+   */
+  image?: { api: ImageApi; prompt?: ImagePromptType; auto?: boolean; style?: boolean; sfw?: boolean; refs?: boolean };
+  /** Speech synthesis on (`--speech <api>`; presets with `speech`), with placeholder characters for `characters`. */
+  speech?: { api: SpeechApi; auto?: boolean; narrator?: boolean; characters?: boolean };
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
   json?: boolean;
@@ -44,6 +53,23 @@ function previewStoryline(preset: APreset, config: Configuration, o: PreviewOpti
     naming, namingMain: switching && Boolean(o.storylineNamingMain), switching,
     // The configuration's freeze mode (I-163); storylines switched off: nothing is frozen.
     frozen: config.storylines?.enabled !== false && freezesStoryline(freezeMode(config.storylines), line),
+  };
+}
+
+/** Placeholder values of the media macros in previews. */
+export const PREVIEW_IMAGE_REFS = [{ id: 'ref1', description: '(reference image 1)' }, { id: 'ref2', description: '(reference image 2)' }];
+export const PREVIEW_SPEECH_FORMAT = '(speech format notes of the API)';
+export const PREVIEW_SPEECH_CHARACTERS = ['(character 1)', '(character 2)'];
+
+function previewMedia(preset: APreset, o: PreviewOptions): { image: ImageVars; speech: SpeechVars; data: Pick<MacroData, 'image' | 'speech'> } {
+  const i = preset.image && o.image ? o.image : undefined;
+  const s = preset.speech && o.speech ? o.speech : undefined;
+  const refs = i?.refs && i.api !== 'novelai' ? PREVIEW_IMAGE_REFS : [];
+  const characters = s?.characters ? PREVIEW_SPEECH_CHARACTERS : [];
+  return {
+    image: i ? { on: true, auto: Boolean(i.auto), api: i.api, prompt: i.prompt ?? defaultImagePromptType(i.api), style: Boolean(i.style), sfw: Boolean(i.sfw), refs: refs.length > 0 } : { ...IMAGE_OFF },
+    speech: s ? { on: true, auto: Boolean(s.auto), api: s.api, narrator: Boolean(s.narrator), characters: characters.length > 0 } : { ...SPEECH_OFF },
+    data: { image: { refs }, speech: { format: s ? PREVIEW_SPEECH_FORMAT : '', characters } },
   };
 }
 
@@ -67,7 +93,9 @@ export function templateModules(preset: APreset, ids: string[], lang?: string): 
 
 /**
  * The preset's bundled user modules as a fresh install gets them for the UI language `lang`:
- * by default those that start enabled; `ids` (or `all`) enables exactly those, `none` none.
+ * by default those that start enabled; `ids` (or `all`) enables exactly those, `none` none. They
+ * are in install order (ungrouped first, then by group); a single group keeps only its first.
+ * Modules of a group the preset switches off are left out (installed, but they do not apply).
  * Returns an error message for unknown ids.
  */
 export function bundledModules(preset: APreset, ids?: string[], lang?: string): UserModule[] | string {
@@ -75,7 +103,9 @@ export function bundledModules(preset: APreset, ids?: string[], lang?: string): 
   const picked = ids ? pick(all, ids, 'bundled user module') : all.filter((m) => m.enabled !== false);
   if (typeof picked === 'string') return picked;
   const labels = (id: string) => (lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : undefined);
-  return picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id));
+  const modules = picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id, { group: m.group }));
+  const groups = presetUserModuleGroups(preset);
+  return activeUserModules(normalizeUserModuleGroups(modules, groups).modules, groups);
 }
 
 /**
@@ -114,15 +144,19 @@ export function preview(source: APreset, o: PreviewOptions): string {
   });
   if (!TRANSPORTS.includes(config.connection.transport)) throw new Error(`unknown transport ${config.connection.transport}`);
   const pure = o.meta === 'pure';
+  // Media only on story turns (like the extension).
+  const media = pure ? previewMedia(preset, {}) : previewMedia(preset, o);
   const vars = defaultVars(preset, config, {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === 'mixed', task: null, recent: false },
     gen: { origin: pure ? 'task' : 'story', type: 'normal', callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== undefined },
     storyline: previewStoryline(preset, config, o),
+    image: media.image,
+    speech: media.speech,
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === 'task') : undefined;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? '(meta text)' : '', inputText: o.input ?? '', storyline: { name: vars.storyline.name, main: '' } } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? '(meta text)' : '', inputText: o.input ?? '', storyline: { name: vars.storyline.name, main: '' }, ...media.data } }, workflow);
   // What happens to the last user message of the chat history (ST macros stay unexpanded here).
   const shaping = preset.inputShaping;
   const historyInput = o.input === undefined ? undefined : !shaping ? o.input : shaping.mode === 'wrap' ? wrapInput(shaping.template, o.input, a.expand) : null;
@@ -159,6 +193,14 @@ export function preview(source: APreset, o: PreviewOptions): string {
     lines.push(`storyline: ${v.main ? `main${v.name ? ` ${v.name}` : ''}` : v.name || '?'}${flags.map((f) => ` (${f})`).join('')}`);
   }
   else if (o.storyline) lines.push('storyline: main (the preset declares no storylines)');
+  if (preset.image || o.image) {
+    const v = vars.image;
+    lines.push(`image: ${!preset.image ? 'off (the preset declares no image)' : v.on ? [v.api, v.prompt, v.auto ? 'auto' : '', v.style ? 'style' : '', v.sfw ? 'sfw' : '', v.refs ? 'refs' : ''].filter(Boolean).join(' · ') : pure && o.image ? 'off (task turn)' : 'off'}`);
+  }
+  if (preset.speech || o.speech) {
+    const v = vars.speech;
+    lines.push(`speech: ${!preset.speech ? 'off (the preset declares no speech)' : v.on ? [v.api, v.auto ? 'auto' : '', v.narrator ? 'narrator' : '', v.characters ? 'characters' : ''].filter(Boolean).join(' · ') : pure && o.speech ? 'off (task turn)' : 'off'}`);
+  }
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === undefined ? ' (not shaped: no --input)' : ''}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   if (fields.length) lines.push(`fields: ${fields.join(' → ')}`);

@@ -7381,8 +7381,8 @@ var SIGNATURE_CHANNELS_SINCE = "1.11.0";
 var CALLER_SCHEMA_DIRECT_SINCE = "1.11.1";
 var BUILD_VAR_TYPES = ["string", "list", "dict"];
 var CONTENT_STAGE_REF = "@content";
-var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "storyline", "custom", "annotations"];
-var INLINE_STRUCTURE_KINDS = ["annotations"];
+var STRUCTURE_KINDS = ["reply", "memory", "recap", "impersonate", "synopsis", "options", "status", "storyline", "custom", "annotations", "image", "speech"];
+var INLINE_STRUCTURE_KINDS = ["annotations", "speech"];
 var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
 var CARD_POSITIONS = ["top", "bottom"];
 var USER_INPUT_MODES = ["keep", "truncate", "remove"];
@@ -7612,8 +7612,23 @@ var MACRO_HEADS = {
   recap: { min: 0, max: 0 },
   recent_meta: { min: 0, max: 0 },
   var: { min: 1, max: 2 },
-  storyline: { min: 0, max: 1 }
+  storyline: { min: 0, max: 1 },
+  image: { min: 1, max: 1 },
+  speech: { min: 1, max: 1 }
 };
+
+// ../protocol/src/media.ts
+var MEDIA_SINCE = "1.12.0";
+var IMAGE_APIS = ["openai", "gemini", "novelai", "openrouter"];
+var IMAGE_PROMPT_TYPES = ["tags", "description", "instruction"];
+var defaultImagePromptType = (api) => api === "novelai" ? "tags" : "instruction";
+var SPEECH_APIS = ["fish", "elevenlabs", "minimax", "gemini", "openai", "deepseek", "openrouter"];
+var IMAGE_OFF = { on: false, auto: false, api: "", prompt: "", style: false, sfw: false, refs: false };
+var SPEECH_OFF = { on: false, auto: false, api: "", narrator: false, characters: false };
+var imageRefsText = (refs) => (refs ?? []).map((r) => `- ${r.id}: ${r.description}`.trimEnd()).join("\n");
+var IMAGE_RATIOS = ["1:1", "3:4", "4:3", "9:16", "16:9"];
+var IMAGE_FIELDS = ["prompt", "refs", "ratio", "caption"];
+var DEFAULT_SPEECH_TAG = "speech";
 
 // ../protocol/src/structures.ts
 var STATUS_FIELDS = ["date", "weekday", "time", "location", "weather"];
@@ -7628,7 +7643,9 @@ var STRUCTURE_PROPERTIES = {
   status: STATUS_FIELDS,
   storyline: STORYLINE_NAMING_FIELDS,
   custom: [],
-  annotations: []
+  annotations: [],
+  image: IMAGE_FIELDS,
+  speech: []
 };
 function structureFieldSchema(decl, expand = (t) => t) {
   const d = (t) => t ? expand(t).trim() || void 0 : void 0;
@@ -7694,7 +7711,27 @@ function structureFieldSchema(decl, expand = (t) => t) {
       });
     }
     case "annotations":
+    case "speech":
       return withDesc({ type: "string" });
+    case "image": {
+      const fields = IMAGE_FIELDS.filter((k) => !decl.requested || decl.requested.includes(k));
+      const shapes = {
+        prompt: { type: "string" },
+        refs: { type: "array", items: { type: "string" } },
+        ratio: { type: "string", enum: [...IMAGE_RATIOS] },
+        caption: { type: "string" }
+      };
+      return withDesc({
+        type: "array",
+        items: {
+          type: "object",
+          properties: Object.fromEntries(fields.map((k) => [k, sub(k, shapes[k])])),
+          required: fields,
+          additionalProperties: false
+        },
+        maxItems: decl.count && decl.count > 0 ? decl.count : 1
+      });
+    }
     case "custom":
       return decl.shape === "kv" ? withDesc({ type: "object", additionalProperties: { type: "string" } }) : withDesc({ type: "string" });
   }
@@ -8617,8 +8654,16 @@ function activeStructures(preset, modules, vars) {
   const ids = new Set(modules.flatMap((m) => m.structures));
   const naming = storylineNamingFields(vars?.storyline);
   return Object.values(preset.structures).filter((s) => ids.has(s.id)).flatMap((s) => {
-    if (s.kind !== "storyline") return [s];
-    return naming.length ? [{ ...s, requested: naming }] : [];
+    switch (s.kind) {
+      case "storyline":
+        return naming.length ? [{ ...s, requested: naming }] : [];
+      case "image":
+        return vars?.image?.on ? [{ ...s, requested: IMAGE_FIELDS.filter((k) => k !== "refs" || vars.image.refs) }] : [];
+      case "speech":
+        return vars?.speech?.on ? [s] : [];
+      default:
+        return [s];
+    }
   });
 }
 function actorName(preset, config, actor) {
@@ -8695,6 +8740,11 @@ function createMacroResolver(input, stages, workflow, buildVars, structures) {
         return readVar(a, b);
       case "storyline":
         return a === "main" ? data.storyline?.main ?? "" : data.storyline?.name ?? vars.storyline?.name ?? "";
+      case "image":
+        return a === "refs" && vars.image?.on ? imageRefsText(data.image?.refs) : "";
+      case "speech":
+        if (!vars.speech?.on) return "";
+        return a === "format" ? data.speech?.format ?? "" : a === "characters" ? (data.speech?.characters ?? []).join(", ") : "";
       default:
         return void 0;
     }
@@ -8825,6 +8875,8 @@ function defaultVars(preset, config, over = {}) {
     input: { shaped: false },
     last: {},
     storyline: { ...MAIN_STORYLINE_VARS },
+    image: { ...IMAGE_OFF },
+    speech: { ...SPEECH_OFF },
     ...over
   };
 }
@@ -9166,6 +9218,31 @@ function ruleError(rule) {
   }
   return null;
 }
+function normalizeUserModuleGroups(modules, groups = []) {
+  const seen = /* @__PURE__ */ new Set();
+  const outGroups = groups.filter((g) => g.id && !seen.has(g.id) && seen.add(g.id));
+  const index = new Map(outGroups.map((g, i) => [g.id, i]));
+  const buckets = [[], ...outGroups.map(() => [])];
+  for (const m of modules) {
+    const at = m.group === void 0 ? void 0 : index.get(m.group);
+    if (at === void 0) {
+      if (m.group === void 0) buckets[0].push(m);
+      else {
+        const { group: _gone, ...rest } = m;
+        buckets[0].push(rest);
+      }
+      continue;
+    }
+    const bucket = buckets[at + 1];
+    const taken = outGroups[at].mode === "single" && m.enabled && bucket.some((x) => x.enabled);
+    bucket.push(taken ? { ...m, enabled: false } : m);
+  }
+  return { modules: buckets.flat(), groups: outGroups };
+}
+function activeUserModules(modules, groups = []) {
+  const off2 = new Set(groups.filter((g) => !partEnabled(g)).map((g) => g.id));
+  return off2.size ? modules.filter((m) => m.group === void 0 || !off2.has(m.group)) : modules;
+}
 function findPoint(preset, id) {
   return (preset.insertionPoints ?? []).find((p) => p.id === id);
 }
@@ -9282,7 +9359,7 @@ function normalizeUserModule(raw) {
     if (e.enabled === false) entry.enabled = false;
     return [entry];
   });
-  return {
+  const m = {
     id: str(raw.id),
     name: str(raw.name),
     enabled: raw.enabled !== false,
@@ -9293,20 +9370,38 @@ function normalizeUserModule(raw) {
       rules: Array.isArray(trigger.rules) ? trigger.rules.map(normalizeRule).filter((r) => Boolean(r)) : []
     }
   };
+  if (typeof raw.group === "string" && raw.group) m.group = raw.group;
+  return m;
+}
+function normalizeUserModuleGroup(raw) {
+  if (!isObj2(raw) || typeof raw.id !== "string" || !raw.id) return null;
+  const g = { id: raw.id, name: str(raw.name), mode: raw.mode === "single" ? "single" : "multi" };
+  if (raw.collapsed === true) g.collapsed = true;
+  if (raw.enabled === false) g.enabled = false;
+  return g;
 }
 function parseUserModuleFile(raw) {
   if (isObj2(raw) && raw.format === USER_MODULES_FORMAT) {
     if (raw.version !== 1) throw new Error(`unsupported user module file version ${String(raw.version)}`);
     const modules = (Array.isArray(raw.modules) ? raw.modules : []).map(normalizeUserModule).filter((m) => Boolean(m));
+    const seen = /* @__PURE__ */ new Set();
+    const groups = (Array.isArray(raw.groups) ? raw.groups : []).map(normalizeUserModuleGroup).filter((g) => Boolean(g) && !seen.has(g.id) && Boolean(seen.add(g.id)));
+    for (const m of modules) if (m.group !== void 0 && !seen.has(m.group)) delete m.group;
     const preset = isObj2(raw.preset) && typeof raw.preset.id === "string" ? { id: raw.preset.id, version: str(raw.preset.version) } : void 0;
-    return { preset, modules };
+    return { preset, modules, groups };
   }
   const single = normalizeUserModule(raw);
-  if (single) return { modules: [single] };
+  if (single) {
+    delete single.group;
+    return { modules: [single], groups: [] };
+  }
   throw new Error("not a user module file");
 }
 
 // ../protocol/src/preset-user-modules.ts
+function presetUserModuleGroups(preset) {
+  return Array.isArray(preset.userModuleGroups) ? preset.userModuleGroups : [];
+}
 function presetUserModules(preset) {
   return Array.isArray(preset.userModules) ? preset.userModules : [];
 }
@@ -9328,7 +9423,8 @@ function userModuleFromSource(body, id, opts = {}) {
     enabled: opts.enabled ?? true,
     entries: body.entries.map((e, i) => ({ id: `e${i + 1}`, ...cloneData(e) })),
     vars: cloneData(body.vars ?? []),
-    trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger()
+    trigger: body.trigger ? cloneData(body.trigger) : emptyTrigger(),
+    ...opts.group ? { group: opts.group } : {}
   };
 }
 
@@ -9639,7 +9735,13 @@ function compileBody(file, src, ctx, id, kind, translation) {
     else if (typeof fm.enabled !== "boolean") diag.error("`enabled` must be true or false", { ...where, path: "enabled" });
     else out.enabled = fm.enabled;
   }
-  const known = /* @__PURE__ */ new Set(["id", "name", "description", "enabled", "point", "role", "vars", "when", "trigger"]);
+  if (fm.group !== void 0) {
+    const at = { ...where, path: "group" };
+    if (translation) diag.warn("`group` comes from the source file; it is ignored in translations", at);
+    else if (typeof fm.group !== "string" || !ctx.userModuleGroups.some((g) => g.id === fm.group)) diag.error(`unknown user module group \`${String(fm.group)}\` (declare it in preset.yaml#userModuleGroups)`, at);
+    else out.group = fm.group;
+  }
+  const known = /* @__PURE__ */ new Set(["id", "name", "description", "enabled", "point", "role", "vars", "when", "trigger", "group"]);
   for (const k of Object.keys(fm)) if (!known.has(k)) diag.warn(`unknown frontmatter key \`${k}\` in a ${noun}`, { ...where, path: k });
   return out;
 }
@@ -9661,8 +9763,12 @@ function compileUserModuleSources(tree, ctx, kind) {
     }
     const body = compileBody(file, tree.get(file), ctx, m[1], kind, false);
     if (!body) continue;
-    const { enabled, ...rest } = body;
-    sources.push({ id: m[1], ...enabled === false ? { enabled } : {}, ...rest });
+    const { enabled, group, ...rest } = body;
+    sources.push({ id: m[1], ...enabled === false ? { enabled } : {}, ...group ? { group } : {}, ...rest });
+    if (kind === "module" && group && enabled !== false && ctx.userModuleGroups.find((g) => g.id === group)?.mode === "single") {
+      const other = sources.find((x) => x.id !== m[1] && x.group === group && x.enabled !== false);
+      if (other) ctx.diag.error(`single user module group \`${group}\` already has \`${other.id}\` enabled; set \`enabled: false\` here or there`, { file, path: "enabled" });
+    }
   }
   for (const { file, id, lang } of translations) {
     const src = sources.find((x) => x.id === id);
@@ -9672,7 +9778,7 @@ function compileUserModuleSources(tree, ctx, kind) {
     }
     const body = compileBody(file, tree.get(file), ctx, id, kind, true);
     if (body) {
-      const { enabled: _ignored, ...rest } = body;
+      const { enabled: _ignored, group: _source, ...rest } = body;
       (src.locales ??= {})[lang] = rest;
     }
   }
@@ -10372,6 +10478,20 @@ function compile(tree) {
     if (o.description !== void 0) point.description = str2(o.description).trim();
     insertionPoints.push(point);
   });
+  const userModuleGroups = [];
+  if (raw.userModuleGroups !== void 0 && !Array.isArray(raw.userModuleGroups)) diag.error("userModuleGroups must be a list", { file: M, path: "userModuleGroups" });
+  (Array.isArray(raw.userModuleGroups) ? raw.userModuleGroups : []).forEach((r, i) => {
+    const where = { file: M, path: `userModuleGroups[${i}]` };
+    if (!isObj5(r)) return diag.error("a user module group is a mapping `{ id, name, mode }`", where);
+    const gid = str2(r.id);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(gid)) return diag.error("user module group id must be lower-case kebab-case", where);
+    if (userModuleGroups.some((x) => x.id === gid)) return diag.error(`duplicate user module group \`${gid}\``, where);
+    if (r.mode !== void 0 && r.mode !== "single" && r.mode !== "multi") diag.error("mode must be single | multi", where);
+    if (r.collapsed !== void 0 && typeof r.collapsed !== "boolean") diag.error("collapsed must be true or false", where);
+    if (r.enabled !== void 0 && typeof r.enabled !== "boolean") diag.error("enabled must be true or false", where);
+    for (const k of Object.keys(r)) if (!["id", "name", "mode", "collapsed", "enabled"].includes(k)) diag.warn(`unknown user module group key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    userModuleGroups.push({ id: gid, name: str2(r.name, gid), mode: r.mode === "single" ? "single" : "multi", ...r.collapsed === true ? { collapsed: true } : {}, ...r.enabled === false ? { enabled: false } : {} });
+  });
   const vars = [];
   if (raw.vars !== void 0 && !isObj5(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
   for (const [vid, v] of Object.entries(isObj5(raw.vars) ? raw.vars : {})) {
@@ -10496,9 +10616,9 @@ function compile(tree) {
     const src = o.history;
     if (src === void 0 || src === null) return void 0;
     const isDepth = (v) => typeof v === "number" && Number.isInteger(v) && v >= 0;
-    if (kind === "annotations") {
+    if (kind === "annotations" || kind === "speech") {
       if (isDepth(src)) return src;
-      diag.error("annotations take a number: `history: N` re-injects the last N messages' annotations", where);
+      diag.error(kind === "speech" ? "speech takes a number: `history: N` re-injects the speech tags of the last N messages" : "annotations take a number: `history: N` re-injects the last N messages' annotations", where);
       return void 0;
     }
     if (typeof src === "number") {
@@ -10557,7 +10677,7 @@ function compile(tree) {
     const decl = {
       id: sid,
       kind,
-      tag: str2(o.tag, sid),
+      tag: str2(o.tag, kind === "speech" ? DEFAULT_SPEECH_TAG : sid),
       field,
       formatPrompt: { tag: text(str2(fp.tag), where), field: fieldText(fp.field, "formatPrompt.field") }
     };
@@ -10586,7 +10706,12 @@ function compile(tree) {
       decl.shape = o.shape === "kv" ? "kv" : "text";
       decl.display = o.display === "hidden" ? "hidden" : "card";
     }
-    if (kind === "annotations") {
+    if (kind === "image" && decl.count !== void 0 && !(Number.isInteger(decl.count) && decl.count >= 1)) {
+      diag.error("`count` of an image structure must be a positive integer (most images per turn)", { ...where, path: `${where.path}.count` });
+      delete decl.count;
+    }
+    if (kind === "speech" && o.tag !== void 0 && !/^[A-Za-z][\w-]*$/.test(decl.tag)) diag.error(`speech tag \`${decl.tag}\` must be a plain element name`, where);
+    if (inline) {
       if (!decl.formatPrompt.tag) decl.formatPrompt.tag = decl.formatPrompt.field;
       if (!decl.formatPrompt.field) decl.formatPrompt.field = decl.formatPrompt.tag;
     }
@@ -10680,6 +10805,19 @@ function compile(tree) {
       if (!storylines.separator.includes("{{storyline}}")) diag.warn("storylines.separator has no {{storyline}}: storylines cannot be told apart in the history", { file: M, path: "storylines.separator" });
     }
   }
+  const mediaFlag = (key) => {
+    const v = raw[key];
+    if (v === void 0 || v === null || v === false) return void 0;
+    if (v === true) return {};
+    if (!isObj5(v)) {
+      diag.error(`${key} must be \`true\` or a mapping`, { file: M, path: key });
+      return void 0;
+    }
+    for (const k of Object.keys(v)) diag.warn(`${key}: unknown key \`${k}\``, { file: M, path: `${key}.${k}` });
+    return {};
+  };
+  const image = mediaFlag("image");
+  const speech = mediaFlag("speech");
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
     const o = isObj5(s) ? s : {};
     const where = { file: M, path: `syntheticTurns[${i}]` };
@@ -10766,6 +10904,7 @@ function compile(tree) {
   const sourceCtx = {
     diag,
     insertionPoints,
+    userModuleGroups,
     expr,
     content,
     varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
@@ -10930,6 +11069,8 @@ function compile(tree) {
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
     ...inputShaping ? { inputShaping } : {},
     ...storylines ? { storylines } : {},
+    ...image ? { image } : {},
+    ...speech ? { speech } : {},
     params,
     groups,
     modules,
@@ -10937,6 +11078,8 @@ function compile(tree) {
     insertionPoints,
     userModules,
     userModuleTemplates,
+    // Only when present, so that other artifacts keep their hash.
+    ...userModuleGroups.length ? { userModuleGroups } : {},
     vars,
     workflows,
     structures,
@@ -11209,7 +11352,19 @@ var FIXED_VARS = {
   "storyline.naming": null,
   "storyline.namingMain": null,
   "storyline.switching": null,
-  "storyline.frozen": null
+  "storyline.frozen": null,
+  "image.on": null,
+  "image.auto": null,
+  "image.api": IMAGE_APIS,
+  "image.prompt": IMAGE_PROMPT_TYPES,
+  "image.style": null,
+  "image.sfw": null,
+  "image.refs": null,
+  "speech.on": null,
+  "speech.auto": null,
+  "speech.api": SPEECH_APIS,
+  "speech.narrator": null,
+  "speech.characters": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -11248,10 +11403,13 @@ function validate(p, map, diag) {
     checkLiterals(e.r, where);
   };
   let storylineUses = 0;
+  const mediaUses = { image: 0, speech: 0 };
   for (const { expr, where } of map.exprs) {
     for (const v of variables(expr)) {
       checkVar(v, where);
       if (v.startsWith("storyline.")) storylineUses++;
+      if (v.startsWith("image.")) mediaUses.image++;
+      if (v.startsWith("speech.")) mediaUses.speech++;
     }
     checkLiterals(expr, where);
   }
@@ -11313,6 +11471,14 @@ function validate(p, map, diag) {
           storylineUses++;
           if (a !== void 0 && a !== "main") bad("expected no argument (current storyline) or `main`");
           break;
+        case "image":
+          mediaUses.image++;
+          if (a !== "refs") bad("expected refs");
+          break;
+        case "speech":
+          mediaUses.speech++;
+          if (a !== "format" && a !== "characters") bad("expected format | characters");
+          break;
         case "var": {
           const decl = varDecls.get(a);
           const sel = rest[1];
@@ -11335,6 +11501,8 @@ function validate(p, map, diag) {
     const code = templateCode(source).join("\n");
     if (/\bmacro\(\s*(['"`])input\1\s*,\s*(['"`])text\2/.test(code)) inputTextUses++;
     if (/(?<![\w$.])storyline\s*\.|\bmacro\(\s*(['"`])storyline\1/.test(code)) storylineUses++;
+    if (/(?<![\w$.])image\s*\.|\bmacro\(\s*(['"`])image\1/.test(code)) mediaUses.image++;
+    if (/(?<![\w$.])speech\s*\.|\bmacro\(\s*(['"`])speech\1/.test(code)) mediaUses.speech++;
     let staticVarReads = 0;
     for (const m of code.matchAll(REF_RE)) {
       const [, root, dotted, , quoted] = m;
@@ -11362,6 +11530,19 @@ function validate(p, map, diag) {
     diag.warn("no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names", { file: M, path: "storylines" });
   if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
     diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: "minAdvancedPreset" });
+  for (const key of ["image", "speech"]) {
+    const decls = Object.values(p.structures).filter((s) => s.kind === key);
+    const what = key === "image" ? "image generation" : "speech synthesis";
+    if (!p[key] && mediaUses[key]) diag.warn(`${key}.* variables and {{ap::${key}::\u2026}} are always off / empty: the preset does not declare ${key} (${what})`, { file: M, path: key });
+    if (!p[key] && decls.length) diag.warn(`structure ${decls[0].id}: ${key} structures are never requested, the preset does not declare ${key}`, { file: M, path: `structures.${decls[0].id}` });
+    if (p[key] && !decls.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
+      diag.warn(`the preset declares ${key} but no module requests a${key === "image" ? "n image" : " speech"} structure: nothing is ${key === "image" ? "generated" : "marked for synthesis"}`, { file: M, path: key });
+    if (p[key] && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, MEDIA_SINCE) < 0))
+      diag.warn(`${what} needs Advanced Preset ${MEDIA_SINCE}: set minAdvancedPreset to ${MEDIA_SINCE} or later (older versions ignore it)`, { file: M, path: "minAdvancedPreset" });
+  }
+  const speechDecl = Object.values(p.structures).find((s) => s.kind === "speech");
+  const tagClash = speechDecl && Object.values(p.structures).find((s) => s !== speechDecl && !isInlineStructure(s) && s.tag === speechDecl.tag);
+  if (speechDecl && tagClash) diag.error(`structures ${speechDecl.id} and ${tagClash.id} share tag \`${speechDecl.tag}\``, { file: M, path: `structures.${speechDecl.id}.tag` });
   const below = (since) => !p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, since) < 0;
   if (p.regexScripts?.length && below(REGEX_SCRIPTS_SINCE))
     diag.warn(`regex scripts need Advanced Preset ${REGEX_SCRIPTS_SINCE}: set minAdvancedPreset to ${REGEX_SCRIPTS_SINCE} or later (older versions leave them out of the Carrier)`, { file: M, path: "minAdvancedPreset" });
@@ -11596,6 +11777,7 @@ function validate(p, map, diag) {
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
       userModules: new Set((p.userModules ?? []).map((x) => x.id)),
+      userModuleGroups: new Set((p.userModuleGroups ?? []).map((x) => x.id)),
       userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys()),
       quickReplySets: new Set((p.quickReplySets ?? []).map((x) => x.id))
@@ -11683,6 +11865,20 @@ function previewStoryline(preset, config, o) {
     frozen: config.storylines?.enabled !== false && freezesStoryline(freezeMode(config.storylines), line)
   };
 }
+var PREVIEW_IMAGE_REFS = [{ id: "ref1", description: "(reference image 1)" }, { id: "ref2", description: "(reference image 2)" }];
+var PREVIEW_SPEECH_FORMAT = "(speech format notes of the API)";
+var PREVIEW_SPEECH_CHARACTERS = ["(character 1)", "(character 2)"];
+function previewMedia(preset, o) {
+  const i = preset.image && o.image ? o.image : void 0;
+  const s = preset.speech && o.speech ? o.speech : void 0;
+  const refs = i?.refs && i.api !== "novelai" ? PREVIEW_IMAGE_REFS : [];
+  const characters = s?.characters ? PREVIEW_SPEECH_CHARACTERS : [];
+  return {
+    image: i ? { on: true, auto: Boolean(i.auto), api: i.api, prompt: i.prompt ?? defaultImagePromptType(i.api), style: Boolean(i.style), sfw: Boolean(i.sfw), refs: refs.length > 0 } : { ...IMAGE_OFF },
+    speech: s ? { on: true, auto: Boolean(s.auto), api: s.api, narrator: Boolean(s.narrator), characters: characters.length > 0 } : { ...SPEECH_OFF },
+    data: { image: { refs }, speech: { format: s ? PREVIEW_SPEECH_FORMAT : "", characters } }
+  };
+}
 function pick(all, ids, noun) {
   const unknown = ids.filter((id) => id !== "all" && id !== "none" && !all.some((t) => t.id === id));
   if (unknown.length) return `unknown ${noun} ${unknown.join(", ")} (have: ${all.map((t) => t.id).join(", ") || "none"})`;
@@ -11700,7 +11896,9 @@ function bundledModules(preset, ids, lang) {
   const picked = ids ? pick(all, ids, "bundled user module") : all.filter((m) => m.enabled !== false);
   if (typeof picked === "string") return picked;
   const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : void 0;
-  return picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id));
+  const modules = picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id, { group: m.group }));
+  const groups = presetUserModuleGroups(preset);
+  return activeUserModules(normalizeUserModuleGroups(modules, groups).modules, groups);
 }
 function parseParamArg(preset, arg) {
   const eq = arg.indexOf("=");
@@ -11733,15 +11931,18 @@ function preview(source, o) {
   });
   if (!TRANSPORTS.includes(config.connection.transport)) throw new Error(`unknown transport ${config.connection.transport}`);
   const pure = o.meta === "pure";
+  const media = pure ? previewMedia(preset, {}) : previewMedia(preset, o);
   const vars = defaultVars(preset, config, {
     meta: { present: Boolean(o.meta), pure, mixed: o.meta === "mixed", task: null, recent: false },
     gen: { origin: pure ? "task" : "story", type: "normal", callerTools: false, callerSchema: false },
     input: { shaped: Boolean(preset.inputShaping) && o.input !== void 0 },
-    storyline: previewStoryline(preset, config, o)
+    storyline: previewStoryline(preset, config, o),
+    image: media.image,
+    speech: media.speech
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "", storyline: { name: vars.storyline.name, main: "" } } }, workflow);
+  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "", storyline: { name: vars.storyline.name, main: "" }, ...media.data } }, workflow);
   const shaping = preset.inputShaping;
   const historyInput = o.input === void 0 ? void 0 : !shaping ? o.input : shaping.mode === "wrap" ? wrapInput(shaping.template, o.input, a.expand) : null;
   const transport = vars.transport;
@@ -11772,6 +11973,14 @@ function preview(source, o) {
     const flags = [v.if ? "if-line" : "", v.new ? "new" : "", v.grouped ? "grouped" : "", v.switching ? "switching" : "", v.naming ? "AI names it" : "", v.namingMain ? "AI names the previous main" : "", v.frozen ? "variables frozen" : ""].filter(Boolean);
     lines.push(`storyline: ${v.main ? `main${v.name ? ` ${v.name}` : ""}` : v.name || "?"}${flags.map((f) => ` (${f})`).join("")}`);
   } else if (o.storyline) lines.push("storyline: main (the preset declares no storylines)");
+  if (preset.image || o.image) {
+    const v = vars.image;
+    lines.push(`image: ${!preset.image ? "off (the preset declares no image)" : v.on ? [v.api, v.prompt, v.auto ? "auto" : "", v.style ? "style" : "", v.sfw ? "sfw" : "", v.refs ? "refs" : ""].filter(Boolean).join(" \xB7 ") : pure && o.image ? "off (task turn)" : "off"}`);
+  }
+  if (preset.speech || o.speech) {
+    const v = vars.speech;
+    lines.push(`speech: ${!preset.speech ? "off (the preset declares no speech)" : v.on ? [v.api, v.auto ? "auto" : "", v.narrator ? "narrator" : "", v.characters ? "characters" : ""].filter(Boolean).join(" \xB7 ") : pure && o.speech ? "off (task turn)" : "off"}`);
+  }
   if (shaping) lines.push(`input shaping: ${shaping.mode}${o.input === void 0 ? " (not shaped: no --input)" : ""}`);
   if (wf) lines.push(`stages: ${workflowSummary(a.stages, (x) => actorName(preset, config, x))}`);
   if (fields.length) lines.push(`fields: ${fields.join(" \u2192 ")}`);
@@ -11844,7 +12053,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.11.2" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.12.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files2(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -11940,7 +12149,7 @@ async function installSkills(target, source = SKILLS_SOURCE) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.11.2" : "0.0.0-dev";
+var VERSION = true ? "1.12.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage
@@ -11953,6 +12162,10 @@ Usage
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
                    [--storyline name|?] [--storyline-new] [--storyline-grouped]
                    [--storyline-switch] [--storyline-naming-main]
+                   [--image openai|gemini|novelai] [--image-prompt tags|description|instruction]
+                   [--image-auto] [--image-style] [--image-sfw] [--image-refs]
+                   [--speech fish|elevenlabs|minimax|gemini|openai|deepseek]
+                   [--speech-auto] [--speech-narrator] [--speech-characters]
                    [--user-modules file]
                    [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
                    [--lang zh-cn] [--json] [--out file]
@@ -11989,6 +12202,16 @@ async function main(argv) {
       "storyline-grouped": { type: "boolean" },
       "storyline-switch": { type: "boolean" },
       "storyline-naming-main": { type: "boolean" },
+      image: { type: "string" },
+      "image-prompt": { type: "string" },
+      "image-auto": { type: "boolean" },
+      "image-style": { type: "boolean" },
+      "image-sfw": { type: "boolean" },
+      "image-refs": { type: "boolean" },
+      speech: { type: "string" },
+      "speech-auto": { type: "boolean" },
+      "speech-narrator": { type: "boolean" },
+      "speech-characters": { type: "boolean" },
       "user-modules": { type: "string" },
       "bundled-modules": { type: "string" },
       "user-module-templates": { type: "string" },
@@ -12015,7 +12238,7 @@ async function main(argv) {
       const failed = !diag.ok || values.strict && diag.warnings.length > 0;
       if (failed || !preset) return 1;
       if (command === "check") {
-        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ""}`);
+        console.log(`\u2713 ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ""}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ""}${preset.userModuleGroups?.length ? `, ${preset.userModuleGroups.length} user module groups` : ""}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ""}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ""}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ""}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ""}`);
         return 0;
       }
       const installer = installerFlag ?? build?.installer ?? true;
@@ -12046,6 +12269,20 @@ async function main(argv) {
         params[parsed.id] = parsed.value;
       }
       const meta = values.meta === "pure" || values.meta === "mixed" ? values.meta : void 0;
+      if (values.image !== void 0 && !IMAGE_APIS.includes(values.image)) {
+        console.error(`--image: expected ${IMAGE_APIS.join(" | ")}`);
+        return 1;
+      }
+      if (values["image-prompt"] !== void 0 && !IMAGE_PROMPT_TYPES.includes(values["image-prompt"])) {
+        console.error(`--image-prompt: expected ${IMAGE_PROMPT_TYPES.join(" | ")}`);
+        return 1;
+      }
+      if (values.speech !== void 0 && !SPEECH_APIS.includes(values.speech)) {
+        console.error(`--speech: expected ${SPEECH_APIS.join(" | ")}`);
+        return 1;
+      }
+      const image = values.image ? { api: values.image, prompt: values["image-prompt"], auto: Boolean(values["image-auto"]), style: Boolean(values["image-style"]), sfw: Boolean(values["image-sfw"]), refs: Boolean(values["image-refs"]) } : void 0;
+      const speech = values.speech ? { api: values.speech, auto: Boolean(values["speech-auto"]), narrator: Boolean(values["speech-narrator"]), characters: Boolean(values["speech-characters"]) } : void 0;
       const ids = (v) => v.split(",").map((x) => x.trim()).filter(Boolean);
       const bundled = bundledModules(preset, values["bundled-modules"] !== void 0 ? ids(values["bundled-modules"]) : void 0, values.lang);
       if (typeof bundled === "string") {
@@ -12053,7 +12290,10 @@ async function main(argv) {
         return 1;
       }
       const userModules = [...bundled];
-      if (values["user-modules"]) userModules.push(...parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8"))).modules);
+      if (values["user-modules"]) {
+        const file = parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8")));
+        userModules.push(...activeUserModules(normalizeUserModuleGroups(file.modules, file.groups).modules, file.groups));
+      }
       if (values["user-module-templates"]) {
         const picked = templateModules(preset, ids(values["user-module-templates"]), values.lang);
         if (typeof picked === "string") {
@@ -12062,7 +12302,7 @@ async function main(argv) {
         }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], storylineSwitch: values["storyline-switch"], storylineNamingMain: values["storyline-naming-main"], userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], storylineSwitch: values["storyline-switch"], storylineNamingMain: values["storyline-naming-main"], image, speech, userModules, json: values.json });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

@@ -31,7 +31,7 @@ function sync(mes: Element): void {
   const msg = st().chat[id];
   const sc = getSidecar(msg);
   const isLive = Boolean(liveOn(id, msg));
-  if (msg && !msg.is_user) syncAnnotationView(text as HTMLElement, Boolean(sc?.annotations?.length || isLive));
+  if (msg && !msg.is_user) syncAnnotationView(text as HTMLElement, Boolean(sc?.annotations?.length || sc?.speech?.length || isLive));
   const lines = storylinesActive.value;
   syncTagView(text as HTMLElement, msg, lines);
   const want = Boolean(msg && !msg.is_user && (sc || isLive));
@@ -97,7 +97,7 @@ function schedule(mes?: Element | null): void {
   });
 }
 
-/** Re-render everything: chat changed, messages loaded / edited / swiped. */
+/** Re-render everything: chat or group changed, messages loaded / edited / swiped. */
 export function refreshMessages(): void {
   bumpChat();
   schedule();
@@ -105,7 +105,7 @@ export function refreshMessages(): void {
 
 export function installMounts(): void {
   const { eventSource, eventTypes: E } = st();
-  for (const e of [E.CHAT_CHANGED, E.MORE_MESSAGES_LOADED, E.MESSAGE_UPDATED, E.MESSAGE_EDITED, E.MESSAGE_SWIPED, E.MESSAGE_DELETED, E.CHARACTER_MESSAGE_RENDERED, E.USER_MESSAGE_RENDERED, 'advanced_preset_message_updated']) {
+  for (const e of [E.CHAT_CHANGED, E.GROUP_UPDATED, E.MORE_MESSAGES_LOADED, E.MESSAGE_UPDATED, E.MESSAGE_EDITED, E.MESSAGE_SWIPED, E.MESSAGE_DELETED, E.CHARACTER_MESSAGE_RENDERED, E.USER_MESSAGE_RENDERED, 'advanced_preset_message_updated']) {
     if (e) eventSource.on(e, refreshMessages);
   }
 

@@ -9,6 +9,9 @@
  */
 import type { Annotation } from '@advanced-preset/protocol';
 
+/** What locating needs of an anchored item (annotations, speech lines). */
+export type Anchor = Pick<Annotation, 'quote' | 'prefix' | 'suffix' | 'start'>;
+
 const SKIP = /[\u200B-\u200D\u2060\uFEFF\u00AD*_~`]/;
 const SPACE = /\s/;
 const DQ = /[“”„‟〝〞＂「」]/;
@@ -58,7 +61,7 @@ function commonPrefix(a: string, b: string): number {
 }
 
 /** Raw `[start, end)` of the annotation in the surface text, or null. */
-export function matchAnnotation(surface: string, mes: string, a: Annotation, s: Normalized = normalize(surface)): [number, number] | null {
+export function matchAnnotation(surface: string, mes: string, a: Anchor, s: Normalized = normalize(surface)): [number, number] | null {
   const q = norm(a.quote).trim();
   if (!q) return null;
   const cands = occurrences(s.text, q);
