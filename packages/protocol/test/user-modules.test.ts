@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  compileText, compileTrigger, evaluate, formatExpr, groupMembers, migrateUserModules, missingPoints, normalizeUserModuleGroups, parseUserModuleFile, ruleError,
+  activeUserModules, compileText, compileTrigger, evaluate, formatExpr, groupMembers, migrateUserModules, missingPoints, normalizeUserModuleGroups, parseUserModuleFile, ruleError,
   userModuleFile, withUserModules, type APreset, type Entry, type Migration, type UserModule, type UserModuleGroup,
 } from '../src';
 
@@ -177,6 +177,28 @@ describe('user module groups', () => {
     expect(parsed.modules.map((m) => m.group)).toEqual(['g1', undefined, undefined]);
     // A bare module never carries a group (there is no group to refer to).
     expect(parseUserModuleFile({ entries: [], group: 'g1' }).modules[0]!.group).toBeUndefined();
+  });
+
+  it('leaves the modules of a switched-off group out, keeping their own switches', () => {
+    const list = [mod('a', ['early'], { group: 'off' }), mod('b', ['early']), mod('c', ['early'], { group: 'on' }), mod('d', ['early'], { group: 'gone' })];
+    const groups = [{ ...g('off'), enabled: false }, g('on')];
+    const active = activeUserModules(list, groups);
+    expect(ids(active)).toEqual(['b', 'c', 'd']);
+    expect(list[0]!.enabled).toBe(true);
+    expect(activeUserModules(list, [g('off'), g('on')])).toBe(list);
+    expect(activeUserModules(list)).toBe(list);
+    const merged = withUserModules(preset, active).preset;
+    expect(merged.modules.map((m) => m.id)).toEqual(['core', 'user-b', 'user-c', 'user-d']);
+    expect(merged.entries.some((e) => e.module === 'user-a')).toBe(false);
+  });
+
+  it('keeps a group\'s off switch in files (on is not written)', () => {
+    const list = [mod('a', [], { group: 'g1' }), mod('b', [], { group: 'g2' })];
+    const file = JSON.parse(JSON.stringify(userModuleFile(list, undefined, [{ ...g('g1'), enabled: false }, g('g2')])));
+    expect(file.groups).toEqual([{ ...g('g1'), enabled: false }, g('g2')]);
+    expect(parseUserModuleFile(file).groups).toEqual([{ ...g('g1'), enabled: false }, g('g2')]);
+    const odd = parseUserModuleFile({ format: 'advanced-preset.user-modules', version: 1, modules: [], groups: [{ id: 'x', enabled: true }, { id: 'y', enabled: 'no' }] });
+    expect(odd.groups).toEqual([{ id: 'x', name: '', mode: 'multi' }, { id: 'y', name: '', mode: 'multi' }]);
   });
 
   it('files from the AP release before groups are read unchanged', () => {

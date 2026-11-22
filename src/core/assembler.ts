@@ -5,7 +5,7 @@
  */
 import {
   INSTALL_NOTICE_MARK,
-  MAIN_STORYLINE_VARS, freezeMode, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, type APreset, type MacroData, type StatusBar, type StorylineVars, type Vars, type Workflow,
+  MAIN_STORYLINE_VARS, freezeMode, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, activeUserModules, type APreset, type MacroData, type StatusBar, type StorylineVars, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
 import { st, toast, type ChatMessage, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
@@ -15,7 +15,7 @@ import { activeCarrierPresetId } from '@/store/carrier';
 import { chatMemory, currentRecap, globalMemory } from '@/store/eventlog';
 import { getSidecar } from '@/store/sidecar';
 import { settings } from '@/store/settings';
-import { keywordTexts, userModules } from '@/store/user-modules';
+import { keywordTexts, userModuleGroups, userModules } from '@/store/user-modules';
 import { classify, metaEnabled, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { alignHistory, annotationHistory, historyEchoes, rewriteHistory, speechHistory, synopsisOptions, type HistoryItem } from './history';
@@ -411,7 +411,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   if (shaping && ctx.input && !located) ctx.warnings.push('input shaping: the input message was not found in the history, sent as is');
   ctx.inputShaped = Boolean(located);
   const { vars, data } = buildVarsAndData(ctx, workflow);
-  const merged = withUserModules(preset, userModules(preset), ctx.keywords);
+  const merged = withUserModules(preset, activeUserModules(userModules(preset), userModuleGroups(preset)), ctx.keywords);
   for (const x of merged.skipped) ctx.warnings.push(`user module ${x.module}: insertion point \`${x.point}\` is missing, entry ${x.entry} skipped`);
   const assembly = assemble({ preset: merged.preset, config: ctx.config, vars, data }, workflow);
   if (assembly.warnings.length) reportTemplateWarnings(assembly.warnings, ctx.warnings);
