@@ -2,7 +2,7 @@
 import { parseArgs } from 'node:util';
 import { basename, resolve } from 'node:path';
 import { readFile, writeFile } from 'node:fs/promises';
-import { IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, parseUserModuleFile, tavernHelperScriptCount, type ImageApi, type ImagePromptType, type ParamValue, type SpeechApi } from '@advanced-preset/protocol';
+import { IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, normalizeUserModuleGroups, parseUserModuleFile, tavernHelperScriptCount, type ImageApi, type ImagePromptType, type ParamValue, type SpeechApi } from '@advanced-preset/protocol';
 import { buildDir, writePresetFile } from './io';
 import { report } from './diagnostics';
 import { bundledModules, parseParamArg, preview, templateModules } from './preview';
@@ -100,7 +100,7 @@ async function main(argv: string[]): Promise<number> {
       const failed = !diag.ok || (values.strict && diag.warnings.length > 0);
       if (failed || !preset) return 1;
       if (command === 'check') {
-        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ''}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ''}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ''}`);
+        console.log(`✓ ${preset.id} ${preset.version}: ${preset.modules.length} modules, ${preset.entries.length} entries, ${preset.workflows.length} workflows${manifestFiles.length > 1 ? `, ${manifestFiles.length - 1} manifest fragments` : ''}${preset.userModules.length ? `, ${preset.userModules.length} user modules` : ''}${preset.userModuleGroups?.length ? `, ${preset.userModuleGroups.length} user module groups` : ''}${preset.userModuleTemplates.length ? `, ${preset.userModuleTemplates.length} user module templates` : ''}${preset.regexScripts?.length ? `, ${preset.regexScripts.length} regex scripts` : ''}${preset.quickReplySets?.length ? `, ${preset.quickReplySets.length} Quick Reply sets (${preset.quickReplySets.reduce((n, s) => n + s.qrList.length, 0)} replies)` : ''}${preset.tavernHelperScripts?.length ? `, ${tavernHelperScriptCount(preset.tavernHelperScripts)} Tavern Helper scripts` : ''}`);
         return 0;
       }
       const installer = installerFlag ?? build?.installer ?? true;
@@ -134,7 +134,10 @@ async function main(argv: string[]): Promise<number> {
       const bundled = bundledModules(preset, values['bundled-modules'] !== undefined ? ids(values['bundled-modules']) : undefined, values.lang);
       if (typeof bundled === 'string') { console.error(bundled); return 1; }
       const userModules = [...bundled];
-      if (values['user-modules']) userModules.push(...parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8'))).modules);
+      if (values['user-modules']) {
+        const file = parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8')));
+        userModules.push(...normalizeUserModuleGroups(file.modules, file.groups).modules);
+      }
       if (values['user-module-templates']) {
         const picked = templateModules(preset, ids(values['user-module-templates']), values.lang);
         if (typeof picked === 'string') { console.error(picked); return 1; }

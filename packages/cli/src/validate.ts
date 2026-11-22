@@ -480,6 +480,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       structures: structureIds,
       insertionPoints: new Set(p.insertionPoints.map((x) => x.id)),
       userModules: new Set((p.userModules ?? []).map((x) => x.id)),
+      userModuleGroups: new Set((p.userModuleGroups ?? []).map((x) => x.id)),
       userModuleTemplates: new Set((p.userModuleTemplates ?? []).map((x) => x.id)),
       vars: new Set(varDecls.keys()),
       quickReplySets: new Set((p.quickReplySets ?? []).map((x) => x.id)),

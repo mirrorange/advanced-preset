@@ -28,6 +28,7 @@
 | `anchors` | map | — | 语义锚点的另一种写法 |
 | `workflowRegion` | region id | `tail` 锚点的区域 | 工作流提示词放入的区域 |
 | `insertionPoints` | list | `[]` | 用户模组插入点，见 [user-modules.md](user-modules.md) |
+| `userModuleGroups` | list | `[]` | 随预设安装的用户模组的组，见 [user-modules.md](user-modules.md#预设中的分组-usermodulegroups) |
 | `vars` | map | `{}` | 构建变量，见 [build-variables.md](build-variables.md) |
 | `params` | list | `[]` | 参数，见[参数](#参数-params) |
 | `groups` | map | `{}` | 面板分组与单选集，见[分组](#分组-groups) |
@@ -441,6 +442,7 @@ build:
 ## 其余字段
 
 - `insertionPoints` → [user-modules.md](user-modules.md#插入点-insertionpoints)
+- `userModuleGroups` → [user-modules.md](user-modules.md#预设中的分组-usermodulegroups)
 - `vars` → [build-variables.md](build-variables.md)
 - `structures` → [structures.md](structures.md)
 - `syntheticTurns`、`tools` → [transports.md](transports.md)

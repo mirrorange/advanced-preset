@@ -1,6 +1,6 @@
 /** `ap preview`: show what a configuration produces — regions, stages and transport artifacts. */
 import {
-  TRANSPORTS, assemble, freezeMode, freezesStoryline, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
+  TRANSPORTS, assemble, freezeMode, freezesStoryline, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, normalizeUserModuleGroups, presetUserModuleGroups, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
   IMAGE_OFF, SPEECH_OFF, defaultImagePromptType,
   type APreset, type Configuration, type StorylineVars, type ParamValue, type Transport, type UserModule, type UserModuleSource,
   type ImageApi, type ImagePromptType, type ImageVars, type MacroData, type SpeechApi, type SpeechVars,
@@ -93,7 +93,8 @@ export function templateModules(preset: APreset, ids: string[], lang?: string): 
 
 /**
  * The preset's bundled user modules as a fresh install gets them for the UI language `lang`:
- * by default those that start enabled; `ids` (or `all`) enables exactly those, `none` none.
+ * by default those that start enabled; `ids` (or `all`) enables exactly those, `none` none. They
+ * are in install order (ungrouped first, then by group); a single group keeps only its first.
  * Returns an error message for unknown ids.
  */
 export function bundledModules(preset: APreset, ids?: string[], lang?: string): UserModule[] | string {
@@ -101,7 +102,8 @@ export function bundledModules(preset: APreset, ids?: string[], lang?: string): 
   const picked = ids ? pick(all, ids, 'bundled user module') : all.filter((m) => m.enabled !== false);
   if (typeof picked === 'string') return picked;
   const labels = (id: string) => (lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : undefined);
-  return picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id));
+  const modules = picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id, { group: m.group }));
+  return normalizeUserModuleGroups(modules, presetUserModuleGroups(preset)).modules;
 }
 
 /**

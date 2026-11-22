@@ -23,7 +23,7 @@ import {
   CACHE_DEFAULTS, CONNECTION_DEFAULTS, DEFAULT_TOOLS, FORMAT_VERSION, STRUCTURE_KINDS, STRUCTURE_PROPERTIES, TRANSPORTS, parseExpr,
   type APreset, type InputShaping, type InputShapingMode, type Actor, type CarrierDecl, type CarrierPrompt, type Configuration, type Content, type Entry, type Expr,
   BUILD_VAR_TYPES, type BuildVarDecl, type BuildVarType, type BuildVarUpdate,
-  type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration,
+  type Group, type InsertionPoint, type Migration, type Module, type Param, type ParamOption, type RecommendedConfiguration, type UserModuleGroup,
   type RegexDecl, type Region, type Role, type SemanticAnchor, type Stage, type StageKind, type StructureDecl, type Style,
   type FieldText, type SyntheticTurn, type ThoughtSignatures, type ToolsDecl, type Transport, type Workflow, type WorkflowSections,
   DEFAULT_SYNOPSIS_HISTORY_TEMPLATE, USER_INPUT_MODES, type UserInputMode, defaultHistoryTemplate, type StructureHistory,
@@ -342,6 +342,21 @@ export function compile(tree: SourceTree): CompileResult {
     const point: InsertionPoint = { id: pid, label: str(o.label, pid), region: rid, order };
     if (o.description !== undefined) point.description = str(o.description).trim();
     insertionPoints.push(point);
+  });
+
+  // ── user module groups ────────────────────────────────────────────────────
+  const userModuleGroups: UserModuleGroup[] = [];
+  if (raw.userModuleGroups !== undefined && !Array.isArray(raw.userModuleGroups)) diag.error('userModuleGroups must be a list', { file: M, path: 'userModuleGroups' });
+  (Array.isArray(raw.userModuleGroups) ? raw.userModuleGroups : []).forEach((r: unknown, i: number) => {
+    const where = { file: M, path: `userModuleGroups[${i}]` };
+    if (!isObj(r)) return diag.error('a user module group is a mapping `{ id, name, mode }`', where);
+    const gid = str(r.id);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(gid)) return diag.error('user module group id must be lower-case kebab-case', where);
+    if (userModuleGroups.some((x) => x.id === gid)) return diag.error(`duplicate user module group \`${gid}\``, where);
+    if (r.mode !== undefined && r.mode !== 'single' && r.mode !== 'multi') diag.error('mode must be single | multi', where);
+    if (r.collapsed !== undefined && typeof r.collapsed !== 'boolean') diag.error('collapsed must be true or false', where);
+    for (const k of Object.keys(r)) if (!['id', 'name', 'mode', 'collapsed'].includes(k)) diag.warn(`unknown user module group key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    userModuleGroups.push({ id: gid, name: str(r.name, gid), mode: r.mode === 'single' ? 'single' : 'multi', ...(r.collapsed === true ? { collapsed: true } : {}) });
   });
 
   // ── build variables ─────────────────────────────────────────────────────────
@@ -749,6 +764,7 @@ export function compile(tree: SourceTree): CompileResult {
   const sourceCtx: SourceContext = {
     diag,
     insertionPoints,
+    userModuleGroups,
     expr,
     content,
     varUpdates: (src, where) => varUpdates(src, vars, diag, where, text),
@@ -930,6 +946,8 @@ export function compile(tree: SourceTree): CompileResult {
     insertionPoints,
     userModules,
     userModuleTemplates,
+    // Only when present, so that other artifacts keep their hash.
+    ...(userModuleGroups.length ? { userModuleGroups } : {}),
     vars,
     workflows,
     structures,

@@ -748,6 +748,74 @@ On.
     expect(out).toContain('## My style');
     expect(out).not.toContain('Be quiet.');
   });
+
+  const GROUPS = `
+userModuleGroups:
+  - { id: styles, name: Styles, mode: single }
+  - { id: extras, collapsed: true }
+`;
+  const one = (name: string, fm = '') => `---\nname: ${name}\npoint: guide\n${fm}---\n${name} text.\n`;
+
+  it('compiles user module groups and the group of bundled modules and templates', () => {
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS,
+      'locales/zh-cn.yaml': 'userModuleGroups:\n  styles: { name: 文风 }\n  nope: { name: x }\n',
+      'user-modules/a-plain.md': one('Plain', 'group: styles\n'),
+      'user-modules/b-ornate.md': one('Ornate', 'group: styles\nenabled: false\n'),
+      'user-modules/b-ornate.zh-cn.md': one('华丽', 'group: extras\n'),
+      'user-modules/c-loose.md': one('Loose'),
+      'user-module-templates/mine.md': one('Mine', 'group: extras\n'),
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.userModuleGroups).toEqual([{ id: 'styles', name: 'Styles', mode: 'single' }, { id: 'extras', name: 'extras', mode: 'multi', collapsed: true }]);
+    expect(preset!.userModules.map((m) => [m.id, m.group])).toEqual([['a-plain', 'styles'], ['b-ornate', 'styles'], ['c-loose', undefined]]);
+    expect(preset!.userModules[1]!.locales?.['zh-cn']).not.toHaveProperty('group');
+    expect(preset!.userModuleTemplates[0]!.group).toBe('extras');
+    const warns = diag.warnings.map((w) => `${w.file}: ${w.message}`).join('\n');
+    expect(warns).toMatch(/b-ornate\.zh-cn\.md: `group` comes from the source file/);
+    expect(warns).toMatch(/userModuleGroups\.nope does not exist/);
+    expect(warns).not.toMatch(/userModuleGroups\.styles/);
+  });
+
+  it('artifacts without groups have no userModuleGroups field', () => {
+    const { preset } = build(tree({ 'preset.yaml': MANIFEST + EXTRA, 'user-modules/x.md': one('X') }));
+    expect(preset).not.toHaveProperty('userModuleGroups');
+  });
+
+  it('reports bad groups, unknown groups and several enabled modules in a single group', () => {
+    const { diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS + '  - { id: Bad_Id }\n  - { id: styles }\n  - { id: odd, mode: radio, collapsed: maybe, color: red }\n',
+      'user-modules/a.md': one('A', 'group: styles\n'),
+      'user-modules/b.md': one('B', 'group: styles\n'),
+      'user-modules/c.md': one('C', 'group: extras\n'),
+      'user-modules/d.md': one('D', 'group: extras\n'),
+      'user-modules/e.md': one('E', 'group: gone\n'),
+      'user-module-templates/t.md': one('T', 'group: [x]\n'),
+    }));
+    const errors = diag.errors.map((e) => `${e.file}: ${e.message}`).join('\n');
+    expect(errors).toMatch(/preset\.yaml: user module group id must be lower-case kebab-case/);
+    expect(errors).toMatch(/preset\.yaml: duplicate user module group `styles`/);
+    expect(errors).toMatch(/preset\.yaml: mode must be single \| multi/);
+    expect(errors).toMatch(/preset\.yaml: collapsed must be true or false/);
+    expect(errors).toMatch(/user-modules\/b\.md: single user module group `styles` already has `a` enabled/);
+    expect(errors).not.toMatch(/user-modules\/d\.md/);
+    expect(errors).toMatch(/user-modules\/e\.md: unknown user module group `gone`/);
+    expect(errors).toMatch(/user-module-templates\/t\.md: unknown user module group/);
+    expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/unknown user module group key `color`/);
+  });
+
+  it('previews bundled modules in install order, one per single group', async () => {
+    const { bundledModules } = await import('../src/preview');
+    const { preset } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS,
+      'user-modules/a.md': one('A', 'group: styles\n'),
+      'user-modules/b.md': one('B', 'group: styles\nenabled: false\n'),
+      'user-modules/c.md': one('C'),
+    }));
+    expect((bundledModules(preset!) as UserModule[]).map((m) => [m.id, m.group, m.enabled])).toEqual([['c', undefined, true], ['a', 'styles', true]]);
+    expect((bundledModules(preset!, ['all']) as UserModule[]).map((m) => [m.id, m.enabled])).toEqual([['c', true], ['a', true], ['b', false]]);
+    expect((bundledModules(preset!, ['b']) as UserModule[]).map((m) => [m.id, m.enabled])).toEqual([['b', true]]);
+  });
 });
 
 describe('build variables', () => {
