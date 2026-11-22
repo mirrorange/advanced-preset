@@ -1,11 +1,11 @@
 <script setup lang="ts">
 /** Drill-in editor of one user module: name, switch, insertion entries, variable updates, trigger and file actions. */
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { ArrowLeft, CopyPlus, Download, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
+import { ArrowLeft, CopyPlus, Download, Folder, Plus, Trash2, TriangleAlert, X } from 'lucide-vue-next';
 import { compileText, findPoint, partEnabled, setPartEnabled, type APreset, type Role, type UserEntry, type UserModule, type UserVarUpdate } from '@advanced-preset/protocol';
 import { t, pt } from '@/i18n';
 import { save } from '@/store/settings';
-import { duplicateUserModule, exportUserModules, newEntry, removeUserModule } from '@/store/user-modules';
+import { duplicateUserModule, exportUserModules, moveUserModule, newEntry, removeUserModule, setUserModuleEnabled, userModuleGroups } from '@/store/user-modules';
 import { downloadJson, fileSlug } from '../../download';
 import IconButton from '../../components/IconButton.vue';
 import Section from '../../components/Section.vue';
@@ -71,6 +71,8 @@ function duplicate() {
   const copy = duplicateUserModule(props.preset, props.module.id, (name) => t('um.copyName', { name }));
   if (copy) emit('open', copy.id);
 }
+const groups = computed(() => userModuleGroups(props.preset));
+const setGroup = (id: string) => moveUserModule(props.preset, props.module.id, id || null, Infinity);
 const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module.name)}.ap-modules.json`, exportUserModules(props.preset, [props.module.id]));
 </script>
 
@@ -79,7 +81,7 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
     <header class="um-head">
       <IconButton :icon="ArrowLeft" :label="t('um.back')" align="start" @click="emit('close')" />
       <input ref="nameInput" v-model="module.name" class="input bare um-name grow" :placeholder="t('um.untitled')" :aria-label="t('um.name')" />
-      <Switch v-model="module.enabled" :label="t('panel.enabled')" />
+      <Switch :model-value="module.enabled" :label="t('panel.enabled')" @update:model-value="setUserModuleEnabled(preset, module.id, $event)" />
     </header>
 
     <Section :title="t('um.content')" :help="t('um.content.help')">
@@ -121,6 +123,13 @@ const exportOne = () => downloadJson(`${props.preset.id}.${fileSlug(props.module
     <footer class="um-foot">
       <button type="button" class="btn ghost" :title="t('um.export')" @click="exportOne"><Download /><span>{{ t('um.export') }}</span></button>
       <button type="button" class="btn ghost" :title="t('um.duplicate')" @click="duplicate"><CopyPlus /><span>{{ t('um.duplicate') }}</span></button>
+      <label v-if="groups.length" class="btn ghost picker um-move" :title="t('um.grp.moveTo')">
+        <Folder /><span class="ellipsis">{{ groups.find((g) => g.id === module.group)?.name || t('um.grp.none') }}</span>
+        <select :value="module.group ?? ''" :aria-label="t('um.grp.moveTo')" @change="setGroup(($event.target as HTMLSelectElement).value)">
+          <option value="">{{ t('um.grp.none') }}</option>
+          <option v-for="g in groups" :key="g.id" :value="g.id">{{ g.name || t('um.grp.untitled') }}</option>
+        </select>
+      </label>
       <span class="grow" />
       <button type="button" class="btn ghost danger" :class="{ armed: confirmDelete }" :title="t('common.delete')" @click="remove"><Trash2 /><span>{{ confirmDelete ? t('um.confirmDelete') : t('common.delete') }}</span></button>
     </footer>

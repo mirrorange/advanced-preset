@@ -148,6 +148,30 @@
 .um-choice-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.35; }
 .um-choice-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .um-new:hover { color: var(--ap-primary); border-color: color-mix(in srgb, var(--ap-primary) 50%, transparent); background: var(--ap-tint); }
+/* Groups of user modules: ungrouped list first, then a card per group; a single group's switches are radios. */
+.um-groups { display: flex; flex-direction: column; gap: var(--ap-space-2); }
+.um-groups.um-dragging, .um-groups.um-dragging * { cursor: grabbing; user-select: none; }
+.um-group { display: flex; flex-direction: column; gap: 2px; padding: 2px var(--ap-space-2) 4px; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md); background: var(--ap-surface); transition: background 0.15s, border-color 0.15s; }
+.um-group.collapsed { padding-bottom: 2px; }
+.um-group.dragging { border-color: color-mix(in srgb, var(--ap-primary) 55%, transparent); background: var(--ap-tint); }
+.um-group-head { display: flex; align-items: center; gap: 2px; min-height: 2.2em; margin-left: -4px; }
+.um-group-head > .um-grip { margin-left: 0; }
+.um-chevron svg.lucide { transition: transform 0.15s; }
+.um-chevron.open svg.lucide { transform: rotate(90deg); }
+.um-group-name { flex: 1 1 6em; font-weight: 600; text-overflow: ellipsis; }
+.um-group-count { flex: none; min-width: 1.6em; padding: 0 0.4em; border-radius: 999px; background: var(--ap-surface-2); text-align: center; line-height: 1.6; }
+.um-group-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-2); padding: 4px var(--ap-space-2); border-radius: var(--ap-radius-sm); background: color-mix(in srgb, var(--ap-danger) 8%, transparent); }
+.um-group-confirm .btn.danger { color: var(--ap-danger); }
+.um-group .um-list { margin: 0 calc(-1 * var(--ap-space-2) + 1px); }
+.um-group .um-picker { margin: 2px 0 4px; }
+.um-drop { display: flex; align-items: center; justify-content: center; min-height: 2.4em; margin: 0 var(--ap-space-2); border: 1px dashed var(--ap-border); border-radius: var(--ap-radius-sm); }
+.um-radio { display: inline-grid; place-items: center; width: 2.2em; height: 1.6em; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.um-radio .radio { width: 1.05em; height: 1.05em; border-radius: 50%; border: 1.5px solid var(--ap-faint); display: grid; place-items: center; transition: border-color 0.15s; }
+.um-radio:hover .radio { border-color: var(--ap-primary); }
+.um-radio.on .radio { border-color: var(--ap-primary); }
+.um-radio.on .radio::after { content: ''; width: 0.52em; height: 0.52em; border-radius: 50%; background: var(--ap-primary); }
+.um-move { position: relative; overflow: hidden; max-width: 12em; }
+.um-move select { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
 
 .um-editor { display: flex; flex-direction: column; gap: var(--ap-space-3); }
 .um-head { display: flex; align-items: center; gap: var(--ap-space-2); margin-left: -6px; }
