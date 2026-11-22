@@ -96,7 +96,7 @@ async function download() {
           <span>{{ playingAll && !speech.paused ? t('media.speech.pause') : t('media.speech.panel.playAll') }}</span>
         </button>
         <IconButton v-if="here" :icon="Square" :label="t('media.speech.stop')" small @click="stopSpeech()" />
-        <span class="grow xs muted ellipsis">{{ conn.name }} · {{ t('media.speech.panel.count', { n: segments.length }) }}</span>
+        <span class="grow xs muted ellipsis speech-panel-meta">{{ conn.name }} · {{ t('media.speech.panel.count', { n: segments.length }) }}</span>
         <IconButton v-if="!allReady" :icon="generating ? LoaderCircle : Sparkles" :class="{ spin: generating }" :label="t('media.speech.generateAll')" :disabled="generating" small @click="generateMessage(mesid)" />
         <IconButton v-if="anyMade" :icon="RotateCcw" :label="t('media.speech.regenerateAll')" :disabled="generating" small @click="regenerate(mesid)" />
         <IconButton v-if="anyMade" :icon="Trash2" :label="t('media.speech.deleteAll')" :disabled="generating" danger small @click="deleteAudio(mesid)" />
@@ -112,23 +112,11 @@ async function download() {
               :icon="playingSeg(s) && !speech.paused ? Pause : statusOf(s, i) === 'loading' ? LoaderCircle : Play" :class="{ spin: statusOf(s, i) === 'loading' && !playingSeg(s) }"
               :label="playingSeg(s) && !speech.paused ? t('media.speech.pause') : t('media.speech.play')" :active="playingSeg(s)" small align="start" class="speech-panel-play" @click="playLine(mesid, s.id)"
             />
-            <strong class="speech-panel-who ellipsis">{{ who(s) }}</strong>
-            <span class="xs muted ellipsis grow" :title="t('media.speech.panel.voice')">{{ voiceOf(s) }}</span>
+            <strong class="speech-panel-who ellipsis" :title="voiceOf(s)">{{ who(s) }}</strong>
+            <span v-if="s.original !== undefined" class="speech-panel-edited" :title="t('media.speech.panel.edited')" :aria-label="t('media.speech.panel.edited')" />
+            <span class="xs muted ellipsis grow speech-panel-voice" :title="t('media.speech.panel.voice')">{{ voiceOf(s) }}</span>
             <span class="badge speech-panel-state" :class="{ neutral: statusOf(s, i) === 'none' || statusOf(s, i) === 'loading', warn: statusOf(s, i) === 'error' }">{{ t(`media.speech.state.${statusOf(s, i)}`) }}</span>
-          </div>
-          <p v-if="s.kind === 'speech' && s.display !== draft(s)" class="speech-panel-display small muted">{{ s.display }}</p>
-          <textarea
-            class="input small speech-panel-text" rows="2" :value="draft(s)" :aria-label="t('media.speech.panel.text', { who: who(s) })" spellcheck="false"
-            @input="edit(s, $event)" @keydown="onKey(s, $event)"
-          />
-          <div class="speech-panel-actions">
-            <span v-if="s.original !== undefined && !dirty(s)" class="xs muted grow">{{ t('media.speech.panel.edited') }}</span>
-            <span v-else class="grow" />
-            <template v-if="dirty(s)">
-              <button type="button" class="btn ghost" @click="cancel(s)">{{ t('common.cancel') }}</button>
-              <button type="button" class="btn primary speech-panel-save" @click="save(s)">{{ t('media.speech.panel.save') }}</button>
-            </template>
-            <template v-else>
+            <template v-if="!dirty(s)">
               <IconButton v-if="s.original !== undefined" :icon="Undo2" :label="t('media.speech.panel.revert')" small class="speech-panel-revert" @click="revert(s)" />
               <IconButton
                 :icon="states[i] ? RotateCcw : Sparkles" :label="states[i] ? t('media.speech.regenerateLine') : t('media.speech.panel.generate')"
@@ -136,6 +124,15 @@ async function download() {
               />
               <IconButton v-if="states[i] === 'ready' || states[i] === 'error'" :icon="Trash2" :label="t('media.speech.deleteLine')" danger small align="end" class="speech-panel-delete" @click="deleteAudio(mesid, [s.id])" />
             </template>
+          </div>
+          <p v-if="s.kind === 'speech' && s.display !== draft(s)" class="speech-panel-display small muted">{{ s.display }}</p>
+          <textarea
+            class="input small speech-panel-text" rows="2" :value="draft(s)" :aria-label="t('media.speech.panel.text', { who: who(s) })" spellcheck="false"
+            @input="edit(s, $event)" @keydown="onKey(s, $event)"
+          />
+          <div v-if="dirty(s)" class="speech-panel-actions">
+            <button type="button" class="btn ghost" @click="cancel(s)">{{ t('common.cancel') }}</button>
+            <button type="button" class="btn primary speech-panel-save" @click="save(s)">{{ t('media.speech.panel.save') }}</button>
           </div>
         </li>
       </ol>

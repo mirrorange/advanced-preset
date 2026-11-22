@@ -176,9 +176,8 @@ function onKey(e: KeyboardEvent) {
 
     <div class="row end tight image-panel-actions">
       <button type="button" class="btn ghost sm-btn image-panel-restore" :disabled="!differsFromModel" @click="restore"><RotateCcw />{{ t('media.image.restore') }}</button>
-      <button type="button" class="btn ghost sm-btn" @click="emit('close')">{{ t('common.cancel') }}</button>
-      <button type="submit" class="btn sm-btn" :disabled="!dirty">{{ t('common.save') }}</button>
-      <button type="button" class="btn primary sm-btn" :disabled="running || !draft.prompt.trim()" @click="saveAndGenerate"><WandSparkles />{{ t('media.image.saveGenerate') }}</button>
+      <button type="submit" class="btn sm-btn image-panel-save" :disabled="!dirty">{{ t('common.save') }}</button>
+      <button type="button" class="btn primary sm-btn image-panel-generate" :disabled="running || !draft.prompt.trim()" @click="saveAndGenerate"><WandSparkles />{{ t('media.image.saveGenerate') }}</button>
     </div>
 
     <ImageViewer v-if="viewing !== null && keys.length" :keys="keys" :start="Math.min(viewing, keys.length - 1)" :caption="effective?.caption ?? effective?.prompt" @close="viewing = null" />
