@@ -50,6 +50,6 @@
   --ap-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
 @supports (color: rgb(from red r g b)) {
-  :host { --ap-panel-bg-solid: rgb(from var(--ap-panel-bg) r g b); }
-  :host([data-ap-theme='dark']) { --ap-panel-bg-solid: rgb(from var(--ap-panel-bg) r g b); }
+  :host { --ap-panel-bg-solid: rgb(from var(--ap-panel-bg) r g b / 1); }
+  :host([data-ap-theme='dark']) { --ap-panel-bg-solid: rgb(from var(--ap-panel-bg) r g b / 1); }
 }
