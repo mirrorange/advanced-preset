@@ -163,7 +163,7 @@ export default async function (page, shots) {
   for (const v of [{ name: 'refs', api: 'OpenAI', base: 'http://127.0.0.1:5055/v1' }, ...variants]) {
     await page.evaluate(() => window.AdvancedPreset.togglePanel(true));
     await tab('Media');
-    await imageSection.locator('.segmented button', { hasText: new RegExp(`^${v.api}$`) }).click();
+    await imageSection.locator('.field', { has: page.locator('.field-label', { hasText: /^API$/ }) }).locator('select').selectOption(v.api.toLowerCase());
     await field('Base URL').locator('input').fill(v.base);
     await field('Base URL').locator('input').dispatchEvent('change');
     await page.waitForTimeout(200);

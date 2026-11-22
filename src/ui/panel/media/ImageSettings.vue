@@ -34,7 +34,6 @@ const MODELS: Record<ImageApi, string[]> = {
   ],
 };
 const apiLabel = (api: string) => t(`media.api.${api}`);
-const apiOptions = IMAGE_APIS.map((value) => ({ value, label: apiLabel(value) }));
 const promptTypeOptions = IMAGE_PROMPT_TYPES.map((value) => ({ value, label: t(`media.image.promptType.${value}`), hint: t(`media.image.promptType.${value}.hint`) }));
 
 const setSwitch = (k: 'enabled' | 'auto', v: boolean) => { image.value[k] = v; saveMedia(); };
@@ -116,7 +115,11 @@ function removeRef(r: StoredRef) {
       </Field>
       <ConnectionBar :connections="image.connections" :active="conn" :api-label="apiLabel" @select="select" @add="add" @copy="copy" @remove="remove" @rename="rename" />
       <div v-if="conn" :key="conn.id" class="col media-conn">
-        <Segmented :model-value="conn.api" :options="apiOptions" @update:model-value="setApi($event as ImageApi)" />
+        <Field :label="t('media.image.api')">
+          <select class="input" :value="conn.api" @change="setApi(($event.target as HTMLSelectElement).value as ImageApi)">
+            <option v-for="a in IMAGE_APIS" :key="a" :value="a">{{ apiLabel(a) }}</option>
+          </select>
+        </Field>
         <Field :label="t('media.baseUrl')">
           <input class="input" :value="conn.baseUrl" :placeholder="IMAGE_DEFAULTS[conn.api].baseUrl" spellcheck="false" @change="edit('baseUrl', ($event.target as HTMLInputElement).value.trim())" />
         </Field>

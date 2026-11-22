@@ -500,6 +500,7 @@
   "media.speech.openrouterModel": "What the model can do (inline tags, voice cloning, default voices) follows the provider in its id, e.g. elevenlabs/eleven-v3 or fish-audio/s2.1-pro. Voices are listed per model.",
   "media.image": "Image generation",
   "media.image.auto.hint": "Off: images are generated when you click Generate.",
+  "media.image.api": "API",
   "media.image.promptType": "Prompt type",
   "media.image.promptType.tags": "Tags",
   "media.image.promptType.tags.hint": "Comma-separated Danbooru-style tags (NovelAI and similar)",
