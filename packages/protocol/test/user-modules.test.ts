@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  compileText, compileTrigger, evaluate, formatExpr, migrateUserModules, missingPoints, parseUserModuleFile, ruleError,
-  userModuleFile, withUserModules, type APreset, type Entry, type Migration, type UserModule,
+  compileText, compileTrigger, evaluate, formatExpr, groupMembers, migrateUserModules, missingPoints, normalizeUserModuleGroups, parseUserModuleFile, ruleError,
+  userModuleFile, withUserModules, type APreset, type Entry, type Migration, type UserModule, type UserModuleGroup,
 } from '../src';
 
 const entry = (id: string, region: string, order: number): Entry => ({ id, module: id.split('/')[0]!, region, order, content: [{ pieces: [{ text: id }] }] });
@@ -124,5 +124,63 @@ describe('user modules', () => {
     ]);
     expect(() => parseUserModuleFile({ format: 'advanced-preset.user-modules', version: 2 })).toThrow();
     expect(() => parseUserModuleFile([1])).toThrow();
+  });
+});
+
+describe('user module groups', () => {
+  const g = (id: string, mode: UserModuleGroup['mode'] = 'multi'): UserModuleGroup => ({ id, name: id, mode });
+  const ids = (list: UserModule[]) => list.map((m) => m.id);
+
+  it('puts ungrouped modules first, then each group in group order, keeping relative order', () => {
+    const list = [mod('a', [], { group: 'g2' }), mod('b', []), mod('c', [], { group: 'g1' }), mod('d', [], { group: 'g2' }), mod('e', [])];
+    const n = normalizeUserModuleGroups(list, [g('g1'), g('g2')]);
+    expect(ids(n.modules)).toEqual(['b', 'e', 'c', 'a', 'd']);
+    expect(n.modules[0]).toBe(list[1]);
+    expect(ids(groupMembers(n.modules, 'g2'))).toEqual(['a', 'd']);
+    expect(ids(groupMembers(n.modules, null))).toEqual(['b', 'e']);
+  });
+
+  it('ungroups modules of unknown groups and drops duplicate groups', () => {
+    const list = [mod('a', [], { group: 'gone' }), mod('b', [], { group: 'g1' })];
+    const n = normalizeUserModuleGroups(list, [g('g1'), { ...g('g1'), name: 'dup' }, g('')]);
+    expect(n.groups).toEqual([g('g1')]);
+    expect(n.modules[0]).toEqual(mod('a', []));
+    expect('group' in n.modules[0]!).toBe(false);
+    expect(list[0]!.group).toBe('gone');
+  });
+
+  it('keeps only the first module on in a single group (all off is fine)', () => {
+    const list = [mod('a', [], { group: 's', enabled: false }), mod('b', [], { group: 's' }), mod('c', [], { group: 's' }), mod('d', [], { group: 'm' }), mod('e', [], { group: 'm' })];
+    const n = normalizeUserModuleGroups(list, [g('s', 'single'), g('m')]);
+    expect(n.modules.map((m) => m.enabled)).toEqual([false, true, false, true, true]);
+    expect(list[2]!.enabled).toBe(true);
+    const off = normalizeUserModuleGroups([mod('x', [], { group: 's', enabled: false })], [g('s', 'single')]);
+    expect(off.modules[0]!.enabled).toBe(false);
+  });
+
+  it('writes the groups modules use into export files and reads them back', () => {
+    const list = [mod('a', ['early'], { group: 'g1' }), mod('b', ['early'])];
+    const file = JSON.parse(JSON.stringify(userModuleFile(list, { id: 'p', version: '1.0.0' }, [g('g1', 'single'), g('unused')])));
+    expect(file.version).toBe(1);
+    expect(file.groups).toEqual([g('g1', 'single')]);
+    expect(parseUserModuleFile(file)).toEqual({ preset: { id: 'p', version: '1.0.0' }, modules: list, groups: [g('g1', 'single')] });
+    expect('groups' in userModuleFile([mod('x', [])], undefined, [g('g1')])).toBe(false);
+  });
+
+  it('normalises untrusted groups and drops references to groups not in the file', () => {
+    const parsed = parseUserModuleFile({
+      format: 'advanced-preset.user-modules', version: 1,
+      groups: [{ id: 'g1', name: 'One', mode: 'single', collapsed: true }, { id: 'g2', mode: 'weird', collapsed: 'yes' }, { id: 'g1', name: 'dup' }, { name: 'no id' }, 3],
+      modules: [{ entries: [], group: 'g1' }, { entries: [], group: 'g9' }, { entries: [], group: 5 }],
+    });
+    expect(parsed.groups).toEqual([{ id: 'g1', name: 'One', mode: 'single', collapsed: true }, { id: 'g2', name: '', mode: 'multi' }]);
+    expect(parsed.modules.map((m) => m.group)).toEqual(['g1', undefined, undefined]);
+    // A bare module never carries a group (there is no group to refer to).
+    expect(parseUserModuleFile({ entries: [], group: 'g1' }).modules[0]!.group).toBeUndefined();
+  });
+
+  it('files from the AP release before groups are read unchanged', () => {
+    const old = { format: 'advanced-preset.user-modules', version: 1, modules: [{ id: 'x', name: 'x', enabled: true, entries: [], vars: [], trigger: { match: 'all', rules: [] } }] };
+    expect(parseUserModuleFile(old)).toEqual({ modules: [mod('x', [])], groups: [] });
   });
 });
