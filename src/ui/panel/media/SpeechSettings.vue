@@ -57,7 +57,7 @@ const select = (id: string) => { speech.value.active = id; saveMedia(); };
 const rename = (c: SpeechConnection, name: string) => { c.name = name; saveMedia(); };
 const setApi = (api: SpeechApi) => { if (conn.value) { changeSpeechApi(conn.value, api); saveMedia(); void gcVoices(); } };
 
-// The current chat's cards (re-read when the chat changes).
+// The current chat's cards (re-read when the chat or its group changes).
 const cards = computed(() => { void ui.chatRev; return chatCards(); });
 
 /** Binding groups: global, then one per card of the chat. */

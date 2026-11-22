@@ -483,7 +483,7 @@
   "media.image.promptType.instruction": "指令",
   "media.image.promptType.instruction.hint": "直接提出图像要求的自然语言，不限语言（GPT Image、Nano Banana 等多模态模型）",
   "media.image.refs.global": "全局",
-  "media.image.refs.move": "移动到",
+  "media.image.refs.scope": "适用于",
   "media.image.style": "风格提示词",
   "media.image.style.hint": "附加到每条图像提示词后。预设会知道已设置风格，AI 不再写风格。",
   "media.image.style.nl": "例如：柔和的水彩插画，低饱和配色",
