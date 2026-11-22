@@ -1504,6 +1504,8 @@ describe('media (image generation / speech synthesis)', () => {
     expect(messages(build(withMedia('image: true\nspeech: true\n', '')))).toMatch(/image generation needs Advanced Preset 1\.12\.0[\s\S]*speech synthesis needs/);
     expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '{{ap::image::nope}} {{ap::speech::x}}')))).toMatch(/expected refs[\s\S]*expected format \| characters/);
     expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '<!-- @if image.api == "dalle" -->x<!-- @end -->')))).toMatch(/`image.api` is never "dalle"/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '<!-- @if image.prompt == "natural" -->x<!-- @end -->')))).toMatch(/`image.prompt` is never "natural" \(expected tags \| description \| instruction\)/);
+    expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, '<!-- @if image.prompt == "tags" -->x<!-- @end -->')))).not.toMatch(/image.prompt/);
     expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('history: 2', 'history: { depth: 2 }'))))).toMatch(/speech takes a number/);
     expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('count: 2', 'count: 0'))))).toMatch(/must be a positive integer/);
     expect(messages(build(withMedia('image: true\nspeech: true\n', undefined, 'x', STRUCTS.replace('tag: Pic', 'tag: speech'))))).toMatch(/share tag `speech`/);
@@ -1519,12 +1521,13 @@ describe('media (image generation / speech synthesis)', () => {
     expect(off).toMatch(/image: off\nspeech: off\n/);
     expect(off).not.toMatch(/Draw\./);
     const on = preview(p, { image: { api: 'gemini', refs: true, sfw: true }, speech: { api: 'fish', characters: true } });
-    expect(on).toMatch(/image: gemini · sfw · refs\nspeech: fish · characters/);
+    expect(on).toMatch(/image: gemini · instruction · sfw · refs\nspeech: fish · characters/);
+    expect(preview(p, { image: { api: 'gemini', prompt: 'description' } })).toMatch(/image: gemini · description\n/);
     expect(on).toMatch(/- ref1: \(reference image 1\)/);
     expect(on).toMatch(/\(speech format notes of the API\) \(character 1\), \(character 2\)/);
     expect(on).toMatch(/structures: [^\n]*pic, voice/);
     const json = JSON.parse(preview(p, { image: { api: 'novelai', refs: true }, json: true, transport: 'structured' }));
-    expect(json.vars.image).toEqual({ on: true, auto: false, api: 'novelai', style: false, sfw: false, refs: false });
+    expect(json.vars.image).toEqual({ on: true, auto: false, api: 'novelai', prompt: 'tags', style: false, sfw: false, refs: false });
     const field = Object.values(json.schema.value.properties as Record<string, { type: string; items?: { properties: object } }>).find((x) => x.type === 'array' && x.items)!;
     expect(Object.keys(field.items!.properties)).toEqual(['prompt', 'ratio', 'caption']);
     expect(preview(build(withMedia('')).preset!, { image: { api: 'openai' } })).toMatch(/image: off \(the preset declares no image\)/);

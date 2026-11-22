@@ -2,11 +2,11 @@
  * Multimodal settings (`extension_settings.advancedPreset.media`): CORS proxy, image generation and
  * speech synthesis connections. Global, not per preset; binaries live in IndexedDB (`media-db.ts`).
  */
-import type { ImageApi, SpeechApi } from '@advanced-preset/protocol';
+import { defaultImagePromptType, type ImageApi, type ImagePromptType, type SpeechApi } from '@advanced-preset/protocol';
 import type { SpeechConnection, VoiceRef } from '@/media/speech/types';
 import { settings, save } from './settings';
 
-export { IMAGE_APIS, SPEECH_APIS, type ImageApi, type SpeechApi } from '@advanced-preset/protocol';
+export { IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, type ImageApi, type ImagePromptType, type SpeechApi } from '@advanced-preset/protocol';
 export type { SpeechConnection, VoiceRef };
 
 export type CorsMode = 'auto' | 'on' | 'off';
@@ -25,11 +25,17 @@ export interface ConnectionBase {
   body: string;
 }
 
-/** A reference image of a connection (`blob`: IndexedDB key). */
-export interface StoredRef { id: string; description: string; blob: string }
+/**
+ * A reference image of a connection (`blob`: IndexedDB key). `card`: avatar file name of the
+ * character card it belongs to (only offered in that card's chats); absent: global. Ids are unique
+ * within the connection.
+ */
+export interface StoredRef { id: string; description: string; blob: string; card?: string }
 
 export interface ImageConnection extends ConnectionBase {
   api: ImageApi;
+  /** How the preset should write prompts (`image.prompt`). */
+  promptType: ImagePromptType;
   /** Style prompt AP appends to every request (never given to the preset). */
   style: string;
   /** NovelAI negative prompt. */
@@ -48,10 +54,10 @@ export interface MediaSettings {
 }
 
 /** Default endpoint and model per image API. */
-export const IMAGE_DEFAULTS: Record<ImageApi, { baseUrl: string; model: string; nsfwBlock: boolean }> = {
-  openai: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-image-2.6-flare', nsfwBlock: true },
-  gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-nano-banana-2.1', nsfwBlock: true },
-  novelai: { baseUrl: 'https://image.novelai.net', model: 'nai-diffusion-4-5-full', nsfwBlock: false },
+export const IMAGE_DEFAULTS: Record<ImageApi, { baseUrl: string; model: string; nsfwBlock: boolean; promptType: ImagePromptType }> = {
+  openai: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-image-2.6-flare', nsfwBlock: true, promptType: defaultImagePromptType('openai') },
+  gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-nano-banana-2.1', nsfwBlock: true, promptType: defaultImagePromptType('gemini') },
+  novelai: { baseUrl: 'https://image.novelai.net', model: 'nai-diffusion-4-5-full', nsfwBlock: false, promptType: defaultImagePromptType('novelai') },
 };
 
 /** Reference images are only sent to these APIs. */
@@ -86,12 +92,12 @@ export const newId = (): string =>
 
 export function newImageConnection(api: ImageApi, name: string): ImageConnection {
   const d = IMAGE_DEFAULTS[api];
-  return { id: newId(), name, api, baseUrl: d.baseUrl, apiKey: '', model: d.model, headers: {}, body: '', style: '', negative: '', nsfwBlock: d.nsfwBlock, refs: [] };
+  return { id: newId(), name, api, baseUrl: d.baseUrl, apiKey: '', model: d.model, headers: {}, body: '', promptType: d.promptType, style: '', negative: '', nsfwBlock: d.nsfwBlock, refs: [] };
 }
 
 /**
- * Switch a connection to another API: endpoint, model and NSFW default follow the API unless the
- * user changed them from the previous API's defaults.
+ * Switch a connection to another API: endpoint, model, prompt type and NSFW default follow the API
+ * unless the user changed them from the previous API's defaults.
  */
 export function changeImageApi(c: ImageConnection, api: ImageApi): void {
   if (c.api === api) return;
@@ -100,6 +106,7 @@ export function changeImageApi(c: ImageConnection, api: ImageApi): void {
   if (!c.baseUrl || c.baseUrl === from.baseUrl) c.baseUrl = to.baseUrl;
   if (!c.model || c.model === from.model) c.model = to.model;
   if (c.nsfwBlock === from.nsfwBlock) c.nsfwBlock = to.nsfwBlock;
+  if (c.promptType === from.promptType) c.promptType = to.promptType;
   c.api = api;
 }
 

@@ -91,8 +91,9 @@ warn  preset.yaml:41 groups: module `x` has no group
 | `--storyline-naming-main` | 与 `--storyline-switch` 一起：原主线没有名称，由 AI 命名（`storyline.namingMain`，请求 `previous_main`） |
 | `--storyline-grouped` | 在主线上模拟分组的历史（`storyline.grouped` 为真；给了 `--storyline` 时总为真） |
 | `--image <api>` | 模拟开启图像生成（预设声明了 `image` 时）：`image.on` 为真，`image.api` 为 `openai` / `gemini` / `novelai`，请求 `image` 结构。摘要中有一行 `image: …` |
+| `--image-prompt <type>` | 与 `--image` 一起：`image.prompt` 为 `tags` / `description` / `instruction`（默认同新建连接：`novelai` 为 `tags`，其他为 `instruction`） |
 | `--image-auto` / `--image-style` / `--image-sfw` | 与 `--image` 一起：`image.auto` / `image.style` / `image.sfw` 为真 |
-| `--image-refs` | 与 `--image` 一起：当前连接有参考图（`image.refs` 为真，`{{ap::image::refs}}` 为两条占位参考图 `ref1` / `ref2`，Schema 中有 `refs`）；`novelai` 没有参考图 |
+| `--image-refs` | 与 `--image` 一起：有可用的参考图（`image.refs` 为真，`{{ap::image::refs}}` 为两条占位参考图 `ref1` / `ref2`，Schema 中有 `refs`）；`novelai` 没有参考图 |
 | `--speech <api>` | 模拟开启语音合成（预设声明了 `speech` 时）：`speech.on` 为真，`speech.api` 为 `fish` / `elevenlabs` / `minimax` / `gemini` / `openai` / `deepseek`，`{{ap::speech::format}}` 为占位文字，请求 `speech` 结构。摘要中有一行 `speech: …` |
 | `--speech-auto` / `--speech-narrator` | 与 `--speech` 一起：`speech.auto` / `speech.narrator` 为真 |
 | `--speech-characters` | 与 `--speech` 一起：有已绑定说话人的角色（`speech.characters` 为真，`{{ap::speech::characters}}` 为占位名） |

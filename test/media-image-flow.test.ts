@@ -19,6 +19,7 @@ const { mediaSettings, newImageConnection } = await import('@/store/media');
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 9]);
 let chat: any[];
 let requests: any[];
+let ctx: any;
 
 function sidecar(genId: string) {
   return { v: 1, presetId: 'p', genId, origin: 'story', structures: { pic: { images: [{ prompt: 'a cat', ratio: '1:1' }, { prompt: 'a dog' }] } }, stages: [], events: [] };
@@ -30,7 +31,7 @@ beforeEach(() => {
   requests = [];
   const sc = sidecar('g1');
   chat = [{ is_user: false, mes: 'x', swipe_id: 0, swipes: ['x'], swipe_info: [{ extra: { advanced_preset: structuredClone(sc) } }], extra: { advanced_preset: sc } }];
-  const ctx = { chat, extensionSettings: {}, saveChat: async () => {}, saveSettingsDebounced: () => {}, getRequestHeaders: () => ({}) };
+  ctx = { chat, extensionSettings: {}, saveChat: async () => {}, saveSettingsDebounced: () => {}, getRequestHeaders: () => ({}) };
   (globalThis as any).SillyTavern = { getContext: () => ctx };
   const m = mediaSettings();
   const c = { ...newImageConnection('openai', 'c'), apiKey: 'k' };
@@ -41,7 +42,9 @@ beforeEach(() => {
 
 describe('image generation flow', () => {
   it('runtime vars follow the settings', () => {
-    expect(imageSettingsRuntime().vars).toMatchObject({ on: true, auto: true, api: 'openai', style: false, sfw: true });
+    expect(imageSettingsRuntime().vars).toMatchObject({ on: true, auto: true, api: 'openai', prompt: 'instruction', style: false, sfw: true });
+    mediaSettings().image.connections[0]!.promptType = 'description';
+    expect(imageSettingsRuntime().vars.prompt).toBe('description');
     mediaSettings().image.enabled = false;
     expect(imageSettingsRuntime().vars.on).toBe(false);
   });
@@ -95,6 +98,24 @@ describe('image generation flow', () => {
     expect(j?.status).toBe('error');
     expect(String((j as { error: Error }).error.message)).toBe('HTTP 429: quota');
     expect(chat[0].extra.advanced_preset.images).toBeUndefined();
+  });
+
+  it('offers and sends only global references and those of the chat\'s cards', async () => {
+    Object.assign(ctx, { characters: [{ name: 'Ann', avatar: 'ann.png' }, { name: 'Bob', avatar: 'bob.png' }], characterId: 0 });
+    const c = mediaSettings().image.connections[0]!;
+    for (const [i, card] of [undefined, 'ann.png', 'bob.png'].entries()) {
+      const blob = `ref:${i + 1}`;
+      stored.set(blob, new Blob([PNG], { type: 'image/png' }));
+      c.refs.push({ id: `ref${i + 1}`, description: `r${i + 1}`, blob, ...(card ? { card } : {}) });
+    }
+    expect(imageSettingsRuntime().refs.map((r) => r.id)).toEqual(['ref1', 'ref2']);
+    chat[0].extra.advanced_preset.structures.pic.images[0].refs = ['ref1', 'ref2', 'ref3'];
+    await generateImage(0, 'pic', 0);
+    expect(requests[0].url).toMatch(/images\/edits$/);
+    expect(requests[0].body.images).toHaveLength(2);
+    // No character open: only the global ones.
+    ctx.characterId = undefined;
+    expect(imageSettingsRuntime().refs.map((r) => r.id)).toEqual(['ref1']);
   });
 
   it('auto generation off: nothing happens', async () => {

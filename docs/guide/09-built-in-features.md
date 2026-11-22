@@ -278,7 +278,7 @@ AP 怎么排历史：在主线上，所有支线的内容挪到前面，主线�
 
 ## 图像生成与语音合成
 
-AP 1.12 起，预设可以让模型为故事配插图、为角色的台词配音。请求由 AP 在浏览器里直接发出，连接（API 类型、Key、模型、风格提示词、参考图、角色与说话人的绑定）都由用户在面板的「多模态」页设置。预设只管**让模型写什么**：插图的提示词、哪些话是谁说的。用户那边开没开、用的是哪种 API，预设通过条件变量知道。
+AP 1.12 起，预设可以让模型为故事配插图、为角色的台词配音。请求由 AP 在浏览器里直接发出，连接（API 类型、Key、模型、提示词类型、风格提示词、参考图、角色与说话人的绑定）都由用户在面板的「多模态」页设置。预设只管**让模型写什么**：插图的提示词、哪些话是谁说的。用户那边开没开、提示词要写成哪一类，预设通过条件变量知道。
 
 和故事线一样，这是预设级的声明，不声明就没有这项功能：
 
@@ -318,7 +318,7 @@ image:
     field: Fill the `{{field}}` field with up to one item `{ "prompt", "refs", "ratio", "caption" }`, or leave it empty.
 ```
 
-每张图包含四项：`prompt`（必填）、`refs`（选用的参考图 id）、`ratio`（画幅）、`caption`（图下的标题）。没有参考图时（`image.refs` 为假），AP 不再要求模型填 `refs`，指令式的 Schema 里也没有这个字段。模型这一轮不输出插图也是可以的。
+每张图包含四项：`prompt`（必填）、`refs`（选用的参考图 id）、`ratio`（画幅）、`caption`（图下的标题）。参考图分为全局的和绑定到某张角色卡的（用户可以在两类之间移动），预设只会看到全局参考图和当前聊天角色卡（群聊为所有成员）的参考图，不相干的角色不会互相干扰。没有可用的参考图时（`image.refs` 为假），AP 不再要求模型填 `refs`，指令式的 Schema 里也没有这个字段。模型这一轮不输出插图也是可以的。
 
 ### 语音：行内 speech 结构
 
@@ -347,9 +347,10 @@ speech:
 | `image.on` / `speech.on` | 预设声明了这项功能，用户打开了它，并且选中了可用的连接 |
 | `image.auto` / `speech.auto` | 用户打开了自动生成 |
 | `image.api` | 当前连接的 API：`openai` `gemini` `novelai`（关闭时为空） |
+| `image.prompt` | 当前连接的提示词类型：`tags`（标签）`description`（描述）`instruction`（指令），关闭时为空。由用户选择，新建或切换 API 时 OpenAI / Gemini 默认指令，NovelAI 默认标签 |
 | `image.style` | 连接有自己的风格提示词，AP 会把它附加到每次请求中（提示词本身不交给预设） |
 | `image.sfw` | 打开了 NSFW 屏蔽（OpenAI / Gemini 默认打开，NovelAI 默认关闭） |
-| `image.refs` | 连接有参考图（仅 OpenAI / Gemini） |
+| `image.refs` | 有可用的参考图：全局的，或属于当前聊天角色卡的（仅 OpenAI / Gemini） |
 | `speech.api` | `fish` `elevenlabs` `minimax` `gemini` `openai` `deepseek`（关闭时为空） |
 | `speech.narrator` | 旁白也要朗读 |
 | `speech.characters` | 有已绑定说话人的角色（`{{ap::speech::characters}}` 非空） |
@@ -377,16 +378,17 @@ structures: [image]
 <!-- @if image.sfw -->
 - Do not illustrate sexual, explicit or graphically violent moments.
 <!-- @end -->
-<!-- @if image.api == "novelai" -->
+<!-- @if image.prompt == "tags" -->
 - Write the prompt as comma-separated Danbooru-style tags…
-<!-- @if !image.style -->
-- End with artist, style and quality tags that suit the story's tone.
 <!-- @end -->
-<!-- @else -->
+<!-- @if image.prompt == "description" -->
 - Write the prompt as one detailed paragraph in English…
-<!-- @if !image.style -->
-- State an art style and medium that suit the story's tone.
 <!-- @end -->
+<!-- @if image.prompt == "instruction" -->
+- Write the prompt as direct instructions to the image model, in the language of your reply…
+<!-- @end -->
+<!-- @if !image.style -->
+- State an art style that suits the story's tone.
 <!-- @end -->
 <!-- @if image.refs -->
 - List the ids of the reference images that appear in this illustration; use only these ids:
@@ -401,7 +403,7 @@ structures: [image]
 
 要点：
 
-- **按 `image.api` 区分写法**：OpenAI 和 Gemini 用自然语言描述，NovelAI 用逗号分隔的标签；
+- **按 `image.prompt` 区分写法**：`tags` 用逗号分隔的标签（NovelAI 等），`description` 用一整段英文描述（SD、Midjourney 类模型），`instruction` 可以直接、指令式地提出要求，也不必用英文（GPT Image、Nano Banana 等多模态模型理解力很强）；
 - **`image.style` 为真时不要写画风**：用户的风格提示词会自动附加，再写一遍只会互相打架；
 - **`image.sfw` 为真时不为 NSFW 场景出图**：换一个安全的画面，或者这一轮不出图；
 - **提示词要自成一体**：图像模型不知道故事，每次都要完整描述人物外貌，不能只写名字；
@@ -409,7 +411,7 @@ structures: [image]
 
 完整的模组见花瓣的 `modules/features/illustrations.md` 与 `voice.md`。
 
-用 `ap preview` 检查各种组合：`--image openai|gemini|novelai` 打开图像生成并指定 API，`--image-auto` `--image-style` `--image-sfw` `--image-refs` 打开对应的变量；`--speech <api>` 打开语音合成，`--speech-auto` `--speech-narrator` `--speech-characters` 同理。参考图、角色名和语音格式说明用占位示例。声明见 [清单参考](../reference/manifest.md#图像生成与语音合成-image--speech)，字段与解析规则见结构参考的 [image](../reference/structures.md#image) 与 [speech](../reference/structures.md#speech)，变量与宏见 [条件变量](../reference/expressions.md#条件变量) 和 [宏](../reference/macros.md#图像与语音)，预览选项见 [ap preview](../reference/cli.md#ap-preview)。
+用 `ap preview` 检查各种组合：`--image openai|gemini|novelai` 打开图像生成并指定 API，`--image-prompt tags|description|instruction` 指定提示词类型（默认随 API），`--image-auto` `--image-style` `--image-sfw` `--image-refs` 打开对应的变量；`--speech <api>` 打开语音合成，`--speech-auto` `--speech-narrator` `--speech-characters` 同理。参考图、角色名和语音格式说明用占位示例。声明见 [清单参考](../reference/manifest.md#图像生成与语音合成-image--speech)，字段与解析规则见结构参考的 [image](../reference/structures.md#image) 与 [speech](../reference/structures.md#speech)，变量与宏见 [条件变量](../reference/expressions.md#条件变量) 和 [宏](../reference/macros.md#图像与语音)，预览选项见 [ap preview](../reference/cli.md#ap-preview)。
 
 ## 状态栏
 

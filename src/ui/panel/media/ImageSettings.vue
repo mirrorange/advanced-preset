@@ -1,14 +1,16 @@
 <script setup lang="ts">
-/** Image generation settings: switches, connections (API, endpoint, key, model, style, NSFW block, reference images) and request overrides. */
+/** Image generation settings: switches, connections (API, endpoint, key, model, prompt type, style, NSFW block, reference images) and request overrides. */
 import { computed, ref } from 'vue';
 import { ImagePlus, Images, Trash2 } from 'lucide-vue-next';
 import { t } from '@/i18n';
 import {
-  activeConnection, changeImageApi, copyConnection, IMAGE_APIS, IMAGE_DEFAULTS, mediaSettings, newImageConnection, saveMedia, supportsRefs,
-  type ImageApi, type ImageConnection,
+  activeConnection, changeImageApi, copyConnection, IMAGE_APIS, IMAGE_DEFAULTS, IMAGE_PROMPT_TYPES, mediaSettings, newImageConnection, saveMedia, supportsRefs,
+  type ImageApi, type ImageConnection, type ImagePromptType, type StoredRef,
 } from '@/store/media';
 import { deleteBlob, putBlob } from '@/store/media-db';
 import { gcRefs, nextRefId } from '@/media/image/refs';
+import { chatCards } from '@/st/cards';
+import { ui } from '@/ui/state';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
@@ -28,6 +30,7 @@ const MODELS: Record<ImageApi, string[]> = {
 };
 const apiLabel = (api: string) => t(`media.api.${api}`);
 const apiOptions = IMAGE_APIS.map((value) => ({ value, label: apiLabel(value) }));
+const promptTypeOptions = IMAGE_PROMPT_TYPES.map((value) => ({ value, label: t(`media.image.promptType.${value}`), hint: t(`media.image.promptType.${value}.hint`) }));
 
 const setSwitch = (k: 'enabled' | 'auto', v: boolean) => { image.value[k] = v; saveMedia(); };
 function edit<K extends keyof ImageConnection>(k: K, v: ImageConnection[K]) {
@@ -59,26 +62,42 @@ const select = (id: string) => { image.value.active = id; saveMedia(); };
 const rename = (c: ImageConnection, name: string) => { c.name = name; saveMedia(); };
 const setApi = (api: ImageApi) => { if (conn.value) { changeImageApi(conn.value, api); saveMedia(); } };
 
+/** Reference image groups: global, then each card of the current chat (refs of other cards stay hidden). */
+const cards = computed(() => { void ui.chatRev; return chatCards(); });
+const scopes = computed(() => [{ key: undefined as string | undefined, label: t('media.image.refs.global') }, ...cards.value.map((c) => ({ key: c.key as string | undefined, label: c.name }))]);
+const refGroups = computed(() => scopes.value.map((s) => ({ ...s, refs: (conn.value?.refs ?? []).filter((r) => r.card === s.key) })));
+
 const fileInput = ref<HTMLInputElement | null>(null);
+let addScope: string | undefined;
+function pickRefs(card: string | undefined) {
+  addScope = card;
+  fileInput.value?.click();
+}
 async function addRefs(e: Event) {
   const c = conn.value;
+  const card = addScope;
   const files = [...((e.target as HTMLInputElement).files ?? [])];
   (e.target as HTMLInputElement).value = '';
   if (!c) return;
   for (const f of files) {
     if (!f.type.startsWith('image/')) continue;
     const blob = await putBlob(f, { prefix: 'ref:' });
-    c.refs.push({ id: nextRefId(c.refs), description: f.name.replace(/\.[^.]+$/, ''), blob });
+    c.refs.push({ id: nextRefId(c.refs), description: f.name.replace(/\.[^.]+$/, ''), blob, ...(card ? { card } : {}) });
   }
   saveMedia();
 }
-function removeRef(i: number) {
+function moveRef(r: StoredRef, card: string) {
+  if (card) r.card = card;
+  else delete r.card;
+  saveMedia();
+}
+function removeRef(r: StoredRef) {
   const c = conn.value;
   if (!c) return;
-  const [r] = c.refs.splice(i, 1);
+  c.refs = c.refs.filter((x) => x !== r);
   saveMedia();
   // Copies of the connection may still use the same blob.
-  if (r && !image.value.connections.some((x) => x.refs.some((y) => y.blob === r.blob))) void deleteBlob(r.blob);
+  if (!image.value.connections.some((x) => x.refs.some((y) => y.blob === r.blob))) void deleteBlob(r.blob);
 }
 </script>
 
@@ -102,8 +121,11 @@ function removeRef(i: number) {
           <input class="input" :list="`ap-image-models-${conn.api}`" :value="conn.model" :placeholder="IMAGE_DEFAULTS[conn.api].model" spellcheck="false" @change="edit('model', ($event.target as HTMLInputElement).value.trim())" />
           <datalist :id="`ap-image-models-${conn.api}`"><option v-for="m in MODELS[conn.api]" :key="m" :value="m" /></datalist>
         </Field>
+        <Field :label="t('media.image.promptType')">
+          <Segmented :model-value="conn.promptType" :options="promptTypeOptions" @update:model-value="edit('promptType', $event as ImagePromptType)" />
+        </Field>
         <Field :label="t('media.image.style')" :help="t('media.image.style.hint')">
-          <textarea class="input" rows="2" :value="conn.style" :placeholder="t(conn.api === 'novelai' ? 'media.image.style.tags' : 'media.image.style.nl')" @change="edit('style', ($event.target as HTMLTextAreaElement).value)" />
+          <textarea class="input" rows="2" :value="conn.style" :placeholder="t(conn.promptType === 'tags' ? 'media.image.style.tags' : 'media.image.style.nl')" @change="edit('style', ($event.target as HTMLTextAreaElement).value)" />
         </Field>
         <Field v-if="conn.api === 'novelai'" :label="t('media.image.negative')">
           <textarea class="input" rows="2" :value="conn.negative ?? ''" :placeholder="t('media.image.negative.placeholder')" @change="edit('negative', ($event.target as HTMLTextAreaElement).value)" />
@@ -113,13 +135,19 @@ function removeRef(i: number) {
         </Field>
         <Field v-if="supportsRefs(conn.api)" :label="t('media.image.refs')" :help="t('media.image.refs.hint')">
           <div class="col media-refs">
-            <div v-for="(r, i) in conn.refs" :key="r.blob" class="media-ref">
-              <BlobImage :blob-key="r.blob" class="media-ref-thumb" :alt="r.description" />
-              <span class="badge neutral mono">{{ r.id }}</span>
-              <input class="input grow" :value="r.description" :placeholder="t('media.image.refs.description')" @change="r.description = ($event.target as HTMLInputElement).value; saveMedia()" />
-              <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeRef(i)" />
+            <div v-for="g in refGroups" :key="g.key ?? ''" class="col media-ref-group">
+              <div class="media-ref-group-title ellipsis">{{ g.label }}</div>
+              <div v-for="r in g.refs" :key="r.blob" class="media-ref">
+                <BlobImage :blob-key="r.blob" class="media-ref-thumb" :alt="r.description" />
+                <span class="badge neutral mono">{{ r.id }}</span>
+                <input class="input grow" :value="r.description" :placeholder="t('media.image.refs.description')" @change="r.description = ($event.target as HTMLInputElement).value; saveMedia()" />
+                <select v-if="scopes.length > 1" class="input media-ref-scope" :value="r.card ?? ''" :title="t('media.image.refs.move')" :aria-label="t('media.image.refs.move')" @change="moveRef(r, ($event.target as HTMLSelectElement).value)">
+                  <option v-for="s in scopes" :key="s.key ?? ''" :value="s.key ?? ''">{{ s.label }}</option>
+                </select>
+                <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeRef(r)" />
+              </div>
+              <button type="button" class="btn ghost add" @click="pickRefs(g.key)"><ImagePlus />{{ t('media.image.refs.add') }}</button>
             </div>
-            <button type="button" class="btn ghost add" @click="fileInput?.click()"><ImagePlus />{{ t('media.image.refs.add') }}</button>
             <input ref="fileInput" type="file" accept="image/*" multiple hidden @change="addRefs" />
           </div>
         </Field>

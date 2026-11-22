@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   activeStructures, cleanSpeechLine, createMacroResolver, defaultVars, extractStructureTags, fillHistoryTemplate, imageRefsText, injectSpeech, normalizeImages,
   normalizeStructure, parseAnnotations, parseSpeech, parseSpeechWith, reanchorSpeech, speechText, structureFieldSchema, structureValueText,
-  IMAGE_OFF, SPEECH_OFF, type APreset, type Configuration, type Module, type StructureDecl,
+  IMAGE_OFF, IMAGE_PROMPT_TYPES, SPEECH_OFF, defaultImagePromptType, type APreset, type Configuration, type Module, type StructureDecl,
 } from '@advanced-preset/protocol';
 
 const IMAGE: StructureDecl = { id: 'img', kind: 'image', tag: 'Image', field: 'images', formatPrompt: { tag: '', field: '' }, properties: { prompt: 'What to draw' } };
@@ -122,6 +122,12 @@ describe('media variables and macros', () => {
     image: {}, speech: {}, structures: { img: IMAGE, voice: SPEECH, memo: { id: 'memo', kind: 'memory', tag: 'm', field: 'm', formatPrompt: { tag: '', field: '' } } },
   } as unknown as APreset;
   const modules = [{ id: 'm', structures: ['img', 'voice', 'memo'] }] as Module[];
+
+  it('image prompt types: defaults per API, empty when off', () => {
+    expect(IMAGE_PROMPT_TYPES).toEqual(['tags', 'description', 'instruction']);
+    expect(['openai', 'gemini', 'novelai'].map((a) => defaultImagePromptType(a as 'openai'))).toEqual(['instruction', 'instruction', 'tags']);
+    expect(IMAGE_OFF.prompt).toBe('');
+  });
 
   it('requests image / speech structures only while on', () => {
     expect(activeStructures(preset, modules).map((s) => s.id)).toEqual(['memo']);

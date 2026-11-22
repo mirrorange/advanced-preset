@@ -22,6 +22,15 @@ export type SpeechDecl = Record<string, never>;
 
 export type ImageApi = 'openai' | 'gemini' | 'novelai';
 export const IMAGE_APIS: readonly ImageApi[] = ['openai', 'gemini', 'novelai'];
+/**
+ * How image prompts are written, chosen per connection: comma-separated Danbooru-style `tags`
+ * (NovelAI), a plain English `description` (SD / Midjourney-like models), or an `instruction` that
+ * may state requirements directly, in any language (multimodal image models).
+ */
+export type ImagePromptType = 'tags' | 'description' | 'instruction';
+export const IMAGE_PROMPT_TYPES: readonly ImagePromptType[] = ['tags', 'description', 'instruction'];
+/** Prompt type of a new connection of an API (OpenAI / Gemini: instruction, NovelAI: tags). */
+export const defaultImagePromptType = (api: ImageApi): ImagePromptType => (api === 'novelai' ? 'tags' : 'instruction');
 export type SpeechApi = 'fish' | 'elevenlabs' | 'minimax' | 'gemini' | 'openai' | 'deepseek';
 export const SPEECH_APIS: readonly SpeechApi[] = ['fish', 'elevenlabs', 'minimax', 'gemini', 'openai', 'deepseek'];
 
@@ -33,11 +42,13 @@ export interface ImageVars {
   auto: boolean;
   /** API type of the selected connection (`''` when off). */
   api: '' | ImageApi;
+  /** Prompt type of the selected connection (`''` when off): how prompts are to be written. */
+  prompt: '' | ImagePromptType;
   /** The connection adds its own style prompt: prompts should not describe a style. */
   style: boolean;
   /** NSFW blocking is on: no prompts for NSFW scenes. */
   sfw: boolean;
-  /** The connection has reference images ({{ap::image::refs}}; openai / gemini). */
+  /** Reference images are offered ({{ap::image::refs}}: global ones and those of the chat's cards; openai / gemini). */
   refs: boolean;
 }
 
@@ -52,7 +63,7 @@ export interface SpeechVars {
   characters: boolean;
 }
 
-export const IMAGE_OFF: ImageVars = { on: false, auto: false, api: '', style: false, sfw: false, refs: false };
+export const IMAGE_OFF: ImageVars = { on: false, auto: false, api: '', prompt: '', style: false, sfw: false, refs: false };
 export const SPEECH_OFF: SpeechVars = { on: false, auto: false, api: '', narrator: false, characters: false };
 
 /** Reference image offered to the model (`{{ap::image::refs}}`). */
@@ -68,7 +79,7 @@ export const IMAGE_RATIOS = ['1:1', '3:4', '4:3', '9:16', '16:9'] as const;
 export type ImageRatio = (typeof IMAGE_RATIOS)[number];
 
 export interface ImagePrompt {
-  /** Natural-language description or comma-separated tags (as the preset asks for `image.api`). */
+  /** Tags, a description or an instruction (as the preset asks for `image.prompt`). */
   prompt: string;
   /** Reference image ids (openai / gemini). */
   refs?: string[];
