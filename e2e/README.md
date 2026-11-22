@@ -9,6 +9,7 @@ CHROMIUM=$(which chromium) node e2e/run.mjs setup   # connect ST to the mock (cu
 AP_TRANSPORT=Tool AP_WORKFLOW=Edit node e2e/run.mjs gen
 node e2e/run.mjs panel | imp | interact | err | dev | ext
 node e2e/run.mjs carrier                             # select the AP Carrier (fresh ST)
+node e2e/run.mjs um-groups                            # needs `ap dev --port 4747` on a Petals copy (like `um`): groups in My modules — create, single choice, drag in / within / out (also onto a collapsed group), export a group and import it back, reorder and delete groups
 node e2e/run.mjs syn-edit                            # edit the last synopsis from its card (after gen)
 node e2e/run.mjs cache                               # token saving + cache optimization over 5 turns, prefix reuse per request (AP_CACHE=off to compare)
 node e2e/run.mjs memory                              # memory follows message versions: swipe, swipe back, regenerate, delete (after carrier)
