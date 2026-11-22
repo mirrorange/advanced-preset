@@ -483,7 +483,7 @@
   "media.image.promptType.instruction": "Instruction",
   "media.image.promptType.instruction.hint": "Direct requirements in natural language, any language (multimodal models such as GPT Image, Nano Banana)",
   "media.image.refs.global": "Global",
-  "media.image.refs.move": "Move to",
+  "media.image.refs.scope": "Applies to",
   "media.image.style": "Style prompt",
   "media.image.style.hint": "Appended to every image prompt. The preset is told a style is set, so the AI leaves style out.",
   "media.image.style.nl": "e.g. Soft watercolor illustration, muted palette",

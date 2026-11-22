@@ -141,7 +141,7 @@ function removeRef(r: StoredRef) {
                 <BlobImage :blob-key="r.blob" class="media-ref-thumb" :alt="r.description" />
                 <span class="badge neutral mono">{{ r.id }}</span>
                 <input class="input grow" :value="r.description" :placeholder="t('media.image.refs.description')" @change="r.description = ($event.target as HTMLInputElement).value; saveMedia()" />
-                <select v-if="scopes.length > 1" class="input media-ref-scope" :value="r.card ?? ''" :title="t('media.image.refs.move')" :aria-label="t('media.image.refs.move')" @change="moveRef(r, ($event.target as HTMLSelectElement).value)">
+                <select v-if="scopes.length > 1" class="input media-ref-scope" :value="r.card ?? ''" :aria-label="t('media.image.refs.scope')" @change="moveRef(r, ($event.target as HTMLSelectElement).value)">
                   <option v-for="s in scopes" :key="s.key ?? ''" :value="s.key ?? ''">{{ s.label }}</option>
                 </select>
                 <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeRef(r)" />

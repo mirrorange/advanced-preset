@@ -3,6 +3,7 @@
 import { nextTick, onBeforeUnmount, ref, toRaw, watch } from 'vue';
 import { t } from '@/i18n';
 import { holdVoices } from '@/media/speech/service';
+import { norm } from '@/media/speech/segments';
 import type { VoiceRef } from '@/media/speech/types';
 import VoicePicker from '../panel/media/VoicePicker.vue';
 import { voiceAsk } from './ask';
@@ -13,7 +14,8 @@ const card = ref('');
 
 watch(() => voiceAsk.request, async (r) => {
   voice.value = null;
-  card.value = r?.cards[0]?.key ?? '';
+  // The card of the same name (a group member speaking), else the first card of the chat.
+  card.value = (r?.cards.find((c) => norm(c.name) === norm(r.character)) ?? r?.cards[0])?.key ?? '';
   if (!r) return;
   await nextTick();
   if (!dialog.value?.open) dialog.value?.showModal();
