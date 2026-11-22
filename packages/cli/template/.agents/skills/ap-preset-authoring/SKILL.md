@@ -39,7 +39,7 @@ description: Write and edit Advanced Preset (AP) source files for SillyTavern �
 | 传输方式、schema / 工具、`tools` 文案、示范轮次 | [transports.md](references/transports.md) |
 | 元指令、任务工作流、生成来源、省 token、用户输入整形 | [meta-and-tasks.md](references/meta-and-tasks.md) |
 | `configurationDefaults`、推荐配置、Carrier、迁移 | [configuration.md](references/configuration.md) |
-| 插入点、用户模组、`user-modules/` 与 `user-module-templates/` | [user-modules.md](references/user-modules.md) |
+| 插入点、用户模组与分组（`userModuleGroups`）、`user-modules/` 与 `user-module-templates/` | [user-modules.md](references/user-modules.md) |
 | 预设携带的 ST 正则脚本（`regex-scripts/`）与快速回复集（`quick-replies/`） | [regex-and-quick-replies.md](references/regex-and-quick-replies.md) |
 | 预设携带的酒馆助手脚本（`tavern-helper-scripts/`） | [tavern-helper-scripts.md](references/tavern-helper-scripts.md) |
 | 面板翻译 | [locales.md](references/locales.md) |

@@ -16,7 +16,7 @@
 | `actors` `narrator` `user` | 角色 |
 | `styles` `plaintextFormat` `contentMarker` `prefillGuide` `historyItemTemplate` `stageHeading` `stop` | 写法与输出格式 |
 | `regions` `anchors` `workflowRegion` | 区域 |
-| `params` `groups` `modules` `entries` `insertionPoints` `userModules` `userModuleTemplates` `vars` | 参数、分组、模组、已排序的条目（条件已编译为 AST）、插入点、随预设安装的用户模组与用户模组模板（条目文字为源码原文，翻译在各项的 `locales` 中，见 [user-modules.md](user-modules.md#预设中的用户模组)）、构建变量 |
+| `params` `groups` `modules` `entries` `insertionPoints` `userModules` `userModuleTemplates` `userModuleGroups` `vars` | 参数、分组、模组、已排序的条目（条件已编译为 AST）、插入点、随预设安装的用户模组与用户模组模板（条目文字为源码原文，翻译在各项的 `locales` 中，见 [user-modules.md](user-modules.md#预设中的用户模组)）、用户模组的组（没有时省略）、构建变量 |
 | `workflows` `structures` `regex` `meta` `tokenSaving` | 工作流、结构、正则标记、元指令、省 token |
 | `regexScripts` `quickReplySets` | ST 正则脚本（ST 的 `RegexScriptData`）与快速回复集，没有时省略（见 [regex-and-quick-replies.md](regex-and-quick-replies.md)） |
 | `tavernHelperScripts` | 酒馆助手脚本与文件夹（酒馆助手自己的形状），没有时省略（见 [tavern-helper-scripts.md](tavern-helper-scripts.md)） |

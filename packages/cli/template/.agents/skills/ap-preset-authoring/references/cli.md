@@ -81,8 +81,8 @@ warn  preset.yaml:41 groups: module `x` has no group
 | `--meta mixed` | 模拟混合元指令：来源 `story` |
 | `--enable a,b` / `--disable c` | 打开 / 关闭模组（逗号分隔的 id） |
 | `--param id=value` | 设置参数值（可重复）。数字参数须为数字；列表参数写逗号分隔的项（`words=闪过,一丝`）、JSON 数组（`'words=["a, b","c"]'`，项中含逗号时使用），或 `words=` 表示空列表 |
-| `--user-modules <file>` | 合并用户模组文件（[user-modules.md](user-modules.md#导入导出格式)） |
-| `--bundled-modules <ids>` | 合并哪些[随预设安装的用户模组](user-modules.md#预设携带的用户模组-user-modules)（逗号分隔的 id，`all` 为全部，`none` 为不合并）；默认按全新安装，合并 `enabled` 不为 `false` 的。它们排在最前 |
+| `--user-modules <file>` | 合并用户模组文件（[user-modules.md](user-modules.md#导入导出格式)）；文件带分组时按组排序并遵守单选规则 |
+| `--bundled-modules <ids>` | 合并哪些[随预设安装的用户模组](user-modules.md#预设携带的用户模组-user-modules)（逗号分隔的 id，`all` 为全部，`none` 为不合并）；默认按全新安装，合并 `enabled` 不为 `false` 的。它们排在最前，顺序与全新安装相同（未分组的在前，然后按组），同一单选组只合并第一个 |
 | `--user-module-templates <ids>` | 把[用户模组模板](user-modules.md#用户模组模板-user-module-templates)当作新建的用户模组合并（逗号分隔的 id，`all` 为全部），排在 `--user-modules` 之后 |
 | `--input <text>` | 模拟本次输入（聊天历史以这条用户消息结尾）：预设声明了 `inputShaping` 时 `input.shaped` 为真、`{{ap::input::text}}` 为这段文字，`historyStart` 区域后多出一节 `chat history (ST) · last user message`，显示历史中这条消息的样子（`wrap` 为包裹后的文字，`extract` 为已提取）。摘要中有一行 `input shaping: <mode>` |
 | `--storyline <name>` | 模拟在故事线 `<name>` 上生成（预设声明了 `storylines` 时）：`storyline.name` 为它、`storyline.main` 为假，名称以 `if` 开头时 `storyline.if` 为真。`?` 模拟 `#?`：AI 命名的新故事线（`storyline.naming`、`storyline.new` 为真，名称为空，请求 `storyline` 结构）；`if?` 模拟 `#if?`（同上，且 `storyline.if` 为真）。可见性（`#@`）对提示词没有影响，无需模拟。`storyline.frozen` 按所选配置的 `storylines.freezeVariables` 计算。摘要中有一行 `storyline: …`（被阻止时带 `(variables frozen)`） |
