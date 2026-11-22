@@ -1,6 +1,7 @@
 // Image generation end to end (after `setup`, with `ap dev --port 4747` on a Petals copy that declares `image`):
 // Media tab → OpenAI connection on the mock → a story turn with an illustration (auto), the large view,
-// manual mode, prompt edit + regenerate, a reference image (images/edits), Gemini and NovelAI, and the
+// manual mode, the image panel (prompt edit + generate, versions, reference image picked by hand),
+// a reference image (images/edits), Gemini and NovelAI, and the
 // `auto` CORS mode falling back to ST's /proxy for an endpoint without CORS headers (mock :5056;
 // needs `enableCorsProxy: true` in ST's config.yaml).
 import fs from 'node:fs';
@@ -16,6 +17,8 @@ export default async function (page, shots) {
   const tab = (title) => panel.locator(`.tab[title="${title}"]`).click();
   const field = (label) => panel.locator('.field', { has: page.locator('.field-label', { hasText: new RegExp(`^${label}$`) }) }).first();
   const lastFigure = () => page.locator('#chat .mes').last().locator('.image-figure').first();
+  const dialog = page.locator('ap-media-dialog .media-dialog');
+  const imagePanel = dialog.locator('.image-panel');
   const waitIdle = () => page.waitForFunction(() => getComputedStyle(document.querySelector('#mes_stop')).display === 'none', null, { timeout: 90000 });
   // Cards live in shadow roots: Playwright locators pierce them, document.querySelector does not.
   const waitImage = () => lastFigure().locator('.image-open img, .image-error').first().waitFor({ timeout: 30000 });
@@ -117,17 +120,30 @@ export default async function (page, shots) {
   await shot('7-manual-done');
   console.log('manual: requests after click', mediaLog().length - before);
 
-  // Edit the prompt, then generate with it.
-  await lastFigure().locator('button[aria-label="Edit prompt"]').click();
-  await lastFigure().locator('textarea').fill('A lighthouse keeper on a spiral staircase, lantern in hand');
-  await shot('8-edit');
-  await lastFigure().locator('form button.primary').click();
-  await page.waitForTimeout(500);
-  await waitImage();
+  // The image panel: edit the prompt, ratio and caption, then save and generate (the panel stays open).
+  await lastFigure().locator('button[aria-label="Edit in the image panel"]').click();
+  await imagePanel.waitFor({ timeout: 5000 });
+  await imagePanel.locator('textarea').fill('A lighthouse keeper on a spiral staircase, lantern in hand');
+  await imagePanel.locator('.field', { hasText: 'Aspect ratio' }).locator('select').selectOption('16:9');
+  await imagePanel.locator('.field', { hasText: 'Caption' }).locator('input').fill('The keeper');
+  await shot('8-panel-edit');
+  const beforeEdit = mediaLog().length;
+  await imagePanel.locator('button', { hasText: 'Save and generate' }).click();
+  await imagePanel.locator('.image-version').nth(1).waitFor({ timeout: 30000 });
   await page.waitForTimeout(400);
-  await shot('9-edited');
-  console.log('edited prompt sent', JSON.stringify(mediaLog().at(-1)?.body.prompt));
-  console.log('stored prompt', JSON.stringify(await page.evaluate(() => { const c = SillyTavern.getContext().chat; return c[c.length - 1].extra?.advanced_preset?.structures; })));
+  await shot('9-panel-versions');
+  const sent = mediaLog().slice(beforeEdit).at(-1)?.body;
+  console.log('panel: edited prompt sent', JSON.stringify({ prompt: sent?.prompt, size: sent?.size, versions: await imagePanel.locator('.image-version').count() }));
+  // Show the first version, then delete it; Esc closes the panel and the card shows the edit.
+  await imagePanel.locator('.image-version-pick').first().click();
+  await page.waitForTimeout(300);
+  await imagePanel.locator('.image-version').first().locator('button[aria-label="Delete"]').click();
+  await page.waitForTimeout(300);
+  console.log('panel: versions after delete', await imagePanel.locator('.image-version').count());
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  console.log('panel: closed', !(await dialog.isVisible().catch(() => false)), 'caption on card', JSON.stringify(await lastFigure().locator('.image-foot').textContent()));
+  console.log('stored edit', JSON.stringify(await page.evaluate(() => { const c = SillyTavern.getContext().chat; return c[c.length - 1].extra?.advanced_preset?.images; })));
 
   // A reference image: the next request goes to images/edits.
   fs.writeFileSync('/tmp/ap-ref.png', (await import('../mock-media.mjs')).png(256, 256));
@@ -165,6 +181,20 @@ export default async function (page, shots) {
     const err = await lastFigure().locator('.image-error').textContent().catch(() => null);
     console.log(v.name, JSON.stringify({ error: err, requests: got.map((r) => ({ url: r.url, cors: r.cors, images: r.body.images?.length, input: r.body.input?.length, keys: Object.keys(r.body) })) }));
     if (v.name === 'refs') {
+      // Pick the reference image by hand in the panel (or drop it when the model picked it).
+      await lastFigure().locator('button[aria-label="Edit in the image panel"]').click();
+      await imagePanel.waitFor({ timeout: 5000 });
+      const box = imagePanel.locator('.image-panel-ref[data-ref="ref1"] input[type=checkbox]');
+      const was = await box.isChecked();
+      await box.click();
+      await shot('11-refs-panel');
+      const m = mediaLog().length;
+      await imagePanel.locator('button', { hasText: 'Save and generate' }).click();
+      for (let i = 0; i < 60 && mediaLog().length === m; i++) await page.waitForTimeout(250);
+      await page.waitForTimeout(500);
+      await page.keyboard.press('Escape');
+      const r = mediaLog().slice(m).at(-1);
+      console.log('panel refs', JSON.stringify({ was, url: r?.url, images: r?.body.images?.length ?? 0 }));
       const chatReq = fs.readFileSync(LOG, 'utf8').trim().split('\n').map((l) => JSON.parse(l)).filter((r) => !r.media).at(-1);
       const schema = JSON.stringify(chatReq?.body.response_format?.json_schema?.schema ?? chatReq?.body.tools ?? {});
       console.log('refs in schema', /"refs"/.test(schema), 'refs macro', JSON.stringify(chatReq?.body.messages?.map((m) => m.content).join('\n').match(/^- ref\d+:.*$/m)?.[0]));

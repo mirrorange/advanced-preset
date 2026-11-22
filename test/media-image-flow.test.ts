@@ -13,7 +13,7 @@ vi.mock('@/store/media-db', () => ({
 const preset = { id: 'p', image: {}, structures: { pic: { id: 'pic', kind: 'image' } } };
 vi.mock('@/store/presets', () => ({ getPreset: () => preset }));
 
-const { autoGenerateImages, deleteImage, generateImage, imageJobs, imageSettingsRuntime, jobKey, setImagePrompt } = await import('@/app/images');
+const { autoGenerateImages, deleteImage, effectiveImage, generateImage, imageEdited, imageJobs, imageSettingsRuntime, jobKey, setImageEdit } = await import('@/app/images');
 const { mediaSettings, newImageConnection } = await import('@/store/media');
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 9]);
@@ -63,7 +63,7 @@ describe('image generation flow', () => {
 
   it('regenerating appends a version; edited prompts are used; deleting removes one', async () => {
     await generateImage(0, 'pic', 0);
-    await setImagePrompt(0, 'pic', 0, 'a black cat');
+    await setImageEdit(0, 'pic', 0, { prompt: 'a black cat' });
     await generateImage(0, 'pic', 0);
     expect(requests.at(-1).body.prompt).toBe('a black cat');
     let rec = chat[0].extra.advanced_preset.images.pic[0];
@@ -116,6 +116,26 @@ describe('image generation flow', () => {
     // No character open: only the global ones.
     ctx.characterId = undefined;
     expect(imageSettingsRuntime().refs.map((r) => r.id)).toEqual(['ref1']);
+  });
+
+  it('edits override the model\'s fields; equal values and null restore them', async () => {
+    const sc = () => chat[0].extra.advanced_preset;
+    await setImageEdit(0, 'pic', 0, { prompt: ' a cat ', refs: [], ratio: '1:1', caption: '' });
+    expect(sc().images.pic[0]).toEqual({ keys: [] });
+    expect(imageEdited(sc(), 'pic', 0)).toBe(false);
+    sc().structures.pic.images[0].refs = ['ref1'];
+    sc().structures.pic.images[0].caption = 'Cat';
+    await setImageEdit(0, 'pic', 0, { prompt: 'a black cat', refs: [], ratio: '16:9', caption: '' });
+    expect(sc().images.pic[0]).toEqual({ keys: [], prompt: 'a black cat', refs: [], ratio: '16:9', caption: '' });
+    expect(effectiveImage(sc(), 'pic', 0)).toEqual({ prompt: 'a black cat', ratio: '16:9' });
+    expect(chat[0].swipe_info[0].extra.advanced_preset.images.pic[0].ratio).toBe('16:9');
+    await generateImage(0, 'pic', 0);
+    expect(requests.at(-1)).toMatchObject({ url: expect.stringMatching(/images\/generations$/), body: { prompt: 'a black cat', size: '1536x1024' } });
+    await setImageEdit(0, 'pic', 0, { refs: ['ref1'], caption: 'Black cat' });
+    expect(sc().images.pic[0]).toEqual({ keys: ['img:1'], shown: 0, caption: 'Black cat' });
+    await setImageEdit(0, 'pic', 0, null);
+    expect(effectiveImage(sc(), 'pic', 0)).toEqual({ prompt: 'a cat', refs: ['ref1'], ratio: '1:1', caption: 'Cat' });
+    expect(imageEdited(sc(), 'pic', 0)).toBe(false);
   });
 
   it('auto generation off: nothing happens', async () => {

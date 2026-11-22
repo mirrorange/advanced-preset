@@ -3,7 +3,7 @@
  * stages, structures, events and diagnostics live here.
  */
 import { cloneData } from '@advanced-preset/protocol';
-import type { Annotation, PatchResult, SpeechSpan, StageKind, Transport } from '@advanced-preset/protocol';
+import type { Annotation, ImageRatio, PatchResult, SpeechSpan, StageKind, Transport } from '@advanced-preset/protocol';
 import { st, type STMessage } from '@/st/host';
 import type { ChatEvent } from './eventlog';
 import { STORYLINE_KEY } from '@/core/storylines';
@@ -20,14 +20,20 @@ export interface SidecarStage {
   status: 'done' | 'interrupted' | 'missing';
 }
 
-/** Images generated for one image prompt. */
+/**
+ * Images generated for one image prompt, and the user's edits of the prompt. An edited field
+ * overrides the model's value; absent: the model's value is used.
+ */
 export interface SidecarImage {
   /** Media store keys (`img:`), oldest first. */
   keys: string[];
   /** Index of the image shown (default: the newest). */
   shown?: number;
-  /** The prompt as the user edited it (absent: the model's prompt). */
   prompt?: string;
+  /** Reference image ids (`[]`: none, even when the model picked some). */
+  refs?: string[];
+  ratio?: ImageRatio;
+  caption?: string;
 }
 
 export interface Sidecar {

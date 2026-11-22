@@ -1,18 +1,19 @@
 <script setup lang="ts">
 /**
  * One image prompt of a message: the image (with its earlier versions), or the prompt and a Generate
- * button. Toolbar: previous / next version, regenerate, edit prompt, download, delete; click the image
- * to view it full size.
+ * button. Toolbar: previous / next version, regenerate, open the image panel (edit the prompt,
+ * reference images, ratio, caption; versions), download, delete; click the image to view it full size.
  */
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { ChevronLeft, ChevronRight, Download, ImageOff, LoaderCircle, Pencil, RefreshCw, Trash2, WandSparkles, X } from 'lucide-vue-next';
 import type { ImagePrompt } from '@advanced-preset/protocol';
 import { t } from '@/i18n';
 import type { SidecarImage } from '@/store/sidecar';
 import { getBlob, hasBlob } from '@/store/media-db';
-import { cancelImage, deleteImage, generateImage, imageJobs, jobKey, setImagePrompt, showImage } from '@/app/images';
+import { cancelImage, deleteImage, generateImage, imageJobs, jobKey, showImage } from '@/app/images';
 import { downloadBlob } from '../../download';
 import { mediaErrorText } from '../../media/errors';
+import { openImagePanel } from '../../media/image-panel';
 import IconButton from '../../components/IconButton.vue';
 import BlobImage from '../../components/BlobImage.vue';
 import ImageViewer from './ImageViewer.vue';
@@ -35,10 +36,11 @@ const shown = computed(() => {
 const current = computed(() => keys.value[shown.value]);
 const lost = computed(() => !keys.value.length && stored.value.length > 0);
 const promptText = computed(() => props.record?.prompt ?? props.prompt.prompt);
+const caption = computed(() => props.record?.caption ?? props.prompt.caption ?? '');
 const job = computed(() => imageJobs.get(jobKey(props.genId, props.structure, props.index)));
 const running = computed(() => job.value?.status === 'running');
 const error = computed(() => (job.value?.status === 'error' ? mediaErrorText(job.value.error) : ''));
-const ratio = computed(() => (props.prompt.ratio ?? '3:4').replace(':', ' / '));
+const ratio = computed(() => (props.record?.ratio ?? props.prompt.ratio ?? '3:4').replace(':', ' / '));
 
 const generate = () => generateImage(props.mesid, props.structure, props.index);
 const cancel = () => cancelImage(props.genId, props.structure, props.index);
@@ -56,27 +58,7 @@ async function download() {
   downloadBlob(`image-${props.mesid}-${props.index + 1}-${shown.value + 1}.${ext}`, blob);
 }
 
-const editing = ref(false);
-const draft = ref('');
-const input = ref<HTMLTextAreaElement>();
-async function edit() {
-  draft.value = promptText.value;
-  editing.value = true;
-  await nextTick();
-  input.value?.focus();
-}
-async function save(regenerate: boolean) {
-  editing.value = false;
-  if (draft.value.trim() !== promptText.value.trim()) await setImagePrompt(props.mesid, props.structure, props.index, draft.value.trim());
-  if (regenerate) void generate();
-}
-/** Keep keys inside the editor (ST's hotkeys). */
-function onKey(e: KeyboardEvent) {
-  e.stopPropagation();
-  if (e.isComposing) return;
-  if (e.key === 'Escape') { e.preventDefault(); editing.value = false; }
-  else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); void save(true); }
-}
+const openPanel = () => openImagePanel(props.mesid, props.structure, props.index);
 
 const viewing = ref(false);
 </script>
@@ -85,12 +67,12 @@ const viewing = ref(false);
   <figure class="image-figure">
     <div class="image-frame" :class="{ empty: !current }" :style="current ? undefined : { aspectRatio: ratio }">
       <button v-if="current" type="button" class="image-open" :aria-label="t('media.image.view')" @click="viewing = true">
-        <BlobImage :blob-key="current" :alt="prompt.caption ?? promptText" @missing="missing.add(current)" />
+        <BlobImage :blob-key="current" :alt="caption || promptText" @missing="missing.add(current)" />
       </button>
       <div v-else class="image-empty">
         <ImageOff v-if="!running && !error" class="faint" aria-hidden="true" />
         <span v-if="lost && !running" class="xs faint">{{ t('media.image.missing') }}</span>
-        <p v-if="!editing" class="image-prompt small muted">{{ promptText }}</p>
+        <p class="image-prompt small muted">{{ promptText }}</p>
       </div>
       <div v-if="running" class="image-busy" role="status">
         <LoaderCircle class="spin" aria-hidden="true" />
@@ -104,27 +86,18 @@ const viewing = ref(false);
       </div>
     </div>
 
-    <form v-if="editing" class="image-edit col" @submit.prevent="save(false)" @keydown="onKey" @click.stop>
-      <textarea ref="input" v-model="draft" class="input small" rows="4" :aria-label="t('media.image.prompt')" />
-      <div class="row end tight">
-        <button type="button" class="btn ghost sm-btn" @click="editing = false">{{ t('common.cancel') }}</button>
-        <button type="submit" class="btn sm-btn">{{ t('common.save') }}</button>
-        <button type="button" class="btn primary sm-btn" @click="save(true)"><WandSparkles />{{ t('media.image.generate') }}</button>
-      </div>
-    </form>
-
-    <figcaption v-else class="image-foot">
+    <figcaption class="image-foot">
       <span v-if="error" class="xs text-danger grow image-error" :title="error">{{ error }}</span>
-      <span v-else class="xs muted grow ellipsis">{{ prompt.caption ?? '' }}</span>
+      <span v-else class="xs muted grow ellipsis">{{ caption }}</span>
       <div class="row tight image-tools">
         <button v-if="!current && !running" type="button" class="btn sm-btn" @click="generate"><WandSparkles />{{ t(error ? 'media.image.retry' : 'media.image.generate') }}</button>
         <IconButton v-if="current && !running" :icon="RefreshCw" :label="t('media.image.regenerate')" small @click="generate" />
-        <IconButton v-if="editable && !running" :icon="Pencil" :label="t('media.image.editPrompt')" small @click="edit" />
+        <IconButton v-if="editable" :icon="Pencil" :label="t('media.image.openPanel')" small @click="openPanel" />
         <IconButton v-if="current" :icon="Download" :label="t('media.image.download')" small @click="download" />
         <IconButton v-if="current && editable && !running" :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="remove" />
       </div>
     </figcaption>
 
-    <ImageViewer v-if="viewing && current" :keys="keys" :start="shown" :caption="prompt.caption ?? promptText" @close="viewing = false" />
+    <ImageViewer v-if="viewing && current" :keys="keys" :start="shown" :caption="caption || promptText" @close="viewing = false" />
   </figure>
 </template>
