@@ -57,7 +57,9 @@
 /* Media dialog (speech / image panels): centered on wide screens, full screen on narrow ones. */
 /* Media dialog: a layer under ST's top bar (left free so a click on it closes the dialog), centred box;
    on narrow screens the box fills the layer, like the AP panel in its drawer. */
-.media-dialog-layer { position: fixed; inset: var(--topBarBlockSize, 0px) 0 0 0; z-index: 2147481000; display: grid; place-items: center; padding: 1em;
+/* Height from the viewport, not `bottom: 0`: ST's mobile styles give <html> a transform, which makes it
+   the containing block of fixed elements, and its height is 0 there. */
+.media-dialog-layer { position: fixed; top: var(--topBarBlockSize, 0px); left: 0; right: 0; height: calc(100dvh - var(--topBarBlockSize, 0px)); z-index: 2147481000; display: grid; place-items: center; padding: 1em;
   background: rgb(0 0 0 / 45%); overscroll-behavior: contain; }
 .media-dialog { display: flex; flex-direction: column; width: min(44em, 100%); max-height: 100%; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md);
   color: var(--ap-text); background: var(--ap-panel-bg-solid); box-shadow: var(--ap-shadow); overflow: hidden; outline: none; }

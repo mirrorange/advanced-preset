@@ -46,9 +46,13 @@ function onWindowKey(e: KeyboardEvent) {
   else if (e.key === 'Tab') { e.preventDefault(); box.value?.focus(); }
 }
 
-/** A click on ST's top bar (anywhere: a drawer button or not) closes; the focus stays where it went. */
+/**
+ * A click outside the layer is on ST's top bar (the layer covers the rest): a drawer button or not, it
+ * closes the dialog, and the focus stays where the click put it. Other dialogs (on top) do not count.
+ */
 function onWindowClick(e: MouseEvent) {
-  if (e.composedPath().some((x) => x instanceof Element && x.matches('#top-bar, #top-settings-holder'))) closeMediaDialog(false);
+  const path = e.composedPath();
+  if (!path.some((x) => x instanceof Element && (x.localName === 'ap-media-dialog' || x.localName === 'dialog' || x.id === 'toast-container'))) closeMediaDialog(false);
 }
 
 function listen(on: boolean) {
