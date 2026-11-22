@@ -12,7 +12,7 @@
  * `modified` tells whether the user changed their copy since the preset gave it to them.
  */
 import {
-  cloneData, localizeUserModuleSource, normalizeUserModule, presetUserModules, userModuleFingerprint, userModuleSourceFingerprint,
+  cloneData, localizeUserModuleSource, normalizeUserModule, normalizeUserModuleGroups, presetUserModules, userModuleFingerprint, userModuleSourceFingerprint,
   userModuleToSource, type APreset, type UserModule, type UserModuleSource,
 } from '@advanced-preset/protocol';
 import { presetState } from './config';
@@ -89,19 +89,27 @@ export function planIsEmpty(plan: BundledPlan, records: Record<string, BundledRe
   return [...keys].every((k) => a[k]?.source === plan.records[k]?.source && a[k]?.copy === plan.records[k]?.copy);
 }
 
-/** Apply a plan: append new modules, replace the conflicts in `take` with the preset's version. */
+/**
+ * Apply a plan: add new modules (ungrouped), replace the conflicts in `take` with the preset's
+ * version (keeping the user's enabled state, group and position).
+ */
 export function applyBundledSync(preset: APreset, plan: BundledPlan, take: Iterable<string> = []): void {
   const s = presetState(preset);
   const list = userModules(preset);
   const records = { ...plan.records };
+  const next = [...list];
   for (const id of take) {
     const c = plan.conflicts.find((x) => x.id === id);
-    const i = list.findIndex((m) => m.id === id);
+    const i = next.findIndex((m) => m.id === id);
     if (!c || i < 0) continue;
-    list.splice(i, 1, { ...c.incoming, enabled: list[i]!.enabled });
+    const { enabled, group } = next[i]!;
+    next.splice(i, 1, { ...c.incoming, enabled, ...(group !== undefined ? { group } : {}) });
     records[id] = { source: records[id]!.source, copy: plan.incomingCopy[id]! };
   }
-  list.push(...plan.add);
+  // New modules join the ungrouped ones (normalizing puts them before the groups).
+  const n = normalizeUserModuleGroups([...next, ...plan.add], s.userModuleGroups ?? []);
+  s.userModules = n.modules;
+  s.userModuleGroups = n.groups;
   s.bundledModules = records;
   save();
 }
