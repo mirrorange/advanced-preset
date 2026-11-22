@@ -405,13 +405,13 @@ speech: true
 
 两个键也接受映射（为以后的选项预留，目前没有键）。声明后：
 
-- 条件变量 `image.on` / `image.auto` / `image.api` / `image.style` / `image.sfw` / `image.refs` 与 `speech.on` / `speech.auto` / `speech.api` / `speech.narrator` / `speech.characters`（[expressions.md](expressions.md)）描述用户的设置；
+- 条件变量 `image.on` / `image.auto` / `image.api` / `image.prompt` / `image.style` / `image.sfw` / `image.refs` 与 `speech.on` / `speech.auto` / `speech.api` / `speech.narrator` / `speech.characters`（[expressions.md](expressions.md)）描述用户的设置；
 - 宏 `{{ap::image::refs}}`、`{{ap::speech::format}}`、`{{ap::speech::characters}}`（[macros.md](macros.md#图像与语音)）；
 - [`image` 结构](structures.md#image)（插图提示词，正文之后）与内联的 [`speech` 结构](structures.md#speech)（正文中的 `<speech character="…">` 台词）只在 `image.on` / `speech.on` 时请求，由模组 `structures:` 列出；
 - 纯元指令、总结等任务轮（`gen.origin == "task"`）两者都关闭；
 - 需要 Advanced Preset 1.12.0 以上（更早的版本忽略这两个键）。
 
-`ap check`：值不是 `true` 或映射时报错；映射中的未知键、`minAdvancedPreset` 低于 1.12.0 时警告；声明了却没有模组请求对应结构、没有声明却有 `image` / `speech` 结构或使用了 `image.*` / `speech.*` / 对应的宏时警告；`image.api` / `speech.api` 与不存在的值比较时报错。
+`ap check`：值不是 `true` 或映射时报错；映射中的未知键、`minAdvancedPreset` 低于 1.12.0 时警告；声明了却没有模组请求对应结构、没有声明却有 `image` / `speech` 结构或使用了 `image.*` / `speech.*` / 对应的宏时警告；`image.api` / `image.prompt` / `speech.api` 与不存在的值比较时报错。
 
 ## 主题 `theme`
 

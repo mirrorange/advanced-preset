@@ -132,7 +132,7 @@ structures: [options]
 
 `storyline` 结构只在需要命名故事线的轮次请求（条件变量 `storyline.naming` / `storyline.namingMain` 至少一个为真），其他轮次即使模组列出它也不请求，见 [storyline](#故事线命名-storyline)。
 
-`image` / `speech` 结构只在预设声明了对应功能（[manifest.md](manifest.md#图像生成与语音合成-image--speech)）、用户开启了它并选好了连接时请求（`image.on` / `speech.on`），其他轮次即使模组列出也不请求；`image` 的 `refs` 子字段只在当前连接有参考图（`image.refs`）时出现在 Schema 中。
+`image` / `speech` 结构只在预设声明了对应功能（[manifest.md](manifest.md#图像生成与语音合成-image--speech)）、用户开启了它并选好了连接时请求（`image.on` / `speech.on`），其他轮次即使模组列出也不请求；`image` 的 `refs` 子字段只在有可用的参考图（`image.refs`）时出现在 Schema 中。
 
 由脚本或其他扩展发起的任务生成（`gen.type == "script"` 且 `gen.origin == "task"`）不请求任何结构，即使模组列出了它们。
 
@@ -473,10 +473,10 @@ structures:
       field: "Fill `{{field}}` with up to one illustration."
 ```
 
-- 提示词的写法由预设决定：`image.api` 为 `openai` / `gemini` 时宜写自然语言描述，`novelai` 时宜写逗号分隔的标签；
+- 提示词的写法由预设按 `image.prompt` 决定：`tags` 写逗号分隔的标签，`description` 写一整段英文描述，`instruction` 写指令式的自然语言（可直接提要求，不限英文）；
 - 用户的**风格提示词**由 AP 附加到请求上，不交给预设；`image.style` 为真时提示词不应再描述画风；
 - `image.sfw` 为真（用户开着 NSFW 屏蔽）时，预设应要求模型不为 NSFW 场景写提示词（可以不写，值为空时不生成）；
-- 参考图（OpenAI / Gemini）：`{{ap::image::refs}}` 列出 `- <id>: <描述>`，`refs` 子字段填所选的 id，AP 把对应图片随请求发送；`image.refs` 为假时 Schema 中没有 `refs`；
+- 参考图（OpenAI / Gemini）：参考图分为全局的和绑定到角色卡的，只有全局参考图与当前聊天角色卡（群聊为所有成员）的参考图交给预设。`{{ap::image::refs}}` 列出 `- <id>: <描述>`，`refs` 子字段填所选的 id，AP 把对应图片随请求发送（不在当前聊天范围内的 id 被忽略）；`image.refs` 为假时 Schema 中没有 `refs`；
 - 宽松解析见 [宽松解析](#宽松解析)；`count` 之外的提示词丢弃。
 
 ### speech
