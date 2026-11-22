@@ -2,7 +2,8 @@
 /**
  * One voice of a speech connection: a built-in voice or an id, or reference audio for cloning (with
  * transcript / consent recording when the provider asks for them). The id input is a combobox: it
- * suggests the built-in voices and, when the provider has a voice library, searches it as you type.
+ * suggests the built-in voices and, when the provider has a voice library, searches it as you type;
+ * its menu opens on a click, typing or ↓ / ↑ (not on focus).
  * The speaker button plays a sample; the default slot adds buttons to the end of the first row.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
@@ -87,7 +88,12 @@ const searchable = computed(() => Boolean(provider.value?.search));
 const showMenu = computed(() => open.value && (options.value.length > 0 || searchable.value));
 watch(options, () => { active.value = -1; });
 
-function onFocus() {
+/**
+ * The menu opens on user intent (a click, typing, ↓ / ↑), not on focus: a dialog that focuses the
+ * input when it opens (the voice question) would otherwise cover its own buttons with the menu.
+ */
+function openMenu() {
+  if (open.value) return;
   open.value = true;
   void search(query.value);
 }
@@ -111,9 +117,9 @@ function onBlur() {
   commit();
 }
 function move(step: number) {
+  if (!open.value) { openMenu(); return; }
   const n = options.value.length;
   if (!n) return;
-  open.value = true;
   // -1 (none) and the options, round and round.
   active.value = ((active.value + 1 + step + n + 1) % (n + 1)) - 1;
   void nextTick(() => menu.value?.querySelector('.voice-option.on')?.scrollIntoView({ block: 'nearest' }));
@@ -234,7 +240,7 @@ let seq = 0;
           :value="draft ?? shown" :aria-label="label" :aria-expanded="showMenu" :aria-controls="menuId"
           :aria-activedescendant="showMenu && active >= 0 ? `${menuId}-${active}` : undefined"
           :placeholder="placeholder ?? (provider?.voices[0]?.name || t(searchable ? 'media.speech.voiceSearch' : 'media.speech.voiceId'))"
-          @focus="onFocus" @blur="onBlur" @input="onInput" @change="commit" @keydown="onKey"
+          @click="openMenu" @blur="onBlur" @input="onInput" @change="commit" @keydown="onKey"
         />
         <div v-if="showMenu" :id="menuId" ref="menu" class="voice-menu" popover="manual" role="listbox" :aria-label="label" @mousedown.prevent>
           <div v-for="(o, i) in options" :id="`${menuId}-${i}`" :key="o.id" class="voice-option" :class="{ on: i === active }" role="option" :aria-selected="i === active" @mouseenter="active = i" @click="pick(o)">

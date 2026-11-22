@@ -89,7 +89,11 @@ export default async function (page, shots) {
   const n1 = tts().length;
   await card().locator('button[aria-label="Generate all"]').click();
   await dialog.waitFor({ timeout: 10000 });
-  await h.set(dialog.locator('input').first(), 'onyx');
+  // The menu stays closed when the dialog focuses the input; typing opens it, Enter takes the text.
+  console.log('menu on open', await page.locator('.voice-menu').count());
+  await dialog.locator('input').first().fill('onyx');
+  console.log('menu while typing', await page.locator('.voice-menu').count());
+  await dialog.locator('input').first().press('Enter');
   await dialog.locator('button', { hasText: 'Save' }).click();
   await page.waitForTimeout(3000);
   console.log('after pick', JSON.stringify(tts().slice(n1).map((r) => ({ input: r.body.input, voice: r.body.voice }))), JSON.stringify((await settings()).bindings));
