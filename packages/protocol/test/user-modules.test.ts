@@ -108,7 +108,7 @@ describe('user modules', () => {
 
   it('round-trips export files and normalises untrusted input', () => {
     const file = JSON.parse(JSON.stringify(userModuleFile([mod('x', ['early'])], { id: 'p', version: '1.0.0' })));
-    expect(parseUserModuleFile(file)).toEqual({ preset: { id: 'p', version: '1.0.0' }, modules: [mod('x', ['early'])] });
+    expect(parseUserModuleFile(file)).toEqual({ preset: { id: 'p', version: '1.0.0' }, modules: [mod('x', ['early'])], groups: [] });
     const loose = parseUserModuleFile({ name: 'n', entries: [{ point: 'p', role: 'bogus', text: 1 }], trigger: { match: 'any', rules: [{ kind: 'nope' }, { kind: 'var', path: 'x', op: '==', value: { a: 1 } }] } });
     expect(loose.modules[0]).toEqual({ id: '', name: 'n', enabled: true, entries: [{ id: 'e1', point: 'p', text: '' }], vars: [], trigger: { match: 'any', rules: [{ kind: 'var', path: 'x', op: '==' }] } });
     const parts = parseUserModuleFile({ entries: [{ point: 'p', text: '', enabled: false }, { point: 'q', text: '', enabled: 'no' }], vars: [{ var: 'v', type: 'list', items: [], enabled: false }] });

@@ -104,6 +104,23 @@ export interface UserModule {
    */
   vars: UserVarUpdate[];
   trigger: Trigger;
+  /** Id of the group the module belongs to; absent → ungrouped. */
+  group?: string;
+}
+
+/**
+ * `single`: at most one module of the group is on (switching one on switches the others off; all
+ * may be off). `multi`: each module is switched on its own.
+ */
+export type UserGroupMode = 'single' | 'multi';
+
+/** A named group of user modules, shown as a card in "My modules". */
+export interface UserModuleGroup {
+  id: string;
+  name: string;
+  mode: UserGroupMode;
+  /** Folded in the panel. */
+  collapsed?: boolean;
 }
 
 /** Texts scanned by keyword rules. `recent` is newest first and starts with the input when there is one. */
@@ -205,6 +222,39 @@ export function ruleError(rule: TriggerRule): string | null {
     }
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Groups
+
+/**
+ * Restore the group invariant (pure; returns new lists, modules are shallow copies only where
+ * changed): groups have unique ids; a module whose group does not exist becomes ungrouped; the
+ * flat list is in display order (ungrouped first, then each group in group order, members kept
+ * contiguous in their relative order); a single group has at most one module on (the first).
+ */
+export function normalizeUserModuleGroups(modules: UserModule[], groups: UserModuleGroup[] = []): { modules: UserModule[]; groups: UserModuleGroup[] } {
+  const seen = new Set<string>();
+  const outGroups = groups.filter((g) => g.id && !seen.has(g.id) && seen.add(g.id));
+  const index = new Map(outGroups.map((g, i) => [g.id, i]));
+  const buckets: UserModule[][] = [[], ...outGroups.map(() => [])];
+  for (const m of modules) {
+    const at = m.group === undefined ? undefined : index.get(m.group);
+    if (at === undefined) {
+      if (m.group === undefined) buckets[0]!.push(m);
+      else { const { group: _gone, ...rest } = m; buckets[0]!.push(rest); }
+      continue;
+    }
+    const bucket = buckets[at + 1]!;
+    const taken = outGroups[at]!.mode === 'single' && m.enabled && bucket.some((x) => x.enabled);
+    bucket.push(taken ? { ...m, enabled: false } : m);
+  }
+  return { modules: buckets.flat(), groups: outGroups };
+}
+
+/** Modules of a group (`null`: ungrouped), in list order. */
+export function groupMembers(modules: UserModule[], group: string | null): UserModule[] {
+  return modules.filter((m) => (m.group ?? null) === group);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -367,6 +417,11 @@ export interface UserModuleFile {
   version: 1;
   preset?: { id: string; version: string };
   modules: UserModule[];
+  /**
+   * Groups the modules refer to (`module.group`). Optional: older AP versions ignore it and import
+   * the modules ungrouped.
+   */
+  groups?: UserModuleGroup[];
 }
 
 type Obj = Record<string, unknown>;
@@ -433,7 +488,7 @@ export function normalizeUserModule(raw: unknown): UserModule | null {
     if (e.enabled === false) entry.enabled = false;
     return [entry];
   });
-  return {
+  const m: UserModule = {
     id: str(raw.id),
     name: str(raw.name),
     enabled: raw.enabled !== false,
@@ -444,21 +499,50 @@ export function normalizeUserModule(raw: unknown): UserModule | null {
       rules: Array.isArray(trigger.rules) ? trigger.rules.map(normalizeRule).filter((r): r is TriggerRule => Boolean(r)) : [],
     },
   };
+  if (typeof raw.group === 'string' && raw.group) m.group = raw.group;
+  return m;
 }
 
-export function userModuleFile(modules: UserModule[], preset?: { id: string; version: string }): UserModuleFile {
-  return { format: USER_MODULES_FORMAT, version: 1, ...(preset ? { preset: { id: preset.id, version: preset.version } } : {}), modules };
+/** Coerce untrusted data into a group, or `null` (no id). */
+export function normalizeUserModuleGroup(raw: unknown): UserModuleGroup | null {
+  if (!isObj(raw) || typeof raw.id !== 'string' || !raw.id) return null;
+  const g: UserModuleGroup = { id: raw.id, name: str(raw.name), mode: raw.mode === 'single' ? 'single' : 'multi' };
+  if (raw.collapsed === true) g.collapsed = true;
+  return g;
+}
+
+/** An export file. Only groups some module refers to are written; none → no `groups` field. */
+export function userModuleFile(modules: UserModule[], preset?: { id: string; version: string }, groups: UserModuleGroup[] = []): UserModuleFile {
+  const used = groups.filter((g) => modules.some((m) => m.group === g.id));
+  return {
+    format: USER_MODULES_FORMAT,
+    version: 1,
+    ...(preset ? { preset: { id: preset.id, version: preset.version } } : {}),
+    modules,
+    ...(used.length ? { groups: used } : {}),
+  };
+}
+
+export interface ParsedUserModuleFile {
+  preset?: { id: string; version: string };
+  /** In file order; `group` refers to `groups` (references to groups not in the file are dropped). */
+  modules: UserModule[];
+  groups: UserModuleGroup[];
 }
 
 /** Parse an exported file (a single bare module is accepted too). Throws on anything else. */
-export function parseUserModuleFile(raw: unknown): { preset?: { id: string; version: string }; modules: UserModule[] } {
+export function parseUserModuleFile(raw: unknown): ParsedUserModuleFile {
   if (isObj(raw) && raw.format === USER_MODULES_FORMAT) {
     if (raw.version !== 1) throw new Error(`unsupported user module file version ${String(raw.version)}`);
     const modules = (Array.isArray(raw.modules) ? raw.modules : []).map(normalizeUserModule).filter((m): m is UserModule => Boolean(m));
+    const seen = new Set<string>();
+    const groups = (Array.isArray(raw.groups) ? raw.groups : []).map(normalizeUserModuleGroup)
+      .filter((g): g is UserModuleGroup => Boolean(g) && !seen.has(g!.id) && Boolean(seen.add(g!.id)));
+    for (const m of modules) if (m.group !== undefined && !seen.has(m.group)) delete m.group;
     const preset = isObj(raw.preset) && typeof raw.preset.id === 'string' ? { id: raw.preset.id, version: str(raw.preset.version) } : undefined;
-    return { preset, modules };
+    return { preset, modules, groups };
   }
   const single = normalizeUserModule(raw);
-  if (single) return { modules: [single] };
+  if (single) { delete single.group; return { modules: [single], groups: [] }; }
   throw new Error('not a user module file');
 }

@@ -9,8 +9,7 @@ import { lostRefs, parseUserModuleFile, partEnabled, presetUserModuleTemplates, 
 import { confirmUserModuleTemplates, isTrustDeclined } from '@/app/trust';
 import { localSource, t, pt } from '@/i18n';
 import { toast } from '@/st/host';
-import { save } from '@/store/settings';
-import { createUserModule, createUserModuleFromTemplate, exportUserModules, importUserModules, moveUserModule, userModules } from '@/store/user-modules';
+import { createUserModule, createUserModuleFromTemplate, exportUserModules, importUserModules, moveUserModule, setUserModuleEnabled, userModules } from '@/store/user-modules';
 import { downloadJson } from '../../download';
 import IconButton from '../../components/IconButton.vue';
 import Section from '../../components/Section.vue';
@@ -37,7 +36,7 @@ const lost = (m: UserModule) => lostRefs(props.preset, m);
 const lostText = (m: UserModule) => t('um.lostHint', { points: lost(m).join(', ') });
 const hasTrigger = (m: UserModule) => m.trigger.rules.some(ruleComplete);
 
-function setEnabled(m: UserModule, v: boolean) { m.enabled = v; save(); }
+function setEnabled(m: UserModule, v: boolean) { setUserModuleEnabled(props.preset, m.id, v); }
 
 const templates = computed(() => presetUserModuleTemplates(props.preset).map((tpl) => ({ tpl, body: localSource(props.preset, tpl, 'userModuleTemplates') })));
 const picking = ref(false);
@@ -95,7 +94,7 @@ function moveDrag(e: PointerEvent) {
   const rows = [...listEl.value.querySelectorAll<HTMLElement>('.um-row')];
   const others = rows.filter((r) => r.dataset.id !== id);
   const to = others.filter((r) => { const b = r.getBoundingClientRect(); return b.top + b.height / 2 < e.clientY; }).length;
-  if (list.value[to]?.id !== id) moveUserModule(props.preset, id, to);
+  if (list.value[to]?.id !== id) moveUserModule(props.preset, id, null, to);
 }
 const endDrag = () => { dragging.value = null; };
 </script>

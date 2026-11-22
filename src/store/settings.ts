@@ -3,7 +3,7 @@
  * so the panel updates live; writes go through to the plain object ST serialises).
  */
 import { reactive } from 'vue';
-import type { APreset, SparseDiff, UserModule } from '@advanced-preset/protocol';
+import type { APreset, SparseDiff, UserModule, UserModuleGroup } from '@advanced-preset/protocol';
 import { st } from '@/st/host';
 import type { MemoryEvent } from './eventlog';
 import type { BundledRecord } from './bundled-modules';
@@ -26,8 +26,13 @@ export interface PresetState {
   hash?: string;
   /** Hash of the Carrier content AP generated last (detects manual edits). */
   carrierHash?: string;
-  /** The user's own modules for this preset, in insertion order. */
+  /**
+   * The user's own modules for this preset, in insertion order, which is also display order:
+   * ungrouped first, then each group of `userModuleGroups` in turn.
+   */
   userModules?: UserModule[];
+  /** Groups of user modules, in display order (`UserModule.group` refers to them). */
+  userModuleGroups?: UserModuleGroup[];
   /** Bundled user modules last synced, by id (see `bundled-modules.ts`). */
   bundledModules?: Record<string, BundledRecord>;
   /**
