@@ -28,11 +28,17 @@ export interface SpeechConnection {
   headers: Record<string, string>;
   /** Advanced: JSON object deep-merged into the request body. */
   body: string;
-  /** Voice of unbound characters (and of narration when no narrator voice is set). */
-  voice: VoiceRef | null;
+  /** Narration voice (`null`: the provider's default voice). */
   narrator: VoiceRef | null;
-  /** Story character → voice (`null`: the default voice). */
-  bindings: { character: string; voice: VoiceRef | null }[];
+  /** Story character → voice. Lines of characters without a voice ask the user for one. */
+  bindings: VoiceBinding[];
+}
+
+export interface VoiceBinding {
+  character: string;
+  voice: VoiceRef | null;
+  /** Character card (avatar file name) the binding belongs to; none: global. */
+  card?: string;
 }
 
 /** A voice the user can pick (built-in list or library search result). */

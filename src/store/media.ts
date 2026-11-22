@@ -3,11 +3,11 @@
  * speech synthesis connections. Global, not per preset; binaries live in IndexedDB (`media-db.ts`).
  */
 import type { ImageApi, SpeechApi } from '@advanced-preset/protocol';
-import type { SpeechConnection, VoiceRef } from '@/media/speech/types';
+import type { SpeechConnection, VoiceBinding, VoiceRef } from '@/media/speech/types';
 import { settings, save } from './settings';
 
 export { IMAGE_APIS, SPEECH_APIS, type ImageApi, type SpeechApi } from '@advanced-preset/protocol';
-export type { SpeechConnection, VoiceRef };
+export type { SpeechConnection, VoiceBinding, VoiceRef };
 
 export type CorsMode = 'auto' | 'on' | 'off';
 export interface CorsSettings { mode: CorsMode; proxy: 'host' | 'custom'; customUrl: string }

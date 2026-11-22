@@ -4,7 +4,7 @@ import type { SpeechApi, SpeechConnection, SpeechEnv } from '@/media/speech/type
 export interface Call { url: string; init: RequestInit; body: unknown }
 
 export function conn(api: SpeechApi, over: Partial<SpeechConnection> = {}): SpeechConnection {
-  return { id: 'c1', name: 'Test', api, baseUrl: '', apiKey: 'KEY', model: '', headers: {}, body: '', voice: null, narrator: null, bindings: [], ...over };
+  return { id: 'c1', name: 'Test', api, baseUrl: '', apiKey: 'KEY', model: '', headers: {}, body: '', narrator: null, bindings: [], ...over };
 }
 
 /** `respond` gets each request and returns the response; requests are recorded in `calls`. */

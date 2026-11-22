@@ -7,18 +7,20 @@ import { reactive } from 'vue';
 import { st, toast } from '@/st/host';
 import { mediaFetch } from '@/media/net';
 import { declaresSpeech } from '@/media/decl';
-import { gc, getBlob, hasBlob, putBlob } from '@/store/media-db';
+import { deleteBlob, gc, getBlob, hasBlob, putBlob } from '@/store/media-db';
 import { provideMedia, type SpeechRuntime } from '@/core/media-vars';
 import { activeConnection, mediaSettings, saveMedia } from '@/store/media';
 import { getPreset } from '@/store/presets';
 import { getSidecar } from '@/store/sidecar';
 import { speechOf } from '@/app/speech';
+import { chatCards } from '@/st/cards';
 import { t } from '@/i18n';
 import { mediaErrorText } from '@/ui/media/errors';
+import type { ChatCard } from '@/st/cards';
 import { Clip, type ClipState } from './clip';
 import { pausePlayback, Playback, resumePlayback } from './player';
 import { speakableLine, speechFormat, speechProvider, speechTags } from './providers';
-import { clipKey, segmentsOf, voiceFor, type Segment } from './segments';
+import { bindingOf, clipKey, norm, scopedBindings, segmentsOf, voiceFor, type Segment } from './segments';
 import type { SpeechConnection, SpeechEnv, VoiceRef } from './types';
 import { pcmToWav, wavToPcm } from './wav';
 
@@ -74,6 +76,51 @@ async function usableVoice(conn: SpeechConnection, voice: VoiceRef | null, signa
   return voice;
 }
 
+/** The voice picked for a character without one, global or for one of the chat's cards; `null`: cancelled. */
+export type VoiceAsker = (conn: SpeechConnection, character: string, cards: ChatCard[]) => Promise<{ voice: VoiceRef; card?: string } | null>;
+
+let askVoice: VoiceAsker = async () => null;
+/** Set by the UI: the dialog that asks for a voice. */
+export const setVoiceAsker = (f: VoiceAsker) => { askVoice = f; };
+
+/** Avatar keys of the current chat's cards. */
+const cardKeys = () => chatCards().map((c) => c.key);
+
+const asking = new Map<string, Promise<boolean>>();
+let asked: Promise<unknown> = Promise.resolve();
+
+/** Make sure `character` has a voice, asking the user (one dialog at a time, once per character). False: cancelled. */
+function ensureVoice(conn: SpeechConnection, character: string): Promise<boolean> {
+  const k = `${conn.id}\n${norm(character)}`;
+  let p = asking.get(k);
+  if (p) return p;
+  p = asked.then(async () => {
+    if (voiceFor(conn, { kind: 'speech', character }, cardKeys()) !== undefined) return true;
+    const cards = chatCards();
+    const r = await askVoice(conn, character, cards);
+    if (!r) return false;
+    const same = (b: { character: string; card?: string }) => norm(b.character) === norm(character) && (b.card ?? '') === (r.card ?? '');
+    const b = conn.bindings.find(same);
+    if (b) b.voice = r.voice;
+    else conn.bindings.push({ character, voice: r.voice, ...(r.card ? { card: r.card } : {}) });
+    saveMedia();
+    return true;
+  }).finally(() => asking.delete(k));
+  asked = p.catch(() => undefined);
+  asking.set(k, p);
+  return p;
+}
+
+/** The segments that have a voice, after asking for the characters that have none (cancelled ones are skipped). */
+async function voiced(conn: SpeechConnection, segs: Segment[]): Promise<Segment[]> {
+  const keys = cardKeys();
+  const missing = new Map<string, string>();
+  for (const s of segs) if (voiceFor(conn, s, keys) === undefined) missing.set(norm(s.character), s.character);
+  for (const name of missing.values()) await ensureVoice(conn, name);
+  const now = cardKeys();
+  return segs.filter((s) => voiceFor(conn, s, now) !== undefined);
+}
+
 // ---- clips --------------------------------------------------------------------------------------
 
 const MEMORY = 48;
@@ -90,15 +137,35 @@ function remember(key: string, clip: Clip): Clip {
   return clip;
 }
 
-const keyOf = (conn: SpeechConnection, seg: Segment) => clipKey(conn, voiceFor(conn, seg), seg.text);
+/** Cache key of a segment's clip; none while its character has no voice. */
+function keyOf(conn: SpeechConnection, seg: Segment): string | undefined {
+  const voice = voiceFor(conn, seg, cardKeys());
+  return voice === undefined ? undefined : clipKey(conn, voice, seg.text);
+}
 
-/** The clip of a segment: in memory, from the cache, or synthesized now. */
-export const clipOf = (conn: SpeechConnection, seg: Segment): Promise<Clip> => clipFor(conn, voiceFor(conn, seg), seg.text);
+/** The clip of a voiced segment: in memory, from the cache, or synthesized now. */
+function clipOf(conn: SpeechConnection, seg: Segment): Promise<Clip> {
+  const voice = voiceFor(conn, seg, cardKeys());
+  if (voice === undefined) return Promise.reject(new Error(`No voice for ${seg.character}`));
+  return clipFor(conn, voice, seg.text);
+}
 
-async function clipFor(conn: SpeechConnection, voice: VoiceRef | null, text: string): Promise<Clip> {
+const looking = new Map<string, Promise<Clip>>();
+
+function clipFor(conn: SpeechConnection, voice: VoiceRef | null, text: string): Promise<Clip> {
   const key = clipKey(conn, voice, text);
   const known = clips.get(key);
-  if (known && known.state !== 'error') return remember(key, known);
+  if (known && known.state !== 'error') return Promise.resolve(remember(key, known));
+  // Concurrent requests for the same clip share one cache lookup and synthesis.
+  let p = looking.get(key);
+  if (!p) {
+    p = newClip(conn, voice, text, key).finally(() => looking.delete(key));
+    looking.set(key, p);
+  }
+  return p;
+}
+
+async function newClip(conn: SpeechConnection, voice: VoiceRef | null, text: string, key: string): Promise<Clip> {
   const cached = await getBlob(key).catch(() => undefined);
   const pcm = cached ? wavToPcm(await cached.arrayBuffer()) : null;
   if (pcm) {
@@ -112,6 +179,8 @@ async function clipFor(conn: SpeechConnection, voice: VoiceRef | null, text: str
     const usable = await usableVoice(conn, voice, signal);
     return provider.synthesize(env, { conn, text, voice: usable, signal });
   }, (c) => {
+    // Deleted (or regenerated) meanwhile.
+    if (clips.get(key) !== c) return;
     speech.clips[key] = c.state;
     if (c.state === 'ready') void putBlob(pcmToWav(c.pcm(), c.sampleRate), { key }).catch((e) => console.warn('[AP] speech cache write failed', e));
   });
@@ -121,7 +190,8 @@ async function clipFor(conn: SpeechConnection, voice: VoiceRef | null, text: str
 /** State of a segment's clip for the UI ('ready' also for cached clips once looked up). */
 export function segmentState(seg: Segment): ClipState | undefined {
   const conn = speechConnection();
-  return conn ? speech.clips[keyOf(conn, seg)] : undefined;
+  const key = conn && keyOf(conn, seg);
+  return key ? speech.clips[key] : undefined;
 }
 
 /** Look up which segments of a message are cached (so the UI can show them as ready). */
@@ -130,7 +200,7 @@ export async function probeCache(segs: Segment[]): Promise<void> {
   if (!conn) return;
   for (const seg of segs) {
     const key = keyOf(conn, seg);
-    if (speech.clips[key]) continue;
+    if (!key || speech.clips[key]) continue;
     if (await hasBlob(key).catch(() => false)) speech.clips[key] ??= 'ready';
   }
 }
@@ -160,20 +230,22 @@ export async function togglePause(): Promise<void> {
 }
 
 /** Play segments of a message in order from `from` (one segment unless `all`), prefetching the next one. */
-async function run(mesId: number, segs: Segment[], from: number, all: boolean): Promise<void> {
+async function run(mesId: number, all: Segment[], from: number, whole: boolean): Promise<void> {
   stopSpeech();
   const conn = speechConnection();
-  if (!conn || !segs[from]) return;
+  if (!conn || !all[from]) return;
   const run = { playback: null as Playback | null, cancelled: false };
   current = run;
-  const last = all ? segs.length - 1 : from;
   try {
-    let next: Promise<Clip> | null = clipOf(conn, segs[from]!);
-    for (let i = from; i <= last && !run.cancelled; i++) {
+    const segs = await voiced(conn, whole ? all.slice(from) : [all[from]!]);
+    if (run.cancelled || !segs.length) return;
+    const last = segs.length - 1;
+    let next: Promise<Clip> | null = clipOf(conn, segs[0]!);
+    for (let i = 0; i <= last && !run.cancelled; i++) {
       const clip: Clip = await next!;
       next = i < last ? clipOf(conn, segs[i + 1]!) : null;
       if (run.cancelled) break;
-      speech.playing = { mesId, segId: segs[i]!.id, all };
+      speech.playing = { mesId, segId: segs[i]!.id, all: whole };
       run.playback = new Playback(clip);
       await run.playback.run();
     }
@@ -217,11 +289,19 @@ export async function previewVoice(conn: SpeechConnection, voice: VoiceRef | nul
   }
 }
 
+const holds = new Set<() => (VoiceRef | null)[]>();
+
+/** Keep the reference audio of voices not yet in the settings (a voice being picked); returns the release. */
+export function holdVoices(voices: () => (VoiceRef | null)[]): () => void {
+  holds.add(voices);
+  return () => { holds.delete(voices); };
+}
+
 /** Delete stored reference audio no connection uses any more. */
 export async function gcVoices(): Promise<void> {
   const keep = new Set<string>();
   for (const c of mediaSettings().speech.connections) {
-    for (const v of [c.voice, c.narrator, ...c.bindings.map((b) => b.voice)]) {
+    for (const v of [c.narrator, ...c.bindings.map((b) => b.voice), ...[...holds].flatMap((h) => h())]) {
       if (v?.kind !== 'clone') continue;
       keep.add(v.audio);
       if (v.consent) keep.add(v.consent);
@@ -234,10 +314,10 @@ export async function gcVoices(): Promise<void> {
 export async function generateMessage(mesId: number): Promise<void> {
   const conn = speechConnection();
   if (!conn || speech.generating[mesId]) return;
-  const segs = messageSegments(mesId);
-  if (!segs.length) return;
+  if (!messageSegments(mesId).length) return;
   speech.generating[mesId] = true;
   try {
+    const segs = await voiced(conn, messageSegments(mesId));
     for (const seg of segs) {
       const clip = await clipOf(conn, seg);
       await clip.done;
@@ -256,7 +336,7 @@ export async function messageAudio(mesId: number): Promise<Blob | null> {
   if (!conn) return null;
   const parts: Uint8Array[] = [];
   let rate = 0;
-  for (const seg of messageSegments(mesId)) {
+  for (const seg of await voiced(conn, messageSegments(mesId))) {
     const clip = await clipOf(conn, seg);
     await clip.done;
     if (clip.state !== 'ready') continue;
@@ -271,6 +351,43 @@ export async function messageAudio(mesId: number): Promise<Blob | null> {
   return pcmToWav(all, rate);
 }
 
+/** Forget the generated audio of a message's lines (all without `segIds`), in memory and in the cache. */
+export async function deleteAudio(mesId: number, segIds?: string[]): Promise<void> {
+  const conn = speechConnection();
+  if (!conn) return;
+  const p = speech.playing;
+  if (p && p.mesId === mesId && (!segIds || segIds.includes(p.segId))) stopSpeech();
+  for (const seg of messageSegments(mesId)) {
+    if (segIds && !segIds.includes(seg.id)) continue;
+    const key = keyOf(conn, seg);
+    if (!key) continue;
+    clips.get(key)?.abort();
+    clips.delete(key);
+    delete speech.clips[key];
+    await deleteBlob(key).catch(() => undefined);
+  }
+}
+
+/** Discard and synthesize again: one line (then played) or the whole message. */
+export async function regenerate(mesId: number, segId?: string): Promise<void> {
+  await deleteAudio(mesId, segId ? [segId] : undefined);
+  if (segId) playLine(mesId, segId);
+  else await generateMessage(mesId);
+}
+
+/** Names of the characters with a voice in the current chat (a card's binding over a global one of the same name). */
+function boundCharacters(conn: SpeechConnection): string[] {
+  const scoped = scopedBindings(conn, cardKeys());
+  const out = new Map<string, string>();
+  for (const b of scoped) {
+    const k = norm(b.character);
+    if (!b.character.trim() || out.has(k)) continue;
+    const hit = bindingOf(scoped, b.character);
+    if (hit) out.set(k, hit.character);
+  }
+  return [...out.values()];
+}
+
 /** `speech.*` variables, format notes, bound characters and the display cleaner for the engine. */
 function runtime(): SpeechRuntime {
   const s = mediaSettings().speech;
@@ -280,7 +397,7 @@ function runtime(): SpeechRuntime {
   return {
     vars: { on: Boolean(conn), auto: s.auto, api, narrator: s.narrator, characters: false },
     format: speechFormat(api),
-    characters: conn?.bindings.filter((b) => b.voice).map((b) => b.character) ?? [],
+    characters: conn ? boundCharacters(conn) : [],
     ...(tags ? { cleaner: tags } : {}),
   };
 }
