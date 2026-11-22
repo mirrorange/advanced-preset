@@ -355,8 +355,9 @@ export function compile(tree: SourceTree): CompileResult {
     if (userModuleGroups.some((x) => x.id === gid)) return diag.error(`duplicate user module group \`${gid}\``, where);
     if (r.mode !== undefined && r.mode !== 'single' && r.mode !== 'multi') diag.error('mode must be single | multi', where);
     if (r.collapsed !== undefined && typeof r.collapsed !== 'boolean') diag.error('collapsed must be true or false', where);
-    for (const k of Object.keys(r)) if (!['id', 'name', 'mode', 'collapsed'].includes(k)) diag.warn(`unknown user module group key \`${k}\``, { ...where, path: `${where.path}.${k}` });
-    userModuleGroups.push({ id: gid, name: str(r.name, gid), mode: r.mode === 'single' ? 'single' : 'multi', ...(r.collapsed === true ? { collapsed: true } : {}) });
+    if (r.enabled !== undefined && typeof r.enabled !== 'boolean') diag.error('enabled must be true or false', where);
+    for (const k of Object.keys(r)) if (!['id', 'name', 'mode', 'collapsed', 'enabled'].includes(k)) diag.warn(`unknown user module group key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    userModuleGroups.push({ id: gid, name: str(r.name, gid), mode: r.mode === 'single' ? 'single' : 'multi', ...(r.collapsed === true ? { collapsed: true } : {}), ...(r.enabled === false ? { enabled: false } : {}) });
   });
 
   // ── build variables ─────────────────────────────────────────────────────────

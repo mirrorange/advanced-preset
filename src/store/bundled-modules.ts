@@ -12,8 +12,8 @@
  * `modified` tells whether the user changed their copy since the preset gave it to them.
  *
  * Groups the preset declares (`userModuleGroups`) are installed the same way: the first time a
- * version carries one it is added after the user's groups; from then on its name, mode, folding
- * and order are the user's, and a group the user deleted is not added again. The group a module
+ * version carries one it is added after the user's groups; from then on its name, mode, folding,
+ * switch and order are the user's, and a group the user deleted is not added again. The group a module
  * is in counts as its position: a new module goes into its group (ungrouped when the user does
  * not have it), an installed one stays where the user put it.
  */
@@ -83,7 +83,8 @@ export function planBundledSync(
     plan.groupRecords.push(g.id);
     // Known (the user has it, or deleted it) → the user's; new → install.
     if (groups.list.some((x) => x.id === g.id) || groups.records?.includes(g.id)) continue;
-    plan.groups.push(localizeUserModuleGroup({ id: g.id, name: g.name, mode: g.mode === 'single' ? 'single' : 'multi', ...(g.collapsed ? { collapsed: true } : {}) }, groupLabels(preset, lang, g.id)));
+    const fresh: UserModuleGroup = { id: g.id, name: g.name, mode: g.mode === 'single' ? 'single' : 'multi', ...(g.collapsed ? { collapsed: true } : {}), ...(g.enabled === false ? { enabled: false } : {}) };
+    plan.groups.push(localizeUserModuleGroup(fresh, groupLabels(preset, lang, g.id)));
   }
   const groupIds = new Set([...groups.list, ...plan.groups].map((g) => g.id));
   const seen = new Set<string>();
@@ -156,7 +157,7 @@ export function applyBundledSync(preset: APreset, plan: BundledPlan, take: Itera
  * The preset as exported with the chosen user modules bundled (they replace what it carried), with
  * the user's groups they are in (`groups`: the user's list). A bundled module the user left
  * unchanged keeps its source, translations included; so does a group the user left as the preset
- * gave it (a renamed group loses the preset's translated names).
+ * gave it (a renamed group loses the preset's translated names). Groups carry the user's switch.
  */
 export function presetWithUserModules(preset: APreset, modules: UserModule[], lang?: string, groups: UserModuleGroup[] = []): APreset {
   const sources = presetUserModules(preset);
@@ -174,9 +175,13 @@ export function presetWithUserModules(preset: APreset, modules: UserModule[], la
   const groupsOut = groups.filter((g) => modules.some((m) => m.group === g.id)).map((g): UserModuleGroup => {
     const src = presetGroups.find((x) => x.id === g.id);
     const same = (a: UserModuleGroup, b: UserModuleGroup) => a.name === b.name && a.mode === b.mode && Boolean(a.collapsed) === Boolean(b.collapsed);
-    if (src && same(localizeUserModuleGroup(src, groupLabels(preset, lang, src.id)), g)) return cloneData(src);
+    const switched = g.enabled === false ? { enabled: false } : {};
+    if (src && same(localizeUserModuleGroup(src, groupLabels(preset, lang, src.id)), g)) {
+      const { enabled: _ignored, ...base } = cloneData(src);
+      return { ...base, ...switched };
+    }
     for (const table of Object.values(locales)) if (table?.userModuleGroups) delete table.userModuleGroups[g.id];
-    return { id: g.id, name: g.name, mode: g.mode, ...(g.collapsed ? { collapsed: true } : {}) };
+    return { id: g.id, name: g.name, mode: g.mode, ...(g.collapsed ? { collapsed: true } : {}), ...switched };
   });
   const { userModuleGroups: _replaced, ...rest } = preset;
   return { ...rest, locales, userModules: userModulesOut, ...(groupsOut.length ? { userModuleGroups: groupsOut } : {}) };

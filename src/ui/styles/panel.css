@@ -160,6 +160,8 @@
 .um-chevron.open svg.lucide { transform: rotate(90deg); }
 .um-group-name { flex: 1 1 6em; font-weight: 600; text-overflow: ellipsis; }
 .um-group-count { flex: none; min-width: 1.6em; padding: 0 0.4em; border-radius: 999px; background: var(--ap-surface-2); text-align: center; line-height: 1.6; }
+.um-group-switch { flex: none; margin-left: 4px; }
+.um-group.off .um-group-name, .um-group.off .um-group-count, .um-group.off .um-list { opacity: 0.55; }
 .um-group-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ap-space-2); padding: 4px var(--ap-space-2); border-radius: var(--ap-radius-sm); background: color-mix(in srgb, var(--ap-danger) 8%, transparent); }
 .um-group-confirm > span { flex: 1 1 100%; }
 .um-group-confirm .btn.danger { color: var(--ap-danger); }

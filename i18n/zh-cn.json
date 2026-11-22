@@ -283,6 +283,7 @@
   "um.grp.empty": "将模组拖到这里",
   "um.grp.dropOut": "拖到这里移出分组",
   "um.grp.none": "未分组",
+  "um.grp.switch": "整组开关：{name}",
   "um.grp.moveTo": "移到分组",
   "um.noEntries": "无内容",
   "um.name": "模组名称",

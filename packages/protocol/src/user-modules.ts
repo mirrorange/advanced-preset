@@ -121,6 +121,11 @@ export interface UserModuleGroup {
   mode: UserGroupMode;
   /** Folded in the panel. */
   collapsed?: boolean;
+  /**
+   * `false`: the whole group is switched off — none of its modules apply, while each keeps its
+   * own switch (and a single group its choice) for when the group is switched on again. Absent → on.
+   */
+  enabled?: boolean;
 }
 
 /** Texts scanned by keyword rules. `recent` is newest first and starts with the input when there is one. */
@@ -250,6 +255,15 @@ export function normalizeUserModuleGroups(modules: UserModule[], groups: UserMod
     bucket.push(taken ? { ...m, enabled: false } : m);
   }
   return { modules: buckets.flat(), groups: outGroups };
+}
+
+/**
+ * The modules that may apply: those in a switched-off group are left out (ungrouped modules and
+ * modules of unknown groups stay). Each module's own switch is checked when merging.
+ */
+export function activeUserModules(modules: UserModule[], groups: UserModuleGroup[] = []): UserModule[] {
+  const off = new Set(groups.filter((g) => !partEnabled(g)).map((g) => g.id));
+  return off.size ? modules.filter((m) => m.group === undefined || !off.has(m.group)) : modules;
 }
 
 /** Modules of a group (`null`: ungrouped), in list order. */
@@ -508,6 +522,7 @@ export function normalizeUserModuleGroup(raw: unknown): UserModuleGroup | null {
   if (!isObj(raw) || typeof raw.id !== 'string' || !raw.id) return null;
   const g: UserModuleGroup = { id: raw.id, name: str(raw.name), mode: raw.mode === 'single' ? 'single' : 'multi' };
   if (raw.collapsed === true) g.collapsed = true;
+  if (raw.enabled === false) g.enabled = false;
   return g;
 }
 

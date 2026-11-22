@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cloneData, type APreset, type UserModule, type UserModuleSource } from '@advanced-preset/protocol';
+import { activeUserModules, cloneData, type APreset, type UserModule, type UserModuleSource } from '@advanced-preset/protocol';
 import { applyBundledSync, planBundledSync, planIsEmpty, presetWithUserModules } from '@/store/bundled-modules';
 import { presetState } from '@/store/config';
 import {
   createUserModule, createUserModuleFromTemplate, createUserModuleGroup, duplicateUserModule, exportUserModuleGroup, exportUserModules,
   importUserModules, moveUserModule, moveUserModuleGroup, removeUserModule, removeUserModuleGroup, renameUserModuleGroup, setUserModuleEnabled,
-  setUserModuleGroupCollapsed, setUserModuleGroupMode, userModuleGroups, userModules,
+  setUserModuleGroupCollapsed, setUserModuleGroupEnabled, setUserModuleGroupMode, userModuleGroups, userModules,
 } from '@/store/user-modules';
 import { petals, withoutTemplates } from './helpers';
 
@@ -115,6 +115,28 @@ describe('user module groups (store)', () => {
     removeUserModuleGroup(p, m, { withModules: true });
     expect(names(p)).toEqual(['b', 's1', 's2', 'a']);
     expect(userModuleGroups(p).map((g) => g.name)).toEqual(['E']);
+  });
+
+  it('switches a whole group off and on, keeping each module\'s switch and the single choice', () => {
+    const { p, s, m } = setup();
+    setUserModuleEnabled(p, byName(p, 's2').id, true);
+    setUserModuleEnabled(p, byName(p, 'm2').id, false);
+    setUserModuleGroupEnabled(p, s, false);
+    setUserModuleGroupEnabled(p, m, false);
+    expect(userModuleGroups(p).map((g) => g.enabled)).toEqual([false, false]);
+    expect(on(p)).toEqual(['a', 'b', 's2', 'm1']);
+    expect(activeUserModules(userModules(p), userModuleGroups(p)).map((x) => x.name)).toEqual(['a', 'b']);
+    // Still editable while off; switching the group on restores the modules as they are.
+    setUserModuleEnabled(p, byName(p, 's1').id, true);
+    setUserModuleGroupEnabled(p, s, true);
+    expect('enabled' in userModuleGroups(p)[0]!).toBe(false);
+    expect(activeUserModules(userModules(p), userModuleGroups(p)).filter((x) => x.enabled).map((x) => x.name)).toEqual(['a', 'b', 's1']);
+    // Off groups are exported and imported off.
+    const one = cloneData(exportUserModuleGroup(p, m));
+    expect(one.groups).toEqual([{ id: m, name: 'M', mode: 'multi', enabled: false }]);
+    expect(cloneData(exportUserModules(p)).groups!.map((g) => g.enabled)).toEqual([undefined, false]);
+    const q = preset();
+    expect(importUserModules(q, one).groups[0]).toMatchObject({ name: 'M', enabled: false });
   });
 
   it('duplicates and creates from templates in the same group', () => {
@@ -252,6 +274,23 @@ describe('user module groups shipped with a preset', () => {
     const third: APreset = { ...next, version: '3.0.0', userModules: [...next.userModules, src('later', { group: 'styles' })] };
     sync(third);
     expect(layout(third).slice(-3)).toEqual(['pick@styles', 'later@styles(off)', 'fresh@more']);
+  });
+
+  it('installs a group switched off when the preset says so; the switch is then the user\'s', () => {
+    const p = shipped();
+    p.userModuleGroups = [{ ...p.userModuleGroups![0]!, enabled: false }, p.userModuleGroups![1]!];
+    sync(p, 'zh-cn');
+    expect(userModuleGroups(p).map((g) => [g.id, g.name, g.enabled])).toEqual([['styles', '文风', false], ['extras', 'Extras', undefined]]);
+    expect(layout(p)).toContain('plain@styles');
+    setUserModuleGroupEnabled(p, 'styles', true);
+    setUserModuleGroupEnabled(p, 'extras', false);
+    const next: APreset = { ...p, version: '2.0.0' };
+    expect(sync(next)).toBe(true);
+    expect(userModuleGroups(next).map((g) => g.enabled)).toEqual([undefined, false]);
+    // Exported with the user's switches; an unchanged group keeps its source and translations.
+    const out = presetWithUserModules(next, userModules(next), 'zh-cn', userModuleGroups(next));
+    expect(out.userModuleGroups).toEqual([{ id: 'styles', name: 'Styles', mode: 'single' }, { id: 'extras', name: 'Extras', mode: 'multi', collapsed: true, enabled: false }]);
+    expect(out.locales['zh-cn']!.userModuleGroups).toEqual({ styles: { name: '文风' } });
   });
 
   it('exports the groups of the chosen modules; unchanged groups keep their source', () => {

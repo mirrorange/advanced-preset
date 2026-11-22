@@ -9,7 +9,7 @@
  */
 import {
   cloneData, compareVersions, emptyTrigger, groupMembers, migrateUserModules, lostRefs, normalizeUserModuleGroups, parseUserModuleFile,
-  userModuleFile, userModuleFromSource,
+  setPartEnabled, userModuleFile, userModuleFromSource,
   type APreset, type KeywordTexts, type UserGroupMode, type UserModuleSourceBody, type UserEntry, type UserModule, type UserModuleFile,
   type UserModuleGroup,
 } from '@advanced-preset/protocol';
@@ -179,6 +179,17 @@ export function setUserModuleGroupCollapsed(preset: APreset, id: string, collaps
   if (!g) return;
   if (collapsed) g.collapsed = true;
   else delete g.collapsed;
+  save();
+}
+
+/**
+ * Switch a whole group on / off (on → `enabled` removed). Its modules keep their own switches, so
+ * switching the group on again restores them.
+ */
+export function setUserModuleGroupEnabled(preset: APreset, id: string, on: boolean): void {
+  const g = findGroup(preset, id);
+  if (!g) return;
+  setPartEnabled(g, on);
   save();
 }
 

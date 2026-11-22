@@ -2,7 +2,7 @@
 import { parseArgs } from 'node:util';
 import { basename, resolve } from 'node:path';
 import { readFile, writeFile } from 'node:fs/promises';
-import { IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, normalizeUserModuleGroups, parseUserModuleFile, tavernHelperScriptCount, type ImageApi, type ImagePromptType, type ParamValue, type SpeechApi } from '@advanced-preset/protocol';
+import { IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, activeUserModules, normalizeUserModuleGroups, parseUserModuleFile, tavernHelperScriptCount, type ImageApi, type ImagePromptType, type ParamValue, type SpeechApi } from '@advanced-preset/protocol';
 import { buildDir, writePresetFile } from './io';
 import { report } from './diagnostics';
 import { bundledModules, parseParamArg, preview, templateModules } from './preview';
@@ -136,7 +136,7 @@ async function main(argv: string[]): Promise<number> {
       const userModules = [...bundled];
       if (values['user-modules']) {
         const file = parseUserModuleFile(JSON.parse(await readFile(values['user-modules'], 'utf8')));
-        userModules.push(...normalizeUserModuleGroups(file.modules, file.groups).modules);
+        userModules.push(...activeUserModules(normalizeUserModuleGroups(file.modules, file.groups).modules, file.groups));
       }
       if (values['user-module-templates']) {
         const picked = templateModules(preset, ids(values['user-module-templates']), values.lang);

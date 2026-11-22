@@ -283,6 +283,7 @@
   "um.grp.empty": "Drag modules here",
   "um.grp.dropOut": "Drop here to take it out of its group",
   "um.grp.none": "No group",
+  "um.grp.switch": "Whole group on / off: {name}",
   "um.grp.moveTo": "Move to group",
   "um.noEntries": "No content",
   "um.name": "Module name",
