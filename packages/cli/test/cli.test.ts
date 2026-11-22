@@ -784,7 +784,7 @@ userModuleGroups:
 
   it('reports bad groups, unknown groups and several enabled modules in a single group', () => {
     const { diag } = build(tree({
-      'preset.yaml': MANIFEST + EXTRA + GROUPS + '  - { id: Bad_Id }\n  - { id: styles }\n  - { id: odd, mode: radio, collapsed: maybe, color: red }\n',
+      'preset.yaml': MANIFEST + EXTRA + GROUPS + '  - { id: Bad_Id }\n  - { id: styles }\n  - { id: odd, mode: radio, collapsed: maybe, enabled: sure, color: red }\n',
       'user-modules/a.md': one('A', 'group: styles\n'),
       'user-modules/b.md': one('B', 'group: styles\n'),
       'user-modules/c.md': one('C', 'group: extras\n'),
@@ -797,11 +797,29 @@ userModuleGroups:
     expect(errors).toMatch(/preset\.yaml: duplicate user module group `styles`/);
     expect(errors).toMatch(/preset\.yaml: mode must be single \| multi/);
     expect(errors).toMatch(/preset\.yaml: collapsed must be true or false/);
+    expect(errors).toMatch(/preset\.yaml: enabled must be true or false/);
     expect(errors).toMatch(/user-modules\/b\.md: single user module group `styles` already has `a` enabled/);
     expect(errors).not.toMatch(/user-modules\/d\.md/);
     expect(errors).toMatch(/user-modules\/e\.md: unknown user module group `gone`/);
     expect(errors).toMatch(/user-module-templates\/t\.md: unknown user module group/);
     expect(diag.warnings.map((w) => w.message).join('\n')).toMatch(/unknown user module group key `color`/);
+  });
+
+  it('compiles a group\'s switch; previews leave out the modules of a group switched off', async () => {
+    const { bundledModules, preview } = await import('../src/preview');
+    const { preset, diag } = build(tree({
+      'preset.yaml': MANIFEST + EXTRA + GROUPS.replace('mode: single }', 'mode: single, enabled: false }') + '  - { id: on, enabled: true }\n',
+      'user-modules/a.md': one('A', 'group: styles\n'),
+      'user-modules/c.md': one('C'),
+      'user-modules/d.md': one('D', 'group: on\n'),
+    }));
+    expect(diag.errors).toEqual([]);
+    expect(preset!.userModuleGroups).toEqual([{ id: 'styles', name: 'Styles', mode: 'single', enabled: false }, { id: 'extras', name: 'extras', mode: 'multi', collapsed: true }, { id: 'on', name: 'on', mode: 'multi' }]);
+    expect((bundledModules(preset!) as UserModule[]).map((m) => m.id)).toEqual(['c', 'd']);
+    const out = preview(preset!, { config: 'fast', userModules: bundledModules(preset!, ['all']) as UserModule[] });
+    expect(out).toContain('C text.');
+    expect(out).toContain('D text.');
+    expect(out).not.toContain('A text.');
   });
 
   it('previews bundled modules in install order, one per single group', async () => {
