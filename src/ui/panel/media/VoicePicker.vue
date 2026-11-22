@@ -2,7 +2,8 @@
 /**
  * One voice of a speech connection: a built-in voice or an id (typed, or picked from the provider's
  * library search), or reference audio for cloning (with transcript / consent recording when the
- * provider asks for them). The speaker button plays a sample.
+ * provider asks for them). The speaker button plays a sample; the default slot adds buttons to the end
+ * of the first row.
  */
 import { computed, ref } from 'vue';
 import { AudioLines, FileAudio, LoaderCircle, Search, Volume2, X } from 'lucide-vue-next';
@@ -116,6 +117,7 @@ function clearClone() {
       </template>
       <IconButton v-if="provider?.clone && v?.kind !== 'clone'" :icon="AudioLines" :label="t('media.speech.clone')" small @click="audioInput?.click()" />
       <IconButton :icon="Volume2" :label="t('media.speech.test')" small align="end" @click="previewVoice(connection, modelValue)" />
+      <slot />
       <input ref="audioInput" type="file" accept="audio/*" hidden @change="upload($event, 'audio')" />
     </div>
     <template v-if="v?.kind === 'clone'">

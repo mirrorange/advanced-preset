@@ -125,9 +125,10 @@ function removeBinding(b: VoiceBinding) {
               <div v-if="groups.length > 1" class="media-ref-group-title ellipsis">{{ g.name }}</div>
               <div v-for="(b, i) in g.bindings" :key="i" class="speech-binding">
                 <input class="input" :value="b.character" :placeholder="t('media.speech.character')" @change="setBinding(b, { character: ($event.target as HTMLInputElement).value.trim() })" />
-                <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(b, { voice: $event })" />
-                <ScopeToggle v-if="groups.length > 1" :model-value="g.card" :options="scopeOptions" @update:model-value="moveBinding(b, $event)" />
-                <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeBinding(b)" />
+                <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(b, { voice: $event })">
+                  <ScopeToggle v-if="groups.length > 1" :model-value="g.card" :options="scopeOptions" @update:model-value="moveBinding(b, $event)" />
+                  <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeBinding(b)" />
+                </VoicePicker>
               </div>
               <button type="button" class="btn ghost add" @click="addBinding(g.card)"><Plus />{{ t('media.speech.addBinding') }}</button>
             </div>
