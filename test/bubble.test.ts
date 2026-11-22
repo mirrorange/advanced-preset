@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { place } from '@/ui/components/bubble';
+import { ref } from 'vue';
+import { place, useTipTriggers } from '@/ui/components/bubble';
 
 const rect = (left: number, top: number, width = 20, height = 20) =>
   ({ left, top, width, height, right: left + width, bottom: top + height, x: left, y: top, toJSON: () => ({}) }) as DOMRect;
@@ -27,5 +28,54 @@ describe('tooltip placement', () => {
     const p = place(rect(100, 40, 20, 700), { width: 100, height: 120 }, view);
     expect(p.top).toBeGreaterThanOrEqual(8);
     expect(p.top + 120).toBeLessThanOrEqual(792);
+  });
+});
+
+describe('tooltip triggers', () => {
+  const pointer = (pointerType: string) => ({ pointerType }) as PointerEvent;
+  const focus = (visible: boolean) => ({ target: { matches: (q: string) => q === ':focus-visible' && visible } }) as unknown as FocusEvent;
+
+  it('shows on mouse hover, not on a touch or pen tap', () => {
+    const open = ref(false);
+    const on = useTipTriggers(open);
+    on.onPointerenter(pointer('touch'));
+    expect(open.value).toBe(false);
+    on.onPointerenter(pointer('mouse'));
+    expect(open.value).toBe(true);
+    on.onPointerleave();
+    expect(open.value).toBe(false);
+  });
+  it('shows on keyboard focus only, not on a focus moved by script or a tap', () => {
+    const open = ref(false);
+    const on = useTipTriggers(open);
+    on.onFocusin(focus(false));
+    expect(open.value).toBe(false);
+    on.onFocusin(focus(true));
+    expect(open.value).toBe(true);
+    on.onFocusout();
+    expect(open.value).toBe(false);
+  });
+  it('toggle pins it on a tap (Help) and the focus leaving unpins it', () => {
+    const open = ref(false);
+    const on = useTipTriggers(open);
+    on.onFocusin(focus(false));
+    on.onPointerleave(); // a touch pointer leaves before the click
+    on.toggle();
+    expect(open.value).toBe(true);
+    on.onPointerleave();
+    on.toggle();
+    expect(open.value).toBe(false);
+    on.toggle();
+    on.onFocusout();
+    expect(open.value).toBe(false);
+  });
+  it('a click while hovered keeps it shown', () => {
+    const open = ref(false);
+    const on = useTipTriggers(open);
+    on.onPointerenter(pointer('mouse'));
+    on.toggle();
+    expect(open.value).toBe(true);
+    on.onPointerleave();
+    expect(open.value).toBe(false);
   });
 });
