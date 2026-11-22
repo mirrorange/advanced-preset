@@ -45,9 +45,29 @@ export const imageStructures = (preset: APreset | undefined): StructureDecl[] =>
 /** Image prompts of an image structure in a sidecar. */
 export const promptsOf = (sc: Sidecar | undefined, id: string): ImagePrompt[] => normalizeImages(sc?.structures?.[id])?.images ?? [];
 
-/** The prompt to generate from (the user's edit, else the model's). */
-export const effectivePrompt = (sc: Sidecar | undefined, id: string, index: number): string =>
-  sc?.images?.[id]?.[index]?.prompt ?? promptsOf(sc, id)[index]?.prompt ?? '';
+/** Fields of an image prompt the user may edit (stored in `SidecarImage` when they differ from the model's). */
+export const IMAGE_EDIT_FIELDS = ['prompt', 'refs', 'ratio', 'caption'] as const;
+
+/** The image prompt to generate from: the model's, with the user's edits on top. */
+export function effectiveImage(sc: Sidecar | undefined, id: string, index: number): ImagePrompt | undefined {
+  const model = promptsOf(sc, id)[index];
+  if (!model) return undefined;
+  const edit = sc?.images?.[id]?.[index];
+  const out: ImagePrompt = {
+    prompt: edit?.prompt ?? model.prompt,
+    refs: edit?.refs ?? model.refs,
+    ratio: edit?.ratio ?? model.ratio,
+    caption: edit?.caption ?? model.caption,
+  };
+  if (!out.refs?.length) delete out.refs;
+  if (!out.ratio) delete out.ratio;
+  if (!out.caption) delete out.caption;
+  return out;
+}
+
+/** Whether the user edited any field of the prompt. */
+export const imageEdited = (sc: Sidecar | undefined, id: string, index: number): boolean =>
+  IMAGE_EDIT_FIELDS.some((f) => sc?.images?.[id]?.[index]?.[f] !== undefined);
 
 /**
  * The message whose sidecar (current swipe or another swipe slot) has `genId`. The message index is
@@ -121,10 +141,9 @@ export async function generateImage(mesId: number, id: string, index: number): P
   try {
     const c = imageConnection();
     if (!c) throw new NoImageConnection();
-    const p = promptsOf(sc, id)[index];
-    const prompt = effectivePrompt(sc, id, index);
-    if (!p || !prompt.trim()) return;
-    const blobs = await requestImages(c, { prompt, ratio: p.ratio, refs: await jobRefs(c, p.refs) }, abort.signal);
+    const p = effectiveImage(sc, id, index);
+    if (!p?.prompt.trim()) return;
+    const blobs = await requestImages(c, { prompt: p.prompt, ratio: p.ratio, refs: await jobRefs(c, p.refs) }, abort.signal);
     const keys: string[] = [];
     for (const b of blobs) keys.push(await putBlob(b, { prefix: 'img:' }));
     const saved = await updateImages(sc.genId, mesId, (images) => {
@@ -148,15 +167,29 @@ export function cancelImage(genId: string, id: string, index: number): void {
   else imageJobs.delete(jobKey(genId, id, index));
 }
 
-/** Save the user's edit of a prompt ('' or the model's prompt restores the model's). */
-export async function setImagePrompt(mesId: number, id: string, index: number, prompt: string): Promise<void> {
+const sameRefs = (a: string[] | undefined, b: string[] | undefined) => {
+  const x = a ?? [];
+  const y = b ?? [];
+  return x.length === y.length && x.every((r) => y.includes(r));
+};
+
+/**
+ * Replace the user's edit of a prompt: fields left out, equal to the model's value (or a blank
+ * prompt) use the model's. `null` restores every field.
+ */
+export async function setImageEdit(mesId: number, id: string, index: number, edit: Partial<ImagePrompt> | null): Promise<void> {
   const sc = getSidecar(st().chat[mesId]);
   if (!sc) return;
-  const original = promptsOf(sc, id)[index]?.prompt ?? '';
+  const model = promptsOf(sc, id)[index];
+  if (!model) return;
   await updateImages(sc.genId, mesId, (images) => {
     const s = slot(images, id, index);
-    if (!prompt.trim() || prompt === original) delete s.prompt;
-    else s.prompt = prompt;
+    for (const f of IMAGE_EDIT_FIELDS) delete s[f];
+    if (!edit) return;
+    if (edit.prompt !== undefined && edit.prompt.trim() && edit.prompt.trim() !== model.prompt.trim()) s.prompt = edit.prompt.trim();
+    if (edit.refs !== undefined && !sameRefs(edit.refs, model.refs)) s.refs = [...edit.refs];
+    if (edit.ratio !== undefined && edit.ratio !== model.ratio) s.ratio = edit.ratio;
+    if (edit.caption !== undefined && edit.caption.trim() !== (model.caption ?? '').trim()) s.caption = edit.caption.trim();
   });
 }
 
