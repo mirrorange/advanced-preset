@@ -1,6 +1,6 @@
 /**
  * Image providers: request construction and response parsing for OpenAI (Image API), Gemini
- * (Interactions or generateContent) and NovelAI. The request body is the built-in default deep-merged
+ * (Interactions or generateContent), NovelAI and OpenRouter (Image API). The request body is the built-in default deep-merged
  * with the connection's body override; headers likewise.
  */
 import type { ImageRatio } from '@advanced-preset/protocol';
@@ -15,7 +15,7 @@ export interface JobRef { id: string; description: string; blob: Blob }
 export interface ImageJob {
   prompt: string;
   ratio?: ImageRatio;
-  /** Reference images picked for this prompt (openai / gemini). */
+  /** Reference images picked for this prompt (all but NovelAI). */
   refs: JobRef[];
 }
 export interface BuiltRequest { url: string; init: RequestInit & { headers: Headers } }
@@ -74,6 +74,21 @@ async function geminiRequest(c: ImageConnection, job: ImageJob): Promise<BuiltRe
   return { url: joinUrl(base(c), 'interactions'), init: json(headers, body) };
 }
 
+/**
+ * OpenRouter `/images`: one request shape for every image model it routes to. Reference images are
+ * `input_references` (in order); the prompt says which is which, as for Gemini.
+ */
+async function openrouterRequest(c: ImageConnection, job: ImageJob): Promise<BuiltRequest> {
+  const styled = styledPrompt(c, job.prompt);
+  const prompt = job.refs.length
+    ? `${job.refs.map((r, i) => `Reference image ${i + 1} (${r.id})${r.description ? `: ${r.description}` : ''}`).join('\n')}\n\n${styled}`
+    : styled;
+  const body: Obj = { model: model(c), prompt, n: 1, aspect_ratio: job.ratio ?? 'auto' };
+  if (job.refs.length) body.input_references = await Promise.all(job.refs.map(async (r) => ({ type: 'image_url', image_url: { url: await dataUrl(r.blob) } })));
+  const headers = mergeHeaders({ 'Content-Type': 'application/json', ...(c.apiKey ? { Authorization: `Bearer ${c.apiKey}` } : {}) }, c);
+  return { url: joinUrl(base(c), 'images'), init: json(headers, deepMerge(body, bodyOverride(c))) };
+}
+
 function novelaiRequest(c: ImageConnection, job: ImageJob): BuiltRequest {
   const prompt = styledPrompt(c, job.prompt);
   const negative = (c.negative ?? '').trim();
@@ -98,6 +113,7 @@ export async function buildImageRequest(c: ImageConnection, job: ImageJob): Prom
     case 'openai': return openaiRequest(c, job);
     case 'gemini': return geminiRequest(c, job);
     case 'novelai': return novelaiRequest(c, { ...job, refs: [] });
+    case 'openrouter': return openrouterRequest(c, job);
   }
 }
 
@@ -153,10 +169,12 @@ export async function readImages(c: ImageConnection, res: Response, signal?: Abo
     if (!images.length) throw new Error(geminiText(j) || 'No image in the response');
     return images;
   }
-  const data = ((j as { data?: { b64_json?: string; url?: string }[] })?.data ?? []);
+  // OpenAI and OpenRouter: `data[]` of base64 images (OpenRouter adds `media_type`, e.g. SVG) or URLs.
+  const data = ((j as { data?: { b64_json?: string; url?: string; media_type?: string }[] })?.data ?? []);
   const out: Blob[] = [];
   for (const d of data) {
-    if (d.b64_json) { const b = base64Blob(d.b64_json, 'image/png'); out.push(blobOf(new Uint8Array(await b.arrayBuffer()))); }
+    const type = d.media_type || 'image/png';
+    if (d.b64_json) { const b = base64Blob(d.b64_json, type); out.push(blobOf(new Uint8Array(await b.arrayBuffer()), type)); }
     else if (d.url) out.push(await (await ensureOk(await mediaFetch(d.url, { signal }))).blob());
   }
   if (!out.length) throw new Error('No image in the response');

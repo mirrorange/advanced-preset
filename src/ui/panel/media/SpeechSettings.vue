@@ -11,7 +11,7 @@ import { activeConnection, copyConnection, mediaSettings, saveMedia, SPEECH_APIS
 import { chatCards } from '@/st/cards';
 import { ui } from '@/ui/state';
 import { changeSpeechApi, newSpeechConnection } from '@/media/speech/connections';
-import { speechProvider } from '@/media/speech/providers';
+import { providerFor } from '@/media/speech/providers';
 import { gcVoices } from '@/media/speech/service';
 import Section from '../../components/Section.vue';
 import Field from '../../components/Field.vue';
@@ -24,7 +24,7 @@ import VoicePicker from './VoicePicker.vue';
 
 const speech = computed(() => mediaSettings().speech);
 const conn = computed(() => activeConnection(speech.value));
-const provider = computed(() => (conn.value ? speechProvider(conn.value.api) : undefined));
+const provider = computed(() => (conn.value ? providerFor(conn.value) : undefined));
 
 const apiLabel = (api: string) => t(`media.api.${api}`);
 const set = (k: 'enabled' | 'auto' | 'narrator', v: boolean) => { speech.value[k] = v; saveMedia(); };
@@ -112,7 +112,7 @@ function removeBinding(b: VoiceBinding) {
         <Field :label="t('media.apiKey')">
           <input class="input" type="password" autocomplete="off" :value="conn.apiKey" @change="edit('apiKey', ($event.target as HTMLInputElement).value.trim())" />
         </Field>
-        <Field :label="t('media.model')">
+        <Field :label="t('media.model')" :help="conn.api === 'openrouter' ? t('media.speech.openrouterModel') : undefined">
           <input class="input" :list="`ap-speech-models-${conn.api}`" :value="conn.model" :placeholder="provider?.defaults.model" spellcheck="false" @change="edit('model', ($event.target as HTMLInputElement).value.trim())" />
           <datalist :id="`ap-speech-models-${conn.api}`"><option v-for="m in provider?.models ?? []" :key="m" :value="m" /></datalist>
         </Field>

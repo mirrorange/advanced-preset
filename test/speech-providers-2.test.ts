@@ -17,7 +17,7 @@ const wav = (data: Uint8Array) => {
   h.set(enc.encode('data'), 36);
   return new Uint8Array([...h, ...data]);
 };
-const strip = (api: 'minimax' | 'gemini', s: string) => s.replace(speechTags(api)!, '');
+const strip = (api: 'minimax' | 'gemini', s: string) => s.replace(speechTags({ api, model: '' })!, '');
 
 describe('minimax', () => {
   const p = speechProvider('minimax')!;
@@ -104,7 +104,7 @@ describe('minimax', () => {
 
   it('strips only MiniMax tags for display', () => {
     expect(strip('minimax', '(sighs) Fine.<#0.5#> Let\'s go (now).')).toBe(' Fine. Let\'s go (now).');
-    expect(speechFormat('minimax')).toMatch(/^Inside a speech tag/);
+    expect(speechFormat({ api: 'minimax', model: '' })).toMatch(/^Inside a speech tag/);
   });
 });
 
@@ -181,7 +181,7 @@ describe('gemini', () => {
 
   it('strips Gemini vocal tags for display', () => {
     expect(strip('gemini', 'Wait... <short pause> look! <GASP> <b>x</b>')).toBe('Wait...  look!  <b>x</b>');
-    expect(speechFormat('gemini')).toMatch(/^Inside a speech tag/);
+    expect(speechFormat({ api: 'gemini', model: '' })).toMatch(/^Inside a speech tag/);
   });
 });
 
@@ -204,8 +204,8 @@ describe('deepseek', () => {
     const out = await p.synthesize(e, { conn: conn('deepseek', { body: '{"format":"wav"}' }), text: 'a', voice: null });
     expect([...await drain(out.chunks)]).toEqual([...pcm]);
     expect((e.calls[0]!.body as any).voice_id).toBe('stella');
-    expect(speechFormat('deepseek')).toBe('');
-    expect(speechTags('deepseek')).toBeNull();
+    expect(speechFormat({ api: 'deepseek', model: '' })).toBe('');
+    expect(speechTags({ api: 'deepseek', model: '' })).toBeNull();
     await expect(p.synthesize(e, { conn: conn('deepseek'), text: 'a', voice: { kind: 'clone', audio: 'k' } })).rejects.toThrow('cloning');
   });
 

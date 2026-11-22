@@ -13,7 +13,7 @@ import {
   deleteAudio, generateLine, generateMessage, messageAudio, messageSegments, playLine, playMessage, probeCache, regenerate, segmentState,
   setSegmentText, speech, speechConnection, stopSpeech, togglePause,
 } from '@/media/speech/service';
-import { speechProvider } from '@/media/speech/providers';
+import { providerFor } from '@/media/speech/providers';
 import { voiceFor, type Segment } from '@/media/speech/segments';
 import type { VoiceRef } from '@/media/speech/types';
 import { ui } from '../state';
@@ -25,7 +25,7 @@ const props = defineProps<{ mesid: number }>();
 
 const conn = computed(() => speechConnection());
 const segments = computed<Segment[]>(() => { void ui.chatRev; return messageSegments(props.mesid); });
-const provider = computed(() => (conn.value ? speechProvider(conn.value.api) : undefined));
+const provider = computed(() => (conn.value ? providerFor(conn.value) : undefined));
 const format = computed(() => provider.value?.format ?? '');
 
 watch(() => segments.value.map((s) => s.id + s.text).join('\n'), () => { void probeCache(segments.value); }, { immediate: true });

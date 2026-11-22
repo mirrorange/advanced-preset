@@ -345,7 +345,7 @@ speech:
 - 角色名到说话人的绑定按连接保存在用户那里，分为全局绑定和按角色卡的绑定：只有全局绑定和当前聊天角色卡（群聊时为所有成员卡）的绑定生效，同名时角色卡的优先。`{{ap::speech::characters}}` 列出这些已绑定的角色名，让模型按同样的写法称呼他们；模型也可以写出未绑定的角色，生成这些台词前 AP 会请用户为该角色选择声音（可存为全局或当前角色卡），取消则这次跳过；
 - 旁白使用旁白声音，未设置时为语音 API 的默认声音；
 - 生成的语音可以在播放框里删除或重新生成，整条消息或正在播放的一句；播放框上的「语音面板」按钮打开该消息的语音面板（独立弹窗）：列出全部分块（角色 / 旁白、使用的声音、未生成 / 生成中 / 已生成 / 失败 / 播放中），每块可以试听、生成或重新生成、删除语音，并可直接编辑发给语音服务的语音提示（可写该服务支持的内联标签，面板里有说明）。修改保存在消息里，只影响这一块（原来的语音随之删除，下次生成使用修改后的文字），可一键还原为模型原文；消息被编辑或滑动后，对应分块不存在的修改不再生效；
-- 有的 API 支持在台词里写语气、停顿标签（如 Fish Audio 的 `<whisper>`、Gemini 的 `<sigh>`）。这些标签交给语音合成，但不显示在正文里。`{{ap::speech::format}}` 是 AP 为当前 API 维护的一小段英文说明，列出可用的标签；API 没有这类标签时为空。预设不需要自己写这些标签；
+- 有的 API 支持在台词里写语气、停顿标签（如 Fish Audio 的 `<whisper>`、Gemini 的 `<sigh>`）。这些标签交给语音合成，但不显示在正文里。`{{ap::speech::format}}` 是 AP 为当前 API 维护的一小段英文说明，列出可用的标签；API 没有这类标签时为空。OpenRouter 连接按模型 id 中的提供者决定（例如 `elevenlabs/eleven-v3` 用 ElevenLabs 的标签，`openai/…` 没有标签），所以同为 `speech.api == "openrouter"`，格式说明也可能不同。预设不需要自己写这些标签；
 - 和批注一样：流式时标记不会闪现，编辑正文后台词会跟随原文，默认历史里只有干净的正文；`history: N` 可以在最近 N 条消息中把 `<speech>` 标记放回去。
 
 ### 条件变量与宏
@@ -354,12 +354,12 @@ speech:
 | --- | --- |
 | `image.on` / `speech.on` | 预设声明了这项功能，用户打开了它，并且选中了可用的连接 |
 | `image.auto` / `speech.auto` | 用户打开了自动生成 |
-| `image.api` | 当前连接的 API：`openai` `gemini` `novelai`（关闭时为空） |
-| `image.prompt` | 当前连接的提示词类型：`tags`（标签）`description`（描述）`instruction`（指令），关闭时为空。由用户选择，新建或切换 API 时 OpenAI / Gemini 默认指令，NovelAI 默认标签 |
+| `image.api` | 当前连接的 API：`openai` `gemini` `novelai` `openrouter`（关闭时为空） |
+| `image.prompt` | 当前连接的提示词类型：`tags`（标签）`description`（描述）`instruction`（指令），关闭时为空。由用户选择，新建或切换 API 时 OpenAI / Gemini / OpenRouter 默认指令，NovelAI 默认标签 |
 | `image.style` | 连接有自己的风格提示词，AP 会把它附加到每次请求中（提示词本身不交给预设） |
-| `image.sfw` | 打开了 NSFW 屏蔽（OpenAI / Gemini 默认打开，NovelAI 默认关闭） |
-| `image.refs` | 有可用的参考图：全局的，或属于当前聊天角色卡的（仅 OpenAI / Gemini） |
-| `speech.api` | `fish` `elevenlabs` `minimax` `gemini` `openai` `deepseek`（关闭时为空） |
+| `image.sfw` | 打开了 NSFW 屏蔽（OpenAI / Gemini / OpenRouter 默认打开，NovelAI 默认关闭） |
+| `image.refs` | 有可用的参考图：全局的，或属于当前聊天角色卡的（OpenAI / Gemini / OpenRouter） |
+| `speech.api` | `fish` `elevenlabs` `minimax` `gemini` `openai` `deepseek` `openrouter`（关闭时为空） |
 | `speech.narrator` | 旁白也要朗读 |
 | `speech.characters` | 当前聊天有已绑定说话人的角色（`{{ap::speech::characters}}` 非空） |
 | `{{ap::image::refs}}` | 参考图清单，每行 `- <id>: <描述>` |
@@ -419,7 +419,7 @@ structures: [image]
 
 完整的模组见花瓣的 `modules/features/illustrations.md` 与 `voice.md`。
 
-用 `ap preview` 检查各种组合：`--image openai|gemini|novelai` 打开图像生成并指定 API，`--image-prompt tags|description|instruction` 指定提示词类型（默认随 API），`--image-auto` `--image-style` `--image-sfw` `--image-refs` 打开对应的变量；`--speech <api>` 打开语音合成，`--speech-auto` `--speech-narrator` `--speech-characters` 同理。参考图、角色名和语音格式说明用占位示例。声明见 [清单参考](../reference/manifest.md#图像生成与语音合成-image--speech)，字段与解析规则见结构参考的 [image](../reference/structures.md#image) 与 [speech](../reference/structures.md#speech)，变量与宏见 [条件变量](../reference/expressions.md#条件变量) 和 [宏](../reference/macros.md#图像与语音)，预览选项见 [ap preview](../reference/cli.md#ap-preview)。
+用 `ap preview` 检查各种组合：`--image openai|gemini|novelai|openrouter` 打开图像生成并指定 API，`--image-prompt tags|description|instruction` 指定提示词类型（默认随 API），`--image-auto` `--image-style` `--image-sfw` `--image-refs` 打开对应的变量；`--speech <api>` 打开语音合成，`--speech-auto` `--speech-narrator` `--speech-characters` 同理。参考图、角色名和语音格式说明用占位示例。声明见 [清单参考](../reference/manifest.md#图像生成与语音合成-image--speech)，字段与解析规则见结构参考的 [image](../reference/structures.md#image) 与 [speech](../reference/structures.md#speech)，变量与宏见 [条件变量](../reference/expressions.md#条件变量) 和 [宏](../reference/macros.md#图像与语音)，预览选项见 [ap preview](../reference/cli.md#ap-preview)。
 
 ## 状态栏
 

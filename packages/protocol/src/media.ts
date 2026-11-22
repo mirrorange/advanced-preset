@@ -20,8 +20,8 @@ export type ImageDecl = Record<string, never>;
 /** `speech` in the manifest (reserved for options; the tag name is the speech structure's `tag`). */
 export type SpeechDecl = Record<string, never>;
 
-export type ImageApi = 'openai' | 'gemini' | 'novelai';
-export const IMAGE_APIS: readonly ImageApi[] = ['openai', 'gemini', 'novelai'];
+export type ImageApi = 'openai' | 'gemini' | 'novelai' | 'openrouter';
+export const IMAGE_APIS: readonly ImageApi[] = ['openai', 'gemini', 'novelai', 'openrouter'];
 /**
  * How image prompts are written, chosen per connection: comma-separated Danbooru-style `tags`
  * (NovelAI), a plain English `description` (SD / Midjourney-like models), or an `instruction` that
@@ -29,10 +29,10 @@ export const IMAGE_APIS: readonly ImageApi[] = ['openai', 'gemini', 'novelai'];
  */
 export type ImagePromptType = 'tags' | 'description' | 'instruction';
 export const IMAGE_PROMPT_TYPES: readonly ImagePromptType[] = ['tags', 'description', 'instruction'];
-/** Prompt type of a new connection of an API (OpenAI / Gemini: instruction, NovelAI: tags). */
+/** Prompt type of a new connection of an API (NovelAI: tags; OpenAI, Gemini, OpenRouter: instruction). */
 export const defaultImagePromptType = (api: ImageApi): ImagePromptType => (api === 'novelai' ? 'tags' : 'instruction');
-export type SpeechApi = 'fish' | 'elevenlabs' | 'minimax' | 'gemini' | 'openai' | 'deepseek';
-export const SPEECH_APIS: readonly SpeechApi[] = ['fish', 'elevenlabs', 'minimax', 'gemini', 'openai', 'deepseek'];
+export type SpeechApi = 'fish' | 'elevenlabs' | 'minimax' | 'gemini' | 'openai' | 'deepseek' | 'openrouter';
+export const SPEECH_APIS: readonly SpeechApi[] = ['fish', 'elevenlabs', 'minimax', 'gemini', 'openai', 'deepseek', 'openrouter'];
 
 /** `image.*` condition variables. */
 export interface ImageVars {
@@ -48,7 +48,7 @@ export interface ImageVars {
   style: boolean;
   /** NSFW blocking is on: no prompts for NSFW scenes. */
   sfw: boolean;
-  /** Reference images are offered ({{ap::image::refs}}: global ones and those of the chat's cards; openai / gemini). */
+  /** Reference images are offered ({{ap::image::refs}}: global ones and those of the chat's cards; openai / gemini / openrouter). */
   refs: boolean;
 }
 

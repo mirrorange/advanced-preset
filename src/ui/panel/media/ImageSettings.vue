@@ -28,6 +28,10 @@ const MODELS: Record<ImageApi, string[]> = {
   openai: ['gpt-image-2.6-flare', 'gpt-image-2.6-sunburst', 'gpt-image-2.5-flare', 'gpt-image-2.5-sunburst', 'gpt-image-1'],
   gemini: ['gemini-nano-banana-2.1', 'gemini-3.1-flash-image', 'gemini-3-pro-image', 'gemini-2.5-flash-image'],
   novelai: ['nai-diffusion-4-5-full', 'nai-diffusion-4-5-curated', 'nai-diffusion-4-full'],
+  openrouter: [
+    'google/gemini-nano-banana-2.1', 'google/gemini-3.1-flash-image', 'google/gemini-3-pro-image', 'openai/gpt-image-2.6-flare', 'openai/gpt-image-2',
+    'bytedance-seed/seedream-5-0-pro', 'black-forest-labs/flux-3-image', 'qwen/qwen-image-3-pro', 'x-ai/grok-imagine-image-2.0',
+  ],
 };
 const apiLabel = (api: string) => t(`media.api.${api}`);
 const apiOptions = IMAGE_APIS.map((value) => ({ value, label: apiLabel(value) }));

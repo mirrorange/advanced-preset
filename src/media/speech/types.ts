@@ -73,6 +73,9 @@ export interface PcmStream {
   chunks: AsyncIterable<Uint8Array>;
 }
 
+/** What a provider's model can do; providers routing to several vendors (OpenRouter) vary it by model. */
+export type SpeechProviderCaps = Pick<SpeechProvider, 'format' | 'tags' | 'voices' | 'clone'>;
+
 export interface SpeechProvider {
   api: SpeechApi;
   defaults: { baseUrl: string; model: string };
@@ -86,6 +89,8 @@ export interface SpeechProvider {
   tags: RegExp | null;
   /** Clone support: `audio` reference audio; `text` transcript; `consent` second recording. */
   clone?: { text: 'none' | 'optional' | 'required'; consent?: boolean };
+  /** Capabilities of one model, over the fields above (see `providerFor`). */
+  forModel?(model: string): SpeechProviderCaps;
   /** Voice library / account voices search. */
   search?(env: SpeechEnv, conn: SpeechConnection, query: string, signal?: AbortSignal): Promise<VoiceOption[]>;
   /**
