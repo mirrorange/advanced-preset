@@ -18,6 +18,7 @@ import Segmented from '../../components/Segmented.vue';
 import IconButton from '../../components/IconButton.vue';
 import BlobImage from '../../components/BlobImage.vue';
 import ConnectionBar from './ConnectionBar.vue';
+import ScopeSelect from './ScopeSelect.vue';
 import AdvancedRequest from './AdvancedRequest.vue';
 
 const image = computed(() => mediaSettings().image);
@@ -65,6 +66,7 @@ const setApi = (api: ImageApi) => { if (conn.value) { changeImageApi(conn.value,
 /** Reference image groups: global, then each card of the current chat (refs of other cards stay hidden). */
 const cards = computed(() => { void ui.chatRev; return chatCards(); });
 const scopes = computed(() => [{ key: undefined as string | undefined, label: t('media.image.refs.global') }, ...cards.value.map((c) => ({ key: c.key as string | undefined, label: c.name }))]);
+const scopeOptions = computed(() => scopes.value.map((s) => ({ value: s.key ?? '', label: s.label })));
 const refGroups = computed(() => scopes.value.map((s) => ({ ...s, refs: (conn.value?.refs ?? []).filter((r) => r.card === s.key) })));
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -141,9 +143,7 @@ function removeRef(r: StoredRef) {
                 <BlobImage :blob-key="r.blob" class="media-ref-thumb" :alt="r.description" />
                 <span class="badge neutral mono">{{ r.id }}</span>
                 <input class="input grow" :value="r.description" :placeholder="t('media.image.refs.description')" @change="r.description = ($event.target as HTMLInputElement).value; saveMedia()" />
-                <select v-if="scopes.length > 1" class="input media-ref-scope" :value="r.card ?? ''" :aria-label="t('media.image.refs.scope')" @change="moveRef(r, ($event.target as HTMLSelectElement).value)">
-                  <option v-for="s in scopes" :key="s.key ?? ''" :value="s.key ?? ''">{{ s.label }}</option>
-                </select>
+                <ScopeSelect v-if="scopes.length > 1" :model-value="r.card ?? ''" :options="scopeOptions" :label="t('media.image.refs.scope')" @update:model-value="moveRef(r, $event)" />
                 <IconButton :icon="Trash2" :label="t('common.delete')" small danger align="end" @click="removeRef(r)" />
               </div>
               <button type="button" class="btn ghost add" @click="pickRefs(g.key)"><ImagePlus />{{ t('media.image.refs.add') }}</button>
