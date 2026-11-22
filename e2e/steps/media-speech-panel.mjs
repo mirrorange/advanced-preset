@@ -9,7 +9,7 @@ export default async function (page, shots) {
   const h = helpers(page);
   const check = (ok, what) => console.log(ok ? 'ok  ' : 'FAIL', what);
   const tts = () => mediaLog().filter((r) => /audio\/speech|\/v1\/tts/.test(r.url));
-  const dialog = page.locator('ap-media-dialog dialog.media-dialog');
+  const dialog = page.locator('ap-media-dialog .media-dialog');
   const segs = dialog.locator('.speech-panel-seg');
   const seg = (i) => segs.nth(i);
   const state = (i) => seg(i).locator('.speech-panel-state').textContent();

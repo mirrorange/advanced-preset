@@ -53,16 +53,17 @@
 .image-viewer-caption { opacity: 0.85; }
 
 /* Media dialog (speech / image panels): centered on wide screens, full screen on narrow ones. */
-.media-dialog { width: min(44em, calc(100vw - 2em)); max-height: calc(100dvh - 2em); padding: 0; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md);
-  color: var(--ap-text); background: var(--ap-panel-bg-solid); box-shadow: var(--ap-shadow); overflow: hidden; }
-.media-dialog:not([open]) { display: none; }
-.media-dialog::backdrop { background: rgb(0 0 0 / 45%); }
-.media-dialog-box { display: flex; flex-direction: column; max-height: inherit; }
+/* Media dialog: a layer under ST's top bar (left free so a click on it closes the dialog), centred box;
+   on narrow screens the box fills the layer, like the AP panel in its drawer. */
+.media-dialog-layer { position: fixed; inset: var(--topBarBlockSize, 0px) 0 0 0; z-index: 2147481000; display: grid; place-items: center; padding: 1em;
+  background: rgb(0 0 0 / 45%); overscroll-behavior: contain; }
+.media-dialog { display: flex; flex-direction: column; width: min(44em, 100%); max-height: 100%; border: 1px solid var(--ap-border); border-radius: var(--ap-radius-md);
+  color: var(--ap-text); background: var(--ap-panel-bg-solid); box-shadow: var(--ap-shadow); overflow: hidden; outline: none; }
 .media-dialog-head { display: flex; align-items: center; gap: var(--ap-space-2); padding: var(--ap-space-2) var(--ap-space-2) var(--ap-space-2) var(--ap-space-3); border-bottom: 1px solid var(--ap-border); }
 .media-dialog-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: var(--ap-space-3); }
 @media (max-width: 600px) {
-  .media-dialog { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border: 0; border-radius: 0; }
-  .media-dialog-box { height: 100%; }
+  .media-dialog-layer { padding: 0; }
+  .media-dialog { width: 100%; height: 100%; border: 0; border-top: 1px solid var(--ap-border); border-radius: 0; box-shadow: none; }
 }
 
 /* Speech: message player (top card area) and settings. */
