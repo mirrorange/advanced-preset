@@ -7648,6 +7648,7 @@ var Ip = (e) => wp.has(e), Lp = (e) => wp.get(e), Rp = {
 	"media.speech.openrouterModel": "What the model can do (inline tags, voice cloning, default voices) follows the provider in its id, e.g. elevenlabs/eleven-v3 or fish-audio/s2.1-pro. Voices are listed per model.",
 	"media.image": "Image generation",
 	"media.image.auto.hint": "Off: images are generated when you click Generate.",
+	"media.image.api": "API",
 	"media.image.promptType": "Prompt type",
 	"media.image.promptType.tags": "Tags",
 	"media.image.promptType.tags.hint": "Comma-separated Danbooru-style tags (NovelAI and similar)",
@@ -8267,6 +8268,7 @@ var Ip = (e) => wp.has(e), Lp = (e) => wp.get(e), Rp = {
 		"media.speech.openrouterModel": "模型的能力（内联标签、语音克隆、默认声音）按模型 id 中的提供者判断，例如 elevenlabs/eleven-v3、fish-audio/s2.1-pro。声音列表按模型获取。",
 		"media.image": "图像生成",
 		"media.image.auto.hint": "关闭时，点击“生成”后才生成图像。",
+		"media.image.api": "接口",
 		"media.image.promptType": "提示词类型",
 		"media.image.promptType.tags": "标签",
 		"media.image.promptType.tags.hint": "逗号分隔的 Danbooru 风格标签（NovelAI 等）",
@@ -12547,7 +12549,7 @@ function Kb(e) {
 }
 async function qb() {
 	let e = await Gb();
-	e && e !== "b8c415af2d5401ef" && sessionStorage.getItem(Wb) !== e && Kb(e);
+	e && e !== "3d2278eedd319292" && sessionStorage.getItem(Wb) !== e && Kb(e);
 }
 async function Jb() {
 	await qb();
@@ -12568,7 +12570,7 @@ async function Qb() {
 	let e = u().replace(/^third-party\//, ""), t = await nx(e, !1);
 	if (t.status === 404 && (t = await nx(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Gb();
-	return r && r !== "b8c415af2d5401ef" ? (Kb(r), {
+	return r && r !== "3d2278eedd319292" ? (Kb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -24715,7 +24717,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				"icon",
 				"help"
 			]),
-			V("div", uV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("b8c415af2d5401ef")), 1)
+			V("div", uV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("3d2278eedd319292")), 1)
 		], 64));
 	}
 }), fV = {
@@ -25071,18 +25073,18 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 			}, 8, ["label", "help"])
 		])) : U("", !0)]));
 	}
-}), WV = ["value", "placeholder"], GV = ["value"], KV = [
+}), WV = ["value"], GV = ["value"], KV = ["value", "placeholder"], qV = ["value"], JV = [
 	"list",
 	"value",
 	"placeholder"
-], qV = ["id"], JV = ["value"], YV = ["value", "placeholder"], XV = ["value", "placeholder"], ZV = { class: "col media-refs" }, QV = {
+], YV = ["id"], XV = ["value"], ZV = ["value", "placeholder"], QV = ["value", "placeholder"], $V = { class: "col media-refs" }, eH = {
 	key: 0,
 	class: "media-ref-group-title ellipsis"
-}, $V = { class: "badge neutral mono" }, eH = [
+}, tH = { class: "badge neutral mono" }, nH = [
 	"value",
 	"placeholder",
 	"onChange"
-], tH = ["onClick"], nH = ["value"], rH = /* @__PURE__ */ F({
+], rH = ["onClick"], iH = ["value"], aH = /* @__PURE__ */ F({
 	__name: "ImageSettings",
 	setup(e) {
 		let t = W(() => bx().image), n = W(() => Tx(t.value)), r = {
@@ -25115,55 +25117,52 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				"qwen/qwen-image-3-pro",
 				"x-ai/grok-imagine-image-2.0"
 			]
-		}, i = (e) => J(`media.api.${e}`), a = pc.map((e) => ({
-			value: e,
-			label: i(e)
-		})), o = mc.map((e) => ({
+		}, i = (e) => J(`media.api.${e}`), a = mc.map((e) => ({
 			value: e,
 			label: J(`media.image.promptType.${e}`),
 			hint: J(`media.image.promptType.${e}.hint`)
-		})), s = (e, n) => {
+		})), o = (e, n) => {
 			t.value[e] = n, xx();
 		};
-		function c(e, t) {
+		function s(e, t) {
 			let r = n.value;
 			r && (r[e] = t, xx());
 		}
-		function l() {
+		function c() {
 			let e = Cx("openai", J("media.connection.default", { n: t.value.connections.length + 1 }));
 			t.value.connections.push(e), t.value.active = e.id, xx();
 		}
-		function u(e) {
+		function l(e) {
 			let n = Ex(e, J("media.connection.copyName", { name: e.name }));
 			t.value.connections.push(n), t.value.active = n.id, xx();
 		}
-		function d(e) {
+		function u(e) {
 			t.value.connections = t.value.connections.filter((t) => t.id !== e.id), t.value.active === e.id && (t.value.active = t.value.connections[0]?.id ?? null), xx(), PS();
 		}
-		let f = (e) => {
+		let d = (e) => {
 			t.value.active = e, xx();
-		}, p = (e, t) => {
+		}, f = (e, t) => {
 			e.name = t, xx();
-		}, m = (e) => {
+		}, p = (e) => {
 			n.value && (wx(n.value, e), xx());
-		}, h = W(() => (Y.chatRev, jS())), g = W(() => [{
+		}, m = W(() => (Y.chatRev, jS())), h = W(() => [{
 			key: void 0,
 			label: J("media.image.refs.global")
-		}, ...h.value.map((e) => ({
+		}, ...m.value.map((e) => ({
 			key: e.key,
 			label: e.name
-		}))]), _ = W(() => g.value.map((e) => ({
+		}))]), g = W(() => h.value.map((e) => ({
 			value: e.key ?? "",
 			label: e.label
-		}))), v = W(() => g.value.map((e) => ({
+		}))), _ = W(() => h.value.map((e) => ({
 			...e,
 			refs: (n.value?.refs ?? []).filter((t) => t.card === e.key)
-		}))), y = /* @__PURE__ */ j(null), b;
-		function x(e) {
-			b = e, y.value?.click();
+		}))), v = /* @__PURE__ */ j(null), y;
+		function b(e) {
+			y = e, v.value?.click();
 		}
-		async function S(e) {
-			let t = n.value, r = b, i = [...e.target.files ?? []];
+		async function x(e) {
+			let t = n.value, r = y, i = [...e.target.files ?? []];
 			if (e.target.value = "", t) {
 				for (let e of i) {
 					if (!e.type.startsWith("image/")) continue;
@@ -25178,21 +25177,21 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				xx();
 			}
 		}
-		function ee(e, t) {
+		function S(e, t) {
 			t ? e.card = t : delete e.card, xx();
 		}
-		function te(e) {
+		function ee(e) {
 			let r = n.value;
 			r && (r.refs = r.refs.filter((t) => t !== e), xx(), t.value.connections.some((t) => t.refs.some((t) => t.blob === e.blob)) || Fx(e.blob));
 		}
-		return (e, h) => (R(), B(dN, {
+		return (e, m) => (R(), B(dN, {
 			title: M(J)("media.image"),
 			icon: M(AA)
 		}, {
 			actions: N(() => [H(UF, {
 				"model-value": t.value.enabled,
 				label: M(J)("media.image"),
-				"onUpdate:modelValue": h[0] ||= (e) => s("enabled", e)
+				"onUpdate:modelValue": m[0] ||= (e) => o("enabled", e)
 			}, null, 8, ["model-value", "label"])]),
 			default: N(() => [t.value.enabled ? (R(), z(L, { key: 0 }, [
 				H($, {
@@ -25202,7 +25201,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 				}, {
 					default: N(() => [H(UF, {
 						"model-value": t.value.auto,
-						"onUpdate:modelValue": h[1] ||= (e) => s("auto", e)
+						"onUpdate:modelValue": m[1] ||= (e) => o("auto", e)
 					}, null, 8, ["model-value"])]),
 					_: 1
 				}, 8, ["label", "help"]),
@@ -25210,29 +25209,35 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 					connections: t.value.connections,
 					active: n.value,
 					"api-label": i,
-					onSelect: f,
-					onAdd: l,
-					onCopy: u,
-					onRemove: d,
-					onRename: p
+					onSelect: d,
+					onAdd: c,
+					onCopy: l,
+					onRemove: u,
+					onRename: f
 				}, null, 8, ["connections", "active"]),
 				n.value ? (R(), z("div", {
 					key: n.value.id,
 					class: "col media-conn"
 				}, [
-					H(_I, {
-						"model-value": n.value.api,
-						options: M(a),
-						"onUpdate:modelValue": h[2] ||= (e) => m(e)
-					}, null, 8, ["model-value", "options"]),
+					H($, { label: M(J)("media.image.api") }, {
+						default: N(() => [V("select", {
+							class: "input",
+							value: n.value.api,
+							onChange: m[2] ||= (e) => p(e.target.value)
+						}, [(R(!0), z(L, null, I(M(pc), (e) => (R(), z("option", {
+							key: e,
+							value: e
+						}, A(i(e)), 9, GV))), 128))], 40, WV)]),
+						_: 1
+					}, 8, ["label"]),
 					H($, { label: M(J)("media.baseUrl") }, {
 						default: N(() => [V("input", {
 							class: "input",
 							value: n.value.baseUrl,
 							placeholder: M(_x)[n.value.api].baseUrl,
 							spellcheck: "false",
-							onChange: h[3] ||= (e) => c("baseUrl", e.target.value.trim())
-						}, null, 40, WV)]),
+							onChange: m[3] ||= (e) => s("baseUrl", e.target.value.trim())
+						}, null, 40, KV)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, { label: M(J)("media.apiKey") }, {
@@ -25241,8 +25246,8 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 							type: "password",
 							autocomplete: "off",
 							value: n.value.apiKey,
-							onChange: h[4] ||= (e) => c("apiKey", e.target.value.trim())
-						}, null, 40, GV)]),
+							onChange: m[4] ||= (e) => s("apiKey", e.target.value.trim())
+						}, null, 40, qV)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, { label: M(J)("media.model") }, {
@@ -25252,18 +25257,18 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 							value: n.value.model,
 							placeholder: M(_x)[n.value.api].model,
 							spellcheck: "false",
-							onChange: h[5] ||= (e) => c("model", e.target.value.trim())
-						}, null, 40, KV), V("datalist", { id: `ap-image-models-${n.value.api}` }, [(R(!0), z(L, null, I(r[n.value.api], (e) => (R(), z("option", {
+							onChange: m[5] ||= (e) => s("model", e.target.value.trim())
+						}, null, 40, JV), V("datalist", { id: `ap-image-models-${n.value.api}` }, [(R(!0), z(L, null, I(r[n.value.api], (e) => (R(), z("option", {
 							key: e,
 							value: e
-						}, null, 8, JV))), 128))], 8, qV)]),
+						}, null, 8, XV))), 128))], 8, YV)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, { label: M(J)("media.image.promptType") }, {
 						default: N(() => [H(_I, {
 							"model-value": n.value.promptType,
-							options: M(o),
-							"onUpdate:modelValue": h[6] ||= (e) => c("promptType", e)
+							options: M(a),
+							"onUpdate:modelValue": m[6] ||= (e) => s("promptType", e)
 						}, null, 8, ["model-value", "options"])]),
 						_: 1
 					}, 8, ["label"]),
@@ -25276,8 +25281,8 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 							rows: "2",
 							value: n.value.style,
 							placeholder: M(J)(n.value.promptType === "tags" ? "media.image.style.tags" : "media.image.style.nl"),
-							onChange: h[7] ||= (e) => c("style", e.target.value)
-						}, null, 40, YV)]),
+							onChange: m[7] ||= (e) => s("style", e.target.value)
+						}, null, 40, ZV)]),
 						_: 1
 					}, 8, ["label", "help"]),
 					n.value.api === "novelai" ? (R(), B($, {
@@ -25289,8 +25294,8 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 							rows: "2",
 							value: n.value.negative ?? "",
 							placeholder: M(J)("media.image.negative.placeholder"),
-							onChange: h[8] ||= (e) => c("negative", e.target.value)
-						}, null, 40, XV)]),
+							onChange: m[8] ||= (e) => s("negative", e.target.value)
+						}, null, 40, QV)]),
 						_: 1
 					}, 8, ["label"])) : U("", !0),
 					H($, {
@@ -25300,7 +25305,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 					}, {
 						default: N(() => [H(UF, {
 							"model-value": n.value.nsfwBlock,
-							"onUpdate:modelValue": h[9] ||= (e) => c("nsfwBlock", e)
+							"onUpdate:modelValue": m[9] ||= (e) => s("nsfwBlock", e)
 						}, null, 8, ["model-value"])]),
 						_: 1
 					}, 8, ["label", "help"]),
@@ -25309,11 +25314,11 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 						label: M(J)("media.image.refs"),
 						help: M(J)("media.image.refs.hint")
 					}, {
-						default: N(() => [V("div", ZV, [(R(!0), z(L, null, I(v.value, (e) => (R(), z("div", {
+						default: N(() => [V("div", $V, [(R(!0), z(L, null, I(_.value, (e) => (R(), z("div", {
 							key: e.key ?? "",
 							class: "col media-ref-group"
 						}, [
-							v.value.length > 1 ? (R(), z("div", QV, A(e.label), 1)) : U("", !0),
+							_.value.length > 1 ? (R(), z("div", eH, A(e.label), 1)) : U("", !0),
 							(R(!0), z(L, null, I(e.refs, (e) => (R(), z("div", {
 								key: e.blob,
 								class: "media-ref"
@@ -25323,7 +25328,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 									class: "media-ref-thumb",
 									alt: e.description
 								}, null, 8, ["blob-key", "alt"]),
-								V("span", $V, A(e.id), 1),
+								V("span", tH, A(e.id), 1),
 								V("input", {
 									class: "input grow",
 									value: e.description,
@@ -25331,12 +25336,12 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 									onChange: (t) => {
 										e.description = t.target.value, M(xx)();
 									}
-								}, null, 40, eH),
-								g.value.length > 1 ? (R(), B(LV, {
+								}, null, 40, nH),
+								h.value.length > 1 ? (R(), B(LV, {
 									key: 0,
 									"model-value": e.card ?? "",
-									options: _.value,
-									"onUpdate:modelValue": (t) => ee(e, t)
+									options: g.value,
+									"onUpdate:modelValue": (t) => S(e, t)
 								}, null, 8, [
 									"model-value",
 									"options",
@@ -25348,7 +25353,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 									small: "",
 									danger: "",
 									align: "end",
-									onClick: (t) => te(e)
+									onClick: (t) => ee(e)
 								}, null, 8, [
 									"icon",
 									"label",
@@ -25358,22 +25363,22 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 							V("button", {
 								type: "button",
 								class: "btn ghost add",
-								onClick: (t) => x(e.key)
-							}, [H(M(kA)), ba(A(M(J)("media.image.refs.add")), 1)], 8, tH)
+								onClick: (t) => b(e.key)
+							}, [H(M(kA)), ba(A(M(J)("media.image.refs.add")), 1)], 8, rH)
 						]))), 128)), V("input", {
 							ref_key: "fileInput",
-							ref: y,
+							ref: v,
 							type: "file",
 							accept: "image/*",
 							multiple: "",
 							hidden: "",
-							onChange: S
+							onChange: x
 						}, null, 544)])]),
 						_: 1
 					}, 8, ["label", "help"])) : U("", !0),
 					H(UV, {
 						connection: n.value,
-						onChanged: h[11] ||= (e) => M(xx)()
+						onChanged: m[11] ||= (e) => M(xx)()
 					}, {
 						default: N(() => [n.value.api === "gemini" ? (R(), B($, {
 							key: 0,
@@ -25382,8 +25387,8 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 							default: N(() => [V("select", {
 								class: "input",
 								value: n.value.endpoint ?? "interactions",
-								onChange: h[10] ||= (e) => c("endpoint", e.target.value)
-							}, [...h[12] ||= [V("option", { value: "interactions" }, "Interactions", -1), V("option", { value: "generateContent" }, "generateContent", -1)]], 40, nH)]),
+								onChange: m[10] ||= (e) => s("endpoint", e.target.value)
+							}, [...m[12] ||= [V("option", { value: "interactions" }, "Interactions", -1), V("option", { value: "generateContent" }, "generateContent", -1)]], 40, iH)]),
 							_: 1
 						}, 8, ["label"])) : U("", !0)]),
 						_: 1
@@ -25396,7 +25401,7 @@ var sB = { class: "row tight xs muted" }, cB = { class: "row" }, lB = {
 });
 //#endregion
 //#region src/media/speech/connections.ts
-function iH(e, t) {
+function oH(e, t) {
 	let n = Pw(e)?.defaults;
 	return {
 		id: Sx(),
@@ -25411,7 +25416,7 @@ function iH(e, t) {
 		bindings: []
 	};
 }
-function aH(e, t) {
+function sH(e, t) {
 	if (e.api === t) return;
 	let n = Pw(e.api)?.defaults, r = Pw(t)?.defaults;
 	(!e.baseUrl || e.baseUrl === n?.baseUrl) && (e.baseUrl = r?.baseUrl ?? ""), (!e.model || e.model === n?.model) && (e.model = r?.model ?? ""), e.api = t, e.narrator = null, e.bindings = e.bindings.map((e) => ({
@@ -25422,18 +25427,18 @@ function aH(e, t) {
 }
 //#endregion
 //#region src/ui/panel/media/SpeechSettings.vue?vue&type=script&setup=true&lang.ts
-var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"], uH = [
+var cH = ["value"], lH = ["value"], uH = ["value", "placeholder"], dH = ["value"], fH = [
 	"list",
 	"value",
 	"placeholder"
-], dH = ["id"], fH = ["value"], pH = { class: "col" }, mH = {
+], pH = ["id"], mH = ["value"], hH = { class: "col" }, gH = {
 	key: 0,
 	class: "media-ref-group-title ellipsis"
-}, hH = [
+}, _H = [
 	"value",
 	"placeholder",
 	"onChange"
-], gH = ["onClick"], _H = /* @__PURE__ */ F({
+], vH = ["onClick"], yH = /* @__PURE__ */ F({
 	__name: "SpeechSettings",
 	setup(e) {
 		let t = W(() => bx().speech), n = W(() => Tx(t.value)), r = W(() => n.value ? Fw(n.value) : void 0), i = (e) => J(`media.api.${e}`), a = (e, n) => {
@@ -25444,7 +25449,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 			r && (r[e] = t, xx());
 		}
 		function s() {
-			let e = iH("fish", J("media.connection.default", { n: t.value.connections.length + 1 }));
+			let e = oH("fish", J("media.connection.default", { n: t.value.connections.length + 1 }));
 			t.value.connections.push(e), t.value.active = e.id, xx();
 		}
 		function c(e) {
@@ -25459,7 +25464,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 		}, d = (e, t) => {
 			e.name = t, xx();
 		}, f = (e) => {
-			n.value && (aH(n.value, e), xx(), AT());
+			n.value && (sH(n.value, e), xx(), AT());
 		}, p = W(() => (Y.chatRev, jS())), m = W(() => {
 			let e = n.value;
 			return e ? [{
@@ -25547,7 +25552,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 						}, [(R(!0), z(L, null, I(M(gc), (e) => (R(), z("option", {
 							key: e,
 							value: e
-						}, A(i(e)), 9, sH))), 128))], 40, oH)]),
+						}, A(i(e)), 9, lH))), 128))], 40, cH)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, { label: M(J)("media.baseUrl") }, {
@@ -25557,7 +25562,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 							placeholder: r.value?.defaults.baseUrl,
 							spellcheck: "false",
 							onChange: p[4] ||= (e) => o("baseUrl", e.target.value.trim())
-						}, null, 40, cH)]),
+						}, null, 40, uH)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, { label: M(J)("media.apiKey") }, {
@@ -25567,7 +25572,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 							autocomplete: "off",
 							value: n.value.apiKey,
 							onChange: p[5] ||= (e) => o("apiKey", e.target.value.trim())
-						}, null, 40, lH)]),
+						}, null, 40, dH)]),
 						_: 1
 					}, 8, ["label"]),
 					H($, {
@@ -25581,10 +25586,10 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 							placeholder: r.value?.defaults.model,
 							spellcheck: "false",
 							onChange: p[6] ||= (e) => o("model", e.target.value.trim())
-						}, null, 40, uH), V("datalist", { id: `ap-speech-models-${n.value.api}` }, [(R(!0), z(L, null, I(r.value?.models ?? [], (e) => (R(), z("option", {
+						}, null, 40, fH), V("datalist", { id: `ap-speech-models-${n.value.api}` }, [(R(!0), z(L, null, I(r.value?.models ?? [], (e) => (R(), z("option", {
 							key: e,
 							value: e
-						}, null, 8, fH))), 128))], 8, dH)]),
+						}, null, 8, mH))), 128))], 8, pH)]),
 						_: 1
 					}, 8, ["label", "help"]),
 					t.value.narrator ? (R(), B($, {
@@ -25609,11 +25614,11 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 						label: M(J)("media.speech.bindings"),
 						help: M(J)("media.speech.bindings.hint")
 					}, {
-						default: N(() => [V("div", pH, [(R(!0), z(L, null, I(m.value, (e) => (R(), z("div", {
+						default: N(() => [V("div", hH, [(R(!0), z(L, null, I(m.value, (e) => (R(), z("div", {
 							key: e.card,
 							class: "col tight"
 						}, [
-							m.value.length > 1 ? (R(), z("div", mH, A(e.name), 1)) : U("", !0),
+							m.value.length > 1 ? (R(), z("div", gH, A(e.name), 1)) : U("", !0),
 							(R(!0), z(L, null, I(e.bindings, (t, r) => (R(), z("div", {
 								key: r,
 								class: "speech-binding"
@@ -25622,7 +25627,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 								value: t.character,
 								placeholder: M(J)("media.speech.character"),
 								onChange: (e) => _(t, { character: e.target.value.trim() })
-							}, null, 40, hH), H(Wj, {
+							}, null, 40, _H), H(Wj, {
 								class: "grow",
 								connection: n.value,
 								"model-value": t.voice,
@@ -25661,7 +25666,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 								type: "button",
 								class: "btn ghost add",
 								onClick: (t) => g(e.card)
-							}, [H(M(XA)), ba(A(M(J)("media.speech.addBinding")), 1)], 8, gH)
+							}, [H(M(XA)), ba(A(M(J)("media.speech.addBinding")), 1)], 8, vH)
 						]))), 128))])]),
 						_: 1
 					}, 8, ["label", "help"]),
@@ -25674,7 +25679,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 			_: 1
 		}, 8, ["title", "icon"]));
 	}
-}), vH = ["value"], yH = /* @__PURE__ */ F({
+}), bH = ["value"], xH = /* @__PURE__ */ F({
 	__name: "MediaTab",
 	setup(e) {
 		let { preset: n } = fI(), r = W(() => bx().cors), i = [
@@ -25725,7 +25730,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 						placeholder: "https://proxy.example/?url={url}",
 						spellcheck: "false",
 						onChange: t[2] ||= (e) => o("customUrl", e.target.value.trim())
-					}, null, 40, vH)]),
+					}, null, 40, bH)]),
 					_: 1
 				}, 8, ["label"])) : U("", !0)], 64))]),
 				_: 1
@@ -25734,15 +25739,15 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 				"icon",
 				"open"
 			]),
-			M(DC)(M(n)) ? (R(), B(rH, { key: 0 })) : U("", !0),
-			M(OC)(M(n)) ? (R(), B(_H, { key: 1 })) : U("", !0)
+			M(DC)(M(n)) ? (R(), B(aH, { key: 0 })) : U("", !0),
+			M(OC)(M(n)) ? (R(), B(yH, { key: 1 })) : U("", !0)
 		], 64)) : (R(), B(mI, { key: 0 }));
 	}
-}), bH = ["aria-label"], xH = { class: "panel-head" }, SH = { class: "panel-logo" }, CH = { class: "grow" }, wH = { class: "panel-title ellipsis" }, TH = { class: "panel-sub ellipsis" }, EH = [
+}), SH = ["aria-label"], CH = { class: "panel-head" }, wH = { class: "panel-logo" }, TH = { class: "grow" }, EH = { class: "panel-title ellipsis" }, DH = { class: "panel-sub ellipsis" }, OH = [
 	"title",
 	"aria-selected",
 	"onClick"
-], DH = { class: "panel-body scroll" }, OH = /* @__PURE__ */ F({
+], kH = { class: "panel-body scroll" }, AH = /* @__PURE__ */ F({
 	__name: "Panel",
 	setup(e) {
 		let t = [
@@ -25779,7 +25784,7 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 			{
 				id: "media",
 				icon: Zk,
-				view: yH
+				view: xH
 			},
 			{
 				id: "debug",
@@ -25811,9 +25816,9 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 				role: "dialog",
 				"aria-label": M(J)("app.name")
 			}, [
-				V("header", xH, [
-					V("div", SH, [H(M(MA))]),
-					V("div", CH, [V("div", wH, A(M(RS) ? M(Up)(M(RS)) : M(J)("app.name")), 1), V("div", TH, A(a.value), 1)]),
+				V("header", CH, [
+					V("div", wH, [H(M(MA))]),
+					V("div", TH, [V("div", EH, A(M(RS) ? M(Up)(M(RS)) : M(J)("app.name")), 1), V("div", DH, A(a.value), 1)]),
 					H(UF, {
 						modelValue: i.value,
 						"onUpdate:modelValue": t[0] ||= (e) => i.value = e,
@@ -25838,19 +25843,19 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 					title: M(J)(`tab.${e.id}`),
 					"aria-selected": e.id === M(Y).tab,
 					onClick: (t) => M(Y).tab = e.id
-				}, [(R(), B($r(e.icon))), V("span", null, A(M(J)(`tab.${e.id}`)), 1)], 10, EH))), 128))], 2),
-				V("main", DH, [(R(), B(Hr, null, [(R(), B($r(r.value.view), { key: r.value.id }))], 1024))])
-			], 8, bH)) : U("", !0)]),
+				}, [(R(), B($r(e.icon))), V("span", null, A(M(J)(`tab.${e.id}`)), 1)], 10, OH))), 128))], 2),
+				V("main", kH, [(R(), B(Hr, null, [(R(), B($r(r.value.view), { key: r.value.id }))], 1024))])
+			], 8, SH)) : U("", !0)]),
 			_: 1
 		}));
 	}
-}), kH = { class: "inline-drawer" }, AH = { class: "inline-drawer-toggle inline-drawer-header" }, jH = { class: "inline-drawer-content" }, MH = { class: "flex-container alignItemsCenter spaceBetween" }, NH = {
+}), jH = { class: "inline-drawer" }, MH = { class: "inline-drawer-toggle inline-drawer-header" }, NH = { class: "inline-drawer-content" }, PH = { class: "flex-container alignItemsCenter spaceBetween" }, FH = {
 	class: "checkbox_label flex1",
 	for: "ap_settings_enabled"
-}, PH = { key: 0 }, FH = { class: "text_muted" }, IH = {
+}, IH = { key: 0 }, LH = { class: "text_muted" }, RH = {
 	key: 1,
 	class: "text_muted"
-}, LH = /* @__PURE__ */ F({
+}, zH = /* @__PURE__ */ F({
 	__name: "SettingsDrawer",
 	setup(e) {
 		let t = W({
@@ -25859,8 +25864,8 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 				G().enabled = e, K();
 			}
 		});
-		return (e, n) => (R(), z("div", kH, [V("div", AH, [V("b", null, A(M(J)("app.name")), 1), n[3] ||= V("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), V("div", jH, [
-			V("div", MH, [V("label", NH, [ur(V("input", {
+		return (e, n) => (R(), z("div", jH, [V("div", MH, [V("b", null, A(M(J)("app.name")), 1), n[3] ||= V("div", { class: "inline-drawer-icon fa-solid fa-circle-chevron-down down" }, null, -1)]), V("div", NH, [
+			V("div", PH, [V("label", FH, [ur(V("input", {
 				id: "ap_settings_enabled",
 				"onUpdate:modelValue": n[0] ||= (e) => t.value = e,
 				type: "checkbox"
@@ -25873,18 +25878,18 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 			}, [n[4] ||= V("i", { class: "fa-solid fa-layer-group" }, null, -1), V("span", null, A(M(J)("panel.open")), 1)], 32)]),
 			n[5] ||= V("hr", null, null, -1),
 			V("h4", null, A(M(J)("settings.preset")), 1),
-			M(RS) ? (R(), z("div", PH, [ba(A(M(Up)(M(RS))) + " ", 1), V("span", FH, "v" + A(M(RS).version) + " · " + A(M(zS).config), 1)])) : (R(), z("i", IH, A(M(J)("settings.inactive")), 1))
+			M(RS) ? (R(), z("div", IH, [ba(A(M(Up)(M(RS))) + " ", 1), V("span", LH, "v" + A(M(RS).version) + " · " + A(M(zS).config), 1)])) : (R(), z("i", RH, A(M(J)("settings.inactive")), 1))
 		])]));
 	}
-}), RH = {
+}), BH = {
 	key: 0,
 	class: "preset-banner"
-}, zH = { class: "preset-banner-text" }, BH = /* @__PURE__ */ F({
+}, VH = { class: "preset-banner-text" }, HH = /* @__PURE__ */ F({
 	__name: "PresetBanner",
 	setup(e) {
-		return (e, t) => M(RS) ? (R(), z("div", RH, [
+		return (e, t) => M(RS) ? (R(), z("div", BH, [
 			H(M(MA), { class: "preset-banner-icon" }),
-			V("span", zH, A(M(J)("banner.usesAp")), 1),
+			V("span", VH, A(M(J)("banner.usesAp")), 1),
 			V("button", {
 				type: "button",
 				class: "btn primary",
@@ -25895,14 +25900,14 @@ var oH = ["value"], sH = ["value"], cH = ["value", "placeholder"], lH = ["value"
 });
 //#endregion
 //#region src/ui/index.ts
-function VH() {
+function UH() {
 	let e = document.getElementById("extensions_settings2") ?? document.getElementById("extensions_settings");
 	if (!e || e.querySelector("#advanced_preset_settings")) return;
 	let t = document.createElement("div");
-	t.id = "advanced_preset_settings", e.append(t), Ss(LH).mount(t);
+	t.id = "advanced_preset_settings", e.append(t), Ss(zH).mount(t);
 }
-function HH() {
-	ED("ap-stages", BM, ["mesid"]), ED("ap-cards", jF, ["mesid"]), ED("ap-top-cards", jF, ["mesid", "position"]), ED("ap-dock", IF), ED("ap-storyline", BF, ["mesid"]), ED("ap-panel", OH), ED("ap-preset-banner", BH), wD(), LS();
+function WH() {
+	ED("ap-stages", BM, ["mesid"]), ED("ap-cards", jF, ["mesid"]), ED("ap-top-cards", jF, ["mesid", "position"]), ED("ap-dock", IF), ED("ap-storyline", BF, ["mesid"]), ED("ap-panel", AH), ED("ap-preset-banner", HH), wD(), LS();
 	let { eventSource: t, eventTypes: n } = e();
 	for (let e of [
 		n.OAI_PRESET_CHANGED_AFTER,
@@ -25910,13 +25915,13 @@ function HH() {
 		n.APP_READY,
 		n.SETTINGS_LOADED_AFTER
 	]) e && t.on(e, LS);
-	wM(), VH(), Tk(), tk(), tM(), mM();
+	wM(), UH(), Tk(), tk(), tM(), mM();
 }
 //#endregion
 //#region src/index.ts
-var UH = {
+var GH = {
 	version: "1.12.0",
-	buildId: "b8c415af2d5401ef",
+	buildId: "3d2278eedd319292",
 	nextGeneration: (e) => wh(e),
 	listPresets: () => Op().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -25932,21 +25937,21 @@ var UH = {
 	annotations: bC,
 	speech: EC
 };
-globalThis.advancedPresetInterceptor = ty, window.AdvancedPreset = UH;
-function WH(e, t) {
+globalThis.advancedPresetInterceptor = ty, window.AdvancedPreset = GH;
+function KH(e, t) {
 	let n;
 	return (...r) => {
 		clearTimeout(n), n = setTimeout(() => e(...r), t);
 	};
 }
-async function GH() {
+async function qH() {
 	for (let { preset: e } of Op()) try {
 		await gh(e);
 	} catch (t) {
 		console.error("[AP] carrier sync failed", e.id, t);
 	}
 }
-async function KH() {
+async function JH() {
 	let { eventSource: t, eventTypes: n } = e();
 	G(), ax(), mE(), YE(), yC(), TC(), zT(), dC(), await i(), await Ep();
 	let r = VE();
@@ -25960,13 +25965,13 @@ async function KH() {
 	((e, n) => t.makeFirst ? t.makeFirst(e, n) : t.on(e, n))(n.CHAT_COMPLETION_PROMPT_READY, (e) => Fv(e)), t.on(n.CHAT_COMPLETION_SETTINGS_READY, (e) => ox(e)), gx(), ey(), t.on(n.MESSAGE_RECEIVED, (e, t) => mC(Number(e), t)), t.on(n.GENERATION_STOPPED, () => {
 		Fh.setPending(null), Fh.takeArmed();
 	}), t.on(n.GENERATION_ENDED, () => Fh.sweep());
-	let a = WH(() => {
+	let a = KH(() => {
 		let e = dh(), t = e ? Mp(e) : void 0;
 		t && Sh(t);
 	}, 300);
 	t.on(n.SETTINGS_UPDATED, a), t.on(n.OAI_PRESET_CHANGED_AFTER, a), t.on(n.OAI_PRESET_CHANGED_AFTER, tD);
 	let o = async () => {
-		await Promise.race([cE(), new Promise((e) => setTimeout(e, 3e3))]), await GH();
+		await Promise.race([cE(), new Promise((e) => setTimeout(e, 3e3))]), await qH();
 		for (let e of r) x("info", J("presets.backToBuiltin", { version: e.version }), Up(e));
 		(async () => {
 			await BE();
@@ -25974,13 +25979,13 @@ async function KH() {
 			await eD(), await zE();
 		})(), mx({ reload: !0 }), sD(), qb();
 	};
-	t.on(n.APP_READY, () => void o()), HH(), Mg("init", {
+	t.on(n.APP_READY, () => void o()), WH(), Mg("init", {
 		version: "1.12.0",
-		build: "b8c415af2d5401ef",
+		build: "3d2278eedd319292",
 		enabled: G().enabled
 	});
 }
-var qH = Jb, JH = ZO;
-KH().catch((e) => console.error("[AP] init failed", e));
+var YH = Jb, XH = ZO;
+JH().catch((e) => console.error("[AP] init failed", e));
 //#endregion
-export { qH as advancedPresetOnUpdate, JH as advancedPresetRegisterChatSurface };
+export { YH as advancedPresetOnUpdate, XH as advancedPresetRegisterChatSurface };
