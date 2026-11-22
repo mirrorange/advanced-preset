@@ -9239,6 +9239,10 @@ function normalizeUserModuleGroups(modules, groups = []) {
   }
   return { modules: buckets.flat(), groups: outGroups };
 }
+function activeUserModules(modules, groups = []) {
+  const off2 = new Set(groups.filter((g) => !partEnabled(g)).map((g) => g.id));
+  return off2.size ? modules.filter((m) => m.group === void 0 || !off2.has(m.group)) : modules;
+}
 function findPoint(preset, id) {
   return (preset.insertionPoints ?? []).find((p) => p.id === id);
 }
@@ -9373,6 +9377,7 @@ function normalizeUserModuleGroup(raw) {
   if (!isObj2(raw) || typeof raw.id !== "string" || !raw.id) return null;
   const g = { id: raw.id, name: str(raw.name), mode: raw.mode === "single" ? "single" : "multi" };
   if (raw.collapsed === true) g.collapsed = true;
+  if (raw.enabled === false) g.enabled = false;
   return g;
 }
 function parseUserModuleFile(raw) {
@@ -10483,8 +10488,9 @@ function compile(tree) {
     if (userModuleGroups.some((x) => x.id === gid)) return diag.error(`duplicate user module group \`${gid}\``, where);
     if (r.mode !== void 0 && r.mode !== "single" && r.mode !== "multi") diag.error("mode must be single | multi", where);
     if (r.collapsed !== void 0 && typeof r.collapsed !== "boolean") diag.error("collapsed must be true or false", where);
-    for (const k of Object.keys(r)) if (!["id", "name", "mode", "collapsed"].includes(k)) diag.warn(`unknown user module group key \`${k}\``, { ...where, path: `${where.path}.${k}` });
-    userModuleGroups.push({ id: gid, name: str2(r.name, gid), mode: r.mode === "single" ? "single" : "multi", ...r.collapsed === true ? { collapsed: true } : {} });
+    if (r.enabled !== void 0 && typeof r.enabled !== "boolean") diag.error("enabled must be true or false", where);
+    for (const k of Object.keys(r)) if (!["id", "name", "mode", "collapsed", "enabled"].includes(k)) diag.warn(`unknown user module group key \`${k}\``, { ...where, path: `${where.path}.${k}` });
+    userModuleGroups.push({ id: gid, name: str2(r.name, gid), mode: r.mode === "single" ? "single" : "multi", ...r.collapsed === true ? { collapsed: true } : {}, ...r.enabled === false ? { enabled: false } : {} });
   });
   const vars = [];
   if (raw.vars !== void 0 && !isObj5(raw.vars)) diag.error("vars must be a mapping of id \u2192 type", { file: M, path: "vars" });
@@ -11891,7 +11897,8 @@ function bundledModules(preset, ids, lang) {
   if (typeof picked === "string") return picked;
   const labels = (id) => lang ? preset.locales[lang.toLowerCase()]?.userModules?.[id] : void 0;
   const modules = picked.map((m) => userModuleFromSource(localizeUserModuleSource(m, lang, labels(m.id)), m.id, { group: m.group }));
-  return normalizeUserModuleGroups(modules, presetUserModuleGroups(preset)).modules;
+  const groups = presetUserModuleGroups(preset);
+  return activeUserModules(normalizeUserModuleGroups(modules, groups).modules, groups);
 }
 function parseParamArg(preset, arg) {
   const eq = arg.indexOf("=");
@@ -12285,7 +12292,7 @@ async function main(argv) {
       const userModules = [...bundled];
       if (values["user-modules"]) {
         const file = parseUserModuleFile(JSON.parse(await readFile4(values["user-modules"], "utf8")));
-        userModules.push(...normalizeUserModuleGroups(file.modules, file.groups).modules);
+        userModules.push(...activeUserModules(normalizeUserModuleGroups(file.modules, file.groups).modules, file.groups));
       }
       if (values["user-module-templates"]) {
         const picked = templateModules(preset, ids(values["user-module-templates"]), values.lang);
