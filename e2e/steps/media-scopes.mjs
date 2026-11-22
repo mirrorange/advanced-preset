@@ -112,10 +112,18 @@ export default async function (page, shots) {
   await h.tab('Media');
   await page.waitForTimeout(300);
   const cardRef = groups.nth(1).locator('.media-ref').first();
-  await cardRef.locator('.scope-select select').selectOption('');
+  console.log('toggle', await cardRef.locator('.scope-toggle button').getAttribute('aria-label'));
+  await cardRef.locator('.scope-toggle button').click();
   await page.waitForTimeout(300);
   console.log('after move', JSON.stringify((await settings()).refs));
-  await groups.nth(0).locator('.media-ref').first().locator('.scope-select select').selectOption({ index: 1 });
+  // The same toggle on a voice: Keeper (bound to the card by the dialog) to Global.
+  const keeper = bindings.locator('.speech-binding', { has: page.locator('input[value="Keeper"]') });
+  await keeper.locator('.scope-toggle button').click();
+  await page.waitForTimeout(300);
+  console.log('voice toggled', JSON.stringify((await settings()).bindings));
+  await bindings.scrollIntoViewIfNeeded();
+  await shot('5-toggles');
+  await groups.nth(0).locator('.media-ref').first().locator('.scope-toggle button').click();
   await page.waitForTimeout(300);
   console.log('moved back', JSON.stringify((await settings()).refs));
   await h.open(false);
@@ -132,7 +140,7 @@ export default async function (page, shots) {
   await h.open();
   await h.tab('Media');
   await page.waitForTimeout(300);
-  console.log('no character: groups', JSON.stringify(await groups.locator('.media-ref-group-title').allTextContents()), 'refs shown', await refs.locator('.media-ref').count(), 'scope controls', await refs.locator('.scope-select').count());
-  await shot('5-no-character');
+  console.log('no character: groups', JSON.stringify(await groups.locator('.media-ref-group-title').allTextContents()), 'refs shown', await refs.locator('.media-ref').count(), 'scope controls', await refs.locator('.scope-toggle').count());
+  await shot('6-no-character');
   await h.open(false);
 }
