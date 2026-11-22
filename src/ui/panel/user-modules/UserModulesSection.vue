@@ -2,23 +2,26 @@
 /**
  * "My modules": ungrouped modules first, then the user's groups as cards. Open, toggle (a single
  * group's modules are radios: at most one on), drag the grip to reorder or move between groups,
- * drag a group's grip to reorder groups; import / export, create modules and groups. When the
- * preset ships user module templates, "new" first asks (inline) whether to start blank or from one.
+ * drag a group's grip to reorder groups; import / export, create modules and groups. A group's
+ * switch turns the whole group on / off; a folded group shows only its grip, name, count and switch.
+ * When the preset ships user module templates, "new" first asks (inline) whether to start blank or
+ * from one.
  */
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
 import { ChevronRight, CircleDot, Download, FolderPlus, GripVertical, Plus, Trash2, Upload } from 'lucide-vue-next';
-import { groupMembers, parseUserModuleFile, presetUserModuleTemplates, type APreset, type UserModuleGroup, type UserModuleTemplate } from '@advanced-preset/protocol';
+import { groupMembers, parseUserModuleFile, partEnabled, presetUserModuleTemplates, type APreset, type UserModuleGroup, type UserModuleTemplate } from '@advanced-preset/protocol';
 import { confirmUserModuleTemplates, isTrustDeclined } from '@/app/trust';
 import { localSource, t } from '@/i18n';
 import { toast } from '@/st/host';
 import {
   createUserModule, createUserModuleFromTemplate, createUserModuleGroup, exportUserModuleGroup, exportUserModules, importUserModules,
   moveUserModule, moveUserModuleGroup, removeUserModuleGroup, renameUserModuleGroup, setUserModuleEnabled, setUserModuleGroupCollapsed,
-  setUserModuleGroupMode, userModuleGroups, userModules,
+  setUserModuleGroupEnabled, setUserModuleGroupMode, userModuleGroups, userModules,
 } from '@/store/user-modules';
 import { downloadJson, fileSlug } from '../../download';
 import IconButton from '../../components/IconButton.vue';
 import Section from '../../components/Section.vue';
+import Switch from '../../components/Switch.vue';
 import UserModulePicker from './UserModulePicker.vue';
 import UserModuleRow from './UserModuleRow.vue';
 
@@ -65,7 +68,14 @@ async function createGroup() {
 }
 const rename = (g: UserModuleGroup, ev: Event) => renameUserModuleGroup(props.preset, g.id, (ev.target as HTMLInputElement).value);
 const setMode = (g: UserModuleGroup) => setUserModuleGroupMode(props.preset, g.id, g.mode === 'single' ? 'multi' : 'single');
-const setCollapsed = (g: UserModuleGroup) => setUserModuleGroupCollapsed(props.preset, g.id, !g.collapsed);
+const setCollapsed = (g: UserModuleGroup) => {
+  if (!g.collapsed) {
+    if (deleting.value === g.id) deleting.value = null;
+    if (pickFor.value === g.id) pickFor.value = undefined;
+  }
+  setUserModuleGroupCollapsed(props.preset, g.id, !g.collapsed);
+};
+const setEnabled = (g: UserModuleGroup, on: boolean) => setUserModuleGroupEnabled(props.preset, g.id, on);
 const exportGroup = (g: UserModuleGroup) => downloadJson(`${props.preset.id}.${fileSlug(g.name)}.ap-modules.json`, exportUserModuleGroup(props.preset, g.id));
 
 /** The group asking how to delete (keep its modules, or delete them too). An empty group goes at once. */
@@ -170,7 +180,7 @@ const draggingModule = (id: string) => drag.value?.kind === 'module' && drag.val
         <div v-if="!ungrouped.length" class="um-drop xs muted">{{ t('um.grp.dropOut') }}</div>
       </div>
       <section
-        v-for="{ g, members } in groups" :key="g.id" class="um-group" :class="{ collapsed: g.collapsed, dragging: drag?.kind === 'group' && drag.id === g.id }"
+        v-for="{ g, members } in groups" :key="g.id" class="um-group" :class="{ collapsed: g.collapsed, off: !partEnabled(g), dragging: drag?.kind === 'group' && drag.id === g.id }"
         :data-group="g.id" :data-zone="g.id" :data-collapsed="g.collapsed ? '' : undefined"
       >
         <header class="um-group-head">
@@ -178,10 +188,13 @@ const draggingModule = (id: string) => drag.value?.kind === 'module' && drag.val
           <IconButton :icon="ChevronRight" :label="t(g.collapsed ? 'um.grp.expand' : 'um.grp.collapse')" :class="['um-chevron', { open: !g.collapsed }]" small align="start" @click="setCollapsed(g)" />
           <input class="input bare um-group-name grow" :value="g.name" :placeholder="t('um.grp.untitled')" :aria-label="t('um.grp.name')" @input="rename(g, $event)" />
           <span class="um-group-count xs muted" :title="t('um.grp.count', { n: members.length })">{{ members.length }}</span>
-          <IconButton :icon="CircleDot" :label="t(g.mode === 'single' ? 'um.grp.single' : 'um.grp.multi')" :pressed="g.mode === 'single'" small align="end" class="um-group-mode" @click="setMode(g)" />
-          <IconButton v-if="hasPoints" :icon="Plus" :label="t('um.grp.addModule')" :active="pickFor === g.id" small align="end" class="um-group-add" @click="create(g.id)" />
-          <IconButton :icon="Download" :label="t('um.grp.export')" small align="end" class="um-group-export" @click="exportGroup(g)" />
-          <IconButton :icon="Trash2" :label="t('um.grp.delete')" :active="deleting === g.id" danger small align="end" class="um-group-delete" @click="askDelete(g, members.length)" />
+          <template v-if="!g.collapsed">
+            <IconButton :icon="CircleDot" :label="t(g.mode === 'single' ? 'um.grp.single' : 'um.grp.multi')" :pressed="g.mode === 'single'" small align="end" class="um-group-mode" @click="setMode(g)" />
+            <IconButton v-if="hasPoints" :icon="Plus" :label="t('um.grp.addModule')" :active="pickFor === g.id" small align="end" class="um-group-add" @click="create(g.id)" />
+            <IconButton :icon="Download" :label="t('um.grp.export')" small align="end" class="um-group-export" @click="exportGroup(g)" />
+            <IconButton :icon="Trash2" :label="t('um.grp.delete')" :active="deleting === g.id" danger small align="end" class="um-group-delete" @click="askDelete(g, members.length)" />
+          </template>
+          <Switch :model-value="partEnabled(g)" :label="t('um.grp.switch', { name: g.name || t('um.grp.untitled') })" class="um-group-switch" @update:model-value="setEnabled(g, $event)" />
         </header>
         <div v-if="deleting === g.id" class="um-group-confirm" role="group" :aria-label="t('um.grp.delete')" @keydown.esc.stop="deleting = null">
           <span class="small grow">{{ t('um.grp.deleteAsk', { n: members.length }) }}</span>
