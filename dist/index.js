@@ -12559,7 +12559,7 @@ function Jb(e) {
 }
 async function Yb() {
 	let e = await qb();
-	e && e !== "49071254ba4e6707" && sessionStorage.getItem(Kb) !== e && Jb(e);
+	e && e !== "39a1f0f051f84d3c" && sessionStorage.getItem(Kb) !== e && Jb(e);
 }
 async function Xb() {
 	await Yb();
@@ -12580,7 +12580,7 @@ async function ex() {
 	let e = u().replace(/^third-party\//, ""), t = await ix(e, !1);
 	if (t.status === 404 && (t = await ix(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await qb();
-	return r && r !== "49071254ba4e6707" ? (Jb(r), {
+	return r && r !== "39a1f0f051f84d3c" ? (Jb(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -24803,7 +24803,7 @@ var lB = { class: "row tight xs muted" }, uB = { class: "row" }, dB = {
 				"icon",
 				"help"
 			]),
-			V("div", fV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("49071254ba4e6707")), 1)
+			V("div", fV, "Advanced Preset " + A(M("1.12.0")) + " · " + A(M("39a1f0f051f84d3c")), 1)
 		], 64));
 	}
 }), mV = {
@@ -26007,7 +26007,7 @@ function KH() {
 //#region src/index.ts
 var qH = {
 	version: "1.12.0",
-	buildId: "49071254ba4e6707",
+	buildId: "39a1f0f051f84d3c",
 	nextGeneration: (e) => Th(e),
 	listPresets: () => kp().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -26067,7 +26067,7 @@ async function XH() {
 	};
 	t.on(n.APP_READY, () => void o()), KH(), Pg("init", {
 		version: "1.12.0",
-		build: "49071254ba4e6707",
+		build: "39a1f0f051f84d3c",
 		enabled: G().enabled
 	});
 }
