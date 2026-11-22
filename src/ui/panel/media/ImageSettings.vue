@@ -136,7 +136,7 @@ function removeRef(r: StoredRef) {
         <Field v-if="supportsRefs(conn.api)" :label="t('media.image.refs')" :help="t('media.image.refs.hint')">
           <div class="col media-refs">
             <div v-for="g in refGroups" :key="g.key ?? ''" class="col media-ref-group">
-              <div class="media-ref-group-title ellipsis">{{ g.label }}</div>
+              <div v-if="refGroups.length > 1" class="media-ref-group-title ellipsis">{{ g.label }}</div>
               <div v-for="r in g.refs" :key="r.blob" class="media-ref">
                 <BlobImage :blob-key="r.blob" class="media-ref-thumb" :alt="r.description" />
                 <span class="badge neutral mono">{{ r.id }}</span>

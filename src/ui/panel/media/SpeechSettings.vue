@@ -4,12 +4,12 @@
  * character voices) and request overrides. Character voices are global or belong to a character
  * card; only the global ones and those of the current chat's cards are shown.
  */
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed } from 'vue';
 import { AudioLines, Plus, Trash2 } from 'lucide-vue-next';
 import { t } from '@/i18n';
 import { activeConnection, copyConnection, mediaSettings, saveMedia, SPEECH_APIS, type SpeechApi, type SpeechConnection, type VoiceBinding, type VoiceRef } from '@/store/media';
-import { st } from '@/st/host';
-import { chatCards, type ChatCard } from '@/st/cards';
+import { chatCards } from '@/st/cards';
+import { ui } from '@/ui/state';
 import { changeSpeechApi, newSpeechConnection } from '@/media/speech/connections';
 import { speechProvider } from '@/media/speech/providers';
 import { gcVoices } from '@/media/speech/service';
@@ -58,11 +58,7 @@ const rename = (c: SpeechConnection, name: string) => { c.name = name; saveMedia
 const setApi = (api: SpeechApi) => { if (conn.value) { changeSpeechApi(conn.value, api); saveMedia(); void gcVoices(); } };
 
 // The current chat's cards (re-read when the chat changes).
-const cards = ref<ChatCard[]>(chatCards());
-const onChat = () => { cards.value = chatCards(); };
-const { eventSource, eventTypes: E } = st();
-if (E.CHAT_CHANGED) eventSource.on(E.CHAT_CHANGED, onChat);
-onBeforeUnmount(() => { if (E.CHAT_CHANGED) eventSource.removeListener(E.CHAT_CHANGED, onChat); });
+const cards = computed(() => { void ui.chatRev; return chatCards(); });
 
 /** Binding groups: global, then one per card of the chat. */
 const groups = computed(() => {
@@ -123,7 +119,7 @@ function removeBinding(b: VoiceBinding) {
         <Field :label="t('media.speech.bindings')" :help="t('media.speech.bindings.hint')">
           <div class="col">
             <div v-for="g in groups" :key="g.card" class="col tight">
-              <span v-if="groups.length > 1" class="xs muted ellipsis">{{ g.name }}</span>
+              <div v-if="groups.length > 1" class="media-ref-group-title ellipsis">{{ g.name }}</div>
               <div v-for="(b, i) in g.bindings" :key="i" class="speech-binding">
                 <input class="input" :value="b.character" :placeholder="t('media.speech.character')" @change="setBinding(b, { character: ($event.target as HTMLInputElement).value.trim() })" />
                 <VoicePicker class="grow" :connection="conn" :model-value="b.voice" :label="b.character || t('media.speech.character')" @update:model-value="setBinding(b, { voice: $event })" />
