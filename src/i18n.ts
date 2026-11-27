@@ -1,10 +1,11 @@
 /** Extension UI strings (`i18n/*.json`), following ST's locale; preset strings come from preset locales. */
 import en from '../i18n/en.json';
 import zhCN from '../i18n/zh-cn.json';
+import zhTW from '../i18n/zh-tw.json';
 import { localizeUserModuleSource, type APreset, type LocaleTable, type UserModuleSource, type UserModuleSourceBody } from '@advanced-preset/protocol';
 
 type Table = Record<string, string>;
-const tables: Record<string, Table> = { en, 'zh-cn': zhCN };
+const tables: Record<string, Table> = { en, 'zh-cn': zhCN, 'zh-tw': zhTW };
 
 export function locale(): string {
   const l = (localStorage.getItem('language') || navigator.language || 'en').toLowerCase();
