@@ -1,15 +1,19 @@
 <script setup lang="ts">
-/** UI preferences (outside the configuration layer): theme colours, stage collapsing and inline annotations. */
+/** UI preferences (outside the configuration layer): interface language, theme colours, stage collapsing and inline annotations. */
 import { computed } from 'vue';
 import { Palette, RotateCcw } from 'lucide-vue-next';
 import { settings, save } from '@/store/settings';
-import { t } from '@/i18n';
+import { setLanguage, t, UI_LANGUAGES } from '@/i18n';
 import Section from '../components/Section.vue';
 import Field from '../components/Field.vue';
 import Switch from '../components/Switch.vue';
 import IconButton from '../components/IconButton.vue';
 
 const ui = settings().ui;
+const language = computed({
+  get: () => ui.language ?? '',
+  set: (v: string) => { ui.language = v || undefined; setLanguage(v); save(); },
+});
 const color = (k: 'primary' | 'accent') => computed({
   get: () => ui[k] ?? '',
   set: (v: string) => { ui[k] = v || undefined; save(); },
@@ -25,6 +29,12 @@ const annotationColor = computed({ get: () => ui.annotations?.color ?? '', set: 
 
 <template>
   <Section :title="t('appearance.title')" :icon="Palette" collapsible :open="false">
+    <Field :label="t('appearance.language')" :help="t('appearance.language.hint')" inline>
+      <select v-model="language" class="input">
+        <option value="">{{ t('appearance.language.auto') }}</option>
+        <option v-for="l in UI_LANGUAGES" :key="l.value" :value="l.value">{{ l.label }}</option>
+      </select>
+    </Field>
     <Field :label="t('appearance.colors')" :help="t('appearance.colors.hint')" inline>
       <div class="swatches">
         <label class="swatch" :style="{ background: primary || 'var(--ap-primary-500)' }" :title="t('appearance.primary')"><input v-model.lazy="primary" type="color" /></label>

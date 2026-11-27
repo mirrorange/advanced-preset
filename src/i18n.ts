@@ -1,4 +1,8 @@
-/** Extension UI strings (`i18n/*.json`), following ST's locale; preset strings come from preset locales. */
+/**
+ * Extension UI strings (`i18n/*.json`) in the interface language: AP's own setting (`ui.language`),
+ * else ST's locale. Preset strings come from preset locales in the same language.
+ */
+import { ref } from 'vue';
 import en from '../i18n/en.json';
 import zhCN from '../i18n/zh-cn.json';
 import zhTW from '../i18n/zh-tw.json';
@@ -7,7 +11,22 @@ import { localizeUserModuleSource, type APreset, type LocaleTable, type UserModu
 type Table = Record<string, string>;
 const tables: Record<string, Table> = { en, 'zh-cn': zhCN, 'zh-tw': zhTW };
 
+/** Languages the interface language setting offers, each named in itself. */
+export const UI_LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'zh-cn', label: '简体中文' },
+  { value: 'zh-tw', label: '繁體中文' },
+] as const;
+
+/** AP's interface language setting; empty follows SillyTavern. Reactive, so the UI re-renders on change. */
+const chosen = ref('');
+
+export function setLanguage(language: string | undefined): void {
+  chosen.value = language ?? '';
+}
+
 export function locale(): string {
+  if (chosen.value) return chosen.value;
   const l = (localStorage.getItem('language') || navigator.language || 'en').toLowerCase();
   if (l.startsWith('zh')) return l.includes('tw') || l.includes('hk') ? 'zh-tw' : 'zh-cn';
   return l.split('-')[0]!;
