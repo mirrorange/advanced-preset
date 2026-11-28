@@ -13,6 +13,8 @@ node e2e/run.mjs language                            # after carrier: interface 
 node e2e/run.mjs um-groups                            # needs `ap dev --port 4747` on a Petals copy (like `um`): groups in My modules — create, single choice, drag in / within / out (also onto a collapsed group), export a group and import it back, reorder and delete groups
 node e2e/run.mjs syn-edit                            # edit the last synopsis from its card (after gen)
 node e2e/run.mjs cache                               # token saving + cache optimization over 5 turns, prefix reuse per request (AP_CACHE=off to compare)
+node e2e/run.mjs bindings                            # after carrier: Config → Connection — only the default binding, add one (model-name target prefilled with the current model), a connection profile target lists only Chat Completion profiles, per-binding transport, the active binding, delete resets the selection; no Multi-model section for the bundled preset
+AP_DEV=1 node e2e/run.mjs bindings                   # same with `ap dev --port 4747` on a Petals copy with `multiModel: true`: the Multi-model section shows, lists every actor but the user, maps one to the new binding
 node e2e/run.mjs memory                              # memory follows message versions: swipe, swipe back, regenerate, delete (after carrier)
 node e2e/run.mjs storylines-gen                      # side-story turns under each freeze mode: Petals' independent-state instruction only when frozen (after carrier)
 node e2e/run.mjs storylines                          # storylines tab toolbar (visibility, rename), freeze mode, tab gone when off (after carrier)

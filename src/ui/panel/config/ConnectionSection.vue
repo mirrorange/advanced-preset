@@ -67,14 +67,23 @@ function remove() {
   const id = editing.value?.id;
   if (!p || !id || id === DEFAULT_BINDING) return;
   // A binding of the recommended / saved layer is masked with null; one the user added is just dropped.
-  const inBase = Boolean(baseConfiguration(p).connection.bindings?.[id]);
+  const base = baseConfiguration(p);
   update((c) => {
     const all = { ...c.connection.bindings } as Record<string, ConnectionBinding | null>;
-    if (inBase) all[id] = null;
+    if (base.connection.bindings?.[id]) all[id] = null;
     else delete all[id];
-    c.connection.bindings = all as Record<string, ConnectionBinding>;
-    if (c.connection.binding === id) c.connection.binding = DEFAULT_BINDING;
-    for (const [actor, b] of Object.entries(c.multiModel?.actors ?? {})) if (b === id) c.multiModel!.actors[actor] = DEFAULT_BINDING;
+    if (Object.keys(all).length || base.connection.bindings) c.connection.bindings = all as Record<string, ConnectionBinding>;
+    else delete c.connection.bindings;
+    // Back to the default: stored only when the layer below names another binding.
+    if (c.connection.binding === id) {
+      if (base.connection.binding === undefined) delete c.connection.binding;
+      else c.connection.binding = DEFAULT_BINDING;
+    }
+    for (const [actor, b] of Object.entries(c.multiModel?.actors ?? {})) {
+      if (b !== id) continue;
+      if (base.multiModel?.actors?.[actor] === undefined) delete c.multiModel!.actors[actor];
+      else c.multiModel!.actors[actor] = DEFAULT_BINDING;
+    }
   });
   editingId.value = DEFAULT_BINDING;
 }
