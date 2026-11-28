@@ -104,7 +104,7 @@ export function pruneDiff(diff: Obj, shape: Obj, path = '', removed: string[] = 
   }
   return removed;
 }
-const OPEN_MAPS = new Set(['sampling', 'connection.bindings', 'multiModel.actors']);
+const OPEN_MAPS = new Set(['sampling', 'connection.target', 'connection.bindings', 'multiModel.actors']);
 
 export function applyMigrations(diff: SparseDiff, migrations: Migration[], fromVersion: string): SparseDiff {
   const out = cloneData(diff) as Obj;
