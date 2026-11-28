@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, configurationShape, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
+  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, configurationShape, MULTI_MODEL_SINCE, DEFAULT_BINDING, BINDING_TARGET_TYPES, BINDING_TRANSPORT_KEYS, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
   SIGNATURE_CHANNELS_SINCE, THOUGHT_SIGNATURE_CHANNELS, CALLER_SCHEMA_DIRECT_SINCE,
   MEDIA_SINCE, IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, STAGE_REGIONS_SINCE,
   type APreset, type Expr,
@@ -224,6 +224,8 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   if (namingStructures.length > 1) diag.warn(`structures ${namingStructures.map((s) => s.id).join(', ')}: only one storyline structure is read (${namingStructures[0]!.id})`, { file: M, path: `structures.${namingStructures[1]!.id}` });
   if (p.storylines && !namingStructures.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
     diag.warn('no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names', { file: M, path: 'storylines' });
+  if (p.multiModel && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, MULTI_MODEL_SINCE) < 0))
+    diag.warn(`multiModel needs Advanced Preset ${MULTI_MODEL_SINCE}: set minAdvancedPreset to ${MULTI_MODEL_SINCE} or later (older versions run every stage in one request)`, { file: M, path: 'minAdvancedPreset' });
   if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
     diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: 'minAdvancedPreset' });
 
@@ -466,14 +468,45 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
       else if (wf.kind !== 'story') diag.error(`workflow \`${conn.workflow}\` is a task workflow`, { file: M, path });
     }
     if (conn.syntheticTurn && !p.syntheticTurns.some((s) => s.id === conn.syntheticTurn)) diag.error(`unknown synthetic turn \`${conn.syntheticTurn}\``, { file: M, path });
+    if (conn.target !== undefined) checkTarget(conn.target, `${path}.target`);
+    if (conn.bindings !== undefined) {
+      if (!conn.bindings || typeof conn.bindings !== 'object' || Array.isArray(conn.bindings)) diag.error('bindings must be a mapping id → binding', { file: M, path: `${path}.bindings` });
+      else for (const [id, b] of Object.entries(conn.bindings)) {
+        const at = `${path}.bindings.${id}`;
+        if (id === DEFAULT_BINDING) diag.error(`binding id \`${DEFAULT_BINDING}\` is the connection itself: set its fields on the connection`, { file: M, path: at });
+        if (!b || typeof b !== 'object') { diag.error('a binding must be a mapping { name, target, transport, … }', { file: M, path: at }); continue; }
+        if (b.name !== undefined && typeof b.name !== 'string') diag.error('binding name must be a string', { file: M, path: at });
+        if (b.target === undefined) diag.error('binding has no target', { file: M, path: at });
+        else checkTarget(b.target, `${at}.target`);
+        const { target: _t, name: _n, ...transport } = b;
+        checkConnection(transport as Partial<typeof c>, at);
+        for (const k of Object.keys(transport)) if (!(BINDING_TRANSPORT_KEYS as readonly string[]).includes(k)) diag.warn(`unknown binding option \`${k}\``, { file: M, path: at });
+      }
+    }
+  };
+  const checkTarget = (target: unknown, path: string) => {
+    const x = target as Record<string, unknown> | null;
+    if (!x || typeof x !== 'object' || !(BINDING_TARGET_TYPES as readonly unknown[]).includes(x.type)) diag.error(`target must be { type: ${BINDING_TARGET_TYPES.join(' | ')} }`, { file: M, path });
+    else if (x.type === 'profile' && typeof x.profile !== 'string') diag.error('a profile target needs `profile` (a SillyTavern connection profile id)', { file: M, path });
+    else if (x.type === 'model' && (typeof x.model !== 'string' || !x.model.trim())) diag.error('a model target needs `model` (a model name)', { file: M, path });
+    else if (x.type === 'profile') diag.warn('profile targets name a connection profile of one SillyTavern install: other users will not have it', { file: M, path });
+  };
+  /** Binding ids named by a resolved configuration exist. */
+  const checkBindingRefs = (full: typeof p.configurationDefaults, path: string) => {
+    const ids = new Set([DEFAULT_BINDING, ...Object.keys(full.connection.bindings ?? {})]);
+    const sel = full.connection.binding;
+    if (sel !== undefined && !ids.has(sel)) diag.error(`binding \`${sel}\` does not exist`, { file: M, path: `${path}.connection.binding` });
+    for (const [a, id] of Object.entries(full.multiModel?.actors ?? {})) if (!ids.has(id)) diag.error(`actor ${a}: binding \`${id}\` does not exist`, { file: M, path: `${path}.multiModel.actors.${a}` });
   };
   checkConnection(c, 'configurationDefaults.connection');
+  checkBindingRefs(p.configurationDefaults, 'configurationDefaults');
   for (const rc of p.configurations) {
     const path = `configurations.${rc.id}`;
     const diff = structuredClone(rc.diff) as Record<string, unknown>;
     for (const removed of pruneDiff(diff, configurationShape(p))) diag.error(`unknown configuration key \`${removed}\``, { file: M, path });
     checkConnection(rc.diff.connection ?? {}, `${path}.connection`);
     const full = deepMerge(p.configurationDefaults, rc.diff);
+    checkBindingRefs(full, path);
     for (const [g, ids] of exclusive) if (ids.filter((id) => full.modules[id]).length > 1) diag.warn(`${rc.id}: exclusive group \`${g}\` has several modules enabled`, { file: M, path });
   }
   if (new Set(p.configurations.map((x) => x.id)).size !== p.configurations.length) diag.error('duplicate configuration ids', { file: M, path: 'configurations' });

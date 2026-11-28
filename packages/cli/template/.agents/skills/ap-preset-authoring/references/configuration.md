@@ -32,6 +32,9 @@ configurationDefaults:
     assumeToolSupport: false
     workflow: story            # 默认：第一个 story 工作流
     syntheticTurn: init        # 默认：第一个示范轮次，没有则 null
+    target: { type: current }  # 默认绑定发送到哪里（1.13，见连接绑定）
+    bindings: {}               # 额外的连接绑定：id → 绑定
+    binding: default           # 未开启多模型时使用的绑定
   sampling:
     temperature: 1
     openai_max_tokens: 8192
@@ -44,6 +47,7 @@ configurationDefaults:
   cache: { enabled: false, ttlMinutes: 5, maxDeferredTurns: 6 }
   meta: { enabled: true, recentCount: 3 }
   storylines: { enabled: true, freezeVariables: all }   # 只在预设声明了 storylines 时存在
+  multiModel: { enabled: false, actors: {} }            # 只在预设声明了 multiModel 时存在
 ```
 
 | 段 | 字段 | 默认 | 说明 |
@@ -59,6 +63,9 @@ configurationDefaults:
 | | `assumeToolSupport` | `false` | 工具传输跳过 ST 对 API 源和模型的检查（[transports.md](transports.md#能力检查)） |
 | | `workflow` | 第一个 `story` 工作流 | 故事轮使用的工作流（必须是 `story` 工作流） |
 | | `syntheticTurn` | 第一个示范轮次或 `null` | 工具传输插入的示范轮次 |
+| | `target` | `{ type: current }` | 默认绑定的去向（[连接绑定](#连接绑定)）。需要 1.13.0 |
+| | `bindings` | `{}` | 额外的连接绑定，id → 绑定（[连接绑定](#连接绑定)） |
+| | `binding` | `default` | 未开启多模型时所有请求使用的绑定；开启时用于元指令回复与脚本调用 |
 | `sampling` | 任意键 | `{}` | ST Chat Completion 预设的设置项，见下 |
 | `identity` | `names.<actor>` / `prefixes.<actor>` | `''` | 覆盖角色名字 / 前缀；空字符串表示用清单 `actors` 的值 |
 | `modules` | `<module id>` | 模组的 `default` | 用户可开关模组的状态 |
@@ -69,6 +76,8 @@ configurationDefaults:
 | | `recentCount` | 清单 `meta.recentCount` | `{{ap::recent_meta}}` 的条数 |
 | `storylines` | `enabled` | `true` | 故事线开关（只在预设声明了 [`storylines`](manifest.md#故事线-storylines) 时存在）；`false` 时 `#标签` 作为文字发送，历史保持原顺序（[meta-and-tasks.md](meta-and-tasks.md#故事线)） |
 | | `freezeVariables` | `all` | 哪些轮次不更新 MVU / 酒馆助手的聊天与消息变量：`all` 主线以外的故事线、`if` 只有 if 线、`off` 不阻止；本轮的结果为条件变量 `storyline.frozen`（[支线轮次的变量](meta-and-tasks.md#支线轮次的变量)） |
+| `multiModel` | `enabled` | `false` | 多模型开关（只在预设声明了 [`multiModel`](manifest.md#多模型-multimodel) 时存在） |
+| | `actors.<actor>` | `{}` | 执行该角色的步骤的绑定 id；没写的角色使用默认绑定 |
 
 ### sampling
 
@@ -82,7 +91,11 @@ ST 内部有几项的设置名与预设文件不同，AP 自动换算：`tempera
 - `params` 的值与参数类型不符（如列表参数不是字符串数组、数字参数不是数字）：错误（推荐配置的 diff 同样检查）；
 - 未知的段（如 `configurationDefaults.foo`）：警告；
 - `cache.enabled` 不是布尔值、`ttlMinutes` / `maxDeferredTurns` 不是非负数：错误；`cache` 中未知的键：警告；
-- `connection.transport` / `streamToolArguments` / `sendThoughtSignature` 取值非法、`workflow` 不存在或是任务工作流、`syntheticTurn` 不存在：错误（推荐配置的 diff 同样检查）。
+- `connection.transport` / `streamToolArguments` / `sendThoughtSignature` 取值非法、`workflow` 不存在或是任务工作流、`syntheticTurn` 不存在：错误（推荐配置的 diff 同样检查）；
+- `connection.target` 或绑定的 `target` 不是 `{ type: current | profile | model }`、`model` 为空、`profile` 缺失：错误；`profile` 目标：警告（连接配置文件只存在于某一个 SillyTavern 中，其他用户没有它）；
+- 绑定 id 为 `default`、绑定的传输选项取值非法：错误；绑定中未知的选项：警告；
+- `connection.binding` 或 `multiModel.actors` 指向不存在的绑定：错误；
+- 预设没有声明 `multiModel` 却写了 `multiModel` 段：警告（忽略）；`multiModel.enabled` 不是布尔值、`actors` 中不存在的角色：错误；`actors` 中写了用户角色：警告（用户角色不执行步骤）。
 
 ## 推荐配置 `configurations`
 
@@ -115,6 +128,54 @@ defaultConfiguration: gemini
 - 某个推荐配置让同一单选集启用了多个模组：警告。
 
 `ap preview --config <id>` 用指定推荐配置预览组装结果（[cli.md](cli.md)）。
+
+## 连接绑定
+
+**连接绑定**把“请求发到哪里”与“用什么传输方式发”组合在一起，在面板「配置 → 连接」中编辑。绑定是配置的一部分，随推荐配置、保存的配置与用户 diff 分层保存。
+
+- **默认绑定**（id `default`）就是 `connection` 本身：`transport`、`forceTool` 等传输字段加上 `connection.target`。1.13 之前的配置与推荐配置因此原样成为默认绑定，不需要迁移；
+- **额外的绑定**写在 `connection.bindings` 中，每个绑定有 `name`、`target` 与自己的传输选项（`transport` `forceTool` `parallelTools` `syntheticTurn` `sendThoughtSignature` `openAiSignatures` `streamToolArguments` `maxSteps` `assumeToolSupport`）。没写的传输选项取默认绑定的值；`workflow`、`finalFallback` 属于连接本身，不随绑定变化；
+- **未开启多模型**时，所有请求使用 `connection.binding` 选中的绑定；
+- **开启多模型**（预设声明了 [`multiModel`](manifest.md#多模型-multimodel)，且 `multiModel.enabled` 为真）时，故事轮的每个步骤由 `multiModel.actors` 中为其角色指定的绑定执行，没有指定的角色使用默认绑定；元指令回复与脚本调用（任务轮）仍是一次请求，使用 `connection.binding`。阶段如何划分、先前步骤如何回放见 [workflows.md](workflows.md)；
+- 指向不存在的绑定（例如已删除）时使用默认绑定，并在组装调试中警告；
+- 在面板中删除来自推荐配置或保存的配置的绑定时，用户 diff 记录 `null` 把它遮住；指向它的选择与角色映射改回默认绑定。
+
+```yaml
+configurations:
+  - id: duo
+    name: Two models
+    diff:
+      connection:
+        transport: tool-single                  # 默认绑定：当前连接、单工具
+        bindings:
+          fast:
+            name: Fast drafts
+            target: { type: model, model: gemini-2.5-flash }
+            transport: structured
+      multiModel: { enabled: true, actors: { critic: fast } }
+```
+
+### 绑定的去向 `target`
+
+| `type` | 字段 | 发送到 |
+| --- | --- | --- |
+| `current` | — | SillyTavern 当前的 API 连接（与 1.12 完全相同，请求体不做任何改动） |
+| `model` | `model` | 当前的 API 连接，只换模型名称 |
+| `profile` | `profile` | SillyTavern 连接配置管理（Connection Manager）中的一个 Chat Completion 连接配置文件（按 id） |
+
+AP 不切换 SillyTavern 的连接：它让 ST 自己（`openai.js` 的 `createGenerationParameters`）分别按当前设置与目标设置生成请求体，把两者不同的字段换进这一次请求。这样与来源相关的字段（如 Claude 的 `top_k` / `use_sysprompt`、OpenRouter 的 `provider`、自定义来源的 `custom_url` / `custom_include_body`、只对部分模型有效的 `reasoning_effort`）与 ST 直接连接该配置文件时一致，而 AP 的提示词、工具、流式设置以及其他扩展对请求体的修改保持不变。无法载入 `openai.js` 时（如部分 ST 分支），只换下表中的连接字段。
+
+连接配置文件中**切换**的内容：
+
+- API（`chat_completion_source`）与模型；配置文件没有记录模型时，用 ST 为该来源保存的模型；
+- 服务器地址（`api-url`：自定义来源的 `custom_url`、Vertex AI 区域、Z.AI / SiliconFlow / MiniMax / Pollinations 端点）；
+- 反向代理（按名称取 ST 的代理预设：`reverse_proxy` / `proxy_password`）；
+- API 密钥：使用 ST 为该来源保存的当前密钥；配置文件记录了 `secret-id` 时使用那一个密钥；
+- 提示词后处理（`custom_prompt_post_processing`）。
+
+**不切换**的内容：配置文件的对话补全预设（采样参数与提示词仍由 AP 的配置与 Carrier 决定）、停止词、回复前缀、推理模板、正则预设；自定义来源的请求头与额外请求体参数沿用当前设置。下列配置文件不能使用（请求前报错，说明原因）：已不存在的配置文件、Text Completion 配置文件，以及保存了自己的“自定义连接”快照的配置文件（其凭据无法安全地单独换入）。
+
+工具传输的[能力检查](transports.md#能力检查)按绑定进行：检查的是该绑定实际发送的来源、模型与提示词后处理，`assumeToolSupport` 取绑定自己的值。
 
 ## Carrier
 

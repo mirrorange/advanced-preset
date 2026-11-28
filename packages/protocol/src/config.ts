@@ -36,6 +36,9 @@ export const BINDING_DEFAULTS: Required<Pick<ConnectionConfig, 'target' | 'bindi
 /** Id of the binding made of the connection's own fields. */
 export const DEFAULT_BINDING = 'default';
 
+/** First Advanced Preset version with connection bindings and multi-model workflows. */
+export const MULTI_MODEL_SINCE = '1.13.0';
+
 /** Multi-model switch defaults (presets that declare `multiModel`). */
 export const MULTI_MODEL_CONFIG_DEFAULTS: MultiModelConfig = { enabled: false, actors: {} };
 
@@ -101,7 +104,7 @@ export function pruneDiff(diff: Obj, shape: Obj, path = '', removed: string[] = 
   }
   return removed;
 }
-const OPEN_MAPS = new Set(['sampling', 'connection.bindings', 'multiModel.actors']);
+const OPEN_MAPS = new Set(['sampling', 'connection.target', 'connection.bindings', 'multiModel.actors']);
 
 export function applyMigrations(diff: SparseDiff, migrations: Migration[], fromVersion: string): SparseDiff {
   const out = cloneData(diff) as Obj;
