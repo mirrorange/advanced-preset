@@ -1,7 +1,7 @@
 /** Cross-reference checks over a compiled artifact (`ap check`, and every `ap build`). */
 import {
   isInlineStructure,
-  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
+  INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, configurationShape, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
   SIGNATURE_CHANNELS_SINCE, THOUGHT_SIGNATURE_CHANNELS, CALLER_SCHEMA_DIRECT_SINCE,
   MEDIA_SINCE, IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS,
   type APreset, type Expr,
@@ -457,7 +457,7 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   for (const rc of p.configurations) {
     const path = `configurations.${rc.id}`;
     const diff = structuredClone(rc.diff) as Record<string, unknown>;
-    for (const removed of pruneDiff(diff, p.configurationDefaults as unknown as Record<string, unknown>)) diag.error(`unknown configuration key \`${removed}\``, { file: M, path });
+    for (const removed of pruneDiff(diff, configurationShape(p))) diag.error(`unknown configuration key \`${removed}\``, { file: M, path });
     checkConnection(rc.diff.connection ?? {}, `${path}.connection`);
     const full = deepMerge(p.configurationDefaults, rc.diff);
     for (const [g, ids] of exclusive) if (ids.filter((id) => full.modules[id]).length > 1) diag.warn(`${rc.id}: exclusive group \`${g}\` has several modules enabled`, { file: M, path });
