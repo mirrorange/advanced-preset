@@ -139,3 +139,75 @@ describe('manifest fragments', () => {
     expect(parsePath('regions[2].merge.wrap')).toEqual(['regions', 2, 'merge', 'wrap']);
   });
 });
+
+describe('stage regions (beforeStage)', () => {
+  const withStageRegion = (stageId: string, extra = '') => tree({
+    'preset.yaml': ROOT + 'minAdvancedPreset: 1.13.0\n' + REGIONS.replace('  - { id: tail, anchor: tail }', `  - { id: tail, anchor: tail }\n  - { id: final_prompt, beforeStage: ${stageId}${extra} }`) + STRUCTURES + MISC,
+  });
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message);
+
+  it('compile without a Carrier anchor', () => {
+    const r = build(withStageRegion('final'));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.preset!.regions.find((x) => x.id === 'final_prompt')).toMatchObject({ beforeStage: 'final' });
+    expect(r.preset!.carrier.prompts.some((p) => p.identifier.includes('final_prompt'))).toBe(false);
+  });
+
+  it('must name a stage, cannot be native, and need 1.13.0', () => {
+    expect(messages(build(withStageRegion('nope')))).toContainEqual(expect.stringContaining('beforeStage `nope` is not a stage'));
+    expect(messages(build(withStageRegion('final', ', native: true')))).toContainEqual(expect.stringContaining('cannot be native'));
+    const old = build(tree({ 'preset.yaml': ROOT + REGIONS.replace('  - { id: tail, anchor: tail }', '  - { id: tail, anchor: tail }\n  - { id: final_prompt, beforeStage: final }') + STRUCTURES + MISC }));
+    expect(messages(old)).toContainEqual(expect.stringContaining('stage regions need Advanced Preset 1.13.0'));
+  });
+
+  it('phase variables are known to conditions', () => {
+    const wf = WORKFLOW.replace('kind: content, label: Write }', 'kind: content, label: Write, when: "!multiModel || phase.stages.final || phase.index == 0 || phase.actor == \\"narrator\\"" }');
+    expect(build(tree({ 'preset.yaml': ROOT + REGIONS + STRUCTURES + MISC, 'workflows/linear.md': wf })).diag.errors).toEqual([]);
+    const bad = WORKFLOW.replace('kind: content, label: Write }', 'kind: content, label: Write, when: "phase.stages.nope" }');
+    expect(messages(build(tree({ 'preset.yaml': ROOT + REGIONS + STRUCTURES + MISC, 'workflows/linear.md': bad })))).toContainEqual(expect.stringContaining('unknown stage `nope`'));
+  });
+});
+
+
+describe('ap preview with multi-model', () => {
+  const WF2 = `---
+id: linear
+stages:
+  - { id: plan, actor: editor, kind: text, label: Plan }
+  - { id: final, actor: narrator, kind: content, label: Write }
+---
+<!-- @section stage:plan -->
+Plan it{{ap::name::editor}}.
+<!-- @section stage:final -->
+Write it.
+`;
+  const files = () => tree({
+    'preset.yaml': ROOT.replace('  user: { name: "{{user}}" }', '  editor: { name: Ed }\n  user: { name: "{{user}}" }') + 'minAdvancedPreset: 1.13.0\nmultiModel: true\n'
+      + REGIONS.replace('  - { id: tail, anchor: tail }', '  - { id: tail, anchor: tail }\n  - { id: write_cue, beforeStage: final }') + STRUCTURES + MISC,
+    'workflows/linear.md': WF2,
+    'modules/cue.md': '---\nid: cue\ntoggle: always\nregion: write_cue\n---\nWRITE NOW\n',
+  });
+
+  it('--phase renders that phase: its stages, stage regions and the replay of earlier phases', async () => {
+    const { preview } = await import('../src/preview');
+    const r = build(files());
+    expect(r.diag.errors).toEqual([]);
+    const p = r.preset!;
+    const first = preview(p, { multiModel: true, transport: 'structured' });
+    expect(first).toMatch(/multi-model phase 0\/1: editor · stages plan/);
+    expect(first).toMatch(/write_cue \(before stage final, not in this phase's request\)/);
+    expect(first).not.toContain('WRITE NOW');
+    const second = preview(p, { phase: 1, transport: 'plaintext' });
+    expect(second).toMatch(/multi-model phase 1\/1: narrator · stages final/);
+    expect(second).toMatch(/write_cue \(before stage final, request tail\)[^\n]*\n\[system\]\nWRITE NOW/);
+    expect(second).toMatch(/earlier phases replayed \(plaintext, placeholder text\)[^\n]*\nEd: \(output of plan\)/);
+    const json = JSON.parse(preview(p, { phase: 1, transport: 'structured', json: true }));
+    expect(json.vars.multiModel).toBe(true);
+    expect(json.vars.phase).toEqual({ stages: { final: true }, index: 1, actor: 'narrator' });
+    expect(Object.keys(json.schema.value.properties)).not.toContain(Object.keys(json.phase.replay)[0]);
+    expect(() => preview(p, { phase: 2 })).toThrow(/expected 0–1/);
+    const off = preview(p, {});
+    expect(off).toMatch(/write_cue \(before stage final, request tail\)[^\n]*\n\[system\]\nWRITE NOW/);
+  });
+});
+

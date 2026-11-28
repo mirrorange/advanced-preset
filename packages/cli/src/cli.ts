@@ -24,7 +24,7 @@ Usage
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value …] [--input text]
                    [--storyline name|?] [--storyline-new] [--storyline-grouped]
-                   [--storyline-switch] [--storyline-naming-main]
+                   [--storyline-switch] [--storyline-naming-main] [--multi-model] [--phase n]
                    [--image openai|gemini|novelai] [--image-prompt tags|description|instruction]
                    [--image-auto] [--image-style] [--image-sfw] [--image-refs]
                    [--speech fish|elevenlabs|minimax|gemini|openai|deepseek]
@@ -66,6 +66,8 @@ async function main(argv: string[]): Promise<number> {
       'storyline-grouped': { type: 'boolean' },
       'storyline-switch': { type: 'boolean' },
       'storyline-naming-main': { type: 'boolean' },
+      'multi-model': { type: 'boolean' },
+      phase: { type: 'string' },
       image: { type: 'string' },
       'image-prompt': { type: 'string' },
       'image-auto': { type: 'boolean' },
@@ -143,7 +145,7 @@ async function main(argv: string[]): Promise<number> {
         if (typeof picked === 'string') { console.error(picked); return 1; }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values['storyline-new'], storylineGrouped: values['storyline-grouped'], storylineSwitch: values['storyline-switch'], storylineNamingMain: values['storyline-naming-main'], image, speech, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values['storyline-new'], storylineGrouped: values['storyline-grouped'], storylineSwitch: values['storyline-switch'], storylineNamingMain: values['storyline-naming-main'], image, speech, userModules, json: values.json, multiModel: values['multi-model'], ...(values.phase !== undefined ? { phase: Number(values.phase) } : {}) });
       if (values.out) await writeFile(values.out, out);
       else console.log(out);
       return 0;

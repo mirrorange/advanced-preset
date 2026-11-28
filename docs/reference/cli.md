@@ -9,7 +9,7 @@ ap dev     [dir] [--port 4747] [--host 127.0.0.1] [--out dist] [--installer | --
 ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed] [--param id=value …]
                  [--enable a,b] [--disable c] [--user-modules file]
                  [--bundled-modules a,b|all|none] [--user-module-templates a,b|all]
-                 [--lang zh-cn] [--json] [--out file]
+                 [--multi-model] [--phase n] [--lang zh-cn] [--json] [--out file]
 ap init    <dir> [--id x] [--name "My Preset"] [--author me]
 ap skills  list
 ap skills  install [dir] [--target .agents/skills]
@@ -97,8 +97,10 @@ warn  preset.yaml:41 groups: module `x` has no group
 | `--speech <api>` | 模拟开启语音合成（预设声明了 `speech` 时）：`speech.on` 为真，`speech.api` 为 `fish` / `elevenlabs` / `minimax` / `gemini` / `openai` / `deepseek` / `openrouter`，`{{ap::speech::format}}` 为占位文字，请求 `speech` 结构。摘要中有一行 `speech: …` |
 | `--speech-auto` / `--speech-narrator` | 与 `--speech` 一起：`speech.auto` / `speech.narrator` 为真 |
 | `--speech-characters` | 与 `--speech` 一起：有已绑定说话人的角色（`speech.characters` 为真，`{{ap::speech::characters}}` 为占位名） |
+| `--multi-model` | 模拟开启[多模型](workflows.md#多模型工作流)（预设声明了 `multiModel` 时；`--meta pure` 时无效）：`multiModel` 为真，渲染第一组的请求。摘要中有一行 `multi-model phase <n>/<最后一组>: <actor> · stages … · structures …` |
+| `--phase <n>` | 渲染第 `n` 组（从 0 开始，隐含 `--multi-model`）的请求：`phase.*` 为该组，传输方式为该 actor 在配置中绑定的传输方式（`--transport` 只改默认绑定）；schema / 工具只含本组的阶段与结构；之前各组以占位文字（`(output of <阶段>)`）按本组传输方式回放，显示在 `earlier phases replayed` 一节；不属于本组的阶段区域标为 `not in this phase's request` |
 | `--lang <lang>` | 按该面板语言选用随预设安装的用户模组与模板的翻译 |
-| `--json` | 输出 JSON：`vars`、`buildVars`、`skipped`、`modules`、`structures`、`stages`、`regions`、`historyInput`（`--input` 时历史中那条消息的样子，提取时为 `null`），以及 `schema`（structured）或 `tools`（工具传输） |
+| `--json` | 输出 JSON：`phase`（多模型时：组号、组数、actor、阶段、结构、回放），`vars`、`buildVars`、`skipped`、`modules`、`structures`、`stages`、`regions`、`historyInput`（`--input` 时历史中那条消息的样子，提取时为 `null`），以及 `schema`（structured）或 `tools`（工具传输） |
 | `--out <file>` | 写入文件而不是标准输出 |
 
 文本输出的开头是摘要（预设、传输方式与写法、工作流、配置、生效模组、构建变量、结构、阶段；指令式传输还有一行 `fields:`，按生成顺序列出本轮的阶段与结构字段名，含排序前缀），然后按 `regions` 顺序列出每个区域的消息，最后是 schema / 工具。

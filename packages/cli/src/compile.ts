@@ -313,7 +313,11 @@ export function compile(tree: SourceTree): CompileResult {
     if (o.merge === 'join' || o.merge === 'none') merge = o.merge;
     else if (isObj(o.merge) && typeof o.merge.wrap === 'string') merge = { wrap: o.merge.wrap };
     else if (o.merge !== undefined) diag.error('merge must be none | join | { wrap: <tag> }', where);
-    regions.push({ id: rid, role, merge, separator: str(o.separator, '\n\n'), ...(o.native ? { native: true } : {}) });
+    const beforeStage = o.beforeStage === undefined ? '' : str(o.beforeStage);
+    if (o.beforeStage !== undefined && !beforeStage) diag.error('beforeStage must name a workflow stage', where);
+    if (beforeStage && o.native) diag.error('a stage region cannot be native', where);
+    if (beforeStage && o.anchor !== undefined) diag.error('a stage region cannot be a semantic anchor', where);
+    regions.push({ id: rid, role, merge, separator: str(o.separator, '\n\n'), ...(o.native ? { native: true } : {}), ...(beforeStage ? { beforeStage } : {}) });
     if (o.anchor !== undefined) {
       const a = str(o.anchor) as SemanticAnchor;
       if (!ANCHORS.includes(a)) diag.error(`anchor must be ${ANCHORS.join(' | ')}`, where);
@@ -1194,7 +1198,9 @@ function compileCarrier(src: Obj, regions: Region[], presetName: string, diag: D
   const add = (identifier: string, enabled: boolean, where: Where) => {
     const region = regions.find((r) => r.id === identifier);
     let p: CarrierPrompt | undefined;
-    if (region && !region.native) {
+    if (region?.beforeStage) {
+      return diag.error(`carrier.order: \`${identifier}\` is a stage region (beforeStage), it has no anchor`, where);
+    } else if (region && !region.native) {
       p = { identifier: anchorIdentifier(region.id), name: `${label} · ${region.id}`, role: region.role, content: anchorText(region.id), system_prompt: false, marker: false, injection_position: 0, injection_depth: 4, forbid_overrides: true };
     } else if (NATIVE_PROMPTS[identifier]) {
       const n = NATIVE_PROMPTS[identifier];
@@ -1217,7 +1223,7 @@ function compileCarrier(src: Obj, regions: Region[], presetName: string, diag: D
       add(k, v !== false, where);
     } else diag.error('carrier.order items are `id` or `{ id: false }`', where);
   });
-  for (const r of regions) if (!r.native && !prompt_order.some((o) => o.identifier === anchorIdentifier(r.id))) diag.error(`region \`${r.id}\` has no anchor in carrier.order`, { file: M, path: 'carrier.order' });
+  for (const r of regions) if (!r.native && !r.beforeStage && !prompt_order.some((o) => o.identifier === anchorIdentifier(r.id))) diag.error(`region \`${r.id}\` has no anchor in carrier.order`, { file: M, path: 'carrier.order' });
   if (!prompt_order.some((o) => o.identifier === 'chatHistory')) diag.error('carrier.order must contain chatHistory', { file: M, path: 'carrier.order' });
   return { prompts, prompt_order };
 }

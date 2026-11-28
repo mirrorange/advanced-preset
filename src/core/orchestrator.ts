@@ -4,16 +4,19 @@
  * a synthesised response that only carries story content (D1, D2, D20).
  */
 import {
+  mergeTurns, replayItems, type Phase, type Stage, type Transport,
   applyPatches, parseAnnotations, parseSpeech, parseSpeechWith, partialTagTail, replyToPlainText, stripComments, terminalContentIndex,
   type Annotation, type MemoryOp, type PatchResult, type SpeechCleaner, type SpeechSpan, type TurnResult,
 } from '@advanced-preset/protocol';
-import { nativeFetch, st, streamContextOf, toast, toolCallingIssue } from '@/st/host';
+import { nativeFetch, st, streamContextOf, toast } from '@/st/host';
 import { planMemoryOps, type ChatEvent, type PendingGlobalOp } from '@/store/eventlog';
 import type { Sidecar, SidecarStage, TurnKind } from '@/store/sidecar';
 import { t } from '@/i18n';
 import type { GenerationContext } from './context';
-import { createDriver, type CallerInfo } from './transports';
-import { presetToolNames } from './transports/base';
+import { createDriver, type CallerInfo, type Driver } from './transports';
+import { artifactsOf, presetToolNames } from './transports/base';
+import { BindingError, applyTarget, bindingCapabilityError, bindingForActor, selectedBinding, type ResolvedBinding } from './bindings';
+import { phaseMessages, phaseView, usesPromptAsBuilt } from './phases';
 import { isSignatureError, sendsBuiltInSignature } from './transports/signatures';
 import { encodeJson, errorResponse, familyOf, streamEncoder, type EncodedToolCall } from './encoder';
 import { BackendError, readResponse, type ReadState } from './reader';
@@ -50,23 +53,37 @@ export const handoff = { pending: null as null | { ctx: GenerationContext; outco
 
 const isAbort = (e: unknown) => (e as Error)?.name === 'AbortError';
 
-function capabilityError(ctx: GenerationContext): string | null {
-  if (ctx.transport !== 'tool-single' && ctx.transport !== 'tool-multi') return null;
-  const issue = toolCallingIssue(ctx.config.connection.assumeToolSupport);
-  if (!issue) return null;
-  switch (issue.reason) {
-    case 'postProcessing': return t('error.toolsUnsupported.postProcessing', { value: issue.label });
-    case 'model': return t('error.toolsUnsupported.model', { target: issue.model ? `${issue.source} / ${issue.model}` : issue.source });
-    default: return t(`error.toolsUnsupported.${issue.reason}`);
+/** A phase of the turn with the binding it runs on and ST's body rewritten for the binding's target. */
+interface PreparedPhase { phase: Phase; binding: ResolvedBinding; base: Record<string, any> }
+
+/** Bindings and bodies of every phase, checked before the first request (an error text when one cannot run). */
+async function preparePhases(ctx: GenerationContext, base: Record<string, any>): Promise<PreparedPhase[] | string> {
+  const phases: Phase[] = ctx.phases?.length ? ctx.phases : [{ index: 0, actor: '', stages: ctx.stages, structures: ctx.structures }];
+  const warnings: string[] = [];
+  const out: PreparedPhase[] = [];
+  for (const phase of phases) {
+    const binding = phase.actor ? bindingForActor(ctx.preset, ctx.config, phase.actor, warnings) : selectedBinding(ctx.config, warnings);
+    let body: Record<string, any>;
+    try {
+      body = await applyTarget(base, binding.target);
+    } catch (e) {
+      if (e instanceof BindingError) return e.message;
+      throw e;
+    }
+    const err = bindingCapabilityError(binding, body);
+    if (err) return err;
+    out.push({ phase, binding, base: body });
   }
+  for (const w of new Set(warnings)) ctx.warnings.push(w);
+  return out;
 }
 
 export async function orchestrate(ctx: GenerationContext, base: Record<string, any>, signal?: AbortSignal | null): Promise<Response> {
   const source = String(base.chat_completion_source ?? '');
   const family = familyOf(source, base);
   const stream = Boolean(base.stream);
-  const err = capabilityError(ctx);
-  if (err) { toast('error', err, 'Advanced Preset'); return errorResponse(err, 400); }
+  const prepared = await preparePhases(ctx, base);
+  if (typeof prepared === 'string') { toast('error', prepared, 'Advanced Preset'); return errorResponse(prepared, 400); }
 
   const ours = ctx.origin === 'task' ? presetToolNames(ctx.preset) : new Set<string>();
   const caller: CallerInfo = ctx.origin === 'task'
@@ -77,7 +94,7 @@ export async function orchestrate(ctx: GenerationContext, base: Record<string, a
   if (!stream) {
     let outcome: Outcome;
     try {
-      outcome = await run(ctx, base, caller, g, signal ?? undefined, () => undefined);
+      outcome = await run(ctx, prepared, caller, g, signal ?? undefined, () => undefined);
     } catch (e) {
       return failure(g, e);
     }
@@ -98,7 +115,7 @@ export async function orchestrate(ctx: GenerationContext, base: Record<string, a
   let streamed = '';
   void (async () => {
     try {
-      const outcome = await run(ctx, base, caller, g, signal ?? undefined, (text) => {
+      const outcome = await run(ctx, prepared, caller, g, signal ?? undefined, (text) => {
         if (text.startsWith(streamed) && text.length > streamed.length) { void write(enc.text(text.slice(streamed.length))); streamed = text; }
       });
       // Whatever was not streamed (patched content, held-back tails, task replies) goes out now.
@@ -125,17 +142,18 @@ function failure(g: LiveGeneration, e: unknown): Response {
   return errorResponse(messageOf(e));
 }
 
+/** Requests of one phase in the sidecar diagnostics (multi-model turns). */
+export interface PhaseDiagnostics { index: number; actor: string; binding: string; transport: Transport; stages: string[]; requests: number }
+
 async function run(
   ctx: GenerationContext,
-  base: Record<string, any>,
+  prepared: PreparedPhase[],
   caller: CallerInfo,
   g: LiveGeneration,
   signal: AbortSignal | undefined,
   onContent: (text: string) => void,
 ): Promise<Outcome> {
-  const source = String(base.chat_completion_source ?? '');
-  const family = familyOf(source, base);
-  const driver = createDriver({ ctx, base, messages: base.messages ?? [], caller, family });
+  const multi = prepared.length > 1;
   const terminal = terminalContentIndex(ctx.stages);
   const terminalId = terminal >= 0 ? ctx.stages[terminal]!.id : null;
   const hasPatch = ctx.stages.some((s) => s.kind === 'patch');
@@ -147,75 +165,107 @@ async function run(
   const speech = speechOptions(ctx);
   const cleanAnno = annotating ? (s: string) => parseAnnotations(s, { final: false }).text : (s: string) => s;
   const clean = speech ? (s: string) => parseSpeech(cleanAnno(s), { ...speech, final: false }).text : cleanAnno;
-  const maxSteps = ctx.transport === 'tool-multi' ? Math.max(1, ctx.config.connection.maxSteps) : 1;
   const started = Date.now();
   let reasoning = '';
   let usage: Record<string, unknown> | undefined;
   let requests = 0;
+  let recorded = 0;
   let interrupted = false;
   let callerToolCalls: EncodedToolCall[] | undefined;
   /** Partial turn at the moment of an abort (parsed as non-final so open stages stay open). */
   let partial: TurnResult | undefined;
+  /** Results of the finished phases, each over its own stages. */
+  const parts: { stages: Stage[]; turn: TurnResult }[] = [];
+  const raws: string[] = [];
+  const phaseDiag: PhaseDiagnostics[] = [];
+  let driver: Driver | undefined;
+  /** The phase's turn merged with the earlier phases (a single phase: as it is). */
+  const merged = (turn: TurnResult, stages: Stage[], final: boolean) => (multi ? mergeTurns(ctx.stages, [...parts, { stages, turn }], final) : turn);
 
-  for (let step = 0; step < maxSteps; step++) {
-    g.step = step;
-    const body = driver.body(step);
-    const rec = recordRequest({ genId: ctx.id, step, at: Date.now(), request: body });
-    requests++;
-    let read: ReadState = { text: '', reasoning: '', toolCalls: [] };
-    try {
-      const resp = await nativeFetch(GENERATE_URL, { method: 'POST', headers: st().getRequestHeaders(), body: JSON.stringify(body), signal });
-      let lastUi = 0;
-      for await (const r of readResponse(resp, streamContextOf(body), Boolean(body.stream), signal)) {
-        read = r;
-        const now = Date.now();
-        if (now - lastUi < 50) continue;
-        lastUi = now;
-        const turn = driver.progress(r, false);
-        updateLive(g, turn, reasoning + r.reasoning);
-        if (gate && terminalId) {
-          const text = turn.stages[terminalId]?.text ?? '';
-          if (text) onContent(clean(text.slice(0, text.length - partialTagTail(text))).trimEnd());
+  for (const { phase, binding, base } of prepared) {
+    const view = phaseView(ctx, phase, binding);
+    const family = familyOf(String(base.chat_completion_source ?? ''), base);
+    let messages = base.messages ?? [];
+    let extraTools: any[] | undefined;
+    if (!usesPromptAsBuilt(ctx, phase, view)) {
+      // A later phase: the prompt again for its transport, then what the earlier phases wrote (replay).
+      const items = replayItems(prepared.slice(0, phase.index).map((p) => p.phase), mergeTurns(ctx.stages, parts, true), artifactsOf(view).layout);
+      const built = phaseMessages(view, phase, items, family);
+      messages = built.messages;
+      if (built.tools.length) extraTools = built.tools;
+    }
+    const d = createDriver({ ctx: view, base, messages, caller, family, ...(extraTools ? { extraTools } : {}) });
+    driver = d;
+    const maxSteps = view.transport === 'tool-multi' ? Math.max(1, view.config.connection.maxSteps) : 1;
+    const before = requests;
+
+    for (let step = 0; step < maxSteps; step++) {
+      g.step = recorded;
+      const body = d.body(step);
+      const rec = recordRequest({ genId: ctx.id, step: recorded++, at: Date.now(), request: body });
+      requests++;
+      let read: ReadState = { text: '', reasoning: '', toolCalls: [] };
+      try {
+        const resp = await nativeFetch(GENERATE_URL, { method: 'POST', headers: st().getRequestHeaders(), body: JSON.stringify(body), signal });
+        let lastUi = 0;
+        for await (const r of readResponse(resp, streamContextOf(body), Boolean(body.stream), signal)) {
+          read = r;
+          const now = Date.now();
+          if (now - lastUi < 50) continue;
+          lastUi = now;
+          const turn = merged(d.progress(r, false), phase.stages, false);
+          updateLive(g, turn, reasoning + r.reasoning);
+          if (gate && terminalId) {
+            const text = turn.stages[terminalId]?.text ?? '';
+            if (text) onContent(clean(text.slice(0, text.length - partialTagTail(text))).trimEnd());
+          }
         }
+        // Cache optimization: the state counts from the last successful request of the first phase
+        // (later phases re-render the prompt and never touch the cache state).
+        if (phase.index === 0) commitCache(ctx);
+        rec.response = read.text || JSON.stringify(read.toolCalls);
+        rec.durationMs = Date.now() - rec.at;
+        rec.usage = read.usage;
+      } catch (e) {
+        rec.error = messageOf(e);
+        if (isAbort(e) || signal?.aborted) {
+          // Output had started: the prompt was processed (and cached) by the provider.
+          if (phase.index === 0 && (read.text || read.reasoning || read.toolCalls.length)) commitCache(ctx);
+          usage = addUsage(usage, read.usage);
+          interrupted = true; partial = merged(d.progress(read, false), phase.stages, false); break;
+        }
+        // The channel does not accept the preset's built-in thought signature: retry without it (once).
+        if (!read.text && !read.toolCalls.length && isSignatureError(e) && sendsBuiltInSignature(view, family)) {
+          ctx.signatureFallback = view.signatureFallback = true;
+          ctx.warnings.push('thought signature rejected: retried without the built-in signature');
+          toast('warning', t('error.signatureFallback'), t('app.name'));
+          step--;
+          continue;
+        }
+        throw e;
       }
-      // Cache optimization: the state counts from the last successful request.
-      commitCache(ctx);
-      rec.response = read.text || JSON.stringify(read.toolCalls);
-      rec.durationMs = Date.now() - rec.at;
-      rec.usage = read.usage;
-    } catch (e) {
-      rec.error = messageOf(e);
-      if (isAbort(e) || signal?.aborted) {
-        // Output had started: the prompt was processed (and cached) by the provider.
-        if (read.text || read.reasoning || read.toolCalls.length) commitCache(ctx);
-        usage = addUsage(usage, read.usage);
-        interrupted = true; partial = driver.progress(read, false); break;
+      reasoning += read.reasoning;
+      usage = addUsage(usage, read.usage);
+      d.progress(read, true);
+      const verdict = d.complete(read, step);
+      if (verdict.callerToolCalls) {
+        callerToolCalls = verdict.callerToolCalls.map((c) => ({ id: c.id || `call_${step}`, name: c.name, arguments: c.arguments || '{}', signature: c.signature }));
+        break;
       }
-      // The channel does not accept the preset's built-in thought signature: retry without it (once).
-      if (!read.text && !read.toolCalls.length && isSignatureError(e) && sendsBuiltInSignature(ctx, family)) {
-        ctx.signatureFallback = true;
-        ctx.warnings.push('thought signature rejected: retried without the built-in signature');
-        toast('warning', t('error.signatureFallback'), t('app.name'));
-        step--;
-        continue;
-      }
-      throw e;
+      if (verdict.done) break;
     }
-    reasoning += read.reasoning;
-    usage = addUsage(usage, read.usage);
-    driver.progress(read, true);
-    const verdict = driver.complete(read, step);
-    if (verdict.callerToolCalls) {
-      callerToolCalls = verdict.callerToolCalls.map((c) => ({ id: c.id || `call_${step}`, name: c.name, arguments: c.arguments || '{}', signature: c.signature }));
-      break;
-    }
-    if (verdict.done) break;
+    raws.push(d.rawText());
+    if (multi) phaseDiag.push({ index: phase.index, actor: phase.actor, binding: binding.id, transport: view.transport, stages: phase.stages.map((s) => s.id), requests: requests - before });
+    if (interrupted) break;
+    parts.push({ stages: phase.stages, turn: d.result() });
+    if (callerToolCalls) break;
   }
 
-  const turn = partial ?? driver.result();
+  const turn = partial ?? (multi ? mergeTurns(ctx.stages, parts, true) : parts[0]?.turn ?? driver!.result());
   if (interrupted) for (const s of Object.values(turn.stages)) if (s.status === 'streaming') s.status = 'interrupted';
   updateLive(g, turn, reasoning);
-  const outcome = finish(ctx, turn, driver.rawText(), driver.callerResult?.(), reasoning, { usage, requests, durationMs: Date.now() - started, interrupted });
+  const raw = multi ? raws.filter((x) => x.trim()).join('\n\n') : raws[0] ?? '';
+  const outcome = finish(ctx, turn, raw, driver?.callerResult?.(), reasoning, { usage, requests, durationMs: Date.now() - started, interrupted, ...(multi ? { phases: phaseDiag } : {}) });
   outcome.toolCalls = callerToolCalls;
   outcome.usage = usage;
   if (callerToolCalls) outcome.content = '';
@@ -229,7 +279,7 @@ function finish(
   raw: string,
   callerResult: unknown,
   reasoning: string,
-  diag: { usage: unknown; requests: number; durationMs: number; interrupted: boolean },
+  diag: { usage: unknown; requests: number; durationMs: number; interrupted: boolean; phases?: PhaseDiagnostics[] },
 ): Outcome {
   const { preset, config } = ctx;
   const warnings = [...ctx.warnings, ...turn.warnings];
@@ -360,7 +410,7 @@ function finish(
     events,
     ...(ctx.meta.segments.length ? { metaInput: ctx.meta.segments } : {}),
     ...(reasoning ? { reasoning } : {}),
-    diagnostics: { warnings, requests: diag.requests, usage: diag.usage, durationMs: diag.durationMs },
+    diagnostics: { warnings, requests: diag.requests, usage: diag.usage, durationMs: diag.durationMs, ...(diag.phases ? { phases: diag.phases } : {}) },
   };
   const outcome: Outcome = { content: mes, reasoning, sidecar, ...(global.length ? { global } : {}) };
   if (persisted) handoff.pending = { ctx, outcome, at: Date.now() };

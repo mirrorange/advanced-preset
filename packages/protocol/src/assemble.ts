@@ -48,6 +48,19 @@ export interface Vars {
   image: ImageVars;
   /** `speech.*`: speech synthesis (always off when the preset does not declare `speech`). */
   speech: SpeechVars;
+  /** `multiModel`: the preset supports multi-model workflows and the configuration switched them on (story turns). */
+  multiModel: boolean;
+  /** `phase.*`: the part of the workflow the current request executes (the whole turn without multi-model). */
+  phase: PhaseVars;
+}
+
+export interface PhaseVars {
+  /** `phase.stages.<id>`: the stage is executed by the current request. */
+  stages: Record<string, boolean>;
+  /** 0-based index of the phase in the turn. */
+  index: number;
+  /** Actor of the phase (`''` without multi-model). */
+  actor: string;
 }
 
 export function resolverOf(vars: Vars): Resolver {
@@ -137,6 +150,8 @@ export interface AssemblyInput {
   config: Configuration;
   vars: Vars;
   data?: MacroData;
+  /** The request executes only these stages (multi-model phase); default: every active stage. */
+  phase?: { stages: string[]; index: number; actor: string };
 }
 
 export interface Assembly {
@@ -325,6 +340,9 @@ export function assemble(input: AssemblyInput, workflowOverride?: Workflow): Ass
   const preResolve = resolverOf(vars);
   const stages = workflow ? activeStages(workflow, preResolve) : [];
   vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
+  vars.phase = input.phase
+    ? { stages: Object.fromEntries(input.phase.stages.map((id) => [id, true])), index: input.phase.index, actor: input.phase.actor }
+    : { stages: { ...vars.stages }, index: 0, actor: '' };
   const resolve = resolverOf(vars);
   const modules = activeModules(preset, config, resolve);
   const structures = activeStructures(preset, modules, vars);
@@ -381,6 +399,8 @@ export function defaultVars(preset: APreset, config: Configuration, over: Partia
     storyline: { ...MAIN_STORYLINE_VARS },
     image: { ...IMAGE_OFF },
     speech: { ...SPEECH_OFF },
+    multiModel: false,
+    phase: { stages: {}, index: 0, actor: '' },
     ...over,
   };
 }

@@ -138,7 +138,9 @@ export function applySticky(ctx: GenerationContext, final: ChatMessage[], histor
     slots.push({ index: i, sticky, fresh });
   }
 
-  const fp: CacheFingerprint = { model: connectionKey(), tools: toolsFingerprint(ctx), prompt: promptFingerprint(final.slice(0, historyAt)) };
+  // A first request on another binding target (profile / model name) is another model for the cache.
+  const model = ctx.firstTarget ? `${connectionKey()}|${JSON.stringify(ctx.firstTarget)}` : connectionKey();
+  const fp: CacheFingerprint = { model, tools: toolsFingerprint(ctx), prompt: promptFingerprint(final.slice(0, historyAt)) };
   const prev = cacheState(plan.chat);
   const res = resolveSticky(cands, prev, fp, cfg, now, plan.omitted);
   let sticky = 0;
