@@ -1,13 +1,14 @@
 /**
  * Regression: without multi-model (and for presets that do not declare it) every request AP sends
  * is exactly what Advanced Preset 1.12.1 sent. The fixture was captured with 1.12.1's engine
- * (`CAPTURE=1 pnpm vitest run test/multi-model-regression.test.ts` on that version).
+ * (`CAPTURE=1 pnpm vitest run test/multi-model-regression.test.ts` on that version) for Petals 7.12.1,
+ * kept in fixtures/petals-7.12.1.apreset.json so later Petals releases do not move the baseline.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resolveConfiguration, type APreset, type Configuration, type Transport } from '@advanced-preset/protocol';
 import type { ChatMessage, STMessage } from '@/st/host';
-import { petals } from './helpers';
+import { petals712 as petals } from './helpers';
 
 const state: { preset: APreset; config: Configuration } = { preset: petals, config: resolveConfiguration(petals, 'other', {}) };
 vi.mock('@/store/settings', async (orig) => ({ ...(await orig<object>()), settings: () => ({ enabled: true }) }));

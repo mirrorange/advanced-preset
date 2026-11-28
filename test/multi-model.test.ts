@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cloneData, parseDialogue, resolveConfiguration, type APreset, type Configuration, type ConnectionBinding, type Transport } from '@advanced-preset/protocol';
 import type { ChatMessage, STMessage } from '@/st/host';
-import { petals } from './helpers';
+import { petals712 as petals } from './helpers';
 
 const state: { preset: APreset; config: Configuration } = { preset: petals, config: resolveConfiguration(petals, 'other', {}) };
 vi.mock('@/store/settings', async (orig) => ({ ...(await orig<object>()), settings: () => ({ enabled: true }) }));

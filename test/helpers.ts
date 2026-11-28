@@ -11,6 +11,8 @@ export function withoutTemplates(p: APreset): APreset {
 }
 
 export const petals = upgradeArtifact(JSON.parse(readFileSync(new URL('../dist/presets/petals.apreset.json', import.meta.url), 'utf8')))!;
+/** Petals 7.12.1, frozen: what the 1.12.1 request fixture was recorded with (no multiModel declaration). */
+export const petals712 = upgradeArtifact(JSON.parse(readFileSync(new URL('./fixtures/petals-7.12.1.apreset.json', import.meta.url), 'utf8')))!;
 
 export function ctxFor(transport: Transport, workflowId = 'linear', over: Partial<GenerationContext> = {}, preset: APreset = petals): GenerationContext {
   const config = resolveConfiguration(preset, 'other', { connection: { transport, workflow: workflowId } });
