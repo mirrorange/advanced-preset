@@ -16,7 +16,7 @@ import type { GenerationContext } from './context';
 import { createDriver, type CallerInfo, type Driver } from './transports';
 import { artifactsOf, presetToolNames } from './transports/base';
 import { BindingError, applyTarget, bindingCapabilityError, bindingForActor, selectedBinding, type ResolvedBinding } from './bindings';
-import { phaseMessages, phaseView, usesPromptAsBuilt } from './phases';
+import { dialoguePhaseEnd, phaseMessages, phaseView, usesPromptAsBuilt } from './phases';
 import { isSignatureError, sendsBuiltInSignature } from './transports/signatures';
 import { encodeJson, errorResponse, familyOf, streamEncoder, type EncodedToolCall } from './encoder';
 import { BackendError, readResponse, type ReadState } from './reader';
@@ -194,7 +194,9 @@ async function run(
       messages = built.messages;
       if (built.tools.length) extraTools = built.tools;
     }
-    const d = createDriver({ ctx: view, base, messages, caller, family, ...(extraTools ? { extraTools } : {}) });
+    // A dialogue phase ends where the next one starts (multi-model only: one phase has no next).
+    const phaseEnd = multi ? dialoguePhaseEnd(view, phase, prepared[phase.index + 1]?.phase) : undefined;
+    const d = createDriver({ ctx: view, base, messages, caller, family, ...(extraTools ? { extraTools } : {}), ...(phaseEnd ? { phaseEnd } : {}) });
     driver = d;
     const maxSteps = view.transport === 'tool-multi' ? Math.max(1, view.config.connection.maxSteps) : 1;
     const before = requests;

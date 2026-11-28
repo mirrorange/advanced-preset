@@ -29,7 +29,8 @@ export function textDriver(input: DriverInput): Driver {
   return {
     body: () => {
       const extra: Record<string, unknown> = {};
-      if (prefill && ctx.preset.stop.length) extra.stop = [...new Set([...(input.base.stop ?? []), ...ctx.preset.stop])];
+      const stop = [...(prefill ? ctx.preset.stop : []), ...(input.phaseEnd?.stop ?? [])];
+      if (stop.length) extra.stop = [...new Set([...(input.base.stop ?? []), ...stop])];
       return baseBody({ ...input, messages }, extra);
     },
     progress: (read, final) => {
@@ -37,6 +38,7 @@ export function textDriver(input: DriverInput): Driver {
       let text = read.text;
       // client-side stop fallback
       for (const s of prefill ? ctx.preset.stop : []) { const i = text.indexOf(s); if (i >= 0) text = text.slice(0, i); }
+      if (input.phaseEnd) text = input.phaseEnd.cut(text);
       turn = parse(text, final);
       return turn;
     },

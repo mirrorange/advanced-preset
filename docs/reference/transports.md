@@ -159,6 +159,7 @@ prefill 与 plaintext 的输出按以下步骤解析（流式时对累计文本�
 - 先前的思考（reasoning）一律丢弃。
 - Gemini 线路（以及开启 `connection.openAiSignatures` 的 OpenAI 兼容线路）上，合成的工具调用带跳过校验的哨兵签名 `skip_thought_signature_validator`。
 - 顺序：提示词 → 回放 → 本组的阶段区域 → 示范轮次（工具传输）。`prefill` 时阶段区域放在预填充助手消息之前，回放在助手消息之内。
+- **对话式组的结束**：`prefill` / `plaintext` 的组后面还有组时，下一组的开头（其第一个阶段的标签，否则其 actor 的前缀，位于行首）作为本次请求的停止词（`prefill` 时加在 `stop` 之后）；客户端同样截断：模型越过本组继续写下去的部分（下一组的开头、其他 actor 的行首前缀、本组以外阶段的标签、本组不含正文阶段时的 `contentMarker`）被丢弃。最后一组不加停止词、不截断；多模型关闭时不变。
 - 这些重新组装的请求不参与缓存优化（见[多模型工作流](workflows.md#多模型工作流)）。
 
 ## 能力检查
