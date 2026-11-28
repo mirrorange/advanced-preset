@@ -66,6 +66,23 @@ export interface STContext {
   POPUP_RESULT?: { AFFIRMATIVE: number };
   getCurrentChatId?(): string | undefined;
   streamingProcessor: { messageId: number; type: string } | null;
+  /** `/api` names → API type / Chat Completion source (ST 1.12.12+). */
+  CONNECT_API_MAP?: Record<string, { selected: string; source?: string; type?: string }>;
+}
+
+/** A SillyTavern Connection Manager profile (only the fields AP reads). */
+export interface ConnectionProfile {
+  id: string;
+  name?: string;
+  /** `cc` Chat Completion, `tc` Text Completion. */
+  mode?: string;
+  api?: string;
+  model?: string;
+  proxy?: string;
+  'api-url'?: string;
+  'secret-id'?: string;
+  'prompt-post-processing'?: string;
+  [key: string]: unknown;
 }
 
 export const st = (): STContext => (globalThis as any).SillyTavern.getContext();
@@ -78,7 +95,13 @@ export interface StreamContext { chatCompletionSource: string; model?: string | 
 type StreamingReply = (data: unknown, state: StreamState, options: Partial<StreamContext> & { overrideShowThoughts?: boolean }) => string;
 export interface StreamState { reasoning: string; images: string[]; signature: string; toolSignatures: Record<string, string> }
 
-let openaiModule: { getStreamingReply?: StreamingReply; getChatCompletionModel?: (settings?: unknown) => string } = {};
+type GenerationParameters = (settings: Record<string, any>, model: string, type: string, messages: unknown[]) => Promise<{ generate_data: Record<string, any> }>;
+let openaiModule: {
+  getStreamingReply?: StreamingReply;
+  getChatCompletionModel?: (settings?: unknown) => string;
+  createGenerationParameters?: GenerationParameters;
+  proxies?: { name: string; url: string; password: string }[];
+} = {};
 
 /** URL of a ST module relative to this bundle (`/scripts/extensions/third-party/<name>/dist/index.js`). */
 const hostUrl = (path: string) => new URL(path, import.meta.url).href;
@@ -102,11 +125,11 @@ export function connectionKey(): string {
   return [source, chatCompletionModel(s), endpoint].join('|');
 }
 
-/** Model of the current Chat Completion connection (ST's own lookup when available). */
-function chatCompletionModel(s: Record<string, any>): string {
+/** Model of a Chat Completion connection, the current one by default (ST's own lookup when available). */
+export function chatCompletionModel(s: Record<string, any>, ofSettings = false): string {
   const source = String(s.chat_completion_source ?? '');
   let model = '';
-  try { model = String(openaiModule.getChatCompletionModel?.() ?? ''); } catch { model = ''; }
+  try { model = String((ofSettings ? openaiModule.getChatCompletionModel?.(s) : openaiModule.getChatCompletionModel?.()) ?? ''); } catch { model = ''; }
   if (!model) {
     const key = ({ makersuite: 'google_model', mistralai: 'mistralai_model' } as Record<string, string>)[source] ?? `${source}_model`;
     model = String(s[key] ?? '');
@@ -129,17 +152,48 @@ export type ToolCallingIssue =
  * whether ST adds the tools registered in ST, and AP sends its own. `assumeSupport` skips the
  * source / model check, which relies on the model list's metadata.
  */
-export function toolCallingIssue(assumeSupport = false): ToolCallingIssue | null {
+export function toolCallingIssue(assumeSupport = false, target?: { source: string; model: string; postProcessing: string }): ToolCallingIssue | null {
   const c = st();
-  const s = c.chatCompletionSettings ?? {};
+  const live = c.chatCompletionSettings ?? {};
+  // A binding to another connection: its source, model and post-processing (the rest as configured).
+  const s = target ? { ...live, chat_completion_source: target.source, custom_prompt_post_processing: target.postProcessing } : live;
   if (c.mainApi !== 'openai') return { reason: 'mainApi' };
   // The backend applies post-processing to every source; the "no tools" types flatten tool calls.
   const pp = String(s.custom_prompt_post_processing ?? '');
   if (!TOOL_POST_PROCESSING.includes(pp)) return { reason: 'postProcessing', label: postProcessingLabel(pp) };
-  if (assumeSupport || c.isToolCallingSupported({ ...s, function_calling: true })) return null;
+  if (assumeSupport || c.isToolCallingSupported({ ...s, function_calling: true }, target?.model)) return null;
   // ST versions that ignore the settings argument still check their own switch.
   if (!s.function_calling) return { reason: 'functionCalling' };
-  return { reason: 'model', source: String(s.chat_completion_source ?? ''), model: chatCompletionModel(s) };
+  return { reason: 'model', source: String(s.chat_completion_source ?? ''), model: target?.model ?? chatCompletionModel(s) };
+}
+
+/** Chat Completion profiles and other profiles of ST's Connection Manager (`[]` when it is off). */
+export function connectionProfiles(): ConnectionProfile[] {
+  const c = st();
+  if ((c.extensionSettings?.disabledExtensions as string[] | undefined)?.includes('connection-manager')) return [];
+  const list = c.extensionSettings?.connectionManager?.profiles;
+  return Array.isArray(list) ? list.filter((p): p is ConnectionProfile => Boolean(p) && typeof p.id === 'string') : [];
+}
+
+/** Chat Completion source of a profile's `api` (`null`: a Text Completion or unknown API). */
+export function profileSource(api: string): string | null {
+  const map = st().CONNECT_API_MAP;
+  if (map && typeof map === 'object') {
+    const e = map[api.toLowerCase()];
+    return e ? (e.selected === 'openai' && e.source ? e.source : null) : null;
+  }
+  // Older ST without the map on the context: the aliases of `/api`, other names are sources.
+  return ({ oai: 'openai', google: 'makersuite' } as Record<string, string>)[api] ?? api;
+}
+
+/** ST's reverse proxy presets (by name). */
+export const proxyPreset = (name: string) => openaiModule.proxies?.find((p) => p.name === name);
+
+/** ST's request body for Chat Completion settings (`null` when openai.js is not importable). */
+export async function generationParameters(settings: Record<string, any>, model: string, type: string): Promise<Record<string, any> | null> {
+  const f = openaiModule.createGenerationParameters;
+  if (!f) return null;
+  return (await f(settings, model, type, [])).generate_data;
 }
 
 /** Label of a post-processing type as ST's own dropdown shows it (localized by ST). */
