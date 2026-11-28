@@ -7387,6 +7387,18 @@ var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
 var CARD_POSITIONS = ["top", "bottom"];
 var USER_INPUT_MODES = ["keep", "truncate", "remove"];
 var DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = "{{content}}\n\n[{{time}} \xB7 {{location}}] {{event}}: {{summary}}";
+var BINDING_TARGET_TYPES = ["current", "profile", "model"];
+var BINDING_TRANSPORT_KEYS = [
+  "transport",
+  "forceTool",
+  "parallelTools",
+  "syntheticTurn",
+  "sendThoughtSignature",
+  "openAiSignatures",
+  "streamToolArguments",
+  "maxSteps",
+  "assumeToolSupport"
+];
 
 // ../protocol/src/expr.ts
 var ExprError = class extends Error {
@@ -8438,6 +8450,14 @@ var CONNECTION_DEFAULTS = {
   finalFallback: true,
   assumeToolSupport: false
 };
+var BINDING_DEFAULTS = {
+  target: { type: "current" },
+  bindings: {},
+  binding: "default"
+};
+var DEFAULT_BINDING = "default";
+var MULTI_MODEL_SINCE = "1.13.0";
+var MULTI_MODEL_CONFIG_DEFAULTS = { enabled: false, actors: {} };
 var CACHE_DEFAULTS = {
   enabled: false,
   ttlMinutes: 5,
@@ -8471,7 +8491,10 @@ function pruneDiff(diff, shape, path = "", removed = [], openMaps = OPEN_MAPS) {
   }
   return removed;
 }
-var OPEN_MAPS = /* @__PURE__ */ new Set(["sampling"]);
+var OPEN_MAPS = /* @__PURE__ */ new Set(["sampling", "connection.target", "connection.bindings", "multiModel.actors"]);
+function configurationShape(preset) {
+  return deepMerge({ connection: BINDING_DEFAULTS }, preset.configurationDefaults);
+}
 function recommended(preset, id) {
   return preset.configurations.find((c) => c.id === id) ?? preset.configurations.find((c) => c.id === preset.defaultConfiguration);
 }
@@ -10816,6 +10839,16 @@ function compile(tree) {
     for (const k of Object.keys(v)) diag.warn(`${key}: unknown key \`${k}\``, { file: M, path: `${key}.${k}` });
     return {};
   };
+  let multiModel;
+  if (raw.multiModel !== void 0 && raw.multiModel !== null && raw.multiModel !== false) {
+    if (raw.multiModel === true) multiModel = {};
+    else if (!isObj5(raw.multiModel)) diag.error("multiModel must be `true` or a mapping { enabled }", { file: M, path: "multiModel" });
+    else {
+      for (const k of Object.keys(raw.multiModel)) if (k !== "enabled") diag.warn(`multiModel: unknown key \`${k}\``, { file: M, path: `multiModel.${k}` });
+      if (raw.multiModel.enabled !== void 0 && typeof raw.multiModel.enabled !== "boolean") diag.error("multiModel.enabled must be a boolean", { file: M, path: "multiModel.enabled" });
+      if (raw.multiModel.enabled !== false) multiModel = {};
+    }
+  }
   const image = mediaFlag("image");
   const speech = mediaFlag("speech");
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
@@ -10951,7 +10984,9 @@ function compile(tree) {
     cache: { ...CACHE_DEFAULTS, ...sect("cache") },
     meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") },
     // Only for presets with storylines, so that other artifacts keep their hash.
-    ...storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...sect("storylines") } } : {}
+    ...storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...sect("storylines") } } : {},
+    // Only for presets with multi-model workflows, so that other artifacts keep their hash.
+    ...multiModel ? { multiModel: { ...MULTI_MODEL_CONFIG_DEFAULTS, ...sect("multiModel"), actors: { ...isObj5(sect("multiModel").actors) ? sect("multiModel").actors : {} } } } : {}
   };
   for (const k of ["names", "prefixes"]) if (isObj5(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
@@ -10995,6 +11030,27 @@ function compile(tree) {
     }
   };
   if (isObj5(cd.storylines)) checkStorylines(cd.storylines, "configurationDefaults.storylines");
+  const checkMultiModel = (c, path) => {
+    if (!multiModel) return void diag.warn(`${path}: the preset does not declare multiModel (ignored)`, { file: M, path });
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (k === "enabled") {
+        if (typeof v !== "boolean") diag.error("`enabled` must be a boolean", where);
+      } else if (k === "actors") {
+        if (!isObj5(v)) {
+          diag.error("`actors` must be a mapping actor \u2192 binding id", where);
+          continue;
+        }
+        for (const [a, b] of Object.entries(v)) {
+          const at = { file: M, path: `${path}.actors.${a}` };
+          if (!actors[a]) diag.error(`${path}.actors: unknown actor \`${a}\``, at);
+          else if (a === user) diag.warn(`${path}.actors: the user actor never runs a stage`, at);
+          if (typeof b !== "string" || !b) diag.error(`${path}.actors.${a} must be a binding id`, at);
+        }
+      } else diag.warn(`unknown multiModel option \`${k}\``, where);
+    }
+  };
+  if (isObj5(cd.multiModel)) checkMultiModel(cd.multiModel, "configurationDefaults.multiModel");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
     const o = isObj5(c) ? c : {};
@@ -11005,6 +11061,7 @@ function compile(tree) {
     if (isObj5(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj5(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
     if (isObj5(rc.diff.storylines)) checkStorylines(rc.diff.storylines, `configurations[${i}].diff.storylines`);
+    if (isObj5(rc.diff.multiModel)) checkMultiModel(rc.diff.multiModel, `configurations[${i}].diff.multiModel`);
     if (isObj5(rc.diff.params)) checkParams(rc.diff.params, `configurations[${i}].diff.params`, (k, v) => {
       rc.diff.params[k] = v;
     }, false);
@@ -11069,6 +11126,7 @@ function compile(tree) {
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
     ...inputShaping ? { inputShaping } : {},
     ...storylines ? { storylines } : {},
+    ...multiModel ? { multiModel } : {},
     ...image ? { image } : {},
     ...speech ? { speech } : {},
     params,
@@ -11528,6 +11586,8 @@ function validate(p, map, diag) {
   if (namingStructures.length > 1) diag.warn(`structures ${namingStructures.map((s) => s.id).join(", ")}: only one storyline structure is read (${namingStructures[0].id})`, { file: M, path: `structures.${namingStructures[1].id}` });
   if (p.storylines && !namingStructures.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
     diag.warn("no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names", { file: M, path: "storylines" });
+  if (p.multiModel && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, MULTI_MODEL_SINCE) < 0))
+    diag.warn(`multiModel needs Advanced Preset ${MULTI_MODEL_SINCE}: set minAdvancedPreset to ${MULTI_MODEL_SINCE} or later (older versions run every stage in one request)`, { file: M, path: "minAdvancedPreset" });
   if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
     diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: "minAdvancedPreset" });
   for (const key of ["image", "speech"]) {
@@ -11751,14 +11811,47 @@ function validate(p, map, diag) {
       else if (wf.kind !== "story") diag.error(`workflow \`${conn.workflow}\` is a task workflow`, { file: M, path });
     }
     if (conn.syntheticTurn && !p.syntheticTurns.some((s) => s.id === conn.syntheticTurn)) diag.error(`unknown synthetic turn \`${conn.syntheticTurn}\``, { file: M, path });
+    if (conn.target !== void 0) checkTarget(conn.target, `${path}.target`);
+    if (conn.bindings !== void 0) {
+      if (!conn.bindings || typeof conn.bindings !== "object" || Array.isArray(conn.bindings)) diag.error("bindings must be a mapping id \u2192 binding", { file: M, path: `${path}.bindings` });
+      else for (const [id, b] of Object.entries(conn.bindings)) {
+        const at = `${path}.bindings.${id}`;
+        if (id === DEFAULT_BINDING) diag.error(`binding id \`${DEFAULT_BINDING}\` is the connection itself: set its fields on the connection`, { file: M, path: at });
+        if (!b || typeof b !== "object") {
+          diag.error("a binding must be a mapping { name, target, transport, \u2026 }", { file: M, path: at });
+          continue;
+        }
+        if (b.name !== void 0 && typeof b.name !== "string") diag.error("binding name must be a string", { file: M, path: at });
+        if (b.target === void 0) diag.error("binding has no target", { file: M, path: at });
+        else checkTarget(b.target, `${at}.target`);
+        const { target: _t, name: _n, ...transport } = b;
+        checkConnection(transport, at);
+        for (const k of Object.keys(transport)) if (!BINDING_TRANSPORT_KEYS.includes(k)) diag.warn(`unknown binding option \`${k}\``, { file: M, path: at });
+      }
+    }
+  };
+  const checkTarget = (target, path) => {
+    const x = target;
+    if (!x || typeof x !== "object" || !BINDING_TARGET_TYPES.includes(x.type)) diag.error(`target must be { type: ${BINDING_TARGET_TYPES.join(" | ")} }`, { file: M, path });
+    else if (x.type === "profile" && typeof x.profile !== "string") diag.error("a profile target needs `profile` (a SillyTavern connection profile id)", { file: M, path });
+    else if (x.type === "model" && (typeof x.model !== "string" || !x.model.trim())) diag.error("a model target needs `model` (a model name)", { file: M, path });
+    else if (x.type === "profile") diag.warn("profile targets name a connection profile of one SillyTavern install: other users will not have it", { file: M, path });
+  };
+  const checkBindingRefs = (full, path) => {
+    const ids = /* @__PURE__ */ new Set([DEFAULT_BINDING, ...Object.keys(full.connection.bindings ?? {})]);
+    const sel = full.connection.binding;
+    if (sel !== void 0 && !ids.has(sel)) diag.error(`binding \`${sel}\` does not exist`, { file: M, path: `${path}.connection.binding` });
+    for (const [a, id] of Object.entries(full.multiModel?.actors ?? {})) if (!ids.has(id)) diag.error(`actor ${a}: binding \`${id}\` does not exist`, { file: M, path: `${path}.multiModel.actors.${a}` });
   };
   checkConnection(c, "configurationDefaults.connection");
+  checkBindingRefs(p.configurationDefaults, "configurationDefaults");
   for (const rc of p.configurations) {
     const path = `configurations.${rc.id}`;
     const diff = structuredClone(rc.diff);
-    for (const removed of pruneDiff(diff, p.configurationDefaults)) diag.error(`unknown configuration key \`${removed}\``, { file: M, path });
+    for (const removed of pruneDiff(diff, configurationShape(p))) diag.error(`unknown configuration key \`${removed}\``, { file: M, path });
     checkConnection(rc.diff.connection ?? {}, `${path}.connection`);
     const full = deepMerge(p.configurationDefaults, rc.diff);
+    checkBindingRefs(full, path);
     for (const [g, ids] of exclusive) if (ids.filter((id) => full.modules[id]).length > 1) diag.warn(`${rc.id}: exclusive group \`${g}\` has several modules enabled`, { file: M, path });
   }
   if (new Set(p.configurations.map((x) => x.id)).size !== p.configurations.length) diag.error("duplicate configuration ids", { file: M, path: "configurations" });

@@ -93,6 +93,11 @@ export interface Region {
   separator: string;
   /** Native region: holds ST markers; AP never writes into it. */
   native?: boolean;
+  /**
+   * Stage region (multi-model workflows): no Carrier anchor; its content is appended to the tail of
+   * the request that executes this stage (after the replayed earlier phases).
+   */
+  beforeStage?: string;
 }
 
 export type SemanticAnchor = 'historyStart' | 'historyEnd' | 'tail';
