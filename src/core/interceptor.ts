@@ -13,7 +13,7 @@ import { t } from '@/i18n';
 import { classify, metaTrigger, pickWorkflow } from './classify';
 import { newGenId, registry, type GenerationContext } from './context';
 import { annotationHistory, historyEchoes, rewriteHistoryIndexed, speechHistory, synopsisOptions } from './history';
-import { buildVarsAndData, storylineViewOf } from './assembler';
+import { buildVarsAndData, firstBinding, multiModelTurn, storylineViewOf } from './assembler';
 import { keywordTexts } from '@/store/user-modules';
 import { detachRegeneratingSidecar } from '@/store/sidecar';
 import { cacheState, currentChatKey, storylineCacheKey } from '@/store/cache-state';
@@ -79,8 +79,11 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
   const { meta, flags, origin } = classify(preset, config, input, stType, true, recentTexts);
 
   // Condition variables as far as they are known before assembly (structure history conditions, I-139).
-  const transport = config.connection.transport;
-  const { vars } = buildVarsAndData({ preset, config, transport, origin, stType, meta, flags, storylines }, pickWorkflow(preset, config, origin));
+  // The first request's binding decides the transport (the selected binding, or the first actor's with multi-model).
+  const multiModel = multiModelTurn(preset, config, origin);
+  const binding = firstBinding({ preset, config, origin, stType, meta, flags, storylines }, multiModel);
+  const transport = binding.transport;
+  const { vars } = buildVarsAndData({ preset, config, transport, origin, stType, meta, flags, storylines, multiModel }, pickWorkflow(preset, config, origin));
   const rewriteOptions = {
     trigger: metaTrigger(preset, config),
     wrap: preset.meta.wrap,
@@ -150,6 +153,8 @@ export async function advancedPresetInterceptor(chat: STMessage[], _contextSize:
     storylines,
     createdAt: Date.now(),
     warnings: [],
+    ...(multiModel ? { multiModel } : {}),
+    ...(binding.target.type !== 'current' ? { firstTarget: binding.target } : {}),
   };
   // Variables stay as they were on frozen storylines (I-154, I-163).
   beginTurn({ line: storylines?.current, frozen: Boolean(storylines?.vars.frozen), from: ctx.inputIndex >= 0 ? ctx.inputIndex : real.length - 1 });

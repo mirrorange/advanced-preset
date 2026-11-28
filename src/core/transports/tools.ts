@@ -31,7 +31,7 @@ export function toolSingleDriver(input: DriverInput): Driver {
   const submit = art.submitTool(caller.schema ? (enveloped ? art.envelope(caller.schema.value) : caller.schema.value) : undefined);
   const submitName = submit.function.name;
   const syn = syntheticTurn(input, 'single', submitName);
-  const tools = [...(syn ? [syn.tool] : []), submit, ...caller.tools];
+  const tools = [...(syn ? [syn.tool] : []), ...(input.extraTools ?? []), submit, ...caller.tools];
   const messages = [...input.messages, ...(syn?.messages ?? [])];
   const force = ctx.config.connection.forceTool && !caller.tools.length;
   let last: ReadState = { text: '', reasoning: '', toolCalls: [] };
@@ -64,7 +64,7 @@ export function toolMultiDriver(input: DriverInput): Driver {
   const stageTools = art.stageTools();
   const first = stageTools[0]?.function.name ?? '';
   const syn = syntheticTurn(input, parallel ? 'parallel' : 'multi', first);
-  const tools = [...(syn ? [syn.tool] : []), ...stageTools, ...caller.tools];
+  const tools = [...(syn ? [syn.tool] : []), ...(input.extraTools ?? []), ...stageTools, ...caller.tools];
   const convo: ChatMessage[] = [...input.messages, ...(syn?.messages ?? [])];
   const byTool = new Map(stages.map((s) => [art.toolOf(s), s]));
   /** Turn object keyed like the structured schema, so the shared object parser does the rest. */

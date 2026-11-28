@@ -68,7 +68,8 @@ export interface Sidecar {
   /** Meta segments of the user input of this turn (for `recent_meta`). */
   metaInput?: string[];
   reasoning?: string;
-  diagnostics?: { warnings: string[]; requests: number; usage?: unknown; durationMs?: number };
+  /** `phases`: multi-model turns, the requests of each phase and the binding it ran on. */
+  diagnostics?: { warnings: string[]; requests: number; usage?: unknown; durationMs?: number; phases?: { index: number; actor: string; binding: string; transport: Transport; stages: string[]; requests: number }[] };
 }
 
 export const SIDECAR_KEY = 'advanced_preset';

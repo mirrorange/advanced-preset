@@ -3,7 +3,7 @@ import {
   isInlineStructure,
   INPUT_SHAPING_SINCE, STORYLINES_SINCE, LIST_PARAMS_SINCE, MACRO_HEADS, TEMPLATES_SINCE, TOOL_ARG_STREAMING, compareVersions, templateCode, TRANSPORTS, VAR_SELECTORS, listMacros, pruneDiff, deepMerge, configurationShape, variables, turnArtifacts, STRUCTURE_LAYOUT_SINCE, CONTENT_STAGE_REF, checkTemplate, REGEX_SCRIPTS_SINCE, QUICK_REPLIES_SINCE, QR_TEXT_FIELDS, TAVERN_HELPER_SINCE,
   SIGNATURE_CHANNELS_SINCE, THOUGHT_SIGNATURE_CHANNELS, CALLER_SCHEMA_DIRECT_SINCE,
-  MEDIA_SINCE, IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS,
+  MEDIA_SINCE, IMAGE_APIS, IMAGE_PROMPT_TYPES, SPEECH_APIS, STAGE_REGIONS_SINCE,
   type APreset, type Expr,
 } from '@advanced-preset/protocol';
 import type { Diagnostics, Where } from './diagnostics';
@@ -51,6 +51,9 @@ const FIXED_VARS: Record<string, readonly string[] | null> = {
   'speech.api': SPEECH_APIS,
   'speech.narrator': null,
   'speech.characters': null,
+  multiModel: null,
+  'phase.index': null,
+  'phase.actor': null,
 };
 
 export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
@@ -68,6 +71,11 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
     if (path in FIXED_VARS) return;
     const [root, ...rest] = path.split('.');
     const key = rest.join('.');
+    if (root === 'phase' && rest[0] === 'stages') {
+      const id = rest.slice(1).join('.');
+      if (!stageIds.has(id)) diag.error(`unknown stage \`${id}\` in condition`, where);
+      return;
+    }
     if (root === 'last') {
       const decl = p.structures[key];
       if (!decl) return diag.error(`unknown structure \`${key}\` in condition`, where);
@@ -259,6 +267,12 @@ export function validate(p: APreset, map: SourceMap, diag: Diagnostics): void {
   }
   for (const r of p.regions) {
     if (r.native && p.workflowRegion === r.id) diag.error('workflowRegion cannot be a native region', { file: M, path: 'workflowRegion' });
+    if (r.beforeStage) {
+      if (!stageIds.has(r.beforeStage)) diag.error(`region \`${r.id}\`: beforeStage \`${r.beforeStage}\` is not a stage of any workflow`, { file: M, path: 'regions' });
+      if (p.workflowRegion === r.id) diag.error('workflowRegion cannot be a stage region', { file: M, path: 'workflowRegion' });
+      if (Object.values(p.anchors).includes(r.id)) diag.error(`region \`${r.id}\`: a stage region cannot be a semantic anchor`, { file: M, path: 'anchors' });
+      if (below(STAGE_REGIONS_SINCE)) diag.warn(`stage regions need Advanced Preset ${STAGE_REGIONS_SINCE}: set minAdvancedPreset to ${STAGE_REGIONS_SINCE} or later (older versions drop their content)`, { file: M, path: 'minAdvancedPreset' });
+    }
     if (!r.native && !p.entries.some((e) => e.region === r.id) && r.id !== p.workflowRegion) diag.warn(`region \`${r.id}\` receives no entries`, { file: M, path: 'regions' });
   }
 

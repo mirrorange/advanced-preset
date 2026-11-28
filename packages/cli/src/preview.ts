@@ -207,7 +207,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
   for (const r of preset.regions) {
     if (r.native) { rule(`${r.id} (native)`); continue; }
     const msgs = a.regions[r.id] ?? [];
-    rule(`${r.id}${msgs.length ? '' : ' (empty)'}`);
+    rule(`${r.id}${r.beforeStage ? ` (before stage ${r.beforeStage}, request tail)` : ''}${msgs.length ? '' : ' (empty)'}`);
     for (const m of msgs) lines.push(`[${m.role}]`, m.content, '');
     if (r.id === preset.anchors.historyStart && historyInput !== undefined) {
       rule('chat history (ST) · last user message');

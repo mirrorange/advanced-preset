@@ -146,7 +146,11 @@ export interface TurnArtifacts {
   toolNames(): string[];
 }
 
-export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stage[], allStructures: StructureDecl[], expand: Expand = same): TurnArtifacts {
+/**
+ * `only`: a multi-model phase. Names and numbering stay those of the whole turn (`stages`); the schema,
+ * the submit tool and the stage tools only hold the phase's stages and the structures they carry.
+ */
+export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stage[], allStructures: StructureDecl[], expand: Expand = same, only?: Stage[]): TurnArtifacts {
   // Inline structures (annotations) live in the content itself: no field, no tool parameter.
   const structures = allStructures.filter((s) => !isInlineStructure(s));
   const desc = (template: string | undefined, stage?: Stage) => {
@@ -155,6 +159,15 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
     return t || undefined;
   };
   const layout = turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const inPhase = only ? new Set(only) : undefined;
+  /** Items of this request: every item, or those of the phase (a structure goes with the stage tool that carries it). */
+  const requested = (it: TurnLayout['items'][number]) => {
+    if (!inPhase) return true;
+    if (it.type === 'stage') return inPhase.has(it.stage);
+    const host = layout.hostOf(it.structure);
+    return host !== undefined && inPhase.has(host);
+  };
+  const ownStages = inPhase ? stages.filter((s) => inPhase.has(s)) : stages;
   const fieldOf = (s: Stage) => layout.stageField(s);
   const structureFieldOf = (d: StructureDecl) => layout.structureField(d);
   const toolOf = (s: Stage) => stageToolName(stages, s, tools);
@@ -168,6 +181,7 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
     const properties: Record<string, JsonSchema> = {};
     const required: string[] = [];
     for (const it of layout.items) {
+      if (!requested(it)) continue;
       if (it.type === 'structure') { addStructure(properties, required, it.structure); continue; }
       const stage = it.stage;
       properties[it.name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
@@ -175,7 +189,7 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
     }
     return { type: 'object', properties, required, additionalProperties: false };
   };
-  const stageTools = (): ToolDef[] => stages.map((stage) => {
+  const stageTools = (): ToolDef[] => ownStages.map((stage) => {
     const properties: Record<string, JsonSchema> = {};
     const required: string[] = [];
     const param = stageParam(stage, tools);
@@ -221,7 +235,7 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
       additionalProperties: false,
     }),
     envelopeKeys: keys,
-    toolNames: () => [tools.submit.name, ...stages.map(toolOf)],
+    toolNames: () => [tools.submit.name, ...ownStages.map(toolOf)],
   };
 }
 

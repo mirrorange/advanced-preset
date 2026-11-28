@@ -5,8 +5,11 @@
  */
 import {
   INSTALL_NOTICE_MARK,
-  MAIN_STORYLINE_VARS, freezeMode, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, activeUserModules, type APreset, type MacroData, type StatusBar, type StorylineVars, type Vars, type Workflow,
+  MAIN_STORYLINE_VARS, freezeMode, actorName, assemble, defaultVars, formatVar, replyToPlainText, statusText, storylineSeparator, withUserModules, activeUserModules,
+  activeStages, layoutOf, phaseGroups, planPhases, resolverOf,
+  type APreset, type Assembly, type Configuration, type MacroData, type Phase, type StatusBar, type Stage, type StorylineVars, type Vars, type Workflow,
 } from '@advanced-preset/protocol';
+import { bindingForActor, multiModelOn, selectedBinding, type ResolvedBinding } from './bindings';
 import { st, toast, type ChatMessage, type STMessage } from '@/st/host';
 import { t } from '@/i18n';
 import { getPreset } from '@/store/presets';
@@ -86,7 +89,25 @@ function customLast(preset: APreset, chat: readonly STMessage[]): Record<string,
 }
 
 /** What the condition variables of a request depend on (the interceptor has it before the context exists). */
-export type VarsSource = Pick<GenerationContext, 'preset' | 'config' | 'transport' | 'origin' | 'stType' | 'meta' | 'flags' | 'inputShaped' | 'storylines'>;
+export type VarsSource = Pick<GenerationContext, 'preset' | 'config' | 'transport' | 'origin' | 'stType' | 'meta' | 'flags' | 'inputShaped' | 'storylines' | 'multiModel'>;
+
+/** Multi-model applies to story turns of presets that declare it, when the configuration switches it on. */
+export const multiModelTurn = (preset: APreset, config: Configuration, origin: GenerationContext['origin']): boolean =>
+  origin === 'story' && multiModelOn(preset, config);
+
+/**
+ * Binding of the turn's first request: the selected binding, or with multi-model the binding of the
+ * actor of the first active stage (its transport decides the variables of the first assembly).
+ */
+export function firstBinding(src: Omit<VarsSource, 'transport' | 'multiModel'>, multiModel: boolean): ResolvedBinding {
+  const selected = selectedBinding(src.config);
+  if (!multiModel) return selected;
+  const workflow = pickWorkflow(src.preset, src.config, src.origin);
+  if (!workflow) return selected;
+  const { vars } = buildVarsAndData({ ...src, transport: selected.transport, multiModel }, workflow);
+  const actor = activeStages(workflow, resolverOf(vars))[0]?.actor;
+  return actor ? bindingForActor(src.preset, src.config, actor) : selected;
+}
 
 /** Chat indices the current storyline sees, in its order (I-153); `undefined`: the whole chat. */
 export const storylineViewOf = (turn: StorylineTurn | undefined): number[] | undefined => turn?.view;
@@ -124,6 +145,7 @@ export function buildVarsAndData(ctx: VarsSource, workflow: Workflow | undefined
     storyline: ctx.storylines?.vars ?? { ...MAIN_STORYLINE_VARS, name: mainName },
     image: image.vars,
     speech: speech.vars,
+    multiModel: Boolean(ctx.multiModel),
   });
   const data: MacroData = {
     metaText: ctx.meta.segments.join('\n\n'),
@@ -233,14 +255,83 @@ function contextFor(preset: APreset, dryRun: boolean): GenerationContext {
   const lastUserIndex = chat.findLastIndex((m) => m.is_user && !m.is_system);
   const lastUser = chat[lastUserIndex];
   const { meta, flags, origin } = classify(preset, config, dryRun ? lastUser?.mes ?? '' : '', dryRun ? 'normal' : 'script', dryRun, [], !dryRun);
+  const stType = dryRun ? 'normal' : 'script';
+  const multiModel = multiModelTurn(preset, config, origin);
+  const binding = firstBinding({ preset, config, origin, stType, meta, flags }, multiModel);
   return {
-    id: newGenId(), preset, config, origin, stType: dryRun ? 'normal' : 'script', interceptorRan: false, dryRun,
-    meta, flags, transport: config.connection.transport, stages: [], structures: [], inputIndex: -1, createdAt: Date.now(), warnings: [],
+    id: newGenId(), preset, config, origin, stType, interceptorRan: false, dryRun,
+    meta, flags, transport: binding.transport, stages: [], structures: [], inputIndex: -1, createdAt: Date.now(), warnings: [],
     keywords: keywordTexts(chat, dryRun ? lastUserIndex : -1),
+    ...(multiModel ? { multiModel } : {}),
+    ...(binding.target.type !== 'current' ? { firstTarget: binding.target } : {}),
   };
 }
 
 const AP_MESSAGE = Symbol('ap-region');
+/** Region id of a message rendered from a region (re-rendered for later phases). */
+export const AP_REGION = Symbol('ap-region-id');
+
+/** Rendered messages of a region (empty ones left out), marked as AP's. */
+function regionMessages(assembly: Assembly, id: string, sub: (s: string) => string): ChatMessage[] {
+  return (assembly.regions[id] ?? []).map((r) => {
+    const msg: ChatMessage = { role: r.role, content: sub(r.content) };
+    Object.defineProperty(msg, AP_MESSAGE, { value: true });
+    Object.defineProperty(msg, AP_REGION, { value: id });
+    return msg;
+  }).filter((x) => textOf(x.content).trim());
+}
+
+/** Stage regions (`beforeStage`) of the given stages, in stage order. */
+export function stageRegionMessages(ctx: GenerationContext, assembly: Assembly, stages: Stage[], sub: (s: string) => string): ChatMessage[] {
+  const out: ChatMessage[] = [];
+  for (const s of stages) for (const r of ctx.preset.regions) if (r.beforeStage === s.id) out.push(...regionMessages(assembly, r.id, sub));
+  return out;
+}
+
+/** Messages with the stage regions at the tail; a trailing assistant prefill stays last. */
+export function withStageMessages(messages: ChatMessage[], tail: ChatMessage[], prefill: boolean): ChatMessage[] {
+  if (!tail.length) return messages;
+  const last = messages[messages.length - 1];
+  if (prefill && last?.role === 'assistant') return [...messages.slice(0, -1), ...tail, last];
+  return [...messages, ...tail];
+}
+
+/**
+ * Re-renders the first request's prompt (after the cache step and input shaping) with another
+ * assembly: every region is rendered again in place, everything else (history, ST prompts) is kept.
+ * A region that rendered nothing goes after the message that preceded its anchor (or the closest
+ * one still in the prompt).
+ */
+function rerenderer(ctx: GenerationContext, final: ChatMessage[], emptySlots: { id: string; before: ChatMessage[] }[], sub: (s: string) => string): NonNullable<GenerationContext['rerender']> {
+  const base = final.slice();
+  const present = new Set<ChatMessage>(base);
+  const slotsAfter = new Map<ChatMessage | null, string[]>();
+  for (const slot of emptySlots) {
+    let at: ChatMessage | null = null;
+    for (let i = slot.before.length - 1; i >= 0; i--) if (present.has(slot.before[i]!)) { at = slot.before[i]!; break; }
+    slotsAfter.set(at, [...(slotsAfter.get(at) ?? []), slot.id]);
+  }
+  return (assembly) => {
+    const fill = ctx.fillInput ?? ((s: string) => s);
+    const messages: ChatMessage[] = [];
+    const done = new Set<string>();
+    let historyAt = -1;
+    const render = (id: string) => {
+      if (done.has(id)) return;
+      done.add(id);
+      messages.push(...regionMessages(assembly, id, (s) => fill(sub(s))));
+      if (id === ctx.preset.anchors.historyStart) historyAt = messages.length;
+    };
+    for (const id of slotsAfter.get(null) ?? []) render(id);
+    for (const m of base) {
+      const id = (m as any)[AP_REGION] as string | undefined;
+      if (id) render(id);
+      else messages.push(m);
+      for (const s of slotsAfter.get(m) ?? []) render(s);
+    }
+    return { messages, historyAt };
+  };
+}
 
 /** History messages of the isolated list: between the semantic anchors (the whole list without them). */
 function historyRange(preset: APreset, list: (ChatMessage & { __anchor?: string })[]): { from: number; to: number } {
@@ -270,6 +361,7 @@ function shapeInput(ctx: GenerationContext, final: ChatMessage[], from: number, 
   }
   if (ctx.inputShaped) {
     const fill = (s: string) => (s.includes(INPUT_SLOT) ? s.replaceAll(INPUT_SLOT, () => text) : s);
+    ctx.fillInput = fill;
     for (const m of final) {
       if (typeof m.content === 'string') m.content = fill(m.content);
       else if (Array.isArray(m.content)) for (const p of m.content as any[]) if (p && typeof p === 'object' && typeof p.text === 'string') p.text = fill(p.text);
@@ -311,7 +403,7 @@ function arrangeHistory(ctx: GenerationContext, turn: StorylineTurn, final: Chat
   });
 }
 
-function renderPrefill(ctx: GenerationContext, list: ChatMessage[], historyAt: number): ChatMessage[] {
+export function renderPrefill(ctx: GenerationContext, list: ChatMessage[], historyAt: number): ChatMessage[] {
   const { preset, config } = ctx;
   const sub = (s: string) => st().substituteParams(s);
   const system = list.slice(0, historyAt).map((m) => textOf(m.content)).filter(Boolean).join('\n\n');
@@ -413,12 +505,26 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   const { vars, data } = buildVarsAndData(ctx, workflow);
   const merged = withUserModules(preset, activeUserModules(userModules(preset), userModuleGroups(preset)), ctx.keywords);
   for (const x of merged.skipped) ctx.warnings.push(`user module ${x.module}: insertion point \`${x.point}\` is missing, entry ${x.entry} skipped`);
-  const assembly = assemble({ preset: merged.preset, config: ctx.config, vars, data }, workflow);
+  // Multi-model (story turns): the first request executes the first phase; its variables say so.
+  const multi = Boolean(ctx.multiModel && workflow);
+  const firstGroup = multi ? phaseGroups(activeStages(workflow!, resolverOf(vars)), true)[0] : undefined;
+  const assemblyInput = { preset: merged.preset, config: ctx.config, vars, data };
+  const assembly = assemble({ ...assemblyInput, ...(firstGroup ? { phase: { stages: firstGroup.stages.map((s) => s.id), index: 0, actor: firstGroup.actor } } : {}) }, workflow);
   if (assembly.warnings.length) reportTemplateWarnings(assembly.warnings, ctx.warnings);
   ctx.workflow = workflow;
   ctx.assembly = assembly;
   ctx.stages = assembly.stages;
   ctx.structures = ctx.origin === 'task' && ctx.stType === 'script' ? [] : assembly.structures;
+  ctx.phases = planPhases(ctx.stages, ctx.structures, multi ? layoutOf(preset, workflow, ctx.stages, ctx.structures) : undefined, multi);
+  if (multi) {
+    ctx.phaseAssembly = (phase, transport) => {
+      const a = assemble({ ...assemblyInput, vars: { ...vars, transport, style: preset.styles[transport] }, phase: { stages: phase.stages.map((s) => s.id), index: phase.index, actor: phase.actor } }, workflow);
+      if (a.warnings.length) reportTemplateWarnings(a.warnings, ctx.warnings);
+      const fill = ctx.fillInput;
+      if (fill) { const expand = a.expand; a.expand = (s) => fill(expand(s)); }
+      return a;
+    };
+  }
 
   const sub = (s: string) => st().substituteParams(s);
   const final: ChatMessage[] = [];
@@ -429,24 +535,24 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
     modules: assembly.modules.map((m) => m.id), regions: [], warnings: ctx.warnings,
     vars: Object.entries(assembly.buildVars).map(([id, v]) => ({ id, text: formatVar(v) })),
   };
+  /** Anchors rendering nothing, with the messages before them (where a later phase puts its content). */
+  const emptySlots: { id: string; before: ChatMessage[] }[] = [];
   for (const m of list) {
     if (!m.__anchor) { final.push(m); continue; }
     const id = m.__anchor;
     if (id === preset.anchors.historyEnd && historyEnd < 0) historyEnd = final.length;
-    const msgs = (assembly.regions[id] ?? []).map((r) => {
-      const msg: ChatMessage = { role: r.role, content: sub(r.content) };
-      Object.defineProperty(msg, AP_MESSAGE, { value: true });
-      return msg;
-    }).filter((x) => textOf(x.content).trim());
+    const msgs = regionMessages(assembly, id, sub);
     snapshot.regions.push({ id, messages: msgs.map((x) => ({ role: x.role, chars: textOf(x.content).length, content: textOf(x.content) })) });
+    if (!msgs.length) emptySlots.push({ id, before: final.slice() });
     final.push(...msgs);
     if (id === preset.anchors.historyStart) historyAt = final.length;
   }
 
   // Regions with output whose anchor is not in ST's prompt (outdated Carrier, prompt switched off …).
   const anchored = new Set(list.map((m) => m.__anchor).filter(Boolean));
+  const stageRegions = new Set(preset.regions.filter((r) => r.beforeStage).map((r) => r.id));
   for (const [id, msgs] of Object.entries(assembly.regions)) {
-    if (!anchored.has(id) && msgs.some((r) => r.content.trim())) ctx.warnings.push(`region ${id}: its anchor is not in the prompt (Carrier outdated or prompt disabled?), content dropped`);
+    if (!anchored.has(id) && !stageRegions.has(id) && msgs.some((r) => r.content.trim())) ctx.warnings.push(`region ${id}: its anchor is not in the prompt (Carrier outdated or prompt disabled?), content dropped`);
   }
 
   let end = historyEnd < 0 ? final.length : historyEnd;
@@ -457,8 +563,21 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   }
   snapshot.cache = applySticky(ctx, final, historyAt, end);
   snapshot.input = shapeInput(ctx, final, historyAt, end, snapshot);
+  if (multi) ctx.rerender = rerenderer(ctx, final, emptySlots, sub);
 
-  const shaped = ctx.transport === 'prefill' && !passthrough && historyAt >= 0 ? renderPrefill(ctx, final, historyAt) : final;
+  const prefill = ctx.transport === 'prefill' && !passthrough && historyAt >= 0;
+  let shaped = prefill ? renderPrefill(ctx, final, historyAt) : final;
+  // Stage regions of the stages this request executes: at the tail (before a trailing prefill).
+  if (!passthrough && workflow) {
+    const phase = ctx.phases[0]!;
+    const tail = stageRegionMessages(ctx, assembly, phase.stages, (s) => (ctx.fillInput ? ctx.fillInput(sub(s)) : sub(s)));
+    for (const r of preset.regions) {
+      if (!r.beforeStage || !phase.stages.some((s) => s.id === r.beforeStage)) continue;
+      const msgs = tail.filter((m) => (m as any)[AP_REGION] === r.id);
+      snapshot.regions.push({ id: r.id, messages: msgs.map((x) => ({ role: x.role, chars: textOf(x.content).length, content: textOf(x.content) })) });
+    }
+    shaped = withStageMessages(shaped, tail, prefill);
+  }
   chat.splice(0, chat.length, ...shaped.map((m) => {
     const { __anchor, ...rest } = m as ChatMessage & { __anchor?: string };
     void __anchor;
