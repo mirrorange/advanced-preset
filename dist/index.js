@@ -3568,17 +3568,17 @@ var ks = {
 	"config.binding.add": "Add binding",
 	"config.binding.newName": "Binding {n}",
 	"config.binding.target": "Sends to",
-	"config.binding.target.current": "Current connection",
+	"config.binding.target.current": "Current",
 	"config.binding.target.current.hint": "SillyTavern's current API connection, exactly as without bindings.",
-	"config.binding.target.profile": "Connection profile",
+	"config.binding.target.profile": "Profile",
 	"config.binding.target.profile.hint": "A Chat Completion profile of SillyTavern's Connection Manager: its API, model, server URL, proxy, API key and prompt post-processing are used for these requests, without switching SillyTavern's connection. The profile's completion preset is not applied: sampling and prompts stay as Advanced Preset sets them.",
-	"config.binding.target.model": "Model name",
+	"config.binding.target.model": "Model",
 	"config.binding.target.model.hint": "SillyTavern's current API connection with another model name.",
-	"config.binding.profile": "Profile",
+	"config.binding.profile": "Connection profile",
 	"config.binding.profile.hint": "Text Completion profiles are not listed: Advanced Preset only sends Chat Completion requests.",
 	"config.binding.profile.missing": "(profile not found)",
 	"config.binding.profile.none": "No Chat Completion connection profiles. Create one with SillyTavern's Connection Manager (API Connections → Connection Profile).",
-	"config.binding.model": "Model",
+	"config.binding.model": "Model name",
 	"config.binding.model.hint": "The model id as the API expects it, e.g. what SillyTavern's model list shows for this source.",
 	"config.binding.active": "Active binding",
 	"config.binding.active.hint": "Binding every request uses.",
@@ -4221,15 +4221,15 @@ var ks = {
 	"config.binding.target": "发送到",
 	"config.binding.target.current": "当前连接",
 	"config.binding.target.current.hint": "SillyTavern 当前的 API 连接，与不使用绑定时完全相同。",
-	"config.binding.target.profile": "连接配置文件",
+	"config.binding.target.profile": "配置文件",
 	"config.binding.target.profile.hint": "SillyTavern 连接配置管理中的 Chat Completion 配置文件：这些请求使用它的 API、模型、服务器地址、代理、API 密钥和提示词后处理，不会切换 SillyTavern 的连接。配置文件中的对话补全预设不会生效：采样参数与提示词仍由 Advanced Preset 决定。",
-	"config.binding.target.model": "模型名称",
+	"config.binding.target.model": "模型",
 	"config.binding.target.model.hint": "SillyTavern 当前的 API 连接，但改用另一个模型名称。",
-	"config.binding.profile": "配置文件",
+	"config.binding.profile": "连接配置文件",
 	"config.binding.profile.hint": "不列出 Text Completion 配置文件：Advanced Preset 只发送 Chat Completion 请求。",
 	"config.binding.profile.missing": "（找不到配置文件）",
 	"config.binding.profile.none": "没有 Chat Completion 连接配置文件。请在 SillyTavern 的连接配置管理中创建（API 连接 → 连接配置文件）。",
-	"config.binding.model": "模型",
+	"config.binding.model": "模型名称",
 	"config.binding.model.hint": "API 所需的模型 ID，例如 SillyTavern 在该来源的模型列表中显示的名称。",
 	"config.binding.active": "当前绑定",
 	"config.binding.active.hint": "所有请求使用的绑定。",
@@ -4872,15 +4872,15 @@ var ks = {
 	"config.binding.target": "傳送到",
 	"config.binding.target.current": "目前連線",
 	"config.binding.target.current.hint": "SillyTavern 目前的 API 連線，與不使用綁定時完全相同。",
-	"config.binding.target.profile": "連線設定檔",
+	"config.binding.target.profile": "設定檔",
 	"config.binding.target.profile.hint": "SillyTavern 連線設定檔管理中的 Chat Completion 設定檔：這些請求使用它的 API、模型、伺服器位址、代理、API 金鑰和提示詞後處理，不會切換 SillyTavern 的連線。設定檔中的對話補全預設不會生效：取樣參數與提示詞仍由 Advanced Preset 決定。",
-	"config.binding.target.model": "模型名稱",
+	"config.binding.target.model": "模型",
 	"config.binding.target.model.hint": "SillyTavern 目前的 API 連線，但改用另一個模型名稱。",
-	"config.binding.profile": "設定檔",
+	"config.binding.profile": "連線設定檔",
 	"config.binding.profile.hint": "不列出 Text Completion 設定檔：Advanced Preset 只傳送 Chat Completion 請求。",
 	"config.binding.profile.missing": "（找不到設定檔）",
 	"config.binding.profile.none": "沒有 Chat Completion 連線設定檔。請在 SillyTavern 的連線設定檔管理中建立（API 連線 → 連線設定檔）。",
-	"config.binding.model": "模型",
+	"config.binding.model": "模型名稱",
 	"config.binding.model.hint": "API 所需的模型 ID，例如 SillyTavern 在該來源的模型清單中顯示的名稱。",
 	"config.binding.active": "目前綁定",
 	"config.binding.active.hint": "所有請求使用的綁定。",
@@ -13934,7 +13934,7 @@ function eS(e) {
 }
 async function tS() {
 	let e = await $x();
-	e && e !== "d7bfae0311cadfdc" && sessionStorage.getItem(Qx) !== e && eS(e);
+	e && e !== "cb21cabe40e408b5" && sessionStorage.getItem(Qx) !== e && eS(e);
 }
 async function nS() {
 	await tS();
@@ -13955,7 +13955,7 @@ async function oS() {
 	let e = m().replace(/^third-party\//, ""), t = await uS(e, !1);
 	if (t.status === 404 && (t = await uS(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await $x();
-	return r && r !== "d7bfae0311cadfdc" ? (eS(r), {
+	return r && r !== "cb21cabe40e408b5" ? (eS(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -23062,11 +23062,11 @@ var CL = { class: "empty" }, wL = /* @__PURE__ */ F({
 		function v() {
 			let e = n.value, t = c.value?.id;
 			if (!e || !t || t === "default") return;
-			let r = !!yh(e).connection.bindings?.[t];
+			let r = yh(e);
 			i((e) => {
 				let n = { ...e.connection.bindings };
-				r ? n[t] = null : delete n[t], e.connection.bindings = n, e.connection.binding === t && (e.connection.binding = Au);
-				for (let [n, r] of Object.entries(e.multiModel?.actors ?? {})) r === t && (e.multiModel.actors[n] = Au);
+				r.connection.bindings?.[t] ? n[t] = null : delete n[t], Object.keys(n).length || r.connection.bindings ? e.connection.bindings = n : delete e.connection.bindings, e.connection.binding === t && (r.connection.binding === void 0 ? delete e.connection.binding : e.connection.binding = Au);
+				for (let [n, i] of Object.entries(e.multiModel?.actors ?? {})) i === t && (r.multiModel?.actors?.[n] === void 0 ? delete e.multiModel.actors[n] : e.multiModel.actors[n] = Au);
 			}), s.value = Au;
 		}
 		let y = /* @__PURE__ */ A(!1), b = /* @__PURE__ */ A("");
@@ -26496,7 +26496,7 @@ var MV = { class: "row tight xs muted" }, NV = { class: "row" }, PV = {
 				"icon",
 				"help"
 			]),
-			V("div", FH, "Advanced Preset " + k(j("1.13.0")) + " · " + k(j("d7bfae0311cadfdc")), 1)
+			V("div", FH, "Advanced Preset " + k(j("1.13.0")) + " · " + k(j("cb21cabe40e408b5")), 1)
 		], 64));
 	}
 }), LH = {
@@ -27700,7 +27700,7 @@ function hW() {
 //#region src/index.ts
 var gW = {
 	version: "1.13.0",
-	buildId: "d7bfae0311cadfdc",
+	buildId: "cb21cabe40e408b5",
 	nextGeneration: (e) => eg(e),
 	listPresets: () => fm().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -27760,7 +27760,7 @@ async function yW() {
 	};
 	t.on(n.APP_READY, () => void o()), hW(), O_("init", {
 		version: "1.13.0",
-		build: "d7bfae0311cadfdc",
+		build: "cb21cabe40e408b5",
 		enabled: q().enabled
 	});
 }
