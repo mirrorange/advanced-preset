@@ -147,6 +147,19 @@ structures:
 Start -> Planning (Narrator) -> Writing (Narrator) [optional] -> (End)
 ```
 
+## 多模型工作流
+
+预设在清单中声明 `multiModel: true`、且用户在配置中开启多模型（见 [configuration.md](configuration.md)）时，故事轮按 actor 把工作流拆成多个**阶段组**（phase），每个阶段组一次请求，由该 actor 绑定的连接执行：
+
+- **阶段组**：本轮激活阶段中，相邻且 actor 相同的阶段合为一组。例如花瓣的线性工作流 `questions (narrator) → planning (editor) → final (narrator)` 是三组；`draft (narrator) → final (narrator)` 这样相邻的同 actor 阶段只请求一次。多模型关闭、任务轮（脚本 / 纯元指令）或没有工作流时，整轮只有一组（与 1.12 相同）。
+- **连接与传输方式**：每组使用其 actor 的绑定（[configuration.md](configuration.md)）：绑定的传输方式、工具选项与目标（ST 连接配置 / 模型名）。多工具模式的循环留在组内。
+- **本组的输出**：请求的 schema / 工具只包含本组的阶段，以及由本组阶段携带的结构（结构跟随它所在位置前面的阶段，见[结构的位置](#结构的位置)；内联结构跟随终结正文阶段）。字段名、工具名与 `{{n}}` 编号仍按**整轮**计算，所以各组的字段名与单次请求时相同。
+- **提示词**：每组重新组装一次区域，条件变量中的 `transport` / `style` 为该组的传输方式，`phase.*` 为该组（见 [expressions.md](expressions.md#条件变量)）；工作流提示词仍是整轮的（摘要也列出全部阶段），预设可以用 `phase.stages.<id>` 只给相关阶段写说明。激活哪些阶段由第一次组装决定，整轮不变。
+- **先前的阶段**：第二组起，之前各组写下的阶段（及其携带的结构）按**当前组的传输方式**重新组装后放在提示词之后，见 [transports.md](transports.md#多模型先前阶段的回放)。先前的思考（reasoning）不回传。
+- **阶段区域**：清单中 `beforeStage: <阶段 id>` 的区域（[manifest.md](manifest.md#区域-regions)）在执行该阶段的请求中追加到末尾：在回放的先前阶段之后，按阶段顺序；先前组的阶段区域不会出现在后面的请求里。多模型关闭时，所有激活阶段的阶段区域都追加到唯一的请求末尾（需要只在多模型下生效的内容用 `multiModel` 条件控制）。
+- **缓存优化**：只有一轮的第一次请求（第一组）参与[缓存优化](configuration.md)：历史按它解析出的渲染方式发送，状态只在它成功后保存；后面的组复用第一次请求的历史渲染，不再判断或保存缓存状态。
+- **结果**：各组的结果合并为一个回合（阶段、结构、正文），阶段面板实时显示所有组；sidecar 诊断中的 `phases` 记录每组的 actor、绑定、传输方式、阶段与请求次数。某一组中止时保留已有的部分结果；出错时整轮报错。
+
 ## 工作流选择
 
 - 故事生成：使用配置 `connection.workflow` 指定的工作流；找不到时用第一个故事工作流（受 `workflowOrder` 影响）。`connection.workflow` 不能是任务工作流（报错）。

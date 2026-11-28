@@ -139,3 +139,32 @@ describe('manifest fragments', () => {
     expect(parsePath('regions[2].merge.wrap')).toEqual(['regions', 2, 'merge', 'wrap']);
   });
 });
+
+describe('stage regions (beforeStage)', () => {
+  const withStageRegion = (stageId: string, extra = '') => tree({
+    'preset.yaml': ROOT + 'minAdvancedPreset: 1.13.0\n' + REGIONS.replace('  - { id: tail, anchor: tail }', `  - { id: tail, anchor: tail }\n  - { id: final_prompt, beforeStage: ${stageId}${extra} }`) + STRUCTURES + MISC,
+  });
+  const messages = (r: ReturnType<typeof build>) => [...r.diag.errors, ...r.diag.warnings].map((d) => d.message);
+
+  it('compile without a Carrier anchor', () => {
+    const r = build(withStageRegion('final'));
+    expect(r.diag.errors).toEqual([]);
+    expect(r.preset!.regions.find((x) => x.id === 'final_prompt')).toMatchObject({ beforeStage: 'final' });
+    expect(r.preset!.carrier.prompts.some((p) => p.identifier.includes('final_prompt'))).toBe(false);
+  });
+
+  it('must name a stage, cannot be native, and need 1.13.0', () => {
+    expect(messages(build(withStageRegion('nope')))).toContainEqual(expect.stringContaining('beforeStage `nope` is not a stage'));
+    expect(messages(build(withStageRegion('final', ', native: true')))).toContainEqual(expect.stringContaining('cannot be native'));
+    const old = build(tree({ 'preset.yaml': ROOT + REGIONS.replace('  - { id: tail, anchor: tail }', '  - { id: tail, anchor: tail }\n  - { id: final_prompt, beforeStage: final }') + STRUCTURES + MISC }));
+    expect(messages(old)).toContainEqual(expect.stringContaining('stage regions need Advanced Preset 1.13.0'));
+  });
+
+  it('phase variables are known to conditions', () => {
+    const wf = WORKFLOW.replace('kind: content, label: Write }', 'kind: content, label: Write, when: "!multiModel || phase.stages.final || phase.index == 0 || phase.actor == \\"narrator\\"" }');
+    expect(build(tree({ 'preset.yaml': ROOT + REGIONS + STRUCTURES + MISC, 'workflows/linear.md': wf })).diag.errors).toEqual([]);
+    const bad = WORKFLOW.replace('kind: content, label: Write }', 'kind: content, label: Write, when: "phase.stages.nope" }');
+    expect(messages(build(tree({ 'preset.yaml': ROOT + REGIONS + STRUCTURES + MISC, 'workflows/linear.md': bad })))).toContainEqual(expect.stringContaining('unknown stage `nope`'));
+  });
+});
+

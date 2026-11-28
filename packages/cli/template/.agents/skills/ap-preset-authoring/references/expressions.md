@@ -76,10 +76,15 @@ transport in ["structured", "tool-single", "tool-multi"]
 | `speech.api` | `fish` `elevenlabs` `minimax` `gemini` `openai` `deepseek` `openrouter`（关闭时为空字符串） | 当前语音连接的 API 类型。`openrouter` 时模型来自哪家提供者不体现在变量里，标签写法看 `{{ap::speech::format}}` |
 | `speech.narrator` | 布尔 | 旁白（台词标签之外的文字）也合成 |
 | `speech.characters` | 布尔 | 当前连接有已绑定说话人的角色（`{{ap::speech::characters}}` 非空） |
+| `multiModel` | 布尔 | 本轮使用[多模型工作流](workflows.md#多模型工作流)：预设声明了 `multiModel`、配置开启了多模型，且是故事轮 |
+| `phase.stages.<id>` | 布尔 | 当前请求执行该阶段。没有多模型时为本轮所有激活阶段（同 `stages.<id>`） |
+| `phase.index` | 数字 | 当前请求是本轮的第几组（从 0 开始；没有多模型时为 0） |
+| `phase.actor` | 字符串 | 当前组的 actor id（没有多模型时为空字符串） |
 
 注意：
 
-- 阶段的 `when` 在 `stages.*` 计算之前求值，所以阶段条件里不要引用 `stages.*`。
+- 阶段的 `when` 在 `stages.*` 计算之前求值，所以阶段条件里不要引用 `stages.*` 或 `phase.*`（`multiModel` 可以用，例如 `when: "!multiModel"`）。
+- 多模型时每组重新组装一次提示词：`transport` / `style` 是该组绑定的传输方式，`phase.*` 是该组。`ap preview` 中 `multiModel` 为假，`phase.stages` 为所有激活阶段。
 - 正则标记的 `requires` 与 `meta.tasks` 在组装之前求值，只能可靠地使用 `meta.*` 与 `flags.*`（`input.shaped` 在那里总为假）。
 - 结构 [`history.when`](structures.md#历史回传) 在历史改写时求值：`stages.*` 为空，`input.shaped` 为假，其余变量可用。
 - `ap preview` 中 `memory.*`、`recap.present`、`chat.group`、`meta.recent`、`last.*` 总为假；`input.shaped` 只在给了 `--input` 且预设声明了 `inputShaping` 时为真；`storyline.*` 由 `--storyline` / `--storyline-new` / `--storyline-grouped` / `--storyline-switch` / `--storyline-naming-main` 决定（默认主线、不分组；给了 `--storyline` 时分组；`storyline.frozen` 按所选配置的 `storylines.freezeVariables` 计算）；`image.*` / `speech.*` 由 `--image` / `--speech` 等选项决定（见 [cli.md](cli.md#ap-preview)），默认关闭。
@@ -90,5 +95,5 @@ transport in ["structured", "tool-single", "tool-multi"]
 `ap check` 检查表达式中的每个变量：
 
 - 未知根变量（如 `foo.bar`）报错；
-- `modules.` / `params.` / `flags.` / `stages.` 后的 id 不存在报错；
+- `modules.` / `params.` / `flags.` / `stages.` / `phase.stages.` 后的 id 不存在报错；
 - 固定取值的变量与字符串比较时，字面量不在取值范围内报错，例如 `transport == "tool"`、`meta.task == "recap"`、`workflow == "不存在的工作流"`。
