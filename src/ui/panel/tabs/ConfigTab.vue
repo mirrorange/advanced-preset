@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Cable, Check, Coins, DatabaseZap, Drama, Gauge, GitBranch, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
-import { STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, freezeMode, type StorylineFreeze, THOUGHT_SIGNATURE_CHANNELS, TOOL_ARG_STREAMING, TRANSPORTS, USER_INPUT_MODES, signatureChannel, type ThoughtSignatureChannel, structureComponents, structureUiHash, type Transport, type UserInputMode } from '@advanced-preset/protocol';
+import { Check, Coins, DatabaseZap, Drama, Gauge, GitBranch, MessagesSquare, Pencil, Plus, Puzzle, RotateCcw, Save, Trash2, Workflow as WorkflowIcon, X } from 'lucide-vue-next';
+import { STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, freezeMode, type StorylineFreeze, USER_INPUT_MODES, structureComponents, structureUiHash, type UserInputMode } from '@advanced-preset/protocol';
 import {
   deleteSaved, isModified, overwriteSaved, presetState, renameSaved, resetConfiguration, saveConfigurationAs, selectConfiguration,
 } from '@/store/config';
@@ -17,6 +17,8 @@ import Field from '../../components/Field.vue';
 import Switch from '../../components/Switch.vue';
 import Segmented from '../../components/Segmented.vue';
 import IconButton from '../../components/IconButton.vue';
+import ConnectionSection from '../config/ConnectionSection.vue';
+import MultiModelSection from '../config/MultiModelSection.vue';
 
 const { preset, config, update } = usePreset();
 const state = computed(() => (preset.value ? presetState(preset.value) : null));
@@ -76,10 +78,6 @@ const reset = () => { if (preset.value) { resetConfiguration(preset.value); void
 const remove = () => { if (preset.value && savedRef.value) { deleteSaved(preset.value, savedRef.value); void pushSampling(preset.value); } };
 const overwrite = () => { if (preset.value && savedRef.value) overwriteSaved(preset.value, savedRef.value); };
 
-const transportOptions = computed(() => TRANSPORTS.map((x) => ({ value: x, label: t(`transport.${x}`), hint: t(`transport.${x}.hint`) })));
-const transport = computed({ get: () => config.value?.connection.transport ?? 'prefill', set: (v: Transport) => update((c) => { c.connection.transport = v; }) });
-const isTool = computed(() => transport.value === 'tool-single' || transport.value === 'tool-multi');
-
 const storyWorkflows = computed(() => (preset.value?.workflows ?? []).filter((w) => w.kind === 'story'));
 const workflowOptions = computed(() => storyWorkflows.value.map((w) => ({
   value: w.id,
@@ -88,29 +86,6 @@ const workflowOptions = computed(() => storyWorkflows.value.map((w) => ({
 })));
 const workflow = computed({ get: () => config.value?.connection.workflow ?? '', set: (v: string) => update((c) => { c.connection.workflow = v; }) });
 const workflowHelp = computed(() => workflowOptions.value.find((w) => w.value === workflow.value)?.hint);
-
-function conn<K extends keyof NonNullable<typeof config.value>['connection']>(key: K) {
-  return computed({
-    get: () => config.value!.connection[key],
-    set: (v) => update((c) => { c.connection[key] = v; }),
-  });
-}
-const forceTool = conn('forceTool');
-const parallelTools = conn('parallelTools');
-// Off is stored as `false`, which older versions also read as off.
-const thoughtSignature = computed({
-  get: () => (config.value ? signatureChannel(config.value.connection) : 'off'),
-  set: (v: ThoughtSignatureChannel) => update((c) => { c.connection.sendThoughtSignature = v === 'off' ? false : v; }),
-});
-const openAiSignatures = conn('openAiSignatures');
-const streamToolArguments = conn('streamToolArguments');
-const finalFallback = conn('finalFallback');
-const maxSteps = conn('maxSteps');
-const assumeToolSupport = conn('assumeToolSupport');
-const syntheticTurn = computed({
-  get: () => config.value?.connection.syntheticTurn ?? '',
-  set: (v: string) => update((c) => { c.connection.syntheticTurn = v || null; }),
-});
 
 const actors = computed(() => Object.entries(preset.value?.actors ?? {}));
 const setIdentity = (kind: 'names' | 'prefixes', id: string, v: string) => update((c) => { c.identity[kind][id] = v; });
@@ -191,37 +166,8 @@ const num = (e: Event) => Number((e.target as HTMLInputElement).value);
       <span v-if="modified" class="xs muted row tight"><span class="dot modified" />{{ t('config.modified') }}</span>
     </div>
 
-    <Section :title="t('config.connection')" :icon="Cable">
-      <Field :label="t('config.transport')" :help="t(`transport.${transport}.hint`)">
-        <Segmented v-model="transport" :options="transportOptions" />
-      </Field>
-      <template v-if="isTool">
-        <Field :label="t('config.forceTool')" :help="t('config.forceTool.hint')" inline><Switch v-model="forceTool" /></Field>
-        <Field :label="t('config.parallelTools')" :help="t('config.parallelTools.hint')" inline><Switch v-model="parallelTools" /></Field>
-        <Field :label="t('config.syntheticTurn')" :help="t('config.syntheticTurn.hint')" inline>
-          <select v-model="syntheticTurn" class="input">
-            <option value="">{{ t('common.none') }}</option>
-            <option v-for="s in preset.syntheticTurns" :key="s.id" :value="s.id">{{ s.label }}</option>
-          </select>
-        </Field>
-        <Field :label="t('config.thoughtSignature')" :help="t('config.thoughtSignature.hint')" inline>
-          <select v-model="thoughtSignature" class="input">
-            <option v-for="m in THOUGHT_SIGNATURE_CHANNELS" :key="m" :value="m">{{ t(`config.thoughtSignature.${m}`) }}</option>
-          </select>
-        </Field>
-        <Field :label="t('config.openAiSignatures')" :help="t('config.openAiSignatures.hint')" inline><Switch v-model="openAiSignatures" /></Field>
-        <Field :label="t('config.streamToolArguments')" :help="t('config.streamToolArguments.hint')" inline>
-          <select v-model="streamToolArguments" class="input">
-            <option v-for="m in TOOL_ARG_STREAMING" :key="m" :value="m">{{ t(`config.streamToolArguments.${m}`) }}</option>
-          </select>
-        </Field>
-        <Field v-if="transport === 'tool-multi'" :label="t('config.maxSteps')" inline>
-          <input class="input" type="number" min="1" max="20" :value="maxSteps" @change="maxSteps = num($event)" />
-        </Field>
-        <Field :label="t('config.assumeToolSupport')" :help="t('config.assumeToolSupport.hint')" inline><Switch v-model="assumeToolSupport" /></Field>
-      </template>
-      <Field :label="t('config.finalFallback')" :help="t('config.finalFallback.hint')" inline><Switch v-model="finalFallback" /></Field>
-    </Section>
+    <ConnectionSection />
+    <MultiModelSection />
 
     <Section v-if="workflowOptions.length > 1" :title="t('config.workflow')" :icon="WorkflowIcon" :help="workflowHelp">
       <Segmented v-model="workflow" :options="workflowOptions" />
