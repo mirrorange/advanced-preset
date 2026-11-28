@@ -168,3 +168,46 @@ describe('stage regions (beforeStage)', () => {
   });
 });
 
+
+describe('ap preview with multi-model', () => {
+  const WF2 = `---
+id: linear
+stages:
+  - { id: plan, actor: editor, kind: text, label: Plan }
+  - { id: final, actor: narrator, kind: content, label: Write }
+---
+<!-- @section stage:plan -->
+Plan it{{ap::name::editor}}.
+<!-- @section stage:final -->
+Write it.
+`;
+  const files = () => tree({
+    'preset.yaml': ROOT.replace('  user: { name: "{{user}}" }', '  editor: { name: Ed }\n  user: { name: "{{user}}" }') + 'minAdvancedPreset: 1.13.0\nmultiModel: true\n'
+      + REGIONS.replace('  - { id: tail, anchor: tail }', '  - { id: tail, anchor: tail }\n  - { id: write_cue, beforeStage: final }') + STRUCTURES + MISC,
+    'workflows/linear.md': WF2,
+    'modules/cue.md': '---\nid: cue\ntoggle: always\nregion: write_cue\n---\nWRITE NOW\n',
+  });
+
+  it('--phase renders that phase: its stages, stage regions and the replay of earlier phases', async () => {
+    const { preview } = await import('../src/preview');
+    const r = build(files());
+    expect(r.diag.errors).toEqual([]);
+    const p = r.preset!;
+    const first = preview(p, { multiModel: true, transport: 'structured' });
+    expect(first).toMatch(/multi-model phase 0\/1: editor · stages plan/);
+    expect(first).toMatch(/write_cue \(before stage final, not in this phase's request\)/);
+    expect(first).not.toContain('WRITE NOW');
+    const second = preview(p, { phase: 1, transport: 'plaintext' });
+    expect(second).toMatch(/multi-model phase 1\/1: narrator · stages final/);
+    expect(second).toMatch(/write_cue \(before stage final, request tail\)[^\n]*\n\[system\]\nWRITE NOW/);
+    expect(second).toMatch(/earlier phases replayed \(plaintext, placeholder text\)[^\n]*\nEd: \(output of plan\)/);
+    const json = JSON.parse(preview(p, { phase: 1, transport: 'structured', json: true }));
+    expect(json.vars.multiModel).toBe(true);
+    expect(json.vars.phase).toEqual({ stages: { final: true }, index: 1, actor: 'narrator' });
+    expect(Object.keys(json.schema.value.properties)).not.toContain(Object.keys(json.phase.replay)[0]);
+    expect(() => preview(p, { phase: 2 })).toThrow(/expected 0–1/);
+    const off = preview(p, {});
+    expect(off).toMatch(/write_cue \(before stage final, request tail\)[^\n]*\n\[system\]\nWRITE NOW/);
+  });
+});
+

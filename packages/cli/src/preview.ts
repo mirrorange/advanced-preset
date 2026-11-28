@@ -2,6 +2,7 @@
 import {
   TRANSPORTS, activeUserModules, assemble, freezeMode, freezesStoryline, isIfName, MAIN_STORYLINE_VARS, wrapInput, normalizeList, localizeUserModuleSource, normalizeUserModuleGroups, presetUserModuleGroups, presetUserModules, presetUserModuleTemplates, userModuleFromSource, defaultVars, plainBuildVars, resolveConfiguration, turnArtifacts, withUserModules, workflowSummary, actorName,
   IMAGE_OFF, SPEECH_OFF, defaultImagePromptType,
+  activeStages, dialogueReplay, emptyTurn, layoutOf, objectReplay, phaseGroups, planPhases, replayItems, resolverOf, toolReplay,
   type APreset, type Configuration, type StorylineVars, type ParamValue, type Transport, type UserModule, type UserModuleSource,
   type ImageApi, type ImagePromptType, type ImageVars, type MacroData, type SpeechApi, type SpeechVars,
 } from '@advanced-preset/protocol';
@@ -37,7 +38,18 @@ export interface PreviewOptions {
   speech?: { api: SpeechApi; auto?: boolean; narrator?: boolean; characters?: boolean };
   /** User modules merged in (keyword rules see empty chat text). */
   userModules?: UserModule[];
+  /** `--multi-model` (presets that declare `multiModel`): the turn runs in phases. */
+  multiModel?: boolean;
+  /** `--phase n` (0-based; implies multi-model): the request of that phase, earlier phases replayed with placeholder text. */
+  phase?: number;
   json?: boolean;
+}
+
+/** Transport of the binding an actor runs on with multi-model (unknown / unset binding: the default binding). */
+function bindingTransport(config: Configuration, actor: string): Transport {
+  const id = config.multiModel?.actors?.[actor];
+  const b = id && id !== 'default' ? config.connection.bindings?.[id] : undefined;
+  return b?.transport ?? config.connection.transport;
 }
 
 function previewStoryline(preset: APreset, config: Configuration, o: PreviewOptions): StorylineVars {
@@ -156,7 +168,24 @@ export function preview(source: APreset, o: PreviewOptions): string {
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === 'task') : undefined;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? '(meta text)' : '', inputText: o.input ?? '', storyline: { name: vars.storyline.name, main: '' }, ...media.data } }, workflow);
+  const data: MacroData = { metaText: o.meta ? '(meta text)' : '', inputText: o.input ?? '', storyline: { name: vars.storyline.name, main: '' }, ...media.data };
+  // Multi-model (story turns of presets that declare it): the requested phase, on its actor's binding.
+  const multi = (o.multiModel || o.phase !== undefined) && !pure;
+  if (multi && !preset.multiModel) throw new Error('--multi-model / --phase: the preset does not declare multiModel');
+  let phaseOf: { index: number; actor: string; stages: string[] } | undefined;
+  if (multi) {
+    vars.multiModel = true;
+    const wf0 = preset.workflows.find((w) => w.id === vars.workflow);
+    const groups = wf0 ? phaseGroups(activeStages(wf0, resolverOf(vars)), true) : [];
+    const index = o.phase ?? 0;
+    if (!Number.isInteger(index) || index < 0 || index >= groups.length) throw new Error(`--phase: expected 0–${Math.max(0, groups.length - 1)} (${groups.length} phases)`);
+    const g = groups[index]!;
+    phaseOf = { index, actor: g.actor, stages: g.stages.map((s) => s.id) };
+    const t = bindingTransport(config, g.actor);
+    vars.transport = t;
+    vars.style = preset.styles[t];
+  }
+  const a = assemble({ preset, config, vars, data, ...(phaseOf ? { phase: phaseOf } : {}) }, workflow);
   // What happens to the last user message of the chat history (ST macros stay unexpanded here).
   const shaping = preset.inputShaping;
   const historyInput = o.input === undefined ? undefined : !shaping ? o.input : shaping.mode === 'wrap' ? wrapInput(shaping.template, o.input, a.expand) : null;
@@ -165,9 +194,37 @@ export function preview(source: APreset, o: PreviewOptions): string {
 
   const artifacts: Record<string, unknown> = {};
   let fields: string[] = [];
+  /** Multi-model: the phase and the replay of the earlier phases (placeholder text). */
+  let phaseInfo: { index: number; count: number; actor: string; stages: string[]; structures: string[]; replay?: unknown } | undefined;
+  let only: { stages: typeof a.stages; structures: typeof a.structures } | undefined;
+  if (wf && phaseOf) {
+    const layout = layoutOf(preset, wf, a.stages, a.structures);
+    const phases = planPhases(a.stages, a.structures, layout, true, wf);
+    const phase = phases[phaseOf.index]!;
+    only = { stages: phase.stages, structures: phase.structures };
+    const done = emptyTurn(a.stages);
+    for (const p of phases.slice(0, phase.index)) {
+      for (const s of p.stages) done.stages[s.id] = s.kind === 'patch' ? { patches: [{ old_string: `(old text, ${s.id})`, new_string: `(new text, ${s.id})` }], status: 'done' } : { text: `(output of ${s.id})`, status: 'done' };
+      for (const d of p.structures) done.structures[d.id] = `(${d.id})`;
+    }
+    const items = replayItems(phases.slice(0, phase.index), done, layout);
+    const full = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
+    let replay: unknown;
+    if (items.length) {
+      if (transport === 'prefill' || transport === 'plaintext') {
+        const prefixes = Object.fromEntries(Object.keys(preset.actors).map((id) => [id, a.expand(config.identity.prefixes[id] || preset.actors[id]!.prefix || `${actorName(preset, config, id)}: `)]));
+        replay = dialogueReplay(items, { prefixes, format: transport === 'prefill' ? 'prefix' : preset.plaintextFormat, contentMarker: preset.contentMarker, stages: a.stages });
+      } else if (transport === 'structured') replay = objectReplay(items, full);
+      else {
+        const art = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand, { stages: items.map((i) => i.stage), structures: items.flatMap((i) => i.structures.map((x) => x.decl)) });
+        replay = toolReplay(items, art).map((c) => ({ name: c.name, arguments: c.arguments }));
+      }
+    }
+    phaseInfo = { index: phase.index, count: phases.length, actor: phase.actor, stages: phase.stages.map((s) => s.id), structures: phase.structures.map((s) => s.id), ...(replay !== undefined ? { replay } : {}) };
+  }
   if (wf) {
     // Same builder as the extension; ST macros ({{user}}, …) stay unexpanded here.
-    const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
+    const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand, only);
     const synthetic = preset.syntheticTurns.find((s) => s.id === config.connection.syntheticTurn);
     const init = synthetic && transport.startsWith('tool-') ? [{ type: 'function', function: { name: synthetic.tool.name, description: a.expand(synthetic.tool.description), parameters: { type: 'object', properties: {} } } }] : [];
     // Turn layout (I-134): stage and structure fields in generation order (object-style transports).
@@ -176,11 +233,12 @@ export function preview(source: APreset, o: PreviewOptions): string {
     if (transport === 'tool-single') artifacts.tools = [...init, t.submitTool()];
     if (transport === 'tool-multi') artifacts.tools = [...init, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ ...(historyInput !== undefined ? { historyInput } : {}), vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...(skipped.length ? { skipped } : {}), ...(a.warnings.length ? { warnings: a.warnings } : {}), modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ ...(phaseInfo ? { phase: phaseInfo } : {}), ...(historyInput !== undefined ? { historyInput } : {}), vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...(skipped.length ? { skipped } : {}), ...(a.warnings.length ? { warnings: a.warnings } : {}), modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
 
   const lines: string[] = [];
   const rule = (title: string) => lines.push('', `━━ ${title} ${'━'.repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} · ${transport} (${vars.style}) · workflow ${wf?.id ?? '—'} · config ${o.config ?? preset.defaultConfiguration}`);
+  if (phaseInfo) lines.push(`multi-model phase ${phaseInfo.index}/${phaseInfo.count - 1}: ${phaseInfo.actor} · stages ${phaseInfo.stages.join(', ')}${phaseInfo.structures.length ? ` · structures ${phaseInfo.structures.join(', ')}` : ''}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(', ')}`);
   for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
   for (const w of a.warnings) lines.push(`warning: ${w}`);
@@ -206,6 +264,7 @@ export function preview(source: APreset, o: PreviewOptions): string {
   if (fields.length) lines.push(`fields: ${fields.join(' → ')}`);
   for (const r of preset.regions) {
     if (r.native) { rule(`${r.id} (native)`); continue; }
+    if (r.beforeStage && phaseOf && !phaseOf.stages.includes(r.beforeStage)) { rule(`${r.id} (before stage ${r.beforeStage}, not in this phase's request)`); continue; }
     const msgs = a.regions[r.id] ?? [];
     rule(`${r.id}${r.beforeStage ? ` (before stage ${r.beforeStage}, request tail)` : ''}${msgs.length ? '' : ' (empty)'}`);
     for (const m of msgs) lines.push(`[${m.role}]`, m.content, '');
@@ -213,6 +272,10 @@ export function preview(source: APreset, o: PreviewOptions): string {
       rule('chat history (ST) · last user message');
       lines.push(historyInput === null ? '(extracted: placed by {{ap::input::text}})' : historyInput, '');
     }
+  }
+  if (phaseInfo?.replay !== undefined) {
+    rule(`earlier phases replayed (${transport}, placeholder text)`);
+    lines.push(typeof phaseInfo.replay === 'string' ? phaseInfo.replay : JSON.stringify(phaseInfo.replay, null, 2));
   }
   for (const [k, v] of Object.entries(artifacts)) {
     rule(k);
