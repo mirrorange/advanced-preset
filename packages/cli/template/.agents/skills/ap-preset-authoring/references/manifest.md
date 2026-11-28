@@ -38,6 +38,7 @@
 | `tokenSaving` | map | 见下 | 省 token 的默认参数 |
 | `inputShaping` | map | — | 用户输入整形（包裹或提取本次输入），见[用户输入整形](#用户输入整形-inputshaping) |
 | `storylines` | `true` \| map | — | 支持故事线（支线故事与 if 线），见[故事线](#故事线-storylines) |
+| `multiModel` | `true` \| map | — | 支持多模型工作流，见[多模型](#多模型-multimodel) |
 | `image` | `true` \| map | — | 支持图像生成，见[图像生成与语音合成](#图像生成与语音合成-image--speech) |
 | `speech` | `true` \| map | — | 支持语音合成，见[图像生成与语音合成](#图像生成与语音合成-image--speech) |
 | `syntheticTurns` | list | `[]` | 工具模式的示范轮次，见 [transports.md](transports.md#示范轮次-syntheticturns) |
@@ -364,6 +365,28 @@ inputShaping:
 `ap check` 警告：未知字段；`extract` 写了 `template`（不使用）；`wrap` 的模板没有 `{{content}}`（输入会丢失）；`extract` 却没有提示词使用 `{{ap::input::text}}`；`minAdvancedPreset` 低于 1.9.0。
 
 完整流程见 [meta-and-tasks.md](meta-and-tasks.md#用户输入整形)。
+
+## 多模型 `multiModel`
+
+声明预设支持**多模型工作流**：用户可以在面板「配置 → 多模型」中开启它，并为每个角色（用户角色除外）指定一个[连接绑定](configuration.md#连接绑定)，工作流的各个步骤就由执行它的角色所绑定的模型完成。不声明时面板不显示多模型选项，条件变量 `multiModel` 恒为假，每轮仍是一次请求。
+
+```yaml
+multiModel: true              # 或 { enabled: true }；false / 不写 = 不支持
+configurationDefaults:
+  multiModel: { enabled: false, actors: {} }   # 默认值，可以不写
+configurations:
+  - id: duo
+    name: Two models
+    diff:
+      multiModel: { actors: { critic: default } }
+```
+
+- 声明后配置中多一段 `multiModel`：`enabled`（默认 `false`）与 `actors`（角色 id → 绑定 id，没写的角色使用默认绑定）。推荐配置可以设置它们；绑定本身由用户在面板中创建，推荐配置中的 `connection.bindings` 只适合 `model` 目标（`profile` 目标指向某一个 SillyTavern 中的连接配置文件）；
+- 只影响故事轮：元指令回复与脚本调用仍是一次请求，使用当前绑定；
+- 步骤如何分成多次请求、先前步骤如何按当前传输方式回放、步骤前的动态区域与新的条件变量见 [workflows.md](workflows.md)；
+- 需要 Advanced Preset 1.13.0 以上（更早的版本忽略这个字段，每轮仍是一次请求）。
+
+`ap check`：`multiModel` 不是 `true` 或映射、`enabled` 不是布尔值时报错；未知字段、`minAdvancedPreset` 低于 1.13.0 时警告；配置段的检查见 [configuration.md](configuration.md#诊断)。
 
 ## 故事线 `storylines`
 
