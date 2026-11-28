@@ -2,7 +2,8 @@
  * GenerationContext (§5.1): one per generation, created by the interceptor or at PROMPT_READY
  * (whichever comes first) and carried through FetchGate → Orchestrator → sidecar via `id`.
  */
-import type { APreset, Assembly, Configuration, SpeechCleaner, Stage, StructureDecl, Transport, Workflow } from '@advanced-preset/protocol';
+import type { APreset, Assembly, BindingTarget, Configuration, Phase, SpeechCleaner, Stage, StructureDecl, Transport, Workflow } from '@advanced-preset/protocol';
+import type { ChatMessage } from '@/st/host';
 import type { KeywordTexts, MetaParse } from '@advanced-preset/protocol';
 import type { CacheState, StickyEntry } from './cache';
 import type { StorylineTurn } from './storylines';
@@ -48,6 +49,20 @@ export interface GenerationContext {
   signatureFallback?: boolean;
   /** Set once FetchGate took over the request. */
   claimed?: boolean;
+  /** Multi-model story turn (the preset declares it, the configuration switched it on): one request per phase. */
+  multiModel?: boolean;
+  /** Target of the binding the first request runs on (cache fingerprint). */
+  firstTarget?: BindingTarget;
+  /** Phases of the turn (one without multi-model), planned at PROMPT_READY. */
+  phases?: Phase[];
+  /** Phase view of a multi-model turn: the whole turn's stages / structures (names and numbering are turn-wide). */
+  turn?: { stages: Stage[]; structures: StructureDecl[] };
+  /** The first request's prompt rendered again with another assembly (later phases; history as resolved for the first request). */
+  rerender?: (assembly: Assembly) => { messages: ChatMessage[]; historyAt: number };
+  /** Assembly of a later phase (variables of its binding's transport and `phase.*`). */
+  phaseAssembly?: (phase: Phase, transport: Transport) => Assembly;
+  /** Input shaping: fills the `{{ap::input::text}}` slots of text rendered after PROMPT_READY. */
+  fillInput?: (text: string) => string;
   warnings: string[];
 }
 

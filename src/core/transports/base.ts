@@ -46,6 +46,13 @@ export interface DriverInput {
   messages: ChatMessage[];
   caller: CallerInfo;
   family: 'openai' | 'claude' | 'gemini' | 'cohere';
+  /** Tools of replayed earlier phases (multi-model), listed before the phase's own tools. */
+  extraTools?: any[];
+  /**
+   * Dialogue phase followed by another phase (multi-model): stop strings for the request, and where
+   * the phase's own output ends in the text (the model went on with another actor's stages).
+   */
+  phaseEnd?: { stop: string[]; cut: (text: string) => string };
 }
 
 /**
@@ -71,6 +78,8 @@ export function textExpander(ctx: GenerationContext): (text: string) => string {
 
 /** Schema / tool names and descriptions of this turn, all from the preset. */
 export function artifactsOf(ctx: GenerationContext): TurnArtifacts {
+  // A multi-model phase: names of the whole turn, schema / tools of the phase.
+  if (ctx.turn) return turnArtifacts(ctx.preset.tools, ctx.workflow!, ctx.turn.stages, ctx.turn.structures, textExpander(ctx), { stages: ctx.stages, structures: ctx.structures });
   return turnArtifacts(ctx.preset.tools, ctx.workflow!, ctx.stages, ctx.structures, textExpander(ctx));
 }
 

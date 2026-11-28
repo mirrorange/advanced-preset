@@ -11,7 +11,7 @@ const popup = vi.fn(async (..._args: unknown[]) => answer);
 
 beforeEach(() => {
   vi.stubGlobal('localStorage', { getItem: () => 'en' });
-  vi.stubGlobal('__AP_VERSION__', '1.12.0');
+  vi.stubGlobal('__AP_VERSION__', '1.13.0');
   answer = AFFIRMATIVE;
   popup.mockClear();
   (globalThis as any).SillyTavern = {

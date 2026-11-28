@@ -4447,13 +4447,13 @@ var require_resolve_block_scalar = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/compose/resolve-block-scalar.js"(exports) {
     "use strict";
     var Scalar = require_Scalar();
-    function resolveBlockScalar(ctx, scalar2, onError) {
-      const start = scalar2.offset;
-      const header = parseBlockScalarHeader(scalar2, ctx.options.strict, onError);
+    function resolveBlockScalar(ctx, scalar3, onError) {
+      const start = scalar3.offset;
+      const header = parseBlockScalarHeader(scalar3, ctx.options.strict, onError);
       if (!header)
         return { value: "", type: null, comment: "", range: [start, start, start] };
       const type = header.mode === ">" ? Scalar.Scalar.BLOCK_FOLDED : Scalar.Scalar.BLOCK_LITERAL;
-      const lines = scalar2.source ? splitLines(scalar2.source) : [];
+      const lines = scalar3.source ? splitLines(scalar3.source) : [];
       let chompStart = lines.length;
       for (let i = lines.length - 1; i >= 0; --i) {
         const content = lines[i][1];
@@ -4465,12 +4465,12 @@ var require_resolve_block_scalar = __commonJS({
       if (chompStart === 0) {
         const value2 = header.chomp === "+" && lines.length > 0 ? "\n".repeat(Math.max(1, lines.length - 1)) : "";
         let end2 = start + header.length;
-        if (scalar2.source)
-          end2 += scalar2.source.length;
+        if (scalar3.source)
+          end2 += scalar3.source.length;
         return { value: value2, type, comment: header.comment, range: [start, end2, end2] };
       }
-      let trimIndent = scalar2.indent + header.indent;
-      let offset = scalar2.offset + header.length;
+      let trimIndent = scalar3.indent + header.indent;
+      let offset = scalar3.offset + header.length;
       let contentStart = 0;
       for (let i = 0; i < chompStart; ++i) {
         const [indent, content] = lines[i];
@@ -4548,7 +4548,7 @@ var require_resolve_block_scalar = __commonJS({
         default:
           value += "\n";
       }
-      const end = start + header.length + scalar2.source.length;
+      const end = start + header.length + scalar3.source.length;
       return { value, type, comment: header.comment, range: [start, end, end] };
     }
     function parseBlockScalarHeader({ offset, props }, strict, onError) {
@@ -4631,8 +4631,8 @@ var require_resolve_flow_scalar = __commonJS({
     "use strict";
     var Scalar = require_Scalar();
     var resolveEnd = require_resolve_end();
-    function resolveFlowScalar(scalar2, strict, onError) {
-      const { offset, type, source, end } = scalar2;
+    function resolveFlowScalar(scalar3, strict, onError) {
+      const { offset, type, source, end } = scalar3;
       let _type;
       let value;
       const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
@@ -4651,7 +4651,7 @@ var require_resolve_flow_scalar = __commonJS({
           break;
         /* istanbul ignore next should not happen */
         default:
-          onError(scalar2, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
+          onError(scalar3, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
           return {
             value: "",
             type: null,
@@ -4866,26 +4866,26 @@ var require_compose_scalar = __commonJS({
         tag = findScalarTagByTest(ctx, value, token, onError);
       else
         tag = ctx.schema[identity.SCALAR];
-      let scalar2;
+      let scalar3;
       try {
         const res = tag.resolve(value, (msg) => onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg), ctx.options);
-        scalar2 = identity.isScalar(res) ? res : new Scalar.Scalar(res);
+        scalar3 = identity.isScalar(res) ? res : new Scalar.Scalar(res);
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
         onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg);
-        scalar2 = new Scalar.Scalar(value);
+        scalar3 = new Scalar.Scalar(value);
       }
-      scalar2.range = range;
-      scalar2.source = value;
+      scalar3.range = range;
+      scalar3.source = value;
       if (type)
-        scalar2.type = type;
+        scalar3.type = type;
       if (tagName)
-        scalar2.tag = tagName;
+        scalar3.tag = tagName;
       if (tag.format)
-        scalar2.format = tag.format;
+        scalar3.format = tag.format;
       if (comment)
-        scalar2.comment = comment;
-      return scalar2;
+        scalar3.comment = comment;
+      return scalar3;
     }
     function findScalarTagByName(schema, value, tagName, tagToken, onError) {
       if (tagName === "!")
@@ -6713,37 +6713,37 @@ var require_parser = __commonJS({
           };
         }
       }
-      *scalar(scalar2) {
+      *scalar(scalar3) {
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
           let sep2;
-          if (scalar2.end) {
-            sep2 = scalar2.end;
+          if (scalar3.end) {
+            sep2 = scalar3.end;
             sep2.push(this.sourceToken);
-            delete scalar2.end;
+            delete scalar3.end;
           } else
             sep2 = [this.sourceToken];
           const map = {
             type: "block-map",
-            offset: scalar2.offset,
-            indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep2 }]
+            offset: scalar3.offset,
+            indent: scalar3.indent,
+            items: [{ start, key: scalar3, sep: sep2 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
         } else
-          yield* this.lineEnd(scalar2);
+          yield* this.lineEnd(scalar3);
       }
-      *blockScalar(scalar2) {
+      *blockScalar(scalar3) {
         switch (this.type) {
           case "space":
           case "comment":
           case "newline":
-            scalar2.props.push(this.sourceToken);
+            scalar3.props.push(this.sourceToken);
             return;
           case "scalar":
-            scalar2.source = this.source;
+            scalar3.source = this.source;
             this.atNewLine = true;
             this.indent = 0;
             if (this.onNewLine) {
@@ -7387,6 +7387,18 @@ var isInlineStructure = (s) => INLINE_STRUCTURE_KINDS.includes(s.kind);
 var CARD_POSITIONS = ["top", "bottom"];
 var USER_INPUT_MODES = ["keep", "truncate", "remove"];
 var DEFAULT_SYNOPSIS_HISTORY_TEMPLATE = "{{content}}\n\n[{{time}} \xB7 {{location}}] {{event}}: {{summary}}";
+var BINDING_TARGET_TYPES = ["current", "profile", "model"];
+var BINDING_TRANSPORT_KEYS = [
+  "transport",
+  "forceTool",
+  "parallelTools",
+  "syntheticTurn",
+  "sendThoughtSignature",
+  "openAiSignatures",
+  "streamToolArguments",
+  "maxSteps",
+  "assumeToolSupport"
+];
 
 // ../protocol/src/expr.ts
 var ExprError = class extends Error {
@@ -7829,6 +7841,7 @@ function turnLayout(workflow, stages, allStructures, tools, stageBase) {
   return {
     items,
     prefixed: Boolean(prefix),
+    prefix,
     stageField: (stage) => stageItem.get(stage)?.name ?? stageBase(stage),
     structureField: (decl) => structureItem.get(decl.id)?.name ?? decl.field,
     hostOf: (decl) => hosts.get(decl.id),
@@ -7838,6 +7851,23 @@ function turnLayout(workflow, stages, allStructures, tools, stageBase) {
       return prefix && it && carriedBy(stage).length ? orderPrefixed(prefix, it.position, total, base) : base;
     }
   };
+}
+function hostWithin(layout, stages, decl) {
+  const at = layout.items.findIndex((it) => it.type === "structure" && it.structure.id === decl.id);
+  if (at < 0) return void 0;
+  const inSet = (i) => {
+    const it = layout.items[i];
+    return it.type === "stage" && stages.includes(it.stage) ? it.stage : void 0;
+  };
+  for (let i = at - 1; i >= 0; i--) {
+    const s = inSet(i);
+    if (s) return s;
+  }
+  for (let i = at + 1; i < layout.items.length; i++) {
+    const s = inSet(i);
+    if (s) return s;
+  }
+  return void 0;
 }
 function withFieldName(decl, name) {
   const r = (t) => t.replaceAll("{{field}}", name);
@@ -7876,6 +7906,10 @@ function fillTemplate(text, vars) {
 function activeStages(workflow, resolve2) {
   return workflow.stages.filter((s) => test(s.when, resolve2));
 }
+function terminalContentIndex(stages) {
+  for (let i = stages.length - 1; i >= 0; i--) if (stages[i].kind === "content") return i;
+  return -1;
+}
 function stageVars(stages, stage) {
   return { n: stages.indexOf(stage) + 1, stage: stage.id, actor: stage.actor, label: stage.label };
 }
@@ -7911,14 +7945,21 @@ function stageSchema(stage, description, tools = DEFAULT_TOOLS, expand = same) {
 function tool(name, description, parameters) {
   return { type: "function", function: { name, ...description ? { description } : {}, parameters } };
 }
-function turnArtifacts(tools, workflow, stages, allStructures, expand = same) {
+function turnArtifacts(tools, workflow, stages, allStructures, expand = same, phase) {
   const structures = allStructures.filter((s) => !isInlineStructure(s));
   const desc = (template, stage) => {
     if (!template) return void 0;
     const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();
     return t || void 0;
   };
-  const layout = turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const layout = phase ? phaseLayout(turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools)), phase) : turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const inPhase = phase ? new Set(phase.stages) : void 0;
+  const phaseStructures = phase ? new Set(phase.structures.map((d) => d.id)) : void 0;
+  const requested = (it) => {
+    if (!inPhase) return true;
+    return it.type === "stage" ? inPhase.has(it.stage) : phaseStructures.has(it.structure.id);
+  };
+  const ownStages = inPhase ? stages.filter((s) => inPhase.has(s)) : stages;
   const fieldOf = (s) => layout.stageField(s);
   const structureFieldOf = (d) => layout.structureField(d);
   const toolOf = (s) => stageToolName(stages, s, tools);
@@ -7932,6 +7973,7 @@ function turnArtifacts(tools, workflow, stages, allStructures, expand = same) {
     const properties = {};
     const required = [];
     for (const it of layout.items) {
+      if (!requested(it)) continue;
       if (it.type === "structure") {
         addStructure(properties, required, it.structure);
         continue;
@@ -7942,7 +7984,7 @@ function turnArtifacts(tools, workflow, stages, allStructures, expand = same) {
     }
     return { type: "object", properties, required, additionalProperties: false };
   };
-  const stageTools = () => stages.map((stage) => {
+  const stageTools = () => ownStages.map((stage) => {
     const properties = {};
     const required = [];
     const param = stageParam(stage, tools);
@@ -7990,12 +8032,39 @@ function turnArtifacts(tools, workflow, stages, allStructures, expand = same) {
       additionalProperties: false
     }),
     envelopeKeys: keys,
-    toolNames: () => [tools.submit.name, ...stages.map(toolOf)]
+    toolNames: () => [tools.submit.name, ...ownStages.map(toolOf)]
+  };
+}
+function phaseLayout(layout, phase) {
+  const { stages } = phase;
+  const own2 = new Set(phase.structures.map((d) => d.id));
+  const carriedBy = (stage) => layout.items.flatMap((it) => it.type === "structure" && own2.has(it.structure.id) && hostWithin(layout, stages, it.structure) === stage ? [it.structure] : []);
+  return {
+    ...layout,
+    hostOf: (decl) => own2.has(decl.id) ? hostWithin(layout, stages, decl) : void 0,
+    carriedBy,
+    stageParam: (stage, base) => {
+      const it = layout.items.find((x) => x.type === "stage" && x.stage === stage);
+      return layout.prefixed && it && carriedBy(stage).length ? orderPrefixed(layout.prefix, it.position, layout.items.length, base) : base;
+    }
   };
 }
 function workflowSummary(stages, actorName2, label = (s) => s.label) {
   const parts = stages.map((s) => `${label(s)} (${actorName2(s.actor)})${s.optional ? " [optional]" : ""}`);
   return ["Start", ...parts, "(End)"].join(" -> ");
+}
+
+// ../protocol/src/turn.ts
+function emptyTurn(stages) {
+  return {
+    stages: Object.fromEntries(stages.map((s) => [s.id, { status: "pending" }])),
+    structures: {},
+    current: null,
+    content: "",
+    contentStarted: false,
+    openStructures: [],
+    warnings: []
+  };
 }
 
 // ../protocol/src/template.ts
@@ -8438,6 +8507,14 @@ var CONNECTION_DEFAULTS = {
   finalFallback: true,
   assumeToolSupport: false
 };
+var BINDING_DEFAULTS = {
+  target: { type: "current" },
+  bindings: {},
+  binding: "default"
+};
+var DEFAULT_BINDING = "default";
+var MULTI_MODEL_SINCE = "1.13.0";
+var MULTI_MODEL_CONFIG_DEFAULTS = { enabled: false, actors: {} };
 var CACHE_DEFAULTS = {
   enabled: false,
   ttlMinutes: 5,
@@ -8471,7 +8548,10 @@ function pruneDiff(diff, shape, path = "", removed = [], openMaps = OPEN_MAPS) {
   }
   return removed;
 }
-var OPEN_MAPS = /* @__PURE__ */ new Set(["sampling"]);
+var OPEN_MAPS = /* @__PURE__ */ new Set(["sampling", "connection.target", "connection.bindings", "multiModel.actors"]);
+function configurationShape(preset) {
+  return deepMerge({ connection: BINDING_DEFAULTS }, preset.configurationDefaults);
+}
 function recommended(preset, id) {
   return preset.configurations.find((c) => c.id === id) ?? preset.configurations.find((c) => c.id === preset.defaultConfiguration);
 }
@@ -8823,6 +8903,7 @@ function assemble(input, workflowOverride) {
   const preResolve = resolverOf(vars);
   const stages = workflow ? activeStages(workflow, preResolve) : [];
   vars.stages = Object.fromEntries(stages.map((s) => [s.id, true]));
+  vars.phase = input.phase ? { stages: Object.fromEntries(input.phase.stages.map((id) => [id, true])), index: input.phase.index, actor: input.phase.actor } : { stages: { ...vars.stages }, index: 0, actor: "" };
   const resolve2 = resolverOf(vars);
   const modules = activeModules(preset, config, resolve2);
   const structures = activeStructures(preset, modules, vars);
@@ -8877,6 +8958,8 @@ function defaultVars(preset, config, over = {}) {
     storyline: { ...MAIN_STORYLINE_VARS },
     image: { ...IMAGE_OFF },
     speech: { ...SPEECH_OFF },
+    multiModel: false,
+    phase: { stages: {}, index: 0, actor: "" },
     ...over
   };
 }
@@ -9474,6 +9557,117 @@ var QR_AUTO_EXECUTE = [
   "executeBeforeGeneration"
 ];
 var QR_TEXT_FIELDS = ["label", "title", "message"];
+
+// ../protocol/src/phases.ts
+var STAGE_REGIONS_SINCE = "1.13.0";
+function phaseGroups(stages, multi) {
+  if (!multi || !stages.length) return [{ actor: "", stages }];
+  const out = [];
+  for (const s of stages) {
+    const last = out[out.length - 1];
+    if (last && last.actor === s.actor) last.stages.push(s);
+    else out.push({ actor: s.actor, stages: [s] });
+  }
+  return out;
+}
+function structureStage(workflow, stages, layout, decl) {
+  const terminal = terminalContentIndex(stages);
+  const content = terminal >= 0 ? stages[terminal] : void 0;
+  const ref = (id) => id === CONTENT_STAGE_REF ? content : stages.find((s) => s.id === id);
+  const anchor2 = (workflow.structuresAfter ? stages.find((s) => s.id === workflow.structuresAfter) : void 0) ?? content ?? stages[stages.length - 1];
+  if (isInlineStructure(decl)) return content ?? anchor2;
+  const o = structureOrderOf(workflow, decl);
+  if (typeof o === "number") {
+    const at = layout ? layout.items.findIndex((it) => it.type === "structure" && it.structure.id === decl.id) : -1;
+    for (let i = at - 1; i >= 0; i--) {
+      const it = layout.items[i];
+      if (it.type === "stage") return it.stage;
+    }
+    return stages[0];
+  }
+  return ("before" in o ? ref(o.before) : ref(o.after)) ?? anchor2;
+}
+function planPhases(stages, structures, layout, multi, workflow = {}) {
+  const groups = phaseGroups(stages, multi);
+  const phases = groups.map((g, index) => ({ index, actor: g.actor, stages: g.stages, structures: [] }));
+  if (phases.length === 1) {
+    phases[0].structures = [...structures];
+    return phases;
+  }
+  for (const d of structures) {
+    const stage = structureStage(workflow, stages, layout, d);
+    const i = stage ? phases.findIndex((p) => p.stages.includes(stage)) : -1;
+    phases[i >= 0 ? i : phases.length - 1].structures.push(d);
+  }
+  return phases;
+}
+function replayItems(phases, turn, layout) {
+  const out = [];
+  for (const p of phases) {
+    for (const stage of p.stages) {
+      const r = turn.stages[stage.id];
+      const hasText = typeof r?.text === "string" && r.text.trim() !== "";
+      if (!r || !hasText && !r.patches) continue;
+      const carried = layout ? p.structures.filter((d) => !isInlineStructure(d) && hostWithin(layout, p.stages, d) === stage) : [];
+      out.push({
+        stage,
+        ...hasText ? { text: r.text } : {},
+        ...r.patches ? { patches: r.patches } : {},
+        structures: carried.filter((d) => turn.structures[d.id] !== void 0).map((d) => ({ decl: d, value: turn.structures[d.id] }))
+      });
+    }
+  }
+  return out;
+}
+var escapeXml = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+var scalar2 = (v) => Array.isArray(v) ? v.map(String).join(", ") : v === null || v === void 0 ? "" : typeof v === "object" ? JSON.stringify(v) : String(v);
+var children = (o) => Object.entries(o).filter(([, v]) => v !== null && v !== void 0 && v !== "").map(([k, v]) => `<${k}>${escapeXml(scalar2(v))}</${k}>`).join("");
+function structureTagText(decl, value) {
+  const tag = decl.tag;
+  const block = (inner) => `<${tag}>${inner}</${tag}>`;
+  if (typeof value === "string") return block(value);
+  if (decl.kind === "options" && Array.isArray(value)) {
+    return block(value.map((o) => `<option title="${escapeXml(o.label ?? "").replace(/"/g, "&quot;")}">${o.content ?? ""}</option>`).join("\n"));
+  }
+  if (Array.isArray(value)) return value.map((x) => block(x && typeof x === "object" ? children(x) : escapeXml(scalar2(x)))).join("\n");
+  if (value && typeof value === "object") return block(children(value));
+  return block(escapeXml(scalar2(value)));
+}
+function dialogueReplay(items, o) {
+  const terminal = terminalContentIndex(o.stages);
+  const terminalId = terminal >= 0 ? o.stages[terminal].id : void 0;
+  const parts = [];
+  for (const it of items) {
+    const s = it.stage;
+    const tag = s.tag ?? (o.format === "tag" || s.kind === "patch" ? s.id : void 0);
+    if (it.patches) parts.push(it.patches.map((p) => `<${tag}><old_string>${escapeXml(p.old_string)}</old_string><new_string>${escapeXml(p.new_string)}</new_string></${tag}>`).join("\n"));
+    else if (tag) parts.push(`<${tag}>
+${it.text ?? ""}
+</${tag}>`);
+    else {
+      const marker = s.id === terminalId && o.contentMarker ? `${o.contentMarker}
+` : "";
+      parts.push(`${o.prefixes[s.actor] ?? ""}${marker}${it.text ?? ""}`);
+    }
+    for (const x of it.structures) parts.push(structureTagText(x.decl, x.value));
+  }
+  return parts.join("\n\n");
+}
+function objectReplay(items, names) {
+  const out = {};
+  for (const it of items) {
+    out[names.fieldOf(it.stage)] = it.patches ?? it.text ?? "";
+    for (const x of it.structures) out[names.structureFieldOf(x.decl)] = x.value;
+  }
+  return out;
+}
+function toolReplay(items, names) {
+  return items.map((it) => {
+    const args = { [names.paramOf(it.stage)]: it.patches ?? it.text ?? "" };
+    for (const x of it.structures) args[names.structureFieldOf(x.decl)] = x.value;
+    return { stage: it.stage, name: names.toolOf(it.stage), arguments: args };
+  });
+}
 
 // src/io.ts
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
@@ -10449,7 +10643,11 @@ function compile(tree) {
     if (o.merge === "join" || o.merge === "none") merge = o.merge;
     else if (isObj5(o.merge) && typeof o.merge.wrap === "string") merge = { wrap: o.merge.wrap };
     else if (o.merge !== void 0) diag.error("merge must be none | join | { wrap: <tag> }", where);
-    regions.push({ id: rid, role, merge, separator: str2(o.separator, "\n\n"), ...o.native ? { native: true } : {} });
+    const beforeStage = o.beforeStage === void 0 ? "" : str2(o.beforeStage);
+    if (o.beforeStage !== void 0 && !beforeStage) diag.error("beforeStage must name a workflow stage", where);
+    if (beforeStage && o.native) diag.error("a stage region cannot be native", where);
+    if (beforeStage && o.anchor !== void 0) diag.error("a stage region cannot be a semantic anchor", where);
+    regions.push({ id: rid, role, merge, separator: str2(o.separator, "\n\n"), ...o.native ? { native: true } : {}, ...beforeStage ? { beforeStage } : {} });
     if (o.anchor !== void 0) {
       const a = str2(o.anchor);
       if (!ANCHORS.includes(a)) diag.error(`anchor must be ${ANCHORS.join(" | ")}`, where);
@@ -10816,6 +11014,16 @@ function compile(tree) {
     for (const k of Object.keys(v)) diag.warn(`${key}: unknown key \`${k}\``, { file: M, path: `${key}.${k}` });
     return {};
   };
+  let multiModel;
+  if (raw.multiModel !== void 0 && raw.multiModel !== null && raw.multiModel !== false) {
+    if (raw.multiModel === true) multiModel = {};
+    else if (!isObj5(raw.multiModel)) diag.error("multiModel must be `true` or a mapping { enabled }", { file: M, path: "multiModel" });
+    else {
+      for (const k of Object.keys(raw.multiModel)) if (k !== "enabled") diag.warn(`multiModel: unknown key \`${k}\``, { file: M, path: `multiModel.${k}` });
+      if (raw.multiModel.enabled !== void 0 && typeof raw.multiModel.enabled !== "boolean") diag.error("multiModel.enabled must be a boolean", { file: M, path: "multiModel.enabled" });
+      if (raw.multiModel.enabled !== false) multiModel = {};
+    }
+  }
   const image = mediaFlag("image");
   const speech = mediaFlag("speech");
   const syntheticTurns = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s, i) => {
@@ -10951,7 +11159,9 @@ function compile(tree) {
     cache: { ...CACHE_DEFAULTS, ...sect("cache") },
     meta: { enabled: true, recentCount: meta.recentCount, ...sect("meta") },
     // Only for presets with storylines, so that other artifacts keep their hash.
-    ...storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...sect("storylines") } } : {}
+    ...storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...sect("storylines") } } : {},
+    // Only for presets with multi-model workflows, so that other artifacts keep their hash.
+    ...multiModel ? { multiModel: { ...MULTI_MODEL_CONFIG_DEFAULTS, ...sect("multiModel"), actors: { ...isObj5(sect("multiModel").actors) ? sect("multiModel").actors : {} } } } : {}
   };
   for (const k of ["names", "prefixes"]) if (isObj5(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect("modules"))) {
@@ -10995,6 +11205,27 @@ function compile(tree) {
     }
   };
   if (isObj5(cd.storylines)) checkStorylines(cd.storylines, "configurationDefaults.storylines");
+  const checkMultiModel = (c, path) => {
+    if (!multiModel) return void diag.warn(`${path}: the preset does not declare multiModel (ignored)`, { file: M, path });
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (k === "enabled") {
+        if (typeof v !== "boolean") diag.error("`enabled` must be a boolean", where);
+      } else if (k === "actors") {
+        if (!isObj5(v)) {
+          diag.error("`actors` must be a mapping actor \u2192 binding id", where);
+          continue;
+        }
+        for (const [a, b] of Object.entries(v)) {
+          const at = { file: M, path: `${path}.actors.${a}` };
+          if (!actors[a]) diag.error(`${path}.actors: unknown actor \`${a}\``, at);
+          else if (a === user) diag.warn(`${path}.actors: the user actor never runs a stage`, at);
+          if (typeof b !== "string" || !b) diag.error(`${path}.actors.${a} must be a binding id`, at);
+        }
+      } else diag.warn(`unknown multiModel option \`${k}\``, where);
+    }
+  };
+  if (isObj5(cd.multiModel)) checkMultiModel(cd.multiModel, "configurationDefaults.multiModel");
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
   const configurations = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c, i) => {
     const o = isObj5(c) ? c : {};
@@ -11005,6 +11236,7 @@ function compile(tree) {
     if (isObj5(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj5(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
     if (isObj5(rc.diff.storylines)) checkStorylines(rc.diff.storylines, `configurations[${i}].diff.storylines`);
+    if (isObj5(rc.diff.multiModel)) checkMultiModel(rc.diff.multiModel, `configurations[${i}].diff.multiModel`);
     if (isObj5(rc.diff.params)) checkParams(rc.diff.params, `configurations[${i}].diff.params`, (k, v) => {
       rc.diff.params[k] = v;
     }, false);
@@ -11069,6 +11301,7 @@ function compile(tree) {
     workflowRegion: str2(raw.workflowRegion, anchors.tail ?? ""),
     ...inputShaping ? { inputShaping } : {},
     ...storylines ? { storylines } : {},
+    ...multiModel ? { multiModel } : {},
     ...image ? { image } : {},
     ...speech ? { speech } : {},
     params,
@@ -11287,7 +11520,9 @@ function compileCarrier(src, regions, presetName, diag) {
   const add = (identifier, enabled, where) => {
     const region = regions.find((r) => r.id === identifier);
     let p;
-    if (region && !region.native) {
+    if (region?.beforeStage) {
+      return diag.error(`carrier.order: \`${identifier}\` is a stage region (beforeStage), it has no anchor`, where);
+    } else if (region && !region.native) {
       p = { identifier: anchorIdentifier(region.id), name: `${label} \xB7 ${region.id}`, role: region.role, content: anchorText(region.id), system_prompt: false, marker: false, injection_position: 0, injection_depth: 4, forbid_overrides: true };
     } else if (NATIVE_PROMPTS[identifier]) {
       const n = NATIVE_PROMPTS[identifier];
@@ -11310,7 +11545,7 @@ function compileCarrier(src, regions, presetName, diag) {
       add(k, v !== false, where);
     } else diag.error("carrier.order items are `id` or `{ id: false }`", where);
   });
-  for (const r of regions) if (!r.native && !prompt_order.some((o) => o.identifier === anchorIdentifier(r.id))) diag.error(`region \`${r.id}\` has no anchor in carrier.order`, { file: M, path: "carrier.order" });
+  for (const r of regions) if (!r.native && !r.beforeStage && !prompt_order.some((o) => o.identifier === anchorIdentifier(r.id))) diag.error(`region \`${r.id}\` has no anchor in carrier.order`, { file: M, path: "carrier.order" });
   if (!prompt_order.some((o) => o.identifier === "chatHistory")) diag.error("carrier.order must contain chatHistory", { file: M, path: "carrier.order" });
   return { prompts, prompt_order };
 }
@@ -11364,7 +11599,10 @@ var FIXED_VARS = {
   "speech.auto": null,
   "speech.api": SPEECH_APIS,
   "speech.narrator": null,
-  "speech.characters": null
+  "speech.characters": null,
+  multiModel: null,
+  "phase.index": null,
+  "phase.actor": null
 };
 function validate(p, map, diag) {
   const M = "preset.yaml";
@@ -11379,6 +11617,11 @@ function validate(p, map, diag) {
     if (path in FIXED_VARS) return;
     const [root, ...rest] = path.split(".");
     const key = rest.join(".");
+    if (root === "phase" && rest[0] === "stages") {
+      const id = rest.slice(1).join(".");
+      if (!stageIds.has(id)) diag.error(`unknown stage \`${id}\` in condition`, where);
+      return;
+    }
     if (root === "last") {
       const decl = p.structures[key];
       if (!decl) return diag.error(`unknown structure \`${key}\` in condition`, where);
@@ -11528,6 +11771,8 @@ function validate(p, map, diag) {
   if (namingStructures.length > 1) diag.warn(`structures ${namingStructures.map((s) => s.id).join(", ")}: only one storyline structure is read (${namingStructures[0].id})`, { file: M, path: `structures.${namingStructures[1].id}` });
   if (p.storylines && !namingStructures.some((s) => p.modules.some((m) => m.structures.includes(s.id))))
     diag.warn("no module requests a storyline structure: storylines started with #? / #!? (and an unnamed main storyline replaced with #!) get generic names", { file: M, path: "storylines" });
+  if (p.multiModel && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, MULTI_MODEL_SINCE) < 0))
+    diag.warn(`multiModel needs Advanced Preset ${MULTI_MODEL_SINCE}: set minAdvancedPreset to ${MULTI_MODEL_SINCE} or later (older versions run every stage in one request)`, { file: M, path: "minAdvancedPreset" });
   if (p.storylines && (!p.minAdvancedPreset || compareVersions(p.minAdvancedPreset, STORYLINES_SINCE) < 0))
     diag.warn(`storylines need Advanced Preset ${STORYLINES_SINCE}: set minAdvancedPreset to ${STORYLINES_SINCE} or later (older versions send the #tags as text and keep the history in order)`, { file: M, path: "minAdvancedPreset" });
   for (const key of ["image", "speech"]) {
@@ -11565,6 +11810,12 @@ function validate(p, map, diag) {
   }
   for (const r of p.regions) {
     if (r.native && p.workflowRegion === r.id) diag.error("workflowRegion cannot be a native region", { file: M, path: "workflowRegion" });
+    if (r.beforeStage) {
+      if (!stageIds.has(r.beforeStage)) diag.error(`region \`${r.id}\`: beforeStage \`${r.beforeStage}\` is not a stage of any workflow`, { file: M, path: "regions" });
+      if (p.workflowRegion === r.id) diag.error("workflowRegion cannot be a stage region", { file: M, path: "workflowRegion" });
+      if (Object.values(p.anchors).includes(r.id)) diag.error(`region \`${r.id}\`: a stage region cannot be a semantic anchor`, { file: M, path: "anchors" });
+      if (below(STAGE_REGIONS_SINCE)) diag.warn(`stage regions need Advanced Preset ${STAGE_REGIONS_SINCE}: set minAdvancedPreset to ${STAGE_REGIONS_SINCE} or later (older versions drop their content)`, { file: M, path: "minAdvancedPreset" });
+    }
     if (!r.native && !p.entries.some((e) => e.region === r.id) && r.id !== p.workflowRegion) diag.warn(`region \`${r.id}\` receives no entries`, { file: M, path: "regions" });
   }
   const exclusive = /* @__PURE__ */ new Map();
@@ -11751,14 +12002,47 @@ function validate(p, map, diag) {
       else if (wf.kind !== "story") diag.error(`workflow \`${conn.workflow}\` is a task workflow`, { file: M, path });
     }
     if (conn.syntheticTurn && !p.syntheticTurns.some((s) => s.id === conn.syntheticTurn)) diag.error(`unknown synthetic turn \`${conn.syntheticTurn}\``, { file: M, path });
+    if (conn.target !== void 0) checkTarget(conn.target, `${path}.target`);
+    if (conn.bindings !== void 0) {
+      if (!conn.bindings || typeof conn.bindings !== "object" || Array.isArray(conn.bindings)) diag.error("bindings must be a mapping id \u2192 binding", { file: M, path: `${path}.bindings` });
+      else for (const [id, b] of Object.entries(conn.bindings)) {
+        const at = `${path}.bindings.${id}`;
+        if (id === DEFAULT_BINDING) diag.error(`binding id \`${DEFAULT_BINDING}\` is the connection itself: set its fields on the connection`, { file: M, path: at });
+        if (!b || typeof b !== "object") {
+          diag.error("a binding must be a mapping { name, target, transport, \u2026 }", { file: M, path: at });
+          continue;
+        }
+        if (b.name !== void 0 && typeof b.name !== "string") diag.error("binding name must be a string", { file: M, path: at });
+        if (b.target === void 0) diag.error("binding has no target", { file: M, path: at });
+        else checkTarget(b.target, `${at}.target`);
+        const { target: _t, name: _n, ...transport } = b;
+        checkConnection(transport, at);
+        for (const k of Object.keys(transport)) if (!BINDING_TRANSPORT_KEYS.includes(k)) diag.warn(`unknown binding option \`${k}\``, { file: M, path: at });
+      }
+    }
+  };
+  const checkTarget = (target, path) => {
+    const x = target;
+    if (!x || typeof x !== "object" || !BINDING_TARGET_TYPES.includes(x.type)) diag.error(`target must be { type: ${BINDING_TARGET_TYPES.join(" | ")} }`, { file: M, path });
+    else if (x.type === "profile" && typeof x.profile !== "string") diag.error("a profile target needs `profile` (a SillyTavern connection profile id)", { file: M, path });
+    else if (x.type === "model" && (typeof x.model !== "string" || !x.model.trim())) diag.error("a model target needs `model` (a model name)", { file: M, path });
+    else if (x.type === "profile") diag.warn("profile targets name a connection profile of one SillyTavern install: other users will not have it", { file: M, path });
+  };
+  const checkBindingRefs = (full, path) => {
+    const ids = /* @__PURE__ */ new Set([DEFAULT_BINDING, ...Object.keys(full.connection.bindings ?? {})]);
+    const sel = full.connection.binding;
+    if (sel !== void 0 && !ids.has(sel)) diag.error(`binding \`${sel}\` does not exist`, { file: M, path: `${path}.connection.binding` });
+    for (const [a, id] of Object.entries(full.multiModel?.actors ?? {})) if (!ids.has(id)) diag.error(`actor ${a}: binding \`${id}\` does not exist`, { file: M, path: `${path}.multiModel.actors.${a}` });
   };
   checkConnection(c, "configurationDefaults.connection");
+  checkBindingRefs(p.configurationDefaults, "configurationDefaults");
   for (const rc of p.configurations) {
     const path = `configurations.${rc.id}`;
     const diff = structuredClone(rc.diff);
-    for (const removed of pruneDiff(diff, p.configurationDefaults)) diag.error(`unknown configuration key \`${removed}\``, { file: M, path });
+    for (const removed of pruneDiff(diff, configurationShape(p))) diag.error(`unknown configuration key \`${removed}\``, { file: M, path });
     checkConnection(rc.diff.connection ?? {}, `${path}.connection`);
     const full = deepMerge(p.configurationDefaults, rc.diff);
+    checkBindingRefs(full, path);
     for (const [g, ids] of exclusive) if (ids.filter((id) => full.modules[id]).length > 1) diag.warn(`${rc.id}: exclusive group \`${g}\` has several modules enabled`, { file: M, path });
   }
   if (new Set(p.configurations.map((x) => x.id)).size !== p.configurations.length) diag.error("duplicate configuration ids", { file: M, path: "configurations" });
@@ -11845,6 +12129,11 @@ async function writePresetFile(preset, outDir, o = {}) {
 }
 
 // src/preview.ts
+function bindingTransport(config, actor) {
+  const id = config.multiModel?.actors?.[actor];
+  const b = id && id !== "default" ? config.connection.bindings?.[id] : void 0;
+  return b?.transport ?? config.connection.transport;
+}
 function previewStoryline(preset, config, o) {
   if (!preset.storylines) return { ...MAIN_STORYLINE_VARS };
   const ifNew = /^if\?$/i.test(o.storyline ?? "");
@@ -11942,15 +12231,58 @@ function preview(source, o) {
   });
   const workflow = pure ? preset.workflows.find((w) => w.kind === "task") : void 0;
   if (workflow) vars.workflow = workflow.id;
-  const a = assemble({ preset, config, vars, data: { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "", storyline: { name: vars.storyline.name, main: "" }, ...media.data } }, workflow);
+  const data = { metaText: o.meta ? "(meta text)" : "", inputText: o.input ?? "", storyline: { name: vars.storyline.name, main: "" }, ...media.data };
+  const multi = (o.multiModel || o.phase !== void 0) && !pure;
+  if (multi && !preset.multiModel) throw new Error("--multi-model / --phase: the preset does not declare multiModel");
+  let phaseOf;
+  if (multi) {
+    vars.multiModel = true;
+    const wf0 = preset.workflows.find((w) => w.id === vars.workflow);
+    const groups = wf0 ? phaseGroups(activeStages(wf0, resolverOf(vars)), true) : [];
+    const index = o.phase ?? 0;
+    if (!Number.isInteger(index) || index < 0 || index >= groups.length) throw new Error(`--phase: expected 0\u2013${Math.max(0, groups.length - 1)} (${groups.length} phases)`);
+    const g = groups[index];
+    phaseOf = { index, actor: g.actor, stages: g.stages.map((s) => s.id) };
+    const t = bindingTransport(config, g.actor);
+    vars.transport = t;
+    vars.style = preset.styles[t];
+  }
+  const a = assemble({ preset, config, vars, data, ...phaseOf ? { phase: phaseOf } : {} }, workflow);
   const shaping = preset.inputShaping;
   const historyInput = o.input === void 0 ? void 0 : !shaping ? o.input : shaping.mode === "wrap" ? wrapInput(shaping.template, o.input, a.expand) : null;
   const transport = vars.transport;
   const wf = a.workflow;
   const artifacts = {};
   let fields = [];
+  let phaseInfo;
+  let only;
+  if (wf && phaseOf) {
+    const layout = layoutOf(preset, wf, a.stages, a.structures);
+    const phases = planPhases(a.stages, a.structures, layout, true, wf);
+    const phase = phases[phaseOf.index];
+    only = { stages: phase.stages, structures: phase.structures };
+    const done = emptyTurn(a.stages);
+    for (const p of phases.slice(0, phase.index)) {
+      for (const s of p.stages) done.stages[s.id] = s.kind === "patch" ? { patches: [{ old_string: `(old text, ${s.id})`, new_string: `(new text, ${s.id})` }], status: "done" } : { text: `(output of ${s.id})`, status: "done" };
+      for (const d of p.structures) done.structures[d.id] = `(${d.id})`;
+    }
+    const items = replayItems(phases.slice(0, phase.index), done, layout);
+    const full = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
+    let replay;
+    if (items.length) {
+      if (transport === "prefill" || transport === "plaintext") {
+        const prefixes = Object.fromEntries(Object.keys(preset.actors).map((id) => [id, a.expand(config.identity.prefixes[id] || preset.actors[id].prefix || `${actorName(preset, config, id)}: `)]));
+        replay = dialogueReplay(items, { prefixes, format: transport === "prefill" ? "prefix" : preset.plaintextFormat, contentMarker: preset.contentMarker, stages: a.stages });
+      } else if (transport === "structured") replay = objectReplay(items, full);
+      else {
+        const art = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand, { stages: items.map((i) => i.stage), structures: items.flatMap((i) => i.structures.map((x) => x.decl)) });
+        replay = toolReplay(items, art).map((c) => ({ name: c.name, arguments: c.arguments }));
+      }
+    }
+    phaseInfo = { index: phase.index, count: phases.length, actor: phase.actor, stages: phase.stages.map((s) => s.id), structures: phase.structures.map((s) => s.id), ...replay !== void 0 ? { replay } : {} };
+  }
   if (wf) {
-    const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand);
+    const t = turnArtifacts(preset.tools, wf, a.stages, a.structures, a.expand, only);
     const synthetic = preset.syntheticTurns.find((s) => s.id === config.connection.syntheticTurn);
     const init2 = synthetic && transport.startsWith("tool-") ? [{ type: "function", function: { name: synthetic.tool.name, description: a.expand(synthetic.tool.description), parameters: { type: "object", properties: {} } } }] : [];
     if (transport === "structured" || transport.startsWith("tool-")) fields = t.layout.items.map((it) => `${it.name}${it.type === "structure" ? ` (${it.structure.id})` : ""}`);
@@ -11958,10 +12290,11 @@ function preview(source, o) {
     if (transport === "tool-single") artifacts.tools = [...init2, t.submitTool()];
     if (transport === "tool-multi") artifacts.tools = [...init2, ...t.stageTools()];
   }
-  if (o.json) return JSON.stringify({ ...historyInput !== void 0 ? { historyInput } : {}, vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, ...a.warnings.length ? { warnings: a.warnings } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
+  if (o.json) return JSON.stringify({ ...phaseInfo ? { phase: phaseInfo } : {}, ...historyInput !== void 0 ? { historyInput } : {}, vars: a.vars, buildVars: plainBuildVars(a.buildVars), ...skipped.length ? { skipped } : {}, ...a.warnings.length ? { warnings: a.warnings } : {}, modules: a.modules.map((m) => m.id), structures: a.structures.map((s) => s.id), stages: a.stages, regions: a.regions, ...artifacts }, null, 2);
   const lines = [];
   const rule = (title) => lines.push("", `\u2501\u2501 ${title} ${"\u2501".repeat(Math.max(4, 60 - title.length))}`);
   lines.push(`${preset.name} ${preset.version} \xB7 ${transport} (${vars.style}) \xB7 workflow ${wf?.id ?? "\u2014"} \xB7 config ${o.config ?? preset.defaultConfiguration}`);
+  if (phaseInfo) lines.push(`multi-model phase ${phaseInfo.index}/${phaseInfo.count - 1}: ${phaseInfo.actor} \xB7 stages ${phaseInfo.stages.join(", ")}${phaseInfo.structures.length ? ` \xB7 structures ${phaseInfo.structures.join(", ")}` : ""}`);
   lines.push(`modules: ${a.modules.map((m) => m.id).join(", ")}`);
   for (const x of skipped) lines.push(`skipped: user module ${x.module} entry ${x.entry} (unknown insertion point \`${x.point}\`)`);
   for (const w of a.warnings) lines.push(`warning: ${w}`);
@@ -11989,13 +12322,21 @@ function preview(source, o) {
       rule(`${r.id} (native)`);
       continue;
     }
+    if (r.beforeStage && phaseOf && !phaseOf.stages.includes(r.beforeStage)) {
+      rule(`${r.id} (before stage ${r.beforeStage}, not in this phase's request)`);
+      continue;
+    }
     const msgs = a.regions[r.id] ?? [];
-    rule(`${r.id}${msgs.length ? "" : " (empty)"}`);
+    rule(`${r.id}${r.beforeStage ? ` (before stage ${r.beforeStage}, request tail)` : ""}${msgs.length ? "" : " (empty)"}`);
     for (const m of msgs) lines.push(`[${m.role}]`, m.content, "");
     if (r.id === preset.anchors.historyStart && historyInput !== void 0) {
       rule("chat history (ST) \xB7 last user message");
       lines.push(historyInput === null ? "(extracted: placed by {{ap::input::text}})" : historyInput, "");
     }
+  }
+  if (phaseInfo?.replay !== void 0) {
+    rule(`earlier phases replayed (${transport}, placeholder text)`);
+    lines.push(typeof phaseInfo.replay === "string" ? phaseInfo.replay : JSON.stringify(phaseInfo.replay, null, 2));
   }
   for (const [k, v] of Object.entries(artifacts)) {
     rule(k);
@@ -12053,7 +12394,7 @@ async function dev(o) {
 import { cp, mkdir as mkdir2, readdir as readdir2, readFile as readFile2, rename, stat, writeFile as writeFile2 } from "node:fs/promises";
 import { join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var CLI_VERSION = true ? "1.12.0" : "0.0.0-dev";
+var CLI_VERSION = true ? "1.13.0" : "0.0.0-dev";
 var TEMPLATE = fileURLToPath(new URL("../template", import.meta.url));
 async function* files2(dir) {
   for (const ent of await readdir2(dir, { withFileTypes: true })) {
@@ -12149,7 +12490,7 @@ async function installSkills(target, source = SKILLS_SOURCE) {
 }
 
 // src/cli.ts
-var VERSION = true ? "1.12.0" : "0.0.0-dev";
+var VERSION = true ? "1.13.0" : "0.0.0-dev";
 var HELP = `ap ${VERSION} \u2014 Advanced Preset toolchain
 
 Usage
@@ -12161,7 +12502,7 @@ Usage
   ap preview [dir] [--transport t] [--workflow w] [--config c] [--meta pure|mixed]
                    [--enable a,b] [--disable c] [--param id=value \u2026] [--input text]
                    [--storyline name|?] [--storyline-new] [--storyline-grouped]
-                   [--storyline-switch] [--storyline-naming-main]
+                   [--storyline-switch] [--storyline-naming-main] [--multi-model] [--phase n]
                    [--image openai|gemini|novelai] [--image-prompt tags|description|instruction]
                    [--image-auto] [--image-style] [--image-sfw] [--image-refs]
                    [--speech fish|elevenlabs|minimax|gemini|openai|deepseek]
@@ -12202,6 +12543,8 @@ async function main(argv) {
       "storyline-grouped": { type: "boolean" },
       "storyline-switch": { type: "boolean" },
       "storyline-naming-main": { type: "boolean" },
+      "multi-model": { type: "boolean" },
+      phase: { type: "string" },
       image: { type: "string" },
       "image-prompt": { type: "string" },
       "image-auto": { type: "boolean" },
@@ -12302,7 +12645,7 @@ async function main(argv) {
         }
         userModules.push(...picked);
       }
-      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], storylineSwitch: values["storyline-switch"], storylineNamingMain: values["storyline-naming-main"], image, speech, userModules, json: values.json });
+      const out = preview(preset, { transport: values.transport, workflow: values.workflow, config: values.config, meta, modules: toggles, params, input: values.input, storyline: values.storyline, storylineNew: values["storyline-new"], storylineGrouped: values["storyline-grouped"], storylineSwitch: values["storyline-switch"], storylineNamingMain: values["storyline-naming-main"], image, speech, userModules, json: values.json, multiModel: values["multi-model"], ...values.phase !== void 0 ? { phase: Number(values.phase) } : {} });
       if (values.out) await writeFile3(values.out, out);
       else console.log(out);
       return 0;

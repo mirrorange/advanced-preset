@@ -4,7 +4,7 @@
  * configuration or a saved user configuration. Only sparse diffs are stored (D9).
  */
 import {
-  activeUserModules, applyMigrations, compareVersions, paramValueMatches, deepMerge, diffObjects, migrateUserModules, lostRefs, pruneDiff, recommended,
+  activeUserModules, applyMigrations, compareVersions, configurationShape, paramValueMatches, deepMerge, diffObjects, migrateUserModules, lostRefs, pruneDiff, recommended,
   type APreset, type Configuration, type SparseDiff, cloneData,
 } from '@advanced-preset/protocol';
 import { toast } from '@/st/host';
@@ -115,7 +115,7 @@ export function migratePresetState(preset: APreset): string[] {
   const from = s.version ?? '0.0.0';
   const upgraded = compareVersions(from, preset.version) < 0;
   const removed: string[] = [];
-  const shape = preset.configurationDefaults as unknown as Record<string, unknown>;
+  const shape = configurationShape(preset);
   const fix = (d: SparseDiff): SparseDiff => {
     const out = (upgraded ? applyMigrations(d, preset.migrations, from) : cloneData(d)) as Record<string, unknown>;
     removed.push(...pruneDiff(out, shape));

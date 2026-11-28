@@ -93,6 +93,11 @@ export interface Region {
   separator: string;
   /** Native region: holds ST markers; AP never writes into it. */
   native?: boolean;
+  /**
+   * Stage region (multi-model workflows): no Carrier anchor; its content is appended to the tail of
+   * the request that executes this stage (after the replayed earlier phases).
+   */
+  beforeStage?: string;
 }
 
 export type SemanticAnchor = 'historyStart' | 'historyEnd' | 'tail';
@@ -500,7 +505,53 @@ export interface ConnectionConfig {
    * can reject models that do support tools. The API type and prompt post-processing are still checked.
    */
   assumeToolSupport: boolean;
+  /**
+   * Target of the default binding (absent = `{ type: 'current' }`). The transport fields above are
+   * the default binding's settings, so configurations from before 1.13 are the default binding.
+   */
+  target?: BindingTarget;
+  /** Extra connection bindings, id → binding (absent = none). */
+  bindings?: Record<string, ConnectionBinding>;
+  /** Binding used when multi-model is off (absent = `'default'`). */
+  binding?: string;
 }
+
+/** Where a connection binding sends its requests. */
+export type BindingTarget =
+  /** ST's current API connection (the behaviour up to 1.12). */
+  | { type: 'current' }
+  /** A SillyTavern Connection Manager profile (by id). */
+  | { type: 'profile'; profile: string }
+  /** ST's current API connection with another model name. */
+  | { type: 'model'; model: string };
+
+export const BINDING_TARGET_TYPES = ['current', 'profile', 'model'] as const;
+
+/** Transport settings of a connection binding (the transport fields of {@link ConnectionConfig}). */
+export type BindingTransport = Pick<ConnectionConfig,
+  'transport' | 'forceTool' | 'parallelTools' | 'syntheticTurn' | 'sendThoughtSignature' |
+  'openAiSignatures' | 'streamToolArguments' | 'maxSteps' | 'assumeToolSupport'>;
+
+export const BINDING_TRANSPORT_KEYS = [
+  'transport', 'forceTool', 'parallelTools', 'syntheticTurn', 'sendThoughtSignature',
+  'openAiSignatures', 'streamToolArguments', 'maxSteps', 'assumeToolSupport',
+] as const satisfies readonly (keyof BindingTransport)[];
+
+/** A model / transport pairing the workflow can run on. The default binding is `ConnectionConfig` itself. */
+export interface ConnectionBinding extends BindingTransport {
+  name: string;
+  target: BindingTarget;
+}
+
+/** Multi-model switch (only for presets that declare `multiModel`): which binding executes each actor. */
+export interface MultiModelConfig {
+  enabled: boolean;
+  /** Actor id → binding id; unmapped actors use the default binding. */
+  actors: Record<ActorId, string>;
+}
+
+/** Preset opt-in for multi-model workflows (`multiModel: true` in preset.yaml). Reserved for options. */
+export type MultiModelDecl = Record<string, never>;
 
 export interface Configuration {
   connection: ConnectionConfig;
@@ -515,6 +566,8 @@ export interface Configuration {
   meta: { enabled: boolean; recentCount: number };
   /** Storylines switch; only present when the preset declares `storylines`. */
   storylines?: StorylineConfig;
+  /** Multi-model workflow; only present when the preset declares `multiModel`. */
+  multiModel?: MultiModelConfig;
 }
 
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
@@ -605,6 +658,8 @@ export interface APreset {
   image?: ImageDecl;
   /** Speech synthesis (absent = the preset does not support it): `speech.*` variables, inline speech lines. */
   speech?: SpeechDecl;
+  /** Multi-model workflows (absent = the preset does not support them: the option is hidden, `multiModel` is false). */
+  multiModel?: MultiModelDecl;
 
   params: Param[];
   groups: Record<string, Group>;

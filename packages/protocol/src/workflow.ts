@@ -8,7 +8,7 @@
 import { isInlineStructure, type FieldText, type Stage, type StructureDecl, type ToolsDecl, type Workflow } from './types';
 import { test, type Resolver } from './expr';
 import { isStructureOptional, structureFieldSchema, type JsonSchema } from './structures';
-import { turnLayout, withFieldName, type TurnLayout } from './layout';
+import { hostWithin, orderPrefixed, turnLayout, withFieldName, type TurnLayout } from './layout';
 
 export interface Patch {
   old_string: string;
@@ -146,7 +146,12 @@ export interface TurnArtifacts {
   toolNames(): string[];
 }
 
-export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stage[], allStructures: StructureDecl[], expand: Expand = same): TurnArtifacts {
+/**
+ * `phase`: a multi-model phase. Names and numbering stay those of the whole turn (`stages`); the schema,
+ * the submit tool and the stage tools only hold the phase's stages and structures, and each structure
+ * rides on a stage tool of the phase.
+ */
+export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stage[], allStructures: StructureDecl[], expand: Expand = same, phase?: { stages: Stage[]; structures: StructureDecl[] }): TurnArtifacts {
   // Inline structures (annotations) live in the content itself: no field, no tool parameter.
   const structures = allStructures.filter((s) => !isInlineStructure(s));
   const desc = (template: string | undefined, stage?: Stage) => {
@@ -154,7 +159,15 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
     const t = expand(stage ? fillTemplate(template, stageVars(stages, stage)) : template).trim();
     return t || undefined;
   };
-  const layout = turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const layout = phase ? phaseLayout(turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools)), phase) : turnLayout(workflow, stages, structures, tools, (s) => stageFieldName(stages, s, tools));
+  const inPhase = phase ? new Set(phase.stages) : undefined;
+  const phaseStructures = phase ? new Set(phase.structures.map((d) => d.id)) : undefined;
+  /** Items of this request: every item, or the phase's stages and structures. */
+  const requested = (it: TurnLayout['items'][number]) => {
+    if (!inPhase) return true;
+    return it.type === 'stage' ? inPhase.has(it.stage) : phaseStructures!.has(it.structure.id);
+  };
+  const ownStages = inPhase ? stages.filter((s) => inPhase.has(s)) : stages;
   const fieldOf = (s: Stage) => layout.stageField(s);
   const structureFieldOf = (d: StructureDecl) => layout.structureField(d);
   const toolOf = (s: Stage) => stageToolName(stages, s, tools);
@@ -168,6 +181,7 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
     const properties: Record<string, JsonSchema> = {};
     const required: string[] = [];
     for (const it of layout.items) {
+      if (!requested(it)) continue;
       if (it.type === 'structure') { addStructure(properties, required, it.structure); continue; }
       const stage = it.stage;
       properties[it.name] = stageSchema(stage, desc(stage.field?.description ?? tools.turn.fieldDescription, stage), tools, expand);
@@ -175,7 +189,7 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
     }
     return { type: 'object', properties, required, additionalProperties: false };
   };
-  const stageTools = (): ToolDef[] => stages.map((stage) => {
+  const stageTools = (): ToolDef[] => ownStages.map((stage) => {
     const properties: Record<string, JsonSchema> = {};
     const required: string[] = [];
     const param = stageParam(stage, tools);
@@ -221,7 +235,23 @@ export function turnArtifacts(tools: ToolsDecl, workflow: Workflow, stages: Stag
       additionalProperties: false,
     }),
     envelopeKeys: keys,
-    toolNames: () => [tools.submit.name, ...stages.map(toolOf)],
+    toolNames: () => [tools.submit.name, ...ownStages.map(toolOf)],
+  };
+}
+
+/** A turn layout whose structures ride on the stages of a phase (names unchanged). */
+function phaseLayout(layout: TurnLayout, phase: { stages: Stage[]; structures: StructureDecl[] }): TurnLayout {
+  const { stages } = phase;
+  const own = new Set(phase.structures.map((d) => d.id));
+  const carriedBy = (stage: Stage) => layout.items.flatMap((it) => (it.type === 'structure' && own.has(it.structure.id) && hostWithin(layout, stages, it.structure) === stage ? [it.structure] : []));
+  return {
+    ...layout,
+    hostOf: (decl) => (own.has(decl.id) ? hostWithin(layout, stages, decl) : undefined),
+    carriedBy,
+    stageParam: (stage, base) => {
+      const it = layout.items.find((x) => x.type === 'stage' && x.stage === stage);
+      return layout.prefixed && it && carriedBy(stage).length ? orderPrefixed(layout.prefix, it.position, layout.items.length, base) : base;
+    },
   };
 }
 

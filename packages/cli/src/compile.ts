@@ -31,6 +31,7 @@ import {
   PARAM_TYPES, emptyParamValue, normalizeList, paramValueMatches, type ParamValue,
   DEFAULT_STORYLINES, STORYLINE_CONFIG_DEFAULTS, STORYLINE_FREEZE_MODES, type StorylineFreeze, type StorylinesDecl,
   DEFAULT_SPEECH_TAG,
+  MULTI_MODEL_CONFIG_DEFAULTS, type MultiModelConfig, type MultiModelDecl,
 } from '@advanced-preset/protocol';
 import { Diagnostics, type Where } from './diagnostics';
 import { compileContent, parseMarkdown, type Chunk } from './markdown';
@@ -312,7 +313,11 @@ export function compile(tree: SourceTree): CompileResult {
     if (o.merge === 'join' || o.merge === 'none') merge = o.merge;
     else if (isObj(o.merge) && typeof o.merge.wrap === 'string') merge = { wrap: o.merge.wrap };
     else if (o.merge !== undefined) diag.error('merge must be none | join | { wrap: <tag> }', where);
-    regions.push({ id: rid, role, merge, separator: str(o.separator, '\n\n'), ...(o.native ? { native: true } : {}) });
+    const beforeStage = o.beforeStage === undefined ? '' : str(o.beforeStage);
+    if (o.beforeStage !== undefined && !beforeStage) diag.error('beforeStage must name a workflow stage', where);
+    if (beforeStage && o.native) diag.error('a stage region cannot be native', where);
+    if (beforeStage && o.anchor !== undefined) diag.error('a stage region cannot be a semantic anchor', where);
+    regions.push({ id: rid, role, merge, separator: str(o.separator, '\n\n'), ...(o.native ? { native: true } : {}), ...(beforeStage ? { beforeStage } : {}) });
     if (o.anchor !== undefined) {
       const a = str(o.anchor) as SemanticAnchor;
       if (!ANCHORS.includes(a)) diag.error(`anchor must be ${ANCHORS.join(' | ')}`, where);
@@ -670,6 +675,17 @@ export function compile(tree: SourceTree): CompileResult {
     for (const k of Object.keys(v)) diag.warn(`${key}: unknown key \`${k}\``, { file: M, path: `${key}.${k}` });
     return {};
   };
+  // Multi-model workflows: `true` or `{ enabled: true }`; absent keeps the artifact (and its hash) as before.
+  let multiModel: MultiModelDecl | undefined;
+  if (raw.multiModel !== undefined && raw.multiModel !== null && raw.multiModel !== false) {
+    if (raw.multiModel === true) multiModel = {};
+    else if (!isObj(raw.multiModel)) diag.error('multiModel must be `true` or a mapping { enabled }', { file: M, path: 'multiModel' });
+    else {
+      for (const k of Object.keys(raw.multiModel)) if (k !== 'enabled') diag.warn(`multiModel: unknown key \`${k}\``, { file: M, path: `multiModel.${k}` });
+      if (raw.multiModel.enabled !== undefined && typeof raw.multiModel.enabled !== 'boolean') diag.error('multiModel.enabled must be a boolean', { file: M, path: 'multiModel.enabled' });
+      if (raw.multiModel.enabled !== false) multiModel = {};
+    }
+  }
   const image = mediaFlag('image');
   const speech = mediaFlag('speech');
   const syntheticTurns: SyntheticTurn[] = (Array.isArray(raw.syntheticTurns) ? raw.syntheticTurns : []).map((s: unknown, i: number) => {
@@ -821,6 +837,8 @@ export function compile(tree: SourceTree): CompileResult {
     meta: { enabled: true, recentCount: meta.recentCount, ...(sect('meta') as object) },
     // Only for presets with storylines, so that other artifacts keep their hash.
     ...(storylines ? { storylines: { ...STORYLINE_CONFIG_DEFAULTS, ...(sect('storylines') as Partial<Configuration['storylines']>) } } : {}),
+    // Only for presets with multi-model workflows, so that other artifacts keep their hash.
+    ...(multiModel ? { multiModel: { ...MULTI_MODEL_CONFIG_DEFAULTS, ...(sect('multiModel') as Partial<MultiModelConfig>), actors: { ...(isObj(sect('multiModel').actors) ? (sect('multiModel').actors as Record<string, string>) : {}) } } } : {}),
   };
   for (const k of ['names', 'prefixes'] as const) if (isObj(identitySrc[k])) Object.assign(configurationDefaults.identity[k], identitySrc[k]);
   for (const [k, v] of Object.entries(sect('modules'))) {
@@ -864,6 +882,24 @@ export function compile(tree: SourceTree): CompileResult {
     }
   };
   if (isObj(cd.storylines)) checkStorylines(cd.storylines, 'configurationDefaults.storylines');
+  /** `multiModel` section of the defaults or of a recommended configuration's diff. */
+  const checkMultiModel = (c: Obj, path: string) => {
+    if (!multiModel) return void diag.warn(`${path}: the preset does not declare multiModel (ignored)`, { file: M, path });
+    for (const [k, v] of Object.entries(c)) {
+      const where = { file: M, path: `${path}.${k}` };
+      if (k === 'enabled') { if (typeof v !== 'boolean') diag.error('`enabled` must be a boolean', where); }
+      else if (k === 'actors') {
+        if (!isObj(v)) { diag.error('`actors` must be a mapping actor → binding id', where); continue; }
+        for (const [a, b] of Object.entries(v)) {
+          const at = { file: M, path: `${path}.actors.${a}` };
+          if (!actors[a]) diag.error(`${path}.actors: unknown actor \`${a}\``, at);
+          else if (a === user) diag.warn(`${path}.actors: the user actor never runs a stage`, at);
+          if (typeof b !== 'string' || !b) diag.error(`${path}.actors.${a} must be a binding id`, at);
+        }
+      } else diag.warn(`unknown multiModel option \`${k}\``, where);
+    }
+  };
+  if (isObj(cd.multiModel)) checkMultiModel(cd.multiModel, 'configurationDefaults.multiModel');
   for (const k of Object.keys(cd)) if (!(k in configurationDefaults)) diag.warn(`unknown configuration section \`${k}\``, { file: M, path: `configurationDefaults.${k}` });
 
   const configurations: RecommendedConfiguration[] = (Array.isArray(raw.configurations) ? raw.configurations : []).map((c: unknown, i: number) => {
@@ -875,6 +911,7 @@ export function compile(tree: SourceTree): CompileResult {
     if (isObj(rc.diff.cache)) checkCache(rc.diff.cache, `configurations[${i}].diff.cache`);
     if (isObj(rc.diff.meta)) checkMeta(rc.diff.meta, `configurations[${i}].diff.meta`);
     if (isObj(rc.diff.storylines)) checkStorylines(rc.diff.storylines as Obj, `configurations[${i}].diff.storylines`);
+    if (isObj(rc.diff.multiModel)) checkMultiModel(rc.diff.multiModel as Obj, `configurations[${i}].diff.multiModel`);
     if (isObj(rc.diff.params)) checkParams(rc.diff.params as Obj, `configurations[${i}].diff.params`, (k, v) => { rc.diff.params![k] = v; }, false); // unknown keys: validate
     return rc;
   });
@@ -938,6 +975,7 @@ export function compile(tree: SourceTree): CompileResult {
     workflowRegion: str(raw.workflowRegion, anchors.tail ?? ''),
     ...(inputShaping ? { inputShaping } : {}),
     ...(storylines ? { storylines } : {}),
+    ...(multiModel ? { multiModel } : {}),
     ...(image ? { image } : {}),
     ...(speech ? { speech } : {}),
     params,
@@ -1160,7 +1198,9 @@ function compileCarrier(src: Obj, regions: Region[], presetName: string, diag: D
   const add = (identifier: string, enabled: boolean, where: Where) => {
     const region = regions.find((r) => r.id === identifier);
     let p: CarrierPrompt | undefined;
-    if (region && !region.native) {
+    if (region?.beforeStage) {
+      return diag.error(`carrier.order: \`${identifier}\` is a stage region (beforeStage), it has no anchor`, where);
+    } else if (region && !region.native) {
       p = { identifier: anchorIdentifier(region.id), name: `${label} · ${region.id}`, role: region.role, content: anchorText(region.id), system_prompt: false, marker: false, injection_position: 0, injection_depth: 4, forbid_overrides: true };
     } else if (NATIVE_PROMPTS[identifier]) {
       const n = NATIVE_PROMPTS[identifier];
@@ -1183,7 +1223,7 @@ function compileCarrier(src: Obj, regions: Region[], presetName: string, diag: D
       add(k, v !== false, where);
     } else diag.error('carrier.order items are `id` or `{ id: false }`', where);
   });
-  for (const r of regions) if (!r.native && !prompt_order.some((o) => o.identifier === anchorIdentifier(r.id))) diag.error(`region \`${r.id}\` has no anchor in carrier.order`, { file: M, path: 'carrier.order' });
+  for (const r of regions) if (!r.native && !r.beforeStage && !prompt_order.some((o) => o.identifier === anchorIdentifier(r.id))) diag.error(`region \`${r.id}\` has no anchor in carrier.order`, { file: M, path: 'carrier.order' });
   if (!prompt_order.some((o) => o.identifier === 'chatHistory')) diag.error('carrier.order must contain chatHistory', { file: M, path: 'carrier.order' });
   return { prompts, prompt_order };
 }

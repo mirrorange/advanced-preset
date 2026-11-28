@@ -3,7 +3,7 @@
  * User data only stores sparse diffs, so new defaults flow in automatically.
  */
 import { cloneData } from './clone';
-import { THOUGHT_SIGNATURE_CHANNELS, type APreset, type CacheConfig, type Configuration, type ConnectionConfig, type Migration, type SparseDiff, type SyntheticTurn, type ThoughtSignatureChannel } from './types';
+import { THOUGHT_SIGNATURE_CHANNELS, type APreset, type CacheConfig, type Configuration, type ConnectionConfig, type Migration, type MultiModelConfig, type SparseDiff, type SyntheticTurn, type ThoughtSignatureChannel } from './types';
 import { satisfies } from './semver';
 
 type Obj = Record<string, unknown>;
@@ -22,6 +22,25 @@ export const CONNECTION_DEFAULTS: Omit<ConnectionConfig, 'workflow' | 'synthetic
   finalFallback: true,
   assumeToolSupport: false,
 };
+
+/**
+ * Connection bindings (1.13): the default binding's target, the extra bindings and the selected one.
+ * Not written into artifacts (they keep their hash): absent means these values.
+ */
+export const BINDING_DEFAULTS: Required<Pick<ConnectionConfig, 'target' | 'bindings' | 'binding'>> = {
+  target: { type: 'current' },
+  bindings: {},
+  binding: 'default',
+};
+
+/** Id of the binding made of the connection's own fields. */
+export const DEFAULT_BINDING = 'default';
+
+/** First Advanced Preset version with connection bindings and multi-model workflows. */
+export const MULTI_MODEL_SINCE = '1.13.0';
+
+/** Multi-model switch defaults (presets that declare `multiModel`). */
+export const MULTI_MODEL_CONFIG_DEFAULTS: MultiModelConfig = { enabled: false, actors: {} };
 
 /** Thought signature channel of a connection (the older boolean switch meant Vertex AI). */
 export function signatureChannel(conn: Pick<ConnectionConfig, 'sendThoughtSignature'>): ThoughtSignatureChannel {
@@ -85,7 +104,7 @@ export function pruneDiff(diff: Obj, shape: Obj, path = '', removed: string[] = 
   }
   return removed;
 }
-const OPEN_MAPS = new Set(['sampling']);
+const OPEN_MAPS = new Set(['sampling', 'connection.target', 'connection.bindings', 'multiModel.actors']);
 
 export function applyMigrations(diff: SparseDiff, migrations: Migration[], fromVersion: string): SparseDiff {
   const out = cloneData(diff) as Obj;
@@ -101,6 +120,11 @@ export function applyMigrations(diff: SparseDiff, migrations: Migration[], fromV
     }
   }
   return out as SparseDiff;
+}
+
+/** Every key a configuration diff may set: the preset's defaults and the connection binding fields. */
+export function configurationShape(preset: APreset): Obj {
+  return deepMerge({ connection: BINDING_DEFAULTS } as Obj, preset.configurationDefaults);
 }
 
 export function recommended(preset: APreset, id: string) {

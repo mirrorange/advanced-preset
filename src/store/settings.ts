@@ -5,6 +5,7 @@
 import { reactive } from 'vue';
 import type { APreset, SparseDiff, UserModule, UserModuleGroup } from '@advanced-preset/protocol';
 import { st } from '@/st/host';
+import { setLanguage } from '@/i18n';
 import type { MemoryEvent } from './eventlog';
 import type { BundledRecord } from './bundled-modules';
 
@@ -56,6 +57,8 @@ export interface APSettings {
     primary?: string;
     accent?: string;
     collapseStages: boolean;
+    /** Interface language (`en` / `zh-cn` / `zh-tw`); unset follows SillyTavern. */
+    language?: string;
     /** Inline annotations (I-86): shown by default; underline colour defaults to the accent. */
     annotations?: { show: boolean; color?: string };
   };
@@ -92,6 +95,7 @@ export function settings(): APSettings {
     else if (v && typeof v === 'object' && !Array.isArray(v)) raw[k] = { ...v, ...raw[k] };
   }
   state = reactive(raw) as APSettings;
+  setLanguage(state.ui.language);
   return state;
 }
 
