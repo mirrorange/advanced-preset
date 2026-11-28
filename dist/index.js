@@ -13205,7 +13205,7 @@ function $b(e) {
 }
 async function ex() {
 	let e = await Qb();
-	e && e !== "c4208e41ce5a2aef" && sessionStorage.getItem(Zb) !== e && $b(e);
+	e && e !== "f4716abd406fd286" && sessionStorage.getItem(Zb) !== e && $b(e);
 }
 async function tx() {
 	await ex();
@@ -13226,7 +13226,7 @@ async function ax() {
 	let e = u().replace(/^third-party\//, ""), t = await lx(e, !1);
 	if (t.status === 404 && (t = await lx(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await Qb();
-	return r && r !== "c4208e41ce5a2aef" ? ($b(r), {
+	return r && r !== "f4716abd406fd286" ? ($b(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -13240,7 +13240,7 @@ async function ox() {
 }
 var sx = "advancedPreset.selfUpdateFor";
 async function cx(e, t) {
-	let n = `1.12.1>${e}`;
+	let n = `1.13.0>${e}`;
 	if (sessionStorage.getItem(sx) === n) return !1;
 	sessionStorage.setItem(sx, n), x("info", K("update.forPreset", {
 		name: t,
@@ -16183,7 +16183,7 @@ function zE(e, t) {
 async function BE(e, t) {
 	let n = Vp(e);
 	if (!n) throw Error(K("presets.invalid"));
-	if (n.minAdvancedPreset && _u("1.12.1", n.minAdvancedPreset) < 0) throw await cx(n.minAdvancedPreset, Np(n)) ? (zE(n, t), new FE(n)) : Error(K("presets.tooNew", { version: n.minAdvancedPreset }));
+	if (n.minAdvancedPreset && _u("1.13.0", n.minAdvancedPreset) < 0) throw await cx(n.minAdvancedPreset, Np(n)) ? (zE(n, t), new FE(n)) : Error(K("presets.tooNew", { version: n.minAdvancedPreset }));
 	await AE(n, Kp(n.id)), await jE(n, Kp(n.id)), qp(n), t && (q().sources[n.id] = t), q().declinedUpdates?.[n.id] && delete q().declinedUpdates[n.id], J();
 	let r = Kp(n.id) ?? n;
 	return oh(r), Up(r.id)?.source === "installed" && await PE(r), await Sh(r), await sE(r), r;
@@ -16337,7 +16337,7 @@ async function aD(e, t) {
 		console.warn("[AP] preset file in an unsupported format", e);
 		return;
 	}
-	if (n.minAdvancedPreset && _u("1.12.1", n.minAdvancedPreset) < 0) {
+	if (n.minAdvancedPreset && _u("1.13.0", n.minAdvancedPreset) < 0) {
 		await cx(n.minAdvancedPreset, Np(n)) || console.warn("[AP] preset file needs a newer Advanced Preset", e, n.minAdvancedPreset);
 		return;
 	}
@@ -25468,7 +25468,7 @@ var gB = { class: "row tight xs muted" }, _B = { class: "row" }, vB = {
 				"icon",
 				"help"
 			]),
-			V("div", yV, "Advanced Preset " + A(M("1.12.1")) + " · " + A(M("c4208e41ce5a2aef")), 1)
+			V("div", yV, "Advanced Preset " + A(M("1.13.0")) + " · " + A(M("f4716abd406fd286")), 1)
 		], 64));
 	}
 }), xV = {
@@ -26671,8 +26671,8 @@ function $H() {
 //#endregion
 //#region src/index.ts
 var eU = {
-	version: "1.12.1",
-	buildId: "c4208e41ce5a2aef",
+	version: "1.13.0",
+	buildId: "f4716abd406fd286",
 	nextGeneration: (e) => Ah(e),
 	listPresets: () => Hp().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -26731,8 +26731,8 @@ async function rU() {
 		})(), xx({ reload: !0 }), mD(), ex();
 	};
 	t.on(n.APP_READY, () => void o()), $H(), zg("init", {
-		version: "1.12.1",
-		build: "c4208e41ce5a2aef",
+		version: "1.13.0",
+		build: "f4716abd406fd286",
 		enabled: q().enabled
 	});
 }
