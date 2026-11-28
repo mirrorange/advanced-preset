@@ -74,7 +74,7 @@ export function textExpander(ctx: GenerationContext): (text: string) => string {
 /** Schema / tool names and descriptions of this turn, all from the preset. */
 export function artifactsOf(ctx: GenerationContext): TurnArtifacts {
   // A multi-model phase: names of the whole turn, schema / tools of the phase.
-  if (ctx.turn) return turnArtifacts(ctx.preset.tools, ctx.workflow!, ctx.turn.stages, ctx.turn.structures, textExpander(ctx), ctx.stages);
+  if (ctx.turn) return turnArtifacts(ctx.preset.tools, ctx.workflow!, ctx.turn.stages, ctx.turn.structures, textExpander(ctx), { stages: ctx.stages, structures: ctx.structures });
   return turnArtifacts(ctx.preset.tools, ctx.workflow!, ctx.stages, ctx.structures, textExpander(ctx));
 }
 

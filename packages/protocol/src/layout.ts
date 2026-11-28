@@ -25,6 +25,8 @@ export interface TurnLayout {
   items: LayoutItem[];
   /** Whether names carry the ordering prefix. */
   prefixed: boolean;
+  /** The ordering prefix template (`''` when names are not prefixed). */
+  prefix: string;
   stageField(stage: Stage): string;
   structureField(decl: StructureDecl): string;
   /** Multi-step: the stage whose tool carries the structure (the preceding stage, else the following one). */
@@ -137,6 +139,7 @@ export function turnLayout(
   return {
     items,
     prefixed: Boolean(prefix),
+    prefix,
     stageField: (stage) => stageItem.get(stage)?.name ?? stageBase(stage),
     structureField: (decl) => structureItem.get(decl.id)?.name ?? decl.field,
     hostOf: (decl) => hosts.get(decl.id),
@@ -146,6 +149,19 @@ export function turnLayout(
       return prefix && it && carriedBy(stage).length ? orderPrefixed(prefix, it.position, total, base) : base;
     },
   };
+}
+
+/**
+ * The stage of a set (a multi-model phase) that carries a structure in a request of that set: the
+ * closest preceding stage of the set in turn order, else the closest following one.
+ */
+export function hostWithin(layout: Pick<TurnLayout, 'items'>, stages: readonly Stage[], decl: StructureDecl): Stage | undefined {
+  const at = layout.items.findIndex((it) => it.type === 'structure' && it.structure.id === decl.id);
+  if (at < 0) return undefined;
+  const inSet = (i: number) => { const it = layout.items[i]!; return it.type === 'stage' && stages.includes(it.stage) ? it.stage : undefined; };
+  for (let i = at - 1; i >= 0; i--) { const s = inSet(i); if (s) return s; }
+  for (let i = at + 1; i < layout.items.length; i++) { const s = inSet(i); if (s) return s; }
+  return undefined;
 }
 
 /** Structure texts with `{{field}}` filled in (ordering-prefixed presets keep the placeholder in the artifact). */

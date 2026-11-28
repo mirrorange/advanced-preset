@@ -515,7 +515,7 @@ export async function onPromptReady(event: { chat: ChatMessage[]; dryRun: boolea
   ctx.assembly = assembly;
   ctx.stages = assembly.stages;
   ctx.structures = ctx.origin === 'task' && ctx.stType === 'script' ? [] : assembly.structures;
-  ctx.phases = planPhases(ctx.stages, ctx.structures, multi ? layoutOf(preset, workflow, ctx.stages, ctx.structures) : undefined, multi);
+  ctx.phases = planPhases(ctx.stages, ctx.structures, multi ? layoutOf(preset, workflow, ctx.stages, ctx.structures) : undefined, multi, workflow);
   if (multi) {
     ctx.phaseAssembly = (phase, transport) => {
       const a = assemble({ ...assemblyInput, vars: { ...vars, transport, style: preset.styles[transport] }, phase: { stages: phase.stages.map((s) => s.id), index: phase.index, actor: phase.actor } }, workflow);

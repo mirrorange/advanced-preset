@@ -76,7 +76,7 @@ export function replayFor(view: GenerationContext, items: ReplayItem[], family: 
       return { messages: [markOwn<ChatMessage>({ role: 'assistant', content: JSON.stringify(objectReplay(items, artifactsOf(view))) })], tools: [] };
     case 'tool-single':
     case 'tool-multi': {
-      const art = turnArtifacts(preset.tools, view.workflow!, turnStages, view.turn?.structures ?? view.structures, textExpander(view), items.map((i) => i.stage));
+      const art = turnArtifacts(preset.tools, view.workflow!, turnStages, view.turn?.structures ?? view.structures, textExpander(view), { stages: items.map((i) => i.stage), structures: items.flatMap((i) => i.structures.map((x) => x.decl)) });
       const calls = toolReplay(items, art);
       const own = artifactsOf(view);
       const after = view.transport === 'tool-multi' ? own.stageTools()[0]?.function.name ?? '' : preset.tools.submit.name;

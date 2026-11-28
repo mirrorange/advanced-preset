@@ -149,11 +149,15 @@ describe('multi-model phases', () => {
     expect(b!.messages.slice(plan + 1).every((m: any) => m.role !== 'system')).toBe(true);
     // 3: the narrator writes; the earlier stages as the turn object, the turn-wide field names.
     expect(c!.model).toBe('gpt-x');
-    expect(props(c!)[0]).toBe(field('final'));
+    expect(props(c!)).toContain(field('final'));
+    expect(props(c!)).not.toContain(field('planning'));
     const obj = JSON.parse(text(c!.messages.at(-1)));
-    // The status bar sits after planning in Petals' layout: Petals' phase wrote it, it is replayed with it.
-    expect(Object.keys(obj)).toEqual([field('questions'), field('planning'), artifactsOf(last.ctx).structureFieldOf(last.ctx.structures.find((x: any) => x.id === 'status'))]);
-    expect(last.ctx.phases.map((p: any) => p.structures.map((x: any) => x.id))).toEqual([[], ['status'], ['synopsis', 'options']]);
+    expect(Object.keys(obj)).toEqual([field('questions'), field('planning')]);
+    // Petals' status bar is placed before the content: Freesia's content phase writes it, not Petals.
+    expect(last.ctx.phases.map((p: any) => p.structures.map((x: any) => x.id))).toEqual([[], [], ['synopsis', 'status', 'options']]);
+    const status = artifactsOf(last.ctx).structureFieldOf(last.ctx.structures.find((x: any) => x.id === 'status'));
+    expect(props(c!)).toContain(status);
+    expect(JSON.stringify(b!.tools)).not.toContain(status);
     expect(JSON.stringify(c)).not.toContain('PLAN NOW');
     // Merged result: the content of the last phase, every stage done, requests per phase.
     expect(last.reply).toBe(`text of ${field('final')}`);

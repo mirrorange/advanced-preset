@@ -22,14 +22,42 @@ describe('phases', () => {
 
   it('structures go with the stage that carries them; inline ones with the content stage', () => {
     const art = turnArtifacts(DEFAULT_TOOLS, workflow, stages, [synopsis, reply, annotations]);
-    const phases = planPhases(stages, [synopsis, reply, annotations], art.layout, true);
+    const phases = planPhases(stages, [synopsis, reply, annotations], art.layout, true, workflow);
     expect(phases.map((p) => p.structures.map((s) => s.id))).toEqual([[], ['reply'], ['synopsis', 'notes'], []]);
     expect(planPhases(stages, [synopsis], art.layout, false)[0]!.structures).toEqual([synopsis]);
   });
 
+  it('before a stage: that stage\'s phase; a sort key: the closest preceding stage; inactive stage: the anchor', () => {
+    const status = { id: 'status', kind: 'status', tag: 'status', field: 'status', formatPrompt: { tag: '', field: '' }, order: { before: '@content' } } as StructureDecl;
+    const early = { ...synopsis, id: 'early', order: 250 } as StructureDecl;
+    const first = { ...synopsis, id: 'first', order: 50 } as StructureDecl;
+    const gone = { ...synopsis, id: 'gone', order: { after: 'nope' } } as StructureDecl;
+    const list = [status, early, first, gone];
+    const art = turnArtifacts(DEFAULT_TOOLS, workflow, stages, list);
+    // The layout carries status on draft (the stage before it), but the content stage's phase writes it.
+    expect(art.layout.hostOf(status)!.id).toBe('draft');
+    const phases = planPhases(stages, list, art.layout, true, workflow);
+    expect(phases.map((p) => p.structures.map((s) => s.id))).toEqual([['first'], ['early'], ['status', 'gone'], []]);
+    expect(planPhases(stages, list, art.layout, true, { structuresAfter: 'review' })[3]!.structures.map((s) => s.id)).toEqual(['gone']);
+    // In that phase's request status rides on a stage of the phase: draft precedes it there too.
+    const p2 = turnArtifacts(DEFAULT_TOOLS, workflow, stages, list, undefined, { stages: phases[2]!.stages, structures: phases[2]!.structures });
+    expect(p2.stageTools().map((t) => [t.function.name, Object.keys(t.function.parameters.properties as object)])).toEqual([
+      ['ap_stage_draft', ['content', 'status']], ['ap_stage_final', ['content', 'synopsis']], // `gone` keeps synopsis' field name
+    ]);
+    // Petals' case: status before @content, but the stage before it belongs to another actor.
+    const two = [stage('planning', 'editor'), stage('final', 'narrator', 'content')];
+    const wf2 = { ...workflow, stages: two } as Workflow;
+    const a2 = turnArtifacts(DEFAULT_TOOLS, wf2, two, [status]);
+    const ph = planPhases(two, [status], a2.layout, true, wf2);
+    expect(ph.map((p) => p.structures.map((s) => s.id))).toEqual([[], ['status']]);
+    const content = turnArtifacts(DEFAULT_TOOLS, wf2, two, [status], undefined, { stages: ph[1]!.stages, structures: ph[1]!.structures });
+    expect(Object.keys(content.stageTools()[0]!.function.parameters.properties as object)).toEqual(['status', 'content']);
+    expect(Object.keys(content.turnSchema().properties as object)).toEqual(['status', 'step2_narrator_final']);
+  });
+
   it('a phase keeps the turn-wide names but only asks for its own stages and structures', () => {
     const full = turnArtifacts(DEFAULT_TOOLS, workflow, stages, [synopsis, reply]);
-    const phase = turnArtifacts(DEFAULT_TOOLS, workflow, stages, [synopsis, reply], undefined, [stages[2]!, stages[3]!]);
+    const phase = turnArtifacts(DEFAULT_TOOLS, workflow, stages, [synopsis, reply], undefined, { stages: [stages[2]!, stages[3]!], structures: [synopsis] });
     expect(Object.keys(phase.turnSchema().properties as object)).toEqual(['step3_narrator_draft', 'step4_narrator_final', 'synopsis']);
     expect(phase.stageTools().map((t) => t.function.name)).toEqual(['ap_stage_draft', 'ap_stage_final']);
     expect(phase.fieldOf(stages[4]!)).toBe(full.fieldOf(stages[4]!));
@@ -59,7 +87,7 @@ describe('replay of earlier phases', () => {
   turn.stages.planning = { text: 'Go north.', status: 'done' };
   turn.structures.reply = '<p>Sure.</p>';
   const art = turnArtifacts(DEFAULT_TOOLS, workflow, stages, [reply]);
-  const phases = planPhases(stages, [reply], art.layout, true);
+  const phases = planPhases(stages, [reply], art.layout, true, workflow);
   const items = replayItems(phases.slice(0, 2), turn, art.layout);
 
   it('stages with output, in order, with the structures they carry; nothing else', () => {

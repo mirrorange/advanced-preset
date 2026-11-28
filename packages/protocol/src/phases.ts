@@ -3,8 +3,8 @@
  * binding of the phase's actor), the merged result, and the replay of earlier phases in the
  * request of a later one. Pure: the extension builds the requests, `ap preview` and tests reuse it.
  */
-import { isInlineStructure, type Stage, type StructureDecl } from './types';
-import type { TurnLayout } from './layout';
+import { CONTENT_STAGE_REF, isInlineStructure, type Stage, type StructureDecl, type Workflow } from './types';
+import { hostWithin, structureOrderOf, type TurnLayout } from './layout';
 import { emptyTurn, type TurnResult } from './turn';
 import { terminalContentIndex, type Patch } from './workflow';
 import { partialTagTail } from './tags';
@@ -34,20 +34,36 @@ export function phaseGroups(stages: Stage[], multi: boolean): { actor: string; s
 }
 
 /**
- * Phases of a turn. Structures belong to the phase of the stage whose tool carries them (the stage
- * they are placed after, else before); inline structures (and any without a stage) to the phase of
- * the terminal content stage, else the last phase.
+ * Stage whose phase writes a structure: the stage it is placed before / after (`@content`: the
+ * terminal content stage; `structures.after` for unpositioned ones), for an absolute sort key the
+ * closest preceding stage (the first stage when it comes before all of them). A reference to a stage
+ * that is not active falls back to the structures anchor, as in the layout. Inline structures live
+ * in the terminal content.
  */
-export function planPhases(stages: Stage[], structures: StructureDecl[], layout: Pick<TurnLayout, 'hostOf'> | undefined, multi: boolean): Phase[] {
+export function structureStage(workflow: Pick<Workflow, 'structureOrder' | 'structuresAfter'>, stages: Stage[], layout: Pick<TurnLayout, 'items'> | undefined, decl: StructureDecl): Stage | undefined {
+  const terminal = terminalContentIndex(stages);
+  const content = terminal >= 0 ? stages[terminal] : undefined;
+  const ref = (id: string) => (id === CONTENT_STAGE_REF ? content : stages.find((s) => s.id === id));
+  const anchor = (workflow.structuresAfter ? stages.find((s) => s.id === workflow.structuresAfter) : undefined) ?? content ?? stages[stages.length - 1];
+  if (isInlineStructure(decl)) return content ?? anchor;
+  const o = structureOrderOf(workflow, decl);
+  if (typeof o === 'number') {
+    const at = layout ? layout.items.findIndex((it) => it.type === 'structure' && it.structure.id === decl.id) : -1;
+    for (let i = at - 1; i >= 0; i--) { const it = layout!.items[i]!; if (it.type === 'stage') return it.stage; }
+    return stages[0];
+  }
+  return ('before' in o ? ref(o.before) : ref(o.after)) ?? anchor;
+}
+
+/** Phases of a turn; each structure goes with the phase of its {@link structureStage}. */
+export function planPhases(stages: Stage[], structures: StructureDecl[], layout: Pick<TurnLayout, 'items'> | undefined, multi: boolean, workflow: Pick<Workflow, 'structureOrder' | 'structuresAfter'> = {}): Phase[] {
   const groups = phaseGroups(stages, multi);
   const phases: Phase[] = groups.map((g, index) => ({ index, actor: g.actor, stages: g.stages, structures: [] }));
   if (phases.length === 1) { phases[0]!.structures = [...structures]; return phases; }
-  const terminal = terminalContentIndex(stages);
-  const fallback = terminal >= 0 ? phases.findIndex((p) => p.stages.includes(stages[terminal]!)) : phases.length - 1;
   for (const d of structures) {
-    const host = isInlineStructure(d) ? undefined : layout?.hostOf(d);
-    const i = host ? phases.findIndex((p) => p.stages.includes(host)) : -1;
-    phases[i >= 0 ? i : fallback]!.structures.push(d);
+    const stage = structureStage(workflow, stages, layout, d);
+    const i = stage ? phases.findIndex((p) => p.stages.includes(stage)) : -1;
+    phases[i >= 0 ? i : phases.length - 1]!.structures.push(d);
   }
   return phases;
 }
@@ -87,14 +103,15 @@ export interface ReplayItem {
  * Stages of earlier phases that produced output, in turn order, with the structures they carry.
  * Previous reasoning is never part of a turn result, so it is dropped here by construction.
  */
-export function replayItems(phases: Phase[], turn: TurnResult, layout: Pick<TurnLayout, 'carriedBy'> | undefined): ReplayItem[] {
+export function replayItems(phases: Phase[], turn: TurnResult, layout: Pick<TurnLayout, 'items'> | undefined): ReplayItem[] {
   const out: ReplayItem[] = [];
   for (const p of phases) {
     for (const stage of p.stages) {
       const r = turn.stages[stage.id];
       const hasText = typeof r?.text === 'string' && r.text.trim() !== '';
       if (!r || (!hasText && !r.patches)) continue;
-      const carried = (layout?.carriedBy(stage) ?? []).filter((d) => p.structures.some((x) => x.id === d.id));
+      // A phase's structures ride on its stages (closest preceding one, else following), as in its request.
+      const carried = layout ? p.structures.filter((d) => !isInlineStructure(d) && hostWithin(layout, p.stages, d) === stage) : [];
       out.push({
         stage,
         ...(hasText ? { text: r.text } : {}),
