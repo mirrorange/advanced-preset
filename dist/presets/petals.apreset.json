@@ -2,11 +2,11 @@
   "formatVersion": 3,
   "id": "petals",
   "name": "Petals Preset",
-  "version": "7.12.1",
+  "version": "7.13.0",
   "author": "mirrorange",
   "description": "Write stories with Freesia! Freesia writes, Petals gives suggestions — a dual-character driven workflow.",
-  "minAdvancedPreset": "1.12.0",
-  "hash": "68a194c28e2d68fb",
+  "minAdvancedPreset": "1.13.0",
+  "hash": "bdc3402ddededa80",
   "actors": {
     "narrator": {
       "name": "Freesia",
@@ -115,6 +115,20 @@
       "role": "system",
       "merge": "none",
       "separator": "\n\n"
+    },
+    {
+      "id": "before_draft",
+      "role": "system",
+      "merge": "none",
+      "separator": "\n\n",
+      "beforeStage": "draft"
+    },
+    {
+      "id": "before_feedback",
+      "role": "system",
+      "merge": "none",
+      "separator": "\n\n",
+      "beforeStage": "feedback"
     }
   ],
   "anchors": {
@@ -131,6 +145,7 @@
     "separator": "<!-- Start of Storyline {{storyline}} -->",
     "mainSeparator": "<!-- Start of the main storyline -->"
   },
+  "multiModel": {},
   "image": {},
   "speech": {},
   "params": [
@@ -524,6 +539,20 @@
       "description": "Freesia expands your input into a full narrative, then carries the story one segment further.",
       "group": "mode",
       "exclusive": "mode"
+    },
+    {
+      "id": "multi-model",
+      "name": "Multi-model cues",
+      "toggle": "always",
+      "default": true,
+      "structures": [],
+      "vars": [],
+      "source": "modules/core/multi-model.md",
+      "description": "With multi-model on, the request of each iterative stage ends with a short cue for that stage (draft, review).",
+      "when": {
+        "t": "var",
+        "path": "multiModel"
+      }
     },
     {
       "id": "always-reply",
@@ -1612,8 +1641,24 @@
       "source": "modules/core/questions.md",
       "description": "The base questions every questions stage asks; modules add their own.",
       "when": {
-        "t": "var",
-        "path": "stages.questions"
+        "t": "bin",
+        "op": "||",
+        "l": {
+          "t": "var",
+          "path": "stages.questions"
+        },
+        "r": {
+          "t": "bin",
+          "op": "&&",
+          "l": {
+            "t": "var",
+            "path": "multiModel"
+          },
+          "r": {
+            "t": "var",
+            "path": "stages.planning"
+          }
+        }
       }
     }
   ],
@@ -3790,7 +3835,40 @@
         {
           "pieces": [
             {
-              "text": "[Assistant and Human have been REMOVED from the chat until the workflow is complete, the prefixes `Assistant` and `Human` are PROHIBITED. Now start the workflow "
+              "text": "[Assistant and Human have been REMOVED from the chat until the workflow is complete, the prefixes `Assistant` and `Human` are PROHIBITED. Now "
+            },
+            {
+              "text": "continue the workflow from where it stopped: deliver only the next stage(s), the stages above are already done",
+              "when": {
+                "t": "bin",
+                "op": ">",
+                "l": {
+                  "t": "var",
+                  "path": "phase.index"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": 0
+                }
+              }
+            },
+            {
+              "text": "start the workflow ",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": ">",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.index"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": 0
+                  }
+                }
+              }
             },
             {
               "text": "(Produce the task results in the specified format.)",
@@ -3798,28 +3876,21 @@
                 "t": "bin",
                 "op": "&&",
                 "l": {
-                  "t": "bin",
-                  "op": "==",
-                  "l": {
-                    "t": "var",
-                    "path": "workflow"
-                  },
-                  "r": {
-                    "t": "lit",
-                    "v": "task"
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": ">",
+                    "l": {
+                      "t": "var",
+                      "path": "phase.index"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": 0
+                    }
                   }
                 },
                 "r": {
-                  "t": "var",
-                  "path": "modules.native-reasoning"
-                }
-              }
-            },
-            {
-              "text": "{{ap::workflow::hint}}",
-              "when": {
-                "t": "not",
-                "e": {
                   "t": "bin",
                   "op": "&&",
                   "l": {
@@ -3842,7 +3913,88 @@
               }
             },
             {
-              "text": ".]\n\n{{ap::prefix::narrator}}Let me begin the workflow.\n\n"
+              "text": "{{ap::workflow::hint}}",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": ">",
+                    "l": {
+                      "t": "var",
+                      "path": "phase.index"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": 0
+                    }
+                  }
+                },
+                "r": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": "&&",
+                    "l": {
+                      "t": "bin",
+                      "op": "==",
+                      "l": {
+                        "t": "var",
+                        "path": "workflow"
+                      },
+                      "r": {
+                        "t": "lit",
+                        "v": "task"
+                      }
+                    },
+                    "r": {
+                      "t": "var",
+                      "path": "modules.native-reasoning"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "text": ".]\n\n{{ap::prefix::narrator}}Let me "
+            },
+            {
+              "text": "continue",
+              "when": {
+                "t": "bin",
+                "op": ">",
+                "l": {
+                  "t": "var",
+                  "path": "phase.index"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": 0
+                }
+              }
+            },
+            {
+              "text": "begin",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": ">",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.index"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": 0
+                  }
+                }
+              }
+            },
+            {
+              "text": " the workflow.\n\n"
             }
           ]
         }
@@ -3869,7 +4021,76 @@
         {
           "pieces": [
             {
-              "text": "{{ap::prefix::user}}Next, You will speak just one sentence as Assistant. Output `<!-- Workflow Start -->` IMMEDIATELY after the Assistant prefix to indicate the beginning of the workflow. After that, proceed DIRECTLY from your prefix `{{ap::prefix::narrator}}` to start the workflow "
+              "text": "{{ap::prefix::user}}Next, You will speak just one sentence as Assistant. Output `<!-- Workflow Start -->` IMMEDIATELY after the Assistant prefix to indicate the beginning of the workflow. After that, proceed DIRECTLY from "
+            },
+            {
+              "text": "{{ap::name::editor}}' prefix `{{ap::prefix::editor}}`",
+              "when": {
+                "t": "bin",
+                "op": "==",
+                "l": {
+                  "t": "var",
+                  "path": "phase.actor"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": "editor"
+                }
+              }
+            },
+            {
+              "text": "your prefix `{{ap::prefix::narrator}}`",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": "==",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.actor"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": "editor"
+                  }
+                }
+              }
+            },
+            {
+              "text": " to "
+            },
+            {
+              "text": "continue the workflow from where it stopped: deliver only the next stage(s), the stages above are already done",
+              "when": {
+                "t": "bin",
+                "op": ">",
+                "l": {
+                  "t": "var",
+                  "path": "phase.index"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": 0
+                }
+              }
+            },
+            {
+              "text": "start the workflow ",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": ">",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.index"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": 0
+                  }
+                }
+              }
             },
             {
               "text": "(Produce the task results in the specified format.)",
@@ -3877,28 +4098,21 @@
                 "t": "bin",
                 "op": "&&",
                 "l": {
-                  "t": "bin",
-                  "op": "==",
-                  "l": {
-                    "t": "var",
-                    "path": "workflow"
-                  },
-                  "r": {
-                    "t": "lit",
-                    "v": "task"
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": ">",
+                    "l": {
+                      "t": "var",
+                      "path": "phase.index"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": 0
+                    }
                   }
                 },
                 "r": {
-                  "t": "var",
-                  "path": "modules.native-reasoning"
-                }
-              }
-            },
-            {
-              "text": "{{ap::workflow::hint}}",
-              "when": {
-                "t": "not",
-                "e": {
                   "t": "bin",
                   "op": "&&",
                   "l": {
@@ -3921,7 +4135,88 @@
               }
             },
             {
-              "text": ".\n\n{{ap::prefix::narrator}}I will output only `<!-- Workflow Start -->` as Assistant, after which I will immediately resume the workflow starting from my prefix `{{ap::prefix::narrator}}`.\n\n<!-- Workflow Indicator -->\n\n"
+              "text": "{{ap::workflow::hint}}",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": ">",
+                    "l": {
+                      "t": "var",
+                      "path": "phase.index"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": 0
+                    }
+                  }
+                },
+                "r": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": "&&",
+                    "l": {
+                      "t": "bin",
+                      "op": "==",
+                      "l": {
+                        "t": "var",
+                        "path": "workflow"
+                      },
+                      "r": {
+                        "t": "lit",
+                        "v": "task"
+                      }
+                    },
+                    "r": {
+                      "t": "var",
+                      "path": "modules.native-reasoning"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "text": ".\n\n{{ap::prefix::narrator}}I will output only `<!-- Workflow Start -->` as Assistant, after which I will immediately resume the workflow starting from "
+            },
+            {
+              "text": "{{ap::name::editor}}' prefix `{{ap::prefix::editor}}`",
+              "when": {
+                "t": "bin",
+                "op": "==",
+                "l": {
+                  "t": "var",
+                  "path": "phase.actor"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": "editor"
+                }
+              }
+            },
+            {
+              "text": "my prefix `{{ap::prefix::narrator}}`",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": "==",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.actor"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": "editor"
+                  }
+                }
+              }
+            },
+            {
+              "text": ".\n\n<!-- Workflow Indicator -->\n\n"
             }
           ]
         }
@@ -3948,7 +4243,37 @@
         {
           "pieces": [
             {
-              "text": "Start the workflow "
+              "text": "Continue the workflow now: the earlier stages are done (see above); deliver only the stages of this request, in order.",
+              "when": {
+                "t": "bin",
+                "op": ">",
+                "l": {
+                  "t": "var",
+                  "path": "phase.index"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": 0
+                }
+              }
+            },
+            {
+              "text": "Start the workflow ",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": ">",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.index"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": 0
+                  }
+                }
+              }
             },
             {
               "text": "(Produce the task results in the specified format.)",
@@ -3956,28 +4281,21 @@
                 "t": "bin",
                 "op": "&&",
                 "l": {
-                  "t": "bin",
-                  "op": "==",
-                  "l": {
-                    "t": "var",
-                    "path": "workflow"
-                  },
-                  "r": {
-                    "t": "lit",
-                    "v": "task"
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": ">",
+                    "l": {
+                      "t": "var",
+                      "path": "phase.index"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": 0
+                    }
                   }
                 },
                 "r": {
-                  "t": "var",
-                  "path": "modules.native-reasoning"
-                }
-              }
-            },
-            {
-              "text": "{{ap::workflow::hint}}",
-              "when": {
-                "t": "not",
-                "e": {
                   "t": "bin",
                   "op": "&&",
                   "l": {
@@ -4000,7 +4318,114 @@
               }
             },
             {
-              "text": " now. Deliver every stage in order.\n"
+              "text": "{{ap::workflow::hint}}",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": ">",
+                    "l": {
+                      "t": "var",
+                      "path": "phase.index"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": 0
+                    }
+                  }
+                },
+                "r": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": "&&",
+                    "l": {
+                      "t": "bin",
+                      "op": "==",
+                      "l": {
+                        "t": "var",
+                        "path": "workflow"
+                      },
+                      "r": {
+                        "t": "lit",
+                        "v": "task"
+                      }
+                    },
+                    "r": {
+                      "t": "var",
+                      "path": "modules.native-reasoning"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "text": " now. Deliver every stage",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": ">",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.index"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": 0
+                  }
+                }
+              }
+            },
+            {
+              "text": " of this request",
+              "when": {
+                "t": "bin",
+                "op": "&&",
+                "l": {
+                  "t": "not",
+                  "e": {
+                    "t": "bin",
+                    "op": ">",
+                    "l": {
+                      "t": "var",
+                      "path": "phase.index"
+                    },
+                    "r": {
+                      "t": "lit",
+                      "v": 0
+                    }
+                  }
+                },
+                "r": {
+                  "t": "var",
+                  "path": "multiModel"
+                }
+              }
+            },
+            {
+              "text": " in order.",
+              "when": {
+                "t": "not",
+                "e": {
+                  "t": "bin",
+                  "op": ">",
+                  "l": {
+                    "t": "var",
+                    "path": "phase.index"
+                  },
+                  "r": {
+                    "t": "lit",
+                    "v": 0
+                  }
+                }
+              }
+            },
+            {
+              "text": "\n"
             }
           ]
         }
@@ -4028,6 +4453,150 @@
               "v": "tool-multi"
             }
           ]
+        }
+      }
+    },
+    {
+      "id": "multi-model/before-draft-dialogue",
+      "module": "multi-model",
+      "region": "before_draft",
+      "order": 1000,
+      "content": [
+        {
+          "pieces": [
+            {
+              "text": "{{ap::prefix::user}}{{ap::name::editor}} has given her input. {{ap::name::narrator}}, it is your turn: write the first draft now, using {{ap::name::editor}}' input. The draft contains the story content only, without any structures"
+            },
+            {
+              "text": ", and is written in {{ap::param::draftLanguage}}",
+              "when": {
+                "t": "bin",
+                "op": "!=",
+                "l": {
+                  "t": "var",
+                  "path": "params.draftLanguage"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": ""
+                }
+              }
+            },
+            {
+              "text": ". Keep to the length requirements; {{ap::name::editor}} will review it next.\n\n"
+            }
+          ]
+        }
+      ],
+      "when": {
+        "t": "bin",
+        "op": "==",
+        "l": {
+          "t": "var",
+          "path": "style"
+        },
+        "r": {
+          "t": "lit",
+          "v": "dialogue"
+        }
+      }
+    },
+    {
+      "id": "multi-model/before-draft-imperative",
+      "module": "multi-model",
+      "region": "before_draft",
+      "order": 1000,
+      "content": [
+        {
+          "pieces": [
+            {
+              "text": "Next stage: **Drafting**. As {{ap::name::narrator}}, write the first draft using {{ap::name::editor}}' input above: story content only, no structures"
+            },
+            {
+              "text": ", in {{ap::param::draftLanguage}}",
+              "when": {
+                "t": "bin",
+                "op": "!=",
+                "l": {
+                  "t": "var",
+                  "path": "params.draftLanguage"
+                },
+                "r": {
+                  "t": "lit",
+                  "v": ""
+                }
+              }
+            },
+            {
+              "text": ". Keep to the length requirements; {{ap::name::editor}} reviews it next.\n\n"
+            }
+          ]
+        }
+      ],
+      "when": {
+        "t": "bin",
+        "op": "==",
+        "l": {
+          "t": "var",
+          "path": "style"
+        },
+        "r": {
+          "t": "lit",
+          "v": "imperative"
+        }
+      }
+    },
+    {
+      "id": "multi-model/before-feedback-dialogue",
+      "module": "multi-model",
+      "region": "before_feedback",
+      "order": 1000,
+      "content": [
+        {
+          "pieces": [
+            {
+              "text": "{{ap::prefix::user}}The draft is ready. {{ap::name::editor}}, please review {{ap::name::narrator}}'s draft now, checking (1) alignment with `<settings>` and `<guidelines>`, (2) writing style, (3) room for improvement. Give organized, actionable feedback for each point that needs work; do not rewrite the draft yourself.\n\n"
+            }
+          ]
+        }
+      ],
+      "when": {
+        "t": "bin",
+        "op": "==",
+        "l": {
+          "t": "var",
+          "path": "style"
+        },
+        "r": {
+          "t": "lit",
+          "v": "dialogue"
+        }
+      }
+    },
+    {
+      "id": "multi-model/before-feedback-imperative",
+      "module": "multi-model",
+      "region": "before_feedback",
+      "order": 1000,
+      "content": [
+        {
+          "pieces": [
+            {
+              "text": "Next stage: **Review and Feedback**. As {{ap::name::editor}}, review {{ap::name::narrator}}'s draft above for (1) alignment with `<settings>` and `<guidelines>`, (2) writing style, (3) room for improvement. Give organized, actionable feedback; do not rewrite the draft yourself.\n"
+            }
+          ]
+        }
+      ],
+      "when": {
+        "t": "bin",
+        "op": "==",
+        "l": {
+          "t": "var",
+          "path": "style"
+        },
+        "r": {
+          "t": "lit",
+          "v": "imperative"
         }
       }
     }
@@ -4402,6 +4971,13 @@
               "name": "questions",
               "description": "Mandatory questions and the relevant optional ones. Questions only, no explanations."
             }
+          },
+          "when": {
+            "t": "not",
+            "e": {
+              "t": "var",
+              "path": "multiModel"
+            }
           }
         },
         {
@@ -4499,7 +5075,24 @@
               {
                 "pieces": [
                   {
-                    "text": "{{ap::prefix::editor}}After receiving {{ap::name::narrator}}'s questions, I will provide professional advice and solutions. I will review the `<settings>`, `<guidelines>`, and `<history>`, identify areas for improvement, including redundancy, overuse of words or phrases, and monotony in sentence structure or themes. Finally, I will ask {{ap::name::narrator}} to create a draft and remind her of the length requirements.\n\n"
+                    "text": "{{ap::prefix::editor}}I will open the workflow myself: from `Questions to Consider` I will pick every item under `Mandatory questions` and the relevant items under `Optional questions`, then answer them directly with professional advice and solutions.",
+                    "when": {
+                      "t": "var",
+                      "path": "multiModel"
+                    }
+                  },
+                  {
+                    "text": "{{ap::prefix::editor}}After receiving {{ap::name::narrator}}'s questions, I will provide professional advice and solutions.",
+                    "when": {
+                      "t": "not",
+                      "e": {
+                        "t": "var",
+                        "path": "multiModel"
+                      }
+                    }
+                  },
+                  {
+                    "text": " I will review the `<settings>`, `<guidelines>`, and `<history>`, identify areas for improvement, including redundancy, overuse of words or phrases, and monotony in sentence structure or themes. Finally, I will ask {{ap::name::narrator}} to create a draft and remind her of the length requirements.\n\n"
                   }
                 ]
               }
@@ -4508,7 +5101,27 @@
               {
                 "pieces": [
                   {
-                    "text": "As {{ap::name::editor}}, answer the questions with professional advice and concrete solutions. Review `<settings>`, `<guidelines>` and `<history>`; point out redundancy, overused words or phrases and monotonous sentence structures or themes. End by reminding {{ap::name::narrator}} of the length requirements.\n\n"
+                    "text": "As {{ap::name::editor}}, "
+                  },
+                  {
+                    "text": "pick every item under `Mandatory questions` and the relevant items under `Optional questions` from `Questions to Consider`, and answer them directly",
+                    "when": {
+                      "t": "var",
+                      "path": "multiModel"
+                    }
+                  },
+                  {
+                    "text": "answer the questions",
+                    "when": {
+                      "t": "not",
+                      "e": {
+                        "t": "var",
+                        "path": "multiModel"
+                      }
+                    }
+                  },
+                  {
+                    "text": " with professional advice and concrete solutions. Review `<settings>`, `<guidelines>` and `<history>`; point out redundancy, overused words or phrases and monotonous sentence structures or themes. End by reminding {{ap::name::narrator}} of the length requirements.\n\n"
                   }
                 ]
               }
@@ -4559,6 +5172,13 @@
             "param": {
               "name": "questions",
               "description": "Mandatory questions and the relevant optional ones. Questions only, no explanations."
+            }
+          },
+          "when": {
+            "t": "not",
+            "e": {
+              "t": "var",
+              "path": "multiModel"
             }
           }
         },
@@ -4693,7 +5313,24 @@
               {
                 "pieces": [
                   {
-                    "text": "{{ap::prefix::editor}}After receiving {{ap::name::narrator}}'s questions, I will provide professional advice and solutions. I will review the `<settings>`, `<guidelines>`, and `<history>`, identify areas for improvement, including redundancy, overuse of words or phrases, and monotony in sentence structure or themes. Finally, I will ask {{ap::name::narrator}} to create a draft and remind her of the length requirements.\n\n"
+                    "text": "{{ap::prefix::editor}}I will open the workflow myself: from `Questions to Consider` I will pick every item under `Mandatory questions` and the relevant items under `Optional questions`, then answer them directly with professional advice and solutions.",
+                    "when": {
+                      "t": "var",
+                      "path": "multiModel"
+                    }
+                  },
+                  {
+                    "text": "{{ap::prefix::editor}}After receiving {{ap::name::narrator}}'s questions, I will provide professional advice and solutions.",
+                    "when": {
+                      "t": "not",
+                      "e": {
+                        "t": "var",
+                        "path": "multiModel"
+                      }
+                    }
+                  },
+                  {
+                    "text": " I will review the `<settings>`, `<guidelines>`, and `<history>`, identify areas for improvement, including redundancy, overuse of words or phrases, and monotony in sentence structure or themes. Finally, I will ask {{ap::name::narrator}} to create a draft and remind her of the length requirements.\n\n"
                   }
                 ]
               }
@@ -4702,7 +5339,27 @@
               {
                 "pieces": [
                   {
-                    "text": "As {{ap::name::editor}}, answer the questions with professional advice and concrete solutions. Review `<settings>`, `<guidelines>` and `<history>`; point out redundancy, overused words or phrases and monotonous sentence structures or themes. End by reminding {{ap::name::narrator}} of the length requirements.\n\n"
+                    "text": "As {{ap::name::editor}}, "
+                  },
+                  {
+                    "text": "pick every item under `Mandatory questions` and the relevant items under `Optional questions` from `Questions to Consider`, and answer them directly",
+                    "when": {
+                      "t": "var",
+                      "path": "multiModel"
+                    }
+                  },
+                  {
+                    "text": "answer the questions",
+                    "when": {
+                      "t": "not",
+                      "e": {
+                        "t": "var",
+                        "path": "multiModel"
+                      }
+                    }
+                  },
+                  {
+                    "text": " with professional advice and concrete solutions. Review `<settings>`, `<guidelines>` and `<history>`; point out redundancy, overused words or phrases and monotonous sentence structures or themes. End by reminding {{ap::name::narrator}} of the length requirements.\n\n"
                   }
                 ]
               }
@@ -4866,6 +5523,13 @@
               "name": "questions",
               "description": "Mandatory questions and the relevant optional ones. Questions only, no explanations."
             }
+          },
+          "when": {
+            "t": "not",
+            "e": {
+              "t": "var",
+              "path": "multiModel"
+            }
           }
         },
         {
@@ -4998,7 +5662,24 @@
               {
                 "pieces": [
                   {
-                    "text": "{{ap::prefix::editor}}After receiving {{ap::name::narrator}}'s questions, I will provide professional advice and solutions. I will review the `<settings>`, `<guidelines>`, and `<history>`, identify areas for improvement, including redundancy, overuse of words or phrases, and monotony in sentence structure or themes. Finally, I will ask {{ap::name::narrator}} to create a draft and remind her of the requirements.\n\n"
+                    "text": "{{ap::prefix::editor}}I will open the workflow myself: from `Questions to Consider` I will pick every item under `Mandatory questions` and the relevant items under `Optional questions`, then answer them directly with professional advice and solutions.",
+                    "when": {
+                      "t": "var",
+                      "path": "multiModel"
+                    }
+                  },
+                  {
+                    "text": "{{ap::prefix::editor}}After receiving {{ap::name::narrator}}'s questions, I will provide professional advice and solutions.",
+                    "when": {
+                      "t": "not",
+                      "e": {
+                        "t": "var",
+                        "path": "multiModel"
+                      }
+                    }
+                  },
+                  {
+                    "text": " I will review the `<settings>`, `<guidelines>`, and `<history>`, identify areas for improvement, including redundancy, overuse of words or phrases, and monotony in sentence structure or themes. Finally, I will ask {{ap::name::narrator}} to create a draft and remind her of the requirements.\n\n"
                   }
                 ]
               }
@@ -5007,7 +5688,27 @@
               {
                 "pieces": [
                   {
-                    "text": "As {{ap::name::editor}}, answer the questions with professional advice and concrete solutions. Review `<settings>`, `<guidelines>` and `<history>`; point out redundancy, overused words or phrases and monotonous sentence structures or themes.\n\n"
+                    "text": "As {{ap::name::editor}}, "
+                  },
+                  {
+                    "text": "pick every item under `Mandatory questions` and the relevant items under `Optional questions` from `Questions to Consider`, and answer them directly",
+                    "when": {
+                      "t": "var",
+                      "path": "multiModel"
+                    }
+                  },
+                  {
+                    "text": "answer the questions",
+                    "when": {
+                      "t": "not",
+                      "e": {
+                        "t": "var",
+                        "path": "multiModel"
+                      }
+                    }
+                  },
+                  {
+                    "text": " with professional advice and concrete solutions. Review `<settings>`, `<guidelines>` and `<history>`; point out redundancy, overused words or phrases and monotonous sentence structures or themes.\n\n"
                   }
                 ]
               }
@@ -6132,6 +6833,10 @@
     "storylines": {
       "enabled": true,
       "freezeVariables": "all"
+    },
+    "multiModel": {
+      "enabled": false,
+      "actors": {}
     }
   },
   "configurations": [

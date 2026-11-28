@@ -13956,7 +13956,7 @@ function tS(e) {
 }
 async function nS() {
 	let e = await eS();
-	e && e !== "a7e50c19cfebf00e" && sessionStorage.getItem($x) !== e && tS(e);
+	e && e !== "c16c2a31661635b0" && sessionStorage.getItem($x) !== e && tS(e);
 }
 async function rS() {
 	await nS();
@@ -13977,7 +13977,7 @@ async function sS() {
 	let e = m().replace(/^third-party\//, ""), t = await dS(e, !1);
 	if (t.status === 404 && (t = await dS(e, !0)), !t.ok) throw Error(await t.text() || t.statusText);
 	let n = await t.json(), r = await eS();
-	return r && r !== "a7e50c19cfebf00e" ? (tS(r), {
+	return r && r !== "c16c2a31661635b0" ? (tS(r), {
 		upToDate: !1,
 		reloading: !0
 	}) : {
@@ -26518,7 +26518,7 @@ var NV = { class: "row tight xs muted" }, PV = { class: "row" }, FV = {
 				"icon",
 				"help"
 			]),
-			V("div", IH, "Advanced Preset " + k(j("1.13.0")) + " · " + k(j("a7e50c19cfebf00e")), 1)
+			V("div", IH, "Advanced Preset " + k(j("1.13.0")) + " · " + k(j("c16c2a31661635b0")), 1)
 		], 64));
 	}
 }), RH = {
@@ -27722,7 +27722,7 @@ function gW() {
 //#region src/index.ts
 var _W = {
 	version: "1.13.0",
-	buildId: "a7e50c19cfebf00e",
+	buildId: "c16c2a31661635b0",
 	nextGeneration: (e) => eg(e),
 	listPresets: () => fm().map(({ preset: e, source: t }) => ({
 		id: e.id,
@@ -27782,7 +27782,7 @@ async function bW() {
 	};
 	t.on(n.APP_READY, () => void o()), gW(), O_("init", {
 		version: "1.13.0",
-		build: "a7e50c19cfebf00e",
+		build: "c16c2a31661635b0",
 		enabled: q().enabled
 	});
 }
