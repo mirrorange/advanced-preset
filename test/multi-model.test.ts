@@ -60,6 +60,10 @@ function fill(schema: any, key = ''): unknown {
   return `text of ${key}`;
 }
 
+let dialogueReply = '';
+const DIALOGUE = 'Freesia: a question\n\nPetals: an answer\n\nFreesia: <START_OF_CONTENT>\nThe rain fell.';
+beforeEach(() => { dialogueReply = DIALOGUE; });
+
 /** The backend: answers every request in the shape its transport expects. */
 function backend(bodies: Record<string, any>[]) {
   return (async (_url: string, init: RequestInit) => {
@@ -71,7 +75,7 @@ function backend(bodies: Record<string, any>[]) {
       const called = new Set(body.messages.flatMap((m: any) => (m.tool_calls ?? []).map((c: any) => c.function.name)));
       const tool = body.tools.find((t: any) => !called.has(t.function.name) && Object.keys(t.function.parameters?.properties ?? {}).length) ?? body.tools[body.tools.length - 1];
       message = { content: '', tool_calls: [{ id: `c${bodies.length}`, type: 'function', function: { name: tool.function.name, arguments: JSON.stringify(fill(tool.function.parameters)) } }] };
-    } else message = { content: 'Freesia: a question\n\nPetals: an answer\n\nFreesia: <START_OF_CONTENT>\nThe rain fell.' };
+    } else message = { content: dialogueReply };
     return new Response(JSON.stringify({ choices: [{ message }] }), { headers: { 'Content-Type': 'application/json' } });
   }) as typeof fetch;
 }
@@ -180,6 +184,7 @@ describe('multi-model phases', () => {
   });
 
   it('prefill phase: the replay continues the assistant prefill, stage regions just before it', async () => {
+    dialogueReply = 'Petals: an answer\n\nFreesia: <START_OF_CONTENT>\nThe rain fell.';
     const bodies = await requests('structured', 'linear', mmPreset(), multi('prefill'));
     const b = bodies[1]!;
     const msgs = b.messages as ChatMessage[];
@@ -199,6 +204,35 @@ describe('multi-model phases', () => {
     const back = parseDialogue(text(replay), { stages: last.ctx.stages.slice(0, 1), prefixes: { narrator: `${p.actors.narrator!.name}: `, editor: `${p.actors.editor!.name}: ` }, user: p.user, contentMarker: p.contentMarker, structures: [], format: p.plaintextFormat, final: true });
     expect(back.stages.questions!.text).toBe(`text of ${field('questions')}`);
     expect(text(msgs.at(-1)!)).toMatch(/^PLAN NOW/);
+  });
+
+  it('dialogue phases stop where the next phase starts; the overflow is dropped', async () => {
+    const p = mmPreset();
+    const narrator = p.actors.narrator!.name;
+    const editor = p.actors.editor!.name;
+    dialogueReply = `${editor}: the plan\n\n${narrator}: <START_OF_CONTENT>\nA story written too early.`;
+    const bodies = await requests('structured', 'linear', p, multi('plaintext'));
+    expect(bodies[1]!.stop).toEqual([`\n${narrator}:`]);
+    const sc = handoff.pending!.outcome.sidecar;
+    expect(sc.stages.find((s: any) => s.id === 'planning')!.text).toBe('the plan');
+    expect(JSON.stringify(sc.stages)).not.toContain('written too early');
+    // Prefill: the stop is added to the preset's own.
+    dialogueReply = `${editor}: plan B\n${narrator}: and more`;
+    const pre = await requests('structured', 'linear', p, multi('prefill'));
+    expect(pre[1]!.stop).toEqual([...p.stop, `\n${narrator}:`]);
+    expect(handoff.pending!.outcome.sidecar.stages.find((s: any) => s.id === 'planning')!.text).toBe('plan B');
+  });
+
+  it('the last phase (and multi-model off) gets no phase stop', async () => {
+    dialogueReply = 'Freesia: <START_OF_CONTENT>\nThe end. Petals: said the sprite.';
+    const p = mmPreset();
+    const c = (cfg: Configuration) => { multi('structured')(cfg); cfg.connection.transport = 'plaintext'; };
+    const bodies = await requests('plaintext', 'linear', p, c);
+    expect(bodies).toHaveLength(3);
+    expect(bodies[0]!.stop).toEqual([`\n${p.actors.editor!.name}:`]);
+    expect(bodies[2]!.stop).toBeUndefined();
+    const off = await requests('plaintext', 'linear', p, multi('structured', false));
+    expect(off[0]!.stop).toBeUndefined();
   });
 
   it('Gemini: replayed tool calls carry the skip-validation signature', async () => {

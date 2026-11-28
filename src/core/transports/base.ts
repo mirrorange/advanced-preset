@@ -48,6 +48,11 @@ export interface DriverInput {
   family: 'openai' | 'claude' | 'gemini' | 'cohere';
   /** Tools of replayed earlier phases (multi-model), listed before the phase's own tools. */
   extraTools?: any[];
+  /**
+   * Dialogue phase followed by another phase (multi-model): stop strings for the request, and where
+   * the phase's own output ends in the text (the model went on with another actor's stages).
+   */
+  phaseEnd?: { stop: string[]; cut: (text: string) => string };
 }
 
 /**

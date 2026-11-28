@@ -4,7 +4,7 @@
  * phase's transport, and the phase's messages.
  */
 import {
-  DEFAULT_BINDING, dialogueReplay, objectReplay, toolReplay, turnArtifacts,
+  DEFAULT_BINDING, dialogueReplay, escapeRe, objectReplay, terminalContentIndex, toolReplay, turnArtifacts,
   type Phase, type ReplayItem,
 } from '@advanced-preset/protocol';
 import { st, type ChatMessage } from '@/st/host';
@@ -119,4 +119,34 @@ export function phaseMessages(view: GenerationContext, phase: Phase, items: Repl
   messages = [...messages, ...replay.messages];
   const tail = stageRegionMessages(view, view.assembly!, phase.stages, sub);
   return { messages: withStageMessages(messages, tail, prefill), tools: replay.tools };
+}
+
+/**
+ * End of a dialogue phase (prefill / plaintext) that another phase follows: the next phase's start
+ * (its first stage's tag, else its actor's prefix at a line start) is a stop string, and the text is
+ * cut where the model went on beyond its phase: the next phase's start, another actor's prefix at a
+ * line start, the tag of a stage outside the phase, or the content marker when the phase does not
+ * hold the content stage. The last phase is never cut.
+ */
+export function dialoguePhaseEnd(view: GenerationContext, phase: Phase, next: Phase | undefined): { stop: string[]; cut: (text: string) => string } | undefined {
+  if (!next || (view.transport !== 'prefill' && view.transport !== 'plaintext')) return undefined;
+  const { preset } = view;
+  const tagged = view.transport === 'plaintext' && preset.plaintextFormat === 'tag';
+  const tagOf = (s: Phase['stages'][number]) => s.tag ?? (tagged ? s.id : undefined);
+  const prefixes = Object.fromEntries(Object.entries(prefixesOf(view)).map(([id, p]) => [id, st().substituteParams(p).trimEnd()]));
+  const first = next.stages[0]!;
+  const firstTag = tagOf(first);
+  const stop = firstTag ? [`<${firstTag}>`] : prefixes[first.actor] ? [`\n${prefixes[first.actor]}`] : [];
+  const turnStages = view.turn?.stages ?? view.stages;
+  const patterns: RegExp[] = [];
+  for (const [id, p] of Object.entries(prefixes)) if (id !== phase.actor && id !== preset.user && p) patterns.push(new RegExp(`(^|\\n)[ \\t]*${escapeRe(p)}`));
+  for (const s of turnStages) { const tag = tagOf(s); if (tag && !phase.stages.includes(s)) patterns.push(new RegExp(`<${escapeRe(tag)}(\\s[^<>]*)?>`)); }
+  const terminal = terminalContentIndex(turnStages);
+  if (preset.contentMarker && (terminal < 0 || !phase.stages.includes(turnStages[terminal]!))) patterns.push(new RegExp(escapeRe(preset.contentMarker)));
+  const cut = (text: string) => {
+    let end = text.length;
+    for (const re of patterns) { const m = re.exec(text); if (m && m.index < end) end = m.index; }
+    return end < text.length ? text.slice(0, end) : text;
+  };
+  return { stop, cut };
 }
